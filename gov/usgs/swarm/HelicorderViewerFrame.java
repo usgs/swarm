@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.File;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -32,6 +33,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.5  2005/05/02 16:22:11  cervelli
  * Moved data classes to separate package.
  *
@@ -49,6 +53,21 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
 public class HelicorderViewerFrame extends JInternalFrame 
 {
 	public static final long serialVersionUID = -1;
+	
+	private static final String IMAGE_MINIMIZE = "images/minimize.png";
+	private static final String IMAGE_SETTINGS = "images/settings.png";
+	private static final String IMAGE_LEFT = "images/left.png";
+	private static final String IMAGE_RIGHT = "images/right.png";
+	private static final String IMAGE_XMINUS = "images/xminus.png";
+	private static final String IMAGE_XPLUS = "images/xplus.png";
+	private static final String IMAGE_YMINUS = "images/yminus.png";
+	private static final String IMAGE_YPLUS = "images/yplus.png";
+	private static final String IMAGE_ZOOMMINUS = "images/zoomminus.png";
+	private static final String IMAGE_ZOOMPLUS = "images/zoomplus.png";
+	private static final String IMAGE_CLIPBOARD = "images/clipboard.png";
+	private static final String IMAGE_DELETE = "images/delete.png";
+	private static final String IMAGE_MAXIMIZE = "images/maximize.png";
+	
 	// minutes * 60 = seconds
 	public static final int[] chunkValues = new int[] {10 * 60, 15 * 60, 20 * 60, 30 * 60, 60 * 60, 120 * 60, 180 * 60, 360 * 60};
 	
@@ -162,7 +181,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 			
 		toolbar = new JToolBar();
 		toolbar.setFloatable(false);
-		JButton hideTB = new JButton(new ImageIcon("images/minimize.png"));
+		JButton hideTB = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_MINIMIZE)));
 		hideTB.setToolTipText("Hide toolbar");
 		hideTB.addActionListener(new ActionListener()
 				{
@@ -179,7 +198,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		toolbar.add(hideTB);
 		toolbar.addSeparator();
 		
-		settingsButton = new JButton(new ImageIcon("images/settings.png"));
+		settingsButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_SETTINGS)));
 		settingsButton.setToolTipText("Helicorder View Settings");
 		settingsButton.addActionListener(new ActionListener()
 				{
@@ -194,7 +213,8 @@ public class HelicorderViewerFrame extends JInternalFrame
 		toolbar.add(settingsButton);
 		
 		toolbar.addSeparator();
-		backButton = new JButton(new ImageIcon("images/left.png"));
+		backButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_LEFT)));
+		
 		backButton.setToolTipText("Scroll back time (A or Left arrow)");
 		backButton.addActionListener(new ActionListener()
 				{
@@ -211,7 +231,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		Util.mapKeyStrokeToButton(this, "LEFT", "backward1", backButton);
 		Util.mapKeyStrokeToButton(this, "A", "backward2", backButton);
 		
-		forwardButton = new JButton(new ImageIcon("images/right.png"));
+		forwardButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_RIGHT)));
 		forwardButton.setToolTipText("Scroll forward time (Z or Right arrow)");
 		forwardButton.addActionListener(new ActionListener()
 				{
@@ -228,7 +248,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		Util.mapKeyStrokeToButton(this, "RIGHT", "forward1", forwardButton);				
 		Util.mapKeyStrokeToButton(this, "Z", "forward2", forwardButton);				
 		
-		compX = new JButton(new ImageIcon("images/xminus.png"));
+		compX = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_XMINUS)));
 		compX.setToolTipText("Compress X-axis (Alt-left arrow)");
 		toolbar.add(compX);
 		compX.addActionListener(new ActionListener()
@@ -242,7 +262,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		compX.setMargin(new Insets(0,0,0,0));
 		Util.mapKeyStrokeToButton(this, "alt LEFT", "compx", compX);
 		
-		expX = new JButton(new ImageIcon("images/xplus.png"));
+		expX = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_XPLUS)));
 		toolbar.add(expX);
 		expX.setToolTipText("Expand X-axis (Alt-right arrow)");
 		expX.addActionListener(new ActionListener()
@@ -256,7 +276,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		expX.setMargin(new Insets(0,0,0,0));
 		Util.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expX);
 		
-		compY = new JButton(new ImageIcon("images/yminus.png"));
+		compY = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_YMINUS)));
 		compY.setToolTipText("Compress Y-axis (Alt-down arrow)");
 		toolbar.add(compY);
 		compY.addActionListener(new ActionListener()
@@ -271,7 +291,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		compY.setMargin(new Insets(0,0,0,0));
 		Util.mapKeyStrokeToButton(this, "alt DOWN", "compy", compY);				
 		
-		expY = new JButton(new ImageIcon("images/yplus.png"));
+		expY = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_YPLUS)));
 		toolbar.add(expY);
 		expY.setToolTipText("Expand Y-axis (Alt-up arrow)");
 		expY.addActionListener(new ActionListener()
@@ -286,7 +306,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		Util.mapKeyStrokeToButton(this, "alt UP", "expy", expY);
 		toolbar.addSeparator();
 		
-		JButton addZoom = new JButton(new ImageIcon("images/zoomplus.png"));
+		JButton addZoom = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_ZOOMPLUS)));
 		addZoom.setToolTipText("Decrease zoom time window (+)");
 		toolbar.add(addZoom);
 		addZoom.addActionListener(new ActionListener()
@@ -301,7 +321,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		Util.mapKeyStrokeToButton(this, "EQUALS", "addzoom1", addZoom);
 		Util.mapKeyStrokeToButton(this, "shift EQUALS", "addzoom2", addZoom);
 		
-		JButton subZoom = new JButton(new ImageIcon("images/zoomminus.png"));
+		JButton subZoom = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_ZOOMMINUS)));
 		toolbar.add(subZoom);
 		subZoom.setToolTipText("Increase zoom time window (-)");
 		subZoom.addActionListener(new ActionListener()
@@ -316,7 +336,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		Util.mapKeyStrokeToButton(this, "MINUS", "subzoom", subZoom);
 
 		new WaveViewSettingsToolbar(waveViewSettings, toolbar, this);
-		clipboard = new JButton(new ImageIcon("images/clipboard.png"));
+		clipboard = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_CLIPBOARD)));
 		clipboard.setEnabled(false);
 		toolbar.add(clipboard);
 		clipboard.setToolTipText("Copy inset to clipboard (C or Ctrl-C)");
@@ -331,7 +351,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		Util.mapKeyStrokeToButton(this, "control C", "clipboard1", clipboard);
 		Util.mapKeyStrokeToButton(this, "C", "clipboard2", clipboard);
 		
-		removeWave = new JButton(new ImageIcon("images/delete.png"));
+		removeWave = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_DELETE)));
 		removeWave.setEnabled(false);
 		toolbar.add(removeWave);
 		removeWave.setToolTipText("Remove inset wave (Delete or Escape)");
@@ -354,7 +374,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		statusPanel.add(statusLabel, BorderLayout.CENTER);
 		mainPanel.add(statusPanel, BorderLayout.SOUTH);
 		
-		showToolbar = new JButton(new ImageIcon("images/maximize.png"));
+		showToolbar = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_MAXIMIZE)));
 		showToolbar.setMargin(new Insets(0, 0, 0, 0));
 		showToolbar.setSize(24, 24);
 		showToolbar.setLocation(0, 0);
@@ -533,6 +553,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		compY.setEnabled(true);
 		expY.setEnabled(true);
 	}
+	//
 
 	public void setFullScreen(boolean full)
 	{

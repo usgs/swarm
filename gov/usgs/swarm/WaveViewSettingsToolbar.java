@@ -18,6 +18,9 @@ import javax.swing.KeyStroke;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * @author Dan Cervelli
  */
 public class WaveViewSettingsToolbar
@@ -28,6 +31,12 @@ public class WaveViewSettingsToolbar
 	
 	private WaveViewSettings settings;
 	
+	private static final String IMAGE_WAVESETTINGS = "images/wavesettings.png";
+	private static final String IMAGE_WAVE = "images/wave.png";
+	private static final String IMAGE_SPECTRA = "images/spectra.png";
+	private static final String IMAGE_SPECTROGRAM = "images/spectrogram.png";
+
+	
 	public WaveViewSettingsToolbar(WaveViewSettings s, JToolBar dest, JComponent keyComp)
 	{
 		settings = s;
@@ -37,7 +46,8 @@ public class WaveViewSettingsToolbar
 	
 	public void createUI(JToolBar dest, JComponent keyComp)
 	{
-		JButton waveSet = new JButton(new ImageIcon("images/wavesettings.png"));
+		//JButton waveSet = new JButton(new ImageIcon("images/wavesettings.png"));
+		JButton waveSet = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_WAVESETTINGS)));
 		dest.add(waveSet);
 		waveSet.setToolTipText("Wave view settings (?)");
 		waveSet.setMargin(new Insets(0,0,0,0));
@@ -52,7 +62,8 @@ public class WaveViewSettingsToolbar
 				});
 		Util.mapKeyStrokeToButton(keyComp, "shift SLASH", "settings", waveSet);
 		
-		waveToggle = new JToggleButton(new ImageIcon("images/wave.png"));
+		//waveToggle = new JToggleButton(new ImageIcon("images/wave.png"));
+		waveToggle = new JToggleButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_WAVE)));
 		waveToggle.setMargin(new Insets(0,0,0,0));
 		dest.add(waveToggle);
 		waveToggle.setSelected(true);
@@ -67,7 +78,8 @@ public class WaveViewSettingsToolbar
 		Util.mapKeyStrokeToButton(keyComp, "COMMA", "wave1", waveToggle);
 		Util.mapKeyStrokeToButton(keyComp, "W", "wave2", waveToggle);
 		
-		spectraToggle = new JToggleButton(new ImageIcon("images/spectra.png"));
+		//spectraToggle = new JToggleButton(new ImageIcon("images/spectra.png"));
+		spectraToggle = new JToggleButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_SPECTRA)));
 		spectraToggle.setMargin(new Insets(0,0,0,0));
 		dest.add(spectraToggle);
 		spectraToggle.setToolTipText("Spectra view (S or .)");
@@ -81,7 +93,8 @@ public class WaveViewSettingsToolbar
 		Util.mapKeyStrokeToButton(keyComp, "PERIOD", "spectra1", spectraToggle);
 		Util.mapKeyStrokeToButton(keyComp, "S", "spectra2", spectraToggle);
 		
-		spectrogramToggle = new JToggleButton(new ImageIcon("images/spectrogram.png"));
+		//spectrogramToggle = new JToggleButton(new ImageIcon("images/spectrogram.png"));
+		spectrogramToggle = new JToggleButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_SPECTROGRAM)));
 		spectrogramToggle.setMargin(new Insets(0,0,0,0));
 		dest.add(spectrogramToggle);
 		spectrogramToggle.setToolTipText("Spectrogram view (G or /)");
