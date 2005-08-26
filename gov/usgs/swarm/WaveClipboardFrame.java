@@ -41,6 +41,9 @@ import javax.swing.event.InternalFrameEvent;
  * The wave clipboard internal frame.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.3  2005/03/27 22:03:46  cervelli
  * Added Save All button.  Moved the Save/Save All/Open ActionListeners into separate
  * internal non-anonymous classes.  Open now opens directories.
@@ -68,6 +71,12 @@ public class WaveClipboardFrame extends JInternalFrame
 	private JButton openButton;
 	private DateFormat saveAllDateFormat;
 	
+	private static final String IMAGE_OPEN = "images/open.png";
+	private static final String IMAGE_SAVE = "images/save.png";
+	private static final String IMAGE_SAVEALL = "images/saveall.png";
+	private static final String IMAGE_CLOCK = "images/clock.png";
+	private static final String IMAGE_DELETE = "images/delete.png";
+
 	public WaveClipboardFrame()
 	{
 		super("Wave Clipboard", true, false, true, true);
@@ -102,21 +111,21 @@ public class WaveClipboardFrame extends JInternalFrame
 		toolbar.setFloatable(false);
 		toolbar.setRollover(true);
 		
-		openButton = new JButton(new ImageIcon("images/open.png"));
+		openButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_OPEN)));
 		openButton.setEnabled(true);
 		openButton.setMargin(new Insets(0,0,0,0));
 		openButton.setToolTipText("Open a saved wave");
 		openButton.addActionListener(new OpenActionListener());
 		toolbar.add(openButton);
 		
-		saveButton = new JButton(new ImageIcon("images/save.png"));
+		saveButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_SAVE)));
 		saveButton.setEnabled(false);
 		saveButton.setMargin(new Insets(0,0,0,0));
 		saveButton.setToolTipText("Save selected wave");
 		saveButton.addActionListener(new SaveActionListener());
 		toolbar.add(saveButton);
 
-		saveAllButton = new JButton(new ImageIcon("images/saveall.png"));
+		saveAllButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_SAVEALL)));
 		saveAllButton.setEnabled(false);
 		saveAllButton.setMargin(new Insets(0,0,0,0));
 		saveAllButton.setToolTipText("Save all waves");
@@ -124,7 +133,7 @@ public class WaveClipboardFrame extends JInternalFrame
 		toolbar.add(saveAllButton);
 		
 		toolbar.addSeparator();
-		syncButton = new JButton(new ImageIcon("images/clock.png"));
+		syncButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_CLOCK)));
 		syncButton.setEnabled(false);
 		syncButton.setMargin(new Insets(0,0,0,0));
 		syncButton.setToolTipText("Synchronize times with selected wave");
@@ -141,7 +150,7 @@ public class WaveClipboardFrame extends JInternalFrame
 		toolbar.add(syncButton);
 		toolbar.addSeparator();
 		
-		removeButton = new JButton(new ImageIcon("images/delete.png"));
+		removeButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_DELETE)));
 		removeButton.setEnabled(false);
 		removeButton.setMargin(new Insets(0,0,0,0));
 		removeButton.setToolTipText("Remove all waves from clipboard");
