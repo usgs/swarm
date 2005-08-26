@@ -1,0 +1,77 @@
+<!--
+$Log: not supported by cvs2svn $
+Revision 1.2  2005/03/27 21:52:12  cervelli
+Changes for Save All and SAC files.
+
+-->
+
+<html>
+	<head>
+		<!-- javascript include version -->
+		<style>
+		p
+		{width: 700px;}
+		</style>
+		<title>Swarm Manual, Section IX, Advanced Topics</title>
+	</head>
+	<body>
+		<h1>Section IX, Advanced Topics</h1>
+		
+		<a name="now"></a><h2>Calculating the Current Time</h2>
+		<p>
+		Oftentimes <b>Swarm</b> needs the current time in order to make requests to data sources.  In order to make sure that <b>Swarm</b>
+		asks for the correct time it attempts to synchronize with Internet time servers (see
+		<a href="http://www.boulder.nist.gov/timefreq/service/time-servers.html">http://www.boulder.nist.gov/timefreq/service/time-servers.html</a>).
+		This does not change your system clock, it just calculates an offset from it.  <b>Swarm</b> will attempt this sychronization approximately
+		every 10 minutes.
+		</p>
+		
+		<a name="groups"></a><h2>Configuring Channel Groups</h2>
+		<p>
+		<b>Swarm</b> looks through a file called 'SwarmGroups.config' to groups channels in the Channel Selector.  The file is very simple: just a list
+		of [channel]=[group] pairs.  Use the default file that comes with the <b>Swarm</b> distribution as a guide.
+		</p>
+		
+		<a name="java"></a><h2>Java Settings</h2>
+		<p>
+		The most basic command to start <b>Swarm</b> is this:<br>
+<pre>java -cp lib/data.jar;lib/util.jar;lib/math.jar;lib/swarm.jar;lib/earthworm.jar;lib/colt.jar;lib/winston.jar;lib/plot.jar gov.usgs.swarm.Swarm</pre>		
+		</p>
+		
+		<p>
+		However, <b>Swarm</b> performs better with a large cache, so allocating it more memory with the <code>-Xmx[size]M</code> option is useful.  This
+		tells the Java Virtual Machine (JVM) that it can use up to [size] megabytes of RAM.  The default batch file specifies: -Xmx256M.
+		</p>
+		
+		<p>
+		Also, when run with java (as opposed to javaw) the Java console is left open.  Some information will periodically be displayed here 
+		if this setting is used.  The default settings is to use javaw.
+		</p>
+		
+		<a name="config"></a><h2>Swarm Configuration File</h2>
+		<p>
+		Every time <b>Swarm</b> start, the file 'Swarm.config', if it exists, is read.  This contains information about servers and some persistent
+		user interface information.  While not recommended, it can be modified directly.  All comment fields will be stripped out and the lines could
+		be reordered after <b>Swarm</b> closes.
+		</p>
+		
+		<a name="config"></a><h2>Swarm Command Line Options</h2>
+		<p>
+		These command line options can be used:<br>
+		<br>
+		<code>--config [file]</code> or <code>-c [file]</code> - Specify a particular file to be used as a Swarm configuration file.<br>
+		<br>
+		<code>--kiosk [file]</code> or <code>-k [file]</code> - Specify a particular file to be used as an 
+		<a href="sectionVIII.html#setup">automatic Kiosk Mode configuration file</a>.<br>
+		<br>
+		<code>--group [file]</code> or <code>-g [file]</code> - Specify a particular file to be used as a channel group configuration file.<br>
+		<br>
+		<code>--sleep [#]</code> or <code>-s [#]</code> - Sleep for a specificed number of seconds before launching Swarm.<br>
+		<br>
+		Example:<br>
+		<code>swarm --config s1.config --group g1.config --kiosk k1.config --sleep 1.5</code>
+		
+		
+		</p>
+	</body>
+</html>

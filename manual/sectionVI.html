@@ -1,0 +1,83 @@
+<!-- 
+$Log: not supported by cvs2svn $
+Revision 1.2  2005/03/27 21:52:31  cervelli
+Changes for Save All and SAC files.
+
+-->
+
+<html>
+	<head>
+		<!-- javascript include version -->
+		<style>
+		p
+		{width: 700px;}
+		</style>
+		<title>Swarm Manual, Section VI, The Wave Clipboard</title>
+	</head>
+	<body>
+		<h1>Section VI, The Wave Clipboard</h1>
+		
+		<a name="ui"></a><h2>User Interface</h2>
+		<p>
+		The primary forum in <b>Swarm</b> for intense interaction with waveforms is the Wave Clipboard.  Here is a snapshot
+		of typical Wave Clipboard usage:<br>
+		<br>
+		<img src="images/secVI_1.png">
+		</p>
+		
+		<p>
+		The Wave Clipboard holds as many simultaneous wave views as you like.  For example you could compare arrival times
+		across many stations, look at the same waveform with three different filters, or compare different events from one station.
+		</p>
+		
+		<p>
+		The user interface consists of a clipboard toolbar at the top and then as many stacked clipboard wave views as you like, each
+		with its own toolbar.  You can also zoom into any portion of a wave (the transparent yellow block is showing the act of zooming).  
+		As usual, the status bar shows the current time under the mouse cursor.  The wave with the blue border is the 'selected' wave for
+		the purposes of the clipboard toolbar.
+		</p>
+		
+		<a name="cbtoolbar"></a><h2>Clipboard Toolbar</h2>
+		<p>
+		The clipboard toolbar has four buttons:<br>
+		<br>
+		<img src="../images/open.png"> - Opens a wave text file as saved by <b>Swarm</b> or a SAC file.  If you select a directory,
+		all of the ".txt" and ".sac" files in it will be loaded.<br>
+		<br>
+		<img src="../images/save.png"> - Save a wave as a text file or SAC file.  The format of the text file is exceedingly simple: 
+		each row has two values, a time	(Unix time: milliseconds seconds January 1, 1970) and a sample.
+		Loading this data into Matlab is trivial with the command: <code>load filename.txt</code>.  Any filename that does not end with ".sac"
+		will be saved as one of these text files (".txt" is the default).  If the filename ends with ".sac" the wave is saved as a SAC file.<br>
+		<br>
+		<img src="../images/saveall.png"> - Save all of the waves as SAC files.  You will be prompted to specify a directory in which to save
+		the waves.  In that directory a directory will be created in YYYYMMDDHHMMSS form that corresponds to each distinct second at which each wave on the clipboard 
+		begins.  Under those directories SAC files will be saved with the name of the channels whose waves start during that second.<br>
+		<br>
+		<img src="../images/clock.png"> - Synchronize all of the channels on the clipboard to the same time window as the selected wave.<br>
+		<br>
+		<img src="../images/delete.png"> - Remove ALL of the waves from the clipboard.<br>
+		</p>
+		
+		<a name="cbwtoolbar"></a><h2>Clipboard Wave Toolbar and Keyboard Interaction</h2>
+		<p>
+		Each wave on the clipboard has its own toolbar.  Here is a description of each button:<br>
+		<br>
+		<img src="../images/minimize.png"> - Minimizes the toolbar, maximizing screen real-estate for the wave.<br>
+		<img src="../images/left.png"> - Scrolls the wave back in time by 20%.  Keyboard shortcut: Left arrow<br>
+		<img src="../images/right.png"> - Scrolls the wave forward in time by 20%.  Keyboard shortcut: Right arrow<br>
+		<img src="../images/gototime.png"> - Positions the wave at a user-specified time.  Keyboard shortcut: Control-G<br>
+		<img src="../images/xminus.png"> - Decreases amount of time on the X axis by 20%.  Keyboard shortcut: Alt-Left arrow<br>
+		<img src="../images/xplus.png"> - Increases amount of time on the X axis by 20%.  Keyboard shortcut: Alt-Right arrow<br>
+		<img src="../images/back.png"> - Reverts to the last time window.  Keyboard shortcut: Backspace<br>
+		<img src="../images/wavesettings.png"> - Opens the <a href="sectionIII.html#settings">Wave View Settings Dialog</a>.  Keyboard shortcut: ?<br>
+		<img src="../images/wave.png"> - Chooses wave view.  Keyboard shortcut: W or ,<br>
+		<img src="../images/spectra.png"> - Chooses spectra view.  Keyboard shortcut: S or .<br>
+		<img src="../images/spectrogram.png"> - Chooses spectrogram view.  Keyboard shortcut: G or /<br>
+		<img src="../images/clipboard.png"> - Puts another copy of the wave on the clipboard. Keyboard shortcut: C or Control-C<br>
+		<img src="../images/up.png"> - Moves this wave up a position on the clipboard. Keyboard shortcut: Up arrow<br>
+		<img src="../images/down.png"> - Moves this wave down a position on the clipboard. Keyboard shortcut: Down arrow<br>
+		<img src="../images/delete.png"> - Removes the wave from the clipboard. Keyboard shortcut: Delete<br>
+		<br>
+		Also, the <a href="sectionIII.html#keys">standard keys for interacting with wave views</a> are active.<br>
+	</body>
+</html>

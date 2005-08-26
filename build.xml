@@ -1,0 +1,123 @@
+<!--
+$Log: not supported by cvs2svn $
+Revision 1.4  2005/03/25 00:52:08  cervelli
+Fixed typo in classpath.
+
+Revision 1.3  2004/10/28 20:29:29  cvs
+Uses auto build versioning script.
+
+Revision 1.2  2004/10/13 00:27:48  cvs
+Changes for renaming of mysql.jar.
+
+Revision 1.1  2004/10/12 22:51:45  cvs
+Initial commit.
+
+-->
+	
+<project name="Swarm" default="jar" basedir=".">
+	<description>USGS Swarm Build File</description>
+
+	<property name="source" location="." />
+	<property name="classpath" location="../USGS/lib/wws.jar;../USGS/lib/winston.jar;../USGS/lib/data.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/seed-pdcc.jar"/>
+	<property name="jarfile" value="swarm.jar" />
+
+	<property name="bin-dir" location="../swarm-bin" />
+
+	<target name="help">
+		<echo>
+Available targets:
+
+compile [default] -- compiles Java code
+jar -- generates new ${jarfile}
+bin-dist -- generates new binary distribution
+		</echo>
+	</target>
+
+	<target name="init">
+	</target>
+
+	<target name="compile" depends="init" description="compile the source">
+		<ant antfile="${source}/../USGS/buildversion.xml" target="version" dir="${source}/../USGS" inheritAll="true">
+					<property name="version" value="1.1.10"/>
+					<property name="path" value="../Swarm/gov/usgs/swarm"/>
+					<property name="package" value="gov.usgs.swarm"/>
+		</ant>
+			
+		<javac srcdir="${source}" destdir="${source}" classpath="${classpath}" debug="on" deprecation="on" />
+	</target>
+
+	<target name="jar" depends="compile">
+		<mkdir dir="${source}/../USGS/lib"/>
+		<jar destfile="${source}/../USGS/lib/${jarfile}" basedir="${source}" includes="**/*.class"/>	
+	</target>
+
+	<target name="bin-dist" depends="init,compile">
+		<delete dir="${bin-dir}" />
+
+		<!-- Create the distribution directory structure -->
+		<mkdir dir="${bin-dir}/swarm/" />
+		<mkdir dir="${bin-dir}/swarm/images" />
+		<mkdir dir="${bin-dir}/swarm/lib" />
+		<mkdir dir="${bin-dir}/swarm/manual" />
+
+		<!-- Copy the distribution files -->
+		<copy todir="${bin-dir}/swarm/lib">
+			<fileset dir="${source}/../USGS/lib">
+				<include name="util.jar" />
+				<include name="winston.jar" />
+				<include name="earthworm.jar" />
+				<include name="swarm.jar" />
+				<include name="plot.jar" />
+				<include name="math.jar" />
+				<include name="data.jar" />
+				<include name="swarm.jar" />
+				<include name="wws.jar" />
+			</fileset>
+		</copy>
+		
+		<copy todir="${bin-dir}/swarm/lib">
+			<fileset dir="${source}/../USGS/contrib">
+				<include name="colt.jar" />
+				<include name="seed-pdcc.jar" />
+				<include name="mysql.jar" />
+			</fileset>
+		</copy>
+
+		<copy todir="${bin-dir}/swarm/images">
+			<fileset dir="${source}/images" />
+		</copy>
+
+		<copy todir="${bin-dir}/swarm/manual">
+			<fileset dir="${source}/manual" excludes="**/*.bak" />
+		</copy>
+
+		<copy todir="${bin-dir}/swarm/" file="${source}/swarm.bat" />
+		<copy todir="${bin-dir}/swarm/" file="${source}/swarm.sh" />
+		
+		<tar destfile="${source}/swarm-bin.tar.gz" basedir="${bin-dir}" compression="gzip" />
+		<zip destfile="${source}/swarm-bin.zip" basedir="${bin-dir}" />
+	</target>
+	
+	<!--
+	<target name="avo-dist" depends="bin-dist,jar">
+		<delete dir="${bin-dir}-avo" />
+		<mkdir dir="${bin-dir}-avo" />
+		
+		<copy todir="${bin-dir}-avo">
+			<fileset dir="${bin-dir}" />
+		</copy>
+				
+		<copy file="${source}/AVOSwarm.config" tofile="${bin-dir}-avo/swarm/Swarm.config" overwrite="true" />
+		<copy file="${source}/../lib/mysql-connector-java-3.0.14-production-bin.jar" todir="${bin-dir}-avo/swarm/lib" />
+		<copy file="${source}/../lib/swarm.jar" todir="${bin-dir}-avo/swarm/lib" overwrite="true" />
+
+		<copy tofile="${bin-dir}-avo/swarm/swarm.bat" file="${source}/avoswarm.bat" overwrite="true" />
+		<copy tofile="${bin-dir}-avo/swarm/swarm.sh" file="${source}/avoswarm.sh" overwrite="true" />
+		
+		<tar destfile="${source}/swarm-bin-avo.tar.gz" basedir="${bin-dir}-avo" compression="gzip" />
+		<zip destfile="${source}/swarm-bin-avo.zip" basedir="${bin-dir}-avo" />
+		
+	</target>
+	-->
+
+</project>

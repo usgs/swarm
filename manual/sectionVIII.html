@@ -1,0 +1,43 @@
+<html>
+	<head>
+		<!-- javascript include version -->
+		<style>
+		p
+		{width: 700px;}
+		</style>
+		<title>Swarm Manual, Section VIII, Kiosk Mode</title>
+	</head>
+	<body>
+		<h1>Section VIII, Kiosk Mode</h1>
+		
+		<a name="intro"><h2>Introduction</h2>
+		<p>
+		<b>Swarm</b> can be used as a <i>much</i> lower cost, more functional replacement to the traditional helicorder by using its Kiosk Mode.
+		In Kiosk Mode <b>Swarm</b> displays all of the open helicorders in full-screen mode.  This make seismic monitoring as easy as a glance 
+		at the screen while still allowing the standard helicorder zooming.  Of course, if you want to look at other stations
+		or use the <a href="sectionVI.html">Wave Clipboard</a> you can just leave Kiosk Mode. F11 toggles between Kiosk Mode and normal operation.
+		</p>
+		
+		<p>
+		Because there are no menus or toolbars when in Kiosk Mode you'll have to use keyboard shortcuts to interact with the inset wave view.  Or,
+		just switch to normal mode.
+		</p>
+		
+		<a name="setup"><h2>Configuring Automatic Kiosk Mode</h2>
+		<p><b>Swarm</b> can be automatically start in Kiosk Mode by running it with the '-k' or '--kiosk' option.  In this case, <b>Swarm</b> will 
+		read the file (in the directory in which it was run) called 'SwarmKiosk.config'.  The format of this file is very simple, best demonstrated
+		with an example file:<br>
+		<pre>
+# SwarmKiosk.config
+# channel=[data source];[channel]{;optional options: x=[minutes],y=[hours]}
+
+# Crater Peak Vertical
+channel=AVO Winston;CRP_SHZ_AK;x=20,y=24
+
+# Crater Peak East
+channel=AVO Winston;CRP_SHE_AK;x=20,y=24
+		</pre>
+		The data source specified has to be one of the configured data sources (see <a href="sectionIX.html">Advanced Topics</a>, Swarm Configuration File).
+	</body>
+</html>
+		

@@ -1,0 +1,89 @@
+<!--
+$Log: not supported by cvs2svn $
+Revision 1.6  2005/04/25 22:46:30  cervelli
+Changes for 1.1.11/1.1.12 versions.
+
+Revision 1.5  2005/03/28 17:25:56  cervelli
+Version 1.1.10 changes.
+
+Revision 1.4  2004/10/24 21:24:09  cvs
+Minor formatting changes.
+
+Revision 1.3  2004/10/23 19:38:58  cvs
+Changes for 1.1.8 release.
+
+Revision 1.2  2004/10/13 02:59:23  cvs
+Changes for 1.1.7 release.
+-->
+
+<html>
+	<head>
+		<title>Swarm</title>
+	</head>
+	<body>
+
+	<h1>Swarm - Seismic Wave Analysis and Realtime Monitor</h1>
+	
+		<table width="800px" cellspacing="0" cellpadding="0"><tr><td>
+
+	
+		<center>
+			<a href="screenshot_full.png"><img border="0" src="screenshot_small.png"></a><br>
+			<b>Click image for full size version.</b>
+		</center>
+	
+		<b><u>Introduction</u></b><br>
+		<b>Swarm</b> is a program for the real-time analysis of seismic waveform data.  Currently it can load data from Earthworm Wave Servers and the under-development Winston system.<br>
+
+		<br>
+		This is a <b>beta</b> version of Swarm.  There are missing features, known bugs, and other limitations to this version.
+		<br>
+		Please email me bug reports or feature requests.  No bug report is too minor (such as a minor UI quirk).  My email address is:
+		<a href="mailto:dcervelli@stanford.edu">dcervelli@stanford.edu</a><br>
+		<br>
+		The current version is: <b>1.1.12.20050425</b><br>
+		<b>Important note #1: Channel names in Wave Servers (both WWS and Earthworm) are now space separated instead of underscore separated. This
+		means that your SwarmGroups.config and SwarmKiosk.config files may need to change.</b><br>
+		<br>
+		<b>Important note #2: Version 1.1.12 fixes a bug that was causing Earthworm Wave Server data sources to not start in kiosk mode properly.</b><br> 
+		<br>
+		<b>Important note #3: We have now finalized the communication protocol for Winston Wave Servers (WWS) and there have been changes. 
+		Consequently, version 1.1.10 will NO LONGER WORK with the pubavo1.wr.usgs.gov WWS.  Please upgrade to 1.1.12 immediately.</b><br>
+		<br>
+		Recent changes of note:<br>
+		<b>Swarm</b> can access Winston Wave Servers.<br>
+		<b>Swarm</b> can now read and write <b>SAC</b> files on the clipboard.<br>
+
+		<br>
+		<b>NOTE:</b> There have been some minor changes to the Swarm.config file so it is recommended that you do not reuse your old Swarm.config file.  I apologize for this and will make every effort to avoid changing formats in the future.<br>
+		<br>
+		A <a href="manual/appendixC.html">list of bug fixes and changes</a> can be found in Appendix C of the manual.<br>
+		<br>
+
+		<b><u>Installation</u></b><br>
+		1.  Install Java Runtime Environment (or SDK) v1.4+.  Available at <a href="http://java.sun.com/j2se/1.4.2/index.jsp">http://java.sun.com/j2se/1.4.2/index.jsp</a><br>
+		Note: The recently released Java 1.5 or (Java 5.0) can also be used to run Swarm.<br>
+		<br>
+		2.  Download Swarm.<br>
+		zip: <a href="http://www.stanford.edu/~dcerv/swarm/swarm-bin.zip">http://www.stanford.edu/~dcerv/swarm/swarm-bin.zip</a><br>
+
+		tar: <a href="http://www.stanford.edu/~dcerv/swarm/swarm-bin.tar.gz">http://www.stanford.edu/~dcerv/swarm/swarm-bin.tar.gz</a><br>
+		<br>
+		3.  Unzip or untar.  The program files are located under a directory called 'swarm' so it is safe to unzip wherever you like.<br>
+		<br>
+		4.  Run Swarm.  On Windows, simply run 'swarm.bat' in the 'swarm' directory.  On Unix-like platforms, run the 'swarm.sh' script.<br>
+		<br>
+		5.  Go through the <a href="manual/tutorial.html">tutorial</a>.  This will quickly get you started using <b>Swarm</b>.<br>
+
+		<br>
+		
+		<b><u>Notes and Issues</u></b><br>
+		-- There is a manual included.  The starting point for the manual is the 'index.html' file under the 'swarm/manual' directory.
+		The manual is also available <a href="manual/index.html">online</a>. <b>The manual is becoming a bit out of date
+		and does not reflect all of the changes sinces version 1.1.4.</b><br>
+		<br>
+		
+		</td></tr></table>
+	</body>
+
+</html>
