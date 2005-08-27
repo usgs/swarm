@@ -32,6 +32,9 @@ import javax.swing.border.TitledBorder;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.3  2005/04/13 00:49:04  cervelli
  * Replaced show() with overriden setVisible().
  *
@@ -64,6 +67,8 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 	private JTextField clipValue;
 	private JCheckBox autoScale;
 	private JTextField barRange;
+	
+	private static final String IMAGE_WAVESETTINGS = "images/wavesettings.png";
 	
 	private static HelicorderViewerSettingsDialog dialog;
 	
@@ -155,7 +160,8 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 		zoomLabel.setLabelFor(zoomList);
 		zoomPanel.add(zoomLabel);
 		zoomPanel.add(zoomList);
-		JButton waveSettingsButton = new JButton("Wave Settings", new ImageIcon("images/wavesettings.png"));
+		//JButton waveSettingsButton = new JButton("Wave Settings", new ImageIcon("images/wavesettings.png"));
+		JButton waveSettingsButton = new JButton("Wave Settings", new ImageIcon(getClass().getClassLoader().getResource(IMAGE_WAVESETTINGS)));
 		zoomPanel.add(waveSettingsButton);
 		waveSettingsButton.addActionListener(new ActionListener()
 				{
