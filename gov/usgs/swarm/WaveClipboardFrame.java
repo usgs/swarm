@@ -41,6 +41,9 @@ import javax.swing.event.InternalFrameEvent;
  * The wave clipboard internal frame.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/08/26 23:49:04  tparker
+ * Create image path constants
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -57,6 +60,12 @@ public class WaveClipboardFrame extends JInternalFrame
 {
 	public static final long serialVersionUID = -1;
 	
+	private static final String IMAGE_OPEN = "images/open.png";
+	private static final String IMAGE_SAVE = "images/save.png";
+	private static final String IMAGE_SAVEALL = "images/saveall.png";
+	private static final String IMAGE_CLOCK = "images/clock.png";
+	private static final String IMAGE_DELETE = "images/delete.png";
+	
 	private JScrollPane scrollPane;
 	private Box waveBox;
 	private List<ClipboardWaveViewPanel> waves;
@@ -70,12 +79,6 @@ public class WaveClipboardFrame extends JInternalFrame
 	private JButton saveAllButton;
 	private JButton openButton;
 	private DateFormat saveAllDateFormat;
-	
-	private static final String IMAGE_OPEN = "images/open.png";
-	private static final String IMAGE_SAVE = "images/save.png";
-	private static final String IMAGE_SAVEALL = "images/saveall.png";
-	private static final String IMAGE_CLOCK = "images/clock.png";
-	private static final String IMAGE_DELETE = "images/delete.png";
 
 	public WaveClipboardFrame()
 	{
