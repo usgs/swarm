@@ -45,6 +45,9 @@ import javax.swing.SwingUtilities;
  * spectrogram.  Relies heavily on the Valve plotting package.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.4  2005/05/02 16:22:11  cervelli
  * Moved data classes to separate package.
  *
@@ -78,6 +81,8 @@ public class WaveViewPanel extends JComponent
 	
 //	private static final int[] SAMPLE_SIZES = new int[] {64, 128, 256, 512, 1024, 2048};
 	private static final double LOG10 = Math.log(10);
+	
+	private static final String IMAGE_CLOSE = "images/close.png";
 	
 	private Plot plot;
 	private SliceWaveRenderer waveRenderer;
@@ -654,7 +659,8 @@ public class WaveViewPanel extends JComponent
 			if (closeListener != null)
 			{
 				if (closeImg == null)
-					closeImg = Toolkit.getDefaultToolkit().createImage("images/close.png");
+					//closeImg = Toolkit.getDefaultToolkit().createImage("images/close.png");
+					closeImg = Toolkit.getDefaultToolkit().createImage(IMAGE_CLOSE);
 				g2.drawImage(closeImg, dim.width - 17, 3, null);
 			}
 		}
