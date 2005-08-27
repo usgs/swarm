@@ -45,6 +45,9 @@ import javax.swing.SwingUtilities;
  * spectrogram.  Relies heavily on the Valve plotting package.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/08/27 00:22:58  tparker
+ * Create image constant
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -659,7 +662,6 @@ public class WaveViewPanel extends JComponent
 			if (closeListener != null)
 			{
 				if (closeImg == null)
-					//closeImg = Toolkit.getDefaultToolkit().createImage("images/close.png");
 					closeImg = Toolkit.getDefaultToolkit().createImage(IMAGE_CLOSE);
 				g2.drawImage(closeImg, dim.width - 17, 3, null);
 			}

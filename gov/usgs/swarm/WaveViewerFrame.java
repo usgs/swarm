@@ -24,6 +24,9 @@ import javax.swing.event.InternalFrameEvent;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/08/27 00:20:25  tparker
+ * Create image constants
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -35,6 +38,13 @@ import javax.swing.event.InternalFrameEvent;
 public class WaveViewerFrame extends JInternalFrame implements Runnable
 {
 	public static final long serialVersionUID = -1;
+	
+	private static final String IMAGE_MINIMIZE = "images/minimize.png";
+	private static final String IMAGE_XMINUS = "images/xminus.png";
+	private static final String IMAGE_XPLUS = "images/xplus.png";
+	private static final String IMAGE_CLIPBOARD = "images/clipboard.png";
+	private static final String IMAGE_MAXIMIZE = "images/maximize.png";
+
 	private long interval = 2000;
 //	private int frames = 30;
 	private final static int[] SPANS = new int[] {15, 30, 60, 120, 180, 240, 300};
@@ -46,12 +56,6 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 	private boolean kill;
 	private JToolBar toolbar;
 	private JButton showToolbar;
-	
-	private static final String IMAGE_MINIMIZE = "images/minimize.png";
-	private static final String IMAGE_XMINUS = "images/xminus.png";
-	private static final String IMAGE_XPLUS = "images/xplus.png";
-	private static final String IMAGE_CLIPBOARD = "images/clipboard.png";
-	private static final String IMAGE_MAXIMIZE = "images/maximize.png";
 
 	
 	private WaveViewSettings settings;
@@ -115,7 +119,6 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 		
 		toolbar = new JToolBar();
 		toolbar.setFloatable(false);
-		//JButton hideTB = new JButton(new ImageIcon("images/minimize.png"));
 		JButton hideTB = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_MINIMIZE)));
 		hideTB.setToolTipText("Hide toolbar");
 		hideTB.addActionListener(new ActionListener()
@@ -133,7 +136,6 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 		toolbar.addSeparator();
 		toolbar.setRollover(true);
 		
-		//JButton compXButton = new JButton(new ImageIcon("images/xminus.png"));
 		JButton compXButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_XMINUS)));
 		compXButton.setMargin(new Insets(0,0,0,0));
 		compXButton.setToolTipText("Shrink time axis (Alt-left arrow)");
@@ -148,7 +150,6 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 		Util.mapKeyStrokeToButton(this, "alt LEFT", "compx", compXButton);
 		toolbar.add(compXButton);
 		
-		//JButton expXButton = new JButton(new ImageIcon("images/xplus.png"));
 		JButton expXButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_XPLUS)));
 		expXButton.setMargin(new Insets(0,0,0,0));
 		expXButton.setToolTipText("Expand time axis (Alt-right arrow)");
@@ -166,7 +167,6 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 
 //		waveChooser.addButtonsToToolbar(toolbar);
 		new WaveViewSettingsToolbar(settings, toolbar, this);
-		//JButton clipboard = new JButton(new ImageIcon("images/clipboard.png"));
 		JButton clipboard = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_CLIPBOARD)));
 		toolbar.add(clipboard);
 		clipboard.setMargin(new Insets(0,0,0,0));
@@ -185,7 +185,6 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 		toolbar.addSeparator();
 		
 		mainPanel.add(toolbar, BorderLayout.NORTH);		
-		//showToolbar = new JButton(new ImageIcon("images/maximize.png"));
 		showToolbar = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_MAXIMIZE)));
 		showToolbar.setMargin(new Insets(0, 0, 0, 0));
 		showToolbar.setSize(24, 24);

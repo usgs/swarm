@@ -33,6 +33,9 @@ import javax.swing.event.InternalFrameEvent;
  * channels in real-time.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/08/27 00:15:08  tparker
+ * Create image constants
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -56,6 +59,12 @@ import javax.swing.event.InternalFrameEvent;
 public class MultiMonitor extends JInternalFrame implements Runnable
 {
 	public static final long serialVersionUID = -1;
+
+	private static final String IMAGE_SETTINGS = "images/settings.png";
+	private static final String IMAGE_XMINUS = "images/xminus.png";
+	private static final String IMAGE_XPLUS = "images/xplus.png";
+	private static final String IMAGE_WAVESETTINGS = "images/wavesettings.png";
+	private static final String IMAGE_DELETE = "images/delete.png";
 	
 	public final static int[] SPANS = new int[] {15, 30, 60, 120, 180, 240, 300, 600, 15*60, 20*60, 30*60, 60*60};
 	private int spanIndex = 1;
@@ -72,12 +81,6 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	private JButton expXButton;
 	private JButton optionsButton;
 	
-	private static final String IMAGE_SETTINGS = "images/settings.png";
-	private static final String IMAGE_XMINUS = "images/xminus.png";
-	private static final String IMAGE_XPLUS = "images/xplus.png";
-	private static final String IMAGE_WAVESETTINGS = "images/wavesettings.png";
-	private static final String IMAGE_DELETE = "images/delete.png";
-
 	private Box waveBox;
 	
 	private long refreshInterval = 1000;
