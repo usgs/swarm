@@ -6,6 +6,9 @@ package gov.usgs.swarm;
  * TODO: eliminate this class in favor of vdx.HelicorderSettings
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.2  2005/03/24 20:39:25  cervelli
  * Gets default timeChunk and span from config file.
  *
@@ -28,6 +31,7 @@ public class HelicorderViewerSettings
 	public boolean showClip;
 	public int clipValue;
 	public int barRange;
+	public double barMult;
 	
 	public HelicorderViewerSettings()
 	{
@@ -38,12 +42,13 @@ public class HelicorderViewerSettings
 		refreshInterval = 15;
 		scrollSize = 1;
 		forceCenter = false;
-		clipBars = 3;
+		clipBars = 21;
 		showWiggler = false;
 		
 		clipValue = 2999;
 		showClip = true;
 		barRange = 1500;
+		barMult = 3;
 		autoScale = true;
 	}
 	

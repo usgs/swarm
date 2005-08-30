@@ -37,6 +37,9 @@ import javax.swing.border.LineBorder;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.4  2005/05/02 16:21:47  cervelli
  * Changed vertical margins.
  *
@@ -549,8 +552,11 @@ public class HelicorderViewPanel extends JComponent
 		
 		if (settings.autoScale)
 		{
-			settings.clipValue = (int)(21 * mean);
-			settings.barRange = (int)(3 * mean);
+			//settings.clipValue = (int)(21 * mean);
+			//settings.barRange = (int)(3 * mean);
+			settings.barRange = (int) (mean * settings.barMult);
+			settings.clipValue = (int) (mean *  settings.clipBars);
+
 //			heliRenderer.setHelicorderExtents(startTime, endTime, -1 * Math.abs(3 * mean), Math.abs(3 * mean));
 		}
 //		else

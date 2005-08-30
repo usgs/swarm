@@ -13,18 +13,23 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.io.File;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
@@ -33,6 +38,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/08/30 00:33:30  tparker
+ * Update to use Images class
+ *
  * Revision 1.2  2005/08/26 23:27:03  uid889
  * Create image path constants
  *
@@ -67,6 +75,10 @@ public class HelicorderViewerFrame extends JInternalFrame
 	// seconds
 	public static final int[] zoomValues = new int[] {1, 2, 5, 10, 20, 30, 60, 120, 300};
 	
+	//autoScaleSliderButton state
+	protected static final int zoomSelected = ItemEvent.DESELECTED;
+	protected static final int clippingSelected = ItemEvent.SELECTED;
+	
 	private RefreshThread refreshThread;
 	private SeismicDataSource dataSource;
 	private String channel;
@@ -82,6 +94,10 @@ public class HelicorderViewerFrame extends JInternalFrame
 	private JButton expY;
 	private JButton clipboard;
 	private JButton removeWave; 
+	protected JCheckBox autoScaleSliderButton;
+	protected int autoScaleSliderButtonState;
+	protected JSlider autoScaleSlider;
+
 	
 //	private JButton waveSettingsButton; 
 	private HelicorderViewPanel helicorderViewPanel;
@@ -354,6 +370,56 @@ public class HelicorderViewerFrame extends JInternalFrame
 		removeWave.setMargin(new Insets(0,0,0,0));
 		Util.mapKeyStrokeToButton(this, "ESCAPE", "removewave", removeWave);
 		Util.mapKeyStrokeToButton(this, "DELETE", "removewave", removeWave);
+		
+
+		toolbar.addSeparator();
+		
+		autoScaleSliderButton = new JCheckBox(new ImageIcon(getClass().getClassLoader().getResource(Images.get("zoomplus"))));
+		autoScaleSliderButton.setSelectedIcon(new ImageIcon(getClass().getClassLoader().getResource(Images.get("clipboard"))));
+		autoScaleSliderButton.setMargin(new Insets(0,0,0,0));
+		autoScaleSliderButton.addItemListener(new ItemListener()
+
+				{
+					public void itemStateChanged(ItemEvent e)
+					{
+
+						autoScaleSliderButtonState = e.getStateChange();
+						if (autoScaleSliderButtonState == zoomSelected) 
+						{
+							autoScaleSlider.setValue(40 - (new Double(settings.barMult * 4).intValue()));
+						} 
+						else if (autoScaleSliderButtonState == clippingSelected)
+						{
+							autoScaleSlider.setValue(settings.clipBars / 3);
+						}
+						
+						settings.notifyView();
+					}
+				});
+		
+		autoScaleSliderButtonState = zoomSelected;
+		toolbar.add(autoScaleSliderButton);
+
+		autoScaleSlider = new JSlider(1, 39, (int) (10 - settings.barMult) * 4);
+		autoScaleSlider.setMaximumSize(new Dimension(100, this.getMaximumSize().height - 6));
+		autoScaleSlider.addChangeListener(new ChangeListener()
+				{
+					public void stateChanged(ChangeEvent e)
+					{
+						settings.autoScale = true;
+						if (!autoScaleSlider.getValueIsAdjusting()) 
+						{
+							if (autoScaleSliderButtonState == zoomSelected)
+								settings.barMult = 10 - ( new Integer(autoScaleSlider.getValue()).doubleValue() / 4);
+							else if (autoScaleSliderButtonState == clippingSelected)
+								settings.clipBars = autoScaleSlider.getValue() * 3;
+							repaintHelicorder();
+						}
+					}
+					
+				});
+		
+		toolbar.add(autoScaleSlider);
 		
 		mainPanel.add(toolbar, BorderLayout.NORTH);
 		
