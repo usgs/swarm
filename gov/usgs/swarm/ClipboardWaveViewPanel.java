@@ -29,6 +29,9 @@ import javax.swing.border.LineBorder;
  * Wave Clipboard.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/08/27 00:27:12  tparker
+ * Tidy code. No functional changes.
+ *
  * Revision 1.2  2005/08/27 00:02:55  tparker
  * Create image constants
  *
@@ -43,19 +46,6 @@ import javax.swing.border.LineBorder;
 public class ClipboardWaveViewPanel extends JPanel
 {
 	private static final long serialVersionUID = -1;
-
-	private static final String IMAGE_MINIMIZE = "images/minimize.png";
-	private static final String IMAGE_MAXIMIZE = "images/maximize.png";
-	private static final String IMAGE_LEFT = "images/left.png";
-	private static final String IMAGE_RIGHT = "images/right.png";
-	private static final String IMAGE_GOTOTIME = "images/gototime.png";
-	private static final String IMAGE_XMINUS = "images/xminus.png";
-	private static final String IMAGE_XPLUS = "images/xplus.png";
-	private static final String IMAGE_BACK = "images/back.png";
-	private static final String IMAGE_CLIPBOARD = "images/clipboard.png";
-	private static final String IMAGE_UP = "images/up.png";
-	private static final String IMAGE_DOWN = "images/down.png";
-	private static final String IMAGE_DELETE = "images/delete.png";
 
 	private WaveViewPanel waveViewPanel;
 	private JLayeredPane mainPane;
@@ -97,7 +87,7 @@ public class ClipboardWaveViewPanel extends JPanel
 		
 		toolbar = new JToolBar();
 		toolbar.setFloatable(false);
-		JButton hideTB = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_MINIMIZE)));
+		JButton hideTB = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("minimize"))));
 		hideTB.setToolTipText("Hide toolbar");
 		hideTB.setMargin(new Insets(0,0,0,0));
 		hideTB.addActionListener(new ActionListener()
@@ -115,7 +105,7 @@ public class ClipboardWaveViewPanel extends JPanel
 		toolbar.add(hideTB);
 		toolbar.addSeparator();
 		
-		showToolbar = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_MAXIMIZE)));
+		showToolbar = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("maximize"))));
 		showToolbar.setToolTipText("Show toolbar");
 		showToolbar.setMargin(new Insets(0, 0, 0, 0));
 		showToolbar.setSize(24, 24);
@@ -134,7 +124,7 @@ public class ClipboardWaveViewPanel extends JPanel
 		mainPane.add(showToolbar);
 		mainPane.setLayer(showToolbar, JLayeredPane.PALETTE_LAYER.intValue());
 		
-		backButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_LEFT)));
+		backButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("left"))));
 		backButton.setMargin(new Insets(0,0,0,0));
 		backButton.setToolTipText("Scroll back time 20% (Left arrow)");
 		backButton.addActionListener(new ActionListener()
@@ -147,7 +137,7 @@ public class ClipboardWaveViewPanel extends JPanel
 		toolbar.add(backButton);
 		Util.mapKeyStrokeToButton(this, "LEFT", "backward1", backButton);
 		
-		forwardButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_RIGHT)));
+		forwardButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("right"))));
 		forwardButton.setMargin(new Insets(0,0,0,0));
 		forwardButton.setToolTipText("Scroll forward time 20% (Right arrow)");
 		forwardButton.addActionListener(new ActionListener()
@@ -160,7 +150,7 @@ public class ClipboardWaveViewPanel extends JPanel
 		toolbar.add(forwardButton);
 		Util.mapKeyStrokeToButton(this, "RIGHT", "forward1", forwardButton);
 		
-		gotoButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_GOTOTIME)));
+		gotoButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("gototime"))));
 		gotoButton.setMargin(new Insets(0,0,0,0));
 		gotoButton.setToolTipText("Go to time (Ctrl-G)");
 		gotoButton.addActionListener(new ActionListener()
@@ -175,7 +165,7 @@ public class ClipboardWaveViewPanel extends JPanel
 		toolbar.add(gotoButton);
 		Util.mapKeyStrokeToButton(this, "ctrl G", "goto", gotoButton);
 		
-		compXButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_XMINUS)));
+		compXButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("xminus"))));
 		compXButton.setMargin(new Insets(0,0,0,0));
 		compXButton.setToolTipText("Shrink sample time 20% (Alt-left arrow)");
 		compXButton.addActionListener(new ActionListener()
@@ -188,7 +178,7 @@ public class ClipboardWaveViewPanel extends JPanel
 		toolbar.add(compXButton);
 		Util.mapKeyStrokeToButton(this, "alt LEFT", "compx", compXButton);
 		
-		expXButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_XPLUS)));
+		expXButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("xplus"))));
 		expXButton.setMargin(new Insets(0,0,0,0));
 		expXButton.setToolTipText("Expand sample time 20% (Alt-right arrow)");
 		expXButton.addActionListener(new ActionListener()
@@ -201,7 +191,7 @@ public class ClipboardWaveViewPanel extends JPanel
 		toolbar.add(expXButton);
 		Util.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expXButton);
 
-		JButton histButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_BACK)));
+		JButton histButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("back"))));
 		histButton.setMargin(new Insets(0,0,0,0));
 		histButton.setToolTipText("Last time settings (Backspace)");
 		histButton.addActionListener(new ActionListener()
@@ -217,7 +207,7 @@ public class ClipboardWaveViewPanel extends JPanel
 
 		new WaveViewSettingsToolbar(waveViewPanel.getWaveViewSettings(), toolbar, this);
 		
-		copyButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_CLIPBOARD)));
+		copyButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("clipboard"))));
 		copyButton.setMargin(new Insets(0,0,0,0));
 		copyButton.setToolTipText("Place another copy of wave on clipboard (C or Ctrl-C)");
 		copyButton.addActionListener(new ActionListener()
@@ -233,7 +223,7 @@ public class ClipboardWaveViewPanel extends JPanel
 		toolbar.add(copyButton);
 		toolbar.addSeparator();
 		
-		upButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_UP)));
+		upButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("up"))));
 		upButton.setMargin(new Insets(0,0,0,0));
 		upButton.setToolTipText("Move wave up in clipboard (Up arrow)");
 		upButton.addActionListener(new ActionListener()
@@ -247,7 +237,7 @@ public class ClipboardWaveViewPanel extends JPanel
 		toolbar.add(upButton);
 		
 		
-		downButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_DOWN)));
+		downButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("down"))));
 		downButton.setMargin(new Insets(0,0,0,0));
 		downButton.setToolTipText("Move wave down in clipboard (Down arrow)");
 		downButton.addActionListener(new ActionListener()
@@ -260,7 +250,7 @@ public class ClipboardWaveViewPanel extends JPanel
 		Util.mapKeyStrokeToButton(this, "DOWN", "down", downButton);
 		toolbar.add(downButton);
 		
-		removeButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_DELETE)));
+		removeButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("delete"))));
 		removeButton.setMargin(new Insets(0,0,0,0));
 		removeButton.setToolTipText("Remove wave from clipboard (Delete)");
 		removeButton.addActionListener(new ActionListener()

@@ -33,6 +33,9 @@ import javax.swing.event.InternalFrameEvent;
  * channels in real-time.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/08/27 00:30:15  tparker
+ * Tidy code, no functional changes.
+ *
  * Revision 1.2  2005/08/27 00:15:08  tparker
  * Create image constants
  *
@@ -59,12 +62,6 @@ import javax.swing.event.InternalFrameEvent;
 public class MultiMonitor extends JInternalFrame implements Runnable
 {
 	public static final long serialVersionUID = -1;
-
-	private static final String IMAGE_SETTINGS = "images/settings.png";
-	private static final String IMAGE_XMINUS = "images/xminus.png";
-	private static final String IMAGE_XPLUS = "images/xplus.png";
-	private static final String IMAGE_WAVESETTINGS = "images/wavesettings.png";
-	private static final String IMAGE_DELETE = "images/delete.png";
 	
 	public final static int[] SPANS = new int[] {15, 30, 60, 120, 180, 240, 300, 600, 15*60, 20*60, 30*60, 60*60};
 	private int spanIndex = 1;
@@ -183,8 +180,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		toolbar.setFloatable(false);
 		toolbar.setRollover(true);
 
-		//optionsButton = new JButton(new ImageIcon("images/settings.png"));
-		optionsButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_SETTINGS)));
+		optionsButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("settings"))));
 		optionsButton.setToolTipText("Monitor options");
 		optionsButton.setMargin(new Insets(0,0,0,0));
 		optionsButton.addActionListener(new ActionListener()
@@ -198,8 +194,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		toolbar.add(optionsButton);
 		toolbar.addSeparator();
 		
-		//compXButton = new JButton(new ImageIcon("images/xminus.png"));
-		compXButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_XMINUS)));
+		compXButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("xminus"))));
 		compXButton.setMargin(new Insets(0,0,0,0));
 		compXButton.setToolTipText("Shrink time axis");
 		compXButton.addActionListener(new ActionListener()
@@ -212,8 +207,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 				});
 		toolbar.add(compXButton);
 		
-		//expXButton = new JButton(new ImageIcon("images/xplus.png"));
-		expXButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_XPLUS)));
+		expXButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("xplus"))));
 		expXButton.setMargin(new Insets(0,0,0,0));
 		expXButton.setToolTipText("Expand time axis");
 		expXButton.addActionListener(new ActionListener()
@@ -227,8 +221,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		toolbar.add(expXButton);
 		toolbar.addSeparator();
 		
-		//settingsButton = new JButton(new ImageIcon("images/wavesettings.png"));
-		settingsButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_WAVESETTINGS)));
+		settingsButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("wavesettings"))));
 		settingsButton.setMargin(new Insets(0,0,0,0));
 		settingsButton.setToolTipText("Settings for selected wave");
 		settingsButton.addActionListener(new ActionListener()
@@ -247,8 +240,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		
 		toolbar.addSeparator();
 		
-		//removeButton = new JButton(new ImageIcon("images/delete.png"));
-		removeButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(IMAGE_DELETE)));
+		removeButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("delete"))));
 		removeButton.setMargin(new Insets(0,0,0,0));
 		removeButton.setToolTipText("Remove selected wave from monitor");
 		removeButton.addActionListener(new ActionListener()

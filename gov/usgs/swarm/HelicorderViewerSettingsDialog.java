@@ -32,6 +32,9 @@ import javax.swing.border.TitledBorder;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/08/27 00:28:59  tparker
+ * Tidy code, no functional changes.
+ *
  * Revision 1.2  2005/08/27 00:07:30  tparker
  * Create image constant
  *
@@ -49,8 +52,6 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 	
 	private static final int WIDTH = 240;
 	private static final int HEIGHT = 500;	
-
-	private static final String IMAGE_WAVESETTINGS = "images/wavesettings.png";
 	
 	private HelicorderViewerSettings settings;
 	private WaveViewSettings waveSettings;
@@ -163,7 +164,7 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 		zoomLabel.setLabelFor(zoomList);
 		zoomPanel.add(zoomLabel);
 		zoomPanel.add(zoomList);
-		JButton waveSettingsButton = new JButton("Wave Settings", new ImageIcon(getClass().getClassLoader().getResource(IMAGE_WAVESETTINGS)));
+		JButton waveSettingsButton = new JButton("Wave Settings", new ImageIcon(getClass().getClassLoader().getResource(Images.get("wavesettings"))));
 		zoomPanel.add(waveSettingsButton);
 		waveSettingsButton.addActionListener(new ActionListener()
 				{
