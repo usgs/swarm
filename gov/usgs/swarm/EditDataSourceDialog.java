@@ -27,6 +27,9 @@ import javax.swing.border.EmptyBorder;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.4  2005/03/24 23:44:26  cervelli
  * Added compression checkbox for WWS.
  *
@@ -219,10 +222,8 @@ public class EditDataSourceDialog extends BaseDialog
 		if (source != null && source.indexOf(";wws:") != -1)
 		{
 			tabIndex = 1;
-			String s = source.substring(source.indexOf(";wws:") + 4);
-//			String[] ss = Util.splitString(s, ":");
+			String s = source.substring(source.indexOf(";wws:") + 5);
 			String[] ss = s.split(":");
-//			wsh = source.substring(source.indexOf(";ws:") + 4, source.indexOf(':', source.indexOf("ws:") + 4));
 			wsh = ss[0];
 			wsp = ss[1];
 			wsto = Double.toString(Double.parseDouble(ss[2]) / 1000);
