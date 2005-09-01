@@ -45,6 +45,9 @@ import javax.swing.SwingUtilities;
  * spectrogram.  Relies heavily on the Valve plotting package.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/08/30 00:34:55  tparker
+ * Update to use Images class
+ *
  * Revision 1.3  2005/08/27 00:33:27  tparker
  * Tidy code, no functional changes.
  *
@@ -741,7 +744,7 @@ public class WaveViewPanel extends JComponent
 		double maxY = settings.maxAmp;
 		if (settings.autoScaleAmp)
 		{
-			int[] dr = new int[] {wv.min(), wv.max()};
+			double[] dr = new double[] {wv.min(), wv.max()};
 			if (settings.autoScaleAmpMemory)
 			{
 				minY = Math.min(minAmp, dr[0] - bias);
