@@ -21,6 +21,9 @@ import java.util.StringTokenizer;
  * be made a descendant of WaveServerSource. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.2  2005/05/08 16:10:48  cervelli
  * Changes for renaming of WWS.
  *
@@ -160,7 +163,7 @@ public class WWSSource extends SeismicDataSource
 			
 			if (hd != null && hd.rows() != 0)
 			{
-				HelicorderData noLatest = hd.subset(hd.getStartTime(), CurrentTime.nowJ2K() - 30);
+				HelicorderData noLatest = hd.subset(hd.getStartTime(), CurrentTime.getInstance().nowJ2K() - 30);
 				if (noLatest != null && noLatest.rows() > 0)
 					cache.putHelicorder(station, noLatest);
 				//cache.putHelicorder(station, hd);

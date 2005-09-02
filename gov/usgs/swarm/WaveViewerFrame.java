@@ -24,6 +24,9 @@ import javax.swing.event.InternalFrameEvent;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/08/30 00:34:40  tparker
+ * Update to use Images class
+ *
  * Revision 1.3  2005/08/27 00:32:40  tparker
  * Tidy code, no functional changes.
  *
@@ -244,7 +247,7 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 		 
 		worker.start();
 		*/
-		now = CurrentTime.nowJ2K();
+		now = CurrentTime.getInstance().nowJ2K();
 		Wave sw = dataSource.getWave(channel, now - SPANS[spanIndex], now);
 		waveViewPanel.setWorking(true);
 		waveViewPanel.setWave(sw, now - SPANS[spanIndex], now);

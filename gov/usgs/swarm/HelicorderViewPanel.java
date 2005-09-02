@@ -37,6 +37,9 @@ import javax.swing.border.LineBorder;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/08/30 18:01:39  tparker
+ * Add Autoscale Slider to Helicorder Viewer Frame
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -369,7 +372,7 @@ public class HelicorderViewPanel extends JComponent
 	{
 		if (insetWavePanel != null)
 		{
-			parent.disableInsetButtons();
+			parent.setInsetButtonsEnabled(false);
 			this.remove(insetWavePanel);
 			insetWavePanel = null;
 			repaint();
@@ -452,7 +455,7 @@ public class HelicorderViewPanel extends JComponent
 
 		double zoomOffset = parent.getHelicorderViewerSettings().waveZoomOffset;
 		loadInsetWave(j2k - zoomOffset, j2k + zoomOffset);
-		parent.enableInsetButtons();		
+		parent.setInsetButtonsEnabled(true);		
 		repaint();
 	}
 	 

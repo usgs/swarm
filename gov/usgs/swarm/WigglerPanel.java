@@ -22,6 +22,9 @@ import javax.swing.JComponent;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.2  2005/05/02 16:22:11  cervelli
  * Moved data classes to separate package.
  *
@@ -99,7 +102,7 @@ public class WigglerPanel extends JComponent implements Runnable
 			try
 			{
 				Thread.sleep(100 * wigglers);
-				double now = CurrentTime.nowJ2K();
+				double now = CurrentTime.getInstance().nowJ2K();
 				setWave(dataSource.getWave(channel, now - 20, now - 10));
 				waveRenderer.setWave(wave);
 				repaint();

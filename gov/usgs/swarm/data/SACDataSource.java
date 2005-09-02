@@ -11,6 +11,9 @@ import java.util.List;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.1  2005/05/02 16:22:11  cervelli
  * Moved data classes to separate package.
  *
@@ -48,7 +51,7 @@ public class SACDataSource extends SeismicDataSource
 	public HelicorderData getHelicorder(String station, double t1, double t2)
 	{
 		double dt = t2 - t1;
-		double now = CurrentTime.nowJ2K();
+		double now = CurrentTime.getInstance().nowJ2K();
 		if (Math.abs(now - t2) < 3600)
 		{
 			t2 = wave.getEndTime();

@@ -28,6 +28,9 @@ import java.util.TimeZone;
  * Class for loading SEED volumes.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.1  2005/05/02 16:22:10  cervelli
  * Moved data classes to separate package.
  *
@@ -146,7 +149,7 @@ public class FullSeedDataSource extends SeismicDataSource
 	public HelicorderData getHelicorder(String station, double t1, double t2)
 	{
 		double dt = t2 - t1;
-		double now = CurrentTime.nowJ2K();
+		double now = CurrentTime.getInstance().nowJ2K();
 		if (Math.abs(now - t2) < 3600)
 		{
 			Wave wave = (Wave)stationMap.get(station);

@@ -50,6 +50,9 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
  * Main application class.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.12  2005/05/02 16:22:11  cervelli
  * Moved data classes to separate package.
  *
@@ -83,7 +86,6 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
  * Revision 1.2  2004/10/12 23:45:11  cvs
  * Bumped version, added log.
  *
- * TODO: external image names and use getResource.  Also package images in jar.
  * @author Dan Cervelli
  */
 public class Swarm extends JFrame
@@ -107,7 +109,7 @@ public class Swarm extends JFrame
 	private WaveClipboardFrame waveClipboard;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "1.2.0-a20050826";
+	private static final String VERSION = "1.2.0-a20050902";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -472,7 +474,7 @@ public class Swarm extends JFrame
 		desktop.add(waveClipboard);
 		
 		this.setVisible(true);
-		long offset = CurrentTime.getOffset();
+		long offset = CurrentTime.getInstance().getOffset();
 		if (Math.abs(offset) > 10 * 60 * 1000)
 			JOptionPane.showMessageDialog(this, "You're system clock is off by more than 10 minutes.\n" + 
 					"This is just for your information, Swarm will not be affected by this.", "System Clock", JOptionPane.INFORMATION_MESSAGE);
@@ -665,7 +667,7 @@ public class Swarm extends JFrame
 		double et = 0;
 		if (cwvp == null)
 		{
-			double now = CurrentTime.nowJ2K();
+			double now = CurrentTime.getInstance().nowJ2K();
 			st = now - 180;
 			et = now;
 		}

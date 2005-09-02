@@ -33,6 +33,9 @@ import javax.swing.event.InternalFrameEvent;
  * channels in real-time.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/08/30 00:34:13  tparker
+ * Update to use Images class
+ *
  * Revision 1.3  2005/08/27 00:30:15  tparker
  * Tidy code, no functional changes.
  *
@@ -327,7 +330,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	
 	public synchronized void refresh()
 	{
-		double now = CurrentTime.nowJ2K();
+		double now = CurrentTime.getInstance().nowJ2K();
 		for (int i = 0; i < channels.size(); i++)
 		{
 			WaveViewPanel waveViewPanel = panels.get(i);

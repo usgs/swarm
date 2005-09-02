@@ -19,9 +19,10 @@ import java.util.Map;
  * An implementation of <code>SeismicDataSource</code> that connects to an
  * Earthworm Wave Server.
  * 
- * TODO: // cache menu
- * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.1  2005/05/02 16:22:10  cervelli
  * Moved data classes to separate package.
  *
@@ -47,7 +48,6 @@ public class WaveServerSource extends SeismicDataSource
 	public WaveServerSource(String s)
 	{
 		params = s;
-//		String[] ss = Util.splitString(params, ":");
 		String[] ss = params.split(":");
 		String h = ss[0];
 		int p = Integer.parseInt(ss[1]);
@@ -124,11 +124,6 @@ public class WaveServerSource extends SeismicDataSource
 		{
 			MenuItem mi = (MenuItem)it.next();
 			list.add(getFormattedSCNL(mi));
-//			
-//			if (isSCNL(params))
-//				list.add(mi.getSCNL());
-//			else
-//				list.add(mi.getSCN());
 		}
 		return list;
 	}
@@ -176,7 +171,7 @@ public class WaveServerSource extends SeismicDataSource
 	
 	public synchronized HelicorderData getHelicorder(String station, double t1, double t2)
 	{
-		double now = CurrentTime.nowJ2K();
+		double now = CurrentTime.getInstance().nowJ2K();
 		// if a time later than now has been asked for make sure to get the latest 
 		if ((t2 - now) >= -20)
 			getWave(station, now - 2*60, now);	
@@ -184,7 +179,6 @@ public class WaveServerSource extends SeismicDataSource
 		CachedDataSource cache = Swarm.getCache();
 		HelicorderData hd = cache.getHelicorder(station, t1, t2);	
 
-//		if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > (t2 - t1) * 0.8))
 		if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 0))
 			requestGulper(station, t1, t2);
 		return hd;
@@ -240,10 +234,8 @@ public class WaveServerSource extends SeismicDataSource
 	{
 		if (gulpers == null)
 			return;
-//		for (int i = 0; i < gulpers.size(); i++)
 		for (Gulper g : gulpers)
 		{
-//			Gulper g = (Gulper)gulpers.elementAt(i);
 			if (g.channel == ch)	
 			{
 				g.kill();
@@ -268,7 +260,7 @@ public class WaveServerSource extends SeismicDataSource
 			channel = ch;
 			lastTime = t2;
 			
-			double now = CurrentTime.nowJ2K();
+			double now = CurrentTime.getInstance().nowJ2K();
 			if (lastTime > now)
 				lastTime = now;
 			
@@ -289,7 +281,6 @@ public class WaveServerSource extends SeismicDataSource
 		public void update(double t1, double t2)
 		{
 			CachedDataSource cache = Swarm.getCache();
-//			double now = CurrentTime.nowJ2K();
 			if (t2 < lastTime)
 				lastTime = t2;
 			goalTime = t1;
@@ -299,7 +290,6 @@ public class WaveServerSource extends SeismicDataSource
 				lastTime -= GULP_SIZE;
 				lastTime += 10;	
 			}
-//			System.out.println("after update: " + goalTime + " " + lastTime);
 		}
 		
 		public void run()
@@ -309,11 +299,7 @@ public class WaveServerSource extends SeismicDataSource
 				try
 				{
 					if (gulpSource.getWave(channel, lastTime - GULP_SIZE, lastTime) != null)
-					{
 						update(goalTime, lastTime - GULP_SIZE + 10);
-						//lastTime -= GULP_SIZE;
-						//lastTime += 10;
-					}
 				}
 				catch (Exception e)
 				{
