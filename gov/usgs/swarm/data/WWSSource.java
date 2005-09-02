@@ -21,6 +21,9 @@ import java.util.StringTokenizer;
  * be made a descendant of WaveServerSource. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/09/02 16:40:29  dcervelli
+ * CurrentTime changes.
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -53,6 +56,7 @@ public class WWSSource extends SeismicDataSource
 	private WWSClient winstonClient;
 	private int timeout = 2000;
 	private boolean compress = false;
+	private int protocolVersion = 1;
 	
 	public WWSSource(String s)
 	{
@@ -66,6 +70,7 @@ public class WWSSource extends SeismicDataSource
 		
 		winstonClient = new WWSClient(h, p);
 		setTimeout(timeout);
+		protocolVersion = winstonClient.getProtocolVersion();
 	}
 	
 	public WWSSource(WWSSource wss)
@@ -134,22 +139,30 @@ public class WWSSource extends SeismicDataSource
 	public synchronized Wave getWave(String station, double t1, double t2)
 	{
 		CachedDataSource cache = Swarm.getCache();
-		Wave sw = cache.getWave(station, t1, t2);
-		if (sw == null)
+		Wave wave = cache.getWave(station, t1, t2);
+		if (wave == null)
 		{
 			String[] scnl = parseSCNL(station);
-			sw = winstonClient.getRawData(scnl[0], scnl[1], scnl[2], scnl[3], Util.j2KToEW(t1), Util.j2KToEW(t2));
-			if (sw == null)
+			if (protocolVersion == 1)
+			{
+				wave = winstonClient.getRawData(scnl[0], scnl[1], scnl[2], scnl[3], Util.j2KToEW(t1), Util.j2KToEW(t2));
+				if (wave != null)
+					wave.convertToJ2K();
+			}
+			else
+				wave = winstonClient.getWave(scnl[0], scnl[1], scnl[2], scnl[3], t1, t2, compress);
+			
+			if (wave == null)
 				return null;
-			sw.convertToJ2K();
-			sw.register();
-			cache.putWave(station, sw);
+			
+			wave.register();
+			cache.putWave(station, wave);
 		}
 		else
 		{
 			//System.out.println("cached");	
 		}
-		return sw;
+		return wave;
 	}
 	
 	public synchronized HelicorderData getHelicorder(String station, double t1, double t2)
