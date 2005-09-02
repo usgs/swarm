@@ -1,6 +1,5 @@
 package gov.usgs.swarm;
 
-import gov.usgs.math.Butterworth;
 import gov.usgs.math.FFT;
 import gov.usgs.math.Filter;
 import gov.usgs.plot.Data;
@@ -45,6 +44,9 @@ import javax.swing.SwingUtilities;
  * spectrogram.  Relies heavily on the Valve plotting package.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2005/09/01 00:31:49  dcervelli
+ * Changes for SliceWave refactor.
+ *
  * Revision 1.4  2005/08/30 00:34:55  tparker
  * Update to use Images class
  *
@@ -675,18 +677,17 @@ public class WaveViewPanel extends JComponent
 	private TextRenderer getFilterLabel()
 	{
 		String ft = "";
-		if (settings.filter.getType() == Butterworth.BANDPASS)
+		switch (settings.filter.getType())
 		{
-			ft = "Band pass [" + settings.filter.getCorner1() + "-" + 
-					settings.filter.getCorner2() + " Hz]";
-		}
-		else if (settings.filter.getType() == Butterworth.HIGHPASS)
-		{
-			ft = "High pass [" + settings.filter.getCorner1() + " Hz]";
-		}
-		else if (settings.filter.getType() == Butterworth.LOWPASS)
-		{
-			ft = "Low pass [" + settings.filter.getCorner1() + " Hz]";
+			case BANDPASS:
+				ft = "Band pass [" + settings.filter.getCorner1() + "-" + settings.filter.getCorner2() + " Hz]";
+				break;
+			case HIGHPASS:
+				ft = "High pass [" + settings.filter.getCorner1() + " Hz]";
+				break;
+			case LOWPASS:
+				ft = "Low pass [" + settings.filter.getCorner1() + " Hz]";
+				break;
 		}
 		TextRenderer tr = new TextRenderer(X_OFFSET, 15, ft);
 		tr.color = Color.red;

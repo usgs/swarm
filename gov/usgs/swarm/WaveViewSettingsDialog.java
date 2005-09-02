@@ -1,6 +1,6 @@
 package gov.usgs.swarm;
 
-import gov.usgs.math.Butterworth;
+import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.util.GridBagHelper;
 import gov.usgs.util.ui.BaseDialog;
 
@@ -29,6 +29,9 @@ import javax.swing.border.TitledBorder;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * @author Dan Cervelli
  */
 public class WaveViewSettingsDialog extends BaseDialog
@@ -324,28 +327,27 @@ public class WaveViewSettingsDialog extends BaseDialog
 		logPower.setSelected(settings.logPower);
 		sgramOverlap.setText(numberFormat.format(settings.spectrogramOverlap * 100));
 		filterOn.setSelected(settings.filterOn);
-		int ft = settings.filter.getType();
-		if (ft == Butterworth.LOWPASS)
+		
+		switch (settings.filter.getType())
 		{
-			lowPass.setSelected(true);
-			corner1.setText("0.0");
-			corner2.setText(numberFormat.format(settings.filter.getCorner1()));
-		}
-		else if (ft == Butterworth.HIGHPASS)
-		{
-			highPass.setSelected(true);
-			corner1.setText(numberFormat.format(settings.filter.getCorner1()));
-			corner2.setText("0.0");
-		}
-		else if (ft == Butterworth.BANDPASS)
-		{
-			bandPass.setSelected(true);
-			corner1.setText(numberFormat.format(settings.filter.getCorner1()));
-			corner2.setText(numberFormat.format(settings.filter.getCorner2()));
+			case LOWPASS:
+				lowPass.setSelected(true);
+				corner1.setText("0.0");
+				corner2.setText(numberFormat.format(settings.filter.getCorner1()));
+				break;
+			case HIGHPASS:
+				highPass.setSelected(true);
+				corner1.setText(numberFormat.format(settings.filter.getCorner1()));
+				corner2.setText("0.0");
+				break;
+			case BANDPASS:
+				bandPass.setSelected(true);
+				corner1.setText(numberFormat.format(settings.filter.getCorner1()));
+				corner2.setText(numberFormat.format(settings.filter.getCorner2()));
+				break;
 		}
 		order.setValue(settings.filter.getOrder());
 		zeroPhaseShift.setSelected(settings.zeroPhaseShift);
-
 	}
 
 	public boolean allowOK()
@@ -445,24 +447,24 @@ public class WaveViewSettingsDialog extends BaseDialog
 			settings.filterOn = filterOn.isSelected();
 			settings.zeroPhaseShift = zeroPhaseShift.isSelected();
 			
-			int ft = 0;
+			FilterType ft = null;
 			double c1 = 0;
 			double c2 = 0;
 			if (lowPass.isSelected())
 			{
-				ft = Butterworth.LOWPASS;
+				ft = FilterType.LOWPASS;
 				c1 = Double.parseDouble(corner2.getText());
 				c2 = 0;
 			}
 			else if (highPass.isSelected())
 			{
-				ft = Butterworth.HIGHPASS;
+				ft = FilterType.HIGHPASS;
 				c1 = Double.parseDouble(corner1.getText());
 				c2 = 0;
 			}
 			else if (bandPass.isSelected())
 			{
-				ft = Butterworth.BANDPASS;
+				ft = FilterType.BANDPASS;
 				c1 = Double.parseDouble(corner1.getText());
 				c2 = Double.parseDouble(corner2.getText());
 			}
