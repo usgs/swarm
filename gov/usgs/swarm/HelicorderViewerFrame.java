@@ -38,6 +38,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/08/30 18:01:39  tparker
+ * Add Autoscale Slider to Helicorder Viewer Frame
+ *
  * Revision 1.3  2005/08/30 00:33:30  tparker
  * Update to use Images class
  *
@@ -576,39 +579,21 @@ public class HelicorderViewerFrame extends JInternalFrame
 		settings.waveZoomOffset = zoomValues[index - 1];
 	}
 	
-	// TODO: change these to setXXX(boolean)
-	public void disableInsetButtons()
+	public void setInsetButtonsEnabled(boolean b)
 	{
-		clipboard.setEnabled(false);
-		removeWave.setEnabled(false);
+		clipboard.setEnabled(b);
+		removeWave.setEnabled(b);
 	}
 	
-	public void enableInsetButtons()
+	public void setNavigationButtonsEnabled(boolean b)
 	{
-		clipboard.setEnabled(true);
-		removeWave.setEnabled(true);
+		compX.setEnabled(b);
+		expX.setEnabled(b);
+		forwardButton.setEnabled(b);
+		backButton.setEnabled(b);
+		compY.setEnabled(b);
+		expY.setEnabled(b);
 	}
-	
-	public void disableNavigationButtons()
-	{
-		compX.setEnabled(false);
-		expX.setEnabled(false);
-		forwardButton.setEnabled(false);
-		backButton.setEnabled(false);
-		compY.setEnabled(false);
-		expY.setEnabled(false);
-	}
-	
-	public void enableNavigationButtons()
-	{
-		compX.setEnabled(true);
-		expX.setEnabled(true);
-		forwardButton.setEnabled(true);
-		backButton.setEnabled(true);
-		compY.setEnabled(true);
-		expY.setEnabled(true);
-	}
-	//
 
 	public void setFullScreen(boolean full)
 	{
@@ -697,7 +682,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 	{
 		double bt = settings.getBottomTime();
 		if (Double.isNaN(bt))
-			bt = CurrentTime.nowJ2K();
+			bt = CurrentTime.getInstance().nowJ2K();
 			
 		settings.setBottomTime(bt + units * settings.scrollSize * settings.timeChunk);
 		getHelicorder();
@@ -721,12 +706,12 @@ public class HelicorderViewerFrame extends JInternalFrame
     				{
     					try
 						{
-	    					disableNavigationButtons();
+	    					setNavigationButtonsEnabled(false);
 	    					Swarm.getParentFrame().incThreadCount();
 	    					working = true;
 							end = settings.getBottomTime();
 							if (Double.isNaN(end))
-								end = CurrentTime.nowJ2K();
+								end = CurrentTime.getInstance().nowJ2K();
 							
 							before = end - settings.span * 60;
 							int tc = 30;
@@ -748,7 +733,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 					{
 						lastRefreshTime = System.currentTimeMillis();
 						Swarm.getParentFrame().decThreadCount();
-						enableNavigationButtons();
+						setNavigationButtonsEnabled(true);
 						working = false;
 						if (success)
 						{
@@ -831,7 +816,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 					try
 					{
 						double bt = settings.getBottomTime();
-						if (dataSource.isActiveSource() || Double.isNaN(bt) || CurrentTime.nowJ2K() < bt)
+						if (dataSource.isActiveSource() || Double.isNaN(bt) || CurrentTime.getInstance().nowJ2K() < bt)
 						{
 							if (!working)
 								getHelicorder();
