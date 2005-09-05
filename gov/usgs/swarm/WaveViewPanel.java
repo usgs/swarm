@@ -1,9 +1,6 @@
 package gov.usgs.swarm;
 
-import gov.usgs.math.FFT;
 import gov.usgs.math.Filter;
-import gov.usgs.plot.Data;
-import gov.usgs.plot.DataRenderer;
 import gov.usgs.plot.FrameRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.TextRenderer;
@@ -12,6 +9,7 @@ import gov.usgs.util.Util;
 import gov.usgs.vdx.data.wave.SliceWave;
 import gov.usgs.vdx.data.wave.Wave;
 import gov.usgs.vdx.data.wave.plot.SliceWaveRenderer;
+import gov.usgs.vdx.data.wave.plot.SpectraRenderer;
 import gov.usgs.vdx.data.wave.plot.SpectrogramRenderer;
 
 import java.awt.Color;
@@ -44,6 +42,9 @@ import javax.swing.SwingUtilities;
  * spectrogram.  Relies heavily on the Valve plotting package.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2005/09/02 16:12:02  dcervelli
+ * Changes for Butterworth enum.
+ *
  * Revision 1.5  2005/09/01 00:31:49  dcervelli
  * Changes for SliceWave refactor.
  *
@@ -91,11 +92,12 @@ public class WaveViewPanel extends JComponent
 	public static final int BOTTOM_HEIGHT = 20;
 	
 //	private static final int[] SAMPLE_SIZES = new int[] {64, 128, 256, 512, 1024, 2048};
-	private static final double LOG10 = Math.log(10);
+//	private static final double LOG10 = Math.log(10);
 	
 	private Plot plot;
 	private SliceWaveRenderer waveRenderer;
 	private SpectrogramRenderer spectrogramRenderer;
+	private SpectraRenderer spectraRenderer;
 	
 	private Wave wave;
 	
@@ -783,71 +785,29 @@ public class WaveViewPanel extends JComponent
 	 */
 	private void plotSpectra(Wave renderWave)
 	{
-//		renderWave.subtract((int)Math.round(renderWave.mean()));
-		Dimension dim = this.getSize();
-		int hTicks = dim.width / 92;
-		int vTicks = dim.height / 24;
-		double[][] data = renderWave.fft();
-		data = FFT.halve(data);
-		FFT.toPowerFreq(data, renderWave.getSamplingRate(), settings.logPower, settings.logFreq);
-		double minFreq = settings.minFreq;
-		double maxFreq = settings.maxFreq;
-		if (settings.logFreq)
-		{
-			if (minFreq == 0)
-				minFreq = data[3][0];
-			else
-				minFreq = Math.log(minFreq) / LOG10;
-			maxFreq = Math.log(maxFreq) / LOG10;
-		}
-		double maxp = -1E300;
-		double minp = 1E300;
-		for (int i = 2; i < data.length; i++)
-		{
-			if (data[i][0] >= minFreq && data[i][0] <= maxFreq)
-			{
-				if (data[i][1] > maxp)
-					maxp = data[i][1];
-				if (data[i][1] < minp)
-					minp = data[i][1];
-			}
-		}
-		
-		Data d = new Data(data);
-		DataRenderer dr = new DataRenderer(d);
-		dr.setLocation(X_OFFSET, Y_OFFSET, dim.width - RIGHT_WIDTH - X_OFFSET, dim.height - BOTTOM_HEIGHT - Y_OFFSET);
-
-		if (settings.autoScalePower)		
-		{
-			if (settings.logPower)
-				maxp = Math.pow(10, maxp);
-			
-			if (settings.autoScalePowerMemory)
-			{
-				maxSpectraPower = Math.max(maxSpectraPower, maxp);
-				maxp = maxSpectraPower;
-			}
-		}
-		else
-			maxp = settings.maxPower;
-		
-		if (settings.logPower)
-				maxp = Math.log(maxp) / Math.log(10);
-		dr.setExtents(minFreq, maxFreq, 0, maxp);
-		dr.createDefaultAxis(hTicks, vTicks, false, false);
-		if (settings.logFreq)
-			dr.createDefaultLogXAxis(5);	
-		if (settings.logPower)
-			dr.createDefaultLogYAxis(2);
-			
-		dr.createDefaultLineRenderers();
-		dr.getAxis().setLeftLabelAsText("Power", -52);
-		dr.getAxis().setBottomLeftLabelAsText("Freq.");
-		plot.addRenderer(dr);
+		if (renderWave == null || renderWave.samples() == 0)
+			return;
+	    
+	    SliceWave wv = new SliceWave(renderWave);
+	    wv.setSlice(startTime, endTime);
+	    
+	    if (spectraRenderer == null)
+	        spectraRenderer = new SpectraRenderer();
+	    
+	    spectraRenderer.setLocation(X_OFFSET, Y_OFFSET, this.getWidth() - RIGHT_WIDTH - X_OFFSET, this.getHeight() - BOTTOM_HEIGHT - Y_OFFSET);
+	    spectraRenderer.setWave(wv);
+	    spectraRenderer.setAutoScale(settings.autoScalePower);
+	    spectraRenderer.setLogPower(settings.logPower);
+	    spectraRenderer.setLogFreq(settings.logFreq);
+	    spectraRenderer.setMaxFreq(settings.maxFreq);
+	    spectraRenderer.setMinFreq(settings.minFreq);
+	    double power = spectraRenderer.update(maxSpectraPower);
+	    maxSpectraPower = Math.max(maxSpectraPower, power);
 		if (settings.filterOn)
 			plot.addRenderer(getFilterLabel());
-		translation = dr.getDefaultTranslation();
-		titleFrame = dr;	
+		translation = spectraRenderer.getDefaultTranslation();
+		titleFrame = spectraRenderer;
+		plot.addRenderer(spectraRenderer);
 	}
 
 	/** Plots a spectrogram.
