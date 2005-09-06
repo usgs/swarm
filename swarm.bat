@@ -1,1 +1,1 @@
-start javaw -Xmx256M -cp lib/wws.jar;lib/mysql.jar;lib/data.jar;lib/util.jar;lib/math.jar;lib/swarm.jar;lib/earthworm.jar;lib/colt.jar;lib/winston.jar;lib/plot.jar;lib/seed-pdcc.jar gov.usgs.swarm.Swarm %1 %2 %3 %4 %5 %6 %7 %8 %9
+start javaw -Xmx256M -cp .;lib/usgs.jar;lib/colt.jar;lib/seed-pdcc.jar gov.usgs.swarm.Swarm %1 %2 %3 %4 %5 %6 %7 %8 %9
