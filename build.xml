@@ -1,5 +1,8 @@
 <!--
 $Log: not supported by cvs2svn $
+Revision 1.2  2005/09/03 21:18:58  dcervelli
+Fixed classpath.
+
 Revision 1.1  2005/08/26 20:40:28  dcervelli
 Initial avosouth commit.
 
@@ -21,7 +24,7 @@ Initial commit.
 	<description>USGS Swarm Build File</description>
 
 	<property name="source" location="." />
-	<property name="classpath" location="../USGS/lib/winston.jar;../USGS/lib/vdx.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/seed-pdcc.jar"/>
+	<property name="classpath" location="../USGS/lib/usgs.jar;../USGS/contrib/plot.jar;../USGS/contrib/seed-pdcc.jar"/>
 	<property name="jarfile" value="swarm.jar" />
 
 	<property name="bin-dir" location="../swarm-bin" />
@@ -66,15 +69,7 @@ bin-dist -- generates new binary distribution
 		<!-- Copy the distribution files -->
 		<copy todir="${bin-dir}/swarm/lib">
 			<fileset dir="${source}/../USGS/lib">
-				<include name="util.jar" />
-				<include name="winston.jar" />
-				<include name="earthworm.jar" />
-				<include name="swarm.jar" />
-				<include name="plot.jar" />
-				<include name="math.jar" />
-				<include name="data.jar" />
-				<include name="swarm.jar" />
-				<include name="wws.jar" />
+				<include name="usgs.jar" />
 			</fileset>
 		</copy>
 		
@@ -82,7 +77,6 @@ bin-dist -- generates new binary distribution
 			<fileset dir="${source}/../USGS/contrib">
 				<include name="colt.jar" />
 				<include name="seed-pdcc.jar" />
-				<include name="mysql.jar" />
 			</fileset>
 		</copy>
 
