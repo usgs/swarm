@@ -48,6 +48,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2005/09/08 18:54:54  tparker
+ * Add save image button
+ *
  * Revision 1.5  2005/09/02 16:40:05  dcervelli
  * CurrentTime changes and changed enable/disable[xxx] to set[xxx].
  *
@@ -613,6 +616,9 @@ public class HelicorderViewerFrame extends JInternalFrame
 		backButton.setEnabled(b);
 		compY.setEnabled(b);
 		expY.setEnabled(b);
+		autoScaleSliderButton.setEnabled(b);
+		autoScaleSlider.setEnabled(b);
+		saveWave.setEnabled(b);
 	}
 
 	public void setFullScreen(boolean full)
