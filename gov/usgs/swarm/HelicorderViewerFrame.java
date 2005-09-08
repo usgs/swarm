@@ -1,13 +1,18 @@
 package gov.usgs.swarm;
 
+import gov.usgs.plot.Plot;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.CurrentTime;
+import gov.usgs.util.GridBagHelper;
 import gov.usgs.util.Util;
 import gov.usgs.vdx.data.heli.HelicorderData;
+import gov.usgs.vdx.data.heli.plot.HelicorderRenderer;
 import gov.usgs.vdx.data.wave.Wave;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,19 +20,24 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.InternalFrameAdapter;
@@ -38,6 +48,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2005/09/02 16:40:05  dcervelli
+ * CurrentTime changes and changed enable/disable[xxx] to set[xxx].
+ *
  * Revision 1.4  2005/08/30 18:01:39  tparker
  * Add Autoscale Slider to Helicorder Viewer Frame
  *
@@ -97,6 +110,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 	private JButton expY;
 	private JButton clipboard;
 	private JButton removeWave; 
+	private JButton saveWave;
 	protected JCheckBox autoScaleSliderButton;
 	protected int autoScaleSliderButtonState;
 	protected JSlider autoScaleSlider;
@@ -373,12 +387,18 @@ public class HelicorderViewerFrame extends JInternalFrame
 		removeWave.setMargin(new Insets(0,0,0,0));
 		Util.mapKeyStrokeToButton(this, "ESCAPE", "removewave", removeWave);
 		Util.mapKeyStrokeToButton(this, "DELETE", "removewave", removeWave);
-		
 
 		toolbar.addSeparator();
 		
-		autoScaleSliderButton = new JCheckBox(new ImageIcon(getClass().getClassLoader().getResource(Images.get("zoomplus"))));
-		autoScaleSliderButton.setSelectedIcon(new ImageIcon(getClass().getClassLoader().getResource(Images.get("clipboard"))));
+		saveWave = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("save"))));
+		toolbar.add(saveWave);
+		saveWave.addActionListener(new SaveButtonActionListener());
+		saveWave.setMargin(new Insets(0,0,0,0));
+
+		toolbar.addSeparator();
+		
+		autoScaleSliderButton = new JCheckBox(new ImageIcon(getClass().getClassLoader().getResource(Images.get("wavezoom"))));
+		autoScaleSliderButton.setSelectedIcon(new ImageIcon(getClass().getClassLoader().getResource(Images.get("waveclip"))));
 		autoScaleSliderButton.setMargin(new Insets(0,0,0,0));
 		autoScaleSliderButton.addItemListener(new ItemListener()
 
@@ -832,4 +852,73 @@ public class HelicorderViewerFrame extends JInternalFrame
 			Swarm.getParentFrame().decThreadCount();
 		}	
 	}
+	
+	private class SaveButtonActionListener implements ActionListener
+	{
+	    public void actionPerformed(ActionEvent e)
+		{
+			JFileChooser chooser = Swarm.getParentFrame().getFileChooser();
+			JPanel imagePanel = new JPanel(new GridBagLayout());
+			GridBagConstraints c = new GridBagConstraints();
+			imagePanel.setBorder(new TitledBorder(new EtchedBorder(), "Image Properties"));
+			
+			JLabel heightLabel = new JLabel("Height:");
+			JTextField heightTextField = new JTextField(4);
+			heightLabel.setLabelFor(heightTextField);
+			heightTextField.setText("1024");
+			
+			JLabel widthLabel = new JLabel("Width:");
+			JTextField widthTextField = new JTextField(4);
+			widthLabel.setLabelFor(widthTextField);
+			widthTextField.setText("1280");
+
+			imagePanel.add(heightLabel, GridBagHelper.set(c, "x=0;y=0;w=1;h=1;wx=1;ix=12;iy=2;a=w;f=n;i=0,4,0,4"));
+			imagePanel.add(heightTextField, GridBagHelper.set(c, "x=1;y=0;w=1;h=1;wx=1;ix=12;iy=2;a=w;f=n;i=0,4,0,4"));
+			imagePanel.add(widthLabel, GridBagHelper.set(c, "x=0;y=1;w=1;h=1;wx=1;ix=12;iy=2;a=w;f=n;i=0,4,0,4"));
+			imagePanel.add(widthTextField, GridBagHelper.set(c, "x=1;y=1;w=1;h=1;wx=1;ix=12;iy=2;a=w;f=n;i=0,4,0,4"));
+			
+			chooser.setAccessory(imagePanel);
+			String fn = channel.replace(' ', '_') + ".png";
+			chooser.setSelectedFile(new File (chooser.getCurrentDirectory().getAbsoluteFile(), fn));
+			int result = chooser.showSaveDialog(Swarm.getParentFrame());
+			if (result == JFileChooser.APPROVE_OPTION) 
+			{						    
+				
+				int width = new Integer(widthTextField.getText());
+				int height = new Integer(heightTextField.getText());
+				
+				Plot plot = new Plot(width, height);
+
+				Double end = settings.getBottomTime();
+				if (Double.isNaN(end))
+					end = CurrentTime.getInstance().nowJ2K();
+				
+				Double before = end - settings.span * 60;
+				int tc = 30;
+				
+				HelicorderData heliData = dataSource.getHelicorder(channel, before - tc, end + tc);
+				HelicorderRenderer heliRenderer = new HelicorderRenderer(heliData, settings.timeChunk);
+								
+				heliRenderer.setChannel(channel);
+				heliRenderer.setLocation(70, 10, width - 90, height - 60);
+				heliRenderer.setHelicorderExtents(before,end , -1 * Math.abs(settings.barRange), Math.abs(settings.barRange));
+				heliRenderer.setTimeZoneOffset(Double.parseDouble(Swarm.getParentFrame().getConfig().getString("timeZoneOffset")));
+				heliRenderer.setTimeZoneAbbr(Swarm.getParentFrame().getConfig().getString("timeZoneAbbr"));
+				heliRenderer.setForceCenter(settings.forceCenter);
+				heliRenderer.setClipBars(settings.clipBars);
+				heliRenderer.setShowClip(settings.showClip);
+				heliRenderer.setClipValue(settings.clipValue);
+
+				heliRenderer.createDefaultAxis();
+				plot.addRenderer(heliRenderer);
+				
+				File f = chooser.getSelectedFile();
+				plot.writePNG(f.getAbsolutePath());
+			}
+			
+			chooser.setAccessory(null);
+		}
+	}
+	
+
 }
