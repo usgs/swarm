@@ -7,6 +7,9 @@ import java.util.Map;
  * Class to return image strings
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/08/30 17:44:02  dcervelli
+ * Doesn't use anonymous class.
+ *
  * Revision 1.2  2005/08/30 00:42:21  tparker
  * Correct formatting, no functional changes.
  *
@@ -41,7 +44,9 @@ public class Images
 		images.put("spectrogram", "images/spectrogram.png");
 		images.put("up", "images/up.png");
 		images.put("wave", "images/wave.png");
+		images.put("waveclip", "images/waveclip.png");
 		images.put("wavesettings", "images/wavesettings.png"); 
+		images.put("wavezoom", "images/wavezoom.png"); 
 		images.put("xminus", "images/xminus.png");
 		images.put("xplus", "images/xplus.png");
 		images.put("yminus", "images/yminus.png");
