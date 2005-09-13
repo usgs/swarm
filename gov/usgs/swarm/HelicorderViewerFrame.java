@@ -30,6 +30,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
@@ -48,6 +49,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2005/09/13 17:56:46  dcervelli
+ * Uses helicorder rendering constants to position helicorder when saving pngs.
+ *
  * Revision 1.7  2005/09/08 20:27:57  tparker
  * Disable save and autoscale controls during rendering
  *
@@ -891,7 +895,22 @@ public class HelicorderViewerFrame extends JInternalFrame
 			chooser.setSelectedFile(new File (chooser.getCurrentDirectory().getAbsoluteFile(), fn));
 			int result = chooser.showSaveDialog(Swarm.getParentFrame());
 			if (result == JFileChooser.APPROVE_OPTION) 
-			{						    
+			{						 
+				
+				File f = chooser.getSelectedFile();
+
+				if (f.exists()) 
+				{
+					int response = JOptionPane.showConfirmDialog (null,
+							"Overwrite existing file?","Confirm Overwrite",
+			                JOptionPane.OK_CANCEL_OPTION,
+			                JOptionPane.QUESTION_MESSAGE);
+					if (response == JOptionPane.CANCEL_OPTION) 
+					{
+						actionPerformed(e);
+						return;
+					}
+			    }
 				
 				int width = new Integer(widthTextField.getText());
 				int height = new Integer(heightTextField.getText());
@@ -923,7 +942,6 @@ public class HelicorderViewerFrame extends JInternalFrame
 				heliRenderer.createDefaultAxis();
 				plot.addRenderer(heliRenderer);
 				
-				File f = chooser.getSelectedFile();
 				plot.writePNG(f.getAbsolutePath());
 			}
 			
