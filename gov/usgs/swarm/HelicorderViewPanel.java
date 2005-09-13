@@ -37,6 +37,9 @@ import javax.swing.border.LineBorder;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/09/02 16:40:17  dcervelli
+ * CurrentTime changes.
+ *
  * Revision 1.2  2005/08/30 18:01:39  tparker
  * Add Autoscale Slider to Helicorder Viewer Frame
  *
@@ -59,11 +62,11 @@ public class HelicorderViewPanel extends JComponent
 {
 	public static final long serialVersionUID = -1;
 	
-	private static final int X_OFFSET = 70;
-	private static final int Y_OFFSET = 10;
-	private static final int RIGHT_WIDTH = 70;
-	private static final int BOTTOM_HEIGHT = 35;
-	private static final int INSET_HEIGHT = 200;
+	public static final int X_OFFSET = 70;
+	public static final int Y_OFFSET = 10;
+	public static final int RIGHT_WIDTH = 70;
+	public static final int BOTTOM_HEIGHT = 35;
+	public static final int INSET_HEIGHT = 200;
 	
 	private Plot plot;
 	private HelicorderRenderer heliRenderer;
