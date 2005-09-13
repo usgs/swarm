@@ -48,6 +48,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2005/09/08 20:27:57  tparker
+ * Disable save and autoscale controls during rendering
+ *
  * Revision 1.6  2005/09/08 18:54:54  tparker
  * Add save image button
  *
@@ -906,7 +909,9 @@ public class HelicorderViewerFrame extends JInternalFrame
 				HelicorderRenderer heliRenderer = new HelicorderRenderer(heliData, settings.timeChunk);
 								
 				heliRenderer.setChannel(channel);
-				heliRenderer.setLocation(70, 10, width - 90, height - 60);
+				heliRenderer.setLocation(HelicorderViewPanel.X_OFFSET, HelicorderViewPanel.Y_OFFSET, 
+						width - HelicorderViewPanel.X_OFFSET - HelicorderViewPanel.RIGHT_WIDTH,
+						height - HelicorderViewPanel.Y_OFFSET - HelicorderViewPanel.BOTTOM_HEIGHT);
 				heliRenderer.setHelicorderExtents(before,end , -1 * Math.abs(settings.barRange), Math.abs(settings.barRange));
 				heliRenderer.setTimeZoneOffset(Double.parseDouble(Swarm.getParentFrame().getConfig().getString("timeZoneOffset")));
 				heliRenderer.setTimeZoneAbbr(Swarm.getParentFrame().getConfig().getString("timeZoneAbbr"));
