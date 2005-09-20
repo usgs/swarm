@@ -24,7 +24,7 @@ Initial commit.
 	<description>USGS Swarm Build File</description>
 
 	<property name="source" location="." />
-	<property name="classpath" location="../USGS/lib/usgs.jar;../USGS/contrib/plot.jar;../USGS/contrib/seed-pdcc.jar"/>
+	<property name="classpath" location="../USGS/lib/winston.jar;../USGS/lib/vdx.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/seed-pdcc.jar"/>
 	<property name="jarfile" value="swarm.jar" />
 
 	<property name="bin-dir" location="../swarm-bin" />
@@ -69,7 +69,14 @@ bin-dist -- generates new binary distribution
 		<!-- Copy the distribution files -->
 		<copy todir="${bin-dir}/swarm/lib">
 			<fileset dir="${source}/../USGS/lib">
-				<include name="usgs.jar" />
+				<include name="util.jar" />
+				<include name="winston.jar" />
+				<include name="earthworm.jar" />
+				<include name="swarm.jar" />
+				<include name="plot.jar" />
+				<include name="math.jar" />
+				<include name="data.jar" />
+				<include name="swarm.jar" />
 			</fileset>
 		</copy>
 		
@@ -94,27 +101,5 @@ bin-dist -- generates new binary distribution
 		<tar destfile="${source}/swarm-bin.tar.gz" basedir="${bin-dir}" compression="gzip" />
 		<zip destfile="${source}/swarm-bin.zip" basedir="${bin-dir}" />
 	</target>
-	
-	<!--
-	<target name="avo-dist" depends="bin-dist,jar">
-		<delete dir="${bin-dir}-avo" />
-		<mkdir dir="${bin-dir}-avo" />
-		
-		<copy todir="${bin-dir}-avo">
-			<fileset dir="${bin-dir}" />
-		</copy>
-				
-		<copy file="${source}/AVOSwarm.config" tofile="${bin-dir}-avo/swarm/Swarm.config" overwrite="true" />
-		<copy file="${source}/../lib/mysql-connector-java-3.0.14-production-bin.jar" todir="${bin-dir}-avo/swarm/lib" />
-		<copy file="${source}/../lib/swarm.jar" todir="${bin-dir}-avo/swarm/lib" overwrite="true" />
-
-		<copy tofile="${bin-dir}-avo/swarm/swarm.bat" file="${source}/avoswarm.bat" overwrite="true" />
-		<copy tofile="${bin-dir}-avo/swarm/swarm.sh" file="${source}/avoswarm.sh" overwrite="true" />
-		
-		<tar destfile="${source}/swarm-bin-avo.tar.gz" basedir="${bin-dir}-avo" compression="gzip" />
-		<zip destfile="${source}/swarm-bin-avo.zip" basedir="${bin-dir}-avo" />
-		
-	</target>
-	-->
 
 </project>
