@@ -49,6 +49,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2005/09/13 18:20:59  tparker
+ * Display confirm dialog before overwritting png file.
+ *
  * Revision 1.8  2005/09/13 17:56:46  dcervelli
  * Uses helicorder rendering constants to position helicorder when saving pngs.
  *
@@ -125,8 +128,6 @@ public class HelicorderViewerFrame extends JInternalFrame
 	protected int autoScaleSliderButtonState;
 	protected JSlider autoScaleSlider;
 
-	
-//	private JButton waveSettingsButton; 
 	private HelicorderViewPanel helicorderViewPanel;
 	
 	private WaveViewSettings waveViewSettings;
@@ -150,6 +151,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 	public HelicorderViewerFrame(Swarm sw, SeismicDataSource sds, String ch)
 	{
 		super("[" + sds + "]: " + ch, true, true, true, true);
+		Swarm.getParentFrame().touchUITime();
 		settings = new HelicorderViewerSettings();
 		waveViewSettings = new WaveViewSettings();
 		dataSource = sds.getCopy();
@@ -162,8 +164,6 @@ public class HelicorderViewerFrame extends JInternalFrame
 						getHelicorder();
 					}
 				});
-		
-		//settingsDialog = new HelicorderViewerSettingsDialog(settings, waveViewSettings);
 		
 		refreshThread = new RefreshThread();
 	}
@@ -315,7 +315,6 @@ public class HelicorderViewerFrame extends JInternalFrame
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-//						settingsDialog.decYAxis();
 						decYAxis();
 						getHelicorder();
 					}
@@ -400,7 +399,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 
 		toolbar.addSeparator();
 		
-		saveWave = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("save"))));
+		saveWave = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("camera"))));
 		toolbar.add(saveWave);
 		saveWave.addActionListener(new SaveButtonActionListener());
 		saveWave.setMargin(new Insets(0,0,0,0));
@@ -411,7 +410,6 @@ public class HelicorderViewerFrame extends JInternalFrame
 		autoScaleSliderButton.setSelectedIcon(new ImageIcon(getClass().getClassLoader().getResource(Images.get("waveclip"))));
 		autoScaleSliderButton.setMargin(new Insets(0,0,0,0));
 		autoScaleSliderButton.addItemListener(new ItemListener()
-
 				{
 					public void itemStateChanged(ItemEvent e)
 					{
@@ -434,7 +432,9 @@ public class HelicorderViewerFrame extends JInternalFrame
 		toolbar.add(autoScaleSliderButton);
 
 		autoScaleSlider = new JSlider(1, 39, (int) (10 - settings.barMult) * 4);
-		autoScaleSlider.setMaximumSize(new Dimension(100, this.getMaximumSize().height - 6));
+		autoScaleSlider.setPreferredSize(new Dimension(100, 20));
+		autoScaleSlider.setMaximumSize(new Dimension(100, 20));
+		autoScaleSlider.setMinimumSize(new Dimension(100, 20));
 		autoScaleSlider.addChangeListener(new ChangeListener()
 				{
 					public void stateChanged(ChangeEvent e)
@@ -449,7 +449,6 @@ public class HelicorderViewerFrame extends JInternalFrame
 							repaintHelicorder();
 						}
 					}
-					
 				});
 		
 		toolbar.add(autoScaleSlider);
@@ -708,7 +707,6 @@ public class HelicorderViewerFrame extends JInternalFrame
 	public void repaintHelicorder()
 	{
 		helicorderViewPanel.invalidateImage();
-		//helicorderViewPanel.repaint();	
 	}
 	
 	public void scroll(int units)
@@ -825,10 +823,17 @@ public class HelicorderViewerFrame extends JInternalFrame
 			Swarm.getParentFrame().incThreadCount();
 			while (!kill)
 			{
-				if (!Double.isNaN(settings.getBottomTime()) && settings.getLastBottomTimeSet() > 10 * 60 * 1000)
+				boolean kiosk = Swarm.getParentFrame().isKiosk();
+				long lastUI = System.currentTimeMillis() - Swarm.getParentFrame().getLastUITime();
+				boolean reset = kiosk && lastUI > 10 * 60 * 1000;
+				// TODO: extract magic number
+				if (reset || !Double.isNaN(settings.getBottomTime()) && settings.getLastBottomTimeSet() > 10 * 60 * 1000)
 				{
 					helicorderViewPanel.removeWaveInset();
+					helicorderViewPanel.clearMarks();
 					settings.setBottomTime(Double.NaN);
+					if (kiosk && !Swarm.getParentFrame().isFullScreenMode())
+						Swarm.getParentFrame().toggleFullScreenMode();
 				}
 				
 				try 
@@ -871,6 +876,9 @@ public class HelicorderViewerFrame extends JInternalFrame
 	    public void actionPerformed(ActionEvent e)
 		{
 			JFileChooser chooser = Swarm.getParentFrame().getFileChooser();
+			File lastPath = new File(Swarm.getParentFrame().getConfig().getString("lastPath"));
+			chooser.setCurrentDirectory(lastPath);
+			
 			JPanel imagePanel = new JPanel(new GridBagLayout());
 			GridBagConstraints c = new GridBagConstraints();
 			imagePanel.setBorder(new TitledBorder(new EtchedBorder(), "Image Properties"));
@@ -878,42 +886,52 @@ public class HelicorderViewerFrame extends JInternalFrame
 			JLabel heightLabel = new JLabel("Height:");
 			JTextField heightTextField = new JTextField(4);
 			heightLabel.setLabelFor(heightTextField);
-			heightTextField.setText("1024");
+			heightTextField.setText("700");
 			
 			JLabel widthLabel = new JLabel("Width:");
 			JTextField widthTextField = new JTextField(4);
 			widthLabel.setLabelFor(widthTextField);
-			widthTextField.setText("1280");
+			widthTextField.setText("900");
+			
+			JCheckBox includeChannel = new JCheckBox("Include channel");
+			includeChannel.setSelected(true);
 
-			imagePanel.add(heightLabel, GridBagHelper.set(c, "x=0;y=0;w=1;h=1;wx=1;ix=12;iy=2;a=w;f=n;i=0,4,0,4"));
-			imagePanel.add(heightTextField, GridBagHelper.set(c, "x=1;y=0;w=1;h=1;wx=1;ix=12;iy=2;a=w;f=n;i=0,4,0,4"));
-			imagePanel.add(widthLabel, GridBagHelper.set(c, "x=0;y=1;w=1;h=1;wx=1;ix=12;iy=2;a=w;f=n;i=0,4,0,4"));
-			imagePanel.add(widthTextField, GridBagHelper.set(c, "x=1;y=1;w=1;h=1;wx=1;ix=12;iy=2;a=w;f=n;i=0,4,0,4"));
+			imagePanel.add(heightLabel, GridBagHelper.set(c, "x=0;y=0;w=1;h=1;wx=1;wy=0;ix=12;iy=2;a=nw;f=n;i=0,4,0,4"));
+			imagePanel.add(heightTextField, GridBagHelper.set(c, "x=1;y=0;w=1;h=1;wx=1;ix=12;iy=2;f=n;i=0,4,0,4"));
+			imagePanel.add(widthLabel, GridBagHelper.set(c, "x=0;y=1;w=1;h=1;wx=1;wy=0;ix=12;iy=2;f=n;i=0,4,0,4"));
+			imagePanel.add(widthTextField, GridBagHelper.set(c, "x=1;y=1;w=1;h=1;wx=1;ix=12;iy=2;f=n;i=0,4,0,4"));
+			imagePanel.add(includeChannel, GridBagHelper.set(c, "x=0;y=2;w=2;h=1;wx=1;wy=1;ix=12;iy=2;a=nw;f=w;i=0,4,0,4"));
 			
 			chooser.setAccessory(imagePanel);
+			
 			String fn = channel.replace(' ', '_') + ".png";
 			chooser.setSelectedFile(new File (chooser.getCurrentDirectory().getAbsoluteFile(), fn));
+			
 			int result = chooser.showSaveDialog(Swarm.getParentFrame());
 			if (result == JFileChooser.APPROVE_OPTION) 
 			{						 
-				
 				File f = chooser.getSelectedFile();
 
 				if (f.exists()) 
 				{
-					int response = JOptionPane.showConfirmDialog (null,
-							"Overwrite existing file?","Confirm Overwrite",
-			                JOptionPane.OK_CANCEL_OPTION,
-			                JOptionPane.QUESTION_MESSAGE);
-					if (response == JOptionPane.CANCEL_OPTION) 
-					{
-						actionPerformed(e);
+					int choice = JOptionPane.showConfirmDialog(Swarm.getParentFrame(), "File exists, overwrite?", "Confirm", JOptionPane.YES_NO_OPTION);
+					if (choice != JOptionPane.YES_OPTION) 
 						return;
-					}
 			    }
-				
-				int width = new Integer(widthTextField.getText());
-				int height = new Integer(heightTextField.getText());
+			
+				int width = -1;
+				int height = -1;
+				try
+				{
+					width = Integer.parseInt(widthTextField.getText());
+					height = Integer.parseInt(heightTextField.getText());
+				}
+				catch (Exception ex) {}
+				if (width <= 0 || height <= 0)
+				{
+					JOptionPane.showMessageDialog(HelicorderViewerFrame.this, "Illegal width or height.", "Error", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
 				
 				Plot plot = new Plot(width, height);
 
@@ -938,11 +956,13 @@ public class HelicorderViewerFrame extends JInternalFrame
 				heliRenderer.setClipBars(settings.clipBars);
 				heliRenderer.setShowClip(settings.showClip);
 				heliRenderer.setClipValue(settings.clipValue);
-
+				heliRenderer.setChannel(channel);
+				heliRenderer.setLargeChannelDisplay(includeChannel.isSelected());
 				heliRenderer.createDefaultAxis();
 				plot.addRenderer(heliRenderer);
 				
 				plot.writePNG(f.getAbsolutePath());
+				Swarm.getParentFrame().getConfig().put("lastPath", f.getParent(), false);
 			}
 			
 			chooser.setAccessory(null);
