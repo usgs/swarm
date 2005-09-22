@@ -50,6 +50,9 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
  * Main application class.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/09/02 16:40:17  dcervelli
+ * CurrentTime changes.
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -109,7 +112,7 @@ public class Swarm extends JFrame
 	private WaveClipboardFrame waveClipboard;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "1.2.0-a20050902";
+	private static final String VERSION = "1.2.0.20050922";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -120,18 +123,18 @@ public class Swarm extends JFrame
 
 	private Map<String, MultiMonitor> monitors;
 	
-//	private String groupConfigFile;
+	private AbstractAction toggleFullScreenAction;
 	
-	private AbstractAction toggleFullScreenAction;	
-					
+	private long lastUITime;
+	
 	public Swarm(String[] args)
 	{
 		super(TITLE + " [" + VERSION + "]");
 		
 		String version = System.getProperty("java.version");
-		if (version.startsWith("1.1") || version.startsWith("1.2") || version.startsWith("1.3"))
+		if (version.startsWith("1.1") || version.startsWith("1.2") || version.startsWith("1.3") || version.startsWith("1.4"))
 		{
-			JOptionPane.showMessageDialog(this, "Swarm requires at least Java version 1.4 or above.", "Error",
+			JOptionPane.showMessageDialog(this, TITLE + " " + VERSION + " requires at least Java version 1.5 or above.", "Error",
 					JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
 		}
@@ -220,6 +223,16 @@ public class Swarm extends JFrame
 		createUI();
 	}
 	
+	public void touchUITime()
+	{
+		lastUITime = System.currentTimeMillis();
+	}
+	
+	public long getLastUITime()
+	{
+		return lastUITime;
+	}
+	
 	private void loadFileChooser()
 	{
 		Thread t = new Thread(new Runnable() 
@@ -232,6 +245,11 @@ public class Swarm extends JFrame
 				
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
+	}
+	
+	public boolean isKiosk()
+	{
+		return (!config.getString("kiosk").equals("false"));
 	}
 	
 	public JFileChooser getFileChooser()
@@ -305,6 +323,19 @@ public class Swarm extends JFrame
 		  
 		if (config.get("saveConfig") == null)
 			config.put("saveConfig", "true", false);
+		
+		if (config.get("durationA") == null)
+			config.put("durationA", "1.86", false);
+		
+		if (config.get("durationB") == null)
+			config.put("durationB", "-0.85", false);
+	}
+
+	public double getDurationMagnitude(double t)
+	{
+		double a = Double.parseDouble(config.getString("durationA"));
+		double b = Double.parseDouble(config.getString("durationB"));
+		return a * (Math.log(t) / Math.log(10)) + b;
 	}
 	
 	public WaveClipboardFrame getWaveClipboard()
@@ -528,10 +559,8 @@ public class Swarm extends JFrame
 		}
 		validate();
 		this.setVisible(true);
-		//for (int i = 0; i < frames.size(); i++)
 		for (JInternalFrame frame : frames)
 		{
-//			if (frames.elementAt(i) instanceof HelicorderViewerFrame)
 			if (frame instanceof HelicorderViewerFrame)
 			{
 				HelicorderViewerFrame f = (HelicorderViewerFrame)frame; 
@@ -567,8 +596,6 @@ public class Swarm extends JFrame
 		waveClipboard.removeWaves();
 		try
 		{
-//			for (int i = 0; i < frames.size(); i++)
-//				((JInternalFrame)frames.elementAt(i)).setClosed(true);
 			for (JInternalFrame frame : frames)
 				frame.setClosed(true);
 		}
@@ -787,7 +814,6 @@ public class Swarm extends JFrame
 		Dimension ds = desktop.getSize();
 
 		ArrayList<HelicorderViewerFrame> hcs = new ArrayList<HelicorderViewerFrame>(10);
-//		for (int i = 0; i < frames.size(); i++)
 		for (JInternalFrame frame : frames)
 		{
 			if (frame instanceof HelicorderViewerFrame)
@@ -839,7 +865,6 @@ public class Swarm extends JFrame
 		Dimension ds = desktop.getSize();
 		
 		int wc = 0;
-//		for (int i = 0; i < frames.size(); i++)
 		for (JInternalFrame frame : frames)
 		{
 			if (frame instanceof WaveViewerFrame)
@@ -851,12 +876,11 @@ public class Swarm extends JFrame
 			
 		int h = ds.height / wc;
 		int cy = 0;
-//		for (int i = 0; i < frames.size(); i++)
 		for (JInternalFrame frame : frames)
 		{
 			if (frame instanceof WaveViewerFrame)
 			{
-				WaveViewerFrame wvf = (WaveViewerFrame)frame;//frames.elementAt(i);
+				WaveViewerFrame wvf = (WaveViewerFrame)frame;
 				try 
 				{ 
 					wvf.setIcon(false);
@@ -894,13 +918,10 @@ public class Swarm extends JFrame
 	
 	public void parseKiosk()
 	{
-//		String[] kiosks = Util.splitString(getConfig().getString("kiosk"), ",");
 		String[] kiosks = getConfig().getString("kiosk").split(",");
 		for (int i = 0; i < kiosks.length; i++)
 		{ 
-//			String[] ch = Util.splitString(kiosks[i], ";");
 			String[] ch = kiosks[i].split(";");
-//			HelicorderViewerFrame f = helicorderChannelSelected(ch[0], ch[1]);
 			helicorderChannelSelected(ch[0], ch[1]);
 		}
 		toggleFullScreenMode();
@@ -908,7 +929,6 @@ public class Swarm extends JFrame
 	
 	public void optionsChanged()
 	{
-//		for (int i = 0; i < frames.size(); i++)
 		for (JInternalFrame frame : frames)
 		{
 			if (frame instanceof HelicorderViewerFrame)
