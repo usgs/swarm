@@ -3,14 +3,15 @@ package gov.usgs.swarm;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
-
 /**
  * Class to return image strings
  *
  * TODO: replace 'new ImageIcon(getClass().getClassLoader().getResource(Images.get("minimize")))' with 'Images.getImage("minimize")'
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2005/09/22 20:48:54  dcervelli
+ * Added camera icon.
+ *
  * Revision 1.4  2005/09/08 18:47:07  tparker
  * Add icons for the autoscale slider
  *
