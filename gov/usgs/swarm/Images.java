@@ -3,10 +3,17 @@ package gov.usgs.swarm;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
 /**
  * Class to return image strings
  *
+ * TODO: replace 'new ImageIcon(getClass().getClassLoader().getResource(Images.get("minimize")))' with 'Images.getImage("minimize")'
+ * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/09/08 18:47:07  tparker
+ * Add icons for the autoscale slider
+ *
  * Revision 1.3  2005/08/30 17:44:02  dcervelli
  * Doesn't use anonymous class.
  *
@@ -25,6 +32,7 @@ public class Images
 	static
 	{
 		images = new HashMap<String, String>();
+		images.put("camera", "images/camera.png");
 		images.put("back", "images/back.png");
 		images.put("clipboard", "images/clipboard.png");
 		images.put("down", "images/down.png");
