@@ -19,6 +19,9 @@ import javax.swing.border.TitledBorder;
  * Global application options dialog.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.2  2004/10/28 20:17:09  cvs
  * Big red mouse cursor option.
  *
@@ -28,14 +31,18 @@ public class OptionsDialog extends BaseDialog
 {
 	public static final long serialVersionUID = -1;
 	
-	private static final int WIDTH = 210;
-	private static final int HEIGHT = 200;	
+	private static final int WIDTH = 240;
+	private static final int HEIGHT = 280;	
 	
 	private JPanel dialogPanel;
 	
 	private JPanel timeZonePanel;
 	private JTextField timeZoneAbbr;
 	private JTextField timeZoneOffset;
+	
+	private JPanel magPanel;
+	private JTextField durationA;
+	private JTextField durationB;
 	
 	private JPanel otherPanel;
 	private JCheckBox useLargeCursor;
@@ -56,8 +63,8 @@ public class OptionsDialog extends BaseDialog
 		timeZonePanel.setBorder(new TitledBorder(new EtchedBorder(), "Time Zone"));
 		JLabel tz1 = new JLabel("Abreviation:");
 		JLabel tz2 = new JLabel("Offset (hrs):");
-		timeZoneAbbr = new JTextField(5);
-		timeZoneOffset = new JTextField(5);
+		timeZoneAbbr = new JTextField(4);
+		timeZoneOffset = new JTextField(4);
 		tz1.setLabelFor(timeZoneAbbr);
 		tz2.setLabelFor(timeZoneOffset);
 		timeZonePanel.add(tz1);
@@ -66,6 +73,16 @@ public class OptionsDialog extends BaseDialog
 		timeZonePanel.add(timeZoneOffset);
 		
 		dialogPanel.add(timeZonePanel);
+	
+		magPanel = new JPanel();
+		magPanel.setBorder(new TitledBorder(new EtchedBorder(), "Duration Magnitude"));
+		durationA = new JTextField(4);
+		durationB = new JTextField(4);
+		magPanel.add(new JLabel("Md="));
+		magPanel.add(durationA);
+		magPanel.add(new JLabel("* Log(t) +"));
+		magPanel.add(durationB);
+		dialogPanel.add(magPanel);
 		
 		otherPanel = new JPanel();
 		otherPanel.setBorder(new TitledBorder(new EtchedBorder(), "Other"));
@@ -83,6 +100,8 @@ public class OptionsDialog extends BaseDialog
 		timeZoneAbbr.setText(config.getString("timeZoneAbbr"));
 		timeZoneOffset.setText(config.getString("timeZoneOffset"));
 		useLargeCursor.setSelected(config.getString("useLargeCursor").equals("true"));
+		durationA.setText(config.getString("durationA"));
+		durationB.setText(config.getString("durationB"));
 	}
 	
 	public boolean allowOK()
@@ -100,6 +119,10 @@ public class OptionsDialog extends BaseDialog
 			double tzo = Double.parseDouble(timeZoneOffset.getText().trim());
 			if (tzo > 13 || tzo < -13)
 				throw new IllegalArgumentException();
+			
+			message = "The duration magnitude constants must be numbers.";
+			Double.parseDouble(durationA.getText().trim());
+			Double.parseDouble(durationB.getText().trim());
 			
 			return true;
 		}
@@ -122,6 +145,8 @@ public class OptionsDialog extends BaseDialog
 			
 		config.put("timeZoneAbbr", timeZoneAbbr.getText().trim(), false);
 		config.put("useLargeCursor", (useLargeCursor.isSelected() ? "true" : "false"), false);
+		config.put("durationA", durationA.getText().trim(), false);
+		config.put("durationB", durationB.getText().trim(), false);
 		
 		Swarm.getParentFrame().optionsChanged();
 	}
