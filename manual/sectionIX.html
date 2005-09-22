@@ -1,5 +1,8 @@
 <!--
 $Log: not supported by cvs2svn $
+Revision 1.1  2005/08/26 20:40:28  dcervelli
+Initial avosouth commit.
+
 Revision 1.2  2005/03/27 21:52:12  cervelli
 Changes for Save All and SAC files.
 
@@ -57,21 +60,17 @@ Changes for Save All and SAC files.
 		
 		<a name="config"></a><h2>Swarm Command Line Options</h2>
 		<p>
-		These command line options can be used:<br>
+		<b>Swarm</b> parses the command line to override or set variables in the configuration file,
+		'Swarm.config' or one specified on the command line.  The format is:<br>
 		<br>
-		<code>--config [file]</code> or <code>-c [file]</code> - Specify a particular file to be used as a Swarm configuration file.<br>
-		<br>
-		<code>--kiosk [file]</code> or <code>-k [file]</code> - Specify a particular file to be used as an 
-		<a href="sectionVIII.html#setup">automatic Kiosk Mode configuration file</a>.<br>
-		<br>
-		<code>--group [file]</code> or <code>-g [file]</code> - Specify a particular file to be used as a channel group configuration file.<br>
-		<br>
-		<code>--sleep [#]</code> or <code>-s [#]</code> - Sleep for a specificed number of seconds before launching Swarm.<br>
+		<code>swarm --[variable1]=[value1] --[variable2]=[value2] [optional config file]</code><br>
 		<br>
 		Example:<br>
-		<code>swarm --config s1.config --group g1.config --kiosk k1.config --sleep 1.5</code>
-		
-		
+		<br>
+		<code>swarm --kiosk="localhost;BGL SHZ AK" --saveConfig=false --timeChunk=15</code><br>
+		<br>
+		This example would start <b>Swarm</b> in Kiosk Mode using the channel BGL SHZ AK from the localhost server
+		with a 15-minute x-axis.  Also, when <b>Swarm</b> exited it wouldn't save the config file.
 		</p>
 	</body>
 </html>

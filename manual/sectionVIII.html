@@ -1,3 +1,5 @@
+<!-- $Id: sectionVIII.html,v 1.2 2005-09-22 21:01:42 dcervelli Exp $ -->
+
 <html>
 	<head>
 		<!-- javascript include version -->
@@ -10,7 +12,7 @@
 	<body>
 		<h1>Section VIII, Kiosk Mode</h1>
 		
-		<a name="intro"><h2>Introduction</h2>
+		<a name="intro"></a><h2>Introduction</h2>
 		<p>
 		<b>Swarm</b> can be used as a <i>much</i> lower cost, more functional replacement to the traditional helicorder by using its Kiosk Mode.
 		In Kiosk Mode <b>Swarm</b> displays all of the open helicorders in full-screen mode.  This make seismic monitoring as easy as a glance 
@@ -23,21 +25,14 @@
 		just switch to normal mode.
 		</p>
 		
-		<a name="setup"><h2>Configuring Automatic Kiosk Mode</h2>
-		<p><b>Swarm</b> can be automatically start in Kiosk Mode by running it with the '-k' or '--kiosk' option.  In this case, <b>Swarm</b> will 
-		read the file (in the directory in which it was run) called 'SwarmKiosk.config'.  The format of this file is very simple, best demonstrated
-		with an example file:<br>
-		<pre>
-# SwarmKiosk.config
-# channel=[data source];[channel]{;optional options: x=[minutes],y=[hours]}
-
-# Crater Peak Vertical
-channel=AVO Winston;CRP_SHZ_AK;x=20,y=24
-
-# Crater Peak East
-channel=AVO Winston;CRP_SHE_AK;x=20,y=24
-		</pre>
-		The data source specified has to be one of the configured data sources (see <a href="sectionIX.html">Advanced Topics</a>, Swarm Configuration File).
+		<a name="setup"></a><h2>Configuring Automatic Kiosk Mode</h2>
+		<p><b>Swarm</b> can be automatically start in Kiosk Mode by running it with the '--kiosk=[parameters]' option or through
+		the configuration file.  The value of the 'kiosk' parameter is <code>[server name];[channel]</code>. Example:<br>
+		<br>
+		<code>swarm --kiosk="localhost;BGL SHZ AK" --saveConfig=false --timeChunk=15</code><br>
+		<br>
+		The data source specified has to be one of the configured data sources.
+		See <a href="sectionIX.html">Advanced Topics</a>, for more information about this topic.
 	</body>
 </html>
 		
