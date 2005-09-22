@@ -40,9 +40,14 @@ import javax.swing.event.InternalFrameEvent;
 /**
  * The wave clipboard internal frame.
  * 
+ * TODO: refactor, clean up dialog boxes.
+ * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/08/30 00:34:26  tparker
+ * Update to use Images class
+ *
  * Revision 1.3  2005/08/27 00:31:20  tparker
- * TIday code, no functional changes.
+ * Tidied code, no functional changes.
  *
  * Revision 1.2  2005/08/26 23:49:04  tparker
  * Create image path constants
@@ -215,6 +220,12 @@ public class WaveClipboardFrame extends JInternalFrame
 	    public void actionPerformed(ActionEvent e)
 		{
 			JFileChooser chooser = Swarm.getParentFrame().getFileChooser();
+			chooser.resetChoosableFileFilters();
+			ExtensionFileFilter txtExt = new ExtensionFileFilter(".txt", "Matlab-readable text files");
+			ExtensionFileFilter sacExt = new ExtensionFileFilter(".sac", "SAC files");
+			chooser.addChoosableFileFilter(txtExt);
+			chooser.addChoosableFileFilter(sacExt);
+			chooser.setFileFilter(chooser.getAcceptAllFileFilter());
 			File lastPath = new File(Swarm.getParentFrame().getConfig().getString("lastPath"));
 			chooser.setCurrentDirectory(lastPath);
 			chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -230,18 +241,12 @@ public class WaveClipboardFrame extends JInternalFrame
 				    {
 				        File[] dfs = fs[i].listFiles();
 				        for (int j = 0; j < dfs.length; j++)
-				        {
-				            String fn = dfs[j].getName().toLowerCase();
-					        if (fn.endsWith(".sac") || fn.endsWith(".txt"))
-					            openFile(dfs[j]);
-				        }
+					        openFile(dfs[j]);
 					    Swarm.getParentFrame().getConfig().put("lastPath", fs[i].getParent(), false);
 				    }
 				    else
 				    {
-				        String fn = fs[i].getName().toLowerCase();
-				        if (fn.endsWith(".sac") || fn.endsWith(".txt"))
-				            openFile(fs[i]);
+				        openFile(fs[i]);
 				        
 					    Swarm.getParentFrame().getConfig().put("lastPath", fs[i].getParent(), false);
 				    }
@@ -294,7 +299,7 @@ public class WaveClipboardFrame extends JInternalFrame
 					    return;
 				    }
 					confirm = false;
-					int choice = JOptionPane.showConfirmDialog(Swarm.getParentFrame(), "File exists, overwrite?", "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
+					int choice = JOptionPane.showConfirmDialog(Swarm.getParentFrame(), "File exists, overwrite?", "Confirm", JOptionPane.YES_NO_OPTION);
 					if (choice == JOptionPane.YES_OPTION)
 						confirm = true;
 				}
@@ -306,8 +311,7 @@ public class WaveClipboardFrame extends JInternalFrame
 					if (fn.endsWith(".sac"))
 					{
 					    SAC sac = wvp.getWave().toSAC();
-//					    String[] scn = Util.splitString(wvp.getChannel(), "_");
-					    String[] scn = wvp.getChannel().split("_");
+					    String[] scn = wvp.getChannel().split(" ");
 					    sac.kstnm = scn[0];
 					    sac.kcmpnm = scn[1];
 					    sac.knetwk = scn[2];
@@ -354,10 +358,8 @@ public class WaveClipboardFrame extends JInternalFrame
 			        return;
 			    if (!f.exists())
 			        f.mkdir();
-//			    for (int i = 0; i < waves.size(); i++)
 			    for (ClipboardWaveViewPanel wave : waves)
 			    {
-//			        WaveViewPanel wvp = ((ClipboardWaveViewPanel)waves.elementAt(i)).getWaveViewPanel();
 			    	WaveViewPanel wvp = wave.getWaveViewPanel();
 			        Wave sw = wvp.getWave();
 			        if (sw != null)
@@ -368,8 +370,7 @@ public class WaveClipboardFrame extends JInternalFrame
 			                dir.mkdir();
 			            
 			            SAC sac = sw.toSAC();
-//					    String[] scn = Util.splitString(wvp.getChannel(), "_");
-					    String[] scn = wvp.getChannel().split("_");
+					    String[] scn = wvp.getChannel().split(" ");
 					    sac.kstnm = scn[0];
 					    sac.kcmpnm = scn[1];
 					    sac.knetwk = scn[2];
@@ -388,30 +389,69 @@ public class WaveClipboardFrame extends JInternalFrame
 		}
 	}
 	
+	private enum FileType 
+	{ 
+		TEXT, SAC, UNKNOWN;
+		
+		public static FileType fromFile(File f)
+		{
+			if (f.getPath().endsWith(".sac"))
+				return SAC;
+			else if( f.getPath().endsWith(".txt"))
+				return TEXT;
+			else 
+				return UNKNOWN;
+		}
+	}
+	
+	private SAC readSAC(File f)
+	{
+		SAC sac = new SAC();
+	    try
+	    {
+	        sac.read(f.getPath());
+	    }
+	    catch (Exception ex)
+	    {
+	    	sac = null;
+	    }
+	    return sac;
+	}
+	
 	public void openFile(File f)
 	{
+		SAC sac = null;
 	    Wave sw = null;
-		if (f.getPath().endsWith(".sac"))
-		{
-		    SAC sac = new SAC();
-		    try
-		    {
-		        sac.read(f.getPath());
-		    }
-		    catch (Exception ex)
-		    {
-		        ex.printStackTrace();
-		    }
-		    if (sac != null)
-		        sw = sac.toWave();
-		}
-		else
-		    sw = Wave.importFromText(f.getPath());
-		
+	    String channel = f.getName();
+	    FileType ft = FileType.fromFile(f);
+	    switch (ft)
+	    {
+		    case SAC:
+		    	sac = readSAC(f);
+		    	
+		    	break;
+		    case TEXT:
+		    	sw = Wave.importFromText(f.getPath());
+		    	break;
+		    case UNKNOWN:
+		    	// try SAC
+		    	sac = readSAC(f);
+		    	// try text
+		    	if (sac == null)
+		    		sw = Wave.importFromText(f.getPath());
+		    	break;
+	    }
+	    
+	    if (sac != null)
+    	{
+    		sw = sac.toWave();
+    		channel = sac.getWinstonChannel().replace('$', ' ');
+    	}
+	    
 		if (sw != null)
 		{
 			WaveViewPanel wvp = new WaveViewPanel();
-			wvp.setChannel(f.getName());
+			wvp.setChannel(channel);
 			Swarm.getCache().putWave(f.getName(), sw);
 			wvp.setDataSource(Swarm.getCache());
 			wvp.setWave(sw, sw.getStartTime(), sw.getEndTime());
@@ -439,10 +479,8 @@ public class WaveClipboardFrame extends JInternalFrame
 				{
 					public Object construct()
 					{
-//						for (int i = 0; i < waves.size(); i++)
 						for (ClipboardWaveViewPanel wave : waves)
 						{
-//							ClipboardWaveViewPanel wave = (ClipboardWaveViewPanel)waves.elementAt(i);
 							if (wave != selected)
 							{
 								WaveViewPanel wvp = wave.getWaveViewPanel();
@@ -518,8 +556,6 @@ public class WaveClipboardFrame extends JInternalFrame
 		if (i == waves.size() - 1)
 			return;
 			
-//		waves.removeElementAt(i);
-//		waves.insertElementAt(p, i + 1);
 		waves.remove(i);
 		waves.add(i + 1, p);
 		waveBox.remove(p);
@@ -537,8 +573,6 @@ public class WaveClipboardFrame extends JInternalFrame
 		if (i == 0)
 			return;
 			
-//		waves.removeElementAt(i);
-//		waves.insertElementAt(p, i - 1);
 		waves.remove(i);
 		waves.add(i - 1, p);
 		waveBox.remove(p);
@@ -552,35 +586,27 @@ public class WaveClipboardFrame extends JInternalFrame
 	public void resizeWaves()
 	{
 		waveBox.validate();
-		//for (int i = 0; i < waves.size(); i++)
 		for (ClipboardWaveViewPanel wave : waves)
 		{
-//			ClipboardWaveViewPanel wave = (ClipboardWaveViewPanel)waves.elementAt(i);
 			wave.setSize(waveBox.getSize().width, 200);
 		}
 		scrollPane.validate();
-//		for (int i = 0; i < waves.size(); i++)
 		for (ClipboardWaveViewPanel wave : waves)
 		{
-//			ClipboardWaveViewPanel wave = (ClipboardWaveViewPanel)waves.elementAt(i);
 			wave.setSize(scrollPane.getViewport().getSize().width, 200);
 		}
-//		waveBox.validate();
 		this.validate();
 		repaint();
 	}
 	 
 	public void removeWaves()
 	{
-//		for (int i = 0; i < waves.size(); i++)
 		for (ClipboardWaveViewPanel wave : waves)
 		{
-//			ClipboardWaveViewPanel wave = (ClipboardWaveViewPanel)waves.elementAt(i);
 			wave.close();
 			waveBox.remove(wave);
 		}
 		selected = null;
-//		waves.removeAllElements();
 		waves.clear();
 		waveBox.validate();
 		scrollPane.validate();
