@@ -9,7 +9,6 @@ import gov.usgs.vdx.data.wave.Wave;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -23,6 +22,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.text.DateFormat;
@@ -37,6 +38,9 @@ import javax.swing.border.LineBorder;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/09/13 17:56:10  dcervelli
+ * Made helicorder rendering constants public.
+ *
  * Revision 1.3  2005/09/02 16:40:17  dcervelli
  * CurrentTime changes.
  *
@@ -84,7 +88,6 @@ public class HelicorderViewPanel extends JComponent
 	
 	private BufferedImage bufferImage, displayImage;
 	private DateFormat dateFormat;
-//	private NumberFormat numberFormat;
 	
 	private boolean working;
 	private boolean resized;
@@ -93,17 +96,19 @@ public class HelicorderViewPanel extends JComponent
 	
 	private boolean fullScreen;
 	
+	private double startMark = Double.NaN;
+	private double endMark = Double.NaN;
+	private int markCount = 0;
+	
 	public HelicorderViewPanel(HelicorderViewerFrame hvf)
 	{
 		parent = hvf;
 		this.setBorder(LineBorder.createGrayLineBorder());
 		dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-//		numberFormat = new DecimalFormat("#.###");
 		plot = new Plot();
 		plot.setBackgroundColor(new Color(0xf7, 0xf7, 0xf7));
 		settings = hvf.getHelicorderViewerSettings();
-		//heliRenderer = new HelicorderRenderer(null, settings);
 		heliRenderer = new HelicorderRenderer();
 		heliRenderer.setExtents(0, 1, Double.MAX_VALUE, -Double.MAX_VALUE);
 		plot.addRenderer(heliRenderer);
@@ -140,15 +145,52 @@ public class HelicorderViewPanel extends JComponent
 		repaint();
 	}
 	
-//	private void setStatus(double j2k)
-//	{
-//		parent.setStatus(dateFormat.format(Util.j2KToDate(j2k)));		
-//	}
-
+	public void setStartMark(double t)
+	{
+		startMark = t;
+	}
+	
+	public void setEndMark(double t)
+	{
+		endMark = t;
+	}
+	
+	public void clearMarks()
+	{
+		startMark = endMark = Double.NaN;
+	}
+	
+	public void markTime(double t)
+	{
+		if (markCount % 2 == 0)
+			startMark = t;
+		else
+			endMark = t;
+		
+		markCount++;
+		if (startMark < startTime)
+		{
+			startMark = Double.NaN;
+			markCount = 0;
+		}
+		if (endMark > endTime)
+		{
+			endMark = Double.NaN;
+			if (!Double.isNaN(startMark))
+				markCount = 1;
+		}
+		if (insetWavePanel != null)
+		{
+			insetWavePanel.setMarks(startMark, endMark);
+		}
+		repaint();
+	}
+	
 	class HelicorderMouseMotionListener implements MouseMotionListener
 	{
 		public void mouseDragged(MouseEvent e)
 		{
+			Swarm.getParentFrame().touchUITime();
 			HelicorderViewPanel.this.requestFocus();
 			int mx = e.getX();
 			int my = e.getY();
@@ -179,6 +221,7 @@ public class HelicorderViewPanel extends JComponent
 		
 		public void mouseMoved(MouseEvent e)
 		{
+			Swarm.getParentFrame().touchUITime();
 			processMousePosition(e.getX(), e.getY());
 		}
 	}
@@ -190,6 +233,7 @@ public class HelicorderViewPanel extends JComponent
 		
 		public void mouseWheelMoved(MouseWheelEvent e)
 		{
+			Swarm.getParentFrame().touchUITime();
 			totalScroll += e.getWheelRotation();
 			if (delay == null)
 				delay = new Delay(250);
@@ -246,6 +290,7 @@ public class HelicorderViewPanel extends JComponent
 	{
 		public void	mouseClicked(MouseEvent e)
 		{
+			Swarm.getParentFrame().touchUITime();
 			HelicorderViewPanel.this.requestFocus();
 		}
 		public void mouseEntered(MouseEvent e)
@@ -254,6 +299,7 @@ public class HelicorderViewPanel extends JComponent
 		{}
 		public void mousePressed(MouseEvent e)
 		{
+			Swarm.getParentFrame().touchUITime();
 			if (e.getButton() == MouseEvent.BUTTON1)
 			{
 				int mx = e.getX();
@@ -349,6 +395,16 @@ public class HelicorderViewPanel extends JComponent
 			if (status == null)
 				status = " ";
 				
+			if (!Double.isNaN(startMark) && !Double.isNaN(endMark))
+			{
+				double dur = Math.abs(startMark - endMark);
+				String pre = String.format("Duration: %.2fs (Md: %.2f)", dur, Swarm.getParentFrame().getDurationMagnitude(dur));
+				if (status.length() > 2)
+					status = pre + ", " + status;
+				else
+					status = pre;
+			}
+			
 			if (status != null)
 				parent.setStatus(status);
 		}
@@ -423,6 +479,8 @@ public class HelicorderViewPanel extends JComponent
 			insetWavePanel = new WaveViewPanel(parent.getWaveViewSettings());
 		
 		this.add(insetWavePanel);
+		insetWavePanel.setHelicorderPanel(this);
+		insetWavePanel.setMarks(startMark, endMark);
 		insetWavePanel.setChannel(parent.getChannel());
 		insetWavePanel.setDataSource(parent.getDataSource());
 		insetWavePanel.setStatusLabel(parent.getStatusLabel());
@@ -467,7 +525,6 @@ public class HelicorderViewPanel extends JComponent
 		final SwingWorker worker = new SwingWorker()
 				{
 					private Wave sw;
-//					private int zoomOffset;
 					
 					public Object construct()
 					{
@@ -553,36 +610,63 @@ public class HelicorderViewPanel extends JComponent
 		Graphics2D ig = (Graphics2D)bufferImage.getGraphics();
 		plot.setSize(d);
 		
-//		boolean rd = parent.getHelicorderViewerSettings().forceCenter;
 		heliRenderer.setLocation(X_OFFSET, Y_OFFSET, d.width - X_OFFSET - RIGHT_WIDTH, d.height - Y_OFFSET - BOTTOM_HEIGHT);
 		
 		if (settings.autoScale)
 		{
-			//settings.clipValue = (int)(21 * mean);
-			//settings.barRange = (int)(3 * mean);
 			settings.barRange = (int) (mean * settings.barMult);
 			settings.clipValue = (int) (mean *  settings.clipBars);
-
-//			heliRenderer.setHelicorderExtents(startTime, endTime, -1 * Math.abs(3 * mean), Math.abs(3 * mean));
 		}
-//		else
-//		{
-//			//heliRenderer.setHelicorderExtents(startTime, endTime, -1 * Math.abs(settings.barRange + bias), Math.abs(settings.barRange + bias));
-//			heliRenderer.setHelicorderExtents(startTime, endTime, -1 * Math.abs(settings.barRange), Math.abs(settings.barRange));
-//		}
+		
 		heliRenderer.setHelicorderExtents(startTime, endTime, -1 * Math.abs(settings.barRange), Math.abs(settings.barRange));
 		heliRenderer.setClipValue(settings.clipValue);
 		heliRenderer.createDefaultAxis();
 		translation = heliRenderer.getTranslationInfo(false);
+		heliRenderer.setLargeChannelDisplay(fullScreen);
+		heliRenderer.setChannel(parent.getChannel());
 		plot.render(ig);
-		if (fullScreen)
-			drawFullScreenLabel(ig, d);
+
 	}
 	
 	public void setFullScreen(boolean b)
 	{
 		fullScreen = b;		
 	}
+	
+	private void drawMark(Graphics2D g2, double t, Color color)
+	{
+		if (Double.isNaN(t))
+			return;
+		
+		int x = (int)(heliRenderer.helicorderGetXPixel(t));
+		int row = heliRenderer.getRow(t);
+		int y = (int)Math.ceil(row * translation[2] + translation[3]);
+		g2.setColor(color);
+		g2.draw(new Line2D.Double(x, y, x, y + translation[2]));
+		
+		GeneralPath gp = new GeneralPath();
+		gp.moveTo((float)x, (float)y);
+		gp.lineTo((float)x - 4, (float)y - 6);
+		gp.lineTo((float)x + 4, (float)y - 6);
+		gp.closePath();
+		g2.setColor(Color.GREEN);
+		g2.fill(gp);
+		g2.setColor(DARK_GREEN);
+		g2.draw(gp);
+		
+		gp.reset();
+		gp.moveTo((float)x, (float)(y + translation[2]));
+		gp.lineTo((float)x - 4, (float)(y + 6 + translation[2]));
+		gp.lineTo((float)x + 4, (float)(y + 6 + translation[2]));
+		gp.closePath();
+		gp.closePath();
+		g2.setColor(Color.GREEN);
+		g2.fill(gp);
+		g2.setColor(DARK_GREEN);
+		g2.draw(gp);
+	}
+	
+	private static final Color DARK_GREEN = new Color(0, 168, 0);
 	
 	public void paint(Graphics g)
 	{
@@ -598,6 +682,9 @@ public class HelicorderViewPanel extends JComponent
 		else if (displayImage != null)
 			g2.drawImage(displayImage, 0, 0, null);
 			
+		drawMark(g2, startMark, DARK_GREEN);
+		drawMark(g2, endMark, DARK_GREEN);
+		
 		if (insetWavePanel != null)
 		{
 			// find out where time highlight will be, possibly reposition the
@@ -636,6 +723,7 @@ public class HelicorderViewPanel extends JComponent
 			
 			// finally, draw the highlight.  support for spanning one row
 			// above and one row below the center point.
+			// TODO: support multi-row span
 			Paint pnt = g2.getPaint();
 			g2.setPaint(new Color(255, 255, 0, 128));
 			Rectangle2D.Double rect = new Rectangle2D.Double();
@@ -675,25 +763,5 @@ public class HelicorderViewPanel extends JComponent
 		}
 		
 		resized = false;
-	}
-
-	private void drawFullScreenLabel(Graphics g, Dimension d)
-	{
-		String channel = parent.getChannel();
-		Point loc = this.getLocation();
-		
-		g.setFont(Font.decode("Arial-BOLD-48"));
-		String c = channel.replace('_', ' ');
-		int width = g.getFontMetrics().stringWidth(c);
-		int lw = width + 20;
-		g.setColor(Color.white);
-		g.fillRect(loc.x + d.width / 2 - lw / 2, 3, lw, 50);
-		g.setColor(Color.black);
-		g.drawRect(loc.x + d.width / 2 - lw / 2, 3, lw, 50);
-		
-		Font oldFont = g.getFont();
-		
-		g.drawString(c, loc.x + d.width / 2 - width / 2, 46);
-		g.setFont(oldFont);
 	}
 }

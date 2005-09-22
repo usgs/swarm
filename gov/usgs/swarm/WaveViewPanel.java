@@ -24,6 +24,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -42,6 +44,9 @@ import javax.swing.SwingUtilities;
  * spectrogram.  Relies heavily on the Valve plotting package.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2005/09/05 00:38:22  dcervelli
+ * Uses new SpectraRenderer.
+ *
  * Revision 1.6  2005/09/02 16:12:02  dcervelli
  * Changes for Butterworth enum.
  *
@@ -150,6 +155,10 @@ public class WaveViewPanel extends JComponent
 	 */
 	private ClipboardWaveViewPanel clipboardPanel;
 	
+	/** A callback reference to the helicorder view if this wave view lives in a helicorder.
+	 */
+	private HelicorderViewPanel heliViewPanel;
+	
 	/** A callback reference to the clipboard if this wave view lives in a monitor.
 	 */
 	private MultiMonitor monitor;
@@ -161,6 +170,9 @@ public class WaveViewPanel extends JComponent
 	/** The wave is rendered to an image that is only updated when the settings change for repaint efficiency.
 	 */
 	private BufferedImage image;
+	
+	private double mark1 = Double.NaN;
+	private double mark2 = Double.NaN;
 	
 //	private boolean stackMode;
 
@@ -231,21 +243,35 @@ public class WaveViewPanel extends JComponent
 				{
 					public void mousePressed(MouseEvent e)
 					{
+						Swarm.getParentFrame().touchUITime();
+						
+						double[] t = getTranslation();
+						int x = e.getX();
+						double j2k = x * t[0] + t[1];
+						if (timeSeries)
+							System.out.printf("%s, UTC: %s, j2k: %.3f, ew: %.3f\n", channel, dateFormat.format(Util.j2KToDate(j2k)), j2k, Util.j2KToEW(j2k));
+						
 						if (SwingUtilities.isRightMouseButton(e) )
 						{
 							settings.cycleType();
+						}
+
+						if (timeSeries && heliViewPanel != null)
+						{
+							if (j2k >= startTime && j2k <= endTime)
+								heliViewPanel.markTime(j2k);
+							
+							processMousePosition(x, e.getY());
 						}
 						
 						if (timeSeries && allowDragging && SwingUtilities.isLeftMouseButton(e))
 						{
 							Dimension size = getSize();
-							double[] t = getTranslation();
-							int x = e.getX();
 							int y = e.getY();
 							if (t != null && y > Y_OFFSET && y < (size.height - BOTTOM_HEIGHT) 
 								&& x > X_OFFSET && x < size.width - RIGHT_WIDTH)
 							{
-							    j2k1 = j2k2 = x * t[0] + t[1];
+								j2k1 = j2k2 = j2k;
 							    if (e.isControlDown())
 							    {
 									System.out.println(channel + ": " + dateFormat.format(Util.j2KToDate(j2k1)));
@@ -265,13 +291,13 @@ public class WaveViewPanel extends JComponent
 					
 					public void mouseReleased(MouseEvent e)
 					{
+						Swarm.getParentFrame().touchUITime();
 						if (SwingUtilities.isLeftMouseButton(e) && dragging)
 						{	
 							dragging = false;
 							zoomDraggedArea();
 							repaint();
 						}
-						
 						
 						int mx = e.getX();
 						int my = e.getY();
@@ -294,11 +320,13 @@ public class WaveViewPanel extends JComponent
 				{
 					public void mouseMoved(MouseEvent e)
 					{
+						Swarm.getParentFrame().touchUITime();
 						processMousePosition(e.getX(), e.getY());
 					}	
 					
 					public void mouseDragged(MouseEvent e)
 					{
+						Swarm.getParentFrame().touchUITime();
 					    /*
 					    // This used to be the launcher for the microview.
 					    // It was removed because it wasn't very useful, but this
@@ -395,6 +423,11 @@ public class WaveViewPanel extends JComponent
 	public void setClipboardPanel(ClipboardWaveViewPanel p)
 	{
 		clipboardPanel = p;	
+	}
+	
+	public void setHelicorderPanel(HelicorderViewPanel p)
+	{
+		heliViewPanel = p;
 	}
 	
 	public void setMonitor(MultiMonitor m)
@@ -542,6 +575,16 @@ public class WaveViewPanel extends JComponent
 		if (status == null)
 			status = " ";
 			
+		if (!Double.isNaN(mark1) && !Double.isNaN(mark2))
+		{
+			double dur = Math.abs(mark1 - mark2);
+			String pre = String.format("Duration: %.2fs (Md: %.2f)", dur, Swarm.getParentFrame().getDurationMagnitude(dur));
+			if (status.length() > 2)
+				status = pre + ", " + status;
+			else
+				status = pre;
+		}
+		
 		if (status != null && statusLabel != null)
 		{
 			final String st = status;
@@ -629,6 +672,29 @@ public class WaveViewPanel extends JComponent
 		w.invalidateStatistics();
 	}
 
+	private static final Color DARK_GREEN = new Color(0, 168, 0);
+	
+	private void paintMark(Graphics2D g2, double j2k)
+	{
+		if (Double.isNaN(j2k) || j2k < startTime || j2k > endTime)
+			return;
+		
+		double[] t = getTranslation();
+		double x = (j2k - t[1]) / t[0];
+		g2.setColor(DARK_GREEN);
+		g2.draw(new Line2D.Double(x, Y_OFFSET, x, getSize().height - Y_OFFSET));
+		
+		GeneralPath gp = new GeneralPath();
+		gp.moveTo((float)x, (float)Y_OFFSET);
+		gp.lineTo((float)x - 5, Y_OFFSET - 7);
+		gp.lineTo((float)x + 5, Y_OFFSET - 7);
+		gp.closePath();
+		g2.setPaint(Color.GREEN);
+		g2.fill(gp);
+		g2.setColor(DARK_GREEN);
+		g2.draw(gp);
+	}
+	
 	/** Paints the component on the specified graphics context.
 	 * @param g the graphics context
 	 */
@@ -666,6 +732,9 @@ public class WaveViewPanel extends JComponent
 			
 			if (dragging)
 				paintDragBox(g2);
+			
+			paintMark(g2, mark1);
+			paintMark(g2, mark2);
 			
 			if (closeListener != null)
 			{
@@ -882,4 +951,9 @@ public class WaveViewPanel extends JComponent
 		return getSize();	
 	}
 	
+	public void setMarks(double m1, double m2)
+	{
+		mark1 = m1;
+		mark2 = m2;
+	}
 }
