@@ -1,5 +1,8 @@
 <!--
 $Log: not supported by cvs2svn $
+Revision 1.4  2005/09/20 20:44:20  dcervelli
+Fixed classpath (again).
+
 Revision 1.2  2005/09/03 21:18:58  dcervelli
 Fixed classpath.
 
@@ -58,6 +61,7 @@ bin-dist -- generates new binary distribution
 	</target>
 
 	<target name="bin-dist" depends="init,compile">
+		<ant antfile="${source}/../USGS/build.xml" target="jar" dir="${source}/../USGS" />
 		<delete dir="${bin-dir}" />
 
 		<!-- Create the distribution directory structure -->
@@ -69,14 +73,7 @@ bin-dist -- generates new binary distribution
 		<!-- Copy the distribution files -->
 		<copy todir="${bin-dir}/swarm/lib">
 			<fileset dir="${source}/../USGS/lib">
-				<include name="util.jar" />
-				<include name="winston.jar" />
-				<include name="earthworm.jar" />
-				<include name="swarm.jar" />
-				<include name="plot.jar" />
-				<include name="math.jar" />
-				<include name="data.jar" />
-				<include name="swarm.jar" />
+				<include name="usgs.jar" />
 			</fileset>
 		</copy>
 		
@@ -95,6 +92,7 @@ bin-dist -- generates new binary distribution
 			<fileset dir="${source}/manual" excludes="**/*.bak" />
 		</copy>
 
+		<copy todir="${bin-dir}/swarm/" file="${source}/swarm_console.bat" />
 		<copy todir="${bin-dir}/swarm/" file="${source}/swarm.bat" />
 		<copy todir="${bin-dir}/swarm/" file="${source}/swarm.sh" />
 		
