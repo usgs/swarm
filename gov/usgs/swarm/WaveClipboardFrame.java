@@ -43,6 +43,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: refactor, clean up dialog boxes.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2005/09/22 20:59:50  dcervelli
+ * Multiple SAC save/load fixes.
+ *
  * Revision 1.4  2005/08/30 00:34:26  tparker
  * Update to use Images class
  *
@@ -362,8 +365,10 @@ public class WaveClipboardFrame extends JInternalFrame
 			    {
 			    	WaveViewPanel wvp = wave.getWaveViewPanel();
 			        Wave sw = wvp.getWave();
+			        
 			        if (sw != null)
 			        {
+			        	sw = sw.subset(wvp.getStartTime(), wvp.getEndTime());
 			            String date = saveAllDateFormat.format(Util.j2KToDate(sw.getStartTime()));
 			            File dir = new File(f.getPath() + File.separatorChar + date);
 			            if (!dir.exists())
@@ -376,7 +381,7 @@ public class WaveClipboardFrame extends JInternalFrame
 					    sac.knetwk = scn[2];
 					    try
 					    {
-					        sac.write(new File(dir.getPath() + File.separatorChar + wvp.getChannel() + ".sac"));
+					        sac.write(new File(dir.getPath() + File.separatorChar + wvp.getChannel().replace(' ', '.') + ".sac"));
 					    }
 					    catch (IOException ex)
 					    {
@@ -428,7 +433,6 @@ public class WaveClipboardFrame extends JInternalFrame
 	    {
 		    case SAC:
 		    	sac = readSAC(f);
-		    	
 		    	break;
 		    case TEXT:
 		    	sw = Wave.importFromText(f.getPath());
@@ -452,7 +456,7 @@ public class WaveClipboardFrame extends JInternalFrame
 		{
 			WaveViewPanel wvp = new WaveViewPanel();
 			wvp.setChannel(channel);
-			Swarm.getCache().putWave(f.getName(), sw);
+			Swarm.getCache().putWave(channel, sw);
 			wvp.setDataSource(Swarm.getCache());
 			wvp.setWave(sw, sw.getStartTime(), sw.getEndTime());
 			WaveClipboardFrame.this.addWave(new ClipboardWaveViewPanel(wvp));
