@@ -44,6 +44,9 @@ import javax.swing.SwingUtilities;
  * spectrogram.  Relies heavily on the Valve plotting package.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2005/09/22 21:00:09  dcervelli
+ * Changes for duration magnitude markers.
+ *
  * Revision 1.7  2005/09/05 00:38:22  dcervelli
  * Uses new SpectraRenderer.
  *
@@ -256,7 +259,7 @@ public class WaveViewPanel extends JComponent
 							settings.cycleType();
 						}
 
-						if (timeSeries && heliViewPanel != null)
+						if (timeSeries && heliViewPanel != null && SwingUtilities.isLeftMouseButton(e))
 						{
 							if (j2k >= startTime && j2k <= endTime)
 								heliViewPanel.markTime(j2k);
