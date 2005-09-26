@@ -28,6 +28,9 @@ import java.util.TimeZone;
  * Class for loading SEED volumes.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/09/02 16:40:29  dcervelli
+ * CurrentTime changes.
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -54,6 +57,7 @@ public class FullSeedDataSource extends SeismicDataSource
 		try
 		{
 			Map<String, List<Wave>> tempStationMap = new HashMap<String, List<Wave>>();
+			stationMap = new HashMap<String, Wave>();
 			
 			DataInputStream ls = new DataInputStream(new BufferedInputStream(
 	                new FileInputStream(fn)));
@@ -67,16 +71,12 @@ public class FullSeedDataSource extends SeismicDataSource
 			
 			Object object;
 			container.iterate();
-//			double last = 0;
 			while ((object = container.getNext()) != null)
 			{
 				Blockette b = (Blockette)object;
 				if (b.getType() != 999)
 					continue;
 				String code = b.getFieldVal(4) + "_" + b.getFieldVal(6) + "_" + b.getFieldVal(7);
-//				System.out.println(code + " " + b.getFieldVal(3) + " " + b.getFieldVal(1));
-//				System.out.println(b.toString());
-//				System.out.println(b.getFieldVal(10) + " " + b.getFieldVal(11));
 				
 				List<Wave> parts = tempStationMap.get(code);
                 if (parts == null)
@@ -91,23 +91,16 @@ public class FullSeedDataSource extends SeismicDataSource
                 	Wave sw = new Wave();
 	                sw.setSamplingRate(getSampleRate(((Integer)b.getFieldVal(10)).intValue(), ((Integer)b.getFieldVal(11)).intValue()));
 	                Btime bTime = (Btime)b.getFieldVal(8);
-//	                sw.setStartTime(Util.dateToJ2K(bTime.toDate()));
 	                sw.setStartTime(Util.dateToJ2K(btimeToDate(bTime)));
 	                sw.buffer = wf.getDecodedIntegers();
 	                sw.register();
-//	                System.out.println(sw.getStartTime() - last);
-//	                last = sw.getStartTime();
-//	                System.out.println(sw + " mean=" + sw.mean() + " min=" + sw.min() + " max=" + sw.max());
 	                parts.add(sw);
                 }
 			}
-//			for (Iterator it = stationMap.keySet().iterator(); it.hasNext(); )
 			for (String key : tempStationMap.keySet())
 			{
-//				String key = (String)it.next();
 				List<Wave> parts = tempStationMap.get(key);
 				Wave wave = Wave.join(parts);
-//				System.out.println(wave.mean() + " " + Util.j2KToDateString(wave.getStartTime()));
 				Swarm.getCache().cacheWaveAsHelicorder(key, wave);
 				Swarm.getCache().putWave(key, wave);
 				stationMap.put(key, wave);
@@ -175,6 +168,5 @@ public class FullSeedDataSource extends SeismicDataSource
 	public List<String> getWaveStations() 
 	{
 		return null;
-//		return stations;
 	}
 }
