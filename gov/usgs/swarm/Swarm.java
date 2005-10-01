@@ -50,6 +50,9 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
  * Main application class.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/09/23 21:58:02  dcervelli
+ * Version bump.
+ *
  * Revision 1.3  2005/09/22 21:00:50  dcervelli
  * Many changes (lastUITime, duration magnitudes, version bump, etc.).
  *
@@ -115,7 +118,7 @@ public class Swarm extends JFrame
 	private WaveClipboardFrame waveClipboard;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "1.2.1.20050923";
+	private static final String VERSION = "1.2.2.20051001";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
