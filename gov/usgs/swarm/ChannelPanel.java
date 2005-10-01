@@ -37,6 +37,9 @@ import javax.swing.tree.TreePath;
  * and how.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.4  2005/04/27 03:52:10  cervelli
  * Peter's configuration changes.
  *
@@ -56,8 +59,6 @@ public class ChannelPanel extends JTabbedPane
 	private Swarm swarm;
 	private JScrollPane waveScrollPane;
 	private JScrollPane heliScrollPane;
-//	private JList waveChannels;
-//	private JList heliChannels;
 	private JButton realtimeButton;
 	private JButton viewHeliButton;
 	private JPanel wavePanel;
@@ -70,7 +71,7 @@ public class ChannelPanel extends JTabbedPane
 	
 	public ChannelPanel(Swarm sw)
 	{
-     groupFile = new ConfigFile(Swarm.getParentFrame().getConfig().getString("groupConfigFile"));
+		groupFile = new ConfigFile(Swarm.getParentFrame().getConfig().getString("groupConfigFile"));
 		swarm = sw;
 		SwingUtilities.invokeLater(new Runnable()
 				{
@@ -242,7 +243,6 @@ public class ChannelPanel extends JTabbedPane
 		if (paths == null)
 			return null;
 			
-//		Vector channels = new Vector();
 		List<String> channels = new ArrayList<String>();
 		for (int i = 0; i < paths.length; i++)
 		{
@@ -301,18 +301,20 @@ public class ChannelPanel extends JTabbedPane
 							allNode.add(node);
 							if (groupFile != null)
 							{
-								String g = groupFile.getString(c);
-								if (g != null)
+								List<String> groups = groupFile.getList(c);
+								if (groups != null)
 								{
-									DefaultMutableTreeNode rn = (DefaultMutableTreeNode)rootMap.get(g);
-									if (rn == null)
+									for (String g : groups)
 									{
-										rn = new DefaultMutableTreeNode(g);
-										rootMap.put(g, rn);
-										//rootNode.add(rn);
+										DefaultMutableTreeNode rn = (DefaultMutableTreeNode)rootMap.get(g);
+										if (rn == null)
+										{
+											rn = new DefaultMutableTreeNode(g);
+											rootMap.put(g, rn);
+										}
+										DefaultMutableTreeNode ln = new DefaultMutableTreeNode(c);
+										rn.add(ln);
 									}
-									DefaultMutableTreeNode ln = new DefaultMutableTreeNode(c);
-									rn.add(ln);
 								}
 							}
 						}
