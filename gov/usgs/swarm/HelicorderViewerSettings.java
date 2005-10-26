@@ -6,6 +6,9 @@ package gov.usgs.swarm;
  * TODO: eliminate this class in favor of vdx.HelicorderSettings
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/08/30 18:01:39  tparker
+ * Add Autoscale Slider to Helicorder Viewer Frame
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -46,7 +49,7 @@ public class HelicorderViewerSettings
 		showWiggler = false;
 		
 		clipValue = 2999;
-		showClip = true;
+		showClip = Boolean.parseBoolean(Swarm.getParentFrame().getConfig().getString("showClip"));
 		barRange = 1500;
 		barMult = 3;
 		autoScale = true;
