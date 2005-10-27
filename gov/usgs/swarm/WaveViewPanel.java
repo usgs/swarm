@@ -44,6 +44,9 @@ import javax.swing.SwingUtilities;
  * spectrogram.  Relies heavily on the Valve plotting package.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2005/09/23 21:57:34  dcervelli
+ * Right click only for duration marker.
+ *
  * Revision 1.8  2005/09/22 21:00:09  dcervelli
  * Changes for duration magnitude markers.
  *
@@ -122,6 +125,8 @@ public class WaveViewPanel extends JComponent
 	
 	private boolean timeSeries;
 	private String channel;
+	
+	private static boolean shownNyquistWarning = false;
 	
 	/** The data source to use for zoom drags.  This should probably be moved from this class
 	 * to follow a stricter interpretation of MVC.
@@ -630,8 +635,11 @@ public class WaveViewPanel extends JComponent
 		
 		if (settings.maxFreq > wave.getSamplingRate() / 2)
 		{
-			JOptionPane.showMessageDialog(Swarm.getParentFrame(), "The maximum frequency was set too high and has been automatically adjusted to the Nyquist frequency.", "Warning", JOptionPane.WARNING_MESSAGE);
+			if (!shownNyquistWarning)
+				JOptionPane.showMessageDialog(Swarm.getParentFrame(), "The maximum frequency was set too high and has been automatically adjusted to the Nyquist frequency. " +
+						"This window will not be shown again.", "Warning", JOptionPane.WARNING_MESSAGE);
 			settings.maxFreq = wave.getSamplingRate() / 2;
+			shownNyquistWarning = true;
 		}
 			
 		timeSeries = !(settings.type == WaveViewSettings.SPECTRA);
