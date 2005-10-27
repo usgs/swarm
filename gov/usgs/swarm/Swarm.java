@@ -50,6 +50,9 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
  * Main application class.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2005/10/26 16:47:38  cervelli
+ * Made showClip variable configurable.  Changed manually slightly.
+ *
  * Revision 1.5  2005/10/01 16:16:30  dcervelli
  * Version bump.
  *
@@ -121,7 +124,7 @@ public class Swarm extends JFrame
 	private WaveClipboardFrame waveClipboard;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "1.2.2.20051026";
+	private static final String VERSION = "1.2.3.2005XXXX";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -340,7 +343,7 @@ public class Swarm extends JFrame
 			config.put("durationB", "-0.85", false);
 		
 		if (config.get("showClip") == null)
-			config.put("showclip", "true", false);
+			config.put("showClip", "true", false);
 	}
 
 	public double getDurationMagnitude(double t)
