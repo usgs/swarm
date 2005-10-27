@@ -50,6 +50,9 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
  * Main application class.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2005/10/27 15:39:27  dcervelli
+ * Fixed showclip typo.
+ *
  * Revision 1.6  2005/10/26 16:47:38  cervelli
  * Made showClip variable configurable.  Changed manually slightly.
  *
@@ -124,7 +127,7 @@ public class Swarm extends JFrame
 	private WaveClipboardFrame waveClipboard;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "1.2.3.2005XXXX";
+	private static final String VERSION = "1.2.3.20051027";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
