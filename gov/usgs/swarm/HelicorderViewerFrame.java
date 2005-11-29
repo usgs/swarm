@@ -25,6 +25,7 @@ import java.io.File;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
@@ -49,6 +50,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2005/09/22 20:57:16  dcervelli
+ * Helicorder screenshot cleaned up a bit, autoscale slider size fixed.
+ *
  * Revision 1.9  2005/09/13 18:20:59  tparker
  * Display confirm dialog before overwritting png file.
  *
@@ -124,6 +128,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 	private JButton clipboard;
 	private JButton removeWave; 
 	private JButton saveWave;
+	private JFileChooser chooser;
 	protected JCheckBox autoScaleSliderButton;
 	protected int autoScaleSliderButtonState;
 	protected JSlider autoScaleSlider;
@@ -875,7 +880,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 	{
 	    public void actionPerformed(ActionEvent e)
 		{
-			JFileChooser chooser = Swarm.getParentFrame().getFileChooser();
+			chooser = Swarm.getParentFrame().getFileChooser();
 			File lastPath = new File(Swarm.getParentFrame().getConfig().getString("lastPath"));
 			chooser.setCurrentDirectory(lastPath);
 			
@@ -895,13 +900,35 @@ public class HelicorderViewerFrame extends JInternalFrame
 			
 			JCheckBox includeChannel = new JCheckBox("Include channel");
 			includeChannel.setSelected(true);
+			
+			JLabel fileFormatLabel = new JLabel("File format:");
+			JComboBox fileFormatCB = new JComboBox();
+			fileFormatCB.addItem("PNG");
+			fileFormatCB.addItem("PS");
+			
+			fileFormatCB.addActionListener(new ActionListener()
+					{
+						public void actionPerformed(ActionEvent e)
+						{
+							JComboBox source = (JComboBox) e.getSource();
+							if (source.getSelectedItem().equals("PS")) {
+								String fn = chooser.getSelectedFile().getName().replaceAll("\\..*$", ".ps");
+								chooser.setSelectedFile(new File (chooser.getCurrentDirectory().getAbsoluteFile(), fn));			
+							} else {
+								String fn = chooser.getSelectedFile().getName().replaceAll("\\..*$", ".png");
+								chooser.setSelectedFile(new File (chooser.getCurrentDirectory().getAbsoluteFile(), fn));			
+							}
+						}
+					});
 
 			imagePanel.add(heightLabel, GridBagHelper.set(c, "x=0;y=0;w=1;h=1;wx=1;wy=0;ix=12;iy=2;a=nw;f=n;i=0,4,0,4"));
 			imagePanel.add(heightTextField, GridBagHelper.set(c, "x=1;y=0;w=1;h=1;wx=1;ix=12;iy=2;f=n;i=0,4,0,4"));
 			imagePanel.add(widthLabel, GridBagHelper.set(c, "x=0;y=1;w=1;h=1;wx=1;wy=0;ix=12;iy=2;f=n;i=0,4,0,4"));
 			imagePanel.add(widthTextField, GridBagHelper.set(c, "x=1;y=1;w=1;h=1;wx=1;ix=12;iy=2;f=n;i=0,4,0,4"));
-			imagePanel.add(includeChannel, GridBagHelper.set(c, "x=0;y=2;w=2;h=1;wx=1;wy=1;ix=12;iy=2;a=nw;f=w;i=0,4,0,4"));
-			
+			imagePanel.add(fileFormatLabel, GridBagHelper.set(c, "x=0;y=2;w=1;h=1;wx=1;wy=0;ix=12;iy=2;a=nw;f=w;i=0,4,0,4"));
+			imagePanel.add(fileFormatCB, GridBagHelper.set(c, "x=1;y=2;w=1;h=1;wx=1;wy=1;ix=12;iy=2;a=nw;f=w;i=0,4,0,4"));
+			imagePanel.add(includeChannel, GridBagHelper.set(c, "x=0;y=3;w=2;h=1;wx=1;wy=1;ix=12;iy=2;a=nw;f=w;i=0,4,0,4"));
+
 			chooser.setAccessory(imagePanel);
 			
 			String fn = channel.replace(' ', '_') + ".png";
@@ -961,7 +988,12 @@ public class HelicorderViewerFrame extends JInternalFrame
 				heliRenderer.createDefaultAxis();
 				plot.addRenderer(heliRenderer);
 				
-				plot.writePNG(f.getAbsolutePath());
+				if (fileFormatCB.getSelectedItem().equals("PS")) {
+					plot.writePS(f.getAbsolutePath());					
+				} else {
+					plot.writePNG(f.getAbsolutePath());
+				}
+			
 				Swarm.getParentFrame().getConfig().put("lastPath", f.getParent(), false);
 			}
 			
