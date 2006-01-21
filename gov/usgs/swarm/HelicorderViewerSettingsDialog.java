@@ -28,10 +28,15 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-
+import javax.speech.*;
+import javax.speech.synthesis.*;
+import java.util.Locale;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/08/30 00:33:43  tparker
+ * Update to use Images class
+ *
  * Revision 1.3  2005/08/27 00:28:59  tparker
  * Tidy code, no functional changes.
  *
@@ -70,6 +75,8 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 	private JCheckBox showWiggler;
 	
 	private JCheckBox showClip;
+	private JCheckBox alertClip;
+	private JTextField alertClipTimeout;
 	private JTextField clipValue;
 	private JCheckBox autoScale;
 	private JTextField barRange;
@@ -185,6 +192,12 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 		clipLabel.setLabelFor(clipBars);
 		
 		showClip = new JCheckBox("Show clip");
+		alertClip = new JCheckBox("Announce Clipping");
+
+		JLabel alertClipTimeoutLabel = new JLabel("Clip ACK, minutes: ");
+		alertClipTimeout = new JTextField(4);
+		alertClipTimeoutLabel.setLabelFor(alertClipTimeout);
+
 		JLabel cvLabel = new JLabel("Clip threshold:");
 		clipValue = new JTextField();
 		cvLabel.setLabelFor(clipValue);
@@ -222,6 +235,7 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 		JPanel otherPanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		otherPanel.setBorder(new TitledBorder(new EtchedBorder(), "Other"));
+		
 		otherPanel.add(refreshLabel, GridBagHelper.set(c, "x=0;y=0;w=2;h=1;wx=1;ix=12;iy=2;a=w;f=n;i=0,4,0,4"));
 		otherPanel.add(refreshInterval, GridBagHelper.set(c, "x=2;y=0;w=1;h=1;f=h;wx=0;a=e"));
 		otherPanel.add(scrollLabel, GridBagHelper.set(c, "x=0;y=1;w=2;h=1;wx=1;a=w;f=n"));
@@ -232,13 +246,17 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 		otherPanel.add(removeDrift, GridBagHelper.set(c, "x=0;y=2;w=3;h=1;f=h;wx=0;a=w"));
 
 		otherPanel.add(showClip, GridBagHelper.set(c, "x=0;y=3;w=3;h=1;f=h;wx=0;a=w"));
+		otherPanel.add(alertClip, GridBagHelper.set(c, "x=0;y=4;w=3;h=1;f=h;wx=0;a=w"));
 		
-		otherPanel.add(autoScale, GridBagHelper.set(c, "x=0;y=4;w=3;h=1;f=h;wx=0;a=w"));
-		otherPanel.add(obrLabel, GridBagHelper.set(c, "x=0;y=5;w=2;h=1;wx=1;a=w;f=n"));
-		otherPanel.add(barRange, GridBagHelper.set(c, "x=2;y=5;w=1;h=1;f=h;wx=0;a=e"));
+		otherPanel.add(alertClipTimeoutLabel, GridBagHelper.set(c, "x=0;y=5;w=2;h=1;wx=1;a=w;f=n"));
+		otherPanel.add(alertClipTimeout, GridBagHelper.set(c, "x=2;y=5;w=1;h=1;f=h;wx=0;a=e"));
 		
-		otherPanel.add(cvLabel, GridBagHelper.set(c, "x=0;y=6;w=2;h=1;wx=1;a=w;f=n"));
-		otherPanel.add(clipValue, GridBagHelper.set(c, "x=2;y=6;w=1;h=1;f=h;wx=0;a=e"));
+		otherPanel.add(autoScale, GridBagHelper.set(c, "x=0;y=6;w=3;h=1;f=h;wx=0;a=w"));
+		otherPanel.add(obrLabel, GridBagHelper.set(c, "x=0;y=7;w=2;h=1;wx=1;a=w;f=n"));
+		otherPanel.add(barRange, GridBagHelper.set(c, "x=2;y=7;w=1;h=1;f=h;wx=0;a=e"));
+		
+		otherPanel.add(cvLabel, GridBagHelper.set(c, "x=0;y=8;w=2;h=1;wx=1;a=w;f=n"));
+		otherPanel.add(clipValue, GridBagHelper.set(c, "x=2;y=8;w=1;h=1;f=h;wx=0;a=e"));
 		
 		showWiggler = new JCheckBox("Show Wiggler");
 		//otherPanel.add(showWiggler, GridBagHelper.set(c, "x=0;y=4;w=3;h=1;f=h;wx=0;a=w"));
@@ -304,6 +322,10 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 		barRange.setText(Integer.toString(settings.barRange));
 		autoScale.setSelected(settings.autoScale);
 		showClip.setSelected(settings.showClip);
+		alertClip.setSelected(settings.alertClip);
+		
+		String alertTO = Integer.toString(settings.alertClipTimeout / 60);
+		alertClipTimeout.setText(alertTO);
 		
 		setAutoScaleEnabled(settings.autoScale);
 	}
@@ -332,6 +354,8 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 			settings.clipBars = Integer.parseInt(clipBars.getText());
 			settings.showWiggler = showWiggler.isSelected();
 			settings.showClip = showClip.isSelected();
+			settings.alertClip = alertClip.isSelected();
+			settings.alertClipTimeout = Integer.parseInt(alertClipTimeout.getText());
 			settings.clipValue = Integer.parseInt(clipValue.getText());
 			settings.autoScale = autoScale.isSelected();
 			settings.barRange = Integer.parseInt(barRange.getText());

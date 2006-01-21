@@ -30,14 +30,20 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
+import javax.speech.synthesis.Synthesizer;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
+
+import cern.colt.matrix.DoubleMatrix2D;
 
 /**
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2005/09/22 20:58:49  dcervelli
+ * Changes for duration magnitude markers.
+ *
  * Revision 1.4  2005/09/13 17:56:10  dcervelli
  * Made helicorder rendering constants public.
  *
@@ -99,6 +105,8 @@ public class HelicorderViewPanel extends JComponent
 	private double startMark = Double.NaN;
 	private double endMark = Double.NaN;
 	private int markCount = 0;
+	
+	private double clipAlertTime = 0;
 	
 	public HelicorderViewPanel(HelicorderViewerFrame hvf)
 	{
@@ -567,6 +575,48 @@ public class HelicorderViewPanel extends JComponent
 			bias = heliData.getBias();
 			mean = Math.abs(bias - mean);
 			heliRenderer.setClipValue(settings.clipValue);
+			
+			HelicorderData recent = heliData.subset(endTime-60, endTime);
+			if (recent != null)
+			{
+				//DoubleMatrix2D recentMaxSorted = recent.getMax();
+				DoubleMatrix2D sortedRecentMax = recent.getMax().viewSorted(0);
+				DoubleMatrix2D sortedRecentMin = recent.getMin().viewSorted(0);
+				double recentMin = sortedRecentMin.getQuick(0,0);
+				double recentMax =  sortedRecentMax.getQuick(sortedRecentMax.rows()-1,0);
+				
+				if (settings.alertClip && recentMax > settings.clipValue || recentMin < -settings.clipValue )
+				{
+					System.out.println("I'M TALKING!!!!!");
+					String channel = parent.getChannel();
+					
+					Synthesizer synthesizer = Swarm.getParentFrame().getSynthesizer();
+					try 
+					{
+						
+						synthesizer.waitEngineState(Synthesizer.QUEUE_EMPTY);
+						synthesizer.getSynthesizerProperties().setSpeakingRate(150.0f);
+						synthesizer.speak("Channel clipping on Station " , null);
+						
+						synthesizer.waitEngineState(Synthesizer.QUEUE_EMPTY);
+						synthesizer.getSynthesizerProperties().setSpeakingRate(300.0f);
+						for (int i=0; i<channel.indexOf(' '); i++)
+						{
+							synthesizer.speak(channel.substring(i, i+1) + ".", null);
+						}
+						
+					} catch (Exception e)
+					{
+						e.printStackTrace();
+					}
+				} else {
+					System.out.println(sortedRecentMax.getQuick(0,0) + " !> " + settings.clipValue + " at " + endTime);
+					System.out.println(sortedRecentMin.getQuick(0,0) + " !< -" + settings.clipValue + " at " + endTime);
+				}
+			} else {
+				System.out.println("NULL VALUE");
+			}
+				
 		}
 	}
 	

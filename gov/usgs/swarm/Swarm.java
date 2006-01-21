@@ -45,11 +45,20 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.metal.DefaultMetalTheme;
 import javax.swing.plaf.metal.MetalLookAndFeel;
+import javax.speech.*;
+import javax.speech.synthesis.*;
+import java.util.Locale;
+import com.sun.speech.freetts.jsapi.FreeTTSEngineCentral;
+
+
 
 /**
  * Main application class.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2005/10/27 16:01:56  cervelli
+ * Added release date to Swarm.java
+ *
  * Revision 1.7  2005/10/27 15:39:27  dcervelli
  * Fixed showclip typo.
  *
@@ -141,6 +150,8 @@ public class Swarm extends JFrame
 	private AbstractAction toggleFullScreenAction;
 	
 	private long lastUITime;
+	
+	private Synthesizer synthesizer;
 	
 	public Swarm(String[] args)
 	{
@@ -281,6 +292,11 @@ public class Swarm extends JFrame
 	public static String getVersion()
 	{
 		return VERSION;
+	}
+	
+	public Synthesizer getSynthesizer()
+	{
+		return synthesizer;
 	}
 	
 	public static CachedDataSource getCache()
@@ -957,8 +973,41 @@ public class Swarm extends JFrame
 		}
 	}
 	
+	private void createSynthesizer() 
+	{
+		try {
+			SynthesizerModeDesc desc = 
+				new SynthesizerModeDesc(null, 
+						"general",
+						Locale.US, 
+						Boolean.FALSE,
+						null);
+			
+			FreeTTSEngineCentral central = new FreeTTSEngineCentral();
+			EngineList list = central.createEngineList(desc); 
+			
+			System.out.println(list.toArray().toString() + "::" + list.size());
+			if (list.size() > 0) { 
+				EngineCreate creator = (EngineCreate) list.get(0); 
+				synthesizer = (Synthesizer) creator.createEngine(); 
+			} 
+			if (synthesizer == null) {
+				System.err.println("Cannot create synthesizer");
+				System.exit(1);
+			}
+			synthesizer.allocate();
+			synthesizer.resume();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void main(String[] args)
 	{
+
+		
+		
 		try 
 		{
 //			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -968,8 +1017,15 @@ public class Swarm extends JFrame
 		}
 		catch (Exception e) { }
 
+		
 		Swarm swarm = new Swarm(args);
+
+		swarm.createSynthesizer();
+		swarm.synthesizer.speakPlainText("welcome to swarm", null);
+
 		if (!(Swarm.getParentFrame().getConfig().getString("kiosk")).equals("false"))
 			swarm.parseKiosk();
+			
+
 	}
 }

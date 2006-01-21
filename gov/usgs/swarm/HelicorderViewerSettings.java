@@ -6,6 +6,9 @@ package gov.usgs.swarm;
  * TODO: eliminate this class in favor of vdx.HelicorderSettings
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/10/26 16:47:38  cervelli
+ * Made showClip variable configurable.  Changed manually slightly.
+ *
  * Revision 1.2  2005/08/30 18:01:39  tparker
  * Add Autoscale Slider to Helicorder Viewer Frame
  *
@@ -32,6 +35,8 @@ public class HelicorderViewerSettings
 	
 	public boolean autoScale;
 	public boolean showClip;
+	public boolean alertClip;
+	public int alertClipTimeout;
 	public int clipValue;
 	public int barRange;
 	public double barMult;
@@ -50,6 +55,10 @@ public class HelicorderViewerSettings
 		
 		clipValue = 2999;
 		showClip = Boolean.parseBoolean(Swarm.getParentFrame().getConfig().getString("showClip"));
+		alertClip = Boolean.parseBoolean(Swarm.getParentFrame().getConfig().getString("alertClip"));
+		String s = Swarm.getParentFrame().getConfig().getString("alertClipTimeout");
+		if (s != null)
+			alertClipTimeout = Integer.parseInt(s) * 60;
 		barRange = 1500;
 		barMult = 3;
 		autoScale = true;
