@@ -34,6 +34,9 @@ import java.util.Locale;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/01/21 01:29:20  tparker
+ * First swipe at adding voice alerting of clipping. A work in progress...
+ *
  * Revision 1.4  2005/08/30 00:33:43  tparker
  * Update to use Images class
  *
@@ -56,7 +59,7 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 	public static final long serialVersionUID = -1;
 	
 	private static final int WIDTH = 240;
-	private static final int HEIGHT = 500;	
+	private static final int HEIGHT = 550;	
 	
 	private HelicorderViewerSettings settings;
 	private WaveViewSettings waveSettings;

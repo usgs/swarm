@@ -50,6 +50,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2005/11/29 00:45:34  tparker
+ * Add PS option to "save image"
+ *
  * Revision 1.10  2005/09/22 20:57:16  dcervelli
  * Helicorder screenshot cleaned up a bit, autoscale slider size fixed.
  *
@@ -151,7 +154,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 	private JPanel heliPanel;
 	private WigglerPanel wigglerPanel;
 	
-	private long lastRefreshTime;
+	protected long lastRefreshTime;
 	
 	public HelicorderViewerFrame(Swarm sw, SeismicDataSource sds, String ch)
 	{

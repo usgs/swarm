@@ -56,6 +56,9 @@ import com.sun.speech.freetts.jsapi.FreeTTSEngineCentral;
  * Main application class.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/01/21 01:29:20  tparker
+ * First swipe at adding voice alerting of clipping. A work in progress...
+ *
  * Revision 1.8  2005/10/27 16:01:56  cervelli
  * Added release date to Swarm.java
  *
@@ -986,6 +989,9 @@ public class Swarm extends JFrame
 			FreeTTSEngineCentral central = new FreeTTSEngineCentral();
 			EngineList list = central.createEngineList(desc); 
 			
+			if (list == null)
+				System.out.println("OOPS!!!!!!!");
+			
 			System.out.println(list.toArray().toString() + "::" + list.size());
 			if (list.size() > 0) { 
 				EngineCreate creator = (EngineCreate) list.get(0); 
@@ -1021,7 +1027,7 @@ public class Swarm extends JFrame
 		Swarm swarm = new Swarm(args);
 
 		swarm.createSynthesizer();
-		swarm.synthesizer.speakPlainText("welcome to swarm", null);
+		//swarm.synthesizer.speakPlainText("welcome to swarm", null);
 
 		if (!(Swarm.getParentFrame().getConfig().getString("kiosk")).equals("false"))
 			swarm.parseKiosk();
