@@ -34,6 +34,9 @@ import java.util.Locale;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/01/21 11:04:11  tparker
+ * Apply alertClip settings
+ *
  * Revision 1.5  2006/01/21 01:29:20  tparker
  * First swipe at adding voice alerting of clipping. A work in progress...
  *
@@ -184,26 +187,42 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 						wvsd.setVisible(true);
 					}
 				});
+		
+		
+		JPanel clippingPanel = new JPanel(new GridLayout(2, 2));
+		clippingPanel.setBorder(new TitledBorder(new EtchedBorder(), "Clipping"));
+		
+		JLabel clipLabel = new JLabel("Clip, rows:");
+		clipBars = new JTextField(4);
+		clipLabel.setLabelFor(clipBars);
+		
+		showClip = new JCheckBox("Show clip");
+		showClip.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						setShowClipEnabled(showClip.isSelected());
+					}
+				});
+		alertClip = new JCheckBox("Announce Clipping");
+		clippingPanel.add(alertClip);
+		
+		JLabel alertClipTimeoutLabel = new JLabel("Clip ACK, minutes: ");
+		alertClipTimeout = new JTextField(4);
+		alertClipTimeoutLabel.setLabelFor(alertClipTimeout);
+		clippingPanel.add(alertClipTimeoutLabel);
+		
+		JLabel cvLabel = new JLabel("Clip threshold:");
+		clipValue = new JTextField();
+		cvLabel.setLabelFor(clipValue);
+		clippingPanel.add(clipValue);
+				
 		refreshInterval = new JTextField(4);
 		JLabel refreshLabel = new JLabel("Refresh, seconds: ");
 		refreshLabel.setLabelFor(refreshInterval);
 		JLabel scrollLabel = new JLabel("Scroll size, rows: ");
 		scrollSize = new JTextField(4);
 		scrollLabel.setLabelFor(scrollSize);
-		JLabel clipLabel = new JLabel("Clip, rows:");
-		clipBars = new JTextField(4);
-		clipLabel.setLabelFor(clipBars);
-		
-		showClip = new JCheckBox("Show clip");
-		alertClip = new JCheckBox("Announce Clipping");
-
-		JLabel alertClipTimeoutLabel = new JLabel("Clip ACK, minutes: ");
-		alertClipTimeout = new JTextField(4);
-		alertClipTimeoutLabel.setLabelFor(alertClipTimeout);
-
-		JLabel cvLabel = new JLabel("Clip threshold:");
-		clipValue = new JTextField();
-		cvLabel.setLabelFor(clipValue);
 		
 		autoScale = new JCheckBox("Auto-scale");
 		autoScale.addActionListener(new ActionListener()
@@ -235,6 +254,14 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 		zoomPanel.add(new JSeparator(), GridBagHelper.set(c, "x=0;y=1;w=3;h=1;f=h;i=5,0,5,0"));
 		zoomPanel.add(waveSettingsButton, GridBagHelper.set(c, "x=0;y=2;w=3;h=1;a=e;f=n;i=0,4,0,4"));
 		
+		clippingPanel = new JPanel(new GridBagLayout());
+		c = new GridBagConstraints();
+		clippingPanel.setBorder(new TitledBorder(new EtchedBorder(), "Clipping"));
+		clippingPanel.add(showClip, GridBagHelper.set(c, "x=0;y=0;w=2;h=1;wx=1;ix=12;iy=2;a=w;f=n;i=0,4,0,4"));
+		clippingPanel.add(alertClip, GridBagHelper.set(c, "x=0;y=1;w=2;h=1;wx=1;ix=12;iy=2;a=w;f=n;i=0,4,0,4"));
+		clippingPanel.add(alertClipTimeoutLabel, GridBagHelper.set(c, "x=0;y=2;w=1;h=1;f=h;wx=0;a=w"));
+		clippingPanel.add(alertClipTimeout, GridBagHelper.set(c, "x=1;y=2;w=1;h=1;f=h;wx=1;a=e"));
+				
 		JPanel otherPanel = new JPanel(new GridBagLayout());
 		c = new GridBagConstraints();
 		otherPanel.setBorder(new TitledBorder(new EtchedBorder(), "Other"));
@@ -248,11 +275,10 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 		removeDrift = new JCheckBox("Force Center");
 		otherPanel.add(removeDrift, GridBagHelper.set(c, "x=0;y=2;w=3;h=1;f=h;wx=0;a=w"));
 
-		otherPanel.add(showClip, GridBagHelper.set(c, "x=0;y=3;w=3;h=1;f=h;wx=0;a=w"));
-		otherPanel.add(alertClip, GridBagHelper.set(c, "x=0;y=4;w=3;h=1;f=h;wx=0;a=w"));
+		//otherPanel.add(alertClip, GridBagHelper.set(c, "x=0;y=4;w=3;h=1;f=h;wx=0;a=w"));
 		
-		otherPanel.add(alertClipTimeoutLabel, GridBagHelper.set(c, "x=0;y=5;w=2;h=1;wx=1;a=w;f=n"));
-		otherPanel.add(alertClipTimeout, GridBagHelper.set(c, "x=2;y=5;w=1;h=1;f=h;wx=0;a=e"));
+		//otherPanel.add(alertClipTimeoutLabel, GridBagHelper.set(c, "x=0;y=5;w=2;h=1;wx=1;a=w;f=n"));
+		//otherPanel.add(alertClipTimeout, GridBagHelper.set(c, "x=2;y=5;w=1;h=1;f=h;wx=0;a=e"));
 		
 		otherPanel.add(autoScale, GridBagHelper.set(c, "x=0;y=6;w=3;h=1;f=h;wx=0;a=w"));
 		otherPanel.add(obrLabel, GridBagHelper.set(c, "x=0;y=7;w=2;h=1;wx=1;a=w;f=n"));
@@ -265,7 +291,8 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 		//otherPanel.add(showWiggler, GridBagHelper.set(c, "x=0;y=4;w=3;h=1;f=h;wx=0;a=w"));
 		
 		centerPanel.add(axisPanel);
-		centerPanel.add(zoomPanel);		
+		centerPanel.add(zoomPanel);	
+		centerPanel.add(clippingPanel);
 		centerPanel.add(otherPanel);
 		
 		dialogPanel.add(centerPanel, BorderLayout.CENTER);
@@ -274,6 +301,22 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 		//setToCurrent();
 	}
 	
+	private void setShowClipEnabled(final boolean b)
+	{
+		SwingWorker worker = new SwingWorker()
+				{
+					public Object construct()
+					{
+						alertClip.setEnabled(b);
+						alertClipTimeout.setEnabled(b);
+						return null;
+					}
+					
+					public void finished() {}
+				};
+		worker.start();
+	}
+
 	private void setAutoScaleEnabled(final boolean b)
 	{
 		SwingWorker worker = new SwingWorker()
@@ -358,7 +401,7 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 			settings.showWiggler = showWiggler.isSelected();
 			settings.showClip = showClip.isSelected();
 			settings.alertClip = alertClip.isSelected();
-			settings.alertClipTimeout = Integer.parseInt(alertClipTimeout.getText());
+			settings.alertClipTimeout = Integer.parseInt(alertClipTimeout.getText()) * 60;
 			settings.clipValue = Integer.parseInt(clipValue.getText());
 			settings.autoScale = autoScale.isSelected();
 			settings.barRange = Integer.parseInt(barRange.getText());

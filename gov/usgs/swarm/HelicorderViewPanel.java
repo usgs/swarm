@@ -41,6 +41,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/01/25 00:37:28  tparker
+ * Move clipping alert into the heli renderer. In progress...
+ *
  * Revision 1.7  2006/01/21 11:04:11  tparker
  * Apply alertClip settings
  *
@@ -577,6 +580,9 @@ public class HelicorderViewPanel extends JComponent
 			heliRenderer.setForceCenter(settings.forceCenter);
 			heliRenderer.setClipBars(settings.clipBars);
 			heliRenderer.setShowClip(settings.showClip);
+			heliRenderer.setAlertClip(settings.alertClip);			
+			heliRenderer.setClipWav("clip.wav");
+			heliRenderer.setClipAlertTimeout(settings.alertClipTimeout);
 			mean = heliData.getMeanMax();
 			bias = heliData.getBias();
 			mean = Math.abs(bias - mean);
