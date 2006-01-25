@@ -28,12 +28,12 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import javax.speech.*;
-import javax.speech.synthesis.*;
-import java.util.Locale;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/01/25 21:45:54  tparker
+ * Move clipping alert into the heli renderer.
+ *
  * Revision 1.6  2006/01/21 11:04:11  tparker
  * Apply alertClip settings
  *

@@ -30,17 +30,17 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
-import javax.speech.synthesis.Synthesizer;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
-
-import cern.colt.matrix.DoubleMatrix2D;
 
 /**
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/01/25 21:46:06  tparker
+ * Move clipping alert into the heli renderer.
+ *
  * Revision 1.8  2006/01/25 00:37:28  tparker
  * Move clipping alert into the heli renderer. In progress...
  *
@@ -114,9 +114,7 @@ public class HelicorderViewPanel extends JComponent
 	private double startMark = Double.NaN;
 	private double endMark = Double.NaN;
 	private int markCount = 0;
-	
-	private long clipAlertTime = -999;
-	
+		
 	public HelicorderViewPanel(HelicorderViewerFrame hvf)
 	{
 		parent = hvf;

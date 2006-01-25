@@ -45,10 +45,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.metal.DefaultMetalTheme;
 import javax.swing.plaf.metal.MetalLookAndFeel;
-import javax.speech.*;
-import javax.speech.synthesis.*;
-import java.util.Locale;
-import com.sun.speech.freetts.jsapi.FreeTTSEngineCentral;
 
 
 
@@ -56,6 +52,9 @@ import com.sun.speech.freetts.jsapi.FreeTTSEngineCentral;
  * Main application class.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2006/01/25 00:39:28  tparker
+ * Move clipping alert into the heli renderer. In progress...
+ *
  * Revision 1.10  2006/01/21 11:04:11  tparker
  * Apply alertClip settings
  *
