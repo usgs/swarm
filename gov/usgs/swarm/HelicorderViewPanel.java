@@ -41,6 +41,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/01/21 11:04:11  tparker
+ * Apply alertClip settings
+ *
  * Revision 1.6  2006/01/21 01:29:20  tparker
  * First swipe at adding voice alerting of clipping. A work in progress...
  *
@@ -579,52 +582,6 @@ public class HelicorderViewPanel extends JComponent
 			mean = Math.abs(bias - mean);
 			heliRenderer.setClipValue(settings.clipValue);
 			
-			HelicorderData recentData = heliData.subset(endTime-60, endTime);
-			if (recentData != null)
-			{
-				//DoubleMatrix2D recentMaxSorted = recent.getMax();
-				DoubleMatrix2D sortedRecentMax = recentData.getMax().viewSorted(0);
-				DoubleMatrix2D sortedRecentMin = recentData.getMin().viewSorted(0);
-				double recentMin = sortedRecentMin.getQuick(0,0);
-				double recentMax =  sortedRecentMax.getQuick(sortedRecentMax.rows()-1,0);
-				long now = System.currentTimeMillis();
-				double clipAlerted = clipAlertTime + (settings.alertClipTimeout * 1000);
-				
-				if (settings.alertClip && now > clipAlerted && 
-						(recentMax > settings.clipValue || recentMin < -settings.clipValue))
-				{
-					clipAlertTime = now;
-					System.out.println("I'M TALKING!!!!!");
-					String channel = parent.getChannel();
-					
-					Synthesizer synthesizer = Swarm.getParentFrame().getSynthesizer();
-					try 
-					{
-						
-						synthesizer.waitEngineState(Synthesizer.QUEUE_EMPTY);
-						synthesizer.getSynthesizerProperties().setSpeakingRate(150.0f);
-						synthesizer.speak("Channel clipping on Station " , null);
-						
-						synthesizer.waitEngineState(Synthesizer.QUEUE_EMPTY);
-						synthesizer.getSynthesizerProperties().setSpeakingRate(300.0f);
-						for (int i=0; i<channel.indexOf(' '); i++)
-						{
-							synthesizer.speak(channel.substring(i, i+1) + ".", null);
-						}
-						
-					} catch (Exception e)
-					{
-						e.printStackTrace();
-					}
-				} else {
-					System.out.println(sortedRecentMax.getQuick(0,0) + " !> " + settings.clipValue + " at " + endTime);
-					System.out.println(sortedRecentMin.getQuick(0,0) + " !< -" + settings.clipValue + " at " + endTime);
-					//System.out.println(endTime + " - " + startTime + " = " + (endTime - startTime) + " :: " + now + " - " + parent.lastRefreshTime + " = " + (now - parent.lastRefreshTime));
-				}
-			} else {
-				System.out.println("NULL VALUE");
-			}
-				
 		}
 	}
 	

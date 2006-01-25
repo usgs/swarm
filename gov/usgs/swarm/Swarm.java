@@ -56,6 +56,9 @@ import com.sun.speech.freetts.jsapi.FreeTTSEngineCentral;
  * Main application class.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/01/21 11:04:11  tparker
+ * Apply alertClip settings
+ *
  * Revision 1.9  2006/01/21 01:29:20  tparker
  * First swipe at adding voice alerting of clipping. A work in progress...
  *
@@ -153,8 +156,7 @@ public class Swarm extends JFrame
 	private AbstractAction toggleFullScreenAction;
 	
 	private long lastUITime;
-	
-	private Synthesizer synthesizer;
+
 	
 	public Swarm(String[] args)
 	{
@@ -295,11 +297,6 @@ public class Swarm extends JFrame
 	public static String getVersion()
 	{
 		return VERSION;
-	}
-	
-	public Synthesizer getSynthesizer()
-	{
-		return synthesizer;
 	}
 	
 	public static CachedDataSource getCache()
@@ -976,38 +973,6 @@ public class Swarm extends JFrame
 		}
 	}
 	
-	private void createSynthesizer() 
-	{
-		try {
-			SynthesizerModeDesc desc = 
-				new SynthesizerModeDesc(null, 
-						"general",
-						Locale.US, 
-						Boolean.FALSE,
-						null);
-			
-			FreeTTSEngineCentral central = new FreeTTSEngineCentral();
-			EngineList list = central.createEngineList(desc); 
-			
-			if (list == null)
-				System.out.println("OOPS!!!!!!!");
-			
-			System.out.println(list.toArray().toString() + "::" + list.size());
-			if (list.size() > 0) { 
-				EngineCreate creator = (EngineCreate) list.get(0); 
-				synthesizer = (Synthesizer) creator.createEngine(); 
-			} 
-			if (synthesizer == null) {
-				System.err.println("Cannot create synthesizer");
-				System.exit(1);
-			}
-			synthesizer.allocate();
-			synthesizer.resume();
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 	
 	public static void main(String[] args)
 	{
@@ -1025,9 +990,6 @@ public class Swarm extends JFrame
 
 		
 		Swarm swarm = new Swarm(args);
-
-		swarm.createSynthesizer();
-		//swarm.synthesizer.speakPlainText("welcome to swarm", null);
 
 		if (!(Swarm.getParentFrame().getConfig().getString("kiosk")).equals("false"))
 			swarm.parseKiosk();
