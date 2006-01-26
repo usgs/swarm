@@ -30,6 +30,9 @@ import javax.swing.border.TitledBorder;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/01/26 00:29:05  tparker
+ * Correct logic for clipping enabled visibility, with a bit of code cleanup.
+ *
  * Revision 1.8  2006/01/25 21:52:50  tparker
  * Cleanup imports
  *
@@ -197,7 +200,7 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 						setShowClipEnabled(showClip.isSelected());
 					}
 				});
-		alertClip = new JCheckBox("Audible Clipping");
+		alertClip = new JCheckBox("Audible clipping");
 		alertClip.addActionListener(new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
