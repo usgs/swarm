@@ -52,6 +52,9 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
  * Main application class.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2006/01/25 21:50:10  tparker
+ * Cleanup imports
+ *
  * Revision 1.11  2006/01/25 00:39:28  tparker
  * Move clipping alert into the heli renderer. In progress...
  *
@@ -362,6 +365,13 @@ public class Swarm extends JFrame
 		
 		if (config.get("showClip") == null)
 			config.put("showClip", "true", false);
+		
+		if (config.get("alertClip") == null)
+			config.put("alertClip", "true", false);
+		
+		if (config.get("alertClipTimeout") == null)
+			config.put("alertClipTimeout", "5", false);
+		
 	}
 
 	public double getDurationMagnitude(double t)
