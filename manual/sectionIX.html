@@ -1,5 +1,8 @@
 <!--
 $Log: not supported by cvs2svn $
+Revision 1.3  2005/09/23 21:58:50  dcervelli
+Fixed bad example.
+
 Revision 1.2  2005/09/22 21:01:42  dcervelli
 1.2.0.20050922 changes.
 
@@ -31,6 +34,14 @@ Changes for Save All and SAC files.
 		This does not change your system clock, it just calculates an offset from it.  <b>Swarm</b> will attempt this sychronization approximately
 		every 10 minutes.
 		</p>
+		<p>
+		You can specify a list of NTP servers, a timeout value, and a recalibration interval in a configuration file called <code>NTP.config</code>.  Here is an example:
+		</p>
+		<p><code>
+		servers=130.118.179.207,129.6.15.28,132.163.4.101,128.138.140.44,192.43.244.18,131.107.1.10<br>
+		timeout=1000<br>
+		recalibrationInterval=10000<br>
+		</code></p>
 		
 		<a name="groups"></a><h2>Configuring Channel Groups</h2>
 		<p>
