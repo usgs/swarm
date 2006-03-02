@@ -4,6 +4,7 @@ import gov.usgs.math.Filter;
 import gov.usgs.plot.FrameRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.TextRenderer;
+import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.Util;
 import gov.usgs.vdx.data.wave.SliceWave;
@@ -44,6 +45,9 @@ import javax.swing.SwingUtilities;
  * spectrogram.  Relies heavily on the Valve plotting package.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2005/10/27 15:39:49  dcervelli
+ * Only shows the Nyquist warning once.
+ *
  * Revision 1.9  2005/09/23 21:57:34  dcervelli
  * Right click only for duration marker.
  *
@@ -390,7 +394,12 @@ public class WaveViewPanel extends JComponent
 					public Object construct()
 					{
 						Swarm.getParentFrame().incThreadCount();
-						Wave sw = source.getWave(channel, st, et);
+						Wave sw = null;
+						if (source instanceof CachedDataSource)
+							sw = ((CachedDataSource)source).getBestWave(channel, st, et);
+						else
+							sw = source.getWave(channel, st, et);
+						System.out.println(sw);
 						setWave(sw, st, et);
 						return null;
 					}
@@ -565,7 +574,10 @@ public class WaveViewPanel extends JComponent
 				}
 				else
 					status = utc;
-				status = status + ", Y: " + numberFormat.format(yi);
+				Calibration cb = Swarm.getParentFrame().getCalibration(channel);
+				if (cb == null)
+					cb = Calibration.IDENTITY;
+				status = status + ", Y: " + numberFormat.format(cb.multiplier * yi + cb.offset);
 			}
 			else
 			{
@@ -844,7 +856,14 @@ public class WaveViewPanel extends JComponent
 	    
 		if (waveRenderer == null)
 		    waveRenderer = new SliceWaveRenderer();
-		    
+
+		System.out.println(channel);
+		Calibration cal = Swarm.getParentFrame().getCalibration(channel);
+		if (cal != null)
+		{
+			waveRenderer.setYLabel(cal.unit);
+			waveRenderer.setYAxisCoefficients(cal.multiplier, cal.offset);
+		}
 		waveRenderer.setLocation(X_OFFSET, Y_OFFSET, this.getWidth() - X_OFFSET - RIGHT_WIDTH, this.getHeight() - Y_OFFSET - BOTTOM_HEIGHT);
 //		waveRenderer.setYLimits(minAmp, maxAmp);
 		waveRenderer.setYLimits(minY, maxY);
