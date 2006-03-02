@@ -52,6 +52,9 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
  * Main application class.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2006/02/05 14:56:50  cervelli
+ * Bumped version. Added info about NTP.config to the manual.
+ *
  * Revision 1.13  2006/01/26 22:02:55  tparker
  * Add new config file defaults.
  *
@@ -130,8 +133,10 @@ public class Swarm extends JFrame
 {
 	private static final long serialVersionUID = -1;
 	private static String DEFAULT_CONFIG_FILE = "Swarm.config";
+	private static String CALIBRATION_CONFIG_FILE = "Calibration.config";
 	private static Swarm parentFrame;
 	private ConfigFile config;
+	private ConfigFile calibrations;
 	private JDesktopPane desktop;
 	private JSplitPane split;
 	private ChannelPanel channelPanel;
@@ -230,12 +235,14 @@ public class Swarm extends JFrame
 		};
 		m.getActionMap().put("fullScreenToggle", toggleFullScreenAction);	
   
+		calibrations = new ConfigFile(CALIBRATION_CONFIG_FILE);
+		
 		String configFile = DEFAULT_CONFIG_FILE;
 		  
 		int n = args.length - 1;
 		if (n >= 0 && !args[n].startsWith("-"))
 			configFile = args[n];
-		  
+
 		parseConfigFile(configFile);
 		config.put("configFile", configFile, false);
 		   
@@ -387,6 +394,15 @@ public class Swarm extends JFrame
 	public WaveClipboardFrame getWaveClipboard()
 	{
 		return waveClipboard;	
+	}
+	
+	public Calibration getCalibration(String scn)
+	{
+		String c = calibrations.getString(scn);
+		if (c == null)
+			 return null;
+		
+		return Calibration.fromString(c);
 	}
 	
 	public ConfigFile getConfig()
