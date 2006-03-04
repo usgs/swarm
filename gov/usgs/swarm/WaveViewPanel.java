@@ -45,6 +45,9 @@ import javax.swing.SwingUtilities;
  * spectrogram.  Relies heavily on the Valve plotting package.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2006/03/02 23:32:22  dcervelli
+ * Added calibration stuff.
+ *
  * Revision 1.10  2005/10/27 15:39:49  dcervelli
  * Only shows the Nyquist warning once.
  *
@@ -831,12 +834,17 @@ public class WaveViewPanel extends JComponent
 	    SliceWave wv = new SliceWave(renderWave);
 	    wv.setSlice(startTime, endTime);
 	    
+	    Calibration cal = Swarm.getParentFrame().getCalibration(channel);
+		if (cal == null)
+			cal = Calibration.IDENTITY;
+		
 	    double bias = 0;
 	    if (settings.removeBias)
 	        bias = wv.mean();
 	    
-	    double minY = settings.minAmp;
-		double maxY = settings.maxAmp;
+	    double minY = (settings.minAmp - cal.offset) / cal.multiplier;
+		double maxY = (settings.maxAmp - cal.offset) / cal.multiplier;
+		
 		if (settings.autoScaleAmp)
 		{
 			double[] dr = new double[] {wv.min(), wv.max()};
@@ -857,8 +865,8 @@ public class WaveViewPanel extends JComponent
 		if (waveRenderer == null)
 		    waveRenderer = new SliceWaveRenderer();
 
-		System.out.println(channel);
-		Calibration cal = Swarm.getParentFrame().getCalibration(channel);
+//		System.out.println(channel);
+		
 		if (cal != null)
 		{
 			waveRenderer.setYLabel(cal.unit);

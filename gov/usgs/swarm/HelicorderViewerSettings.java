@@ -6,6 +6,9 @@ package gov.usgs.swarm;
  * TODO: eliminate this class in favor of vdx.HelicorderSettings
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/01/21 01:29:20  tparker
+ * First swipe at adding voice alerting of clipping. A work in progress...
+ *
  * Revision 1.3  2005/10/26 16:47:38  cervelli
  * Made showClip variable configurable.  Changed manually slightly.
  *
@@ -48,7 +51,7 @@ public class HelicorderViewerSettings
 		waveZoomOffset = 30;
 		bottomTime = Double.NaN;
 		refreshInterval = 15;
-		scrollSize = 1;
+		scrollSize = 24;
 		forceCenter = false;
 		clipBars = 21;
 		showWiggler = false;

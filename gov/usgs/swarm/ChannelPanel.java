@@ -3,6 +3,7 @@ package gov.usgs.swarm;
 import gov.usgs.util.ConfigFile;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -37,6 +39,9 @@ import javax.swing.tree.TreePath;
  * and how.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/10/01 15:46:01  dcervelli
+ * A channel can now be in multiple groups.
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -57,14 +62,14 @@ public class ChannelPanel extends JTabbedPane
 	private static final int MAX_CHANNELS_AT_ONCE = 500;
 	private String source;
 	private Swarm swarm;
-	private JScrollPane waveScrollPane;
+//	private JScrollPane waveScrollPane;
 	private JScrollPane heliScrollPane;
 	private JButton realtimeButton;
 	private JButton viewHeliButton;
-	private JPanel wavePanel;
+//	private JPanel wavePanel;
 	private JPanel heliPanel;
 	
-	private JTree waveTree;
+//	private JTree waveTree;
 	private JTree heliTree;
 	
 	private ConfigFile groupFile;
@@ -85,25 +90,7 @@ public class ChannelPanel extends JTabbedPane
 	public void createUI()
 	{
 		DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("root");
-		waveTree = new JTree(rootNode);
-		waveTree.setRootVisible(false);
-		waveTree.addMouseListener(new MouseAdapter()
-				{
-					public void mouseClicked(MouseEvent e)
-					{
-						if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e))
-						{
-							TreePath path = waveTree.getSelectionPath();
-							if (path != null)
-							{
-								DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
-								if (node != null && node.isLeaf())
-									swarm.waveChannelSelected(source, node.toString());
-							}
-						}	
-					}
-				});
-		
+	
 		class makeVisibileTSL implements TreeSelectionListener
 		{
 			public void valueChanged(TreeSelectionEvent e) 
@@ -116,63 +103,9 @@ public class ChannelPanel extends JTabbedPane
 				}
 			}
 		}
-		waveTree.addKeyListener(new KeyAdapter()
-				{
-					public void keyTyped(KeyEvent e) 
-					{
-						if (e.getKeyChar() == 0x0a)
-							realtimeButton.doClick();
-					}
-				});
-		waveTree.addTreeSelectionListener(new makeVisibileTSL());
-
-		wavePanel = new JPanel(new BorderLayout());
-		waveScrollPane = new JScrollPane(waveTree);				
-		
-		JPanel waveButtonPanel = new JPanel(new GridLayout(3, 1));
-		realtimeButton = new JButton("Real-time");
-		realtimeButton.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						TreePath[] paths = waveTree.getSelectionPaths();
-						String[] channels = getSelectedLeaves(paths);
-						for (int i = 0; i < channels.length; i++)
-							swarm.waveChannelSelected(source, channels[i]);
-					}
-				});
-				
-		JButton clipboardButton = new JButton("Clipboard");
-		clipboardButton.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent ev)
-					{
-						TreePath[] paths = waveTree.getSelectionPaths();
-						String[] channels = getSelectedLeaves(paths);
-						if (channels != null)
-							swarm.clipboardWaveChannelSelected(source, channels);
-					}
-				});
-		
-		JButton monitorButton = new JButton("Monitor");
-		monitorButton.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent ev)
-					{
-						TreePath[] paths = waveTree.getSelectionPaths();
-						String[] channels = getSelectedLeaves(paths);
-						if (channels != null)
-							swarm.monitorChannelSelected(source, channels);
-					}
-				});
-		waveButtonPanel.add(realtimeButton);
-		waveButtonPanel.add(clipboardButton);
-		waveButtonPanel.add(monitorButton);
-		
-		wavePanel.add(waveScrollPane, BorderLayout.CENTER);
-		wavePanel.add(waveButtonPanel, BorderLayout.SOUTH);
-		
 		heliPanel = new JPanel(new BorderLayout());
+		
+		JPanel heliButtonPanel = new JPanel(new GridLayout(1,4));
 		
 		rootNode = new DefaultMutableTreeNode("root");
 		heliTree = new JTree(rootNode);
@@ -193,6 +126,7 @@ public class ChannelPanel extends JTabbedPane
 						}	
 					}
 				});
+				
 		heliTree.addKeyListener(new KeyAdapter()
 				{
 					public void keyTyped(KeyEvent e) 
@@ -207,7 +141,8 @@ public class ChannelPanel extends JTabbedPane
 		heliPanel = new JPanel(new BorderLayout());
 		heliScrollPane = new JScrollPane(heliTree);				
 		
-		viewHeliButton = new JButton("View Helicorder");
+//		viewHeliButton = new JButton("H");
+		viewHeliButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("heli"))));
 		viewHeliButton.addActionListener(new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
@@ -218,20 +153,69 @@ public class ChannelPanel extends JTabbedPane
 							swarm.helicorderChannelSelected(source, channels[i]);
 					}
 				});
+		
+		realtimeButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("wave"))));
+		realtimeButton.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						TreePath[] paths = heliTree.getSelectionPaths();
+						String[] channels = getSelectedLeaves(paths);
+						for (int i = 0; i < channels.length; i++)
+							swarm.waveChannelSelected(source, channels[i]);
+					}
+				});
+				
+//		JButton clipboardButton = new JButton("C");
+		JButton clipboardButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("clipboard"))));
+		clipboardButton.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent ev)
+					{
+						TreePath[] paths = heliTree.getSelectionPaths();
+						String[] channels = getSelectedLeaves(paths);
+						if (channels != null)
+							swarm.clipboardWaveChannelSelected(source, channels);
+					}
+				});
+		
+//		JButton monitorButton = new JButton("M");
+		JButton monitorButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("monitor"))));
+		monitorButton.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent ev)
+					{
+						TreePath[] paths = heliTree.getSelectionPaths();
+						String[] channels = getSelectedLeaves(paths);
+						if (channels != null)
+							swarm.monitorChannelSelected(source, channels);
+					}
+				});
+
+
+
+
+		
+		heliButtonPanel.add(viewHeliButton);
+		heliButtonPanel.add(clipboardButton);
+		heliButtonPanel.add(monitorButton);
+		heliButtonPanel.add(realtimeButton);
+		
 		heliPanel.add(heliScrollPane, BorderLayout.CENTER);
-		heliPanel.add(viewHeliButton, BorderLayout.SOUTH);
+		heliPanel.add(heliButtonPanel, BorderLayout.SOUTH);
+
 		
 		this.setBorder(new TitledBorder(new EtchedBorder(), "Data"));
 		
-		this.add("Helicorders", heliPanel);
-		this.add("Waves", wavePanel);
+		this.add("Channels", heliPanel);
+//		this.add("Waves", wavePanel);
 
 	}
 	
-	public void populateWaveChannels(final String s, final java.util.List items)
-	{
-		populateTree(s, items, waveTree);
-	}
+//	public void populateWaveChannels(final String s, final java.util.List items)
+//	{
+//		//populateTree(s, items, waveTree);
+//	}
 	
 	public void populateHelicorderChannels(final String s, final java.util.List items)
 	{

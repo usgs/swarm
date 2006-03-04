@@ -30,6 +30,9 @@ import javax.swing.border.TitledBorder;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/01/26 18:06:33  tparker
+ * Correct spelling
+ *
  * Revision 1.9  2006/01/26 00:29:05  tparker
  * Correct logic for clipping enabled visibility, with a bit of code cleanup.
  *
@@ -395,6 +398,9 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 			settings.showClip = showClip.isSelected();
 			settings.alertClip = alertClip.isSelected();
 			settings.alertClipTimeout = Integer.parseInt(alertClipTimeout.getText()) * 60;
+			
+//			Calibration cb = Swarm.getParentFrame().getCalibration(channel);
+
 			settings.clipValue = Integer.parseInt(clipValue.getText());
 			settings.autoScale = autoScale.isSelected();
 			settings.barRange = Integer.parseInt(barRange.getText());
@@ -434,7 +440,7 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 			
 			message = "Invalid scroll size; legal values are between 1 and 48.";
 			int ss = Integer.parseInt(scrollSize.getText());
-			if (ss <= 0 || ss >= 48)
+			if (ss < 1 || ss > 48)
 				throw new NumberFormatException();
 							
 			message = "Invalid clip value.";

@@ -38,6 +38,9 @@ import javax.swing.border.LineBorder;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/01/25 21:51:25  tparker
+ * Cleanup imports
+ *
  * Revision 1.9  2006/01/25 21:46:06  tparker
  * Move clipping alert into the heli renderer.
  *
@@ -157,6 +160,7 @@ public class HelicorderViewPanel extends JComponent
 			loadInsetWave(j2k - zoomOffset, j2k + zoomOffset);
 		}
 		parent.settingsChanged();
+
 		repaint();
 	}
 	
@@ -628,6 +632,10 @@ public class HelicorderViewPanel extends JComponent
 		
 		Graphics2D ig = (Graphics2D)bufferImage.getGraphics();
 		plot.setSize(d);
+	    
+		Calibration cal = Swarm.getParentFrame().getCalibration(parent.getChannel());
+		if (cal == null)
+			cal = Calibration.IDENTITY;
 		
 		heliRenderer.setLocation(X_OFFSET, Y_OFFSET, d.width - X_OFFSET - RIGHT_WIDTH, d.height - Y_OFFSET - BOTTOM_HEIGHT);
 		
@@ -635,14 +643,24 @@ public class HelicorderViewPanel extends JComponent
 		{
 			settings.barRange = (int) (mean * settings.barMult);
 			settings.clipValue = (int) (mean *  settings.clipBars);
+			heliRenderer.setHelicorderExtents(startTime, endTime, -1 * Math.abs(settings.barRange), Math.abs(settings.barRange));
+		}
+		else
+		{
+			heliRenderer.setHelicorderExtents(startTime, endTime, -1 * Math.abs((settings.barRange - cal.offset) / cal.multiplier), Math.abs((settings.barRange - cal.offset) / cal.multiplier));
 		}
 		
-		heliRenderer.setHelicorderExtents(startTime, endTime, -1 * Math.abs(settings.barRange), Math.abs(settings.barRange));
+		
 		heliRenderer.setClipValue(settings.clipValue);
 		heliRenderer.createDefaultAxis();
 		translation = heliRenderer.getTranslationInfo(false);
 		heliRenderer.setLargeChannelDisplay(fullScreen);
-		heliRenderer.setChannel(parent.getChannel());
+		
+		if (cal.alias == null)
+			heliRenderer.setChannel(parent.getChannel());
+		else
+			heliRenderer.setChannel(cal.alias);
+		
 		plot.render(ig);
 
 	}

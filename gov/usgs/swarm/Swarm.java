@@ -52,6 +52,9 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
  * Main application class.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2006/03/02 00:55:02  dcervelli
+ * Added calibrations.
+ *
  * Revision 1.14  2006/02/05 14:56:50  cervelli
  * Bumped version. Added info about NTP.config to the manual.
  *
@@ -152,7 +155,7 @@ public class Swarm extends JFrame
 	private WaveClipboardFrame waveClipboard;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "1.2.4.20060205";
+	private static final String VERSION = "1.2.5.20060304";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -705,7 +708,7 @@ public class Swarm extends JFrame
 							SeismicDataSource sds = parseDataSource(source);
 							if (sds != null)
 							{
-								ws = sds.getWaveStations();
+//								ws = sds.getWaveStations();
 								hs = sds.getHelicorderStations();
 								sds.close();
 							}
@@ -723,7 +726,7 @@ public class Swarm extends JFrame
 					{
 						if (!failed)
 						{
-							channelPanel.populateWaveChannels(source, ws);
+	//						channelPanel.populateWaveChannels(source, ws);
 							channelPanel.populateHelicorderChannels(source, hs);
 						}
 						chooser.enableGoButton();

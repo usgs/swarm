@@ -50,6 +50,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2006/01/21 11:04:11  tparker
+ * Apply alertClip settings
+ *
  * Revision 1.11  2005/11/29 00:45:34  tparker
  * Add PS option to "save image"
  *
@@ -158,7 +161,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 	
 	public HelicorderViewerFrame(Swarm sw, SeismicDataSource sds, String ch)
 	{
-		super("[" + sds + "]: " + ch, true, true, true, true);
+		super(ch + ", [" + sds + "]", true, true, true, true);
 		Swarm.getParentFrame().touchUITime();
 		settings = new HelicorderViewerSettings();
 		waveViewSettings = new WaveViewSettings();

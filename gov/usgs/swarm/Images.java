@@ -9,6 +9,9 @@ import java.util.Map;
  * TODO: replace 'new ImageIcon(getClass().getClassLoader().getResource(Images.get("minimize")))' with 'Images.getImage("minimize")'
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2005/09/22 20:49:57  dcervelli
+ * Got rid of stupid warning.
+ *
  * Revision 1.5  2005/09/22 20:48:54  dcervelli
  * Added camera icon.
  *
@@ -62,6 +65,8 @@ public class Images
 		images.put("yplus", "images/yplus.png");
 		images.put("zoomminus", "images/zoomminus.png");
 		images.put("zoomplus", "images/zoomplus.png");
+		images.put("monitor", "images/monitor.png");
+		images.put("heli", "images/heli.png"); 
 	}
 	
 	public static String get(String key)
