@@ -3,7 +3,6 @@ package gov.usgs.swarm;
 import gov.usgs.util.ConfigFile;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,7 +21,6 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
@@ -39,6 +37,9 @@ import javax.swing.tree.TreePath;
  * and how.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/03/04 23:03:45  cervelli
+ * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
+ *
  * Revision 1.2  2005/10/01 15:46:01  dcervelli
  * A channel can now be in multiple groups.
  *
@@ -56,7 +57,7 @@ import javax.swing.tree.TreePath;
  *
  * @author Dan Cervelli
  */
-public class ChannelPanel extends JTabbedPane
+public class ChannelPanel extends JPanel
 {
 	private static final long serialVersionUID = -1;
 	private static final int MAX_CHANNELS_AT_ONCE = 500;
@@ -76,6 +77,7 @@ public class ChannelPanel extends JTabbedPane
 	
 	public ChannelPanel(Swarm sw)
 	{
+		this.setLayout(new BorderLayout());
 		groupFile = new ConfigFile(Swarm.getParentFrame().getConfig().getString("groupConfigFile"));
 		swarm = sw;
 		SwingUtilities.invokeLater(new Runnable()
@@ -204,10 +206,10 @@ public class ChannelPanel extends JTabbedPane
 		heliPanel.add(heliScrollPane, BorderLayout.CENTER);
 		heliPanel.add(heliButtonPanel, BorderLayout.SOUTH);
 
-		
 		this.setBorder(new TitledBorder(new EtchedBorder(), "Data"));
 		
-		this.add("Channels", heliPanel);
+		this.add(heliPanel, BorderLayout.CENTER);
+//		this.add("Channels", heliPanel);
 //		this.add("Waves", wavePanel);
 
 	}
