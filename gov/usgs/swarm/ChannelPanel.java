@@ -37,6 +37,9 @@ import javax.swing.tree.TreePath;
  * and how.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/03/04 23:10:55  dcervelli
+ * Made into a JPanel.
+ *
  * Revision 1.3  2006/03/04 23:03:45  cervelli
  * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
  *
@@ -145,6 +148,7 @@ public class ChannelPanel extends JPanel
 		
 //		viewHeliButton = new JButton("H");
 		viewHeliButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("heli"))));
+		viewHeliButton.setToolTipText("Helicorder");
 		viewHeliButton.addActionListener(new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
@@ -157,6 +161,7 @@ public class ChannelPanel extends JPanel
 				});
 		
 		realtimeButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("wave"))));
+		realtimeButton.setToolTipText("Wave");
 		realtimeButton.addActionListener(new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
@@ -170,6 +175,7 @@ public class ChannelPanel extends JPanel
 				
 //		JButton clipboardButton = new JButton("C");
 		JButton clipboardButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("clipboard"))));
+		clipboardButton.setToolTipText("Clipboard");
 		clipboardButton.addActionListener(new ActionListener()
 				{
 					public void actionPerformed(ActionEvent ev)
@@ -183,6 +189,7 @@ public class ChannelPanel extends JPanel
 		
 //		JButton monitorButton = new JButton("M");
 		JButton monitorButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("monitor"))));
+		monitorButton.setToolTipText("Monitor");
 		monitorButton.addActionListener(new ActionListener()
 				{
 					public void actionPerformed(ActionEvent ev)
