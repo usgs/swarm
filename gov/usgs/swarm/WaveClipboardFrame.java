@@ -43,6 +43,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: refactor, clean up dialog boxes.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2005/09/23 21:57:09  dcervelli
+ * Uses subset() on save all SAC.
+ *
  * Revision 1.5  2005/09/22 20:59:50  dcervelli
  * Multiple SAC save/load fixes.
  *
@@ -381,7 +384,7 @@ public class WaveClipboardFrame extends JInternalFrame
 					    sac.knetwk = scn[2];
 					    try
 					    {
-					        sac.write(new File(dir.getPath() + File.separatorChar + wvp.getChannel().replace(' ', '.') + ".sac"));
+					        sac.write(new File(dir.getPath() + File.separatorChar + wvp.getChannel().replace(' ', '.')));
 					    }
 					    catch (IOException ex)
 					    {
