@@ -52,6 +52,9 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
  * Main application class.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2006/03/04 23:03:45  cervelli
+ * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
+ *
  * Revision 1.15  2006/03/02 00:55:02  dcervelli
  * Added calibrations.
  *
@@ -155,7 +158,7 @@ public class Swarm extends JFrame
 	private WaveClipboardFrame waveClipboard;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "1.2.5.20060304";
+	private static final String VERSION = "1.2.5.20060331";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
