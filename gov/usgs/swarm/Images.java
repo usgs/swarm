@@ -9,6 +9,9 @@ import java.util.Map;
  * TODO: replace 'new ImageIcon(getClass().getClassLoader().getResource(Images.get("minimize")))' with 'Images.getImage("minimize")'
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/03/04 23:03:45  cervelli
+ * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
+ *
  * Revision 1.6  2005/09/22 20:49:57  dcervelli
  * Got rid of stupid warning.
  *
@@ -44,9 +47,11 @@ public class Images
 		images.put("close", "images/close.png");
 		images.put("delete", "images/delete.png");
 		images.put("gototime", "images/gototime.png");
+		images.put("heli", "images/heli.png"); 
 		images.put("left", "images/left.png");
 		images.put("maximize","images/maximize.png"); 
-		images.put("minimize", "images/minimize.png"); 
+		images.put("minimize", "images/minimize.png");
+		images.put("monitor", "images/monitor.png");
 		images.put("open", "images/open.png");
 		images.put("right", "images/right.png");
 		images.put("save", "images/save.png");
@@ -64,9 +69,7 @@ public class Images
 		images.put("yminus", "images/yminus.png");
 		images.put("yplus", "images/yplus.png");
 		images.put("zoomminus", "images/zoomminus.png");
-		images.put("zoomplus", "images/zoomplus.png");
-		images.put("monitor", "images/monitor.png");
-		images.put("heli", "images/heli.png"); 
+		images.put("zoomplus", "images/zoomplus.png");		
 	}
 	
 	public static String get(String key)
