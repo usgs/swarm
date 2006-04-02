@@ -25,8 +25,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Line2D;
+//import java.awt.geom.GeneralPath;
+//import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -45,6 +45,9 @@ import javax.swing.SwingUtilities;
  * spectrogram.  Relies heavily on the Valve plotting package.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2006/03/04 23:03:45  cervelli
+ * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
+ *
  * Revision 1.11  2006/03/02 23:32:22  dcervelli
  * Added calibration stuff.
  *
@@ -270,14 +273,15 @@ public class WaveViewPanel extends JComponent
 						{
 							settings.cycleType();
 						}
-
-						if (timeSeries && heliViewPanel != null && SwingUtilities.isLeftMouseButton(e))
-						{
-							if (j2k >= startTime && j2k <= endTime)
-								heliViewPanel.markTime(j2k);
-							
-							processMousePosition(x, e.getY());
-						}
+//						Uncomment to allow stupid green lines
+//
+//						if (timeSeries && heliViewPanel != null && SwingUtilities.isLeftMouseButton(e))
+//						{
+//							if (j2k >= startTime && j2k <= endTime)
+//								heliViewPanel.markTime(j2k);
+//							
+//							processMousePosition(x, e.getY());
+//						}
 						
 						if (timeSeries && allowDragging && SwingUtilities.isLeftMouseButton(e))
 						{
@@ -698,28 +702,28 @@ public class WaveViewPanel extends JComponent
 		w.invalidateStatistics();
 	}
 
-	private static final Color DARK_GREEN = new Color(0, 168, 0);
+//	private static final Color DARK_GREEN = new Color(0, 168, 0);
 	
-	private void paintMark(Graphics2D g2, double j2k)
-	{
-		if (Double.isNaN(j2k) || j2k < startTime || j2k > endTime)
-			return;
-		
-		double[] t = getTranslation();
-		double x = (j2k - t[1]) / t[0];
-		g2.setColor(DARK_GREEN);
-		g2.draw(new Line2D.Double(x, Y_OFFSET, x, getSize().height - Y_OFFSET));
-		
-		GeneralPath gp = new GeneralPath();
-		gp.moveTo((float)x, (float)Y_OFFSET);
-		gp.lineTo((float)x - 5, Y_OFFSET - 7);
-		gp.lineTo((float)x + 5, Y_OFFSET - 7);
-		gp.closePath();
-		g2.setPaint(Color.GREEN);
-		g2.fill(gp);
-		g2.setColor(DARK_GREEN);
-		g2.draw(gp);
-	}
+//	private void paintMark(Graphics2D g2, double j2k)
+//	{
+//		if (Double.isNaN(j2k) || j2k < startTime || j2k > endTime)
+//			return;
+//		
+//		double[] t = getTranslation();
+//		double x = (j2k - t[1]) / t[0];
+//		g2.setColor(DARK_GREEN);
+//		g2.draw(new Line2D.Double(x, Y_OFFSET, x, getSize().height - Y_OFFSET));
+//		
+//		GeneralPath gp = new GeneralPath();
+//		gp.moveTo((float)x, (float)Y_OFFSET);
+//		gp.lineTo((float)x - 5, Y_OFFSET - 7);
+//		gp.lineTo((float)x + 5, Y_OFFSET - 7);
+//		gp.closePath();
+//		g2.setPaint(Color.GREEN);
+//		g2.fill(gp);
+//		g2.setColor(DARK_GREEN);
+//		g2.draw(gp);
+//	}
 	
 	/** Paints the component on the specified graphics context.
 	 * @param g the graphics context
@@ -755,18 +759,20 @@ public class WaveViewPanel extends JComponent
 			
 			if (image != null)
 				g2.drawImage(image, 0, 0, null);
-			
+
 			if (dragging)
 				paintDragBox(g2);
 			
-			paintMark(g2, mark1);
-			paintMark(g2, mark2);
-			
+//			paintMark(g2, mark1);
+//			paintMark(g2, mark2);
+
 			if (closeListener != null)
 			{
 				if (closeImg == null)
 					closeImg = Toolkit.getDefaultToolkit().createImage(Images.get("close"));
+				
 				g2.drawImage(closeImg, dim.width - 17, 3, null);
+
 			}
 		}
 	}
@@ -844,7 +850,7 @@ public class WaveViewPanel extends JComponent
 	    
 	    double minY = (settings.minAmp - cal.offset) / cal.multiplier;
 		double maxY = (settings.maxAmp - cal.offset) / cal.multiplier;
-		
+
 		if (settings.autoScaleAmp)
 		{
 			double[] dr = new double[] {wv.min(), wv.max()};
