@@ -1,5 +1,6 @@
 package gov.usgs.swarm;
 
+import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.vdx.data.wave.Wave;
@@ -33,6 +34,9 @@ import javax.swing.event.InternalFrameEvent;
  * channels in real-time.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2005/09/02 16:40:17  dcervelli
+ * CurrentTime changes.
+ *
  * Revision 1.4  2005/08/30 00:34:13  tparker
  * Update to use Images class
  *
@@ -330,14 +334,33 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	
 	public synchronized void refresh()
 	{
+		CachedDataSource cache = Swarm.getCache();
 		double now = CurrentTime.getInstance().nowJ2K();
+		double start = now - SPANS[spanIndex];
 		for (int i = 0; i < channels.size(); i++)
 		{
 			WaveViewPanel waveViewPanel = panels.get(i);
 			String channel = channels.get(i);
-			Wave sw = dataSource.getWave(channel, now - SPANS[spanIndex], now);
+			Wave sw = cache.getBestWave(channel, start, now);
+			if (sw != null) 
+			{
+				if (sw.getEndTime() < now)
+				{
+					Wave w2 = dataSource.getWave(channel, sw.getEndTime(), now);
+					if (w2 != null)
+						sw = sw.combine(w2);
+				}
+				if (sw.getStartTime() > start)
+				{
+					Wave w2 = dataSource.getWave(channel, start, sw.getStartTime());
+					if (w2 != null)
+						sw = sw.combine(w2);
+				}
+			}
+			else
+				sw = dataSource.getWave(channel, start, now);
 			waveViewPanel.setWorking(true);
-			waveViewPanel.setWave(sw, now - SPANS[spanIndex], now);
+			waveViewPanel.setWave(sw, start, now);
 			waveViewPanel.setChannel(channel);
 			waveViewPanel.setDataSource(dataSource);
 			waveViewPanel.setWorking(false);
