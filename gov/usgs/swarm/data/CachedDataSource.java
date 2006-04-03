@@ -20,6 +20,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * so I had to add some hacky code for the CachePurgeActions.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.1  2005/05/02 16:22:11  cervelli
  * Moved data classes to separate package.
  *
@@ -79,19 +82,23 @@ public class CachedDataSource extends SeismicDataSource
 			return null;
 		else
 		{
-//			Iterator it = waves.iterator();
 			List<Wave> parts = new ArrayList<Wave>();
-//			while (it.hasNext())
+			double minT = 1E300;
+			double maxT = -1E300;
 			for (CachedWave cw : waves)
 			{
-//				CachedWave cw = (CachedWave)it.next();
-//				System.out.println(t1 + " " + t2 + " " + cw.t1 + " " + cw.t2);
-//				System.out.println(t1 >= cw.t1 && t2 <= cw.t2);
 				if (cw.wave.overlaps(t1, t2))
+				{
 					parts.add(cw.wave);
+					minT = Math.min(minT, cw.t1);
+					maxT = Math.max(maxT, cw.t2);
+				}
 			}
 			
-			wave = Wave.join(parts);
+			if (parts.size() == 1)
+				return parts.get(0);
+			
+			wave = Wave.join(parts, minT, maxT);
 			if (wave != null)
 				wave = wave.subset(t1, t2);
 		}
@@ -630,7 +637,7 @@ public class CachedDataSource extends SeismicDataSource
 		abstract public int getMemorySize();
 	}
 	
-	private class CachedWave extends CacheEntry
+	private class CachedWave extends CacheEntry implements Comparable<CacheEntry>
 	{
 		public Wave wave;
 		
