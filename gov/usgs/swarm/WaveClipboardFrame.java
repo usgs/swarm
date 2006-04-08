@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -43,6 +44,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: refactor, clean up dialog boxes.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/04/02 17:15:23  cervelli
+ * Got rid of automatic '.sac' extension at request of John Power
+ *
  * Revision 1.6  2005/09/23 21:57:09  dcervelli
  * Uses subset() on save all SAC.
  *
@@ -91,6 +95,7 @@ public class WaveClipboardFrame extends JInternalFrame
 	public WaveClipboardFrame()
 	{
 		super("Wave Clipboard", true, false, true, true);
+		this.setFocusable(true);
 		saveAllDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 		saveAllDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 		waves = new ArrayList<ClipboardWaveViewPanel>();
@@ -312,26 +317,32 @@ public class WaveClipboardFrame extends JInternalFrame
 				
 				if (confirm)
 				{
-					Swarm.getParentFrame().getConfig().put("lastPath", f.getParent(), false);
-					String fn = f.getPath().toLowerCase();
-					if (fn.endsWith(".sac"))
-					{
-					    SAC sac = wvp.getWave().toSAC();
-					    String[] scn = wvp.getChannel().split(" ");
-					    sac.kstnm = scn[0];
-					    sac.kcmpnm = scn[1];
-					    sac.knetwk = scn[2];
-					    try
-					    {
-					        sac.write(f);
-					    }
-					    catch (IOException ex)
-					    {
-					        ex.printStackTrace();
-					    }
-					}
-					else
-					    wvp.getWave().exportToText(f.getPath());
+					try
+				    {
+						Swarm.getParentFrame().getConfig().put("lastPath", f.getParent(), false);
+						String fn = f.getPath().toLowerCase();
+						if (fn.endsWith(".sac"))
+						{
+						    SAC sac = wvp.getWave().toSAC();
+						    String[] scn = wvp.getChannel().split(" ");
+						    sac.kstnm = scn[0];
+						    sac.kcmpnm = scn[1];
+						    sac.knetwk = scn[2];
+						    sac.write(f);
+						}
+						else
+						    wvp.getWave().exportToText(f.getPath());
+				    }
+					catch (FileNotFoundException ex)
+				    {
+				    	JOptionPane.showMessageDialog(Swarm.getParentFrame(), 
+				    			"Directory does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
+				    }
+				    catch (IOException ex)
+				    {
+				    	JOptionPane.showMessageDialog(Swarm.getParentFrame(), 
+				    			"Error writing file.", "Error", JOptionPane.ERROR_MESSAGE);
+				    }
 				}
 			}
 		}
@@ -360,39 +371,45 @@ public class WaveClipboardFrame extends JInternalFrame
 			}
 			if (result == JFileChooser.APPROVE_OPTION) 
 			{	
-			    if (f.exists() && !f.isDirectory())
-			        return;
-			    if (!f.exists())
-			        f.mkdir();
-			    for (ClipboardWaveViewPanel wave : waves)
+				try
 			    {
-			    	WaveViewPanel wvp = wave.getWaveViewPanel();
-			        Wave sw = wvp.getWave();
-			        
-			        if (sw != null)
-			        {
-			        	sw = sw.subset(wvp.getStartTime(), wvp.getEndTime());
-			            String date = saveAllDateFormat.format(Util.j2KToDate(sw.getStartTime()));
-			            File dir = new File(f.getPath() + File.separatorChar + date);
-			            if (!dir.exists())
-			                dir.mkdir();
-			            
-			            SAC sac = sw.toSAC();
-					    String[] scn = wvp.getChannel().split(" ");
-					    sac.kstnm = scn[0];
-					    sac.kcmpnm = scn[1];
-					    sac.knetwk = scn[2];
-					    try
-					    {
+				    if (f.exists() && !f.isDirectory())
+				        return;
+				    if (!f.exists())
+				        f.mkdir();
+				    for (ClipboardWaveViewPanel wave : waves)
+				    {
+				    	WaveViewPanel wvp = wave.getWaveViewPanel();
+				        Wave sw = wvp.getWave();
+				        
+				        if (sw != null)
+				        {
+				        	sw = sw.subset(wvp.getStartTime(), wvp.getEndTime());
+				            String date = saveAllDateFormat.format(Util.j2KToDate(sw.getStartTime()));
+				            File dir = new File(f.getPath() + File.separatorChar + date);
+				            if (!dir.exists())
+				                dir.mkdir();
+				            
+				            SAC sac = sw.toSAC();
+						    String[] scn = wvp.getChannel().split(" ");
+						    sac.kstnm = scn[0];
+						    sac.kcmpnm = scn[1];
+						    sac.knetwk = scn[2];
 					        sac.write(new File(dir.getPath() + File.separatorChar + wvp.getChannel().replace(' ', '.')));
-					    }
-					    catch (IOException ex)
-					    {
-					        ex.printStackTrace();
-					    }
-			        }
+				        }
+				    }
+				    Swarm.getParentFrame().getConfig().put("lastPath", f.getPath(), false);
 			    }
-			    Swarm.getParentFrame().getConfig().put("lastPath", f.getPath(), false);
+				catch (FileNotFoundException ex)
+			    {
+			    	JOptionPane.showMessageDialog(Swarm.getParentFrame(), 
+			    			"Directory does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
+			    }
+			    catch (IOException ex)
+			    {
+			    	JOptionPane.showMessageDialog(Swarm.getParentFrame(), 
+			    			"Error writing file.", "Error", JOptionPane.ERROR_MESSAGE);
+			    }
 			}
 		}
 	}
