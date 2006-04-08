@@ -52,6 +52,9 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
  * Main application class.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2006/04/02 17:18:18  cervelli
+ * Green lines banished, '.sac' extension no longer is automatically appended.
+ *
  * Revision 1.16  2006/03/04 23:03:45  cervelli
  * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
  *
@@ -158,7 +161,7 @@ public class Swarm extends JFrame
 	private WaveClipboardFrame waveClipboard;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "1.2.5.20060331";
+	private static final String VERSION = "1.2.5.20060404";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -383,7 +386,7 @@ public class Swarm extends JFrame
 			config.put("showClip", "true", false);
 		
 		if (config.get("alertClip") == null)
-			config.put("alertClip", "true", false);
+			config.put("alertClip", "false", false);
 		
 		if (config.get("alertClipTimeout") == null)
 			config.put("alertClipTimeout", "5", false);
