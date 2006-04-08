@@ -38,6 +38,9 @@ import javax.swing.border.LineBorder;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2006/03/04 23:03:45  cervelli
+ * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
+ *
  * Revision 1.10  2006/01/25 21:51:25  tparker
  * Cleanup imports
  *
@@ -509,10 +512,9 @@ public class HelicorderViewPanel extends JComponent
 			Dimension d = getSize();
 			int height = INSET_HEIGHT;
 			int row = heliRenderer.getRow(j2k);
-			//int row = getHelicorderRow(insetY);
 			
 			insetWavePanel.setSize(d.width, height);
-			if (insetY > height + translation[3])
+			if (insetY - heliRenderer.getRowHeight() > height + translation[3])
 			{
 				int y = (int)Math.ceil((row - 1) * translation[2] + translation[3]);
 				insetWavePanel.setLocation(0, y - height);
