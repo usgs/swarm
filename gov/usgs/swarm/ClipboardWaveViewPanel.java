@@ -1,5 +1,7 @@
 package gov.usgs.swarm;
 
+import gov.usgs.swarm.data.CachedDataSource;
+import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.Util;
 import gov.usgs.vdx.data.wave.Wave;
 
@@ -29,6 +31,9 @@ import javax.swing.border.LineBorder;
  * Wave Clipboard.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/08/30 00:33:19  tparker
+ * Update to use Images class
+ *
  * Revision 1.3  2005/08/27 00:27:12  tparker
  * Tidy code. No functional changes.
  *
@@ -63,7 +68,6 @@ public class ClipboardWaveViewPanel extends JPanel
 	private JButton gotoButton;
 	private DateFormat dateFormat;
 	
-
 	private boolean selected;
 	private Stack<double[]> history;
 	
@@ -443,7 +447,14 @@ public class ClipboardWaveViewPanel extends JPanel
 					{
 						disableNavigationButtons();
 						Swarm.getParentFrame().incThreadCount();
-						Wave sw = waveViewPanel.getDataSource().getWave(waveViewPanel.getChannel(), nst, net);
+						System.out.println(waveViewPanel.getDataSource().getClass());
+						SeismicDataSource sds = waveViewPanel.getDataSource();
+						// Hacky fix for bug #84
+						Wave sw = null;
+						if (sds instanceof CachedDataSource)
+							sw = ((CachedDataSource)sds).getBestWave(waveViewPanel.getChannel(), nst, net);
+						else
+							sw = sds.getWave(waveViewPanel.getChannel(), nst, net);
 						waveViewPanel.setWave(sw, nst, net);
 						return null;
 					}
