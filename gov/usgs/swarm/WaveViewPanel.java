@@ -45,6 +45,9 @@ import javax.swing.SwingUtilities;
  * spectrogram.  Relies heavily on the Valve plotting package.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2006/04/02 17:17:21  cervelli
+ * Commented out dread green lines
+ *
  * Revision 1.12  2006/03/04 23:03:45  cervelli
  * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
  *
@@ -192,8 +195,6 @@ public class WaveViewPanel extends JComponent
 	private double mark1 = Double.NaN;
 	private double mark2 = Double.NaN;
 	
-//	private boolean stackMode;
-
 	/** Constructs a WaveViewPanel with default settings.
 	 */	
 	public WaveViewPanel()
@@ -420,13 +421,6 @@ public class WaveViewPanel extends JComponent
 		worker.start();	
 	}
 
-	/*
-	public void setStackMode(boolean b)
-	{
-		stackMode = b;
-	}
-	*/
-	
 	/** Set the working flag.  This flag indicates whether data are being loaded for this panel.
 	 * @param b the working flag state
 	 */
@@ -452,6 +446,11 @@ public class WaveViewPanel extends JComponent
 	public void setHelicorderPanel(HelicorderViewPanel p)
 	{
 		heliViewPanel = p;
+	}
+	
+	public HelicorderViewPanel getHelicorderPanel()
+	{
+		return heliViewPanel;
 	}
 	
 	public void setMonitor(MultiMonitor m)
