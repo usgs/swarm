@@ -46,12 +46,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.plaf.metal.DefaultMetalTheme;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 
-
-
 /**
  * Main application class.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2006/04/08 18:15:16  cervelli
+ * Made audible alerts off by default.
+ *
  * Revision 1.17  2006/04/02 17:18:18  cervelli
  * Green lines banished, '.sac' extension no longer is automatically appended.
  *
@@ -161,7 +162,7 @@ public class Swarm extends JFrame
 	private WaveClipboardFrame waveClipboard;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "1.2.5.20060404";
+	private static final String VERSION = "1.2.5.20060411";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -376,6 +377,9 @@ public class Swarm extends JFrame
 		if (config.get("saveConfig") == null)
 			config.put("saveConfig", "true", false);
 		
+		if (config.get("durationEnabled") == null)
+			config.put("durationEnabled", "false", false);
+		
 		if (config.get("durationA") == null)
 			config.put("durationA", "1.86", false);
 		
@@ -393,6 +397,11 @@ public class Swarm extends JFrame
 		
 	}
 
+	public boolean durationEnabled()
+	{
+		return config.getString("durationEnabled").equals("true");
+	}
+	
 	public double getDurationMagnitude(double t)
 	{
 		double a = Double.parseDouble(config.getString("durationA"));
@@ -702,8 +711,7 @@ public class Swarm extends JFrame
 	{
 		final SwingWorker worker = new SwingWorker()
 				{
-					private java.util.List ws;
-					private java.util.List hs;
+					private List hs;
 					private boolean failed;
 					
 					public Object construct()

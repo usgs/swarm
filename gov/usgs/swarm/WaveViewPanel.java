@@ -25,8 +25,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-//import java.awt.geom.GeneralPath;
-//import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -45,6 +43,9 @@ import javax.swing.SwingUtilities;
  * spectrogram.  Relies heavily on the Valve plotting package.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2006/04/09 18:28:44  dcervelli
+ * Eliminated warning.
+ *
  * Revision 1.13  2006/04/02 17:17:21  cervelli
  * Commented out dread green lines
  *
@@ -274,15 +275,14 @@ public class WaveViewPanel extends JComponent
 						{
 							settings.cycleType();
 						}
-//						Uncomment to allow stupid green lines
-//
-//						if (timeSeries && heliViewPanel != null && SwingUtilities.isLeftMouseButton(e))
-//						{
-//							if (j2k >= startTime && j2k <= endTime)
-//								heliViewPanel.markTime(j2k);
-//							
-//							processMousePosition(x, e.getY());
-//						}
+
+						if (Swarm.getParentFrame().durationEnabled() && timeSeries && heliViewPanel != null && SwingUtilities.isLeftMouseButton(e))
+						{
+							if (j2k >= startTime && j2k <= endTime)
+								heliViewPanel.markTime(j2k);
+							
+							processMousePosition(x, e.getY());
+						}
 						
 						if (timeSeries && allowDragging && SwingUtilities.isLeftMouseButton(e))
 						{
