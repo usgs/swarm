@@ -19,6 +19,9 @@ import javax.swing.border.TitledBorder;
  * Global application options dialog.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/09/22 20:59:29  dcervelli
+ * Changes for duration magnitude options.
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -32,7 +35,7 @@ public class OptionsDialog extends BaseDialog
 	public static final long serialVersionUID = -1;
 	
 	private static final int WIDTH = 240;
-	private static final int HEIGHT = 280;	
+	private static final int HEIGHT = 300;	
 	
 	private JPanel dialogPanel;
 	
@@ -43,6 +46,7 @@ public class OptionsDialog extends BaseDialog
 	private JPanel magPanel;
 	private JTextField durationA;
 	private JTextField durationB;
+	private JCheckBox durationEnabled;
 	
 	private JPanel otherPanel;
 	private JCheckBox useLargeCursor;
@@ -74,14 +78,18 @@ public class OptionsDialog extends BaseDialog
 		
 		dialogPanel.add(timeZonePanel);
 	
-		magPanel = new JPanel();
-		magPanel.setBorder(new TitledBorder(new EtchedBorder(), "Duration Magnitude"));
+		JPanel bottomPanel = new JPanel();
 		durationA = new JTextField(4);
 		durationB = new JTextField(4);
-		magPanel.add(new JLabel("Md="));
-		magPanel.add(durationA);
-		magPanel.add(new JLabel("* Log(t) +"));
-		magPanel.add(durationB);
+		bottomPanel.add(new JLabel("Md="));
+		bottomPanel.add(durationA);
+		bottomPanel.add(new JLabel("* Log(t) +"));
+		bottomPanel.add(durationB);
+		durationEnabled = new JCheckBox("Enabled");
+		magPanel = new JPanel(new GridLayout(2, 1));
+		magPanel.setBorder(new TitledBorder(new EtchedBorder(), "Duration Magnitude"));
+		magPanel.add(durationEnabled);
+		magPanel.add(bottomPanel);
 		dialogPanel.add(magPanel);
 		
 		otherPanel = new JPanel();
@@ -102,6 +110,7 @@ public class OptionsDialog extends BaseDialog
 		useLargeCursor.setSelected(config.getString("useLargeCursor").equals("true"));
 		durationA.setText(config.getString("durationA"));
 		durationB.setText(config.getString("durationB"));
+		durationEnabled.setSelected(config.getString("durationEnabled").equals("true"));
 	}
 	
 	public boolean allowOK()
@@ -145,6 +154,7 @@ public class OptionsDialog extends BaseDialog
 			
 		config.put("timeZoneAbbr", timeZoneAbbr.getText().trim(), false);
 		config.put("useLargeCursor", (useLargeCursor.isSelected() ? "true" : "false"), false);
+		config.put("durationEnabled", (durationEnabled.isSelected() ? "true" : "false"), false);
 		config.put("durationA", durationA.getText().trim(), false);
 		config.put("durationB", durationB.getText().trim(), false);
 		
