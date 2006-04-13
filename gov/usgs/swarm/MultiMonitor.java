@@ -34,6 +34,9 @@ import javax.swing.event.InternalFrameEvent;
  * channels in real-time.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/04/03 05:15:53  dcervelli
+ * Reduced bandwidth monitor mode.
+ *
  * Revision 1.5  2005/09/02 16:40:17  dcervelli
  * CurrentTime changes.
  *
@@ -346,18 +349,20 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 			{
 				if (sw.getEndTime() < now)
 				{
-					Wave w2 = dataSource.getWave(channel, sw.getEndTime(), now);
+					Wave w2 = dataSource.getWave(channel, sw.getEndTime() - 10, now);
 					if (w2 != null)
 						sw = sw.combine(w2);
 				}
 				if (sw.getStartTime() > start)
 				{
-					Wave w2 = dataSource.getWave(channel, start, sw.getStartTime());
+					Wave w2 = dataSource.getWave(channel, start, sw.getStartTime() + 10);
 					if (w2 != null)
 						sw = sw.combine(w2);
 				}
 			}
-			else
+			
+			// something bad happened above, just get the whole wave
+			if (sw == null)
 				sw = dataSource.getWave(channel, start, now);
 			waveViewPanel.setWorking(true);
 			waveViewPanel.setWave(sw, start, now);
