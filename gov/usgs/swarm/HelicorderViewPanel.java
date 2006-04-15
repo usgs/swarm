@@ -38,6 +38,9 @@ import javax.swing.border.LineBorder;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2006/04/08 01:50:44  dcervelli
+ * Fixed cosmetic bug #17.
+ *
  * Revision 1.11  2006/03/04 23:03:45  cervelli
  * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
  *
@@ -145,7 +148,7 @@ public class HelicorderViewPanel extends JComponent
 	public void cursorChanged()
 	{
 		Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
-		if (Swarm.getParentFrame().getConfig().get("useLargeCursor").equals("true"))
+		if (Swarm.config.useLargeCursor)
 		{
 			Image cursorImg = Toolkit.getDefaultToolkit().getImage("images/crosshair.gif");
 			crosshair = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(16, 16), "Large crosshair");
@@ -212,7 +215,7 @@ public class HelicorderViewPanel extends JComponent
 	{
 		public void mouseDragged(MouseEvent e)
 		{
-			Swarm.getParentFrame().touchUITime();
+			Swarm.getApplication().touchUITime();
 			HelicorderViewPanel.this.requestFocus();
 			int mx = e.getX();
 			int my = e.getY();
@@ -243,7 +246,7 @@ public class HelicorderViewPanel extends JComponent
 		
 		public void mouseMoved(MouseEvent e)
 		{
-			Swarm.getParentFrame().touchUITime();
+			Swarm.getApplication().touchUITime();
 			processMousePosition(e.getX(), e.getY());
 		}
 	}
@@ -255,7 +258,7 @@ public class HelicorderViewPanel extends JComponent
 		
 		public void mouseWheelMoved(MouseWheelEvent e)
 		{
-			Swarm.getParentFrame().touchUITime();
+			Swarm.getApplication().touchUITime();
 			totalScroll += e.getWheelRotation();
 			if (delay == null)
 				delay = new Delay(250);
@@ -312,7 +315,7 @@ public class HelicorderViewPanel extends JComponent
 	{
 		public void	mouseClicked(MouseEvent e)
 		{
-			Swarm.getParentFrame().touchUITime();
+			Swarm.getApplication().touchUITime();
 			HelicorderViewPanel.this.requestFocus();
 		}
 		public void mouseEntered(MouseEvent e)
@@ -321,7 +324,7 @@ public class HelicorderViewPanel extends JComponent
 		{}
 		public void mousePressed(MouseEvent e)
 		{
-			Swarm.getParentFrame().touchUITime();
+			Swarm.getApplication().touchUITime();
 			if (e.getButton() == MouseEvent.BUTTON1)
 			{
 				int mx = e.getX();
@@ -375,7 +378,7 @@ public class HelicorderViewPanel extends JComponent
 		{
 			ClipboardWaveViewPanel p =  new ClipboardWaveViewPanel(insetWavePanel);
 			p.getWaveViewPanel().setDataSource(insetWavePanel.getDataSource().getCopy());
-			Swarm.getParentFrame().getWaveClipboard().addWave(p);
+			Swarm.getApplication().getWaveClipboard().addWave(p);
 			requestFocus();
 		}
 	}
@@ -404,10 +407,10 @@ public class HelicorderViewPanel extends JComponent
 				{
 					double j2k = getMouseJ2K(x, y);
 					status = dateFormat.format(Util.j2KToDate(j2k));
-					double tzo = Double.parseDouble(Swarm.getParentFrame().getConfig().getString("timeZoneOffset"));
+					double tzo = Swarm.config.timeZoneOffset;
 					if (tzo != 0)
 					{
-						String tza = Swarm.getParentFrame().getConfig().getString("timeZoneAbbr");
+						String tza = Swarm.config.timeZoneAbbr;
 						status = dateFormat.format(Util.j2KToDate(j2k + tzo * 3600)) + " (" + tza + "), " +
 								status + " (UTC)";
 					}
@@ -420,7 +423,7 @@ public class HelicorderViewPanel extends JComponent
 			if (!Double.isNaN(startMark) && !Double.isNaN(endMark))
 			{
 				double dur = Math.abs(startMark - endMark);
-				String pre = String.format("Duration: %.2fs (Md: %.2f)", dur, Swarm.getParentFrame().getDurationMagnitude(dur));
+				String pre = String.format("Duration: %.2fs (Md: %.2f)", dur, Swarm.config.getDurationMagnitude(dur));
 				if (status.length() > 2)
 					status = pre + ", " + status;
 				else
@@ -549,7 +552,7 @@ public class HelicorderViewPanel extends JComponent
 					
 					public Object construct()
 					{
-						Swarm.getParentFrame().incThreadCount();
+						Swarm.getApplication().incThreadCount();
 						working = true;
 						sw = parent.getWave(st, et);
 						return null;
@@ -557,7 +560,7 @@ public class HelicorderViewPanel extends JComponent
 					
 					public void finished()
 					{
-						Swarm.getParentFrame().decThreadCount();
+						Swarm.getApplication().decThreadCount();
 						working = false;
 						if (insetWavePanel != null)
 						{
@@ -579,8 +582,8 @@ public class HelicorderViewPanel extends JComponent
 			endTime = time2;
 			heliRenderer.setData(heliData);
 			heliRenderer.setTimeChunk(settings.timeChunk);
-			heliRenderer.setTimeZoneOffset(Double.parseDouble(Swarm.getParentFrame().getConfig().getString("timeZoneOffset")));
-			heliRenderer.setTimeZoneAbbr(Swarm.getParentFrame().getConfig().getString("timeZoneAbbr"));
+			heliRenderer.setTimeZoneOffset(Swarm.config.timeZoneOffset);
+			heliRenderer.setTimeZoneAbbr(Swarm.config.timeZoneAbbr);
 			heliRenderer.setForceCenter(settings.forceCenter);
 			heliRenderer.setClipBars(settings.clipBars);
 			heliRenderer.setShowClip(settings.showClip);
@@ -601,7 +604,7 @@ public class HelicorderViewPanel extends JComponent
 				{
 					public Object construct()
 					{
-						Swarm.getParentFrame().incThreadCount();
+						Swarm.getApplication().incThreadCount();
 						createImage();	
 						return null;
 					}
@@ -610,7 +613,7 @@ public class HelicorderViewPanel extends JComponent
 					{
 						displayImage = bufferImage;
 						repaint();	
-						Swarm.getParentFrame().decThreadCount();
+						Swarm.getApplication().decThreadCount();
 					}
 				};
 		worker.start();
@@ -635,7 +638,7 @@ public class HelicorderViewPanel extends JComponent
 		Graphics2D ig = (Graphics2D)bufferImage.getGraphics();
 		plot.setSize(d);
 	    
-		Calibration cal = Swarm.getParentFrame().getCalibration(parent.getChannel());
+		Calibration cal = Swarm.getApplication().getCalibration(parent.getChannel());
 		if (cal == null)
 			cal = Calibration.IDENTITY;
 		

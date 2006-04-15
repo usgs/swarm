@@ -44,6 +44,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: refactor, clean up dialog boxes.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/04/08 01:31:04  dcervelli
+ * Error messages on failed saves, bug #34.
+ *
  * Revision 1.7  2006/04/02 17:15:23  cervelli
  * Got rid of automatic '.sac' extension at request of John Power
  *
@@ -230,18 +233,18 @@ public class WaveClipboardFrame extends JInternalFrame
 	{
 	    public void actionPerformed(ActionEvent e)
 		{
-			JFileChooser chooser = Swarm.getParentFrame().getFileChooser();
+			JFileChooser chooser = Swarm.getApplication().getFileChooser();
 			chooser.resetChoosableFileFilters();
 			ExtensionFileFilter txtExt = new ExtensionFileFilter(".txt", "Matlab-readable text files");
 			ExtensionFileFilter sacExt = new ExtensionFileFilter(".sac", "SAC files");
 			chooser.addChoosableFileFilter(txtExt);
 			chooser.addChoosableFileFilter(sacExt);
 			chooser.setFileFilter(chooser.getAcceptAllFileFilter());
-			File lastPath = new File(Swarm.getParentFrame().getConfig().getString("lastPath"));
+			File lastPath = new File(Swarm.config.lastPath);
 			chooser.setCurrentDirectory(lastPath);
 			chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 			chooser.setMultiSelectionEnabled(true);
-			int result = chooser.showOpenDialog(Swarm.getParentFrame());
+			int result = chooser.showOpenDialog(Swarm.getApplication());
 			if (result == JFileChooser.APPROVE_OPTION) 
 			{						            
 				File[] fs = chooser.getSelectedFiles();
@@ -253,13 +256,12 @@ public class WaveClipboardFrame extends JInternalFrame
 				        File[] dfs = fs[i].listFiles();
 				        for (int j = 0; j < dfs.length; j++)
 					        openFile(dfs[j]);
-					    Swarm.getParentFrame().getConfig().put("lastPath", fs[i].getParent(), false);
+					    Swarm.config.lastPath = fs[i].getParent();
 				    }
 				    else
 				    {
 				        openFile(fs[i]);
-				        
-					    Swarm.getParentFrame().getConfig().put("lastPath", fs[i].getParent(), false);
+				        Swarm.config.lastPath = fs[i].getParent();
 				    }
 				}
 			}
@@ -275,7 +277,7 @@ public class WaveClipboardFrame extends JInternalFrame
 			
 			WaveViewPanel wvp = selected.getWaveViewPanel();
 			
-			JFileChooser chooser = Swarm.getParentFrame().getFileChooser();
+			JFileChooser chooser = Swarm.getApplication().getFileChooser();
 			chooser.resetChoosableFileFilters();
 			chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 			chooser.setMultiSelectionEnabled(false);
@@ -286,10 +288,10 @@ public class WaveClipboardFrame extends JInternalFrame
 			chooser.addChoosableFileFilter(sacExt);
 			chooser.setFileFilter(chooser.getAcceptAllFileFilter());
 			
-			File lastPath = new File(Swarm.getParentFrame().getConfig().getString("lastPath"));
+			File lastPath = new File(Swarm.config.lastPath);
 			chooser.setCurrentDirectory(lastPath);
 			chooser.setSelectedFile(new File(wvp.getChannel() + ".txt"));
-			int result = chooser.showSaveDialog(Swarm.getParentFrame());
+			int result = chooser.showSaveDialog(Swarm.getApplication());
 			if (result == JFileChooser.APPROVE_OPTION) 
 			{						            
 				File f = chooser.getSelectedFile();
@@ -306,11 +308,11 @@ public class WaveClipboardFrame extends JInternalFrame
 				{
 				    if (f.isDirectory())
 				    {
-				        JOptionPane.showMessageDialog(Swarm.getParentFrame(), "You can not select an existing directory.", "Error", JOptionPane.ERROR_MESSAGE);
+				        JOptionPane.showMessageDialog(Swarm.getApplication(), "You can not select an existing directory.", "Error", JOptionPane.ERROR_MESSAGE);
 					    return;
 				    }
 					confirm = false;
-					int choice = JOptionPane.showConfirmDialog(Swarm.getParentFrame(), "File exists, overwrite?", "Confirm", JOptionPane.YES_NO_OPTION);
+					int choice = JOptionPane.showConfirmDialog(Swarm.getApplication(), "File exists, overwrite?", "Confirm", JOptionPane.YES_NO_OPTION);
 					if (choice == JOptionPane.YES_OPTION)
 						confirm = true;
 				}
@@ -319,7 +321,7 @@ public class WaveClipboardFrame extends JInternalFrame
 				{
 					try
 				    {
-						Swarm.getParentFrame().getConfig().put("lastPath", f.getParent(), false);
+						Swarm.config.lastPath = f.getParent();
 						String fn = f.getPath().toLowerCase();
 						if (fn.endsWith(".sac"))
 						{
@@ -335,12 +337,12 @@ public class WaveClipboardFrame extends JInternalFrame
 				    }
 					catch (FileNotFoundException ex)
 				    {
-				    	JOptionPane.showMessageDialog(Swarm.getParentFrame(), 
+				    	JOptionPane.showMessageDialog(Swarm.getApplication(), 
 				    			"Directory does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
 				    }
 				    catch (IOException ex)
 				    {
-				    	JOptionPane.showMessageDialog(Swarm.getParentFrame(), 
+				    	JOptionPane.showMessageDialog(Swarm.getApplication(), 
 				    			"Error writing file.", "Error", JOptionPane.ERROR_MESSAGE);
 				    }
 				}
@@ -355,18 +357,18 @@ public class WaveClipboardFrame extends JInternalFrame
 			if (waves.size() <= 0)
 				return;
 			
-			JFileChooser chooser = Swarm.getParentFrame().getFileChooser();
+			JFileChooser chooser = Swarm.getApplication().getFileChooser();
 			chooser.resetChoosableFileFilters();
 			chooser.setMultiSelectionEnabled(false);
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			
-			File lastPath = new File(Swarm.getParentFrame().getConfig().getString("lastPath"));
+			File lastPath = new File(Swarm.config.lastPath);
 			chooser.setCurrentDirectory(lastPath);
-			int result = chooser.showSaveDialog(Swarm.getParentFrame());
+			int result = chooser.showSaveDialog(Swarm.getApplication());
 			File f = chooser.getSelectedFile();
 			if (f == null)
 			{
-			    JOptionPane.showMessageDialog(Swarm.getParentFrame(), "You must select a directory.", "Error", JOptionPane.ERROR_MESSAGE);
+			    JOptionPane.showMessageDialog(Swarm.getApplication(), "You must select a directory.", "Error", JOptionPane.ERROR_MESSAGE);
 			    return;
 			}
 			if (result == JFileChooser.APPROVE_OPTION) 
@@ -398,16 +400,16 @@ public class WaveClipboardFrame extends JInternalFrame
 					        sac.write(new File(dir.getPath() + File.separatorChar + wvp.getChannel().replace(' ', '.')));
 				        }
 				    }
-				    Swarm.getParentFrame().getConfig().put("lastPath", f.getPath(), false);
+				    Swarm.config.lastPath = f.getPath();
 			    }
 				catch (FileNotFoundException ex)
 			    {
-			    	JOptionPane.showMessageDialog(Swarm.getParentFrame(), 
+			    	JOptionPane.showMessageDialog(Swarm.getApplication(), 
 			    			"Directory does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
 			    }
 			    catch (IOException ex)
 			    {
-			    	JOptionPane.showMessageDialog(Swarm.getParentFrame(), 
+			    	JOptionPane.showMessageDialog(Swarm.getApplication(), 
 			    			"Error writing file.", "Error", JOptionPane.ERROR_MESSAGE);
 			    }
 			}
@@ -482,7 +484,7 @@ public class WaveClipboardFrame extends JInternalFrame
 			WaveClipboardFrame.this.addWave(new ClipboardWaveViewPanel(wvp));
 		}
 		else
-			JOptionPane.showMessageDialog(Swarm.getParentFrame(), "There was an error opening the file, '" + f.getName() + "'.", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(Swarm.getApplication(), "There was an error opening the file, '" + f.getName() + "'.", "Error", JOptionPane.ERROR_MESSAGE);
 	}
 	
 	private void doButtonEnables()

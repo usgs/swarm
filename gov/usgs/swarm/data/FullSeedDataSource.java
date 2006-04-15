@@ -28,6 +28,9 @@ import java.util.TimeZone;
  * Class for loading SEED volumes.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2005/09/26 15:26:33  dcervelli
+ * Fixed bug introduced during change to Java 1.5.
+ *
  * Revision 1.2  2005/09/02 16:40:29  dcervelli
  * CurrentTime changes.
  *
@@ -155,7 +158,7 @@ public class FullSeedDataSource extends SeismicDataSource
 		return Swarm.getCache().getHelicorder(station, t1, t2);
 	}
 	
-	public List<String> getHelicorderStations()
+	public List<String> getChannels()
 	{
 		return stations;
 	}
@@ -163,10 +166,5 @@ public class FullSeedDataSource extends SeismicDataSource
 	public Wave getWave(String station, double t1, double t2) 
 	{
 		return Swarm.getCache().getBestWave(station, t1, t2);
-	}
-	
-	public List<String> getWaveStations() 
-	{
-		return null;
 	}
 }

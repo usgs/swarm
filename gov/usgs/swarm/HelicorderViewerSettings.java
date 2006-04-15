@@ -6,6 +6,9 @@ package gov.usgs.swarm;
  * TODO: eliminate this class in favor of vdx.HelicorderSettings
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/03/04 23:03:45  cervelli
+ * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
+ *
  * Revision 1.4  2006/01/21 01:29:20  tparker
  * First swipe at adding voice alerting of clipping. A work in progress...
  *
@@ -46,8 +49,8 @@ public class HelicorderViewerSettings
 	
 	public HelicorderViewerSettings()
 	{
-		timeChunk = Integer.parseInt(Swarm.getParentFrame().getConfig().getString("timeChunk")) * 60;
-		span = Integer.parseInt(Swarm.getParentFrame().getConfig().getString("span")) * 60;
+		timeChunk = Swarm.config.timeChunk * 60;
+		span = Swarm.config.span * 60;
 		waveZoomOffset = 30;
 		bottomTime = Double.NaN;
 		refreshInterval = 15;
@@ -57,11 +60,9 @@ public class HelicorderViewerSettings
 		showWiggler = false;
 		
 		clipValue = 2999;
-		showClip = Boolean.parseBoolean(Swarm.getParentFrame().getConfig().getString("showClip"));
-		alertClip = Boolean.parseBoolean(Swarm.getParentFrame().getConfig().getString("alertClip"));
-		String s = Swarm.getParentFrame().getConfig().getString("alertClipTimeout");
-		if (s != null)
-			alertClipTimeout = Integer.parseInt(s) * 60;
+		showClip = Swarm.config.showClip; 
+		alertClip = Swarm.config.alertClip; 
+		alertClipTimeout = Swarm.config.alertClipTimeout * 60;
 		barRange = 1500;
 		barMult = 3;
 		autoScale = true;

@@ -17,6 +17,9 @@ import java.util.List;
  * DirectWinstonSource.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.2  2005/05/08 16:10:31  cervelli
  * Changes for renaming of WWS.
  *
@@ -56,15 +59,6 @@ public class DirectWWSSource extends SeismicDataSource
 		winston.close();
 	}
 	
-	public synchronized List<String> getWaveStations()
-	{
-		List<Channel> chs = stations.getChannels();
-		List<String> result = new ArrayList<String>();
-		for (Channel ch : chs)
-			result.add(ch.toString());
-		return result;
-	}
-	
 	public synchronized Wave getWave(String station, double t1, double t2)
 	{
 		CachedDataSource cache = Swarm.getCache();
@@ -81,7 +75,7 @@ public class DirectWWSSource extends SeismicDataSource
 		return sw;	
 	}
 	
-	public synchronized List<String> getHelicorderStations()
+	public synchronized List<String> getChannels()
 	{
 		List<Channel> chs = stations.getChannels();
 		List<String> result = new ArrayList<String>();

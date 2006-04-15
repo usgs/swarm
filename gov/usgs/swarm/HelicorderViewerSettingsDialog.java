@@ -30,6 +30,9 @@ import javax.swing.border.TitledBorder;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2006/03/04 23:03:45  cervelli
+ * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
+ *
  * Revision 1.10  2006/01/26 18:06:33  tparker
  * Correct spelling
  *
@@ -98,7 +101,7 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 	
 	private HelicorderViewerSettingsDialog() 
 	{
-		super(Swarm.getParentFrame(), "Helicorder View Settings", true, WIDTH, HEIGHT);
+		super(Swarm.getApplication(), "Helicorder View Settings", true, WIDTH, HEIGHT);
 		dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
 		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 		createSettingsUI();	
@@ -353,7 +356,7 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 			bottomTime.setText("Now");
 		else
 		{
-			double tzo = Double.parseDouble(Swarm.getParentFrame().getConfig().getString("timeZoneOffset"));
+			double tzo = Swarm.config.timeZoneOffset;
 			bottomTime.setText(dateFormat.format(Util.j2KToDate(bt + tzo * 3600)));
 		}
 		
@@ -391,7 +394,7 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 				if (t.length() == 8)
 					t = t + "2359";
 				Date bt = dateFormat.parse(t);
-				double tzo = Double.parseDouble(Swarm.getParentFrame().getConfig().getString("timeZoneOffset"));
+				double tzo = Swarm.config.timeZoneOffset;
 				settings.setBottomTime(Util.dateToJ2K(bt) - tzo * 3600);
 			}
 			settings.forceCenter = removeDrift.isSelected();

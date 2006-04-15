@@ -29,6 +29,9 @@ import javax.swing.border.TitledBorder;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/09/02 16:12:14  dcervelli
+ * Changes for Butterworth enum.
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -81,7 +84,7 @@ public class WaveViewSettingsDialog extends BaseDialog
 	
 	private WaveViewSettingsDialog()
 	{
-		super(Swarm.getParentFrame(), "Wave View Settings", true, WIDTH, HEIGHT);
+		super(Swarm.getApplication(), "Wave View Settings", true, WIDTH, HEIGHT);
 //		settings = s;
 		numberFormat = new DecimalFormat("#.##");
 		createSettingsUI();

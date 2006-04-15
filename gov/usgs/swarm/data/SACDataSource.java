@@ -11,6 +11,9 @@ import java.util.List;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/09/02 16:40:29  dcervelli
+ * CurrentTime changes.
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -60,7 +63,7 @@ public class SACDataSource extends SeismicDataSource
 		return Swarm.getCache().getHelicorder(station, t1, t2);
 	}
 	
-	public List<String> getHelicorderStations()
+	public List<String> getChannels()
 	{
 		List<String> list = new ArrayList<String>();
 		list.add(station);
@@ -72,13 +75,4 @@ public class SACDataSource extends SeismicDataSource
 		return Swarm.getCache().getBestWave(station, t1, t2);
 	}
 	
-	public List<String> getWaveStations() 
-	{
-		return null;
-		/*
-		ArrayList list = new ArrayList();
-		list.add(station);
-		return list;
-		*/
-	}
 }

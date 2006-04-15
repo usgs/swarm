@@ -20,6 +20,9 @@ import java.util.Map;
  * Earthworm Wave Server.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/09/02 16:40:29  dcervelli
+ * CurrentTime changes.
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -128,12 +131,6 @@ public class WaveServerSource extends SeismicDataSource
 		return list;
 	}
 	
-	public synchronized List<String> getWaveStations()
-	{
-		Menu menu = getMenu();
-		return getMenuList(menu.getSortedItems());
-	}
-	
 	public synchronized Wave getWave(String station, double t1, double t2)
 	{
 		CachedDataSource cache = Swarm.getCache();
@@ -163,7 +160,7 @@ public class WaveServerSource extends SeismicDataSource
 		return sw;
 	}
 	
-	public synchronized List<String> getHelicorderStations()
+	public synchronized List<String> getChannels()
 	{
 		Menu menu = getMenu();
 		return getMenuList(menu.getSortedItems());

@@ -3,12 +3,18 @@ package gov.usgs.swarm;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+
 /**
  * Class to return image strings
  *
  * TODO: replace 'new ImageIcon(getClass().getClassLoader().getResource(Images.get("minimize")))' with 'Images.getImage("minimize")'
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/04/02 17:14:24  cervelli
+ * Made everything nice and alphabetical
+ *
  * Revision 1.7  2006/03/04 23:03:45  cervelli
  * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
  *
@@ -34,46 +40,65 @@ import java.util.Map;
  */
 public class Images 
 {
-	private static Map<String, String> images;
+	private static Images images;
+	private Map<String, String> imageMap;
 
-	static
+	private Images()
 	{
-		images = new HashMap<String, String>();
-		images.put("camera", "images/camera.png");
-		images.put("back", "images/back.png");
-		images.put("clipboard", "images/clipboard.png");
-		images.put("down", "images/down.png");
-		images.put("clock", "images/clock.png");
-		images.put("close", "images/close.png");
-		images.put("delete", "images/delete.png");
-		images.put("gototime", "images/gototime.png");
-		images.put("heli", "images/heli.png"); 
-		images.put("left", "images/left.png");
-		images.put("maximize","images/maximize.png"); 
-		images.put("minimize", "images/minimize.png");
-		images.put("monitor", "images/monitor.png");
-		images.put("open", "images/open.png");
-		images.put("right", "images/right.png");
-		images.put("save", "images/save.png");
-		images.put("saveall", "images/saveall.png");
-		images.put("settings", "images/settings.png");
-		images.put("spectra", "images/spectra.png");
-		images.put("spectrogram", "images/spectrogram.png");
-		images.put("up", "images/up.png");
-		images.put("wave", "images/wave.png");
-		images.put("waveclip", "images/waveclip.png");
-		images.put("wavesettings", "images/wavesettings.png"); 
-		images.put("wavezoom", "images/wavezoom.png"); 
-		images.put("xminus", "images/xminus.png");
-		images.put("xplus", "images/xplus.png");
-		images.put("yminus", "images/yminus.png");
-		images.put("yplus", "images/yplus.png");
-		images.put("zoomminus", "images/zoomminus.png");
-		images.put("zoomplus", "images/zoomplus.png");		
+		imageMap = new HashMap<String, String>();
+		imageMap.put("camera", "images/camera.png");
+		imageMap.put("back", "images/back.png");
+		imageMap.put("clipboard", "images/clipboard.png");
+		imageMap.put("down", "images/down.png");
+		imageMap.put("clock", "images/clock.png");
+		imageMap.put("close", "images/close.png");
+		imageMap.put("delete", "images/delete.png");
+		imageMap.put("new_delete", "images/new_delete.gif");
+		imageMap.put("gototime", "images/gototime.png");
+		imageMap.put("heli", "images/heli.png"); 
+		imageMap.put("left", "images/left.png");
+		imageMap.put("maximize","images/maximize.png"); 
+		imageMap.put("minimize", "images/minimize.png");
+		imageMap.put("monitor", "images/monitor.png");
+		imageMap.put("open", "images/open.png");
+		imageMap.put("right", "images/right.png");
+		imageMap.put("save", "images/save.png");
+		imageMap.put("saveall", "images/saveall.png");
+		imageMap.put("settings", "images/settings.png");
+		imageMap.put("spectra", "images/spectra.png");
+		imageMap.put("spectrogram", "images/spectrogram.png");
+		imageMap.put("up", "images/up.png");
+		imageMap.put("wave", "images/wave.png");
+		imageMap.put("waveclip", "images/waveclip.png");
+		imageMap.put("wavesettings", "images/wavesettings.png"); 
+		imageMap.put("wavezoom", "images/wavezoom.png"); 
+		imageMap.put("xminus", "images/xminus.png");
+		imageMap.put("xplus", "images/xplus.png");
+		imageMap.put("yminus", "images/yminus.png");
+		imageMap.put("yplus", "images/yplus.png");
+		imageMap.put("zoomminus", "images/zoomminus.png");
+		imageMap.put("zoomplus", "images/zoomplus.png");
+		imageMap.put("server", "images/server.gif");
+		imageMap.put("new_server", "images/new_server.gif");
+		imageMap.put("collapse", "images/collapse.gif");
+		imageMap.put("wave_folder", "images/wave_folder.gif");
+		imageMap.put("warning", "images/warning.gif");
+		imageMap.put("broken_server", "images/broken_server.gif");
+		imageMap.put("edit_server", "images/edit_server.gif");
+		imageMap.put("bullet", "images/bullet.gif");
+	}
+	
+	public static Icon getIcon(String key)
+	{
+		if (images == null)
+			images = new Images();
+		return new ImageIcon(images.getClass().getClassLoader().getResource(images.imageMap.get(key)));
 	}
 	
 	public static String get(String key)
 	{
-		return images.get(key);
+		if (images == null)
+			images = new Images();
+		return images.imageMap.get(key);
 	}
 }

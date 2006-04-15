@@ -7,7 +7,6 @@ import gov.usgs.util.CurrentTime;
 import gov.usgs.util.ui.GlobalKeyManager;
 import gov.usgs.vdx.data.wave.Wave;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.KeyboardFocusManager;
@@ -22,11 +21,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.DefaultDesktopManager;
 import javax.swing.JComponent;
@@ -39,17 +38,22 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.plaf.SplitPaneUI;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.plaf.metal.DefaultMetalTheme;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 
 /**
- * Main application class.
+ * The main UI and application class for Swarm.  Only functions directly 
+ * pertaining to the UI and overall application operation belong here.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2006/04/11 17:55:14  dcervelli
+ * Duration magnitude option.
+ *
  * Revision 1.18  2006/04/08 18:15:16  cervelli
  * Made audible alerts off by default.
  *
@@ -142,27 +146,23 @@ import javax.swing.plaf.metal.MetalLookAndFeel;
 public class Swarm extends JFrame
 {
 	private static final long serialVersionUID = -1;
-	private static String DEFAULT_CONFIG_FILE = "Swarm.config";
 	private static String CALIBRATION_CONFIG_FILE = "Calibration.config";
-	private static Swarm parentFrame;
-	private ConfigFile config;
+	private static Swarm application;
 	private ConfigFile calibrations;
 	private JDesktopPane desktop;
 	private JSplitPane split;
-	private ChannelPanel channelPanel;
-	private DataSourceChooser chooser;
+	private DataChooser chooser;
 	private JMenuBar menuBar;
 	private CachedDataSource cache;
 	private AboutDialog aboutDialog;
 	private JLabel threadLabel;
-	private JPanel leftPanel;
 	private int frameCount = 0;
 	private int threadCount = 0;
 	
 	private WaveClipboardFrame waveClipboard;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "1.2.5.20060411";
+	private static final String VERSION = "1.3.0.20060411";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -176,23 +176,39 @@ public class Swarm extends JFrame
 	private AbstractAction toggleFullScreenAction;
 	
 	private long lastUITime;
-
+	
+	public static Config config;
 	
 	public Swarm(String[] args)
 	{
 		super(TITLE + " [" + VERSION + "]");
+
+		monitors = new HashMap<String, MultiMonitor>();
+		calibrations = new ConfigFile(CALIBRATION_CONFIG_FILE);
+		cache = new CachedDataSource();
+		frames = new ArrayList<JInternalFrame>();
+		application = this;
 		
+		checkJavaVersion();
+		loadFileChooser();
+		setupGlobalKeys();
+		config = Config.createConfig(args);
+		createUI();
+	}
+
+	private void checkJavaVersion()
+	{
 		String version = System.getProperty("java.version");
 		if (version.startsWith("1.1") || version.startsWith("1.2") || version.startsWith("1.3") || version.startsWith("1.4"))
 		{
 			JOptionPane.showMessageDialog(this, TITLE + " " + VERSION + " requires at least Java version 1.5 or above.", "Error",
 					JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
+			System.exit(-1);
 		}
-
-		loadFileChooser();
-		monitors = new HashMap<String, MultiMonitor>();
-		
+	}
+	
+	private void setupGlobalKeys()
+	{
 		// clean this up a bit and decide if I really want to use this ghkm thingy
 		GlobalKeyManager m = GlobalKeyManager.getInstance();
 		m.getInputMap().put(KeyStroke.getKeyStroke("F12"), "focus");
@@ -244,36 +260,6 @@ public class Swarm extends JFrame
 			}	
 		};
 		m.getActionMap().put("fullScreenToggle", toggleFullScreenAction);	
-  
-		calibrations = new ConfigFile(CALIBRATION_CONFIG_FILE);
-		
-		String configFile = DEFAULT_CONFIG_FILE;
-		  
-		int n = args.length - 1;
-		if (n >= 0 && !args[n].startsWith("-"))
-			configFile = args[n];
-
-		parseConfigFile(configFile);
-		config.put("configFile", configFile, false);
-		   
-		for (int i = 0; i <= n; i++)
-		{
-			if (args[i].startsWith("--"))
-			{
-				String key = args[i].substring(2, args[i].indexOf('='));
-				String val = args[i].substring(args[i].indexOf('=') + 1);
-				System.out.println(key + " = " + val);
-				config.put(key, val, false);
-			}
-		}
-		 
-		checkConfig();  
-  
-		cache = new CachedDataSource();
-		
-		parentFrame = this;
-		frames = new ArrayList<JInternalFrame>();
-		createUI();
 	}
 	
 	public void touchUITime()
@@ -300,11 +286,6 @@ public class Swarm extends JFrame
 		t.start();
 	}
 	
-	public boolean isKiosk()
-	{
-		return (!config.getString("kiosk").equals("false"));
-	}
-	
 	public JFileChooser getFileChooser()
 	{
 		int timeout = 10000;
@@ -323,90 +304,7 @@ public class Swarm extends JFrame
 	
 	public static CachedDataSource getCache()
 	{
-		return parentFrame.cache;
-	}
-
-	public void parseConfigFile(String fn)
-	{
-		config = new ConfigFile(fn);
-		if (config == null)
-			config = new ConfigFile();
-	}
-	
-	public void checkConfig()
-	{
-		if (config.get("timeZoneAbbr") == null)
-			config.put("timeZoneAbbr", "UTC", false);
-		
-		if (config.get("timeZoneOffset") == null)
-			config.put("timeZoneOffset", "0", false);
-			
-		if (config.get("windowX") == null)
-			config.put("windowX", "50", false);
-			
-		if (config.get("windowY") == null)
-			config.put("windowY", "50", false);
-			
-		if (config.get("windowSizeX") == null)
-			config.put("windowSizeX", "800", false);
-			
-		if (config.get("windowSizeY") == null)
-			config.put("windowSizeY", "600", false);
-			
-		if (config.get("windowMaximized") == null)
-			config.put("windowMaximized", "false", false);
-		
-		if (config.get("useLargeCursor") == null)
-			config.put("useLargeCursor", "false", false);
-			
-		if (config.get("span") == null)
-			config.put("span", "24", false);
-			
-		if (config.get("timeChunk") == null)
-			config.put("timeChunk", "30", false);
-			
-		if (config.get("lastPath") == null)
-			config.put("lastPath", "default", false);
-  
-		if (config.get("kiosk") == null)
-			config.put("kiosk", "false", false);
-		  
-		if (config.get("groupConfigFile") == null)
-			config.put("groupConfigFile", "SwarmGroups.config", false);
-		  
-		if (config.get("saveConfig") == null)
-			config.put("saveConfig", "true", false);
-		
-		if (config.get("durationEnabled") == null)
-			config.put("durationEnabled", "false", false);
-		
-		if (config.get("durationA") == null)
-			config.put("durationA", "1.86", false);
-		
-		if (config.get("durationB") == null)
-			config.put("durationB", "-0.85", false);
-		
-		if (config.get("showClip") == null)
-			config.put("showClip", "true", false);
-		
-		if (config.get("alertClip") == null)
-			config.put("alertClip", "false", false);
-		
-		if (config.get("alertClipTimeout") == null)
-			config.put("alertClipTimeout", "5", false);
-		
-	}
-
-	public boolean durationEnabled()
-	{
-		return config.getString("durationEnabled").equals("true");
-	}
-	
-	public double getDurationMagnitude(double t)
-	{
-		double a = Double.parseDouble(config.getString("durationA"));
-		double b = Double.parseDouble(config.getString("durationB"));
-		return a * (Math.log(t) / Math.log(10)) + b;
+		return application.cache;
 	}
 	
 	public WaveClipboardFrame getWaveClipboard()
@@ -423,14 +321,22 @@ public class Swarm extends JFrame
 		return Calibration.fromString(c);
 	}
 	
-	public ConfigFile getConfig()
+	public static Swarm getApplication()
 	{
-		return config;	
+		return application;	
 	}
 	
-	public static Swarm getParentFrame()
+	public static JSplitPane createStrippedSplitPane(int orient, JComponent comp1, JComponent comp2)
 	{
-		return parentFrame;	
+		JSplitPane split = new JSplitPane(orient, comp1, comp2);
+		split.setBorder(BorderFactory.createEmptyBorder());
+		SplitPaneUI splitPaneUI = split.getUI();
+	    if (splitPaneUI instanceof BasicSplitPaneUI)
+	    {
+	        BasicSplitPaneUI basicUI = (BasicSplitPaneUI)splitPaneUI;
+	        basicUI.getDivider().setBorder(BorderFactory.createEmptyBorder());
+	    }
+	    return split;
 	}
 	
 	public void createUI()
@@ -470,17 +376,9 @@ public class Swarm extends JFrame
 					public void focusLost(FocusEvent e)
 					{}
 				});
-		leftPanel = new JPanel(new BorderLayout());
-		channelPanel = new ChannelPanel(this);
-		channelPanel.setMinimumSize(new Dimension(190, 150));
-		chooser = new DataSourceChooser(this);
-		chooser.setMinimumSize(new Dimension(190, 150));
-		
-		JSplitPane leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, chooser, channelPanel);
-		leftSplit.setOneTouchExpandable(true);
-		leftPanel.add(leftSplit, BorderLayout.CENTER);
 		
 		desktop = new JDesktopPane();
+		desktop.setBorder(BorderFactory.createLineBorder(DataChooser.LINE_COLOR));
 		desktop.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
 		// disable dragging in fullscreen mode
 		desktop.setDesktopManager(new DefaultDesktopManager()
@@ -502,18 +400,22 @@ public class Swarm extends JFrame
 							super.dragFrame(f, x, y);
 					}
 				});
-		this.setSize(Integer.parseInt(config.getString("windowSizeX")), Integer.parseInt(config.getString("windowSizeY")));
-		this.setLocation(Integer.parseInt(config.getString("windowX")), Integer.parseInt(config.getString("windowY")));
-		if (config.getString("windowMaximized").equals("true"))
+		
+		this.setSize(config.windowWidth, config.windowHeight);
+		this.setLocation(config.windowX, config.windowY);
+		if (config.windowMaximized)
 			this.setExtendedState(Frame.MAXIMIZED_BOTH);
+		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, desktop);
-		split.setOneTouchExpandable(true);
-		split.setDividerLocation(200);
+		chooser = new DataChooser();
+		split = createStrippedSplitPane(JSplitPane.HORIZONTAL_SPLIT, chooser, desktop);
+		split.setDividerLocation(config.chooserDividerLocation);
+		split.setDividerSize(4);
 		this.setContentPane(split);	
 		
 		menuBar = new JMenuBar();
+//		menuBar.setBorder(BorderFactory.createEmptyBorder());
 		JMenu fileMenu = new JMenu("File");
 		JMenuItem exit = new JMenuItem("Exit");
 		exit.addActionListener(new ActionListener()
@@ -609,22 +511,19 @@ public class Swarm extends JFrame
 		this.setResizable(!full);
 		waveClipboard.setVisible(!full);
 		waveClipboard.toBack();
+		
 		if (full)
 		{
 			this.setJMenuBar(null);
+			config.chooserDividerLocation = split.getDividerLocation();
 			oldState = this.getExtendedState();
 			oldSize = this.getSize();
 			oldLocation = this.getLocation();
-			
 			this.setContentPane(desktop);
-			// having two setVisibles makes the desktop resize it self appropriately
 			this.setVisible(true);
 			this.setExtendedState(Frame.MAXIMIZED_BOTH);
 			desktop.setSize(this.getSize());
 			desktop.setPreferredSize(this.getSize());
-			desktop.setMinimumSize(this.getSize());
-			desktop.setMaximumSize(this.getSize());
-//			this.setVisible(false);
 		}
 		else
 		{
@@ -632,9 +531,8 @@ public class Swarm extends JFrame
 			this.setExtendedState(oldState);
 			this.setSize(oldSize);
 			this.setLocation(oldLocation);
-			split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, desktop);
-			split.setOneTouchExpandable(true);
-			split.setDividerLocation(200);
+			split.setRightComponent(desktop);
+			split.setDividerLocation(config.chooserDividerLocation);
 			this.setContentPane(split);
 		}
 		validate();
@@ -655,22 +553,24 @@ public class Swarm extends JFrame
 		Point p = this.getLocation();
 
 		if (this.getExtendedState() == Frame.MAXIMIZED_BOTH)
-			config.put("windowMaximized", "true", false);
+			config.windowMaximized = true;
 		else
 		{
 			Dimension d = this.getSize();
-			config.put("windowX", Integer.toString(p.x), false);
-			config.put("windowY", Integer.toString(p.y), false);
-			config.put("windowSizeX", Integer.toString(d.width), false);
-			config.put("windowSizeY", Integer.toString(d.height), false);
-			config.put("windowMaximized", "false", false);
+			config.windowX = p.x;
+			config.windowY = p.y;
+			config.windowWidth = d.width;
+			config.windowHeight = d.height;
+			config.windowMaximized = false;
 		}
-  
-		if ((config.getString("saveConfig")).equals("true"))
+
+		config.chooserDividerLocation = split.getDividerLocation();
+		
+		if (config.saveConfig)
 		{
-			String configFile = config.getString("configFile");
-			config.remove("configFile");
-			config.writeToFile(configFile);
+			ConfigFile configFile = config.toConfigFile();
+			configFile.remove("configFile");
+			configFile.writeToFile(config.configFilename);
 		}
   
 		waveClipboard.removeWaves();
@@ -682,73 +582,56 @@ public class Swarm extends JFrame
 		catch (Exception e) {} // doesn't matter at this point
 		System.exit(0);
 	}
-	
-	public String findSource(String abbr)
-	{
-		java.util.List sl = config.getList("server");
-		Iterator it = sl.iterator();
-		while (it.hasNext())
-		{
-			String s = (String)it.next();
-			if (s.startsWith(abbr))
-				return s;
-		}
-		return null;
-	}
-	
-	public boolean sourceExists(String abbr)
-	{
-		return findSource(abbr) != null;
-	}
-	
+
+	// TODO: move these functions
 	public SeismicDataSource parseDataSource(String abbrSource)
 	{
-		String source = findSource(abbrSource);
+		String source = config.getServer(abbrSource);
 		return SeismicDataSource.getDataSource(source);
 	}
 	
-	public void dataSourceSelected(final String source)
-	{
-		final SwingWorker worker = new SwingWorker()
-				{
-					private List hs;
-					private boolean failed;
-					
-					public Object construct()
-					{
-						incThreadCount();
-						try
-						{
-							SeismicDataSource sds = parseDataSource(source);
-							if (sds != null)
-							{
-//								ws = sds.getWaveStations();
-								hs = sds.getHelicorderStations();
-								sds.close();
-							}
-							else 
-								failed = true;
-						} 
-						catch (Exception e)
-						{
-							failed = true;
-						}
-						return null;	
-					}			
-					
-					public void finished()
-					{
-						if (!failed)
-						{
-	//						channelPanel.populateWaveChannels(source, ws);
-							channelPanel.populateHelicorderChannels(source, hs);
-						}
-						chooser.enableGoButton();
-						decThreadCount();
-					}
-				};
-		worker.start();
-	}
+//	public void dataSourceSelected(final String source)
+//	{
+//		final SwingWorker worker = new SwingWorker()
+//				{
+//					private List hs;
+//					private boolean failed;
+//					
+//					public Object construct()
+//					{
+//						incThreadCount();
+//						try
+//						{
+//							SeismicDataSource sds = parseDataSource(source);
+//							if (sds != null)
+//							{
+////								ws = sds.getWaveStations();
+//								hs = sds.getHelicorderStations();
+//								sds.close();
+//							}
+//							else 
+//								failed = true;
+//						} 
+//						catch (Exception e)
+//						{
+//							failed = true;
+//						}
+//						return null;	
+//					}			
+//					
+//					public void finished()
+//					{
+//						if (!failed)
+//						{
+//	//						channelPanel.populateWaveChannels(source, ws);
+//							channelPanel.populateHelicorderChannels(source, hs);
+//						}
+//						chooser.enableGoButton();
+//						decThreadCount();
+//					}
+//				};
+//		worker.start();
+//	}
 
 	public void clipboardWaveChannelSelected(final String source, final String[] channels)
 	{
@@ -811,17 +694,7 @@ public class Swarm extends JFrame
 		worker.start();
 	}
 	
-	/*
-	public NewWaveViewerFrame waveChannelSelected(String source, String channel)
-	{
-		SeismicDataSource sds = parseDataSource(source);
-		NewWaveViewerFrame frame = new NewWaveViewerFrame(this, sds, channel);
-		addInternalFrame(frame);
-		return frame;
-	}
-	*/
-
-	public void monitorChannelSelected(String source, String[] channels)
+	public void monitorChannelSelected(String source, String channel)
 	{
 		MultiMonitor monitor = (MultiMonitor)monitors.get(source);
 		if (monitor == null)
@@ -834,8 +707,8 @@ public class Swarm extends JFrame
 	
 		if (!monitor.isVisible())
 			monitor.setVisible(true);
-		for (int i = 0; i < channels.length; i++)
-			monitor.addChannel(channels[i]);
+		
+		monitor.addChannel(channel);
 	}
 	
 	public WaveViewerFrame waveChannelSelected(String source, String channel)
@@ -997,7 +870,7 @@ public class Swarm extends JFrame
 	
 	public void parseKiosk()
 	{
-		String[] kiosks = getConfig().getString("kiosk").split(",");
+		String[] kiosks = config.kiosk.split(",");
 		for (int i = 0; i < kiosks.length; i++)
 		{ 
 			String[] ch = kiosks[i].split(";");
@@ -1018,27 +891,20 @@ public class Swarm extends JFrame
 		}
 	}
 	
-	
 	public static void main(String[] args)
 	{
-
-		
-		
 		try 
 		{
-//			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			// JDK 1.5 by default has an ugly theme, this line uses the one from 1.4
+//			UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
+//			UIManager.setLookAndFeel("net.java.plaf.windows.WindowsLookAndFeel");
 			MetalLookAndFeel.setCurrentTheme(new DefaultMetalTheme());
-			//UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
 		}
 		catch (Exception e) { }
-
 		
 		Swarm swarm = new Swarm(args);
 
-		if (!(Swarm.getParentFrame().getConfig().getString("kiosk")).equals("false"))
+		if (Swarm.config.isKiosk())
 			swarm.parseKiosk();
-			
-
 	}
 }

@@ -27,6 +27,9 @@ import javax.swing.border.EmptyBorder;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2005/08/30 18:10:32  tparker
+ * Correct WWS config parsing bug.
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -77,7 +80,7 @@ public class EditDataSourceDialog extends BaseDialog
 	
 	public EditDataSourceDialog(String source)
 	{
-		super(Swarm.getParentFrame(), "", true, WIDTH, HEIGHT);
+		super(Swarm.getApplication(), "", true, WIDTH, HEIGHT);
 		if (source == null)
 		{
 			this.setTitle("New Data Source");
@@ -159,8 +162,8 @@ public class EditDataSourceDialog extends BaseDialog
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						JFileChooser chooser = Swarm.getParentFrame().getFileChooser();
-						int result = chooser.showOpenDialog(Swarm.getParentFrame());
+						JFileChooser chooser = Swarm.getApplication().getFileChooser();
+						int result = chooser.showOpenDialog(Swarm.getApplication());
 						if (result == JFileChooser.APPROVE_OPTION) 
 						{						            
 							File f = chooser.getSelectedFile();
@@ -202,8 +205,8 @@ public class EditDataSourceDialog extends BaseDialog
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						JFileChooser chooser = Swarm.getParentFrame().getFileChooser();
-						int result = chooser.showOpenDialog(Swarm.getParentFrame());
+						JFileChooser chooser = Swarm.getApplication().getFileChooser();
+						int result = chooser.showOpenDialog(Swarm.getApplication());
 						if (result == JFileChooser.APPROVE_OPTION) 
 						{						            
 							File f = chooser.getSelectedFile();
@@ -386,7 +389,8 @@ public class EditDataSourceDialog extends BaseDialog
 		// check name
 		if (n == null || n.length() <= 0)
 			message = "You must specify a name for this data source.";
-		else if (!edit && Swarm.getParentFrame().sourceExists(n))
+//		else if (!edit && Swarm.getParentFrame().serverExists(n))
+		else if (!edit && Swarm.config.serverExists(n))
 			message = "A data source by that name already exists.";
 		
 		if (message == null)
@@ -458,7 +462,7 @@ public class EditDataSourceDialog extends BaseDialog
 		
 		if (message != null)
 		{
-			JOptionPane.showMessageDialog(Swarm.getParentFrame(), message, "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(Swarm.getApplication(), message, "Error", JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
 		else

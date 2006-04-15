@@ -31,6 +31,9 @@ import javax.swing.border.LineBorder;
  * Wave Clipboard.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/04/08 01:00:44  dcervelli
+ * Fix in fetchNewWave() for bug #84.
+ *
  * Revision 1.4  2005/08/30 00:33:19  tparker
  * Update to use Images class
  *
@@ -161,7 +164,7 @@ public class ClipboardWaveViewPanel extends JPanel
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						String t = JOptionPane.showInputDialog(Swarm.getParentFrame(), "Input time in 'YYYYMMDDhhmm[ss]' format:", "Go to Time", JOptionPane.PLAIN_MESSAGE);
+						String t = JOptionPane.showInputDialog(Swarm.getApplication(), "Input time in 'YYYYMMDDhhmm[ss]' format:", "Go to Time", JOptionPane.PLAIN_MESSAGE);
 						if (t != null)
 							gotoTime(t);
 					}
@@ -416,7 +419,7 @@ public class ClipboardWaveViewPanel extends JPanel
 		}	
 		catch (Exception e)
 		{
-			JOptionPane.showMessageDialog(Swarm.getParentFrame(), "Illegal time value.", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(Swarm.getApplication(), "Illegal time value.", "Error", JOptionPane.ERROR_MESSAGE);
 		}	
 		
 		if (d != null)
@@ -431,7 +434,7 @@ public class ClipboardWaveViewPanel extends JPanel
 				dt = (et - st);	
 			}
 			
-			double tzo = Double.parseDouble(Swarm.getParentFrame().getConfig().getString("timeZoneOffset"));
+			double tzo = Swarm.config.timeZoneOffset;
 			double nst = Util.dateToJ2K(d) - tzo * 3600 - dt / 2;
 			double net = nst + dt;
 
@@ -446,7 +449,7 @@ public class ClipboardWaveViewPanel extends JPanel
 					public Object construct()
 					{
 						disableNavigationButtons();
-						Swarm.getParentFrame().incThreadCount();
+						Swarm.getApplication().incThreadCount();
 						System.out.println(waveViewPanel.getDataSource().getClass());
 						SeismicDataSource sds = waveViewPanel.getDataSource();
 						// Hacky fix for bug #84
@@ -461,7 +464,7 @@ public class ClipboardWaveViewPanel extends JPanel
 					
 					public void finished()
 					{
-						Swarm.getParentFrame().decThreadCount();
+						Swarm.getApplication().decThreadCount();
 						repaint();	
 						enableNavigationButtons();
 					}

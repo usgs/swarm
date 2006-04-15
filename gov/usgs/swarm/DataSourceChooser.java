@@ -22,6 +22,9 @@ import javax.swing.border.TitledBorder;
  * This is a UI element for choosing which data source to use.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.3  2005/04/11 00:22:41  cervelli
  * Removed JDK 1.5 deprecated Dialog.show().
  *
@@ -33,7 +36,6 @@ import javax.swing.border.TitledBorder;
 public class DataSourceChooser extends JPanel
 {
 	private static final long serialVersionUID = -1;
-	private Swarm swarm;
 	
 	private JList servers;
 	private JButton newButton;
@@ -46,9 +48,8 @@ public class DataSourceChooser extends JPanel
 	 * Constructs a <code>DataSourceChooser</code>.
 	 * @param sw the application parent
 	 */
-	public DataSourceChooser(Swarm sw)
+	public DataSourceChooser()
 	{
-		swarm = sw;
 		SwingUtilities.invokeLater(new Runnable()
 				{
 					public void run()
@@ -72,7 +73,7 @@ public class DataSourceChooser extends JPanel
 						if (goButton.isEnabled() && e.getClickCount() == 2 && servers.getSelectedIndex() != -1)
 						{
 							goButton.setEnabled(false);
-							swarm.dataSourceSelected((String)servers.getModel().getElementAt(servers.getSelectedIndex()));
+//							Swarm.getApplication().dataSourceSelected((String)servers.getModel().getElementAt(servers.getSelectedIndex()));
 						}
 					}
 				});
@@ -90,7 +91,8 @@ public class DataSourceChooser extends JPanel
 					{
 						if (servers.getSelectedIndex() != -1)
 						{
-							swarm.getConfig().remove("server", swarm.findSource((String)servers.getModel().getElementAt(servers.getSelectedIndex())));
+//							swarm.getConfig().remove("server", swarm.getServer((String)servers.getModel().getElementAt(servers.getSelectedIndex())));
+							Swarm.config.removeServer(Swarm.config.getServer((String)servers.getModel().getElementAt(servers.getSelectedIndex())));
 							((DefaultListModel)servers.getModel()).removeElementAt(servers.getSelectedIndex());
 						}
 					}
@@ -103,7 +105,7 @@ public class DataSourceChooser extends JPanel
 						if (servers.getSelectedIndex() != -1)
 						{
 							goButton.setEnabled(false);
-							swarm.dataSourceSelected((String)servers.getModel().getElementAt(servers.getSelectedIndex()));
+//							Swarm.getApplication().dataSourceSelected((String)servers.getModel().getElementAt(servers.getSelectedIndex()));
 						}
 					}	
 				});
@@ -117,7 +119,7 @@ public class DataSourceChooser extends JPanel
 						if (nds != null)
 						{
 							((DefaultListModel)servers.getModel()).addElement(nds.substring(0, nds.indexOf(";")));
-							swarm.getConfig().put("server", nds, true);
+							Swarm.config.addServer(nds);
 						}
 					}	
 				});
@@ -131,15 +133,17 @@ public class DataSourceChooser extends JPanel
 							
 							String selected = (String)servers.getModel().getElementAt(i);
 							
-							EditDataSourceDialog d = new EditDataSourceDialog(Swarm.getParentFrame().findSource(selected));
+//							EditDataSourceDialog d = new EditDataSourceDialog(Swarm.getParentFrame().getServer(selected));
+							EditDataSourceDialog d = new EditDataSourceDialog(Swarm.config.getServer(selected));
 							d.setVisible(true);
 							String eds = d.getResult();
 							if (eds != null)
 							{
 								((DefaultListModel)servers.getModel()).removeElementAt(i);
-								swarm.getConfig().remove("server", swarm.findSource(selected));
+//								swarm.getConfig().remove("server", swarm.getServer(selected));
+								Swarm.config.removeServer(Swarm.config.getServer(selected));
 								((DefaultListModel)servers.getModel()).add(i, eds.substring(0, eds.indexOf(";")));
-								swarm.getConfig().put("server", eds, true);
+								Swarm.config.addServer(eds);
 								servers.setSelectedIndex(i);
 							}
 						}
@@ -155,11 +159,11 @@ public class DataSourceChooser extends JPanel
 		this.add(buttonPanel, BorderLayout.SOUTH);
 		this.setBorder(new TitledBorder(new EtchedBorder(), "Data Sources"));
 		
-		java.util.List<String> sl = swarm.getConfig().getList("server");
-		Collections.sort(sl);
 		DefaultListModel model = new DefaultListModel();
+		java.util.List<String> sl = Swarm.config.servers;
 		if (sl != null)
 		{
+			Collections.sort(sl);
 			Iterator it = sl.iterator();
 			while (it.hasNext())
 			{

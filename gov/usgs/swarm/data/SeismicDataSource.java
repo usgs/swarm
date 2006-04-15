@@ -10,6 +10,9 @@ import java.util.List;
  * Base class for seismic data sources.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.2  2005/05/08 16:10:40  cervelli
  * Changes for renaming of WWS.
  *
@@ -31,10 +34,9 @@ abstract public class SeismicDataSource
 {
 	protected String name = "Unnamed Data Source";
 	
-	abstract public List<String> getWaveStations();
-	abstract public Wave getWave(String station, double t1, double t2);
+	abstract public List<String> getChannels();
 	
-	abstract public List<String> getHelicorderStations();
+	abstract public Wave getWave(String station, double t1, double t2);
 	abstract public HelicorderData getHelicorder(String station, double t1, double t2);
 	
 	public void notifyDataNotNeeded(String station, double t1, double t2)

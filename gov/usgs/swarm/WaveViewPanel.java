@@ -43,6 +43,9 @@ import javax.swing.SwingUtilities;
  * spectrogram.  Relies heavily on the Valve plotting package.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2006/04/11 17:55:25  dcervelli
+ * Duration magnitude option.
+ *
  * Revision 1.14  2006/04/09 18:28:44  dcervelli
  * Eliminated warning.
  *
@@ -263,7 +266,7 @@ public class WaveViewPanel extends JComponent
 				{
 					public void mousePressed(MouseEvent e)
 					{
-						Swarm.getParentFrame().touchUITime();
+						Swarm.getApplication().touchUITime();
 						
 						double[] t = getTranslation();
 						int x = e.getX();
@@ -276,7 +279,7 @@ public class WaveViewPanel extends JComponent
 							settings.cycleType();
 						}
 
-						if (Swarm.getParentFrame().durationEnabled() && timeSeries && heliViewPanel != null && SwingUtilities.isLeftMouseButton(e))
+						if (Swarm.config.durationEnabled && timeSeries && heliViewPanel != null && SwingUtilities.isLeftMouseButton(e))
 						{
 							if (j2k >= startTime && j2k <= endTime)
 								heliViewPanel.markTime(j2k);
@@ -311,7 +314,7 @@ public class WaveViewPanel extends JComponent
 					
 					public void mouseReleased(MouseEvent e)
 					{
-						Swarm.getParentFrame().touchUITime();
+						Swarm.getApplication().touchUITime();
 						if (SwingUtilities.isLeftMouseButton(e) && dragging)
 						{	
 							dragging = false;
@@ -340,13 +343,13 @@ public class WaveViewPanel extends JComponent
 				{
 					public void mouseMoved(MouseEvent e)
 					{
-						Swarm.getParentFrame().touchUITime();
+						Swarm.getApplication().touchUITime();
 						processMousePosition(e.getX(), e.getY());
 					}	
 					
 					public void mouseDragged(MouseEvent e)
 					{
-						Swarm.getParentFrame().touchUITime();
+						Swarm.getApplication().touchUITime();
 					    /*
 					    // This used to be the launcher for the microview.
 					    // It was removed because it wasn't very useful, but this
@@ -401,7 +404,7 @@ public class WaveViewPanel extends JComponent
 				{
 					public Object construct()
 					{
-						Swarm.getParentFrame().incThreadCount();
+						Swarm.getApplication().incThreadCount();
 						Wave sw = null;
 						if (source instanceof CachedDataSource)
 							sw = ((CachedDataSource)source).getBestWave(channel, st, et);
@@ -414,7 +417,7 @@ public class WaveViewPanel extends JComponent
 					
 					public void finished()
 					{
-						Swarm.getParentFrame().decThreadCount();
+						Swarm.getApplication().decThreadCount();
 						repaint();	
 					}
 				};
@@ -571,16 +574,16 @@ public class WaveViewPanel extends JComponent
 			if (timeSeries)
 			{
 				String utc = dateFormat.format(Util.j2KToDate(j2k));
-				double tzo = Double.parseDouble(Swarm.getParentFrame().getConfig().getString("timeZoneOffset"));
+				double tzo = Swarm.config.timeZoneOffset;
 				if (tzo != 0)
 				{
-					String tza = Swarm.getParentFrame().getConfig().getString("timeZoneAbbr");
+					String tza = Swarm.config.timeZoneAbbr;
 					status = dateFormat.format(Util.j2KToDate(j2k + tzo * 3600)) + " (" + tza + "), " +
 							utc + " (UTC)";
 				}
 				else
 					status = utc;
-				Calibration cb = Swarm.getParentFrame().getCalibration(channel);
+				Calibration cb = Swarm.getApplication().getCalibration(channel);
 				if (cb == null)
 					cb = Calibration.IDENTITY;
 				status = status + ", Y: " + numberFormat.format(cb.multiplier * yi + cb.offset);
@@ -604,7 +607,7 @@ public class WaveViewPanel extends JComponent
 		if (!Double.isNaN(mark1) && !Double.isNaN(mark2))
 		{
 			double dur = Math.abs(mark1 - mark2);
-			String pre = String.format("Duration: %.2fs (Md: %.2f)", dur, Swarm.getParentFrame().getDurationMagnitude(dur));
+			String pre = String.format("Duration: %.2fs (Md: %.2f)", dur, Swarm.config.getDurationMagnitude(dur));
 			if (status.length() > 2)
 				status = pre + ", " + status;
 			else
@@ -654,7 +657,7 @@ public class WaveViewPanel extends JComponent
 		if (settings.maxFreq > wave.getSamplingRate() / 2)
 		{
 			if (!shownNyquistWarning)
-				JOptionPane.showMessageDialog(Swarm.getParentFrame(), "The maximum frequency was set too high and has been automatically adjusted to the Nyquist frequency. " +
+				JOptionPane.showMessageDialog(Swarm.getApplication(), "The maximum frequency was set too high and has been automatically adjusted to the Nyquist frequency. " +
 						"This window will not be shown again.", "Warning", JOptionPane.WARNING_MESSAGE);
 			settings.maxFreq = wave.getSamplingRate() / 2;
 			shownNyquistWarning = true;
@@ -839,7 +842,7 @@ public class WaveViewPanel extends JComponent
 	    SliceWave wv = new SliceWave(renderWave);
 	    wv.setSlice(startTime, endTime);
 	    
-	    Calibration cal = Swarm.getParentFrame().getCalibration(channel);
+	    Calibration cal = Swarm.getApplication().getCalibration(channel);
 		if (cal == null)
 			cal = Calibration.IDENTITY;
 		

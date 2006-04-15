@@ -23,6 +23,9 @@ import javax.swing.border.LineBorder;
  * A class that shows an about dialog with some extra controls.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.2  2004/10/12 23:43:15  cvs
  * Added log info and some comments.
  *
@@ -48,10 +51,10 @@ public class AboutDialog extends JDialog
 	 */
 	public AboutDialog()
 	{
-		super(Swarm.getParentFrame(), "About", true);
+		super(Swarm.getApplication(), "About", true);
 		this.setSize(WIDTH, HEIGHT);
-		Dimension parentSize = Swarm.getParentFrame().getSize();
-		Point parentLoc = Swarm.getParentFrame().getLocation();
+		Dimension parentSize = Swarm.getApplication().getSize();
+		Point parentLoc = Swarm.getApplication().getLocation();
 		this.setLocation(parentLoc.x + (parentSize.width / 2 - WIDTH / 2),
 				parentLoc.y + (parentSize.height / 2 - HEIGHT / 2));
 				

@@ -50,6 +50,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2006/03/04 23:03:45  cervelli
+ * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
+ *
  * Revision 1.12  2006/01/21 11:04:11  tparker
  * Apply alertClip settings
  *
@@ -162,7 +165,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 	public HelicorderViewerFrame(Swarm sw, SeismicDataSource sds, String ch)
 	{
 		super(ch + ", [" + sds + "]", true, true, true, true);
-		Swarm.getParentFrame().touchUITime();
+		Swarm.getApplication().touchUITime();
 		settings = new HelicorderViewerSettings();
 		waveViewSettings = new WaveViewSettings();
 		dataSource = sds.getCopy();
@@ -190,7 +193,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 					{
 						dispose();
 						refreshThread.kill();
-						Swarm.getParentFrame().removeInternalFrame(HelicorderViewerFrame.this);
+						Swarm.getApplication().removeInternalFrame(HelicorderViewerFrame.this);
 						dataSource.notifyDataNotNeeded(channel, helicorderViewPanel.getStartTime(), helicorderViewPanel.getEndTime());
 						dataSource.close();
 						if (wigglerPanel != null)
@@ -674,6 +677,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		if (helicorderViewPanel != null)
 			helicorderViewPanel.requestFocus();
 	}
+	
 	public void setStatus(final String status)
 	{
 		SwingUtilities.invokeLater(new Runnable() 
@@ -749,7 +753,7 @@ public class HelicorderViewerFrame extends JInternalFrame
     					try
 						{
 	    					setNavigationButtonsEnabled(false);
-	    					Swarm.getParentFrame().incThreadCount();
+	    					Swarm.getApplication().incThreadCount();
 	    					working = true;
 							end = settings.getBottomTime();
 							if (Double.isNaN(end))
@@ -774,7 +778,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 					public void finished()
 					{
 						lastRefreshTime = System.currentTimeMillis();
-						Swarm.getParentFrame().decThreadCount();
+						Swarm.getApplication().decThreadCount();
 						setNavigationButtonsEnabled(true);
 						working = false;
 						if (success)
@@ -831,20 +835,19 @@ public class HelicorderViewerFrame extends JInternalFrame
 		
 		public void run()
 		{
-			Swarm.getParentFrame().incThreadCount();
+			Swarm.getApplication().incThreadCount();
 			while (!kill)
 			{
-				boolean kiosk = Swarm.getParentFrame().isKiosk();
-				long lastUI = System.currentTimeMillis() - Swarm.getParentFrame().getLastUITime();
-				boolean reset = kiosk && lastUI > 10 * 60 * 1000;
+				long lastUI = System.currentTimeMillis() - Swarm.getApplication().getLastUITime();
+				boolean reset = Swarm.config.isKiosk() && lastUI > 10 * 60 * 1000;
 				// TODO: extract magic number
 				if (reset || !Double.isNaN(settings.getBottomTime()) && settings.getLastBottomTimeSet() > 10 * 60 * 1000)
 				{
 					helicorderViewPanel.removeWaveInset();
 					helicorderViewPanel.clearMarks();
 					settings.setBottomTime(Double.NaN);
-					if (kiosk && !Swarm.getParentFrame().isFullScreenMode())
-						Swarm.getParentFrame().toggleFullScreenMode();
+					if (Swarm.config.isKiosk() && !Swarm.getApplication().isFullScreenMode())
+						Swarm.getApplication().toggleFullScreenMode();
 				}
 				
 				try 
@@ -878,7 +881,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 					}
 				}
 			}			
-			Swarm.getParentFrame().decThreadCount();
+			Swarm.getApplication().decThreadCount();
 		}	
 	}
 	
@@ -886,8 +889,8 @@ public class HelicorderViewerFrame extends JInternalFrame
 	{
 	    public void actionPerformed(ActionEvent e)
 		{
-			chooser = Swarm.getParentFrame().getFileChooser();
-			File lastPath = new File(Swarm.getParentFrame().getConfig().getString("lastPath"));
+			chooser = Swarm.getApplication().getFileChooser();
+			File lastPath = new File(Swarm.config.lastPath);
 			chooser.setCurrentDirectory(lastPath);
 			
 			JPanel imagePanel = new JPanel(new GridBagLayout());
@@ -940,14 +943,14 @@ public class HelicorderViewerFrame extends JInternalFrame
 			String fn = channel.replace(' ', '_') + ".png";
 			chooser.setSelectedFile(new File (chooser.getCurrentDirectory().getAbsoluteFile(), fn));
 			
-			int result = chooser.showSaveDialog(Swarm.getParentFrame());
+			int result = chooser.showSaveDialog(Swarm.getApplication());
 			if (result == JFileChooser.APPROVE_OPTION) 
 			{						 
 				File f = chooser.getSelectedFile();
 
 				if (f.exists()) 
 				{
-					int choice = JOptionPane.showConfirmDialog(Swarm.getParentFrame(), "File exists, overwrite?", "Confirm", JOptionPane.YES_NO_OPTION);
+					int choice = JOptionPane.showConfirmDialog(Swarm.getApplication(), "File exists, overwrite?", "Confirm", JOptionPane.YES_NO_OPTION);
 					if (choice != JOptionPane.YES_OPTION) 
 						return;
 			    }
@@ -983,8 +986,8 @@ public class HelicorderViewerFrame extends JInternalFrame
 						width - HelicorderViewPanel.X_OFFSET - HelicorderViewPanel.RIGHT_WIDTH,
 						height - HelicorderViewPanel.Y_OFFSET - HelicorderViewPanel.BOTTOM_HEIGHT);
 				heliRenderer.setHelicorderExtents(before,end , -1 * Math.abs(settings.barRange), Math.abs(settings.barRange));
-				heliRenderer.setTimeZoneOffset(Double.parseDouble(Swarm.getParentFrame().getConfig().getString("timeZoneOffset")));
-				heliRenderer.setTimeZoneAbbr(Swarm.getParentFrame().getConfig().getString("timeZoneAbbr"));
+				heliRenderer.setTimeZoneOffset(Swarm.config.timeZoneOffset);
+				heliRenderer.setTimeZoneAbbr(Swarm.config.timeZoneAbbr);
 				heliRenderer.setForceCenter(settings.forceCenter);
 				heliRenderer.setClipBars(settings.clipBars);
 				heliRenderer.setShowClip(settings.showClip);
@@ -1000,7 +1003,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 					plot.writePNG(f.getAbsolutePath());
 				}
 			
-				Swarm.getParentFrame().getConfig().put("lastPath", f.getParent(), false);
+				Swarm.config.lastPath = f.getParent();
 			}
 			
 			chooser.setAccessory(null);

@@ -1,6 +1,5 @@
 package gov.usgs.swarm;
 
-import gov.usgs.util.ConfigFile;
 import gov.usgs.util.ui.BaseDialog;
 
 import java.awt.BorderLayout;
@@ -19,6 +18,9 @@ import javax.swing.border.TitledBorder;
  * Global application options dialog.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/04/11 17:54:59  dcervelli
+ * Added option for turning off duration magnitude.
+ *
  * Revision 1.2  2005/09/22 20:59:29  dcervelli
  * Changes for duration magnitude options.
  *
@@ -53,7 +55,7 @@ public class OptionsDialog extends BaseDialog
 	
 	public OptionsDialog()
 	{
-		super(Swarm.getParentFrame(), "Options", true, WIDTH, HEIGHT);
+		super(Swarm.getApplication(), "Options", true, WIDTH, HEIGHT);
 		createOptionsUI();
 	}
 	
@@ -104,13 +106,12 @@ public class OptionsDialog extends BaseDialog
 	
 	public void setCurrentValues()
 	{
-		ConfigFile config = Swarm.getParentFrame().getConfig();
-		timeZoneAbbr.setText(config.getString("timeZoneAbbr"));
-		timeZoneOffset.setText(config.getString("timeZoneOffset"));
-		useLargeCursor.setSelected(config.getString("useLargeCursor").equals("true"));
-		durationA.setText(config.getString("durationA"));
-		durationB.setText(config.getString("durationB"));
-		durationEnabled.setSelected(config.getString("durationEnabled").equals("true"));
+		timeZoneAbbr.setText(Swarm.config.timeZoneAbbr);
+		timeZoneOffset.setText(Double.toString(Swarm.config.timeZoneOffset));
+		useLargeCursor.setSelected(Swarm.config.useLargeCursor);
+		durationA.setText(Double.toString(Swarm.config.durationA));
+		durationB.setText(Double.toString(Swarm.config.durationB));
+		durationEnabled.setSelected(Swarm.config.durationEnabled);
 	}
 	
 	public boolean allowOK()
@@ -144,20 +145,19 @@ public class OptionsDialog extends BaseDialog
 	
 	public void wasOK()
 	{
-		ConfigFile config = Swarm.getParentFrame().getConfig();
 		double tzo = 9999;
 		try { tzo = Double.parseDouble(timeZoneOffset.getText().trim()); } catch (Exception e) {}
 		if (tzo == 9999 || tzo > 13 || tzo < -13)
 			JOptionPane.showMessageDialog(this, "Time Zone Offset has an illegal value.", "Options Error", JOptionPane.ERROR_MESSAGE);
 		else
-			config.put("timeZoneOffset", Double.toString(tzo), false);
+			Swarm.config.timeZoneOffset = tzo;
 			
-		config.put("timeZoneAbbr", timeZoneAbbr.getText().trim(), false);
-		config.put("useLargeCursor", (useLargeCursor.isSelected() ? "true" : "false"), false);
-		config.put("durationEnabled", (durationEnabled.isSelected() ? "true" : "false"), false);
-		config.put("durationA", durationA.getText().trim(), false);
-		config.put("durationB", durationB.getText().trim(), false);
+		Swarm.config.timeZoneAbbr = timeZoneAbbr.getText().trim();
+		Swarm.config.useLargeCursor = useLargeCursor.isSelected();
+		Swarm.config.durationEnabled = durationEnabled.isSelected();
+		Swarm.config.durationA = Double.parseDouble(durationA.getText().trim());
+		Swarm.config.durationB = Double.parseDouble(durationB.getText().trim());
 		
-		Swarm.getParentFrame().optionsChanged();
+		Swarm.getApplication().optionsChanged();
 	}
 }

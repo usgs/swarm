@@ -20,6 +20,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * so I had to add some hacky code for the CachePurgeActions.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/04/03 05:16:20  dcervelli
+ * Changes for reduced bandwidth monitor mode.
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -55,23 +58,6 @@ public class CachedDataSource extends SeismicDataSource
 	public boolean isActiveSource()
 	{
 		return false;
-	}
-	
-	public List<String> getWaveStations()
-	{
-		List<String> st = new ArrayList<String>();
-//		Iterator it = waveCache.keySet().iterator();
-//		while (it.hasNext())
-		for (String key : waveCache.keySet())
-		{
-//			String key = (String)it.next();
-			st.add(key);
-		}
-		
-		if (st.size() == 0)
-			return null;
-		else
-			return st;
 	}
 	
 	public synchronized Wave getBestWave(String station, double t1, double t2)
@@ -145,7 +131,7 @@ public class CachedDataSource extends SeismicDataSource
 		return null;
 	}
 	
-	public List<String> getHelicorderStations()
+	public List<String> getChannels()
 	{
 		List<String> st = new ArrayList<String>();
 //		Iterator it = helicorderCache.keySet().iterator();

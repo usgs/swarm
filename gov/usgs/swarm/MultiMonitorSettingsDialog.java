@@ -19,6 +19,9 @@ import javax.swing.border.TitledBorder;
  * A dialog for Monitor Mode Settings.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2005/08/26 20:40:28  dcervelli
+ * Initial avosouth commit.
+ *
  * Revision 1.3  2005/04/15 04:36:40  cervelli
  * More JDK 1.5 deprecation stuff.
  *
@@ -48,7 +51,7 @@ public class MultiMonitorSettingsDialog extends BaseDialog
 	
 	private MultiMonitorSettingsDialog()
 	{
-		super(Swarm.getParentFrame(), "Monitor Settings", true, WIDTH, HEIGHT);
+		super(Swarm.getApplication(), "Monitor Settings", true, WIDTH, HEIGHT);
 		createSettingsUI();	
 	}
 	

@@ -24,6 +24,9 @@ import javax.swing.event.InternalFrameEvent;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2005/09/02 16:40:17  dcervelli
+ * CurrentTime changes.
+ *
  * Revision 1.4  2005/08/30 00:34:40  tparker
  * Update to use Images class
  *
@@ -176,7 +179,7 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 					public void actionPerformed(ActionEvent e)
 					{
 						if (waveViewPanel != null)
-							Swarm.getParentFrame().getWaveClipboard().addWave(new ClipboardWaveViewPanel(waveViewPanel));
+							Swarm.getApplication().getWaveClipboard().addWave(new ClipboardWaveViewPanel(waveViewPanel));
 					}
 				});
 		Util.mapKeyStrokeToButton(this, "C", "clipboard1", clipboard);
@@ -207,7 +210,7 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 					public void internalFrameClosing(InternalFrameEvent e)
 					{
 						kill();	
-						Swarm.getParentFrame().removeInternalFrame(WaveViewerFrame.this);
+						Swarm.getApplication().removeInternalFrame(WaveViewerFrame.this);
 						dataSource.close();
 					}
 				});
@@ -268,7 +271,7 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 	
 	public void run()
 	{
-		Swarm.getParentFrame().incThreadCount();
+		Swarm.getApplication().incThreadCount();
 //		int count = 0;
 		while (!kill)
 		{
@@ -284,7 +287,7 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 			}
 			catch (InterruptedException e) {}
 		}
-		Swarm.getParentFrame().decThreadCount();
+		Swarm.getApplication().decThreadCount();
 		dataSource.close();
 		System.out.println(updateThread.getName() + " killed");
 		

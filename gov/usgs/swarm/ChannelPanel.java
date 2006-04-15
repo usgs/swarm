@@ -37,6 +37,9 @@ import javax.swing.tree.TreePath;
  * and how.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/03/07 18:11:28  cervelli
+ * Added tooltips to helicorder, clipboard, monitor, and wave icons at the bottom of the channel panel.
+ *
  * Revision 1.4  2006/03/04 23:10:55  dcervelli
  * Made into a JPanel.
  *
@@ -81,7 +84,7 @@ public class ChannelPanel extends JPanel
 	public ChannelPanel(Swarm sw)
 	{
 		this.setLayout(new BorderLayout());
-		groupFile = new ConfigFile(Swarm.getParentFrame().getConfig().getString("groupConfigFile"));
+		groupFile = new ConfigFile(Swarm.config.groupConfigFile);
 		swarm = sw;
 		SwingUtilities.invokeLater(new Runnable()
 				{
@@ -194,10 +197,10 @@ public class ChannelPanel extends JPanel
 				{
 					public void actionPerformed(ActionEvent ev)
 					{
-						TreePath[] paths = heliTree.getSelectionPaths();
-						String[] channels = getSelectedLeaves(paths);
-						if (channels != null)
-							swarm.monitorChannelSelected(source, channels);
+//						TreePath[] paths = heliTree.getSelectionPaths();
+//						String[] channels = getSelectedLeaves(paths);
+//						if (channels != null)
+//							swarm.monitorChannelSelected(source, channels);
 					}
 				});
 
@@ -260,7 +263,7 @@ public class ChannelPanel extends JPanel
 		int cnt = channels.size();
 		if (cnt > MAX_CHANNELS_AT_ONCE)
 		{
-			JOptionPane.showMessageDialog(Swarm.getParentFrame(), "You may only choose " + MAX_CHANNELS_AT_ONCE + " channels at one time.", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(Swarm.getApplication(), "You may only choose " + MAX_CHANNELS_AT_ONCE + " channels at one time.", "Error", JOptionPane.ERROR_MESSAGE);
 			cnt = MAX_CHANNELS_AT_ONCE;
 		}
 		
