@@ -21,6 +21,9 @@ import java.util.StringTokenizer;
  * be made a descendant of WaveServerSource. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/04/15 16:00:13  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.3  2005/09/02 22:38:54  dcervelli
  * Changes for new GETWAVERAW.
  *
@@ -93,7 +96,7 @@ public class WWSSource extends SeismicDataSource
 		winstonClient.setTimeout(to);
 	}
 	
-	public synchronized void close()
+	public void close()
 	{
 		if (winstonClient != null)
 			winstonClient.close();
@@ -188,11 +191,6 @@ public class WWSSource extends SeismicDataSource
 	{
 		Menu menu = winstonClient.getMenuSCNL();
 		return getMenuList(menu.getSortedItems());
-	}
-	
-	public synchronized void notifyDataNotNeeded(String station, double t1, double t2)
-	{
-		
 	}
 	
 	public synchronized boolean isActiveSource()
