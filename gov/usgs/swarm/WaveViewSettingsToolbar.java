@@ -2,13 +2,11 @@ package gov.usgs.swarm;
 
 import gov.usgs.util.Util;
 
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JToggleButton;
@@ -18,6 +16,9 @@ import javax.swing.KeyStroke;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2005/08/30 00:35:06  tparker
+ * Update to use Images class
+ *
  * Revision 1.3  2005/08/27 00:34:46  tparker
  * Tidy code, no functional changes.
  *
@@ -37,7 +38,6 @@ public class WaveViewSettingsToolbar
 	
 	private WaveViewSettings settings;
 	
-	
 	public WaveViewSettingsToolbar(WaveViewSettings s, JToolBar dest, JComponent keyComp)
 	{
 		settings = s;
@@ -47,27 +47,24 @@ public class WaveViewSettingsToolbar
 	
 	public void createUI(JToolBar dest, JComponent keyComp)
 	{
-		JButton waveSet = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("wavesettings"))));
-		dest.add(waveSet);
-		waveSet.setToolTipText("Wave view settings (?)");
-		waveSet.setMargin(new Insets(0,0,0,0));
-		waveSet.addActionListener(new ActionListener()
+		JButton waveSet = SwarmUtil.createToolBarButton(
+				Images.getIcon("wavesettings"),
+				"Wave view settings (?)",
+				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
 					{
 					    WaveViewSettingsDialog wvsd = WaveViewSettingsDialog.getInstance(settings);
-//						WaveViewSettingsDialog wvsd = new WaveViewSettingsDialog(settings);
 						wvsd.setVisible(true);
 					}
 				});
 		Util.mapKeyStrokeToButton(keyComp, "shift SLASH", "settings", waveSet);
+		dest.add(waveSet);
 		
-		waveToggle = new JToggleButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("wave"))));
-		waveToggle.setMargin(new Insets(0,0,0,0));
-		dest.add(waveToggle);
-		waveToggle.setSelected(true);
-		waveToggle.setToolTipText("Wave view (W or ,)");
-		waveToggle.addActionListener(new ActionListener()
+		waveToggle = SwarmUtil.createToolBarToggleButton(
+				Images.getIcon("wave"),
+				"Wave view (W or ,)",
+				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
 					{
@@ -76,12 +73,13 @@ public class WaveViewSettingsToolbar
 				});
 		Util.mapKeyStrokeToButton(keyComp, "COMMA", "wave1", waveToggle);
 		Util.mapKeyStrokeToButton(keyComp, "W", "wave2", waveToggle);
+		waveToggle.setSelected(true);
+		dest.add(waveToggle);
 		
-		spectraToggle = new JToggleButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("spectra"))));
-		spectraToggle.setMargin(new Insets(0,0,0,0));
-		dest.add(spectraToggle);
-		spectraToggle.setToolTipText("Spectra view (S or .)");
-		spectraToggle.addActionListener(new ActionListener()
+		spectraToggle = SwarmUtil.createToolBarToggleButton(
+				Images.getIcon("spectra"),
+				"Spectra view (S or .)",
+				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
 					{
@@ -90,12 +88,12 @@ public class WaveViewSettingsToolbar
 				});
 		Util.mapKeyStrokeToButton(keyComp, "PERIOD", "spectra1", spectraToggle);
 		Util.mapKeyStrokeToButton(keyComp, "S", "spectra2", spectraToggle);
+		dest.add(spectraToggle);
 		
-		spectrogramToggle = new JToggleButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("spectrogram"))));
-		spectrogramToggle.setMargin(new Insets(0,0,0,0));
-		dest.add(spectrogramToggle);
-		spectrogramToggle.setToolTipText("Spectrogram view (G or /)");
-		spectrogramToggle.addActionListener(new ActionListener()
+		spectrogramToggle = SwarmUtil.createToolBarToggleButton(
+				Images.getIcon("spectrogram"),
+				"Spectrogram view (G or /)",
+				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
 					{
@@ -104,6 +102,7 @@ public class WaveViewSettingsToolbar
 				});
 		Util.mapKeyStrokeToButton(keyComp, "SLASH", "spectrogram1", spectrogramToggle);
 		Util.mapKeyStrokeToButton(keyComp, "G", "spectrogram2", spectrogramToggle);
+		dest.add(spectrogramToggle);
 		
 		keyComp.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke("L"), "cycleLogSettings");
 		keyComp.getActionMap().put("cycleLogSettings", new AbstractAction()

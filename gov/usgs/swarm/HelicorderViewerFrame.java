@@ -22,7 +22,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 
-import javax.swing.ImageIcon;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -30,13 +31,14 @@ import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
@@ -49,7 +51,13 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
 /**
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
+ * TODO: slider tooltip
+ * TODO: change slider checkbox
+ * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2006/04/15 15:58:52  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.13  2006/03/04 23:03:45  cervelli
  * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
  *
@@ -125,8 +133,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 	private SeismicDataSource dataSource;
 	private String channel;
 	private JPanel mainPanel;
-	private JToolBar toolbar;
-	private JButton showToolbar;
+	private JToolBar toolBar;
 	private JButton settingsButton;
 	private JButton backButton;
 	private JButton forwardButton;
@@ -138,7 +145,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 	private JButton removeWave; 
 	private JButton saveWave;
 	private JFileChooser chooser;
-	protected JCheckBox autoScaleSliderButton;
+	protected JToggleButton autoScaleSliderButton;
 	protected int autoScaleSliderButtonState;
 	protected JSlider autoScaleSlider;
 
@@ -148,11 +155,9 @@ public class HelicorderViewerFrame extends JInternalFrame
 	private HelicorderViewerSettings settings;
 	
 	private boolean working;
-	private JPanel statusPanel;
 	private JLabel statusLabel;
 	
 	private boolean fullScreen;
-	private boolean toolbarWasVisible;
 	
 	private JComponent northPane;
 	private Dimension oldNorthPaneSize;
@@ -161,6 +166,10 @@ public class HelicorderViewerFrame extends JInternalFrame
 	private WigglerPanel wigglerPanel;
 	
 	protected long lastRefreshTime;
+	
+	private Border border;
+	
+	protected Throbber throbber;
 	
 	public HelicorderViewerFrame(Swarm sw, SeismicDataSource sds, String ch)
 	{
@@ -184,14 +193,283 @@ public class HelicorderViewerFrame extends JInternalFrame
 	
 	public void createUI()
 	{
+		mainPanel = new JPanel(new BorderLayout());
+		createHeliPanel();
+		createToolBar();
+		createStatusLabel();
+		createListeners();
+		
+		setFrameIcon(Images.getIcon("heli"));
+		setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
+		setSize(800, 750);
+		setContentPane(mainPanel);
+		setVisible(true);
+	}
+
+	private void createStatusLabel()
+	{
+		statusLabel = new JLabel(" ");
+		statusLabel.setBorder(BorderFactory.createEmptyBorder(1, 5, 1, 1));
+		mainPanel.add(statusLabel, BorderLayout.SOUTH);
+	}
+	
+	private void createHeliPanel()
+	{
 		helicorderViewPanel = new HelicorderViewPanel(this);
 		settings.view = helicorderViewPanel;
+		heliPanel = new JPanel(new BorderLayout());
+		border = BorderFactory.createCompoundBorder(
+				BorderFactory.createEmptyBorder(0, 2, 0, 3), 
+				LineBorder.createGrayLineBorder());
+		heliPanel.setBorder(border);
+		heliPanel.add(helicorderViewPanel, BorderLayout.CENTER);
+		mainPanel.add(heliPanel, BorderLayout.CENTER);
+	}
+	
+	private void createToolBar()
+	{
+		toolBar = SwarmUtil.createToolBar();
+		
+		settingsButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("settings"),
+				"Helicorder view settings",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						HelicorderViewerSettingsDialog hvsd = HelicorderViewerSettingsDialog.getInstance(settings, waveViewSettings);
+						hvsd.setVisible(true);
+						getHelicorder();
+					}
+				});
+		toolBar.add(settingsButton);
+		
+		toolBar.addSeparator();
+		
+		backButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("left"),
+				"Scroll back time (A or Left arrow)",						
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						if (helicorderViewPanel.hasInset())
+							helicorderViewPanel.moveInset(-1);
+						else
+							scroll(-1);
+					}
+				});
+		Util.mapKeyStrokeToButton(this, "LEFT", "backward1", backButton);
+		Util.mapKeyStrokeToButton(this, "A", "backward2", backButton);
+		toolBar.add(backButton);
+		
+		forwardButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("right"),
+				"Scroll forward time (Z or Right arrow)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						if (helicorderViewPanel.hasInset())
+							helicorderViewPanel.moveInset(1);
+						else
+							scroll(1);
+					}
+				});
+		Util.mapKeyStrokeToButton(this, "RIGHT", "forward1", forwardButton);				
+		Util.mapKeyStrokeToButton(this, "Z", "forward2", forwardButton);
+		toolBar.add(forwardButton);
+		
+		compX = SwarmUtil.createToolBarButton(
+				Images.getIcon("xminus"),
+				"Compress X-axis (Alt-left arrow)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						decXAxis();
+						getHelicorder();
+					}
+				});
+		Util.mapKeyStrokeToButton(this, "alt LEFT", "compx", compX);
+		toolBar.add(compX);
+		
+		expX = SwarmUtil.createToolBarButton(
+				Images.getIcon("xplus"),
+				"Expand X-axis (Alt-right arrow)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						incXAxis();
+						getHelicorder();
+					}
+				});
+		Util.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expX);
+		toolBar.add(expX);
+		
+		compY = SwarmUtil.createToolBarButton(
+				Images.getIcon("yminus"),
+				"Compress Y-axis (Alt-down arrow)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						decYAxis();
+						getHelicorder();
+					}
+				});
+		Util.mapKeyStrokeToButton(this, "alt DOWN", "compy", compY);
+		toolBar.add(compY);
+		
+		expY = SwarmUtil.createToolBarButton(
+				Images.getIcon("yplus"),
+				"Expand Y-axis (Alt-up arrow)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						incYAxis();
+						getHelicorder();
+					}
+				});
+		Util.mapKeyStrokeToButton(this, "alt UP", "expy", expY);
+		toolBar.add(expY);
+		
+		toolBar.addSeparator();
+		
+		JButton addZoom = SwarmUtil.createToolBarButton(
+				Images.getIcon("zoomplus"),
+				"Decrease zoom time window (+)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						decZoom();
+						settings.notifyView();
+					}
+				});
+		Util.mapKeyStrokeToButton(this, "EQUALS", "addzoom1", addZoom);
+		Util.mapKeyStrokeToButton(this, "shift EQUALS", "addzoom2", addZoom);
+		toolBar.add(addZoom);
+		
+		JButton subZoom = SwarmUtil.createToolBarButton(
+				Images.getIcon("zoomminus"),
+				"Increase zoom time window (-)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						incZoom();
+						settings.notifyView();
+					}
+				});
+		Util.mapKeyStrokeToButton(this, "MINUS", "subzoom", subZoom);
+		toolBar.add(subZoom);
 
+		new WaveViewSettingsToolbar(waveViewSettings, toolBar, this);
+		
+		clipboard = SwarmUtil.createToolBarButton(
+				Images.getIcon("clipboard"),
+				"Copy inset to clipboard (C or Ctrl-C)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						helicorderViewPanel.insetToClipboard();
+					}
+				});
+		clipboard.setEnabled(false);
+		Util.mapKeyStrokeToButton(this, "control C", "clipboard1", clipboard);
+		Util.mapKeyStrokeToButton(this, "C", "clipboard2", clipboard);
+		toolBar.add(clipboard);
+		
+		removeWave = SwarmUtil.createToolBarButton(
+				Images.getIcon("delete"),
+				"Remove inset wave (Delete or Escape)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						helicorderViewPanel.removeWaveInset();
+					}
+				});
+		removeWave.setEnabled(false);
+		Util.mapKeyStrokeToButton(this, "ESCAPE", "removewave", removeWave);
+		Util.mapKeyStrokeToButton(this, "DELETE", "removewave", removeWave);
+		toolBar.add(removeWave);
+
+		toolBar.addSeparator();
+		
+		saveWave = SwarmUtil.createToolBarButton(
+				Images.getIcon("camera"),
+				"Save helicorder image",
+				new SaveButtonActionListener());
+		toolBar.add(saveWave);
+
+		toolBar.addSeparator();
+		
+		autoScaleSliderButton = new JCheckBox(Images.getIcon("wavezoom"));
+		autoScaleSliderButton.setFocusable(false);
+		autoScaleSliderButton.setSelectedIcon(Images.getIcon("waveclip"));
+		autoScaleSliderButton.setMargin(new Insets(0,0,0,0));
+		autoScaleSliderButton.addItemListener(new ItemListener()
+				{
+					public void itemStateChanged(ItemEvent e)
+					{
+
+						autoScaleSliderButtonState = e.getStateChange();
+						if (autoScaleSliderButtonState == zoomSelected) 
+						{
+							autoScaleSlider.setValue(40 - (new Double(settings.barMult * 4).intValue()));
+						} 
+						else if (autoScaleSliderButtonState == clippingSelected)
+						{
+							autoScaleSlider.setValue(settings.clipBars / 3);
+						}
+						
+						settings.notifyView();
+					}
+				});
+		autoScaleSliderButtonState = zoomSelected;
+		toolBar.add(autoScaleSliderButton);
+
+		autoScaleSlider = new JSlider(1, 39, (int) (10 - settings.barMult) * 4);
+		autoScaleSlider.setFocusable(false);
+		autoScaleSlider.setPreferredSize(new Dimension(100, 20));
+		autoScaleSlider.setMaximumSize(new Dimension(100, 20));
+		autoScaleSlider.setMinimumSize(new Dimension(100, 20));
+		autoScaleSlider.addChangeListener(new ChangeListener()
+				{
+					public void stateChanged(ChangeEvent e)
+					{
+						settings.autoScale = true;
+						if (!autoScaleSlider.getValueIsAdjusting()) 
+						{
+							if (autoScaleSliderButtonState == zoomSelected)
+								settings.barMult = 10 - ( new Integer(autoScaleSlider.getValue()).doubleValue() / 4);
+							else if (autoScaleSliderButtonState == clippingSelected)
+								settings.clipBars = autoScaleSlider.getValue() * 3;
+							repaintHelicorder();
+						}
+					}
+				});
+		toolBar.add(autoScaleSlider);
+		
+		toolBar.add(Box.createHorizontalGlue());
+		throbber = new Throbber();
+		toolBar.add(throbber);
+		mainPanel.add(toolBar, BorderLayout.NORTH);
+	}
+	
+	private void createListeners()
+	{
 		this.addInternalFrameListener(new InternalFrameAdapter()
 				{
 					public void internalFrameClosing(InternalFrameEvent e)
 					{
 						dispose();
+						throbber.close();
 						refreshThread.kill();
 						Swarm.getApplication().removeInternalFrame(HelicorderViewerFrame.this);
 						dataSource.notifyDataNotNeeded(channel, helicorderViewPanel.getStartTime(), helicorderViewPanel.getEndTime());
@@ -217,285 +495,8 @@ public class HelicorderViewerFrame extends JInternalFrame
 						repaint();
 					}
 				});
-		this.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
-		
-		mainPanel = new JPanel(new BorderLayout());
-		heliPanel = new JPanel(new BorderLayout());
-		heliPanel.setBorder(LineBorder.createGrayLineBorder());
-		heliPanel.add(helicorderViewPanel, BorderLayout.CENTER);
-		mainPanel.add(heliPanel, BorderLayout.CENTER);
-			
-		toolbar = new JToolBar();
-		toolbar.setFloatable(false);
-		JButton hideTB = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("minimize"))));
-		hideTB.setToolTipText("Hide toolbar");
-		hideTB.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						showToolbar.setVisible(true);
-						mainPanel.remove(toolbar);
-						mainPanel.validate();
-						repaintHelicorder();
-						helicorderViewPanel.requestFocus();
-					}
-				});
-		hideTB.setMargin(new Insets(0,0,0,0));
-		toolbar.add(hideTB);
-		toolbar.addSeparator();
-		
-		settingsButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("settings"))));
-		settingsButton.setToolTipText("Helicorder View Settings");
-		settingsButton.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						HelicorderViewerSettingsDialog hvsd = HelicorderViewerSettingsDialog.getInstance(settings, waveViewSettings);
-						hvsd.setVisible(true);
-						getHelicorder();
-					}
-				});
-		settingsButton.setMargin(new Insets(0,0,0,0));
-		toolbar.add(settingsButton);
-		
-		toolbar.addSeparator();
-		backButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("left"))));
-		
-		backButton.setToolTipText("Scroll back time (A or Left arrow)");
-		backButton.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						if (helicorderViewPanel.hasInset())
-							helicorderViewPanel.moveInset(-1);
-						else
-							scroll(-1);
-					}
-				});
-		backButton.setMargin(new Insets(0,0,0,0));
-		toolbar.add(backButton);
-		Util.mapKeyStrokeToButton(this, "LEFT", "backward1", backButton);
-		Util.mapKeyStrokeToButton(this, "A", "backward2", backButton);
-		
-		forwardButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("right"))));
-		forwardButton.setToolTipText("Scroll forward time (Z or Right arrow)");
-		forwardButton.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						if (helicorderViewPanel.hasInset())
-							helicorderViewPanel.moveInset(1);
-						else
-							scroll(1);
-					}
-				});
-		forwardButton.setMargin(new Insets(0,0,0,0));
-		toolbar.add(forwardButton);
-		Util.mapKeyStrokeToButton(this, "RIGHT", "forward1", forwardButton);				
-		Util.mapKeyStrokeToButton(this, "Z", "forward2", forwardButton);				
-		
-		compX = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("xminus"))));
-		compX.setToolTipText("Compress X-axis (Alt-left arrow)");
-		toolbar.add(compX);
-		compX.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						decXAxis();
-						getHelicorder();
-					}
-				});
-		compX.setMargin(new Insets(0,0,0,0));
-		Util.mapKeyStrokeToButton(this, "alt LEFT", "compx", compX);
-		
-		expX = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("xplus"))));
-		toolbar.add(expX);
-		expX.setToolTipText("Expand X-axis (Alt-right arrow)");
-		expX.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						incXAxis();
-						getHelicorder();
-					}
-				});
-		expX.setMargin(new Insets(0,0,0,0));
-		Util.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expX);
-		
-		compY = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("yminus"))));
-		compY.setToolTipText("Compress Y-axis (Alt-down arrow)");
-		toolbar.add(compY);
-		compY.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						decYAxis();
-						getHelicorder();
-					}
-				});
-		compY.setMargin(new Insets(0,0,0,0));
-		Util.mapKeyStrokeToButton(this, "alt DOWN", "compy", compY);				
-		
-		expY = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("yplus"))));
-		toolbar.add(expY);
-		expY.setToolTipText("Expand Y-axis (Alt-up arrow)");
-		expY.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						incYAxis();
-						getHelicorder();
-					}
-				});
-		expY.setMargin(new Insets(0,0,0,0));
-		Util.mapKeyStrokeToButton(this, "alt UP", "expy", expY);
-		toolbar.addSeparator();
-		
-		JButton addZoom = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("zoomplus"))));
-		addZoom.setToolTipText("Decrease zoom time window (+)");
-		toolbar.add(addZoom);
-		addZoom.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						decZoom();
-						settings.notifyView();
-					}
-				});
-		addZoom.setMargin(new Insets(0,0,0,0));
-		Util.mapKeyStrokeToButton(this, "EQUALS", "addzoom1", addZoom);
-		Util.mapKeyStrokeToButton(this, "shift EQUALS", "addzoom2", addZoom);
-		
-		JButton subZoom = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("zoomminus"))));
-		toolbar.add(subZoom);
-		subZoom.setToolTipText("Increase zoom time window (-)");
-		subZoom.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						incZoom();
-						settings.notifyView();
-					}
-				});
-		subZoom.setMargin(new Insets(0,0,0,0));
-		Util.mapKeyStrokeToButton(this, "MINUS", "subzoom", subZoom);
-
-		new WaveViewSettingsToolbar(waveViewSettings, toolbar, this);
-		clipboard = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("clipboard"))));
-		clipboard.setEnabled(false);
-		toolbar.add(clipboard);
-		clipboard.setToolTipText("Copy inset to clipboard (C or Ctrl-C)");
-		clipboard.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						helicorderViewPanel.insetToClipboard();
-					}
-				});
-		clipboard.setMargin(new Insets(0,0,0,0));
-		Util.mapKeyStrokeToButton(this, "control C", "clipboard1", clipboard);
-		Util.mapKeyStrokeToButton(this, "C", "clipboard2", clipboard);
-		
-		removeWave = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("delete"))));
-		removeWave.setEnabled(false);
-		toolbar.add(removeWave);
-		removeWave.setToolTipText("Remove inset wave (Delete or Escape)");
-		removeWave.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						helicorderViewPanel.removeWaveInset();
-					}
-				});		
-		removeWave.setMargin(new Insets(0,0,0,0));
-		Util.mapKeyStrokeToButton(this, "ESCAPE", "removewave", removeWave);
-		Util.mapKeyStrokeToButton(this, "DELETE", "removewave", removeWave);
-
-		toolbar.addSeparator();
-		
-		saveWave = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("camera"))));
-		toolbar.add(saveWave);
-		saveWave.addActionListener(new SaveButtonActionListener());
-		saveWave.setMargin(new Insets(0,0,0,0));
-
-		toolbar.addSeparator();
-		
-		autoScaleSliderButton = new JCheckBox(new ImageIcon(getClass().getClassLoader().getResource(Images.get("wavezoom"))));
-		autoScaleSliderButton.setSelectedIcon(new ImageIcon(getClass().getClassLoader().getResource(Images.get("waveclip"))));
-		autoScaleSliderButton.setMargin(new Insets(0,0,0,0));
-		autoScaleSliderButton.addItemListener(new ItemListener()
-				{
-					public void itemStateChanged(ItemEvent e)
-					{
-
-						autoScaleSliderButtonState = e.getStateChange();
-						if (autoScaleSliderButtonState == zoomSelected) 
-						{
-							autoScaleSlider.setValue(40 - (new Double(settings.barMult * 4).intValue()));
-						} 
-						else if (autoScaleSliderButtonState == clippingSelected)
-						{
-							autoScaleSlider.setValue(settings.clipBars / 3);
-						}
-						
-						settings.notifyView();
-					}
-				});
-		
-		autoScaleSliderButtonState = zoomSelected;
-		toolbar.add(autoScaleSliderButton);
-
-		autoScaleSlider = new JSlider(1, 39, (int) (10 - settings.barMult) * 4);
-		autoScaleSlider.setPreferredSize(new Dimension(100, 20));
-		autoScaleSlider.setMaximumSize(new Dimension(100, 20));
-		autoScaleSlider.setMinimumSize(new Dimension(100, 20));
-		autoScaleSlider.addChangeListener(new ChangeListener()
-				{
-					public void stateChanged(ChangeEvent e)
-					{
-						settings.autoScale = true;
-						if (!autoScaleSlider.getValueIsAdjusting()) 
-						{
-							if (autoScaleSliderButtonState == zoomSelected)
-								settings.barMult = 10 - ( new Integer(autoScaleSlider.getValue()).doubleValue() / 4);
-							else if (autoScaleSliderButtonState == clippingSelected)
-								settings.clipBars = autoScaleSlider.getValue() * 3;
-							repaintHelicorder();
-						}
-					}
-				});
-		
-		toolbar.add(autoScaleSlider);
-		
-		mainPanel.add(toolbar, BorderLayout.NORTH);
-		
-		statusPanel = new JPanel(new BorderLayout());
-		statusLabel = new JLabel(" ");
-		statusLabel.setHorizontalAlignment(JLabel.LEFT);
-		statusPanel.add(statusLabel, BorderLayout.CENTER);
-		mainPanel.add(statusPanel, BorderLayout.SOUTH);
-		
-		showToolbar = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("maximize"))));
-		showToolbar.setMargin(new Insets(0, 0, 0, 0));
-		showToolbar.setSize(24, 24);
-		showToolbar.setLocation(0, 0);
-		showToolbar.setVisible(false);
-		showToolbar.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						showToolbar();
-					}
-				});
-		this.getLayeredPane().setLayer(showToolbar, JLayeredPane.PALETTE_LAYER.intValue());
-		this.getLayeredPane().add(showToolbar);
-		
-		toolbar.setRollover(true);
-		this.setContentPane(mainPanel);
-		this.setSize(800, 750);
-		this.setVisible(true);
 	}
-
+	
 	public HelicorderViewPanel getHelicorderViewPanel()
 	{
 		return helicorderViewPanel;
@@ -528,121 +529,86 @@ public class HelicorderViewerFrame extends JInternalFrame
 
 	public void incXAxis()
 	{
-		int index = -1;
-		for (int i = 0; i < chunkValues.length; i++)
-			if (settings.timeChunk == chunkValues[i])
-			{
-				index = i;
-				break;
-			}
-		
+		int index = SwarmUtil.linearSearch(chunkValues, settings.timeChunk);
 		if (index == -1 || index == chunkValues.length - 1)
 			return;
-		
 		settings.timeChunk = chunkValues[index + 1];
 	}
 	
 	public void decXAxis()
 	{
-		int index = -1;
-		for (int i = 0; i < chunkValues.length; i++)
-			if (settings.timeChunk == chunkValues[i])
-			{
-				index = i;
-				break;
-			}
-		
+		int index = SwarmUtil.linearSearch(chunkValues, settings.timeChunk);
 		if (index == -1 || index == 0)
 			return;
-		
 		settings.timeChunk = chunkValues[index - 1];
 	}
 	
 	public void incYAxis()
 	{
-		int index = -1;
-		for (int i = 0; i < spanValues.length; i++)
-			if (settings.span == spanValues[i])
-			{
-				index = i;
-				break;
-			}
-		
+		int index = SwarmUtil.linearSearch(spanValues, settings.span);
 		if (index == -1 || index == spanValues.length - 1)
 			return;
-		
 		settings.span = spanValues[index + 1];
 	}
 	
 	public void decYAxis()
 	{
-		int index = -1;
-		for (int i = 0; i < spanValues.length; i++)
-			if (settings.span == spanValues[i])
-			{
-				index = i;
-				break;
-			}
-		
+		int index = SwarmUtil.linearSearch(spanValues, settings.span);
 		if (index == -1 || index == 0)
 			return;
-		
 		settings.span = spanValues[index - 1];
 	}
 	
 	public void incZoom()
 	{
-		int index = -1;
-		for (int i = 0; i < zoomValues.length; i++)
-			if (settings.waveZoomOffset == zoomValues[i])
-			{
-				index = i;
-				break;
-			}
-		
+		int index = SwarmUtil.linearSearch(zoomValues, settings.waveZoomOffset);
 		if (index == -1 || index == zoomValues.length - 1)
 			return;
-		
 		settings.waveZoomOffset = zoomValues[index + 1];
 	}
 	
 	public void decZoom()
 	{ 
-		int index = -1;
-		for (int i = 0; i < zoomValues.length; i++)
-			if (settings.waveZoomOffset == zoomValues[i])
-			{
-				index = i;
-				break;
-			}
-		
+		int index = SwarmUtil.linearSearch(zoomValues, settings.waveZoomOffset);
 		if (index == -1 || index == 0)
 			return;
-		
 		settings.waveZoomOffset = zoomValues[index - 1];
 	}
 	
-	public void setInsetButtonsEnabled(boolean b)
+	public void setInsetButtonsEnabled(final boolean b)
 	{
-		clipboard.setEnabled(b);
-		removeWave.setEnabled(b);
+		SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						clipboard.setEnabled(b);
+						removeWave.setEnabled(b);				
+					}
+				});
 	}
 	
-	public void setNavigationButtonsEnabled(boolean b)
+	public void setNavigationButtonsEnabled(final boolean b)
 	{
-		compX.setEnabled(b);
-		expX.setEnabled(b);
-		forwardButton.setEnabled(b);
-		backButton.setEnabled(b);
-		compY.setEnabled(b);
-		expY.setEnabled(b);
-		autoScaleSliderButton.setEnabled(b);
-		autoScaleSlider.setEnabled(b);
-		saveWave.setEnabled(b);
+		SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						compX.setEnabled(b);
+						expX.setEnabled(b);
+						forwardButton.setEnabled(b);
+						backButton.setEnabled(b);
+						compY.setEnabled(b);
+						expY.setEnabled(b);
+						autoScaleSliderButton.setEnabled(b);
+						autoScaleSlider.setEnabled(b);
+						saveWave.setEnabled(b);
+					}
+				});
 	}
 
 	public void setFullScreen(boolean full)
 	{
+		System.out.println("evd: " + SwingUtilities.isEventDispatchThread());
 		fullScreen = full;
 		
 		this.setResizable(!fullScreen);
@@ -658,22 +624,16 @@ public class HelicorderViewerFrame extends JInternalFrame
 			oldNorthPaneSize = northPane.getSize();
 			northPane.setVisible(false);
 			northPane.setPreferredSize(new Dimension(0,0));
-			
-			toolbarWasVisible = !showToolbar.isVisible();
-			mainPanel.remove(toolbar);
-			showToolbar.setVisible(false);
+			mainPanel.remove(toolBar);
+			heliPanel.setBorder(null);
 		}
 		else
 		{
 			northPane.setVisible(true);
 			northPane.setPreferredSize(oldNorthPaneSize);
-			if (toolbarWasVisible)
-				mainPanel.add(toolbar, BorderLayout.NORTH);
-			else
-				showToolbar.setVisible(true);
+			mainPanel.add(toolBar, BorderLayout.NORTH);
+			heliPanel.setBorder(border);
 		}	
-	}
-	{
 		if (helicorderViewPanel != null)
 			helicorderViewPanel.requestFocus();
 	}
@@ -689,6 +649,11 @@ public class HelicorderViewerFrame extends JInternalFrame
 				});	
 	}
 	
+	public Throbber getThrobber()
+	{
+		return throbber;
+	}
+	
 	public JLabel getStatusLabel()
 	{
 		return statusLabel;	
@@ -702,21 +667,6 @@ public class HelicorderViewerFrame extends JInternalFrame
 	public HelicorderViewerSettings getHelicorderViewerSettings()
 	{
 		return settings;	
-	}
-
-	public void showToolbar()
-	{
-		SwingUtilities.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						showToolbar.setVisible(false);
-						mainPanel.add(toolbar, BorderLayout.PAGE_START);	
-						mainPanel.doLayout();
-						repaintHelicorder();
-						helicorderViewPanel.requestFocus();
-					}
-				});
 	}
 
 	public void repaintHelicorder()
@@ -753,7 +703,7 @@ public class HelicorderViewerFrame extends JInternalFrame
     					try
 						{
 	    					setNavigationButtonsEnabled(false);
-	    					Swarm.getApplication().incThreadCount();
+	    					throbber.increment();
 	    					working = true;
 							end = settings.getBottomTime();
 							if (Double.isNaN(end))
@@ -778,7 +728,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 					public void finished()
 					{
 						lastRefreshTime = System.currentTimeMillis();
-						Swarm.getApplication().decThreadCount();
+						throbber.decrement();
 						setNavigationButtonsEnabled(true);
 						working = false;
 						if (success)
@@ -816,7 +766,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		return channel;	
 	}
 
-	class RefreshThread extends Thread
+	private class RefreshThread extends Thread
 	{
 		private boolean kill = false;
 		
@@ -997,11 +947,10 @@ public class HelicorderViewerFrame extends JInternalFrame
 				heliRenderer.createDefaultAxis();
 				plot.addRenderer(heliRenderer);
 				
-				if (fileFormatCB.getSelectedItem().equals("PS")) {
+				if (fileFormatCB.getSelectedItem().equals("PS"))
 					plot.writePS(f.getAbsolutePath());					
-				} else {
+				else
 					plot.writePNG(f.getAbsolutePath());
-				}
 			
 				Swarm.config.lastPath = f.getParent();
 			}

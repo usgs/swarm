@@ -20,7 +20,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Paint;
-import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -43,6 +42,9 @@ import javax.swing.SwingUtilities;
  * spectrogram.  Relies heavily on the Valve plotting package.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2006/04/15 15:58:52  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.15  2006/04/11 17:55:25  dcervelli
  * Duration magnitude option.
  *
@@ -268,7 +270,15 @@ public class WaveViewPanel extends JComponent
 					{
 						Swarm.getApplication().touchUITime();
 						
+						if (clipboardPanel != null)
+							clipboardPanel.select();
+						if (monitor != null)
+							monitor.select(WaveViewPanel.this);
+						
 						double[] t = getTranslation();
+						if (t == null)
+							return;
+						
 						int x = e.getX();
 						double j2k = x * t[0] + t[1];
 						if (timeSeries)
@@ -306,10 +316,6 @@ public class WaveViewPanel extends JComponent
 							    }
 							}
 						}
-						if (clipboardPanel != null)
-							clipboardPanel.select();
-						if (monitor != null)
-							monitor.select(WaveViewPanel.this);
 					}
 					
 					public void mouseReleased(MouseEvent e)
@@ -736,7 +742,7 @@ public class WaveViewPanel extends JComponent
 		Dimension dim = this.getSize();
 		if (wave == null)
 		{
-			g2.setColor(Color.lightGray);
+			g2.setColor(backgroundColor);
 			g2.fillRect(0, 0, dim.width, dim.height);
 			g2.setColor(Color.black);
 			if (working)
@@ -771,7 +777,7 @@ public class WaveViewPanel extends JComponent
 			if (closeListener != null)
 			{
 				if (closeImg == null)
-					closeImg = Toolkit.getDefaultToolkit().createImage(Images.get("close"));
+					closeImg = Images.getIcon("close_view").getImage();
 				
 				g2.drawImage(closeImg, dim.width - 17, 3, null);
 

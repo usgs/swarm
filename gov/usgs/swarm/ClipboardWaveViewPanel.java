@@ -31,6 +31,9 @@ import javax.swing.border.LineBorder;
  * Wave Clipboard.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/04/15 15:58:52  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.5  2006/04/08 01:00:44  dcervelli
  * Fix in fetchNewWave() for bug #84.
  *
@@ -59,7 +62,7 @@ public class ClipboardWaveViewPanel extends JPanel
 	private JLayeredPane mainPane;
 	private JPanel mainPanel;
 	private JToolBar toolbar;
-	private JButton showToolbar;
+//	private JButton showToolbar;
 	private JButton upButton;
 	private JButton downButton;
 	private JButton removeButton;
@@ -94,42 +97,42 @@ public class ClipboardWaveViewPanel extends JPanel
 		
 		toolbar = new JToolBar();
 		toolbar.setFloatable(false);
-		JButton hideTB = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("minimize"))));
-		hideTB.setToolTipText("Hide toolbar");
-		hideTB.setMargin(new Insets(0,0,0,0));
-		hideTB.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						showToolbar.setVisible(true);
-						mainPanel.remove(toolbar);
-						mainPanel.validate();
-						repaint();
-						waveViewPanel.requestFocus();
-					}
-				});
+//		JButton hideTB = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("minimize"))));
+//		hideTB.setToolTipText("Hide toolbar");
+//		hideTB.setMargin(new Insets(0,0,0,0));
+//		hideTB.addActionListener(new ActionListener()
+//				{
+//					public void actionPerformed(ActionEvent e)
+//					{
+//						showToolbar.setVisible(true);
+//						mainPanel.remove(toolbar);
+//						mainPanel.validate();
+//						repaint();
+//						waveViewPanel.requestFocus();
+//					}
+//				});
+//		
+//		toolbar.add(hideTB);
+//		toolbar.addSeparator();
 		
-		toolbar.add(hideTB);
-		toolbar.addSeparator();
-		
-		showToolbar = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("maximize"))));
-		showToolbar.setToolTipText("Show toolbar");
-		showToolbar.setMargin(new Insets(0, 0, 0, 0));
-		showToolbar.setSize(24, 24);
-		showToolbar.setLocation(0, 0);
-		showToolbar.setVisible(false);
-		showToolbar.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						showToolbar.setVisible(false);
-						mainPanel.add(toolbar, BorderLayout.NORTH);	
-						mainPanel.doLayout();
-						waveViewPanel.requestFocus();
-					}
-				});
-		mainPane.add(showToolbar);
-		mainPane.setLayer(showToolbar, JLayeredPane.PALETTE_LAYER.intValue());
+//		showToolbar = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("maximize"))));
+//		showToolbar.setToolTipText("Show toolbar");
+//		showToolbar.setMargin(new Insets(0, 0, 0, 0));
+//		showToolbar.setSize(24, 24);
+//		showToolbar.setLocation(0, 0);
+//		showToolbar.setVisible(false);
+//		showToolbar.addActionListener(new ActionListener()
+//				{
+//					public void actionPerformed(ActionEvent e)
+//					{
+//						showToolbar.setVisible(false);
+//						mainPanel.add(toolbar, BorderLayout.NORTH);	
+//						mainPanel.doLayout();
+//						waveViewPanel.requestFocus();
+//					}
+//				});
+//		mainPane.add(showToolbar);
+//		mainPane.setLayer(showToolbar, JLayeredPane.PALETTE_LAYER.intValue());
 		
 		backButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("left"))));
 		backButton.setMargin(new Insets(0,0,0,0));

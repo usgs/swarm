@@ -3,15 +3,17 @@ package gov.usgs.swarm;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
 /**
  * Class to return image strings
  *
- * TODO: replace 'new ImageIcon(getClass().getClassLoader().getResource(Images.get("minimize")))' with 'Images.getImage("minimize")'
+ * TODO: make images static final, don't use map 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/04/15 15:58:52  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.8  2006/04/02 17:14:24  cervelli
  * Made everything nice and alphabetical
  *
@@ -46,38 +48,41 @@ public class Images
 	private Images()
 	{
 		imageMap = new HashMap<String, String>();
-		imageMap.put("camera", "images/camera.png");
-		imageMap.put("back", "images/back.png");
-		imageMap.put("clipboard", "images/clipboard.png");
-		imageMap.put("down", "images/down.png");
-		imageMap.put("clock", "images/clock.png");
+		imageMap.put("swarm", "images/swarm.gif");
+		imageMap.put("camera", "images/camera.gif");
+		imageMap.put("back", "images/back.gif");
+		imageMap.put("clipboard", "images/clipboard.gif");
+		imageMap.put("down", "images/down.gif");
+		imageMap.put("clock", "images/date.gif");
 		imageMap.put("close", "images/close.png");
-		imageMap.put("delete", "images/delete.png");
-		imageMap.put("new_delete", "images/new_delete.gif");
-		imageMap.put("gototime", "images/gototime.png");
-		imageMap.put("heli", "images/heli.png"); 
-		imageMap.put("left", "images/left.png");
+		imageMap.put("crosshair", "images/crosshair.gif");
+		imageMap.put("close_view", "images/closeview.gif");
+		imageMap.put("delete", "images/delete.gif");
+		imageMap.put("new_delete", "images/delete.gif");
+		imageMap.put("gototime", "images/date.gif");
+		imageMap.put("heli", "images/helicorder.gif"); 
+		imageMap.put("left", "images/left.gif");
 		imageMap.put("maximize","images/maximize.png"); 
 		imageMap.put("minimize", "images/minimize.png");
-		imageMap.put("monitor", "images/monitor.png");
-		imageMap.put("open", "images/open.png");
-		imageMap.put("right", "images/right.png");
-		imageMap.put("save", "images/save.png");
-		imageMap.put("saveall", "images/saveall.png");
-		imageMap.put("settings", "images/settings.png");
+		imageMap.put("monitor", "images/monitor.gif");
+		imageMap.put("open", "images/wave_folder.gif");
+		imageMap.put("right", "images/right.gif");
+		imageMap.put("save", "images/save.gif");
+		imageMap.put("saveall", "images/saveall.gif");
+		imageMap.put("settings", "images/settings.gif");
 		imageMap.put("spectra", "images/spectra.png");
 		imageMap.put("spectrogram", "images/spectrogram.png");
-		imageMap.put("up", "images/up.png");
-		imageMap.put("wave", "images/wave.png");
-		imageMap.put("waveclip", "images/waveclip.png");
-		imageMap.put("wavesettings", "images/wavesettings.png"); 
-		imageMap.put("wavezoom", "images/wavezoom.png"); 
-		imageMap.put("xminus", "images/xminus.png");
-		imageMap.put("xplus", "images/xplus.png");
-		imageMap.put("yminus", "images/yminus.png");
-		imageMap.put("yplus", "images/yplus.png");
-		imageMap.put("zoomminus", "images/zoomminus.png");
-		imageMap.put("zoomplus", "images/zoomplus.png");
+		imageMap.put("up", "images/up.gif");
+		imageMap.put("wave", "images/wave.gif");
+		imageMap.put("waveclip", "images/waveclip.gif");
+		imageMap.put("wavesettings", "images/wavesettings.gif"); 
+		imageMap.put("wavezoom", "images/wavezoom.gif"); 
+		imageMap.put("xminus", "images/xminus.gif");
+		imageMap.put("xplus", "images/xplus.gif");
+		imageMap.put("yminus", "images/yminus.gif");
+		imageMap.put("yplus", "images/yplus.gif");
+		imageMap.put("zoomminus", "images/zoomminus.gif");
+		imageMap.put("zoomplus", "images/zoomplus.gif");
 		imageMap.put("server", "images/server.gif");
 		imageMap.put("new_server", "images/new_server.gif");
 		imageMap.put("collapse", "images/collapse.gif");
@@ -86,9 +91,20 @@ public class Images
 		imageMap.put("broken_server", "images/broken_server.gif");
 		imageMap.put("edit_server", "images/edit_server.gif");
 		imageMap.put("bullet", "images/bullet.gif");
+		imageMap.put("honeycomb", "images/honeycomb.jpg");
+		
+		imageMap.put("throbber_off", "images/throbber_off.gif");
+		imageMap.put("throbber_0", "images/throbber_0.gif");
+		imageMap.put("throbber_1", "images/throbber_1.gif");
+		imageMap.put("throbber_2", "images/throbber_2.gif");
+		imageMap.put("throbber_3", "images/throbber_3.gif");
+		imageMap.put("throbber_4", "images/throbber_4.gif");
+		imageMap.put("throbber_5", "images/throbber_5.gif");
+		imageMap.put("throbber_6", "images/throbber_6.gif");
+		imageMap.put("throbber_7", "images/throbber_7.gif");
 	}
 	
-	public static Icon getIcon(String key)
+	public static ImageIcon getIcon(String key)
 	{
 		if (images == null)
 			images = new Images();

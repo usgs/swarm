@@ -12,7 +12,6 @@ import java.awt.Frame;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
@@ -26,31 +25,31 @@ import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.DefaultDesktopManager;
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import javax.swing.plaf.SplitPaneUI;
-import javax.swing.plaf.basic.BasicSplitPaneUI;
-import javax.swing.plaf.metal.DefaultMetalTheme;
-import javax.swing.plaf.metal.MetalLookAndFeel;
+import javax.swing.UIManager;
+
+import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
 
 /**
  * The main UI and application class for Swarm.  Only functions directly 
  * pertaining to the UI and overall application operation belong here.
  *
+ * TODO: resize listener
+ * TODO: chooser visibility
+ *
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2006/04/15 15:58:52  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.19  2006/04/11 17:55:14  dcervelli
  * Duration magnitude option.
  *
@@ -152,17 +151,15 @@ public class Swarm extends JFrame
 	private JDesktopPane desktop;
 	private JSplitPane split;
 	private DataChooser chooser;
-	private JMenuBar menuBar;
+	private SwarmMenu swarmMenu;
 	private CachedDataSource cache;
-	private AboutDialog aboutDialog;
-	private JLabel threadLabel;
 	private int frameCount = 0;
 	private int threadCount = 0;
 	
 	private WaveClipboardFrame waveClipboard;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "1.3.0.20060411";
+	private static final String VERSION = "1.3.1.20060416";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -182,6 +179,7 @@ public class Swarm extends JFrame
 	public Swarm(String[] args)
 	{
 		super(TITLE + " [" + VERSION + "]");
+		setIconImage(Images.getIcon("swarm").getImage());
 
 		monitors = new HashMap<String, MultiMonitor>();
 		calibrations = new ConfigFile(CALIBRATION_CONFIG_FILE);
@@ -326,19 +324,6 @@ public class Swarm extends JFrame
 		return application;	
 	}
 	
-	public static JSplitPane createStrippedSplitPane(int orient, JComponent comp1, JComponent comp2)
-	{
-		JSplitPane split = new JSplitPane(orient, comp1, comp2);
-		split.setBorder(BorderFactory.createEmptyBorder());
-		SplitPaneUI splitPaneUI = split.getUI();
-	    if (splitPaneUI instanceof BasicSplitPaneUI)
-	    {
-	        BasicSplitPaneUI basicUI = (BasicSplitPaneUI)splitPaneUI;
-	        basicUI.getDivider().setBorder(BorderFactory.createEmptyBorder());
-	    }
-	    return split;
-	}
-	
 	public void createUI()
 	{
 		this.addWindowListener(new WindowAdapter()
@@ -409,88 +394,59 @@ public class Swarm extends JFrame
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		chooser = new DataChooser();
-		split = createStrippedSplitPane(JSplitPane.HORIZONTAL_SPLIT, chooser, desktop);
+		split = SwarmUtil.createStrippedSplitPane(JSplitPane.HORIZONTAL_SPLIT, chooser, desktop);
 		split.setDividerLocation(config.chooserDividerLocation);
 		split.setDividerSize(4);
-		this.setContentPane(split);	
-		
-		menuBar = new JMenuBar();
-//		menuBar.setBorder(BorderFactory.createEmptyBorder());
-		JMenu fileMenu = new JMenu("File");
-		JMenuItem exit = new JMenuItem("Exit");
-		exit.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						closeApp();
-					}
-				});
-		fileMenu.add(exit);
-		JMenu editMenu = new JMenu("Edit");
-		JMenuItem options = new JMenuItem("Options...");
-		options.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						OptionsDialog od = new OptionsDialog();
-						od.setVisible(true);
-					}
-				});
-		editMenu.add(options);
-		JMenu windowMenu = new JMenu("Window");
-		JMenuItem tileHelis = new JMenuItem("Tile Helicorders");
-		tileHelis.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						tileHelicorders();
-					}
-				});
-		windowMenu.add(tileHelis);
-		JMenuItem tileWaves = new JMenuItem("Tile Waves");
-		tileWaves.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						tileWaves();
-					}
-				});
-		windowMenu.add(tileWaves);
-		windowMenu.addSeparator();
-		JMenuItem fullScreenItem = new JMenuItem("Kiosk Mode");
-		fullScreenItem.addActionListener(toggleFullScreenAction);
-		fullScreenItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0));
-		windowMenu.add(fullScreenItem);
-		JMenu helpMenu = new JMenu("Help");
-		JMenuItem about = new JMenuItem("About...");
-		aboutDialog = new AboutDialog();
-		about.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						aboutDialog.update();
-						aboutDialog.setVisible(true);
-					}
-				});
-				
-		helpMenu.add(about);
-		menuBar.add(fileMenu);
-		menuBar.add(editMenu);
-		menuBar.add(windowMenu);
-		menuBar.add(helpMenu);
-		menuBar.add(Box.createHorizontalGlue());
-		threadLabel = new JLabel(" ");
-		menuBar.add(threadLabel);
-		this.setJMenuBar(menuBar);
+		setChooserVisible(config.chooserVisible);
 		
 		waveClipboard = new WaveClipboardFrame();
 		desktop.add(waveClipboard);
+		waveClipboard.setVisible(config.clipboardVisible);
+		
+		swarmMenu = new SwarmMenu();
+		this.setJMenuBar(swarmMenu);
 		
 		this.setVisible(true);
 		long offset = CurrentTime.getInstance().getOffset();
 		if (Math.abs(offset) > 10 * 60 * 1000)
 			JOptionPane.showMessageDialog(this, "You're system clock is off by more than 10 minutes.\n" + 
 					"This is just for your information, Swarm will not be affected by this.", "System Clock", JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	public void setChooserVisible(boolean vis)
+	{
+		if (vis)
+		{
+			split.setRightComponent(desktop);
+			split.setDividerLocation(config.chooserDividerLocation);
+			setContentPane(split);
+		}
+		else
+		{
+			if (isChooserVisible())
+				config.chooserDividerLocation = split.getDividerLocation();
+			setContentPane(desktop);
+		}
+		if (SwingUtilities.isEventDispatchThread())
+			validate();
+	}
+	
+	public boolean isChooserVisible()
+	{
+		return getContentPane() == split;
+	}
+	
+	public boolean isClipboardVisible()
+	{
+		return waveClipboard.isVisible();
+	}
+	
+	public void setClipboardVisible(boolean vis)
+	{
+		waveClipboard.setVisible(vis);
+		
+		if (vis)
+			waveClipboard.toFront();
 	}
 	
 	public boolean isFullScreenMode()
@@ -527,7 +483,7 @@ public class Swarm extends JFrame
 		}
 		else
 		{
-			this.setJMenuBar(menuBar);
+			this.setJMenuBar(swarmMenu);
 			this.setExtendedState(oldState);
 			this.setSize(oldSize);
 			this.setLocation(oldLocation);
@@ -564,7 +520,20 @@ public class Swarm extends JFrame
 			config.windowMaximized = false;
 		}
 
+		if (waveClipboard.isMaximum())
+			config.clipboardMaximized = true;
+		else
+		{
+			config.clipboardVisible = isClipboardVisible();
+			config.clipboardX = waveClipboard.getX();
+			config.clipboardY = waveClipboard.getY();
+			config.clipboardWidth = waveClipboard.getWidth();
+			config.clipboardHeight = waveClipboard.getHeight();
+			config.clipboardMaximized = false;
+		}
+		
 		config.chooserDividerLocation = split.getDividerLocation();
+		config.chooserVisible = isChooserVisible();
 		
 		if (config.saveConfig)
 		{
@@ -590,49 +559,6 @@ public class Swarm extends JFrame
 		return SeismicDataSource.getDataSource(source);
 	}
 	
-//	public void dataSourceSelected(final String source)
-//	{
-//		final SwingWorker worker = new SwingWorker()
-//				{
-//					private List hs;
-//					private boolean failed;
-//					
-//					public Object construct()
-//					{
-//						incThreadCount();
-//						try
-//						{
-//							SeismicDataSource sds = parseDataSource(source);
-//							if (sds != null)
-//							{
-////								ws = sds.getWaveStations();
-//								hs = sds.getHelicorderStations();
-//								sds.close();
-//							}
-//							else 
-//								failed = true;
-//						} 
-//						catch (Exception e)
-//						{
-//							failed = true;
-//						}
-//						return null;	
-//					}			
-//					
-//					public void finished()
-//					{
-//						if (!failed)
-//						{
-//	//						channelPanel.populateWaveChannels(source, ws);
-//							channelPanel.populateHelicorderChannels(source, hs);
-//						}
-//						chooser.enableGoButton();
-//						decThreadCount();
-//					}
-//				};
-//		worker.start();
-//	}
-
 	public void clipboardWaveChannelSelected(final String source, final String[] channels)
 	{
 		final SeismicDataSource sds = parseDataSource(source);
@@ -714,7 +640,7 @@ public class Swarm extends JFrame
 	public WaveViewerFrame waveChannelSelected(String source, String channel)
 	{
 		SeismicDataSource sds = parseDataSource(source);
-		WaveViewerFrame frame = new WaveViewerFrame(this, sds, channel);
+		WaveViewerFrame frame = new WaveViewerFrame(sds, channel);
 		addInternalFrame(frame);
 		return frame;
 	}
@@ -848,12 +774,14 @@ public class Swarm extends JFrame
 
 	public void updateThreadLabel()
 	{
+		/*
 		if (threadCount == 0)
 			threadLabel.setText(" ");
 		else if (threadCount == 1)
 			threadLabel.setText("1 thread ");
 		else
 			threadLabel.setText(threadCount + " threads ");
+			*/
 	}
 
 	public void incThreadCount()
@@ -896,9 +824,9 @@ public class Swarm extends JFrame
 		try 
 		{
 			// JDK 1.5 by default has an ugly theme, this line uses the one from 1.4
-//			UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
+			UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
 //			UIManager.setLookAndFeel("net.java.plaf.windows.WindowsLookAndFeel");
-			MetalLookAndFeel.setCurrentTheme(new DefaultMetalTheme());
+//			MetalLookAndFeel.setCurrentTheme(new DefaultMetalTheme());
 		}
 		catch (Exception e) { }
 		

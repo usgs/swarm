@@ -32,12 +32,14 @@ import java.util.TimeZone;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
-import javax.swing.border.LineBorder;
 
 /**
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2006/04/15 15:58:52  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.12  2006/04/08 01:50:44  dcervelli
  * Fixed cosmetic bug #17.
  *
@@ -88,6 +90,7 @@ import javax.swing.border.LineBorder;
  */
 public class HelicorderViewPanel extends JComponent
 {
+	private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
 	public static final long serialVersionUID = -1;
 	
 	public static final int X_OFFSET = 70;
@@ -127,11 +130,10 @@ public class HelicorderViewPanel extends JComponent
 	public HelicorderViewPanel(HelicorderViewerFrame hvf)
 	{
 		parent = hvf;
-		this.setBorder(LineBorder.createGrayLineBorder());
 		dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 		plot = new Plot();
-		plot.setBackgroundColor(new Color(0xf7, 0xf7, 0xf7));
+		plot.setBackgroundColor(BACKGROUND_COLOR);
 		settings = hvf.getHelicorderViewerSettings();
 		heliRenderer = new HelicorderRenderer();
 		heliRenderer.setExtents(0, 1, Double.MAX_VALUE, -Double.MAX_VALUE);
@@ -150,7 +152,7 @@ public class HelicorderViewPanel extends JComponent
 		Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
 		if (Swarm.config.useLargeCursor)
 		{
-			Image cursorImg = Toolkit.getDefaultToolkit().getImage("images/crosshair.gif");
+			Image cursorImg = Images.getIcon("crosshair").getImage();
 			crosshair = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(16, 16), "Large crosshair");
 		}
 		
@@ -516,16 +518,16 @@ public class HelicorderViewPanel extends JComponent
 			int height = INSET_HEIGHT;
 			int row = heliRenderer.getRow(j2k);
 			
-			insetWavePanel.setSize(d.width, height);
+			insetWavePanel.setSize(d.width + 2, height);
 			if (insetY - heliRenderer.getRowHeight() > height + translation[3])
 			{
 				int y = (int)Math.ceil((row - 1) * translation[2] + translation[3]);
-				insetWavePanel.setLocation(0, y - height);
+				insetWavePanel.setLocation(-1, y - height);
 			}
 			else
 			{
 				int y = (int)Math.ceil((row + 2) * translation[2] + translation[3]);
-				insetWavePanel.setLocation(0, y);
+				insetWavePanel.setLocation(-1, y);
 			}
 			
 			insetWavePanel.setCloseListener(new ActionListener()
@@ -552,7 +554,7 @@ public class HelicorderViewPanel extends JComponent
 					
 					public Object construct()
 					{
-						Swarm.getApplication().incThreadCount();
+						parent.getThrobber().increment();
 						working = true;
 						sw = parent.getWave(st, et);
 						return null;
@@ -560,7 +562,7 @@ public class HelicorderViewPanel extends JComponent
 					
 					public void finished()
 					{
-						Swarm.getApplication().decThreadCount();
+						parent.getThrobber().decrement();
 						working = false;
 						if (insetWavePanel != null)
 						{

@@ -7,7 +7,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -22,6 +21,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -51,6 +51,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/04/15 15:53:25  dcervelli
+ * Initial commit.
+ *
  * @author Dan Cervelli
  */
 public class DataChooser extends JPanel
@@ -71,10 +74,14 @@ public class DataChooser extends JPanel
 	
 	private JToolBar toolBar;
 	
+	private JButton newButton;
+	private JButton closeButton;
+	
 	private JButton heliButton;
 	private JButton clipboardButton;
 	private JButton monitorButton;
 	private JButton realtimeButton;
+	
 	
 	private ConfigFile groupFile;
 	
@@ -95,13 +102,12 @@ public class DataChooser extends JPanel
 	
 	private void createToolBar()
 	{
-		toolBar = new JToolBar();
-		toolBar.setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
-		toolBar.setRollover(true);
-		toolBar.setFloatable(false);
+		toolBar = SwarmUtil.createToolBar();
 		
-		JButton newButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("new_server")))); //$NON-NLS-1$
-		newButton.addActionListener(new ActionListener()
+		newButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("new_server"), //$NON-NLS-1$
+				Messages.getString("DataChooser.newSourceToolTip"), //$NON-NLS-1$
+				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
 					{
@@ -121,14 +127,11 @@ public class DataChooser extends JPanel
 								});
 					}	
 				});
-		newButton.setFocusable(false);
-		newButton.setMargin(new Insets(0,0,0,0));
-		newButton.setToolTipText(Messages.getString("DataChooser.newSourceToolTip")); //$NON-NLS-1$
 		toolBar.add(newButton);
 		
 		JButton editButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("edit_server")))); //$NON-NLS-1$
 		editButton.setFocusable(false);
-		editButton.setMargin(new Insets(0,0,0,0));
+//		editButton.setMargin(new Insets(0,0,0,0));
 		editButton.setToolTipText(Messages.getString("DataChooser.editSourceToolTip")); //$NON-NLS-1$
 		editButton.addActionListener(new ActionListener()
 				{
@@ -164,13 +167,14 @@ public class DataChooser extends JPanel
 					}
 				});
 		collapseButton.setFocusable(false);
-		collapseButton.setMargin(new Insets(0,0,0,0));
+//		collapseButton.setMargin(new Insets(0,0,0,0));
 		collapseButton.setToolTipText(Messages.getString("DataChooser.collapseToolTip")); //$NON-NLS-1$
+		collapseButton.setFocusable(false);
 		toolBar.add(collapseButton);
 		
 		JButton deleteButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("new_delete")))); //$NON-NLS-1$
 		deleteButton.setFocusable(false);
-		deleteButton.setMargin(new Insets(0,0,0,0));
+//		deleteButton.setMargin(new Insets(0,0,0,0));
 		deleteButton.addActionListener(new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
@@ -188,6 +192,21 @@ public class DataChooser extends JPanel
 				});
 		deleteButton.setToolTipText(Messages.getString("DataChooser.removeSourceToolTip")); //$NON-NLS-1$
 		toolBar.add(deleteButton);
+		
+		toolBar.add(Box.createHorizontalGlue());
+		
+		closeButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("close_view"),
+				"Close data chooser",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						Swarm.getApplication().setChooserVisible(false);
+						closeButton.getModel().setRollover(false);
+					}
+				});
+		toolBar.add(closeButton);
 		
 		this.add(toolBar, BorderLayout.NORTH);
 	}
@@ -578,7 +597,7 @@ public class DataChooser extends JPanel
 						rootNode.add(allNode);
 						for (String channel : channels)
 						{
-							DefaultMutableTreeNode node = new DefaultMutableTreeNode(channel);
+							DefaultMutableTreeNode node = new DefaultMutableTreeNode(CHANNEL_CHAR + channel);
 							allNode.add(node);
 							
 							if (groupFile != null)

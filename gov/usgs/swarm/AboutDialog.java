@@ -23,6 +23,9 @@ import javax.swing.border.LineBorder;
  * A class that shows an about dialog with some extra controls.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/04/15 15:58:52  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -60,7 +63,7 @@ public class AboutDialog extends JDialog
 				
 		this.setResizable(false);
 				
-		background = new ImageIcon("images/honeycomb.jpg");
+		background = Images.getIcon("honeycomb");
 		JPanel bp = new JPanel(new BorderLayout());
 		bp.add(new JLabel(background), BorderLayout.CENTER);
 		bp.setSize(237, 245);
@@ -91,13 +94,13 @@ public class AboutDialog extends JDialog
 		mainPanel.add(panel, BorderLayout.CENTER);
 		mainPanel.setSize(224, 100);
 		mainPanel.setLocation(5, 94);
-		panel.setBackground(new Color(255, 255, 0, 150));
+		panel.setBackground(new Color(255, 255, 0, 210));
 		mainPanel.setBackground(new Color(0, 0, 0, 0));
 		this.getLayeredPane().add(mainPanel);
 		this.getLayeredPane().setLayer(mainPanel, JLayeredPane.PALETTE_LAYER.intValue());
 		
 		JPanel title = new JPanel(new GridLayout(4, 1));
-		title.setBackground(new Color(255, 255, 0, 150));
+		title.setBackground(new Color(255, 255, 0, 210));
 		title.setSize(224, 80);
 		title.setLocation(5, 5);
 		title.setBorder(LineBorder.createBlackLineBorder());

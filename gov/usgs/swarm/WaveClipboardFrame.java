@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -44,6 +45,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: refactor, clean up dialog boxes.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/04/15 15:58:52  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.8  2006/04/08 01:31:04  dcervelli
  * Error messages on failed saves, bug #34.
  *
@@ -97,7 +101,7 @@ public class WaveClipboardFrame extends JInternalFrame
 
 	public WaveClipboardFrame()
 	{
-		super("Wave Clipboard", true, false, true, true);
+		super("Wave Clipboard", true, true, true, true);
 		this.setFocusable(true);
 		saveAllDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 		saveAllDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -122,8 +126,9 @@ public class WaveClipboardFrame extends JInternalFrame
 	 
 	public void createUI()
 	{
-		this.setSize(600, 700);
-		this.setLocation(0, 0);
+		this.setFrameIcon(Images.getIcon("clipboard"));
+		this.setSize(Swarm.config.clipboardWidth, Swarm.config.clipboardHeight);
+		this.setLocation(Swarm.config.clipboardX, Swarm.config.clipboardY);
 		mainPanel = new JPanel(new BorderLayout());
 
 		toolbar = new JToolBar();
@@ -209,9 +214,17 @@ public class WaveClipboardFrame extends JInternalFrame
 		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.getVerticalScrollBar().setUnitIncrement(40);
 		mainPanel.add(scrollPane, BorderLayout.CENTER);
-		statusLabel = new JLabel(" ", JLabel.LEFT);
+		statusLabel = new JLabel(" ");
+		statusLabel.setBorder(BorderFactory.createEmptyBorder(1, 3, 1, 1));
 		mainPanel.add(statusLabel, BorderLayout.SOUTH);
 		this.setContentPane(mainPanel);
+		
+		if (Swarm.config.clipboardMaximized)
+		{
+			try { this.setMaximum(true); } catch (Exception e) {}
+		}
+
+		this.setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);
 		
 		this.addInternalFrameListener(new InternalFrameAdapter()
 				{
@@ -225,8 +238,18 @@ public class WaveClipboardFrame extends JInternalFrame
 					{
 						resizeWaves();	
 					}
+					
+					public void internalFrameClosing(InternalFrameEvent e)
+					{
+						setVisible(false);
+					}
+					
+					public void internalFrameClosed(InternalFrameEvent e)
+					{
+						System.out.println("closed");
+					}
 				});
-		this.setVisible(true);
+//		this.setVisible(true);
 	}
 	
 	private class OpenActionListener implements ActionListener

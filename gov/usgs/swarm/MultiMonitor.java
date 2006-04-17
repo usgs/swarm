@@ -9,7 +9,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -17,6 +16,7 @@ import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -24,7 +24,7 @@ import javax.swing.JButton;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
@@ -32,8 +32,13 @@ import javax.swing.event.InternalFrameEvent;
 /**
  * MultiMonitor is a window that is used to display multiple seismic
  * channels in real-time.
- *
+ * 
+ * TODO: save monitor size
+ * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/04/13 16:41:33  dcervelli
+ * Fixed some bugs with the low bandwidth monitor.
+ *
  * Revision 1.6  2006/04/03 05:15:53  dcervelli
  * Reduced bandwidth monitor mode.
  *
@@ -99,51 +104,17 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	private static final Color selectColor = new Color(204, 204, 255);
 	private static final Color backgroundColor = new Color(0xf7, 0xf7, 0xf7);	
 	
+	private Throbber throbber;
+	
 	public MultiMonitor(SeismicDataSource sds)
 	{
-		super("Monitor", true, true, true, true);
+		super("Monitor, [" + sds.getName() + "]", true, true, true, true);
+		this.setFrameIcon(new ImageIcon(getClass().getClassLoader().getResource(Images.get("monitor"))));
 		dataSource = sds;
 		channels = new ArrayList<String>();
 		panels = new ArrayList<WaveViewPanel>();
 		waveBox = new Box(BoxLayout.Y_AXIS);
-		SwingUtilities.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						createUI();
-					}
-				});
-		this.addComponentListener(new ComponentAdapter()
-				{
-					public void componentMoved(ComponentEvent e)
-					{
-						resizeWaves();
-					}
-					
-					public void componentResized(ComponentEvent e)
-					{
-						resizeWaves();
-					}
-				});
-		this.addInternalFrameListener(new InternalFrameAdapter()
-			  {
-					public void internalFrameOpened(InternalFrameEvent e)
-					{
-						resizeWaves();
-					}
-					
-					public void internalFrameClosing(InternalFrameEvent e)
-					{
-						dataSource.close();
-						panels.clear();
-						channels.clear();
-						waveBox.removeAll();
-//						wavePanel.removeAll();
-						MultiMonitor.this.setVisible(true);
-					}
-			  });
-
-		this.setDefaultCloseOperation(JInternalFrame.HIDE_ON_CLOSE);
+		createUI();
 		refreshThread = new Thread(this);
 		refreshThread.start();
 	}
@@ -185,15 +156,17 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		this.setSize(600, 700);
 		this.setLocation(100, 0);
 		mainPanel = new JPanel(new BorderLayout());
+		Border border = BorderFactory.createCompoundBorder(
+				BorderFactory.createEmptyBorder(0, 2, 0, 3), 
+				LineBorder.createGrayLineBorder());
+//		mainPanel.setBorder(border);
 		
-		toolbar = new JToolBar();
-		toolbar.setFloatable(false);
-		toolbar.setRollover(true);
+		toolbar = SwarmUtil.createToolBar();
 
-		optionsButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("settings"))));
-		optionsButton.setToolTipText("Monitor options");
-		optionsButton.setMargin(new Insets(0,0,0,0));
-		optionsButton.addActionListener(new ActionListener()
+		optionsButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("settings"),
+				"Monitor options",
+				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
 					{
@@ -202,12 +175,13 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 					}
 				});
 		toolbar.add(optionsButton);
+		
 		toolbar.addSeparator();
 		
-		compXButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("xminus"))));
-		compXButton.setMargin(new Insets(0,0,0,0));
-		compXButton.setToolTipText("Shrink time axis");
-		compXButton.addActionListener(new ActionListener()
+		compXButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("xminus"),
+				"Shrink time axis",
+				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
 					{
@@ -217,10 +191,10 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 				});
 		toolbar.add(compXButton);
 		
-		expXButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("xplus"))));
-		expXButton.setMargin(new Insets(0,0,0,0));
-		expXButton.setToolTipText("Expand time axis");
-		expXButton.addActionListener(new ActionListener()
+		expXButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("xplus"),
+				"Expand time axis",
+				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
 					{
@@ -229,12 +203,13 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 					}
 				});
 		toolbar.add(expXButton);
+		
 		toolbar.addSeparator();
 		
-		settingsButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("wavesettings"))));
-		settingsButton.setMargin(new Insets(0,0,0,0));
-		settingsButton.setToolTipText("Settings for selected wave");
-		settingsButton.addActionListener(new ActionListener()
+		settingsButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("wavesettings"),
+				"Settings for selected wave",
+				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
 					{
@@ -250,10 +225,10 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		
 		toolbar.addSeparator();
 		
-		removeButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("delete"))));
-		removeButton.setMargin(new Insets(0,0,0,0));
-		removeButton.setToolTipText("Remove selected wave from monitor");
-		removeButton.addActionListener(new ActionListener()
+		removeButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("delete"),
+				"Remove selected wave from monitor",
+				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
 					{
@@ -262,17 +237,62 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 							removeWaveAtIndex(selectedIndex);
 							selectedIndex = -1;
 						}
-						
 					}
 				});
 		toolbar.add(removeButton);
+		
+		toolbar.add(Box.createHorizontalGlue());
+		
+		throbber = new Throbber();
+		toolbar.add(throbber);
+		
 		mainPanel.add(toolbar, BorderLayout.NORTH);
 		mainPanel.add(waveBox, BorderLayout.CENTER);
 		
-		waveBox.setBorder(LineBorder.createGrayLineBorder());
-		
+//		waveBox.setBorder(LineBorder.createGrayLineBorder());
+		border = BorderFactory.createCompoundBorder(
+				BorderFactory.createEmptyBorder(0, 2, 3, 3), 
+				LineBorder.createGrayLineBorder());
+		waveBox.setBorder(border);
+
+		createListeners();
 		this.setContentPane(mainPanel);
 		this.setVisible(true);
+	}
+	
+	private void createListeners()
+	{
+		this.addComponentListener(new ComponentAdapter()
+				{
+					public void componentMoved(ComponentEvent e)
+					{
+						resizeWaves();
+					}
+					
+					public void componentResized(ComponentEvent e)
+					{
+						resizeWaves();
+					}
+				});
+		
+		this.addInternalFrameListener(new InternalFrameAdapter()
+			  {
+					public void internalFrameOpened(InternalFrameEvent e)
+					{
+						resizeWaves();
+					}
+					
+					public void internalFrameClosing(InternalFrameEvent e)
+					{
+						dataSource.close();
+						panels.clear();
+						channels.clear();
+						waveBox.removeAll();
+						MultiMonitor.this.setVisible(true);
+					}
+			  });
+
+		this.setDefaultCloseOperation(JInternalFrame.HIDE_ON_CLOSE);
 	}
 	
 	public synchronized void addChannel(String ch)
@@ -324,12 +344,26 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	{
 		if (panels.size () == 0 || waveBox == null)
 			return;
-		int dy = waveBox.getHeight() / panels.size();
+		int ah = waveBox.getHeight() - 5;
+		double dy = ((double)ah / (double)panels.size());
+		int wh = (int)Math.round(dy);
+		int th = wh * panels.size();
+		int dh = th - ah;
 		for (int i = 0; i < panels.size(); i++)
 		{
 			WaveViewPanel wvp = panels.get(i);
-			wvp.setLocation(0, dy * i);
-			wvp.setSize(this.getWidth(), dy);
+			int awh = wh;
+			if (dh < 0)
+			{
+				awh++;
+				dh++;
+			}
+			else if (dh > 0)
+			{
+				awh--;
+				dh--;
+			}
+			wvp.setSize(this.getWidth(), awh);
 		}
 		waveBox.validate();
 		repaint();
@@ -337,6 +371,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	
 	public synchronized void refresh()
 	{
+		throbber.increment();
 		CachedDataSource cache = Swarm.getCache();
 		double now = CurrentTime.getInstance().nowJ2K();
 		double start = now - SPANS[spanIndex];
@@ -372,6 +407,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		}
 		if (!this.isVisible())
 			dataSource.close();
+		throbber.decrement();
 	}
 	
 	public void run()

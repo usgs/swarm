@@ -17,6 +17,9 @@ import java.util.List;
  * 4) Individual command line config key/values.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/04/15 15:53:09  dcervelli
+ * Initial commit.
+ *
  * @author Dan Cervelli
  */
 public class Config
@@ -54,6 +57,14 @@ public class Config
 	public List<String> servers;
 	
 	public int chooserDividerLocation;
+	public boolean chooserVisible;
+	
+	public boolean clipboardVisible;
+	public int clipboardX;
+	public int clipboardY;
+	public int clipboardWidth;
+	public int clipboardHeight;
+	public boolean clipboardMaximized;
 
 	public static Config createConfig(String[] args)
 	{
@@ -94,13 +105,14 @@ public class Config
 		windowY = Util.stringToInt(config.getString("windowY"), 50);
 		windowWidth = Util.stringToInt(config.getString("windowSizeX"), 800);
 		windowHeight = Util.stringToInt(config.getString("windowSizeY"), 600);
+		windowMaximized = Util.stringToBoolean(config.getString("windowMaximized"), false);
 		
 		chooserDividerLocation = Util.stringToInt(config.getString("chooserDividerLocation"), 200);
+		chooserVisible = Util.stringToBoolean(config.getString("chooserVisible"), true);
 		
 		timeZoneAbbr = Util.stringToString(config.getString("timeZoneAbbr"), "UTC");
 		timeZoneOffset = Util.stringToDouble(config.getString("timeZoneOffset"), 0);
 		
-		windowMaximized = Util.stringToBoolean(config.getString("windowMaximized"), false);
 		useLargeCursor = Util.stringToBoolean(config.getString("useLargeCursor"), false);
 		
 		span = Util.stringToInt(config.getString("span"), 24);
@@ -120,6 +132,13 @@ public class Config
 		showClip = Util.stringToBoolean(config.getString("showClip"), true);
 		alertClip = Util.stringToBoolean(config.getString("alertClip"), false);
 		alertClipTimeout = Util.stringToInt(config.getString("alertClipTimeout"), 5);
+		
+		clipboardVisible = Util.stringToBoolean(config.getString("clipboardVisible"), true);
+		clipboardX = Util.stringToInt(config.getString("clipboardX"), 5);
+		clipboardY = Util.stringToInt(config.getString("clipboardY"), 5);
+		clipboardWidth = Util.stringToInt(config.getString("clipboardSizeX"), 600);
+		clipboardHeight = Util.stringToInt(config.getString("clipboardSizeY"), 700);
+		clipboardMaximized = Util.stringToBoolean(config.getString("clipboardMaximized"), false);
 		
 		servers = config.getList("server");
 		if (servers == null)
@@ -174,6 +193,7 @@ public class Config
 		config.put("windowSizeX", Integer.toString(windowWidth));
 		config.put("windowSizeY", Integer.toString(windowHeight));
 		config.put("chooserDividerLocation", Integer.toString(chooserDividerLocation));
+		config.put("chooserVisible", Boolean.toString(chooserVisible));
 		
 		config.put("timeZoneAbbr", timeZoneAbbr);
 		config.put("timeZoneOffset", Double.toString(timeZoneOffset));
@@ -199,6 +219,13 @@ public class Config
 		config.put("alertClip", Boolean.toString(alertClip));
 		config.put("alertClipTimeout", Integer.toString(alertClipTimeout));
 
+		config.put("clipboardVisible", Boolean.toString(clipboardVisible));
+		config.put("clipboardX", Integer.toString(clipboardX));
+		config.put("clipboardY", Integer.toString(clipboardY));
+		config.put("clipboardSizeX", Integer.toString(clipboardWidth));
+		config.put("clipboardSizeY", Integer.toString(clipboardHeight));
+		config.put("clipboardMaximized", Boolean.toString(clipboardMaximized));
+		
 		config.putList("server", servers);
 		
 		return config;
