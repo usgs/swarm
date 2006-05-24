@@ -1,5 +1,8 @@
 <!--
 $Log: not supported by cvs2svn $
+Revision 1.5  2005/09/22 21:06:40  dcervelli
+Changed classpath, distro files.
+
 Revision 1.4  2005/09/20 20:44:20  dcervelli
 Fixed classpath (again).
 
@@ -27,7 +30,7 @@ Initial commit.
 	<description>USGS Swarm Build File</description>
 
 	<property name="source" location="." />
-	<property name="classpath" location="../USGS/lib/winston.jar;../USGS/lib/vdx.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/seed-pdcc.jar"/>
+	<property name="classpath" location="../USGS/lib/winston.jar;../USGS/lib/vdx.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/seed-pdcc.jar;../USGS/contrib/looks-2.0.1.jar"/>
 	<property name="jarfile" value="swarm.jar" />
 
 	<property name="bin-dir" location="../swarm-bin" />
