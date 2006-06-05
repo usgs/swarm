@@ -1,36 +1,14 @@
 package gov.usgs.swarm;
 
-import gov.usgs.swarm.data.CachedDataSource;
-import gov.usgs.swarm.data.SeismicDataSource;
-import gov.usgs.util.Util;
-import gov.usgs.vdx.data.wave.Wave;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Stack;
-import java.util.TimeZone;
-
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLayeredPane;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JToolBar;
-import javax.swing.border.LineBorder;
 
 /**
  * This is a panel that holds a <code>WaveViewPanel</code> on the
  * Wave Clipboard.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/04/17 04:16:36  dcervelli
+ * More 1.3 changes.
+ *
  * Revision 1.6  2006/04/15 15:58:52  dcervelli
  * 1.3 changes (renaming, new datachooser, different config).
  *
@@ -54,15 +32,17 @@ import javax.swing.border.LineBorder;
  *
  * @author Dan Cervelli
  */
-public class ClipboardWaveViewPanel extends JPanel
+public class ClipboardWaveViewPanel extends WaveViewPanel
 {
+	private static final long serialVersionUID = 1L;
+	
+	/*
 	private static final long serialVersionUID = -1;
 
 	private WaveViewPanel waveViewPanel;
 	private JLayeredPane mainPane;
 	private JPanel mainPanel;
 	private JToolBar toolbar;
-//	private JButton showToolbar;
 	private JButton upButton;
 	private JButton downButton;
 	private JButton removeButton;
@@ -92,47 +72,12 @@ public class ClipboardWaveViewPanel extends JPanel
 		//waveViewPanel.setDataSource(waveViewPanel.getDataSource().getCopy());
 		//waveViewPanel.setStackMode(true);
 		waveViewPanel.setDisplayTitle(true);
-		waveViewPanel.setClipboardPanel(this);
+		waveViewPanel.addListener(new ClipboardWaveViewPanelListener());
+//		waveViewPanel.setClipboardPanel(this);
 		mainPane = new JLayeredPane();
 		
 		toolbar = new JToolBar();
 		toolbar.setFloatable(false);
-//		JButton hideTB = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("minimize"))));
-//		hideTB.setToolTipText("Hide toolbar");
-//		hideTB.setMargin(new Insets(0,0,0,0));
-//		hideTB.addActionListener(new ActionListener()
-//				{
-//					public void actionPerformed(ActionEvent e)
-//					{
-//						showToolbar.setVisible(true);
-//						mainPanel.remove(toolbar);
-//						mainPanel.validate();
-//						repaint();
-//						waveViewPanel.requestFocus();
-//					}
-//				});
-//		
-//		toolbar.add(hideTB);
-//		toolbar.addSeparator();
-		
-//		showToolbar = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("maximize"))));
-//		showToolbar.setToolTipText("Show toolbar");
-//		showToolbar.setMargin(new Insets(0, 0, 0, 0));
-//		showToolbar.setSize(24, 24);
-//		showToolbar.setLocation(0, 0);
-//		showToolbar.setVisible(false);
-//		showToolbar.addActionListener(new ActionListener()
-//				{
-//					public void actionPerformed(ActionEvent e)
-//					{
-//						showToolbar.setVisible(false);
-//						mainPanel.add(toolbar, BorderLayout.NORTH);	
-//						mainPanel.doLayout();
-//						waveViewPanel.requestFocus();
-//					}
-//				});
-//		mainPane.add(showToolbar);
-//		mainPane.setLayer(showToolbar, JLayeredPane.PALETTE_LAYER.intValue());
 		
 		backButton = new JButton(new ImageIcon(getClass().getClassLoader().getResource(Images.get("left"))));
 		backButton.setMargin(new Insets(0,0,0,0));
@@ -288,6 +233,28 @@ public class ClipboardWaveViewPanel extends JPanel
 		this.add(mainPane, BorderLayout.CENTER);
 	}
 
+	private class ClipboardWaveViewPanelListener implements WaveViewPanelListener
+	{
+
+		public void waveZoomed(double st, double et)
+		{
+			didZoom(st, et);
+		}
+
+		public void mousePressed(MouseEvent e)
+		{
+			select();
+		}
+
+		public void waveClosed()
+		{
+			close();
+		}
+		
+		public void waveTimePressed(MouseEvent e, double j2k)
+		{}
+	}
+	
 	public void close()
 	{
 		waveViewPanel.getDataSource().close();
@@ -314,8 +281,8 @@ public class ClipboardWaveViewPanel extends JPanel
 
 	public void select()
 	{
-		if (!selected)
-			clipboard.select(ClipboardWaveViewPanel.this);
+//		if (!selected)
+//			clipboard.select(ClipboardWaveViewPanel.this);
 			
 		requestFocus();
 	}
@@ -452,7 +419,6 @@ public class ClipboardWaveViewPanel extends JPanel
 					public Object construct()
 					{
 						disableNavigationButtons();
-						Swarm.getApplication().incThreadCount();
 						System.out.println(waveViewPanel.getDataSource().getClass());
 						SeismicDataSource sds = waveViewPanel.getDataSource();
 						// Hacky fix for bug #84
@@ -467,11 +433,11 @@ public class ClipboardWaveViewPanel extends JPanel
 					
 					public void finished()
 					{
-						Swarm.getApplication().decThreadCount();
 						repaint();	
 						enableNavigationButtons();
 					}
 				};
 		worker.start();	
 	}
+	*/
 }

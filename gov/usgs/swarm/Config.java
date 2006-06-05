@@ -1,10 +1,13 @@
 package gov.usgs.swarm;
 
+import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Swarm configuration class. 
@@ -17,6 +20,9 @@ import java.util.List;
  * 4) Individual command line config key/values.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/04/17 04:16:36  dcervelli
+ * More 1.3 changes.
+ *
  * Revision 1.1  2006/04/15 15:53:09  dcervelli
  * Initial commit.
  *
@@ -54,8 +60,6 @@ public class Config
 	public boolean saveConfig;
 	public String groupConfigFile;
 	
-	public List<String> servers;
-	
 	public int chooserDividerLocation;
 	public boolean chooserVisible;
 	
@@ -66,6 +70,8 @@ public class Config
 	public int clipboardHeight;
 	public boolean clipboardMaximized;
 
+	public Map<String, SeismicDataSource> sources;
+	
 	public static Config createConfig(String[] args)
 	{
 		String configFile = DEFAULT_CONFIG_FILE;
@@ -140,38 +146,56 @@ public class Config
 		clipboardHeight = Util.stringToInt(config.getString("clipboardSizeY"), 700);
 		clipboardMaximized = Util.stringToBoolean(config.getString("clipboardMaximized"), false);
 		
-		servers = config.getList("server");
-		if (servers == null)
-			servers = new ArrayList<String>();
-	}
-	
-	public void addServer(String server)
-	{
-		servers.add(server);
-	}
-	
-	public void removeServer(String server)
-	{
-		servers.remove(server);
-	}
-	
-	public String getServer(String abbr)
-	{
-		if (servers == null)
-			return null;
-		
-		for (String server : servers)
+		sources = new TreeMap<String, SeismicDataSource>();
+		List<String> servers = config.getList("server");
+		if (servers != null)
 		{
-			if (server.startsWith(abbr))
-				return server;
+			
+			for (String server : servers)
+			{
+				SeismicDataSource sds = SeismicDataSource.getDataSource(server);
+				sources.put(sds.getName(), sds);
+			}
 		}
-		return null;
 	}
 	
-	public boolean serverExists(String abbr)
+	public SeismicDataSource getSource(String key)
 	{
-		return getServer(abbr) != null;
+		return sources.get(key);
 	}
+	
+	public boolean sourceExists(String key)
+	{
+		return sources.containsKey(key);
+	}
+	
+	public void addSource(SeismicDataSource source)
+	{
+		sources.put(source.getName(), source);
+	}
+	
+	public void removeSource(String key)
+	{
+		sources.remove(key);
+	}
+//	
+//	public String getServer(String abbr)
+//	{
+//		if (servers == null)
+//			return null;
+//		
+//		for (String server : servers)
+//		{
+//			if (server.startsWith(abbr))
+//				return server;
+//		}
+//		return null;
+//	}
+//	
+//	public boolean serverExists(String abbr)
+//	{
+//		return getServer(abbr) != null;
+//	}
 	
 	public double getDurationMagnitude(double t)
 	{
@@ -225,6 +249,10 @@ public class Config
 		config.put("clipboardSizeX", Integer.toString(clipboardWidth));
 		config.put("clipboardSizeY", Integer.toString(clipboardHeight));
 		config.put("clipboardMaximized", Boolean.toString(clipboardMaximized));
+		
+		List<String> servers = new ArrayList<String>(); 
+		for (SeismicDataSource sds : sources.values())
+			servers.add(sds.toConfigString());
 		
 		config.putList("server", servers);
 		

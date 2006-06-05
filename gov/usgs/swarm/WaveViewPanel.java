@@ -4,8 +4,10 @@ import gov.usgs.math.Filter;
 import gov.usgs.plot.FrameRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.TextRenderer;
+import gov.usgs.swarm.WaveViewSettings.ViewType;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
+import gov.usgs.util.Time;
 import gov.usgs.util.Util;
 import gov.usgs.vdx.data.wave.SliceWave;
 import gov.usgs.vdx.data.wave.Wave;
@@ -20,28 +22,30 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Paint;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.TimeZone;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.event.EventListenerList;
 
 /**
  * A component that renders a wave in either a standard wave view, a frequency spectra, or 
  * spectrogram.  Relies heavily on the Valve plotting package.
  *
+ * TODO: move filter method
+ *
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2006/04/17 04:16:36  dcervelli
+ * More 1.3 changes.
+ *
  * Revision 1.16  2006/04/15 15:58:52  dcervelli
  * 1.3 changes (renaming, new datachooser, different config).
  *
@@ -105,24 +109,19 @@ public class WaveViewPanel extends JComponent
 {
 	public static final long serialVersionUID = -1;
 	
-	/** X pixel location of where the main plot axis should be located on the component. 
-	*/
+	/** X pixel location of where the main plot axis should be located on the component. */
 	public static final int X_OFFSET = 60;
 	
-	/** Y pixel location of where the main plot axis should be located on the component.
-	*/
+	/** Y pixel location of where the main plot axis should be located on the component. */
 	public static final int Y_OFFSET = 20;
 	
-	/** The amount of padding space on the right side.
-	*/
+	/** The amount of padding space on the right side. */
 	public static final int RIGHT_WIDTH = 20;
 	
-	/** The amount of padding space on the bottom.
-	*/
+	/** The amount of padding space on the bottom. */
 	public static final int BOTTOM_HEIGHT = 20;
 	
-//	private static final int[] SAMPLE_SIZES = new int[] {64, 128, 256, 512, 1024, 2048};
-//	private static final double LOG10 = Math.log(10);
+	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 	
 	private Plot plot;
 	private SliceWaveRenderer waveRenderer;
@@ -148,26 +147,22 @@ public class WaveViewPanel extends JComponent
 	private static boolean shownNyquistWarning = false;
 	
 	/** The data source to use for zoom drags.  This should probably be moved from this class
-	 * to follow a stricter interpretation of MVC.
-	 */
+	 * to follow a stricter interpretation of MVC. */
 	private SeismicDataSource source;
 	
 	/** A flag to indicate wheter the plot should display a title.  Currently used
-	 * when the plot is on the clipboard.
-	 */
+	 * when the plot is on the clipboard or monitor. */
 	private boolean displayTitle;
 	
 	/** The frame renderers whose axis the title will be attached to if the title is 
-	 * to be displayed.
-	 */
+	 * to be displayed. */
 	private FrameRenderer titleFrame;
 	
 	private Color backgroundColor;
-	private DateFormat dateFormat;
-	private NumberFormat numberFormat;
+//	private DateFormat dateFormat;
+//	private NumberFormat numberFormat;
 	private JLabel statusLabel;
 	
-	// variable used for zoom dragging mode
 	private boolean allowDragging;
 	private boolean dragging;
 	private double j2k1;
@@ -176,19 +171,9 @@ public class WaveViewPanel extends JComponent
 	private int highlightX2;
 	
 	private static Image closeImg;
-	private ActionListener closeListener;
+	private boolean allowClose;
 	
-	/** A callback reference to the clipboard if this wave view lives in a clipboard.
-	 */
-	private ClipboardWaveViewPanel clipboardPanel;
-	
-	/** A callback reference to the helicorder view if this wave view lives in a helicorder.
-	 */
-	private HelicorderViewPanel heliViewPanel;
-	
-	/** A callback reference to the clipboard if this wave view lives in a monitor.
-	 */
-	private MultiMonitor monitor;
+	private EventListenerList listeners = new EventListenerList();
 	
 	/** A flag that indicates whether data are being loaded for this panel.
 	 */
@@ -213,9 +198,9 @@ public class WaveViewPanel extends JComponent
 	 */
 	public WaveViewPanel(WaveViewSettings s)
 	{
-		dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-		numberFormat = new DecimalFormat("#.###");
+//		dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+//		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+//		numberFormat = new DecimalFormat("#.###");
 
 		settings = s;
 		s.view = this;
@@ -230,9 +215,9 @@ public class WaveViewPanel extends JComponent
 	 */
 	public WaveViewPanel(WaveViewPanel p)
 	{
-		dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-		numberFormat = new DecimalFormat("#.###");
+//		dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+//		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+//		numberFormat = new DecimalFormat("#.###");
 		channel = p.channel;
 		source = p.source;
 		startTime = p.startTime;	
@@ -250,14 +235,55 @@ public class WaveViewPanel extends JComponent
 		wave = p.wave;
 		displayTitle = p.displayTitle;
 		backgroundColor = p.backgroundColor;
-		closeListener = null;
 		setupMouseHandler();
 		processSettings();
 	}
 
-	public void setCloseListener(ActionListener al)
+	public void addListener(WaveViewPanelListener listener)
 	{
-		closeListener = al;
+		listeners.add(WaveViewPanelListener.class, listener);
+	}
+	
+	public void removeListener(WaveViewPanelListener listener)
+	{
+		listeners.remove(WaveViewPanelListener.class, listener);
+	}
+
+	public void fireZoomed(MouseEvent e, double oldST, double oldET)
+	{
+		Object[] ls = listeners.getListenerList();
+	     for (int i = ls.length - 2; i >= 0; i -= 2)
+	         if (ls[i] == WaveViewPanelListener.class)
+	             ((WaveViewPanelListener)ls[i + 1]).waveZoomed(oldST, oldET);
+	}
+	
+	public void fireTimePressed(MouseEvent e, double j2k)
+	{
+		Object[] ls = listeners.getListenerList();
+	     for (int i = ls.length - 2; i >= 0; i -= 2)
+	         if (ls[i] == WaveViewPanelListener.class)
+	             ((WaveViewPanelListener)ls[i + 1]).waveTimePressed(e, j2k);
+	}
+	
+	public void fireMousePressed(MouseEvent e)
+	{
+	     Object[] ls = listeners.getListenerList();
+	     for (int i = ls.length - 2; i >= 0; i -= 2)
+	         if (ls[i] == WaveViewPanelListener.class)
+	             ((WaveViewPanelListener)ls[i + 1]).mousePressed(e);
+	}
+	
+	public void fireClose()
+	{
+	     Object[] ls = listeners.getListenerList();
+	     for (int i = ls.length - 2; i >= 0; i -= 2)
+	         if (ls[i] == WaveViewPanelListener.class)
+	             ((WaveViewPanelListener)ls[i + 1]).waveClosed();
+	}
+	
+	public void setAllowClose(boolean b)
+	{
+		allowClose = b;
 	}
 	
 	private void setupMouseHandler()
@@ -270,10 +296,9 @@ public class WaveViewPanel extends JComponent
 					{
 						Swarm.getApplication().touchUITime();
 						
-						if (clipboardPanel != null)
-							clipboardPanel.select();
-						if (monitor != null)
-							monitor.select(WaveViewPanel.this);
+						fireMousePressed(e);
+//						if (monitor != null)
+//							monitor.select(WaveViewPanel.this);
 						
 						double[] t = getTranslation();
 						if (t == null)
@@ -282,20 +307,15 @@ public class WaveViewPanel extends JComponent
 						int x = e.getX();
 						double j2k = x * t[0] + t[1];
 						if (timeSeries)
-							System.out.printf("%s, UTC: %s, j2k: %.3f, ew: %.3f\n", channel, dateFormat.format(Util.j2KToDate(j2k)), j2k, Util.j2KToEW(j2k));
+							System.out.printf("%s UTC: %s j2k: %.3f ew: %.3f\n", channel, Time.format(DATE_FORMAT, Util.j2KToDate(j2k)), j2k, Util.j2KToEW(j2k));
 						
 						if (SwingUtilities.isRightMouseButton(e) )
 						{
 							settings.cycleType();
 						}
 
-						if (Swarm.config.durationEnabled && timeSeries && heliViewPanel != null && SwingUtilities.isLeftMouseButton(e))
-						{
-							if (j2k >= startTime && j2k <= endTime)
-								heliViewPanel.markTime(j2k);
-							
-							processMousePosition(x, e.getY());
-						}
+						if (timeSeries && j2k >= startTime && j2k <= endTime)
+							fireTimePressed(e, j2k);
 						
 						if (timeSeries && allowDragging && SwingUtilities.isLeftMouseButton(e))
 						{
@@ -307,7 +327,7 @@ public class WaveViewPanel extends JComponent
 								j2k1 = j2k2 = j2k;
 							    if (e.isControlDown())
 							    {
-									System.out.println(channel + ": " + dateFormat.format(Util.j2KToDate(j2k1)));
+									System.out.println(channel + ": " + Time.format(DATE_FORMAT, Util.j2KToDate(j2k1)));
 							    }
 							    else
 							    {
@@ -324,17 +344,18 @@ public class WaveViewPanel extends JComponent
 						if (SwingUtilities.isLeftMouseButton(e) && dragging)
 						{	
 							dragging = false;
+							fireZoomed(e, getStartTime(), getEndTime());
 							zoomDraggedArea();
 							repaint();
 						}
 						
 						int mx = e.getX();
 						int my = e.getY();
-						if (closeListener != null && SwingUtilities.isLeftMouseButton(e) &&  
+						if (allowClose && SwingUtilities.isLeftMouseButton(e) &&  
 								mx > WaveViewPanel.this.getWidth() - 17 && mx < WaveViewPanel.this.getWidth() - 3 && 
 								my > 2 && my < 17)
 						{
-							closeListener.actionPerformed(null);
+							fireClose();
 						}
 					}
 					
@@ -400,9 +421,6 @@ public class WaveViewPanel extends JComponent
 		if (j2k1 == j2k2 || source == null)
 			return;
 		
-		if (clipboardPanel != null)
-			clipboardPanel.didZoom(startTime, endTime);	
-			
 		final double st = Math.min(j2k1, j2k2);	
 		final double et = Math.max(j2k1, j2k2);
 		
@@ -410,7 +428,6 @@ public class WaveViewPanel extends JComponent
 				{
 					public Object construct()
 					{
-						Swarm.getApplication().incThreadCount();
 						Wave sw = null;
 						if (source instanceof CachedDataSource)
 							sw = ((CachedDataSource)source).getBestWave(channel, st, et);
@@ -423,7 +440,7 @@ public class WaveViewPanel extends JComponent
 					
 					public void finished()
 					{
-						Swarm.getApplication().decThreadCount();
+						
 						repaint();	
 					}
 				};
@@ -445,26 +462,6 @@ public class WaveViewPanel extends JComponent
 	public void setAllowDragging(boolean b)
 	{
 		allowDragging = b;	
-	}
-
-	public void setClipboardPanel(ClipboardWaveViewPanel p)
-	{
-		clipboardPanel = p;	
-	}
-	
-	public void setHelicorderPanel(HelicorderViewPanel p)
-	{
-		heliViewPanel = p;
-	}
-	
-	public HelicorderViewPanel getHelicorderPanel()
-	{
-		return heliViewPanel;
-	}
-	
-	public void setMonitor(MultiMonitor m)
-	{
-		monitor = m;
 	}
 
 	public void setStatusLabel(JLabel l)
@@ -558,7 +555,8 @@ public class WaveViewPanel extends JComponent
 	 */
 	public void setBackgroundColor(Color c)
 	{
-		backgroundColor = c;	
+		backgroundColor = c;
+		invalidateImage();
 	}
 	
 	/** Processes the mouse position variables when the cursor is over the panel.
@@ -579,12 +577,12 @@ public class WaveViewPanel extends JComponent
 			double yi = y * -t[2] + t[3];
 			if (timeSeries)
 			{
-				String utc = dateFormat.format(Util.j2KToDate(j2k));
+				String utc = Time.format(DATE_FORMAT, Util.j2KToDate(j2k));
 				double tzo = Swarm.config.timeZoneOffset;
 				if (tzo != 0)
 				{
 					String tza = Swarm.config.timeZoneAbbr;
-					status = dateFormat.format(Util.j2KToDate(j2k + tzo * 3600)) + " (" + tza + "), " +
+					status = Time.format(DATE_FORMAT, Util.j2KToDate(j2k + tzo * 3600)) + " (" + tza + "), " +
 							utc + " (UTC)";
 				}
 				else
@@ -592,16 +590,16 @@ public class WaveViewPanel extends JComponent
 				Calibration cb = Swarm.getApplication().getCalibration(channel);
 				if (cb == null)
 					cb = Calibration.IDENTITY;
-				status = status + ", Y: " + numberFormat.format(cb.multiplier * yi + cb.offset);
+				status = String.format("%s, Y: %.3f", status, cb.multiplier * yi + cb.offset);
 			}
 			else
 			{
 				double xi = j2k;
-				if (settings.type == WaveViewSettings.SPECTRA && settings.logFreq)
+				if (settings.viewType == ViewType.SPECTRA && settings.logFreq)
 					xi = Math.pow(10.0, xi);
-				if (settings.type == WaveViewSettings.SPECTRA && settings.logPower)
+				if (settings.viewType == ViewType.SPECTRA && settings.logPower)
 					yi = Math.pow(10.0, yi);
-				status = "X: " + numberFormat.format(xi) + ", Y: " + numberFormat.format(yi);
+				status = String.format("X: %.3f, Y: %.3f", xi, yi);
 			}
 		}
 		else
@@ -669,7 +667,7 @@ public class WaveViewPanel extends JComponent
 			shownNyquistWarning = true;
 		}
 			
-		timeSeries = !(settings.type == WaveViewSettings.SPECTRA);
+		timeSeries = !(settings.viewType == ViewType.SPECTRA);
 		
 		if (getParent() != null)
 			getParent().repaint();
@@ -710,29 +708,6 @@ public class WaveViewPanel extends JComponent
 		w.invalidateStatistics();
 	}
 
-//	private static final Color DARK_GREEN = new Color(0, 168, 0);
-	
-//	private void paintMark(Graphics2D g2, double j2k)
-//	{
-//		if (Double.isNaN(j2k) || j2k < startTime || j2k > endTime)
-//			return;
-//		
-//		double[] t = getTranslation();
-//		double x = (j2k - t[1]) / t[0];
-//		g2.setColor(DARK_GREEN);
-//		g2.draw(new Line2D.Double(x, Y_OFFSET, x, getSize().height - Y_OFFSET));
-//		
-//		GeneralPath gp = new GeneralPath();
-//		gp.moveTo((float)x, (float)Y_OFFSET);
-//		gp.lineTo((float)x - 5, Y_OFFSET - 7);
-//		gp.lineTo((float)x + 5, Y_OFFSET - 7);
-//		gp.closePath();
-//		g2.setPaint(Color.GREEN);
-//		g2.fill(gp);
-//		g2.setColor(DARK_GREEN);
-//		g2.draw(gp);
-//	}
-	
 	/** Paints the component on the specified graphics context.
 	 * @param g the graphics context
 	 */
@@ -771,16 +746,18 @@ public class WaveViewPanel extends JComponent
 			if (dragging)
 				paintDragBox(g2);
 			
-//			paintMark(g2, mark1);
-//			paintMark(g2, mark2);
-
-			if (closeListener != null)
+			if (!Double.isNaN(mark1))
+				paintMark(g2, mark1);
+			
+			if (!Double.isNaN(mark2))
+				paintMark(g2, mark2);
+			
+			if (allowClose)
 			{
 				if (closeImg == null)
 					closeImg = Images.getIcon("close_view").getImage();
 				
 				g2.drawImage(closeImg, dim.width - 17, 3, null);
-
 			}
 		}
 	}
@@ -824,12 +801,18 @@ public class WaveViewPanel extends JComponent
 				bias = (int)Math.round(renderWave.mean());
 		}
 						
-		if (settings.type == WaveViewSettings.WAVE)
-			plotWave(renderWave);
-		else if (settings.type == WaveViewSettings.SPECTRA)
-			plotSpectra(renderWave);
-		else if (settings.type == WaveViewSettings.SPECTROGRAM)
-			plotSpectrogram(renderWave);
+		switch (settings.viewType)
+		{
+			case WAVE:
+				plotWave(renderWave);
+				break;
+			case SPECTRA:
+				plotSpectra(renderWave);
+				break;
+			case SPECTROGRAM:
+				plotSpectrogram(renderWave);
+				break;
+		}
 			
 		if (channel != null && displayTitle && titleFrame != null)
 			titleFrame.getAxis().setTopLabelAsText(channel);
@@ -977,6 +960,29 @@ public class WaveViewPanel extends JComponent
 		g2.setPaint(new Color(255, 255, 0, 128));
 		g2.fillRect(x1, Y_OFFSET + 1, width, getSize().height - BOTTOM_HEIGHT - Y_OFFSET);
 		g2.setPaint(pnt);
+	}
+	
+	private static final Color DARK_GREEN = new Color(0, 168, 0);
+	
+	private void paintMark(Graphics2D g2, double j2k)
+	{
+		if (Double.isNaN(j2k) || j2k < startTime || j2k > endTime)
+			return;
+		
+		double[] t = getTranslation();
+		double x = (j2k - t[1]) / t[0];
+		g2.setColor(DARK_GREEN);
+		g2.draw(new Line2D.Double(x, Y_OFFSET, x, getSize().height - Y_OFFSET));
+		
+		GeneralPath gp = new GeneralPath();
+		gp.moveTo((float)x, Y_OFFSET);
+		gp.lineTo((float)x - 5, Y_OFFSET - 7);
+		gp.lineTo((float)x + 5, Y_OFFSET - 7);
+		gp.closePath();
+		g2.setPaint(Color.GREEN);
+		g2.fill(gp);
+		g2.setColor(DARK_GREEN);
+		g2.draw(gp);
 	}
 	
 	/** Overload of Component.  Always returns the developer-specified size.

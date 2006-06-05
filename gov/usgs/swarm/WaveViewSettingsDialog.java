@@ -1,18 +1,10 @@
 package gov.usgs.swarm;
 
 import gov.usgs.math.Butterworth.FilterType;
-import gov.usgs.util.GridBagHelper;
-import gov.usgs.util.ui.BaseDialog;
+import gov.usgs.swarm.WaveViewSettings.ViewType;
 
 import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
-import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -20,76 +12,69 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * 
  * $Log: not supported by cvs2svn $
- * Revision 1.2  2005/09/02 16:12:14  dcervelli
- * Changes for Butterworth enum.
- *
- * Revision 1.1  2005/08/26 20:40:28  dcervelli
- * Initial avosouth commit.
- *
  * @author Dan Cervelli
  */
-public class WaveViewSettingsDialog extends BaseDialog
+public class WaveViewSettingsDialog extends SwarmDialog
 {
-	public static final long serialVersionUID = -1;
-	private static final int WIDTH = 520;
-	private static final int HEIGHT = 560;	
-	private WaveViewSettings settings;
-	private NumberFormat numberFormat; 
-	
+	private static final long serialVersionUID = 1L;
+
 	private JPanel dialogPanel;
 	
-	private JPanel wavePanel;
-	private JTextField minAmp;
-	private JTextField maxAmp;
-	private JCheckBox autoScaleAmp;
-	private JCheckBox autoScaleAmpMemory;
-	private JCheckBox removeBias;
-
-	private JCheckBox autoScalePower;
-	private JCheckBox autoScalePowerMemory;
-	private JTextField maxPower;
-
-	private JPanel spectraPanel;
-	private JComboBox fftSize;
-	private JTextField minFreq;
-	private JTextField maxFreq;
-	private JCheckBox logFreq;
-	private JCheckBox logPower;
-	private JTextField sgramOverlap;
-
-	private JPanel typePanel;	
+	private static WaveViewSettingsDialog dialog;
+	private WaveViewSettings settings;
+	
+	private ButtonGroup viewGroup;
 	private JRadioButton waveButton;
+	private JCheckBox removeBias;
 	private JRadioButton spectraButton;
 	private JRadioButton spectrogramButton;
 	
-	private JCheckBox filterOn;
-	private JCheckBox zeroPhaseShift;
+	private ButtonGroup waveScaleGroup;
+	private JRadioButton waveAutoScale;
+	private JRadioButton waveManualScale;
+	private JCheckBox waveAutoScaleMemory;
+	private JTextField minAmp;
+	private JTextField maxAmp;
+	
+	private JCheckBox logPower;
+	private JCheckBox logFreq;
+	private JTextField maxPower;
+	private JTextField minFreq;
+	private JTextField maxFreq;
+	private ButtonGroup spectraScaleGroup;
+	private JRadioButton spectraAutoScale;
+	private JRadioButton spectraManualScale;
+	private JCheckBox spectraAutoScaleMemory;
+	private JComboBox fftSize;
+	private JSlider spectrogramOverlap;
+	
+	private ButtonGroup filterGroup;
+	private JCheckBox filterEnabled;
 	private JRadioButton lowPass;
 	private JRadioButton highPass;
 	private JRadioButton bandPass;
-	private JSlider order;
+	private JCheckBox zeroPhaseShift;
 	private JTextField corner1;
 	private JTextField corner2;
-	
-	private static WaveViewSettingsDialog dialog;
+	private JSlider order;
 	
 	private WaveViewSettingsDialog()
 	{
-		super(Swarm.getApplication(), "Wave View Settings", true, WIDTH, HEIGHT);
-//		settings = s;
-		numberFormat = new DecimalFormat("#.##");
-		createSettingsUI();
+		super(Swarm.getApplication(), "Wave Settings", true);
+		createUI();
+		setSizeAndLocation();
 	}
-	
+
 	public static WaveViewSettingsDialog getInstance(WaveViewSettings s)
 	{
 		if (dialog == null)
@@ -99,260 +84,226 @@ public class WaveViewSettingsDialog extends BaseDialog
 		dialog.setToCurrent();
 		return dialog;
 	}
-
+	
 	public void setSettings(WaveViewSettings s)
 	{
 	    settings = s;
 	}
 	
-	public void createSettingsUI()
-	{
-		dialogPanel = new JPanel(new GridBagLayout());
-		
-		AbstractAction enableAction = new AbstractAction()
-		{
-			public static final long serialVersionUID = -1;
-			public void actionPerformed(ActionEvent e)
-			{
-				doEnables();
-			}
-		};
-		
-		typePanel = new JPanel(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		typePanel.setBorder(new TitledBorder(new EtchedBorder(), "General View Options"));
-		waveButton = new JRadioButton("Wave");
-		spectraButton = new JRadioButton("Spectra");
-		spectrogramButton = new JRadioButton("Spectrogram");
-		ButtonGroup bg = new ButtonGroup();
-		removeBias = new JCheckBox("Remove bias");
-
-		typePanel.add(waveButton, GridBagHelper.set(c, "x=0;y=0;a=w;wx=0.5;ix=2;iy=2"));
-		typePanel.add(spectraButton, GridBagHelper.set(c, "x=0;y=1;a=w;wx=0.5"));
-		typePanel.add(spectrogramButton, GridBagHelper.set(c, "x=0;y=2;a=w;wx=0.5"));
-		typePanel.add(removeBias, GridBagHelper.set(c, "x=1;y=0;a=e;f=n;wx=0.5"));
-		
-		bg.add(waveButton);
-		bg.add(spectraButton);
-		bg.add(spectrogramButton);
-		
-		wavePanel = new JPanel(new GridBagLayout());
-		
-		wavePanel.setBorder(new TitledBorder(new EtchedBorder(), "Wave Options")); 
-		autoScaleAmp = new JCheckBox("Auto-scale amplitude");
-		autoScaleAmp.addActionListener(enableAction);
-		autoScaleAmpMemory = new JCheckBox("Auto-scale memory");
-		
-		minAmp = new JTextField(5);
-		maxAmp = new JTextField(5);
-		JLabel minAmpLabel = new JLabel("Minimum amplitude: ");
-		JLabel maxAmpLabel = new JLabel("Maximum amplitude: ");
-		minAmpLabel.setLabelFor(minAmp);
-		maxAmpLabel.setLabelFor(maxAmp);
-		JPanel p1 = new JPanel();
-		p1.add(minAmpLabel);
-		p1.add(minAmp);
-		JPanel p2 = new JPanel();
-		p2.add(maxAmpLabel);
-		p2.add(maxAmp);
-		
-		wavePanel.add(autoScaleAmp, GridBagHelper.set(c, "x=0;y=0;w=3;a=w;wx=1"));
-		wavePanel.add(autoScaleAmpMemory, GridBagHelper.set(c, "x=0;y=1;w=3;a=w;wx=1"));
-		wavePanel.add(minAmpLabel, GridBagHelper.set(c, "x=0;y=2;a=w;w=2;wx=0"));
-		wavePanel.add(minAmp, GridBagHelper.set(c, "x=3;y=2;a=w;f=h;w=1;wx=1"));
-		wavePanel.add(maxAmpLabel, GridBagHelper.set(c, "x=0;y=3;a=nw;w=2;wx=0;wy=1"));
-		wavePanel.add(maxAmp, GridBagHelper.set(c, "x=3;y=3;a=nw;f=h;w=1;wx=1;wy=1"));
-		
-		spectraPanel = new JPanel(new GridBagLayout());
-		spectraPanel.setBorder(new TitledBorder(new EtchedBorder(), "Spectra/Spectrogram Options"));
-		fftSize = new JComboBox(new String[] {"Auto", "64", "128", "256", "512", "1024", "2048"});
-		
-		JLabel fftLabel = new JLabel("FFT bin (samples): ");
-		fftLabel.setLabelFor(fftSize);
-		JPanel p3 = new JPanel();
-		p3.add(fftLabel);
-		p3.add(fftSize);
-		
-		minFreq = new JTextField(5);
-		JLabel minFreqLabel = new JLabel("Minimum frequency: ");
-		maxFreq = new JTextField(5);
-		JLabel maxFreqLabel = new JLabel("Maximum frequency: ");
-		minFreqLabel.setLabelFor(minFreq);
-		maxFreqLabel.setLabelFor(maxFreq);
-		minFreqLabel.setLabelFor(minFreq);
-		maxFreqLabel.setLabelFor(maxFreq);
-		JPanel p4 = new JPanel();
-		p4.add(minFreqLabel);
-		p4.add(minFreq);
-		JPanel p5 = new JPanel();
-		p5.add(maxFreqLabel);
-		p5.add(maxFreq);
-		logPower = new JCheckBox("Log of power");
-		logFreq = new JCheckBox("Log of frequency");
-		JLabel sgramOverlapLabel = new JLabel("Spectrogram Overlap (%): ");
-		sgramOverlap = new JTextField(5);
-		sgramOverlapLabel.setLabelFor(sgramOverlap);
-		
-		autoScalePower = new JCheckBox("Auto-scale power");
-		autoScalePower.addActionListener(enableAction);
-		autoScalePowerMemory = new JCheckBox("Auto-scale power memory");
-		
-		JLabel maxPowerLabel = new JLabel("Maximum power: ");
-		maxPower = new JTextField(5);
-		
-		spectraPanel.add(autoScalePower, GridBagHelper.set(c, "x=0;y=0;w=3;a=w;wx=1"));
-		spectraPanel.add(autoScalePowerMemory, GridBagHelper.set(c, "x=0;y=1;w=3;a=w;wx=1"));
-		spectraPanel.add(maxPowerLabel, GridBagHelper.set(c, "x=0;y=2;w=2;a=w;wx=1;f=n"));
-		spectraPanel.add(maxPower, GridBagHelper.set(c, "x=2;y=2;w=1;a=e;wx=0"));
-		spectraPanel.add(new JSeparator(), GridBagHelper.set(c, "x=0;y=3;w=4;a=c;wx=1;f=h"));
-		spectraPanel.add(minFreqLabel, GridBagHelper.set(c, "x=0;y=4;w=2;a=w;wx=1;f=n"));
-		spectraPanel.add(minFreq, GridBagHelper.set(c, "x=2;y=4;w=1;a=e;wx=0"));
-		spectraPanel.add(maxFreqLabel, GridBagHelper.set(c, "x=0;y=5;w=2;a=w;wx=1"));
-		spectraPanel.add(maxFreq, GridBagHelper.set(c, "x=2;y=5;w=1;a=e;wx=0"));
-		spectraPanel.add(logPower, GridBagHelper.set(c, "x=0;y=6;w=3;a=w;wx=1"));
-		spectraPanel.add(logFreq, GridBagHelper.set(c, "x=0;y=7;w=3;a=w;wx=1"));
-		spectraPanel.add(new JSeparator(), GridBagHelper.set(c, "x=0;y=8;w=4;a=c;wx=1;f=h"));
-		spectraPanel.add(fftLabel, GridBagHelper.set(c, "x=0;y=9;w=2;a=w;wx=1"));
-		spectraPanel.add(fftSize, GridBagHelper.set(c, "x=2;y=9;w=1;a=e;wx=0;f=h"));
-		spectraPanel.add(sgramOverlapLabel, GridBagHelper.set(c, "x=0;y=10;w=2;a=nw;wx=1;f=n;wy=1"));
-		spectraPanel.add(sgramOverlap, GridBagHelper.set(c, "x=2;y=10;w=1;a=ne;wx=0;wy=1"));
-		
-		JPanel filterPanel = new JPanel(new GridBagLayout());
-		filterPanel.setBorder(new TitledBorder(new EtchedBorder(), "Butterworth Filter")); 
-		order = new JSlider(2, 8, 4);
-		order.setMajorTickSpacing(2);
-		order.setSnapToTicks(true);
-		order.createStandardLabels(2);
-		order.setPaintLabels(true);
-		order.setPaintTicks(true);
-		JLabel orderLabel = new JLabel("Order");
-		
-		zeroPhaseShift = new JCheckBox("Zero phase shift");
-		
-		corner1 = new JTextField(5);
-		corner2 = new JTextField(5);
-		JLabel c1Label = new JLabel("Minimum hz:");
-		JLabel c2Label = new JLabel("Maximum hz:");
-		c1Label.setLabelFor(corner1);
-		c2Label.setLabelFor(corner2);
-		
-//		JLabel filterType = new JLabel("Type");
-		lowPass = new JRadioButton("Low pass");
-		highPass = new JRadioButton("High pass");
-		bandPass = new JRadioButton("Band pass");
-		ButtonGroup filterTypeGroup = new ButtonGroup();
-		filterTypeGroup.add(lowPass);
-		filterTypeGroup.add(highPass);
-		filterTypeGroup.add(bandPass);
-		lowPass.addActionListener(enableAction);
-		highPass.addActionListener(enableAction);
-		bandPass.addActionListener(enableAction);
-		
-		JPanel ftPanel = new JPanel(new GridLayout(3, 1));
-		ftPanel.setBorder(new TitledBorder(new EtchedBorder(), "Type")); 
-		ftPanel.add(lowPass);
-		ftPanel.add(highPass);
-		ftPanel.add(bandPass);
-		filterOn = new JCheckBox("Enabled");
-		
-		JLabel zeroLabel = new JLabel("<html>Runs filter forward<br>and backward.<br>This effectively doubles<br>filter order.</html>");
-		
-		filterPanel.add(filterOn, GridBagHelper.set(c, "x=0;y=0;w=4;h=1;a=nw;wx=0.2;ix=2;i=2,0,0,0"));
-		filterPanel.add(ftPanel, GridBagHelper.set(c, "x=0;y=1;w=1;h=4;a=nw;wx=0;f=v"));
-		filterPanel.add(zeroPhaseShift, GridBagHelper.set(c, "x=1;y=0;w=1;h=1;a=w;wx=0.3;f=n"));
-		filterPanel.add(zeroLabel, GridBagHelper.set(c, "x=1;y=1;w=1;h=4;a=nw;wx=0.3;f=n;i=0,5,0,0"));
-		
-		filterPanel.add(orderLabel, GridBagHelper.set(c, "x=2;y=0;w=3;h=1;a=c;wx=5;f=n;i=2,0,0,0"));
-		filterPanel.add(order, GridBagHelper.set(c, "x=2;y=1;w=3;a=w;wx=0"));
-		filterPanel.add(c1Label, GridBagHelper.set(c, "x=2;y=2;w=2;a=w;wx=0"));
-		filterPanel.add(corner1, GridBagHelper.set(c, "x=4;y=2;w=1;a=e;wx=0"));
-		filterPanel.add(c2Label, GridBagHelper.set(c, "x=2;y=3;w=2;a=w;wx=0"));
-		filterPanel.add(corner2, GridBagHelper.set(c, "x=4;y=3;w=1;a=e;wx=0"));
-		
-		dialogPanel.add(typePanel, GridBagHelper.set(c, "x=0;y=0;w=1;h=1;f=b;a=w;wx=0"));
-		dialogPanel.add(wavePanel, GridBagHelper.set(c, "x=0;y=1;w=1;h=1;f=b;a=w;wx=0"));
-		dialogPanel.add(spectraPanel, GridBagHelper.set(c, "x=1;y=0;w=1;h=2;f=b;a=e;wx=1"));
-		dialogPanel.add(filterPanel, GridBagHelper.set(c, "x=0;y=2;w=2;h=1;f=b;a=w;wx=0"));
-		
-//		setToCurrent();
-		doEnables();
-		mainPanel.add(dialogPanel, BorderLayout.CENTER);
-	}
-	
-	private void doEnables()
-	{
-		if (lowPass.isSelected())
-		{
-			corner1.setEnabled(false);
-			corner2.setEnabled(true);
-		}
-		else if (highPass.isSelected())
-		{
-			corner1.setEnabled(true);
-			corner2.setEnabled(false);
-		}
-		else if (bandPass.isSelected())
-		{
-			corner1.setEnabled(true);
-			corner2.setEnabled(true);
-		}
-		
-		minAmp.setEnabled(!autoScaleAmp.isSelected());
-		maxAmp.setEnabled(!autoScaleAmp.isSelected());
-		
-		maxPower.setEnabled(!autoScalePower.isSelected());
-	}
-	
 	public void setToCurrent()
 	{
-		if (settings.type == WaveViewSettings.WAVE)
-			waveButton.setSelected(true);
-		else if (settings.type == WaveViewSettings.SPECTRA)
-			spectraButton.setSelected(true);
-		else if (settings.type == WaveViewSettings.SPECTROGRAM)
-			spectrogramButton.setSelected(true);
-		
+		switch (settings.viewType)
+		{
+			case WAVE:
+				waveButton.setSelected(true);
+				break;
+			case SPECTRA:
+				spectraButton.setSelected(true);
+				break;
+			case SPECTROGRAM:
+				spectrogramButton.setSelected(true);
+				break;
+		}
 		removeBias.setSelected(settings.removeBias);
-		autoScaleAmp.setSelected(settings.autoScaleAmp);
-		autoScaleAmpMemory.setSelected(settings.autoScaleAmpMemory);
 		
-		autoScalePower.setSelected(settings.autoScalePower);
-		autoScalePowerMemory.setSelected(settings.autoScalePowerMemory);
+		if (settings.autoScaleAmp)
+			waveAutoScale.setSelected(true);
+		else
+			waveManualScale.setSelected(true);
+		waveAutoScaleMemory.setSelected(settings.autoScaleAmpMemory);
+
+		if (settings.autoScalePower)
+			spectraAutoScale.setSelected(true);
+		else
+			spectraManualScale.setSelected(true);
+		spectraAutoScaleMemory.setSelected(settings.autoScalePowerMemory);
 		
-		minAmp.setText(numberFormat.format(settings.minAmp));
-		maxAmp.setText(numberFormat.format(settings.maxAmp));
-		maxPower.setText(numberFormat.format(settings.maxPower));
+		minAmp.setText(String.format("%.1f", settings.minAmp));
+		maxAmp.setText(String.format("%.1f", settings.maxAmp));
+		maxPower.setText(String.format("%.1f", settings.maxPower));
 
 		fftSize.setSelectedItem(settings.fftSize);
-		minFreq.setText(numberFormat.format(settings.minFreq));
-		maxFreq.setText(numberFormat.format(settings.maxFreq));
+		minFreq.setText(String.format("%.1f", settings.minFreq));
+		maxFreq.setText(String.format("%.1f", settings.maxFreq));
 		logFreq.setSelected(settings.logFreq);
 		logPower.setSelected(settings.logPower);
-		sgramOverlap.setText(numberFormat.format(settings.spectrogramOverlap * 100));
-		filterOn.setSelected(settings.filterOn);
+		spectrogramOverlap.setValue((int)Math.round(settings.spectrogramOverlap * 100));
+		filterEnabled.setSelected(settings.filterOn);
 		
 		switch (settings.filter.getType())
 		{
 			case LOWPASS:
 				lowPass.setSelected(true);
 				corner1.setText("0.0");
-				corner2.setText(numberFormat.format(settings.filter.getCorner1()));
+				corner2.setText(String.format("%.1f", settings.filter.getCorner1()));
 				break;
 			case HIGHPASS:
 				highPass.setSelected(true);
-				corner1.setText(numberFormat.format(settings.filter.getCorner1()));
+				corner1.setText(String.format("%.1f", settings.filter.getCorner1()));
 				corner2.setText("0.0");
 				break;
 			case BANDPASS:
 				bandPass.setSelected(true);
-				corner1.setText(numberFormat.format(settings.filter.getCorner1()));
-				corner2.setText(numberFormat.format(settings.filter.getCorner2()));
+				corner1.setText(String.format("%.1f", settings.filter.getCorner1()));
+				corner2.setText(String.format("%.1f", settings.filter.getCorner2()));
 				break;
 		}
 		order.setValue(settings.filter.getOrder());
-		zeroPhaseShift.setSelected(settings.zeroPhaseShift);
 	}
-
+	
+	private void createComponents()
+	{
+		viewGroup = new ButtonGroup();
+		waveButton = new JRadioButton("Wave");
+		spectraButton = new JRadioButton("Spectra");
+		spectrogramButton = new JRadioButton("Spectrogram");
+		viewGroup.add(waveButton);
+		viewGroup.add(spectraButton);
+		viewGroup.add(spectrogramButton);
+		
+		waveScaleGroup = new ButtonGroup();
+		removeBias = new JCheckBox("Remove bias");
+		waveAutoScale = new JRadioButton("Autoscale");
+		waveManualScale = new JRadioButton("Manual scale");
+		waveScaleGroup.add(waveAutoScale);
+		waveScaleGroup.add(waveManualScale);
+		waveAutoScaleMemory = new JCheckBox("Memory");
+		minAmp = new JTextField(7);
+		maxAmp = new JTextField(7);
+		
+		logPower = new JCheckBox("Log power");
+		logFreq = new JCheckBox("Log frequency");
+		maxPower = new JTextField(7);
+		minFreq = new JTextField(7);
+		maxFreq = new JTextField(7);
+		spectraScaleGroup = new ButtonGroup();
+		spectraAutoScale = new JRadioButton("Autoscale");
+		spectraManualScale = new JRadioButton("Manual scale");
+		spectraScaleGroup.add(spectraAutoScale);
+		spectraScaleGroup.add(spectraManualScale);
+		spectraAutoScaleMemory = new JCheckBox("Memory");
+		fftSize = new JComboBox(new String[] {"Auto", "64", "128", "256", "512", "1024", "2048"});
+		spectrogramOverlap = new JSlider(0, 90, 20);
+		spectrogramOverlap.setMajorTickSpacing(15);
+		spectrogramOverlap.setMinorTickSpacing(5);
+		spectrogramOverlap.setSnapToTicks(true);
+		spectrogramOverlap.createStandardLabels(15);
+		spectrogramOverlap.setPaintLabels(true);
+		
+		filterGroup = new ButtonGroup();
+		filterEnabled = new JCheckBox("Enabled");
+		lowPass = new JRadioButton("Low pass");
+		highPass = new JRadioButton("High pass");
+		bandPass = new JRadioButton("Band pass");
+		filterGroup.add(lowPass);
+		filterGroup.add(highPass);
+		filterGroup.add(bandPass);
+		zeroPhaseShift = new JCheckBox("Zero phase shift (doubles order)");
+		corner1 = new JTextField(7);
+		corner2 = new JTextField(7);
+		order = new JSlider(2, 8, 4);
+		order.setMajorTickSpacing(2);
+		order.setSnapToTicks(true);
+		order.createStandardLabels(2);
+		order.setPaintLabels(true);
+	}
+	
+	protected void createUI()
+	{
+		super.createUI();
+		createComponents();
+		FormLayout layout = new FormLayout(
+				"left:60dlu, 3dlu, left:60dlu, 3dlu, left:60dlu, 3dlu, left:60dlu", 
+				"");
+		
+		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+		builder.setDefaultDialogBorder();
+		
+		CellConstraints cc = new CellConstraints();
+		
+		builder.appendSeparator("View");
+		builder.nextLine();
+		builder.append(waveButton);
+		builder.append(spectraButton);
+		builder.append(spectrogramButton);
+		builder.nextLine();
+		
+		builder.appendSeparator("Wave Options");
+		builder.nextLine();
+		builder.append(removeBias, 3);
+		builder.append(waveAutoScale);
+		builder.append(waveAutoScaleMemory);
+		builder.nextLine();
+		builder.append(new JLabel(""), 3);
+		builder.append(waveManualScale);
+		builder.nextLine();
+		builder.append(new JLabel(""), 3);
+		builder.add(new JLabel("Minimum:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+		builder.nextColumn(2);
+		builder.append(minAmp);
+		builder.nextLine();
+		builder.append(new JLabel(""), 3);
+		builder.add(new JLabel("Maximum:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+		builder.nextColumn(2);
+		builder.append(maxAmp);
+		builder.nextLine();
+		
+		builder.appendSeparator("Spectra/Spectrogram Options");
+		builder.nextLine();
+		builder.append(logPower, 3);
+		builder.append(spectraAutoScale);
+		builder.append(spectraAutoScaleMemory);
+		builder.nextLine();
+		builder.append(logFreq, 3);
+		builder.append(spectraManualScale);
+		builder.nextLine();
+		builder.appendRow("center:17dlu");
+		builder.add(new JLabel("Min. frequency:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+		builder.nextColumn(2);
+		builder.append(minFreq);
+		builder.add(new JLabel("Max. power:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+		builder.nextColumn(2);
+		builder.append(maxPower);
+		builder.nextLine();
+		builder.appendRow("center:17dlu");
+		builder.add(new JLabel("Max. frequency:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+		builder.nextColumn(2);
+		builder.append(maxFreq);
+		builder.add(new JLabel("Spectrogram overlap (%)"), cc.xyw(builder.getColumn(), builder.getRow(), 3, "center, center"));
+		builder.nextLine();
+		builder.appendRow("center:20dlu");
+		builder.add(new JLabel("Spectrogram bin:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+		builder.nextColumn(2);
+		builder.append(fftSize);
+		builder.append(spectrogramOverlap, 3);
+		builder.nextLine();
+		
+		builder.appendSeparator("Butterworth Filter");
+		builder.append(filterEnabled, 3);
+		builder.append(zeroPhaseShift, 3);
+		builder.nextLine();
+		builder.append(lowPass, 3);
+		builder.add(new JLabel("Min. frequency:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+		builder.nextColumn(2);
+		builder.append(corner1);
+		builder.nextLine();
+		builder.append(highPass, 3);
+		builder.add(new JLabel("Max. frequency:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+		builder.nextColumn(2);
+		builder.append(corner2);
+		builder.nextLine();
+		builder.append(bandPass, 3);
+		builder.add(new JLabel("Order"), cc.xyw(builder.getColumn(), builder.getRow(), 3, "center, center"));
+		builder.nextLine();
+		builder.appendRow("center:20dlu");
+		builder.nextColumn(3);
+		builder.append(order, 4);
+		builder.nextLine();
+		
+		dialogPanel = builder.getPanel();
+		mainPanel.add(dialogPanel, BorderLayout.CENTER);
+	}
+	
 	public boolean allowOK()
 	{
 		String message = null;
@@ -381,7 +332,7 @@ public class WaveViewSettingsDialog extends BaseDialog
 				throw new NumberFormatException();
 			
 			message = "Error in spectrogram overlap format.";
-			double so = Double.parseDouble(sgramOverlap.getText());
+			double so = spectrogramOverlap.getValue();
 			message = "Spectrogram overlap must be between 0 and 95%.";
 			if (so < 0 || so > 95)
 				throw new NumberFormatException();
@@ -417,18 +368,18 @@ public class WaveViewSettingsDialog extends BaseDialog
 		try
 		{
 			if (waveButton.isSelected())
-				settings.type = WaveViewSettings.WAVE;
+				settings.viewType = ViewType.WAVE;
 			else if (spectraButton.isSelected())
-				settings.type = WaveViewSettings.SPECTRA;
+				settings.viewType = ViewType.SPECTRA;
 			else if (spectrogramButton.isSelected())
-				settings.type = WaveViewSettings.SPECTROGRAM;
+				settings.viewType = ViewType.SPECTROGRAM;
 				
 			settings.removeBias = removeBias.isSelected();
-			settings.autoScaleAmp = autoScaleAmp.isSelected();
-			settings.autoScaleAmpMemory = autoScaleAmpMemory.isSelected();
+			settings.autoScaleAmp = waveAutoScale.isSelected();
+			settings.autoScaleAmpMemory = waveAutoScaleMemory.isSelected();
 			
-			settings.autoScalePower = autoScalePower.isSelected();
-			settings.autoScalePowerMemory = autoScalePowerMemory.isSelected();
+			settings.autoScalePower = spectraAutoScale.isSelected();
+			settings.autoScalePowerMemory = spectraAutoScaleMemory.isSelected();
 			settings.maxPower = Double.parseDouble(maxPower.getText());
 			
 			settings.minAmp = Double.parseDouble(minAmp.getText());
@@ -442,12 +393,12 @@ public class WaveViewSettingsDialog extends BaseDialog
 			settings.fftSize = (String)fftSize.getSelectedItem();
 			settings.logFreq = logFreq.isSelected();
 			settings.logPower = logPower.isSelected();
-			settings.spectrogramOverlap = Double.parseDouble(sgramOverlap.getText()) / 100;
+			settings.spectrogramOverlap = spectrogramOverlap.getValue() / 100.0;
 			if (settings.spectrogramOverlap > 0.95 || settings.spectrogramOverlap < 0)
 				settings.spectrogramOverlap = 0;
 			settings.notifyView();
 
-			settings.filterOn = filterOn.isSelected();
+			settings.filterOn = filterEnabled.isSelected();
 			settings.zeroPhaseShift = zeroPhaseShift.isSelected();
 			
 			FilterType ft = null;
@@ -478,5 +429,4 @@ public class WaveViewSettingsDialog extends BaseDialog
 			JOptionPane.showMessageDialog(this, "Illegal values.", "Options Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
-	
 }

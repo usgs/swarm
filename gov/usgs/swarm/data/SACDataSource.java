@@ -11,6 +11,9 @@ import java.util.List;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/04/15 16:00:13  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.2  2005/09/02 16:40:29  dcervelli
  * CurrentTime changes.
  *
@@ -30,12 +33,15 @@ public class SACDataSource extends SeismicDataSource
 	private String station;
 	private Wave wave;
 	
+	private String filename;
+	
 	//private static List loadedList = new ArrayList();
 	
 	public SACDataSource(String fn)
 	{
 		try
 		{
+			filename = fn;
 //			if (loadedList.contains(fn))
 //				return;
 			SAC sac = new SAC();
@@ -73,6 +79,11 @@ public class SACDataSource extends SeismicDataSource
 	public Wave getWave(String station, double t1, double t2) 
 	{
 		return Swarm.getCache().getBestWave(station, t1, t2);
+	}
+	
+	public String toConfigString()
+	{
+		return name + ";sac:" + filename;
 	}
 	
 }

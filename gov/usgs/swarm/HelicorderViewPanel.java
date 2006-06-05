@@ -15,8 +15,6 @@ import java.awt.Image;
 import java.awt.Paint;
 import java.awt.Point;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -37,6 +35,9 @@ import javax.swing.SwingUtilities;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2006/04/17 04:16:36  dcervelli
+ * More 1.3 changes.
+ *
  * Revision 1.13  2006/04/15 15:58:52  dcervelli
  * 1.3 changes (renaming, new datachooser, different config).
  *
@@ -111,7 +112,6 @@ public class HelicorderViewPanel extends JComponent
 	private double[] translation;
 	
 	private WaveViewPanel insetWavePanel;
-	//private WigglerPanel wigglerPanel;
 	
 	private BufferedImage bufferImage, displayImage;
 	private DateFormat dateFormat;
@@ -378,8 +378,8 @@ public class HelicorderViewPanel extends JComponent
 	{
 		if (insetWavePanel != null)
 		{
-			ClipboardWaveViewPanel p =  new ClipboardWaveViewPanel(insetWavePanel);
-			p.getWaveViewPanel().setDataSource(insetWavePanel.getDataSource().getCopy());
+			WaveViewPanel p =  new WaveViewPanel(insetWavePanel);
+			p.setDataSource(insetWavePanel.getDataSource().getCopy());
 			Swarm.getApplication().getWaveClipboard().addWave(p);
 			requestFocus();
 		}
@@ -505,44 +505,49 @@ public class HelicorderViewPanel extends JComponent
 		if (insetWavePanel == null)
 			insetWavePanel = new WaveViewPanel(parent.getWaveViewSettings());
 		
-		this.add(insetWavePanel);
-		insetWavePanel.setHelicorderPanel(this);
+//		insetWavePanel.setHelicorderPanel(this);
 		insetWavePanel.setMarks(startMark, endMark);
 		insetWavePanel.setChannel(parent.getChannel());
 		insetWavePanel.setDataSource(parent.getDataSource());
 		insetWavePanel.setStatusLabel(parent.getStatusLabel());
 		
-		if (insetWavePanel != null)
+		Dimension d = getSize();
+		int height = INSET_HEIGHT;
+		int row = heliRenderer.getRow(j2k);
+		
+		insetWavePanel.setSize(d.width + 2, height);
+		if (insetY - heliRenderer.getRowHeight() > height + translation[3])
 		{
-			Dimension d = getSize();
-			int height = INSET_HEIGHT;
-			int row = heliRenderer.getRow(j2k);
-			
-			insetWavePanel.setSize(d.width + 2, height);
-			if (insetY - heliRenderer.getRowHeight() > height + translation[3])
-			{
-				int y = (int)Math.ceil((row - 1) * translation[2] + translation[3]);
-				insetWavePanel.setLocation(-1, y - height);
-			}
-			else
-			{
-				int y = (int)Math.ceil((row + 2) * translation[2] + translation[3]);
-				insetWavePanel.setLocation(-1, y);
-			}
-			
-			insetWavePanel.setCloseListener(new ActionListener()
-					{
-						public void actionPerformed(ActionEvent e)
-						{
-							removeWaveInset();
-						}
-					});
-			insetWavePanel.setWorking(true);
+			int y = (int)Math.ceil((row - 1) * translation[2] + translation[3]);
+			insetWavePanel.setLocation(-1, y - height);
 		}
+		else
+		{
+			int y = (int)Math.ceil((row + 2) * translation[2] + translation[3]);
+			insetWavePanel.setLocation(-1, y);
+		}
+		
+		insetWavePanel.addListener(new WaveViewPanelAdapter()
+				{
+					public void waveClosed()
+					{
+						removeWaveInset();
+					}
+					
+					public void waveTimePressed(MouseEvent e, double j2k)
+					{
+						if (Swarm.config.durationEnabled && SwingUtilities.isLeftMouseButton(e))
+							markTime(j2k);
+						insetWavePanel.processMousePosition(e.getX(), e.getY());
+					}
+				});
+		insetWavePanel.setAllowClose(true);
+		insetWavePanel.setWorking(true);
 
 		double zoomOffset = parent.getHelicorderViewerSettings().waveZoomOffset;
 		loadInsetWave(j2k - zoomOffset, j2k + zoomOffset);
-		parent.setInsetButtonsEnabled(true);		
+		parent.setInsetButtonsEnabled(true);
+		this.add(insetWavePanel);
 		repaint();
 	}
 	 
@@ -606,7 +611,6 @@ public class HelicorderViewPanel extends JComponent
 				{
 					public Object construct()
 					{
-						Swarm.getApplication().incThreadCount();
 						createImage();	
 						return null;
 					}
@@ -615,7 +619,6 @@ public class HelicorderViewPanel extends JComponent
 					{
 						displayImage = bufferImage;
 						repaint();	
-						Swarm.getApplication().decThreadCount();
 					}
 				};
 		worker.start();
@@ -689,7 +692,7 @@ public class HelicorderViewPanel extends JComponent
 		g2.draw(new Line2D.Double(x, y, x, y + translation[2]));
 		
 		GeneralPath gp = new GeneralPath();
-		gp.moveTo((float)x, (float)y);
+		gp.moveTo(x, y);
 		gp.lineTo((float)x - 4, (float)y - 6);
 		gp.lineTo((float)x + 4, (float)y - 6);
 		gp.closePath();
@@ -699,7 +702,7 @@ public class HelicorderViewPanel extends JComponent
 		g2.draw(gp);
 		
 		gp.reset();
-		gp.moveTo((float)x, (float)(y + translation[2]));
+		gp.moveTo(x, (float)(y + translation[2]));
 		gp.lineTo((float)x - 4, (float)(y + 6 + translation[2]));
 		gp.lineTo((float)x + 4, (float)(y + 6 + translation[2]));
 		gp.closePath();
@@ -772,7 +775,7 @@ public class HelicorderViewPanel extends JComponent
 			g2.setPaint(new Color(255, 255, 0, 128));
 			Rectangle2D.Double rect = new Rectangle2D.Double();
 			int zoomOffset = parent.getHelicorderViewerSettings().waveZoomOffset;
-			double xo = 1.0 / translation[7] * (double)zoomOffset;
+			double xo = 1.0 / translation[7] * zoomOffset;
 			int bx = (int)(heliRenderer.helicorderGetXPixel(t) - xo);
 			int width = (int)(xo * 2);
 			int right = heliRenderer.getGraphX() + heliRenderer.getGraphWidth();

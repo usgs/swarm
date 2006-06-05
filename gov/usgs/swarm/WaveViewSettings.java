@@ -3,12 +3,21 @@ package gov.usgs.swarm;
 import java.awt.*;
 import gov.usgs.math.*;
  
+/**
+ * 
+ * $Log: not supported by cvs2svn $
+ * @author Dan Cervelli
+ */
 public class WaveViewSettings
 {
-	public static final int WAVE = 1;
-	public static final int SPECTRA = 2;
-	public static final int SPECTROGRAM = 3;
-	public int type;
+	public enum ViewType
+	{
+		WAVE,
+		SPECTRA,
+		SPECTROGRAM
+	}
+	
+	public ViewType viewType;
 	
 	public Butterworth filter;
 	public boolean filterOn;
@@ -39,7 +48,7 @@ public class WaveViewSettings
 	
 	public WaveViewSettings()
 	{
-		type = WAVE;
+		viewType = ViewType.WAVE;
 		removeBias = true;
 		autoScaleAmp = true;
 		autoScaleAmpMemory = true;
@@ -49,7 +58,7 @@ public class WaveViewSettings
 		autoScalePowerMemory = true;
 		maxPower = 40000;
 		logFreq = false;
-		logPower = false;
+		logPower = true;
 		spectrogramOverlap = 0.2;
 		minFreq = 0.75;
 		maxFreq = 25;
@@ -64,7 +73,7 @@ public class WaveViewSettings
 	
 	public WaveViewSettings(WaveViewSettings s)
 	{
-		type = s.type;
+		viewType = s.viewType;
 		removeBias = s.removeBias;
 		autoScaleAmp = s.autoScaleAmp;
 		autoScaleAmpMemory = s.autoScaleAmpMemory;
@@ -86,17 +95,26 @@ public class WaveViewSettings
 		filterOn = s.filterOn;
 	}
 	
-	public void setType(int t)
+	public void setType(ViewType t)
 	{
-		type = t;
+		viewType = t;
 		notifyView();	
 	}
 	
 	public void cycleType()
 	{
-		type++;
-		if (type > SPECTROGRAM)
-			type = WAVE;
+		switch (viewType)
+		{
+			case WAVE:
+				viewType = ViewType.SPECTRA;
+				break;
+			case SPECTRA:
+				viewType = ViewType.SPECTROGRAM;
+				break;
+			case SPECTROGRAM:
+				viewType = ViewType.WAVE;
+				break;
+		}
 		notifyView();	
 	}
 

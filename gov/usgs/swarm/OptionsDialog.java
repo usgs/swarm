@@ -1,106 +1,81 @@
 package gov.usgs.swarm;
 
-import gov.usgs.util.ui.BaseDialog;
-
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
 
-import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
- * Global application options dialog.
  * 
  * $Log: not supported by cvs2svn $
- * Revision 1.3  2006/04/11 17:54:59  dcervelli
- * Added option for turning off duration magnitude.
- *
- * Revision 1.2  2005/09/22 20:59:29  dcervelli
- * Changes for duration magnitude options.
- *
- * Revision 1.1  2005/08/26 20:40:28  dcervelli
- * Initial avosouth commit.
- *
- * Revision 1.2  2004/10/28 20:17:09  cvs
- * Big red mouse cursor option.
- *
  * @author Dan Cervelli
  */
-public class OptionsDialog extends BaseDialog
+public class OptionsDialog extends SwarmDialog
 {
-	public static final long serialVersionUID = -1;
-	
-	private static final int WIDTH = 240;
-	private static final int HEIGHT = 300;	
-	
+	private static final long serialVersionUID = 1L;
+
 	private JPanel dialogPanel;
 	
-	private JPanel timeZonePanel;
-	private JTextField timeZoneAbbr;
-	private JTextField timeZoneOffset;
-	
-	private JPanel magPanel;
+	private JCheckBox durationEnabled;
 	private JTextField durationA;
 	private JTextField durationB;
-	private JCheckBox durationEnabled;
-	
-	private JPanel otherPanel;
+	private JTextField timeZoneOffset;
+	private JTextField timeZoneAbbr;
 	private JCheckBox useLargeCursor;
 	
 	public OptionsDialog()
 	{
-		super(Swarm.getApplication(), "Options", true, WIDTH, HEIGHT);
-		createOptionsUI();
+		super(Swarm.getApplication(), "Options", true);
+		createUI();
+		setCurrentValues();
+		setSizeAndLocation();
 	}
 	
-	public void createOptionsUI()
+	private void createFields()
 	{
-		dialogPanel = new JPanel();
-		BoxLayout bl = new BoxLayout(dialogPanel, BoxLayout.Y_AXIS);
-		dialogPanel.setLayout(bl);
-		
-		timeZonePanel = new JPanel(new GridLayout(2, 2));
-		timeZonePanel.setBorder(new TitledBorder(new EtchedBorder(), "Time Zone"));
-		JLabel tz1 = new JLabel("Abreviation:");
-		JLabel tz2 = new JLabel("Offset (hrs):");
-		timeZoneAbbr = new JTextField(4);
-		timeZoneOffset = new JTextField(4);
-		tz1.setLabelFor(timeZoneAbbr);
-		tz2.setLabelFor(timeZoneOffset);
-		timeZonePanel.add(tz1);
-		timeZonePanel.add(timeZoneAbbr);
-		timeZonePanel.add(tz2);
-		timeZonePanel.add(timeZoneOffset);
-		
-		dialogPanel.add(timeZonePanel);
-	
-		JPanel bottomPanel = new JPanel();
-		durationA = new JTextField(4);
-		durationB = new JTextField(4);
-		bottomPanel.add(new JLabel("Md="));
-		bottomPanel.add(durationA);
-		bottomPanel.add(new JLabel("* Log(t) +"));
-		bottomPanel.add(durationB);
 		durationEnabled = new JCheckBox("Enabled");
-		magPanel = new JPanel(new GridLayout(2, 1));
-		magPanel.setBorder(new TitledBorder(new EtchedBorder(), "Duration Magnitude"));
-		magPanel.add(durationEnabled);
-		magPanel.add(bottomPanel);
-		dialogPanel.add(magPanel);
+		durationA = new JTextField();
+		durationB = new JTextField();;
+		timeZoneOffset = new JTextField();;
+		timeZoneAbbr = new JTextField();;
+		useLargeCursor = new JCheckBox("Large Helicorder Cursor");
+	}
+	
+	protected void createUI()
+	{
+		super.createUI();
+		createFields();
 		
-		otherPanel = new JPanel();
-		otherPanel.setBorder(new TitledBorder(new EtchedBorder(), "Other"));
-		useLargeCursor = new JCheckBox("Large helicorder cursor");
-		otherPanel.add(useLargeCursor);
-		dialogPanel.add(otherPanel);
+		FormLayout layout = new FormLayout(
+				"right:max(30dlu;pref), 3dlu, 30dlu, 3dlu, right:max(30dlu;pref), 3dlu, 30dlu", 
+				"");
 		
-		setCurrentValues();
+		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+		builder.setDefaultDialogBorder();
+		
+		builder.appendSeparator("Time Zone");
+		builder.append("Abbreviation:", timeZoneAbbr);
+		builder.nextLine();
+		
+		builder.append("Offset (hrs):", timeZoneOffset);
+		builder.nextLine();
+		
+		builder.appendSeparator("Duration Magnitude");
+		builder.append(durationEnabled, 7);
+		builder.nextLine();
+		builder.append("Md=", durationA);
+		builder.append("* Log(t) +", durationB);
+		
+		builder.appendSeparator("Other");
+		builder.append(useLargeCursor, 7);
+		builder.nextLine();
+		
+		dialogPanel = builder.getPanel();
 		mainPanel.add(dialogPanel, BorderLayout.CENTER);
 	}
 	

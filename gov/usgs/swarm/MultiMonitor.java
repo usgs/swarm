@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,8 +35,14 @@ import javax.swing.event.InternalFrameEvent;
  * channels in real-time.
  * 
  * TODO: save monitor size
+ * TODO: clipboard
+ * TODO: up/down arrows
+ * TODO: wvs buttons
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/04/17 04:16:36  dcervelli
+ * More 1.3 changes.
+ *
  * Revision 1.7  2006/04/13 16:41:33  dcervelli
  * Fixed some bugs with the low bandwidth monitor.
  *
@@ -88,7 +95,6 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	private JButton settingsButton;
 	private JButton removeButton;
 	private JPanel mainPanel;
-//	private JPanel wavePanel;
 	private JButton compXButton;
 	private JButton expXButton;
 	private JButton optionsButton;
@@ -101,8 +107,8 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	
 	private int selectedIndex = -1;
 	
-	private static final Color selectColor = new Color(204, 204, 255);
-	private static final Color backgroundColor = new Color(0xf7, 0xf7, 0xf7);	
+	private static final Color SELECT_COLOR = new Color(204, 204, 255);
+	private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);	
 	
 	private Throbber throbber;
 	
@@ -298,12 +304,18 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	public synchronized void addChannel(String ch)
 	{
 		channels.add(ch);
-		WaveViewPanel panel = new WaveViewPanel();
+		final WaveViewPanel panel = new WaveViewPanel();
 		panel.setWorking(true);
 		panel.setDisplayTitle(true);
 		panels.add(panel);
 		waveBox.add(panel);
-		panel.setMonitor(this);
+		panel.addListener(new WaveViewPanelAdapter()
+				{
+					public void mousePressed(MouseEvent e)
+					{
+						select(panel);
+					}
+				});
 		resizeWaves();
 	}
 	
@@ -312,7 +324,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		if (selectedIndex >= 0)
 		{
 			WaveViewPanel panel = panels.get(selectedIndex);
-			panel.setBackgroundColor(backgroundColor);
+			panel.setBackgroundColor(BACKGROUND_COLOR);
 			panel.invalidateImage();
 			panel.repaint();
 		}
@@ -322,7 +334,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 			if (panel == p)
 			{
 				selectedIndex = i;
-				panel.setBackgroundColor(selectColor);
+				panel.setBackgroundColor(SELECT_COLOR);
 				panel.invalidateImage();
 				panel.repaint();
 				break;

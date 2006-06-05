@@ -1,5 +1,6 @@
 package gov.usgs.swarm;
 
+import gov.usgs.swarm.WaveViewSettings.ViewType;
 import gov.usgs.util.Util;
 
 import java.awt.event.ActionEvent;
@@ -16,6 +17,9 @@ import javax.swing.KeyStroke;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/04/17 04:16:36  dcervelli
+ * More 1.3 changes.
+ *
  * Revision 1.4  2005/08/30 00:35:06  tparker
  * Update to use Images class
  *
@@ -32,6 +36,7 @@ import javax.swing.KeyStroke;
  */
 public class WaveViewSettingsToolbar
 {
+	private JButton waveSet;
 	private JToggleButton waveToggle;
 	private JToggleButton spectraToggle;
 	private JToggleButton spectrogramToggle;
@@ -40,22 +45,24 @@ public class WaveViewSettingsToolbar
 	
 	public WaveViewSettingsToolbar(WaveViewSettings s, JToolBar dest, JComponent keyComp)
 	{
-		settings = s;
 		createUI(dest, keyComp);
-		settings.toolbar = this;
+		setSettings(s);
 	}
 	
 	public void createUI(JToolBar dest, JComponent keyComp)
 	{
-		JButton waveSet = SwarmUtil.createToolBarButton(
+		waveSet = SwarmUtil.createToolBarButton(
 				Images.getIcon("wavesettings"),
 				"Wave view settings (?)",
 				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-					    WaveViewSettingsDialog wvsd = WaveViewSettingsDialog.getInstance(settings);
-						wvsd.setVisible(true);
+						if (settings != null)
+						{
+						    WaveViewSettingsDialog wvsd = WaveViewSettingsDialog.getInstance(settings);
+							wvsd.setVisible(true);
+						}
 					}
 				});
 		Util.mapKeyStrokeToButton(keyComp, "shift SLASH", "settings", waveSet);
@@ -68,7 +75,8 @@ public class WaveViewSettingsToolbar
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						settings.setType(WaveViewSettings.WAVE);
+						if (settings != null)
+							settings.setType(ViewType.WAVE);
 					}
 				});
 		Util.mapKeyStrokeToButton(keyComp, "COMMA", "wave1", waveToggle);
@@ -83,7 +91,8 @@ public class WaveViewSettingsToolbar
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						settings.setType(WaveViewSettings.SPECTRA);
+						if (settings != null)
+							settings.setType(ViewType.SPECTRA);
 					}
 				});
 		Util.mapKeyStrokeToButton(keyComp, "PERIOD", "spectra1", spectraToggle);
@@ -97,7 +106,8 @@ public class WaveViewSettingsToolbar
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						settings.setType(WaveViewSettings.SPECTROGRAM);
+						if (settings != null)
+							settings.setType(ViewType.SPECTROGRAM);
 					}
 				});
 		Util.mapKeyStrokeToButton(keyComp, "SLASH", "spectrogram1", spectrogramToggle);
@@ -110,7 +120,8 @@ public class WaveViewSettingsToolbar
 					public static final long serialVersionUID = -1;
 					public void actionPerformed(ActionEvent e)
 					{
-						settings.cycleLogSettings();
+						if (settings != null)
+							settings.cycleLogSettings();
 					}	
 				});
 				
@@ -120,7 +131,8 @@ public class WaveViewSettingsToolbar
 					public static final long serialVersionUID = -1;
 					public void actionPerformed(ActionEvent e)
 					{
-						settings.toggleFilter();
+						if (settings != null)
+							settings.toggleFilter();
 					}	
 				});				
 				
@@ -130,7 +142,8 @@ public class WaveViewSettingsToolbar
 					public static final long serialVersionUID = -1;
 					public void actionPerformed(ActionEvent e)
 					{
-						settings.resetAutoScaleMemory();
+						if (settings != null)
+							settings.resetAutoScaleMemory();
 					}	
 				});
 				
@@ -140,10 +153,20 @@ public class WaveViewSettingsToolbar
 		waveTypes.add(spectrogramToggle);
 	}
 	
+	public void setSettings(WaveViewSettings s)
+	{
+		settings = s;
+		if (settings != null)
+		{
+			settings.toolbar = this;
+			settingsChanged();
+		}
+	}
+	
 	public void settingsChanged()
 	{
-		waveToggle.setSelected(settings.type == WaveViewSettings.WAVE);	
-		spectraToggle.setSelected(settings.type == WaveViewSettings.SPECTRA);
-		spectrogramToggle.setSelected(settings.type == WaveViewSettings.SPECTROGRAM);
+		waveToggle.setSelected(settings.viewType == ViewType.WAVE);	
+		spectraToggle.setSelected(settings.viewType == ViewType.SPECTRA);
+		spectrogramToggle.setSelected(settings.viewType == ViewType.SPECTROGRAM);
 	}
 }

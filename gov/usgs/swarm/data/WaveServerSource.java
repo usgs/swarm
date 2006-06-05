@@ -20,6 +20,9 @@ import java.util.Map;
  * Earthworm Wave Server.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/04/15 16:00:13  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.2  2005/09/02 16:40:29  dcervelli
  * CurrentTime changes.
  *
@@ -46,18 +49,21 @@ public class WaveServerSource extends SeismicDataSource
 	private WaveServer waveServer;
 	private int timeout = 2000;
 	
+	private String server;
+	private int port;
+	
 	private static Map<String, Boolean> scnlSources = new HashMap<String, Boolean>();
 	
 	public WaveServerSource(String s)
 	{
 		params = s;
 		String[] ss = params.split(":");
-		String h = ss[0];
-		int p = Integer.parseInt(ss[1]);
+		server = ss[0];
+		port = Integer.parseInt(ss[1]);
 		if (ss.length == 3)
 			timeout = Integer.parseInt(ss[2]);
 		
-		waveServer = new WaveServer(h, p);
+		waveServer = new WaveServer(server, port);
 		setTimeout(timeout);
 	}
 	
@@ -71,13 +77,18 @@ public class WaveServerSource extends SeismicDataSource
 		return new WaveServerSource(this);	
 	}
 
+	public String toConfigString()
+	{
+		return String.format("%s;ws:%s:%d:%d", name, server, port, timeout);
+	}
+	
 	public boolean isSCNL(String p)
 	{
-		Boolean b = (Boolean)scnlSources.get(p);
+		Boolean b = scnlSources.get(p);
 		if (b == null)
 		{
 			getMenu();
-			b = (Boolean)scnlSources.get(p);
+			b = scnlSources.get(p);
 			if (b == null)
 				return false;
 		}

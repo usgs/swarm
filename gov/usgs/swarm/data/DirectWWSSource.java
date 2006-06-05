@@ -17,6 +17,9 @@ import java.util.List;
  * DirectWinstonSource.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/04/15 16:00:13  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -98,6 +101,11 @@ public class DirectWWSSource extends SeismicDataSource
 				hd = null;
 		}
 		return hd;
+	}
+	
+	public String toConfigString()
+	{
+		return "winston:";
 	}
 	
 }

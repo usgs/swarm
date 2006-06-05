@@ -55,6 +55,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * TODO: change slider checkbox
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2006/04/17 04:16:36  dcervelli
+ * More 1.3 changes.
+ *
  * Revision 1.14  2006/04/15 15:58:52  dcervelli
  * 1.3 changes (renaming, new datachooser, different config).
  *
@@ -171,7 +174,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 	
 	protected Throbber throbber;
 	
-	public HelicorderViewerFrame(Swarm sw, SeismicDataSource sds, String ch)
+	public HelicorderViewerFrame(SeismicDataSource sds, String ch)
 	{
 		super(ch + ", [" + sds + "]", true, true, true, true);
 		Swarm.getApplication().touchUITime();
@@ -185,6 +188,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 					{
 						createUI();
 						getHelicorder();
+						
 					}
 				});
 		
@@ -203,6 +207,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
 		setSize(800, 750);
 		setContentPane(mainPanel);
+//		createWiggler();
 		setVisible(true);
 	}
 
@@ -785,7 +790,6 @@ public class HelicorderViewerFrame extends JInternalFrame
 		
 		public void run()
 		{
-			Swarm.getApplication().incThreadCount();
 			while (!kill)
 			{
 				long lastUI = System.currentTimeMillis() - Swarm.getApplication().getLastUITime();
@@ -831,7 +835,6 @@ public class HelicorderViewerFrame extends JInternalFrame
 					}
 				}
 			}			
-			Swarm.getApplication().decThreadCount();
 		}	
 	}
 	

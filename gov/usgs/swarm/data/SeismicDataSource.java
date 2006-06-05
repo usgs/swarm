@@ -1,15 +1,21 @@
 package gov.usgs.swarm.data;
 
+import gov.usgs.swarm.Images;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.vdx.data.heli.HelicorderData;
 import gov.usgs.vdx.data.wave.Wave;
 
 import java.util.List;
 
+import javax.swing.Icon;
+
 /**
  * Base class for seismic data sources.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/04/15 16:00:13  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -95,6 +101,16 @@ abstract public class SeismicDataSource
 		return name;
 	}
 	
+	public Icon getIcon()
+	{
+		return Images.getIcon("wave_server");
+	}
+	
+	public void establish()
+	{}
+	
+	abstract public String toConfigString();
+	
 	/**
 	 * Returns the appropriate type of seismic data source based on the passed
 	 * parameter string.
@@ -112,35 +128,19 @@ abstract public class SeismicDataSource
 		String type = source.substring(0, source.indexOf(":"));
 		String params = source.substring(source.indexOf(":") + 1);
 		SeismicDataSource sds = null;
+
 		if (type.equals("ws"))
 		{
-//			String server = source.substring(source.indexOf(":") + 1);
 			sds = new WaveServerSource(params);
 		}
-		
 		else if (type.equals("wws"))
 		{
-//			String server = source.substring(source.indexOf(":") + 1);
 			sds = new WWSSource(params);
 		}
-		
-		/*
-		else if (type.equals("winston"))
-		{
-			if (params != null)
-			{
-				int pipe = params.indexOf("|");
-				String driver = params.substring(0, pipe);
-				String url = params.substring(pipe + 1);
-				sds = new DirectWinstonSource(driver, url);
-			}
-		}
-		*/
 		else if (type.equals("wwsd"))
 		{
 			if (params != null)
 			{
-//				String[] ss = Util.splitString(params, "|");
 				String[] ss = params.split("|");
 				String driver = ss[0];
 				String url = ss[1];
@@ -148,12 +148,6 @@ abstract public class SeismicDataSource
 				sds = new DirectWWSSource(driver, url, db);
 			}
 		}
-		/*
-		else if (type.equals("winstonserver"))
-		{
-			sds = new WinstonSource();
-		}
-		*/
 		else if (type.equals("cache"))
 		{
 			sds = Swarm.getCache();				
@@ -169,10 +163,4 @@ abstract public class SeismicDataSource
 		sds.setName(name);
 		return sds;
 	}
-	
-	//public List getRSAMStations();
-	//public RSAMData getRSAM(String station, double t1, double t2);
-	
-	//public List getRegions();
-	//public List getHypocenters();
 }

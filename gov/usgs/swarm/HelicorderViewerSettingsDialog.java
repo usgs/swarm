@@ -30,6 +30,9 @@ import javax.swing.border.TitledBorder;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2006/04/15 15:58:52  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.11  2006/03/04 23:03:45  cervelli
  * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
  *
@@ -345,7 +348,7 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 		String tc = Integer.toString((int)(settings.timeChunk / 60.0));
 		chunkList.setSelectedItem(tc);
 		
-		String span = Integer.toString((int)(settings.span / 60));
+		String span = Integer.toString((int)(settings.span / 60.0));
 		spanList.setSelectedItem(span);
 		
 		String wzo = Integer.toString(settings.waveZoomOffset);

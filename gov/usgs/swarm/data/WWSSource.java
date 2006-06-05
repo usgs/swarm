@@ -21,6 +21,9 @@ import java.util.StringTokenizer;
  * be made a descendant of WaveServerSource. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/04/17 03:35:20  dcervelli
+ * Unsynchronized close() to avoid blocking in the event thread.
+ *
  * Revision 1.4  2006/04/15 16:00:13  dcervelli
  * 1.3 changes (renaming, new datachooser, different config).
  *
@@ -64,19 +67,24 @@ public class WWSSource extends SeismicDataSource
 	private boolean compress = false;
 	private int protocolVersion = 1;
 	
+	private String server;
+	private int port;
+	
+	private boolean established;
+	
 	public WWSSource(String s)
 	{
 		params = s;
 //		String[] ss = Util.splitString(params, ":");
 		String[] ss = params.split(":");
-		String h = ss[0];
-		int p = Integer.parseInt(ss[1]);
+		server = ss[0];
+		port = Integer.parseInt(ss[1]);
 		timeout = Integer.parseInt(ss[2]);
 		compress = ss[3].equals("1");
 		
-		winstonClient = new WWSClient(h, p);
+		winstonClient = new WWSClient(server, port);
 		setTimeout(timeout);
-		protocolVersion = winstonClient.getProtocolVersion();
+//		protocolVersion = winstonClient.getProtocolVersion();
 	}
 	
 	public WWSSource(WWSSource wss)
@@ -89,6 +97,20 @@ public class WWSSource extends SeismicDataSource
 	public SeismicDataSource getCopy()
 	{
 		return new WWSSource(this);	
+	}
+	
+	public void establish()
+	{
+		if (!established)
+		{
+			protocolVersion = winstonClient.getProtocolVersion();
+			established = true;
+		}
+	}
+	
+	public String toConfigString()
+	{
+		return String.format("%s;wws:%s:%d:%d:%s", name, server, port, timeout, compress ? "1" : "0");
 	}
 	
 	public synchronized void setTimeout(int to)

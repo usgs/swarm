@@ -20,6 +20,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * so I had to add some hacky code for the CachePurgeActions.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/04/15 16:00:13  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.2  2006/04/03 05:16:20  dcervelli
  * Changes for reduced bandwidth monitor mode.
  *
@@ -829,5 +832,10 @@ public class CachedDataSource extends SeismicDataSource
 			}
 			return chunk;
 		}
+	}
+	
+	public String toConfigString()
+	{
+		return "cache:";
 	}
 }

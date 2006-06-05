@@ -27,6 +27,9 @@ import javax.swing.border.EmptyBorder;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/04/15 15:58:52  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.2  2005/08/30 18:10:32  tparker
  * Correct WWS config parsing bug.
  *
@@ -390,7 +393,7 @@ public class EditDataSourceDialog extends BaseDialog
 		if (n == null || n.length() <= 0)
 			message = "You must specify a name for this data source.";
 //		else if (!edit && Swarm.getParentFrame().serverExists(n))
-		else if (!edit && Swarm.config.serverExists(n))
+		else if (!edit && Swarm.config.sourceExists(n))
 			message = "A data source by that name already exists.";
 		
 		if (message == null)

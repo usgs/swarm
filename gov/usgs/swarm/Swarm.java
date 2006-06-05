@@ -47,6 +47,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: chooser visibility
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2006/04/17 04:16:36  dcervelli
+ * More 1.3 changes.
+ *
  * Revision 1.20  2006/04/15 15:58:52  dcervelli
  * 1.3 changes (renaming, new datachooser, different config).
  *
@@ -154,12 +157,11 @@ public class Swarm extends JFrame
 	private SwarmMenu swarmMenu;
 	private CachedDataSource cache;
 	private int frameCount = 0;
-	private int threadCount = 0;
 	
 	private WaveClipboardFrame waveClipboard;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "1.3.1.20060416";
+	private static final String VERSION = "1.3.3.20060506";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -345,7 +347,7 @@ public class Swarm extends JFrame
 							JInternalFrame jf = null;
 							for (int i = 0; i < frames.size(); i++)
 							{
-								JInternalFrame f = (JInternalFrame)frames.get(i);
+								JInternalFrame f = frames.get(i);
 								if (f instanceof HelicorderViewerFrame)
 								{
 									jf = f;
@@ -353,7 +355,7 @@ public class Swarm extends JFrame
 								}
 							}
 							if (jf == null)
-								jf = (JInternalFrame)frames.get(0);
+								jf = frames.get(0);
 							jf.requestFocus();
 						}
 					}
@@ -552,32 +554,12 @@ public class Swarm extends JFrame
 		System.exit(0);
 	}
 
-	// TODO: move these functions
-	public SeismicDataSource parseDataSource(String abbrSource)
-	{
-		String source = config.getServer(abbrSource);
-		return SeismicDataSource.getDataSource(source);
-	}
-	
-	public void clipboardWaveChannelSelected(final String source, final String[] channels)
-	{
-		final SeismicDataSource sds = parseDataSource(source);
-		for (int i = 0; i < channels.length; i++)
-			loadClipboardWave(sds, channels[i]);
-	}
-	
-	public void clipboardWaveChannelSelected(final String source, final String channel)
-	{
-		final SeismicDataSource sds = parseDataSource(source);
-		loadClipboardWave(sds, channel);
-	}
-	
-	private void loadClipboardWave(final SeismicDataSource source, final String channel)
+	public void loadClipboardWave(final SeismicDataSource source, final String channel)
 	{
 		final WaveViewPanel wvp = new WaveViewPanel();
 		wvp.setChannel(channel);
 		wvp.setDataSource(source);
-		ClipboardWaveViewPanel cwvp = waveClipboard.getSelected();
+		WaveViewPanel cwvp = waveClipboard.getSelected();
 		double st = 0;
 		double et = 0;
 		if (cwvp == null)
@@ -588,8 +570,8 @@ public class Swarm extends JFrame
 		}
 		else
 		{
-			st = cwvp.getWaveViewPanel().getStartTime();	
-			et = cwvp.getWaveViewPanel().getEndTime();
+			st = cwvp.getStartTime();	
+			et = cwvp.getEndTime();
 		}
 		final double fst = st;
 		final double fet = et;
@@ -598,7 +580,6 @@ public class Swarm extends JFrame
 				{
 					public Object construct()
 					{
-						incThreadCount();
 //						double now = CurrentTime.nowJ2K();
 						Wave sw = source.getWave(channel, fst, fet);
 						wvp.setWave(sw, fst, fet);
@@ -613,21 +594,19 @@ public class Swarm extends JFrame
 							waveClipboard.setSelected(true);
 						}
 						catch (Exception e) {}
-						waveClipboard.addWave(new ClipboardWaveViewPanel(wvp));
-						decThreadCount();
+						waveClipboard.addWave(wvp);
 					}
 				};
 		worker.start();
 	}
 	
-	public void monitorChannelSelected(String source, String channel)
+	public void monitorChannelSelected(SeismicDataSource source, String channel)
 	{
-		MultiMonitor monitor = (MultiMonitor)monitors.get(source);
+		MultiMonitor monitor = monitors.get(source.getName());
 		if (monitor == null)
 		{
-			SeismicDataSource sds = parseDataSource(source);
-			monitor = new MultiMonitor(sds);
-			monitors.put(source, monitor);
+			monitor = new MultiMonitor(source);
+			monitors.put(source.getName(), monitor);
 			addInternalFrame(monitor);
 		}
 	
@@ -636,19 +615,19 @@ public class Swarm extends JFrame
 		
 		monitor.addChannel(channel);
 	}
-	
-	public WaveViewerFrame waveChannelSelected(String source, String channel)
+
+	public WaveViewerFrame openRealtimeWave(SeismicDataSource source, String channel)
 	{
-		SeismicDataSource sds = parseDataSource(source);
-		WaveViewerFrame frame = new WaveViewerFrame(sds, channel);
+		WaveViewerFrame frame = new WaveViewerFrame(source, channel);
 		addInternalFrame(frame);
 		return frame;
 	}
+
 	
-	public HelicorderViewerFrame helicorderChannelSelected(String source, String channel)
+	public HelicorderViewerFrame openHelicorder(SeismicDataSource source, String channel)
 	{
-		SeismicDataSource sds = parseDataSource(source);
-		HelicorderViewerFrame frame = new HelicorderViewerFrame(this, sds, channel);
+		source.establish();
+		HelicorderViewerFrame frame = new HelicorderViewerFrame(source, channel);
 		addInternalFrame(frame);
 		return frame;
 	}
@@ -671,7 +650,7 @@ public class Swarm extends JFrame
 		frames.add(f);
 		frameCount++;			
 		frameCount = frameCount % 10;
-		f.setLocation(frameCount * 30, frameCount * 30);
+		f.setLocation(frameCount * 24, frameCount * 24);
 		SwingUtilities.invokeLater(new Runnable()
 				{
 					public void run()
@@ -705,10 +684,10 @@ public class Swarm extends JFrame
 		{
 		    int w = ds.width / 2;
 		    int h = ds.height / 2;
-		    HelicorderViewerFrame hvf0 = (HelicorderViewerFrame)hcs.get(0);
-		    HelicorderViewerFrame hvf1 = (HelicorderViewerFrame)hcs.get(1);
-		    HelicorderViewerFrame hvf2 = (HelicorderViewerFrame)hcs.get(2);
-		    HelicorderViewerFrame hvf3 = (HelicorderViewerFrame)hcs.get(3);
+		    HelicorderViewerFrame hvf0 = hcs.get(0);
+		    HelicorderViewerFrame hvf1 = hcs.get(1);
+		    HelicorderViewerFrame hvf2 = hcs.get(2);
+		    HelicorderViewerFrame hvf3 = hcs.get(3);
 		    hvf0.setSize(w, h);
 		    hvf0.setLocation(0, 0);
 		    hvf1.setSize(w, h);
@@ -724,7 +703,7 @@ public class Swarm extends JFrame
 			int cx = 0;
 			for (int i = 0; i < hcs.size(); i++)
 			{
-				HelicorderViewerFrame hvf = (HelicorderViewerFrame)hcs.get(i);
+				HelicorderViewerFrame hvf = hcs.get(i);
 				try 
 				{ 
 					hvf.setIcon(false);
@@ -772,37 +751,16 @@ public class Swarm extends JFrame
 		}
 	}
 
-	public void updateThreadLabel()
-	{
-		/*
-		if (threadCount == 0)
-			threadLabel.setText(" ");
-		else if (threadCount == 1)
-			threadLabel.setText("1 thread ");
-		else
-			threadLabel.setText(threadCount + " threads ");
-			*/
-	}
-
-	public void incThreadCount()
-	{
-		threadCount++;	
-		updateThreadLabel();
-	}
-	
-	public void decThreadCount()
-	{
-		threadCount--;	
-		updateThreadLabel();
-	}
-	
 	public void parseKiosk()
 	{
 		String[] kiosks = config.kiosk.split(",");
 		for (int i = 0; i < kiosks.length; i++)
 		{ 
 			String[] ch = kiosks[i].split(";");
-			helicorderChannelSelected(ch[0], ch[1]);
+			SeismicDataSource sds = config.getSource(ch[0]);
+			if (sds == null)
+				continue;
+			openHelicorder(sds, ch[1]);
 		}
 		toggleFullScreenMode();
 	}
@@ -824,6 +782,7 @@ public class Swarm extends JFrame
 		try 
 		{
 			// JDK 1.5 by default has an ugly theme, this line uses the one from 1.4
+//			PlasticLookAndFeel.setTabStyle(PlasticLookAndFeel.TAB_STYLE_METAL_VALUE);
 			UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
 //			UIManager.setLookAndFeel("net.java.plaf.windows.WindowsLookAndFeel");
 //			MetalLookAndFeel.setCurrentTheme(new DefaultMetalTheme());

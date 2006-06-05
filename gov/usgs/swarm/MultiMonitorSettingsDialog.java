@@ -19,6 +19,9 @@ import javax.swing.border.TitledBorder;
  * A dialog for Monitor Mode Settings.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/04/15 15:58:52  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.1  2005/08/26 20:40:28  dcervelli
  * Initial avosouth commit.
  *
@@ -106,7 +109,7 @@ public class MultiMonitorSettingsDialog extends BaseDialog
 	public void setToCurrent()
 	{
 		refreshInterval.setText(Long.toString(monitor.getRefreshInterval() / 1000));
-		String span = Integer.toString((int)(monitor.getSpan()));
+		String span = Integer.toString(monitor.getSpan());
 		spanList.setSelectedItem(span);
 	}
 
