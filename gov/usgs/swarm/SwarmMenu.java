@@ -3,8 +3,11 @@ package gov.usgs.swarm;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JInternalFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -15,6 +18,9 @@ import javax.swing.event.MenuListener;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/04/17 04:16:36  dcervelli
+ * More 1.3 changes.
+ *
  * @author Dan Cervelli
  */
 public class SwarmMenu extends JMenuBar
@@ -38,10 +44,12 @@ public class SwarmMenu extends JMenuBar
 	
 	private AboutDialog aboutDialog;
 	
+	private Map<JInternalFrame, InternalFrameMenuItem> windows;
+	
 	public SwarmMenu()
 	{
 		super();
-		
+		windows = new HashMap<JInternalFrame, InternalFrameMenuItem>();
 		createFileMenu();
 		createEditMenu();
 		createWindowMenu();
@@ -165,6 +173,8 @@ public class SwarmMenu extends JMenuBar
 					public void menuCanceled(MenuEvent e)
 					{}
 				});
+
+		windowMenu.addSeparator();
 		
 		add(windowMenu);
 	}
@@ -187,5 +197,44 @@ public class SwarmMenu extends JMenuBar
 				
 		helpMenu.add(about);
 		add(helpMenu);
+	}
+	
+	private class InternalFrameMenuItem extends JMenuItem
+	{
+		private static final long serialVersionUID = 1L;
+		private JInternalFrame frame;
+		
+		public InternalFrameMenuItem(JInternalFrame f)
+		{
+			frame = f;
+			setText(f.getTitle());
+			setIcon(f.getFrameIcon());
+			addActionListener(new ActionListener()
+					{
+						public void actionPerformed(ActionEvent e)
+						{
+							frame.toFront();
+							try
+							{
+								frame.setSelected(true);
+							}
+							catch (Exception ex) {}
+						}
+					});
+		}
+	}
+	
+	public void addInternalFrame(JInternalFrame f)
+	{
+		InternalFrameMenuItem mi = new InternalFrameMenuItem(f);
+		windows.put(f, mi);
+		windowMenu.add(mi);
+	}
+	
+	public void removeInternalFrame(JInternalFrame f)
+	{
+		InternalFrameMenuItem mi = windows.get(f);
+		windows.remove(f);
+		windowMenu.remove(mi);
 	}
 }

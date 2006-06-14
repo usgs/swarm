@@ -1,7 +1,6 @@
 package gov.usgs.swarm;
 
 import gov.usgs.swarm.data.SeismicDataSource;
-import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Pair;
 
 import java.awt.BorderLayout;
@@ -16,20 +15,29 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -49,6 +57,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/06/05 18:06:49  dcervelli
+ * Major 1.3 changes.
+ *
  * Revision 1.2  2006/04/17 04:16:36  dcervelli
  * More 1.3 changes.
  *
@@ -66,6 +77,14 @@ public class DataChooser extends JPanel
 	public static final Color LINE_COLOR = new Color(0xac, 0xa8, 0x99);
 	
 	private JTree dataTree;
+	private JScrollPane treeScrollPane;
+	private JLabel nearestLabel;
+	private JList nearestList;
+	private JScrollPane nearestScrollPane;
+	private JSplitPane split;
+	private JPanel nearestPanel;
+	private String lastNearest;
+	
 	private DefaultMutableTreeNode rootNode;
 	
 	private JToolBar toolBar;
@@ -81,16 +100,23 @@ public class DataChooser extends JPanel
 	private JButton monitorButton;
 	private JButton realtimeButton;
 	
-	private ConfigFile groupFile;
+	private Map<String, TreePath> nearestPaths;
+	
+//	private ConfigFile groupFile;
 	
 	public DataChooser()
 	{
 		super(new BorderLayout());
 
-		groupFile = new ConfigFile(Swarm.config.groupConfigFile);
+		nearestPaths = new HashMap<String, TreePath>();
+//		groupFile = new ConfigFile(Swarm.config.groupConfigFile);
 		
 		createToolBar();
 		createTree();
+		createNearest();
+		split = SwarmUtil.createStrippedSplitPane(JSplitPane.VERTICAL_SPLIT, treeScrollPane, nearestPanel);
+		split.setDividerSize(4);
+		add(split, BorderLayout.CENTER);
 		createActionBar();
 
 		setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 0));
@@ -137,23 +163,25 @@ public class DataChooser extends JPanel
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-//						List<String> servers = getSelectedServers();
-//						if (servers != null)
-//						{
-//							String selected = servers.get(0).substring(1);
-//							
-//							EditDataSourceDialog d = new EditDataSourceDialog(Swarm.config.getServer(selected));
-//							d.setVisible(true);
-//							String eds = d.getResult();
-//							if (eds != null)
-//							{
-////								((DefaultListModel)servers.getModel()).removeElementAt(i);
-////								Swarm.swarmConfig.removeServer(Swarm.swarmConfig.getServer(selected));
-////								((DefaultListModel)servers.getModel()).add(i, eds.substring(0, eds.indexOf(";")));
-////								Swarm.swarmConfig.addServer(eds);
-////								servers.setSelectedIndex(i);
-//							}
-//						}
+						List<ServerNode> servers = getSelectedServers();
+						if (servers != null)
+						{
+							String selected = servers.get(0).getSource().toConfigString();
+							EditDataSourceDialog d = new EditDataSourceDialog(selected);
+							d.setVisible(true);
+							String eds = d.getResult();
+							if (eds != null)
+							{
+								SeismicDataSource newSource = SeismicDataSource.getDataSource(eds);
+								if (newSource == null)
+									return;
+								removeServer(servers.get(0));
+								String svn = eds.substring(0, eds.indexOf(";"));
+								Swarm.config.removeSource(svn);
+								Swarm.config.addSource(newSource);
+								insertServer(newSource);
+							}
+						}
 					}	
 				});
 		toolBar.add(editButton);
@@ -211,6 +239,7 @@ public class DataChooser extends JPanel
 		actionPanel.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
 
 		heliButton = new JButton(Images.getIcon("heli")); //$NON-NLS-1$
+		heliButton.setFocusable(false);
 		heliButton.setToolTipText(Messages.getString("DataChooser.heliButtonToolTip")); //$NON-NLS-1$
 		heliButton.addActionListener(new ActionListener()
 				{
@@ -223,6 +252,9 @@ public class DataChooser extends JPanel
 										List<Pair<ServerNode, ChannelNode>> channels = getSelections();
 										if (channels != null)
 										{
+//											Pair<ServerNode, ChannelNode> ch1 = channels.get(0);
+//											if (ch1 != null)
+//												setNearest(ch1.item2.getChannel());
 											for (Pair<ServerNode, ChannelNode> pair : channels)
 											{
 												Swarm.getApplication().openHelicorder(pair.item1.getSource(), pair.item2.getChannel());
@@ -318,6 +350,16 @@ public class DataChooser extends JPanel
 		add(actionPanel, BorderLayout.SOUTH);
 	}
 	
+	public int getDividerLocation()
+	{
+		return split.getDividerLocation();
+	}
+	
+	public void setDividerLocation(int dl)
+	{
+		split.setDividerLocation(dl);
+	}
+	
 	private List<ServerNode> getSelectedServers()
 	{
 		TreePath[] paths = dataTree.getSelectionPaths();
@@ -349,7 +391,7 @@ public class DataChooser extends JPanel
 			if (e.isAddedPath())
 			{
 				TreePath[] paths = e.getPaths();
-				if (paths.length == 2)
+//				if (paths.length = 2)
 					((JTree)e.getSource()).scrollPathToVisible(paths[0]);
 			}
 		}
@@ -503,11 +545,11 @@ public class DataChooser extends JPanel
 		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
 		dataTree.setModel(treeModel);
 		
-		JScrollPane scrollPane = new JScrollPane(dataTree);
+		treeScrollPane = new JScrollPane(dataTree);
 		
 		dataTree.addTreeSelectionListener(new MakeVisibileTSL());
 		dataTree.addTreeExpansionListener(new ExpansionListener());
-		dataTree.setCellRenderer(new CellRenderer2());
+		dataTree.setCellRenderer(new CellRenderer());
 		
 		dataTree.addMouseListener(new MouseAdapter()
 				{
@@ -542,7 +584,61 @@ public class DataChooser extends JPanel
 					}
 				});
 		
-		add(scrollPane, BorderLayout.CENTER);
+	}
+
+	public void setNearest(final String channel)
+	{
+		if (channel.equals(lastNearest))
+			return;
+		
+		SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						List<Pair<Double, String>> nrst = Metadata.findNearest(Swarm.config.metadata, channel);
+						if (nrst == null)
+							return;
+						lastNearest = channel;
+						nearestLabel.setText("Nearest to " + channel);
+						DefaultListModel model = (DefaultListModel)nearestList.getModel();
+						model.removeAllElements();
+						for (Pair<Double, String> item : nrst)
+							model.addElement(String.format("%s (%.1f km)", item.item2, item.item1));
+					}
+				});
+	}
+	
+	private void createNearest()
+	{
+		nearestList = new JList(new DefaultListModel());
+		nearestScrollPane = new JScrollPane(nearestList);
+		nearestPanel = new JPanel(new BorderLayout());
+		nearestPanel.add(nearestScrollPane, BorderLayout.CENTER);
+		nearestLabel = new JLabel("Nearest");
+		nearestPanel.add(nearestLabel, BorderLayout.NORTH);
+		nearestList.setCellRenderer(new ListCellRenderer());
+		
+		nearestList.addListSelectionListener(new ListSelectionListener()
+				{
+					public void valueChanged(ListSelectionEvent e)
+					{
+						if (!e.getValueIsAdjusting())
+						{
+							dataTree.clearSelection();
+							Object[] sels = nearestList.getSelectedValues();
+							for (Object o : sels)
+							{
+								String ch = (String)o;
+								ch = ch.substring(0, ch.indexOf("(")).trim();
+								TreePath tp = nearestPaths.get(ch);
+								dataTree.addSelectionPath(tp);
+							}
+						}
+//						dataTree.addSelectionPath(new TreePath());
+//						System.out.println(e);
+					}
+				});
+		
 	}
 	
 	private void populateServer(final ServerNode node, final List<String> channels)
@@ -566,27 +662,29 @@ public class DataChooser extends JPanel
 						for (String channel : channels)
 						{
 //							DefaultMutableTreeNode node = new DefaultMutableTreeNode(CHANNEL_CHAR + channel);
-							ChannelNode node = new ChannelNode(channel);
-							allNode.add(node);
+							ChannelNode newNode = new ChannelNode(channel);
+							allNode.add(newNode);
 							
-							if (groupFile != null)
+							Metadata md = Swarm.config.metadata.get(channel);
+							if (md != null && md.groups != null)
 							{
-								List<String> groups = groupFile.getList(channel);
-								if (groups != null)
+								Set<String> groups = md.groups;
+								for (String g : groups)
 								{
-									for (String g : groups)
-									{
-										GroupNode gn = rootMap.get(g);
+									GroupNode gn = rootMap.get(g);
 //										DefaultMutableTreeNode rn = (DefaultMutableTreeNode)rootMap.get(g);
-										if (gn == null)
-										{
-											gn = new GroupNode(g);
-											rootMap.put(g, gn);
-										}
-										ChannelNode ln = new ChannelNode(channel);
-										gn.add(ln);
+									if (gn == null)
+									{
+										gn = new GroupNode(g);
+										rootMap.put(g, gn);
 									}
+									ChannelNode ln = new ChannelNode(channel);
+									gn.add(ln);
 								}
+							}
+							else
+							{
+								nearestPaths.put(channel, new TreePath(newNode.getPath()));
 							}
 						}
 						
@@ -594,9 +692,15 @@ public class DataChooser extends JPanel
 						{
 							GroupNode n = rootMap.get(key);
 							rootNode.add(n);
+							for (int i = 0; i < n.getChildCount(); i++)
+							{
+								ChannelNode cn = (ChannelNode)n.getChildAt(i);
+								nearestPaths.put(cn.getChannel(), new TreePath(cn.getPath()));
+							}
 						}
 						
 						((DefaultTreeModel)dataTree.getModel()).reload(rootNode);
+						nearestList.repaint();
 					}
 				});	
 	}
@@ -774,7 +878,23 @@ public class DataChooser extends JPanel
 		}
 	}
 	
-	private class CellRenderer2 extends DefaultTreeCellRenderer
+	private class ListCellRenderer extends DefaultListCellRenderer
+	{
+		private static final long serialVersionUID = 1L;
+
+		public Component getListCellRendererComponent(JList list, Object value,
+				int index, boolean isSelected, boolean hasFocus)
+		{
+			String ch = (String)value;
+			ch = ch.substring(0, ch.indexOf("(")).trim();
+			Icon icon = nearestPaths.containsKey(ch) ? Images.getIcon("bullet") : Images.getIcon("redbullet");
+			super.getListCellRendererComponent(list, value, index, isSelected, hasFocus);
+			setIcon(icon);
+			return this;
+		}
+	}
+	
+	private class CellRenderer extends DefaultTreeCellRenderer
 	{
 		private static final long serialVersionUID = 1L;
 

@@ -55,6 +55,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * TODO: change slider checkbox
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2006/06/05 18:06:49  dcervelli
+ * Major 1.3 changes.
+ *
  * Revision 1.15  2006/04/17 04:16:36  dcervelli
  * More 1.3 changes.
  *
@@ -182,15 +185,15 @@ public class HelicorderViewerFrame extends JInternalFrame
 		waveViewSettings = new WaveViewSettings();
 		dataSource = sds.getCopy();
 		channel = ch;
-		SwingUtilities.invokeLater(new Runnable() 
-				{
-					public void run()
-					{
+//		SwingUtilities.invokeLater(new Runnable() 
+//				{
+//					public void run()
+//					{
 						createUI();
 						getHelicorder();
-						
-					}
-				});
+//						
+//					}
+//				});
 		
 		refreshThread = new RefreshThread();
 	}
@@ -208,6 +211,14 @@ public class HelicorderViewerFrame extends JInternalFrame
 		setSize(800, 750);
 		setContentPane(mainPanel);
 //		createWiggler();
+		addInternalFrameListener(new InternalFrameAdapter()
+				{
+					public void internalFrameActivated(InternalFrameEvent e)
+					{
+						if (channel != null)
+							Swarm.getApplication().getDataChooser().setNearest(channel);
+					}
+				});
 		setVisible(true);
 	}
 

@@ -1,5 +1,11 @@
 package gov.usgs.swarm;
 
+import gov.usgs.plot.AxisRenderer;
+import gov.usgs.plot.FrameDecorator;
+import gov.usgs.plot.FrameRenderer;
+import gov.usgs.plot.Renderer;
+import gov.usgs.plot.SmartTick;
+import gov.usgs.plot.TextRenderer;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.CurrentTime;
@@ -40,6 +46,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: wvs buttons
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/06/05 18:06:49  dcervelli
+ * Major 1.3 changes.
+ *
  * Revision 1.8  2006/04/17 04:16:36  dcervelli
  * More 1.3 changes.
  *
@@ -283,6 +292,15 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		
 		this.addInternalFrameListener(new InternalFrameAdapter()
 			  {
+					public void internalFrameActivated(InternalFrameEvent e)
+					{
+						if (selectedIndex != -1)
+						{
+							String ch = panels.get(selectedIndex).getChannel();
+							Swarm.getApplication().getDataChooser().setNearest(ch);
+						}
+					}
+					
 					public void internalFrameOpened(InternalFrameEvent e)
 					{
 						resizeWaves();
@@ -290,6 +308,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 					
 					public void internalFrameClosing(InternalFrameEvent e)
 					{
+						selectedIndex = -1;
 						dataSource.close();
 						panels.clear();
 						channels.clear();
@@ -301,12 +320,59 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		this.setDefaultCloseOperation(JInternalFrame.HIDE_ON_CLOSE);
 	}
 	
+	private class MonitorWaveDecorator implements FrameDecorator
+	{
+		private WaveViewPanel panel;
+		
+		public MonitorWaveDecorator(WaveViewPanel wvp)
+		{
+			panel = wvp;
+		}
+		
+		public void decorate(FrameRenderer fr)
+		{
+			fr.createEmptyAxis();
+			AxisRenderer ar = fr.getAxis();
+			ar.createDefault();
+			ar.setBackgroundColor(Color.WHITE);
+			if (selectedIndex != -1 && panels.get(selectedIndex) == panel)
+				ar.setBackgroundColor(SELECT_COLOR);
+				
+			TextRenderer label = new TextRenderer(fr.getGraphX() + 4, fr.getGraphY() + 14, panel.getChannel(), Color.BLACK);
+			label.backgroundColor = Color.WHITE;
+			
+			int hTicks = fr.getGraphWidth() / 108;
+			Object[] stt = SmartTick.autoTimeTick(fr.getMinXAxis(), fr.getMaxXAxis(), hTicks);
+	        if (stt != null)
+	        	ar.createVerticalGridLines((double[])stt[0]);
+	        
+	        double[] bt = (double[])stt[0];
+	        String[] labels = (String[])stt[1];
+	        for (int i = 0; i < bt.length; i++)
+	        {
+	            TextRenderer tr = new TextRenderer();
+                tr.text = labels[i];
+	            tr.x = (float)fr.getXPixel(bt[i]);
+	            tr.y = fr.getGraphY() + fr.getGraphHeight() - 10;
+	            tr.color = Color.BLACK;
+	            tr.horizJustification = TextRenderer.CENTER;
+	            tr.vertJustification = TextRenderer.TOP;
+	            tr.font = TextRenderer.SMALL_FONT;
+	            ar.addPostRenderer(tr);
+	        }
+	        
+	        ar.addPostRenderer(label);
+		}
+	}
+	
 	public synchronized void addChannel(String ch)
 	{
 		channels.add(ch);
 		final WaveViewPanel panel = new WaveViewPanel();
+		panel.setOffsets(-1, 0, 0, 0);
 		panel.setWorking(true);
 		panel.setDisplayTitle(true);
+		panel.setFrameDecorator(new MonitorWaveDecorator(panel));
 		panels.add(panel);
 		waveBox.add(panel);
 		panel.addListener(new WaveViewPanelAdapter()
@@ -334,6 +400,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 			if (panel == p)
 			{
 				selectedIndex = i;
+				Swarm.getApplication().getDataChooser().setNearest(panel.getChannel());
 				panel.setBackgroundColor(SELECT_COLOR);
 				panel.invalidateImage();
 				panel.repaint();
@@ -355,7 +422,10 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	private void resizeWaves()
 	{
 		if (panels.size () == 0 || waveBox == null)
+		{
+			repaint();
 			return;
+		}
 		int ah = waveBox.getHeight() - 5;
 		double dy = ((double)ah / (double)panels.size());
 		int wh = (int)Math.round(dy);

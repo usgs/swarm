@@ -20,6 +20,9 @@ import java.util.TreeMap;
  * 4) Individual command line config key/values.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/06/05 18:06:49  dcervelli
+ * Major 1.3 changes.
+ *
  * Revision 1.2  2006/04/17 04:16:36  dcervelli
  * More 1.3 changes.
  *
@@ -63,6 +66,8 @@ public class Config
 	public int chooserDividerLocation;
 	public boolean chooserVisible;
 	
+	public int nearestDividerLocation;
+	
 	public boolean clipboardVisible;
 	public int clipboardX;
 	public int clipboardY;
@@ -71,6 +76,8 @@ public class Config
 	public boolean clipboardMaximized;
 
 	public Map<String, SeismicDataSource> sources;
+	
+	public Map<String, Metadata> metadata;
 	
 	public static Config createConfig(String[] args)
 	{
@@ -94,6 +101,7 @@ public class Config
 			}
 		}
 		Config config = new Config(cf);
+		config.metadata = Metadata.loadMetadata(Metadata.DEFAULT_METADATA_FILENAME);
 		return config;
 	}
 	
@@ -115,6 +123,8 @@ public class Config
 		
 		chooserDividerLocation = Util.stringToInt(config.getString("chooserDividerLocation"), 200);
 		chooserVisible = Util.stringToBoolean(config.getString("chooserVisible"), true);
+	
+		nearestDividerLocation = Util.stringToInt(config.getString("nearestDividerLocation"), 600);
 		
 		timeZoneAbbr = Util.stringToString(config.getString("timeZoneAbbr"), "UTC");
 		timeZoneOffset = Util.stringToDouble(config.getString("timeZoneOffset"), 0);
@@ -178,24 +188,6 @@ public class Config
 	{
 		sources.remove(key);
 	}
-//	
-//	public String getServer(String abbr)
-//	{
-//		if (servers == null)
-//			return null;
-//		
-//		for (String server : servers)
-//		{
-//			if (server.startsWith(abbr))
-//				return server;
-//		}
-//		return null;
-//	}
-//	
-//	public boolean serverExists(String abbr)
-//	{
-//		return getServer(abbr) != null;
-//	}
 	
 	public double getDurationMagnitude(double t)
 	{
@@ -218,6 +210,8 @@ public class Config
 		config.put("windowSizeY", Integer.toString(windowHeight));
 		config.put("chooserDividerLocation", Integer.toString(chooserDividerLocation));
 		config.put("chooserVisible", Boolean.toString(chooserVisible));
+		
+		config.put("nearestDividerLocation", Integer.toString(nearestDividerLocation));
 		
 		config.put("timeZoneAbbr", timeZoneAbbr);
 		config.put("timeZoneOffset", Double.toString(timeZoneOffset));

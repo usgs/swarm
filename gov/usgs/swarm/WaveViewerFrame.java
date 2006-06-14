@@ -23,6 +23,9 @@ import javax.swing.event.InternalFrameEvent;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/06/05 18:06:49  dcervelli
+ * Major 1.3 changes.
+ *
  * Revision 1.7  2006/04/17 04:16:36  dcervelli
  * More 1.3 changes.
  *
@@ -138,7 +141,11 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 					public void actionPerformed(ActionEvent e)
 					{
 						if (waveViewPanel != null)
-							Swarm.getApplication().getWaveClipboard().addWave(new WaveViewPanel(waveViewPanel));
+						{
+							WaveClipboardFrame cb = Swarm.getApplication().getWaveClipboard();
+							cb.setVisible(true);
+							cb.addWave(new WaveViewPanel(waveViewPanel));
+						}
 					}
 				});
 		Util.mapKeyStrokeToButton(this, "C", "clipboard1", clipboard);
@@ -156,6 +163,12 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 		
 		this.addInternalFrameListener(new InternalFrameAdapter()
 				{
+					public void internalFrameActivated(InternalFrameEvent e)
+					{
+						if (channel != null)
+							Swarm.getApplication().getDataChooser().setNearest(channel);
+					}
+					
 					public void internalFrameClosing(InternalFrameEvent e)
 					{
 						kill();	

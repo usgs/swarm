@@ -11,6 +11,9 @@ import javax.swing.ImageIcon;
  * TODO: make images static final, don't use map 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/04/17 04:16:36  dcervelli
+ * More 1.3 changes.
+ *
  * Revision 1.9  2006/04/15 15:58:52  dcervelli
  * 1.3 changes (renaming, new datachooser, different config).
  *
@@ -43,10 +46,12 @@ import javax.swing.ImageIcon;
 public class Images 
 {
 	private static Images images;
+	private Map<String, ImageIcon> icons;
 	private Map<String, String> imageMap;
 
 	private Images()
 	{
+		icons = new HashMap<String, ImageIcon>();
 		imageMap = new HashMap<String, String>();
 		imageMap.put("swarm", "images/swarm.gif");
 		imageMap.put("camera", "images/camera.gif");
@@ -92,6 +97,9 @@ public class Images
 		imageMap.put("edit_server", "images/edit_server.gif");
 		imageMap.put("bullet", "images/bullet.gif");
 		imageMap.put("honeycomb", "images/honeycomb.jpg");
+		imageMap.put("redbullet", "images/redbullet.gif");
+		imageMap.put("helilink", "images/helicorderlink.gif");
+		imageMap.put("geosort", "images/geosort.gif");
 		
 		imageMap.put("throbber_off", "images/throbber_off.gif");
 		imageMap.put("throbber_0", "images/throbber_0.gif");
@@ -108,7 +116,16 @@ public class Images
 	{
 		if (images == null)
 			images = new Images();
-		return new ImageIcon(images.getClass().getClassLoader().getResource(images.imageMap.get(key)));
+		
+		ImageIcon icon = images.icons.get(key);
+		if (icon == null)
+		{
+			icon = new ImageIcon(images.getClass().getClassLoader().getResource(images.imageMap.get(key)));
+			images.icons.put(key, icon);
+		}
+		
+		return icon;
+			
 	}
 	
 	public static String get(String key)

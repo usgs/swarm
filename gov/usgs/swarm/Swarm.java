@@ -1,5 +1,6 @@
 package gov.usgs.swarm;
  
+import gov.usgs.earthworm.Menu;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.ConfigFile;
@@ -47,6 +48,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: chooser visibility
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.22  2006/06/05 18:06:49  dcervelli
+ * Major 1.3 changes.
+ *
  * Revision 1.21  2006/04/17 04:16:36  dcervelli
  * More 1.3 changes.
  *
@@ -148,9 +152,7 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
 public class Swarm extends JFrame
 {
 	private static final long serialVersionUID = -1;
-	private static String CALIBRATION_CONFIG_FILE = "Calibration.config";
 	private static Swarm application;
-	private ConfigFile calibrations;
 	private JDesktopPane desktop;
 	private JSplitPane split;
 	private DataChooser chooser;
@@ -161,7 +163,7 @@ public class Swarm extends JFrame
 	private WaveClipboardFrame waveClipboard;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "1.3.3.20060506";
+	private static final String VERSION = "1.3.4.20060614";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -184,7 +186,6 @@ public class Swarm extends JFrame
 		setIconImage(Images.getIcon("swarm").getImage());
 
 		monitors = new HashMap<String, MultiMonitor>();
-		calibrations = new ConfigFile(CALIBRATION_CONFIG_FILE);
 		cache = new CachedDataSource();
 		frames = new ArrayList<JInternalFrame>();
 		application = this;
@@ -312,13 +313,9 @@ public class Swarm extends JFrame
 		return waveClipboard;	
 	}
 	
-	public Calibration getCalibration(String scn)
+	public DataChooser getDataChooser()
 	{
-		String c = calibrations.getString(scn);
-		if (c == null)
-			 return null;
-		
-		return Calibration.fromString(c);
+		return chooser;
 	}
 	
 	public static Swarm getApplication()
@@ -400,6 +397,7 @@ public class Swarm extends JFrame
 		split.setDividerLocation(config.chooserDividerLocation);
 		split.setDividerSize(4);
 		setChooserVisible(config.chooserVisible);
+		chooser.setDividerLocation(config.nearestDividerLocation);
 		
 		waveClipboard = new WaveClipboardFrame();
 		desktop.add(waveClipboard);
@@ -537,6 +535,8 @@ public class Swarm extends JFrame
 		config.chooserDividerLocation = split.getDividerLocation();
 		config.chooserVisible = isChooserVisible();
 		
+		config.nearestDividerLocation = chooser.getDividerLocation();
+		
 		if (config.saveConfig)
 		{
 			ConfigFile configFile = config.toConfigFile();
@@ -588,6 +588,7 @@ public class Swarm extends JFrame
 					
 					public void finished()
 					{
+						waveClipboard.setVisible(true);
 						waveClipboard.toFront();
 						try
 						{
@@ -628,6 +629,7 @@ public class Swarm extends JFrame
 	{
 		source.establish();
 		HelicorderViewerFrame frame = new HelicorderViewerFrame(source, channel);
+		frame.getHelicorderViewPanel().addListener(waveClipboard.getLinkListener());
 		addInternalFrame(frame);
 		return frame;
 	}
@@ -638,6 +640,7 @@ public class Swarm extends JFrame
 				{
 					public void run()
 					{
+						swarmMenu.removeInternalFrame(f);
 						frames.remove(f);
 						if (frameCount > 0)
 							frameCount--;
@@ -655,6 +658,7 @@ public class Swarm extends JFrame
 				{
 					public void run()
 					{
+						swarmMenu.addInternalFrame(f);
 						desktop.add(f);
 						f.toFront();
 						try

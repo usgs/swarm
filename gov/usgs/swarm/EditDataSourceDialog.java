@@ -27,6 +27,9 @@ import javax.swing.border.EmptyBorder;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/06/05 18:06:49  dcervelli
+ * Major 1.3 changes.
+ *
  * Revision 1.3  2006/04/15 15:58:52  dcervelli
  * 1.3 changes (renaming, new datachooser, different config).
  *
@@ -47,11 +50,11 @@ import javax.swing.border.EmptyBorder;
  *
  * @author Dan Cervelli
  */
-public class EditDataSourceDialog extends BaseDialog
+public class EditDataSourceDialog extends SwarmDialog
 {
 	private static final long serialVersionUID = -1;
-	private static final int WIDTH = 400;
-	private static final int HEIGHT = 300;
+//	private static final int WIDTH = 400;
+//	private static final int HEIGHT = 300;
 	
 	private JTextField name;
 	
@@ -83,7 +86,8 @@ public class EditDataSourceDialog extends BaseDialog
 	
 	public EditDataSourceDialog(String source)
 	{
-		super(Swarm.getApplication(), "", true, WIDTH, HEIGHT);
+//		super(Swarm.getApplication(), "", true, WIDTH, HEIGHT);
+		super(Swarm.getApplication(), "", true);
 		if (source == null)
 		{
 			this.setTitle("New Data Source");
@@ -94,7 +98,8 @@ public class EditDataSourceDialog extends BaseDialog
 			this.setTitle("Edit Data Source");
 			edit = true;
 		}
-		createDataSourceUI(source);	
+		createDataSourceUI(source);
+		setSizeAndLocation();
 	}
 	
 	public void createDataSourceUI(String source)
@@ -103,13 +108,11 @@ public class EditDataSourceDialog extends BaseDialog
 		createSACPanel(source);
 		createSeedPanel(source);
 		createWaveServerPanel(source);
-//		createWinstonPanel(source);
 		createWWSPanel(source);
 		
 		tabPane = new JTabbedPane();
-		tabPane.add("Wave Server", waveServerPanel);
 		tabPane.add("WWS", wwsPanel);
-//		tabPane.add("Winston", winstonPanel);
+		tabPane.add("Wave Server", waveServerPanel);
 		tabPane.add("SEED", seedPanel);
 		tabPane.add("SAC", sacPanel);
 		//tabPane.setBorder(new TitledBorder(new EtchedBorder(), "Data Source Type"));
@@ -227,7 +230,7 @@ public class EditDataSourceDialog extends BaseDialog
 		boolean wscomp = false;
 		if (source != null && source.indexOf(";wws:") != -1)
 		{
-			tabIndex = 1;
+			tabIndex = 0;
 			String s = source.substring(source.indexOf(";wws:") + 5);
 			String[] ss = s.split(":");
 			wsh = ss[0];
@@ -239,22 +242,22 @@ public class EditDataSourceDialog extends BaseDialog
 		wwsPanel.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
 		GridBagConstraints c = new GridBagConstraints();
 		
-		wwsHost = new JTextField();
+		wwsHost = new JTextField(20);
 		wwsHost.setMinimumSize(new Dimension(180, 20));
 		wwsHost.setText(wsh);
-		wwsPort = new JTextField("16022");
+		wwsPort = new JTextField("16022", 5);
 		wwsPort.setMinimumSize(new Dimension(50, 20));
 		wwsPort.setText(wsp);
 		
-		wwsTimeout = new JTextField("10");
+		wwsTimeout = new JTextField("10", 5);
 		wwsTimeout.setMinimumSize(new Dimension(50, 20));
 		wwsTimeout.setText(wsto);
 
 		wwsCompress = new JCheckBox();
 		wwsCompress.setSelected(wscomp);
 		
-		JLabel info = new JLabel("<html>Use this type of data source to connect to a Winston Wave Server (WWS). The default WWS port is 16022.</html>");
-		wwsPanel.add(info, GridBagHelper.set(c, "x=0;y=0;w=2;h=1;ix=4;iy=4;wy=0.3;f=b"));
+		JLabel info = new JLabel("<html>Use this type of data source to connect to a Winston Wave Server (WWS).<br>The default WWS port is 16022.</html>");
+		wwsPanel.add(info, GridBagHelper.set(c, "x=0;y=0;w=2;h=1;ix=4;iy=4;wy=0.0;f=b"));
 		
 		wwsPanel.add(new JSeparator(), GridBagHelper.set(c, "x=0;y=1;w=2;h=1;ix=4;iy=4;wy=0;wx=1.0;f=h"));
 		JLabel ipLabel = new JLabel("IP address or host name:");
@@ -269,12 +272,12 @@ public class EditDataSourceDialog extends BaseDialog
 		
 		JLabel toLabel = new JLabel("Timeout, seconds:");
 		toLabel.setHorizontalAlignment(JLabel.RIGHT);
-		wwsPanel.add(toLabel, GridBagHelper.set(c, "x=0;y=4;a=ne;w=1;h=1;wx=0;wy=0.7;i=0,0,0,8"));
+		wwsPanel.add(toLabel, GridBagHelper.set(c, "x=0;y=4;a=ne;w=1;h=1;wx=0;wy=0;i=0,0,0,8"));
 		wwsPanel.add(wwsTimeout, GridBagHelper.set(c, "x=1;y=4;a=nw;w=1;h=1;wx=1;i=0,0,0,0"));
 		
 		JLabel compLabel = new JLabel("Use compression:");
 		compLabel.setHorizontalAlignment(JLabel.RIGHT);
-		wwsPanel.add(compLabel, GridBagHelper.set(c, "x=0;y=5;a=ne;w=1;h=1;wx=0;wy=0.7;i=0,0,0,8"));
+		wwsPanel.add(compLabel, GridBagHelper.set(c, "x=0;y=5;a=ne;w=1;h=1;wx=0;wy=1;i=0,0,0,8"));
 		wwsPanel.add(wwsCompress, GridBagHelper.set(c, "x=1;y=5;a=nw;w=1;h=1;wx=1;i=0,0,0,0"));
 	}
 	
@@ -285,7 +288,7 @@ public class EditDataSourceDialog extends BaseDialog
 		String wsto = "2";
 		if (source != null && source.indexOf(";ws:") != -1)
 		{
-			tabIndex = 0;
+			tabIndex = 1;
 			String s = source.substring(source.indexOf(";ws:") + 4);
 //			String[] ss = Util.splitString(s, ":");
 			String[] ss = s.split(":");
@@ -298,19 +301,19 @@ public class EditDataSourceDialog extends BaseDialog
 		waveServerPanel.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
 		GridBagConstraints c = new GridBagConstraints();
 		
-		wsHost = new JTextField();
-		wsHost.setMinimumSize(new Dimension(180, 20));
+		wsHost = new JTextField(20);
+//		wsHost.setMinimumSize(new Dimension(180, 20));
 		wsHost.setText(wsh);
-		wsPort = new JTextField("16022");
-		wsPort.setMinimumSize(new Dimension(50, 20));
+		wsPort = new JTextField("16022", 5);
+//		wsPort.setMinimumSize(new Dimension(50, 20));
 		wsPort.setText(wsp);
 		
-		wsTimeout = new JTextField("2");
-		wsTimeout.setMinimumSize(new Dimension(50, 20));
+		wsTimeout = new JTextField("2", 5);
+//		wsTimeout.setMinimumSize(new Dimension(50, 20));
 		wsTimeout.setText(wsto);
 		
-		JLabel info = new JLabel("<html>Use this type of data source to connect to an Earthworm Wave Server. The default Wave Server port is 16022.</html>");
-		waveServerPanel.add(info, GridBagHelper.set(c, "x=0;y=0;w=2;h=1;ix=4;iy=4;wy=0.3;f=b"));
+		JLabel info = new JLabel("<html>Use this type of data source to connect to a Earthworm Wave Server.<br>The default Wave Server port is 16022.</html>");
+		waveServerPanel.add(info, GridBagHelper.set(c, "x=0;y=0;w=2;h=1;ix=4;iy=4;wy=0.0;f=b"));
 		
 		waveServerPanel.add(new JSeparator(), GridBagHelper.set(c, "x=0;y=1;w=2;h=1;ix=4;iy=4;wy=0;wx=1.0;f=h"));
 		JLabel ipLabel = new JLabel("IP address or host name:");
@@ -325,64 +328,9 @@ public class EditDataSourceDialog extends BaseDialog
 		
 		JLabel toLabel = new JLabel("Timeout, seconds:");
 		toLabel.setHorizontalAlignment(JLabel.RIGHT);
-		waveServerPanel.add(toLabel, GridBagHelper.set(c, "x=0;y=4;a=ne;w=1;h=1;wx=0;wy=0.7;i=0,0,0,8"));
+		waveServerPanel.add(toLabel, GridBagHelper.set(c, "x=0;y=4;a=ne;w=1;h=1;wx=0;wy=1;i=0,0,0,8"));
 		waveServerPanel.add(wsTimeout, GridBagHelper.set(c, "x=1;y=4;a=nw;w=1;h=1;wx=1;i=0,0,0,0"));
 	}
-	
-	/*
-	private void createWinstonPanel(String source)
-	{
-		String wh = "";
-		String wp = "";
-		String wu = "";
-		
-		if (source != null && source.indexOf(";winstonserver:") != -1)
-		{
-			tabIndex = 1;
-			String[] s = Util.splitString(source, ":");
-			wh = s[1];
-			wp = s[2];
-			wu = s[3];
-		}
-		winstonPanel = new JPanel(new GridBagLayout());
-		
-		winstonPanel.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
-		GridBagConstraints c = new GridBagConstraints();
-		
-		JLabel info = new JLabel("<html>Use this type of data source to connect to a Winston Server. The default Winston Server port is 6369.</html>");
-		winstonPanel.add(info, GridBagHelper.set(c, "x=0;y=0;w=2;h=1;ix=4;iy=4;wy=0.3;f=b"));
-		winstonPanel.add(new JSeparator(), GridBagHelper.set(c, "x=0;y=1;w=2;h=1;ix=4;iy=4;wy=0;wx=1.0;f=h"));
-		
-		JLabel hostLabel = new JLabel("IP address or host name:");
-		hostLabel.setHorizontalAlignment(JLabel.RIGHT);
-		
-		winstonHost = new JTextField(wh);
-		winstonHost.setMinimumSize(new Dimension(180, 20));
-		winstonPanel.add(hostLabel, GridBagHelper.set(c, "x=0;y=2;a=e;w=1;h=1;wx=0;wy=0;f=n;i=0,0,0,8"));
-		winstonPanel.add(winstonHost, GridBagHelper.set(c, "x=1;y=2;a=w;w=1;h=1;wx=1;i=0,0,0,0;f=n"));
-		
-		JLabel portLabel = new JLabel("Port:");
-		portLabel.setHorizontalAlignment(JLabel.RIGHT);
-		winstonPort = new JTextField(wp);
-		winstonPort.setMinimumSize(new Dimension(50, 20));
-		winstonPanel.add(portLabel, GridBagHelper.set(c, "x=0;y=3;a=e;w=1;h=1;wx=0;wy=0.0;i=0,0,0,8"));
-		winstonPanel.add(winstonPort, GridBagHelper.set(c, "x=1;y=3;a=nw;w=1;h=1;wx=1;i=0,0,0,0;f=n"));
-		
-		JLabel uidLabel = new JLabel("User ID:");
-		uidLabel.setHorizontalAlignment(JLabel.RIGHT);
-		winstonUser = new JTextField(wu);
-		winstonUser.setMinimumSize(new Dimension(180, 20));
-		winstonPanel.add(uidLabel, GridBagHelper.set(c, "x=0;y=4;a=e;w=1;h=1;wx=0;wy=0.0;i=0,0,0,8"));
-		winstonPanel.add(winstonUser, GridBagHelper.set(c, "x=1;y=4;a=nw;w=1;h=1;wx=1;i=0,0,0,0;f=n"));
-
-		JLabel pwLabel = new JLabel("Password:");
-		pwLabel.setHorizontalAlignment(JLabel.RIGHT);
-		winstonPassword = new JPasswordField();
-		winstonPassword.setMinimumSize(new Dimension(180, 20));
-		winstonPanel.add(pwLabel, GridBagHelper.set(c, "x=0;y=5;a=ne;w=1;h=1;wx=0;wy=0.7;i=0,0,0,8"));
-		winstonPanel.add(winstonPassword, GridBagHelper.set(c, "x=1;y=5;a=nw;w=1;h=1;wx=1;i=0,0,0,0;f=n"));
-	}
-	*/
 	
 	protected boolean allowOK()
 	{
@@ -392,14 +340,13 @@ public class EditDataSourceDialog extends BaseDialog
 		// check name
 		if (n == null || n.length() <= 0)
 			message = "You must specify a name for this data source.";
-//		else if (!edit && Swarm.getParentFrame().serverExists(n))
 		else if (!edit && Swarm.config.sourceExists(n))
 			message = "A data source by that name already exists.";
 		
 		if (message == null)
 		{
 			int type = tabPane.getSelectedIndex();
-			if (type == 0) // Wave Server
+			if (type == 1) // Wave Server
 			{
 				String host = wsHost.getText();
 				if (host == null || host.length() == 0 || host.indexOf(';') != -1 || host.indexOf(':') !=-1)
@@ -414,7 +361,7 @@ public class EditDataSourceDialog extends BaseDialog
 				if (to <= 0)
 					message = "There is an error with the Wave Server time out (must be > 0).";
 			}
-			else if (type == 1) // WWS
+			else if (type == 0) // WWS
 			{
 				String host = wwsHost.getText();
 				if (host == null || host.length() == 0 || host.indexOf(';') != -1 || host.indexOf(':') !=-1)
@@ -429,27 +376,6 @@ public class EditDataSourceDialog extends BaseDialog
 				if (to <= 0)
 					message = "There is an error with the WWS time out (must be > 0).";
 			}
-			/*
-			else if (type == 1) // Winston
-			{
-				String host = winstonHost.getText();
-				if (host == null || host.length() == 0 || host.indexOf(';') != -1 || host.indexOf(':') !=-1)
-					message = "There is an error with the Winston Server IP address or host name.";
-				int ip = -1;
-				try { ip = Integer.parseInt(winstonPort.getText()); } catch (Exception e) {}
-				if (ip < 0 || ip > 65535)
-					message = "There is an error with the Winston Server port.";
-				
-				String user = winstonUser.getText();
-				if (user == null || user.length() == 0 || user.length() > 20 || user.indexOf(';') != -1 
-						|| user.indexOf(':') != -1)
-					message = "There is an error with the Winston user ID.";
-				
-				String password = new String(winstonPassword.getPassword());
-				if (password == null || password.length() == 0)
-					message = "There is an error with the Winston password.";
-			}
-			*/
 			else if (type == 2) // SEED
 			{
 				if (seedFilename.getText().length() == 0)
@@ -475,7 +401,7 @@ public class EditDataSourceDialog extends BaseDialog
 	protected void wasOK()
 	{
 		int type = tabPane.getSelectedIndex();
-		if (type == 0)  // Earthworm Wave Server
+		if (type == 1)  // Earthworm Wave Server
 		{
 			int timeout = (int)(Double.parseDouble(wsTimeout.getText()) * 1000);
 			result = name.getText() + ";ws:" + wsHost.getText() + ":" + wsPort.getText() + ":" + timeout;
@@ -487,7 +413,7 @@ public class EditDataSourceDialog extends BaseDialog
 					winstonUser.getText() + ":" + Util.md5(new String(winstonPassword.getPassword()));
 		}
 		*/
-		else if (type == 1)  // WWS
+		else if (type == 0)  // WWS
 		{
 		    int timeout = (int)(Double.parseDouble(wwsTimeout.getText()) * 1000);
 			result = name.getText() + ";wws:" + wwsHost.getText() + ":" + wwsPort.getText() + ":" + timeout + ":" + (wwsCompress.isSelected() ? "1" : "0");

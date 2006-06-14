@@ -1,6 +1,7 @@
 package gov.usgs.swarm;
 
 import gov.usgs.math.Filter;
+import gov.usgs.plot.FrameDecorator;
 import gov.usgs.plot.FrameRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.TextRenderer;
@@ -43,6 +44,9 @@ import javax.swing.event.EventListenerList;
  * TODO: move filter method
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2006/06/05 18:06:49  dcervelli
+ * Major 1.3 changes.
+ *
  * Revision 1.17  2006/04/17 04:16:36  dcervelli
  * More 1.3 changes.
  *
@@ -109,21 +113,22 @@ public class WaveViewPanel extends JComponent
 {
 	public static final long serialVersionUID = -1;
 	
+	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+
 	/** X pixel location of where the main plot axis should be located on the component. */
-	public static final int X_OFFSET = 60;
+	private int xOffset = 60;
 	
 	/** Y pixel location of where the main plot axis should be located on the component. */
-	public static final int Y_OFFSET = 20;
+	private int yOffset = 20;
 	
 	/** The amount of padding space on the right side. */
-	public static final int RIGHT_WIDTH = 20;
+	private int rightWidth = 20;
 	
 	/** The amount of padding space on the bottom. */
-	public static final int BOTTOM_HEIGHT = 20;
-	
-	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+	private int bottomHeight = 20;
 	
 	private Plot plot;
+	private FrameDecorator decorator;
 	private SliceWaveRenderer waveRenderer;
 	private SpectrogramRenderer spectrogramRenderer;
 	private SpectraRenderer spectraRenderer;
@@ -215,9 +220,6 @@ public class WaveViewPanel extends JComponent
 	 */
 	public WaveViewPanel(WaveViewPanel p)
 	{
-//		dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-//		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-//		numberFormat = new DecimalFormat("#.###");
 		channel = p.channel;
 		source = p.source;
 		startTime = p.startTime;	
@@ -239,6 +241,14 @@ public class WaveViewPanel extends JComponent
 		processSettings();
 	}
 
+	public void setOffsets(int xo, int yo, int rw, int bh)
+	{
+		xOffset = xo;
+		yOffset = yo;
+		rightWidth = rw;
+		bottomHeight = bh;
+	}
+	
 	public void addListener(WaveViewPanelListener listener)
 	{
 		listeners.add(WaveViewPanelListener.class, listener);
@@ -297,8 +307,6 @@ public class WaveViewPanel extends JComponent
 						Swarm.getApplication().touchUITime();
 						
 						fireMousePressed(e);
-//						if (monitor != null)
-//							monitor.select(WaveViewPanel.this);
 						
 						double[] t = getTranslation();
 						if (t == null)
@@ -321,8 +329,8 @@ public class WaveViewPanel extends JComponent
 						{
 							Dimension size = getSize();
 							int y = e.getY();
-							if (t != null && y > Y_OFFSET && y < (size.height - BOTTOM_HEIGHT) 
-								&& x > X_OFFSET && x < size.width - RIGHT_WIDTH)
+							if (t != null && y > yOffset && y < (size.height - bottomHeight) 
+								&& x > xOffset && x < size.width - rightWidth)
 							{
 								j2k1 = j2k2 = j2k;
 							    if (e.isControlDown())
@@ -404,8 +412,8 @@ public class WaveViewPanel extends JComponent
 							int x = e.getX();
 							int y = e.getY();
 							Dimension size = getSize();
-							if (t != null && y > Y_OFFSET && y < (size.height - BOTTOM_HEIGHT) 
-								&& x > X_OFFSET && x < size.width - RIGHT_WIDTH)
+							if (t != null && y > yOffset && y < (size.height - bottomHeight) 
+								&& x > xOffset && x < size.width - rightWidth)
 							{
 								j2k2 = x * t[0] + t[1];
 								highlightX2 = x;
@@ -520,6 +528,11 @@ public class WaveViewPanel extends JComponent
 		source = s;	
 	}
 	
+	public void setFrameDecorator(FrameDecorator fd)
+	{
+		decorator = fd;
+	}
+	
 	public void setDisplayTitle(boolean b)
 	{
 		displayTitle = b;	
@@ -570,8 +583,8 @@ public class WaveViewPanel extends JComponent
 		String status = null;
 		Dimension size = getSize();
 		double[] t = getTranslation();
-		if (t != null && y > Y_OFFSET && y < (size.height - BOTTOM_HEIGHT) 
-			&& x > X_OFFSET && x < size.width - RIGHT_WIDTH)
+		if (t != null && y > yOffset && y < (size.height - bottomHeight) 
+			&& x > xOffset && x < size.width - rightWidth)
 		{
 			double j2k = x * t[0] + t[1];
 			double yi = y * -t[2] + t[3];
@@ -587,10 +600,15 @@ public class WaveViewPanel extends JComponent
 				}
 				else
 					status = utc;
-				Calibration cb = Swarm.getApplication().getCalibration(channel);
-				if (cb == null)
-					cb = Calibration.IDENTITY;
-				status = String.format("%s, Y: %.3f", status, cb.multiplier * yi + cb.offset);
+				double offset = 0;
+				double multiplier = 1;
+				Metadata md = Swarm.config.metadata.get(channel);
+				if (md != null)
+				{
+					offset = md.offset;
+					multiplier = md.multiplier;
+				}
+				status = String.format("%s, Y: %.3f", status, multiplier * yi + offset);
 			}
 			else
 			{
@@ -777,7 +795,7 @@ public class WaveViewPanel extends JComponent
 				ft = "Low pass [" + settings.filter.getCorner1() + " Hz]";
 				break;
 		}
-		TextRenderer tr = new TextRenderer(X_OFFSET, 15, ft);
+		TextRenderer tr = new TextRenderer(xOffset, 15, ft);
 		tr.color = Color.red;
 		return tr;
 	}
@@ -813,9 +831,9 @@ public class WaveViewPanel extends JComponent
 				plotSpectrogram(renderWave);
 				break;
 		}
-			
-		if (channel != null && displayTitle && titleFrame != null)
-			titleFrame.getAxis().setTopLabelAsText(channel);
+
+//		if (channel != null && displayTitle && titleFrame != null)
+//			titleFrame.getAxis().setTopLabelAsText(channel);
 		
 		plot.render(g2);
 	}
@@ -831,16 +849,25 @@ public class WaveViewPanel extends JComponent
 	    SliceWave wv = new SliceWave(renderWave);
 	    wv.setSlice(startTime, endTime);
 	    
-	    Calibration cal = Swarm.getApplication().getCalibration(channel);
-		if (cal == null)
-			cal = Calibration.IDENTITY;
+	    double offset = 0;
+		double multiplier = 1;
+		Metadata md = Swarm.config.metadata.get(channel);
+		if (md != null)
+		{
+			offset = md.offset;
+			multiplier = md.multiplier;
+		}
+	    
+//	    Calibration cal = Swarm.getApplication().getCalibration(channel);
+//		if (cal == null)
+//			cal = Calibration.IDENTITY;
 		
 	    double bias = 0;
 	    if (settings.removeBias)
 	        bias = wv.mean();
 	    
-	    double minY = (settings.minAmp - cal.offset) / cal.multiplier;
-		double maxY = (settings.maxAmp - cal.offset) / cal.multiplier;
+	    double minY = (settings.minAmp - offset) / multiplier;
+		double maxY = (settings.maxAmp - offset) / multiplier;
 
 		if (settings.autoScaleAmp)
 		{
@@ -862,20 +889,25 @@ public class WaveViewPanel extends JComponent
 		if (waveRenderer == null)
 		    waveRenderer = new SliceWaveRenderer();
 
+		if (decorator != null)
+			waveRenderer.setFrameDecorator(decorator);
+		
 //		System.out.println(channel);
 		
-		if (cal != null)
-		{
-			waveRenderer.setYLabel(cal.unit);
-			waveRenderer.setYAxisCoefficients(cal.multiplier, cal.offset);
-		}
-		waveRenderer.setLocation(X_OFFSET, Y_OFFSET, this.getWidth() - X_OFFSET - RIGHT_WIDTH, this.getHeight() - Y_OFFSET - BOTTOM_HEIGHT);
+		if (md != null)
+			waveRenderer.setYLabel(md.unit);
+		
+		waveRenderer.setYAxisCoefficients(multiplier, offset);
+//		}
+		waveRenderer.setLocation(xOffset, yOffset, this.getWidth() - xOffset - rightWidth, this.getHeight() - yOffset - bottomHeight);
 //		waveRenderer.setYLimits(minAmp, maxAmp);
 		waveRenderer.setYLimits(minY, maxY);
 		waveRenderer.setViewTimes(startTime, endTime);
 		waveRenderer.setWave(wv);
 		waveRenderer.setRemoveBias(settings.removeBias);
 		waveRenderer.setAutoScale(true);
+		if (channel != null && displayTitle)
+			waveRenderer.setTitle(channel);
 		waveRenderer.update();
 	    plot.addRenderer(waveRenderer);
 		if (settings.filterOn)
@@ -898,7 +930,7 @@ public class WaveViewPanel extends JComponent
 	    if (spectraRenderer == null)
 	        spectraRenderer = new SpectraRenderer();
 	    
-	    spectraRenderer.setLocation(X_OFFSET, Y_OFFSET, this.getWidth() - RIGHT_WIDTH - X_OFFSET, this.getHeight() - BOTTOM_HEIGHT - Y_OFFSET);
+	    spectraRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset, this.getHeight() - bottomHeight - yOffset);
 	    spectraRenderer.setWave(wv);
 	    spectraRenderer.setAutoScale(settings.autoScalePower);
 	    spectraRenderer.setLogPower(settings.logPower);
@@ -929,7 +961,7 @@ public class WaveViewPanel extends JComponent
 	    if (spectrogramRenderer == null)
 	        spectrogramRenderer = new SpectrogramRenderer();
 	    
-	    spectrogramRenderer.setLocation(X_OFFSET, Y_OFFSET, this.getWidth() - RIGHT_WIDTH - X_OFFSET, this.getHeight() - BOTTOM_HEIGHT - Y_OFFSET);
+	    spectrogramRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset, this.getHeight() - bottomHeight - yOffset);
 	    spectrogramRenderer.setWave(wv);
 	    spectrogramRenderer.setViewStartTime(startTime);
 	    spectrogramRenderer.setViewEndTime(endTime);
@@ -958,7 +990,7 @@ public class WaveViewPanel extends JComponent
 		int width = x2 - x1 + 1;
 		Paint pnt = g2.getPaint();
 		g2.setPaint(new Color(255, 255, 0, 128));
-		g2.fillRect(x1, Y_OFFSET + 1, width, getSize().height - BOTTOM_HEIGHT - Y_OFFSET);
+		g2.fillRect(x1, yOffset + 1, width, getSize().height - bottomHeight - yOffset);
 		g2.setPaint(pnt);
 	}
 	
@@ -972,12 +1004,12 @@ public class WaveViewPanel extends JComponent
 		double[] t = getTranslation();
 		double x = (j2k - t[1]) / t[0];
 		g2.setColor(DARK_GREEN);
-		g2.draw(new Line2D.Double(x, Y_OFFSET, x, getSize().height - Y_OFFSET));
+		g2.draw(new Line2D.Double(x, yOffset, x, getSize().height - yOffset));
 		
 		GeneralPath gp = new GeneralPath();
-		gp.moveTo((float)x, Y_OFFSET);
-		gp.lineTo((float)x - 5, Y_OFFSET - 7);
-		gp.lineTo((float)x + 5, Y_OFFSET - 7);
+		gp.moveTo((float)x, yOffset);
+		gp.lineTo((float)x - 5, yOffset - 7);
+		gp.lineTo((float)x + 5, yOffset - 7);
 		gp.closePath();
 		g2.setPaint(Color.GREEN);
 		g2.fill(gp);

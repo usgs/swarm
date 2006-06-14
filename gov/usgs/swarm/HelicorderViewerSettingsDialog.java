@@ -2,7 +2,6 @@ package gov.usgs.swarm;
 
 import gov.usgs.util.GridBagHelper;
 import gov.usgs.util.Util;
-import gov.usgs.util.ui.BaseDialog;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -30,6 +29,9 @@ import javax.swing.border.TitledBorder;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2006/06/05 18:06:49  dcervelli
+ * Major 1.3 changes.
+ *
  * Revision 1.12  2006/04/15 15:58:52  dcervelli
  * 1.3 changes (renaming, new datachooser, different config).
  *
@@ -71,12 +73,9 @@ import javax.swing.border.TitledBorder;
  *
  * @author Dan Cervelli
  */
-public class HelicorderViewerSettingsDialog extends BaseDialog
+public class HelicorderViewerSettingsDialog extends SwarmDialog
 {
 	public static final long serialVersionUID = -1;
-	
-	private static final int WIDTH = 240;
-	private static final int HEIGHT = 550;	
 	
 	private HelicorderViewerSettings settings;
 	private WaveViewSettings waveSettings;
@@ -104,10 +103,12 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 	
 	private HelicorderViewerSettingsDialog() 
 	{
-		super(Swarm.getApplication(), "Helicorder View Settings", true, WIDTH, HEIGHT);
+//		super(Swarm.getApplication(), "Helicorder View Settings", true, WIDTH, HEIGHT);
+		super(Swarm.getApplication(), "Helicorder View Settings", true);
 		dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
 		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-		createSettingsUI();	
+		createUI();	
+		setSizeAndLocation();
 	}
 	
 	public static HelicorderViewerSettingsDialog getInstance(HelicorderViewerSettings s, WaveViewSettings s2)
@@ -116,7 +117,7 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 			dialog = new HelicorderViewerSettingsDialog();
 
 		dialog.setSettings(s, s2);
-		dialog.setToCurrent();
+//		dialog.setToCurrent();
 		return dialog;
 	}
 	
@@ -134,8 +135,28 @@ public class HelicorderViewerSettingsDialog extends BaseDialog
 		setToCurrent();
 	}
 	
-	private void createSettingsUI()
+	private void createComponents()
 	{
+		int[] values = HelicorderViewerFrame.chunkValues;
+		String[] chunks = new String[values.length];
+		for (int i = 0; i < chunks.length; i++)
+			chunks[i] = Integer.toString(values[i] / 60);
+			
+		chunkList = new JComboBox(chunks);
+		
+		values = HelicorderViewerFrame.spanValues;
+		String[] spans = new String[values.length];
+		for (int i = 0; i < spans.length; i++)
+			spans[i] = Integer.toString(values[i] / 60);
+		
+		spanList = new JComboBox(spans);
+	}
+	
+	protected void createUI()
+	{
+		super.createUI();
+		createComponents();
+		
 		// AXIS PANEL
 		int[] values = HelicorderViewerFrame.chunkValues;
 		String[] chunks = new String[values.length];
