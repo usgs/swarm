@@ -36,6 +36,9 @@ import javax.swing.event.EventListenerList;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2006/06/14 19:19:31  dcervelli
+ * Major 1.3.4 changes.
+ *
  * Revision 1.15  2006/06/05 18:06:49  dcervelli
  * Major 1.3 changes.
  *
@@ -701,7 +704,7 @@ public class HelicorderViewPanel extends JComponent
 		translation = heliRenderer.getTranslationInfo(false);
 		heliRenderer.setLargeChannelDisplay(fullScreen);
 		
-		if (md.alias == null)
+		if (md == null || md.alias == null)
 			heliRenderer.setChannel(parent.getChannel());
 		else
 			heliRenderer.setChannel(md.alias);
