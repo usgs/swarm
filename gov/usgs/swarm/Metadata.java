@@ -1,5 +1,6 @@
 package gov.usgs.swarm;
 
+import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Pair;
 
@@ -11,15 +12,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/06/14 19:19:31  dcervelli
+ * Major 1.3.4 changes.
+ *
  * @author Dan Cervelli
  */
-public class Metadata
+public class Metadata implements Comparable<Metadata>
 {
 	public static final String DEFAULT_METADATA_FILENAME = "SwarmMetadata.config";
+	
+	public SCNL scnl;
 	
 	public String channel = null;
 	
@@ -33,7 +40,9 @@ public class Metadata
 	public double latitude = Double.NaN;
 	public double height = Double.NaN;
 	
-	public double timeZone = 0;
+	public SeismicDataSource source;
+	
+	public TimeZone timeZone = TimeZone.getTimeZone("UTC");
 	
 	public Set<String> groups = null;
 	
@@ -74,7 +83,7 @@ public class Metadata
 		}
 		else if (kv[0].equals("TimeZone"))
 		{
-			timeZone = Double.parseDouble(kv[1]);	
+			timeZone = TimeZone.getTimeZone(kv[1]);
 		}
 		else if (kv[0].equals("Group"))
 		{
@@ -88,6 +97,11 @@ public class Metadata
 				ancillaryMetadata = new HashMap<String, String>();
 			ancillaryMetadata.put(kv[0], kv[1]);	
 		}
+	}
+	
+	public double getLocationHashCode()
+	{
+		return longitude * 100000 + latitude;
 	}
 	
 	public static Map<String, Metadata> loadMetadata(String fn)
@@ -105,6 +119,7 @@ public class Metadata
 				md = new Metadata();
 				data.put(key, md);
 				md.channel = key;
+				md.scnl = new SCNL(md.channel);
 			}
 			else
 				md = data.get(key);
@@ -177,5 +192,9 @@ public class Metadata
 	{
 		return channel +  "," + alias + "," + unit + "," + multiplier + "," + offset + "," + longitude + "," + latitude + "," + height + "," + timeZone;
 	}
-	
+
+	public int compareTo(Metadata o)
+	{
+		return channel.compareTo(o.channel);
+	}
 }
