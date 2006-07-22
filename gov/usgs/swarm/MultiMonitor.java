@@ -3,12 +3,12 @@ package gov.usgs.swarm;
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.FrameDecorator;
 import gov.usgs.plot.FrameRenderer;
-import gov.usgs.plot.Renderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.CurrentTime;
+import gov.usgs.util.Util;
 import gov.usgs.vdx.data.wave.Wave;
 
 import java.awt.BorderLayout;
@@ -23,6 +23,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -43,9 +44,11 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: save monitor size
  * TODO: clipboard
  * TODO: up/down arrows
- * TODO: wvs buttons
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/06/14 19:19:31  dcervelli
+ * Major 1.3.4 changes.
+ *
  * Revision 1.9  2006/06/05 18:06:49  dcervelli
  * Major 1.3 changes.
  *
@@ -250,11 +253,46 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 						if (selectedIndex >= 0)
 						{
 							removeWaveAtIndex(selectedIndex);
-							selectedIndex = -1;
+							if (channels.size() == 0)
+								selectedIndex = -1;
+							else if (channels.size() == selectedIndex)
+								selectedIndex--;
+							if (selectedIndex != -1)
+								select(panels.get(selectedIndex));
 						}
 					}
 				});
+		Util.mapKeyStrokeToButton(this, "DELETE", "delete", removeButton);
 		toolbar.add(removeButton);
+		
+		Util.mapKeyStrokeToAction(this, "UP", "up", new AbstractAction()
+				{
+					private static final long serialVersionUID = 1L;
+
+					public void actionPerformed(ActionEvent e)
+					{
+						if (selectedIndex > 0)
+						{
+							deselect();
+							selectedIndex--;
+							select(panels.get(selectedIndex));
+						}
+					}
+				});
+		
+		Util.mapKeyStrokeToAction(this, "DOWN", "down", new AbstractAction()
+				{
+					private static final long serialVersionUID = 1L;
+					public void actionPerformed(ActionEvent e)
+					{
+						if (selectedIndex < panels.size() - 1)
+						{
+							deselect();
+							selectedIndex++;
+							select(panels.get(selectedIndex));
+						}
+					}
+				});
 		
 		toolbar.add(Box.createHorizontalGlue());
 		
@@ -313,6 +351,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 						panels.clear();
 						channels.clear();
 						waveBox.removeAll();
+						Swarm.getApplication().removeInternalFrame(MultiMonitor.this);
 						MultiMonitor.this.setVisible(true);
 					}
 			  });
@@ -338,8 +377,8 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 			if (selectedIndex != -1 && panels.get(selectedIndex) == panel)
 				ar.setBackgroundColor(SELECT_COLOR);
 				
-			TextRenderer label = new TextRenderer(fr.getGraphX() + 4, fr.getGraphY() + 14, panel.getChannel(), Color.BLACK);
-			label.backgroundColor = Color.WHITE;
+			TextRenderer label = new TextRenderer(fr.getGraphX() + 2, fr.getGraphY() + 12, panel.getChannel(), Color.BLACK);
+			label.backgroundColor = new Color(255, 255, 255, 210);
 			
 			int hTicks = fr.getGraphWidth() / 108;
 			Object[] stt = SmartTick.autoTimeTick(fr.getMinXAxis(), fr.getMaxXAxis(), hTicks);
@@ -379,13 +418,14 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 				{
 					public void mousePressed(MouseEvent e)
 					{
+						requestFocusInWindow();
 						select(panel);
 					}
 				});
 		resizeWaves();
 	}
 	
-	public void select(WaveViewPanel p)
+	public void deselect()
 	{
 		if (selectedIndex >= 0)
 		{
@@ -394,6 +434,11 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 			panel.invalidateImage();
 			panel.repaint();
 		}
+	}
+	
+	public void select(WaveViewPanel p)
+	{
+		deselect();
 		for (int i = 0; i < panels.size(); i++)
 		{
 			WaveViewPanel panel = panels.get(i);
