@@ -4,22 +4,20 @@ import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Util;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.TreeMap;
 
 /**
  * Swarm configuration class. 
  * 
- * Order of configuration options:
- * 
- * 1) Swarm.config in current directory.
- * 2) Swarm.config in user's home directory.
- * 3) User specified config file.
- * 4) Individual command line config key/values.
- * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/06/14 19:19:31  dcervelli
+ * Major 1.3.4 changes.
+ *
  * Revision 1.3  2006/06/05 18:06:49  dcervelli
  * Major 1.3 changes.
  *
@@ -34,6 +32,7 @@ import java.util.TreeMap;
 public class Config
 {
 	private static String DEFAULT_CONFIG_FILE = "Swarm.config";
+	private static String DEFAULT_DATA_SOURCES_FILE = "DataSources.config";
 	
 	public String configFilename;
 	public int windowX;
@@ -42,8 +41,9 @@ public class Config
 	public int windowHeight;
 	public boolean windowMaximized;
 	
-	public String timeZoneAbbr;
-	public double timeZoneOffset;
+	public TimeZone specificTimeZone;
+	public boolean useInstrumentTimeZone;
+	public boolean useLocalTimeZone;
 	
 	public String lastPath;
 	
@@ -75,13 +75,24 @@ public class Config
 	public int clipboardHeight;
 	public boolean clipboardMaximized;
 
+	public boolean mapVisible;
+	public int mapX;
+	public int mapY;
+	public int mapWidth;
+	public int mapHeight;
+	public boolean mapMaximized;
+	
+	public double mapScale;
+	public double mapLongitude;
+	public double mapLatitude;
+	
 	public Map<String, SeismicDataSource> sources;
 	
 	public Map<String, Metadata> metadata;
 	
 	public static Config createConfig(String[] args)
 	{
-		String configFile = DEFAULT_CONFIG_FILE;
+		String configFile = System.getProperty("user.home") + File.separatorChar + DEFAULT_CONFIG_FILE;
 		  
 		int n = args.length - 1;
 		if (n >= 0 && !args[n].startsWith("-"))
@@ -102,7 +113,41 @@ public class Config
 		}
 		Config config = new Config(cf);
 		config.metadata = Metadata.loadMetadata(Metadata.DEFAULT_METADATA_FILENAME);
+		config.loadDataSources();
 		return config;
+	}
+	
+	private void loadDataSources()
+	{
+		ConfigFile cf = new ConfigFile(DEFAULT_DATA_SOURCES_FILE);
+//		cf.getList("server");
+		List<String> servers = cf.getList("server");
+		if (servers != null)
+		{
+			for (String server : servers)
+			{
+				SeismicDataSource sds = SeismicDataSource.getDataSource(server);
+				sds.setStoreInUserConfig(false);
+				sources.put(sds.getName(), sds);
+			}
+		}
+	}
+
+	public void getMetadata(List<String> channels, SeismicDataSource source)
+	{
+		for (String ch : channels)
+		{
+			Metadata md = metadata.get(ch);
+			if (md == null)
+			{
+				md = DefaultMetadata.getMetadata(ch);
+				if (md != null)
+					metadata.put(ch, md);
+			}
+			
+			if (md != null)
+				md.source = source;
+		}
 	}
 	
 	/**
@@ -126,8 +171,9 @@ public class Config
 	
 		nearestDividerLocation = Util.stringToInt(config.getString("nearestDividerLocation"), 600);
 		
-		timeZoneAbbr = Util.stringToString(config.getString("timeZoneAbbr"), "UTC");
-		timeZoneOffset = Util.stringToDouble(config.getString("timeZoneOffset"), 0);
+		specificTimeZone = TimeZone.getTimeZone(Util.stringToString(config.getString("specificTimeZone"), "UTC"));
+		useInstrumentTimeZone = Util.stringToBoolean(config.getString("useInstrumentTimeZone"), true);
+		useLocalTimeZone = Util.stringToBoolean(config.getString("useLocalTimeZone"), true);
 		
 		useLargeCursor = Util.stringToBoolean(config.getString("useLargeCursor"), false);
 		
@@ -155,6 +201,17 @@ public class Config
 		clipboardWidth = Util.stringToInt(config.getString("clipboardSizeX"), 600);
 		clipboardHeight = Util.stringToInt(config.getString("clipboardSizeY"), 700);
 		clipboardMaximized = Util.stringToBoolean(config.getString("clipboardMaximized"), false);
+		
+		mapVisible = Util.stringToBoolean(config.getString("mapVisible"), true);
+		mapX = Util.stringToInt(config.getString("mapX"), 10);
+		mapY = Util.stringToInt(config.getString("mapY"), 10);
+		mapWidth = Util.stringToInt(config.getString("mapWidth"), 600);
+		mapHeight = Util.stringToInt(config.getString("mapHeight"), 400);
+		mapMaximized = Util.stringToBoolean(config.getString("mapMaximized"), false);
+	
+		mapScale = Util.stringToDouble(config.getString("mapScale"), 80000);
+		mapLongitude = Util.stringToDouble(config.getString("mapLongitude"), 0);
+		mapLatitude = Util.stringToDouble(config.getString("mapLatitude"), 0);
 		
 		sources = new TreeMap<String, SeismicDataSource>();
 		List<String> servers = config.getList("server");
@@ -194,6 +251,21 @@ public class Config
 		return durationA * (Math.log(t) / Math.log(10)) + durationB;
 	}
 	
+	public TimeZone getTimeZone(String channel)
+	{
+		if (useInstrumentTimeZone && channel != null)
+		{
+			Metadata md = metadata.get(channel);
+			if (md != null && md.timeZone != null)
+				return md.timeZone;
+		}
+		
+		if (useLocalTimeZone)
+			return TimeZone.getDefault();
+		else
+			return specificTimeZone;
+	}
+	
 	public boolean isKiosk()
 	{
 		return !kiosk.toLowerCase().equals("false");
@@ -213,8 +285,9 @@ public class Config
 		
 		config.put("nearestDividerLocation", Integer.toString(nearestDividerLocation));
 		
-		config.put("timeZoneAbbr", timeZoneAbbr);
-		config.put("timeZoneOffset", Double.toString(timeZoneOffset));
+		config.put("specificTimeZone", specificTimeZone.getID());
+		config.put("useInstrumentTimeZone", Boolean.toString(useInstrumentTimeZone));
+		config.put("useLocalTimeZone", Boolean.toString(useLocalTimeZone));
 		
 		config.put("windowMaximized", Boolean.toString(windowMaximized));
 		config.put("useLargeCursor", Boolean.toString(useLargeCursor));
@@ -244,9 +317,22 @@ public class Config
 		config.put("clipboardSizeY", Integer.toString(clipboardHeight));
 		config.put("clipboardMaximized", Boolean.toString(clipboardMaximized));
 		
+		config.put("mapVisible", Boolean.toString(mapVisible));
+		config.put("mapX", Integer.toString(mapX));
+		config.put("mapY", Integer.toString(mapY));
+		config.put("mapWidth", Integer.toString(mapWidth));
+		config.put("mapHeight", Integer.toString(mapHeight));
+		config.put("mapMaximized", Boolean.toString(mapMaximized));
+		config.put("mapScale", Double.toString(mapScale));
+		config.put("mapLongitude", Double.toString(mapLongitude));
+		config.put("mapLatitude", Double.toString(mapLatitude));
+		
 		List<String> servers = new ArrayList<String>(); 
 		for (SeismicDataSource sds : sources.values())
-			servers.add(sds.toConfigString());
+		{
+			if (sds.isStoreInUserConfig())
+				servers.add(sds.toConfigString());
+		}
 		
 		config.putList("server", servers);
 		
