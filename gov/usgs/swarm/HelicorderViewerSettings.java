@@ -6,6 +6,9 @@ package gov.usgs.swarm;
  * TODO: eliminate this class in favor of vdx.HelicorderSettings
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/04/15 15:58:52  dcervelli
+ * 1.3 changes (renaming, new datachooser, different config).
+ *
  * Revision 1.5  2006/03/04 23:03:45  cervelli
  * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
  *
@@ -28,6 +31,7 @@ package gov.usgs.swarm;
  */
 public class HelicorderViewerSettings
 {
+	public String channel;
 	public int timeChunk; // seconds
 	public int span; // minutes
 	public int waveZoomOffset; // seconds
@@ -46,9 +50,11 @@ public class HelicorderViewerSettings
 	public int clipValue;
 	public int barRange;
 	public double barMult;
+	public HelicorderViewPanel view;
 	
-	public HelicorderViewerSettings()
+	public HelicorderViewerSettings(String ch)
 	{
+		channel = ch;
 		timeChunk = Swarm.config.timeChunk * 60;
 		span = Swarm.config.span * 60;
 		waveZoomOffset = 30;
@@ -68,8 +74,6 @@ public class HelicorderViewerSettings
 		autoScale = true;
 	}
 	
-	public HelicorderViewPanel view;
-
 	public long getLastBottomTimeSet()
 	{
 		return System.currentTimeMillis() - lastBottomTimeSet;
