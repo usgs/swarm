@@ -1,5 +1,6 @@
 package gov.usgs.swarm;
 
+import gov.usgs.plot.map.GeoRange;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.Pair;
 
@@ -57,6 +58,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/06/14 19:19:31  dcervelli
+ * Major 1.3.4 changes.
+ *
  * Revision 1.3  2006/06/05 18:06:49  dcervelli
  * Major 1.3 changes.
  *
@@ -99,17 +103,15 @@ public class DataChooser extends JPanel
 	private JButton clipboardButton;
 	private JButton monitorButton;
 	private JButton realtimeButton;
+	private JButton mapButton;
 	
 	private Map<String, TreePath> nearestPaths;
-	
-//	private ConfigFile groupFile;
 	
 	public DataChooser()
 	{
 		super(new BorderLayout());
 
 		nearestPaths = new HashMap<String, TreePath>();
-//		groupFile = new ConfigFile(Swarm.config.groupConfigFile);
 		
 		createToolBar();
 		createTree();
@@ -268,6 +270,7 @@ public class DataChooser extends JPanel
 				});
 		
 		realtimeButton = new JButton(Images.getIcon("wave")); //$NON-NLS-1$
+		realtimeButton.setFocusable(false);
 		realtimeButton.setToolTipText(Messages.getString("DataChooser.waveButtonToolTip")); //$NON-NLS-1$
 		realtimeButton.addActionListener(new ActionListener()
 				{
@@ -293,6 +296,7 @@ public class DataChooser extends JPanel
 				});
 		
 		clipboardButton = new JButton(Images.getIcon("clipboard")); //$NON-NLS-1$
+		clipboardButton.setFocusable(false);
 		clipboardButton.setToolTipText(Messages.getString("DataChooser.clipboardButtonToolTip")); //$NON-NLS-1$
 		clipboardButton.addActionListener(new ActionListener()
 				{
@@ -310,6 +314,7 @@ public class DataChooser extends JPanel
 												Swarm.getApplication().loadClipboardWave(pair.item1.getSource(), pair.item2.getChannel());
 											}
 										}
+										Swarm.getApplication().getWaveClipboard().requestFocusInWindow();
 										return null;
 									}
 								};
@@ -318,6 +323,7 @@ public class DataChooser extends JPanel
 				});
 		
 		monitorButton = new JButton(Images.getIcon("monitor")); //$NON-NLS-1$
+		monitorButton.setFocusable(false);
 		monitorButton.setToolTipText(Messages.getString("DataChooser.monitorButtonToolTip")); //$NON-NLS-1$
 		monitorButton.addActionListener(new ActionListener()
 				{
@@ -342,10 +348,62 @@ public class DataChooser extends JPanel
 					}
 				});
 		
+		mapButton = new JButton(Images.getIcon("geosort"));
+		mapButton.setFocusable(false);
+		mapButton.setToolTipText("Open map interface"); 
+		mapButton.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						SwingWorker worker = new SwingWorker()
+						{
+							public Object construct()
+							{
+								List<Pair<ServerNode, ChannelNode>> channels = getSelections();
+								double minLon = Double.MAX_VALUE;
+								double maxLon = -Double.MAX_VALUE;
+								double minLat = Double.MAX_VALUE;
+								double maxLat = -Double.MAX_VALUE;
+								boolean found = false;
+								for (Pair<ServerNode, ChannelNode> pair : channels)
+								{
+									Metadata md = Swarm.config.metadata.get(pair.item2.getChannel());
+									if (md != null && !Double.isNaN(md.longitude) && !Double.isNaN(md.latitude))
+									{
+										minLon = Math.min(minLon, md.longitude);
+										minLat = Math.min(minLat, md.latitude);
+										maxLon = Math.max(maxLon, md.longitude);
+										maxLat = Math.max(maxLat, md.latitude);
+										found = true;
+									}
+								}
+								if (found)
+								{
+									if (minLon == maxLon)
+									{
+										minLon -= 0.1;
+										maxLon += 0.1;
+									}
+									if (minLat == maxLat)
+									{
+										minLat -= 0.1;
+										maxLat += 0.1;
+									}
+									GeoRange gr = new GeoRange(minLon, maxLon, minLat, maxLat);
+									Swarm.getApplication().getMapFrame().setView(gr);
+								}
+								return null;
+							}
+						};
+						worker.start();
+					}
+				});
+		
 		actionPanel.add(heliButton);
 		actionPanel.add(clipboardButton);
 		actionPanel.add(monitorButton);
 		actionPanel.add(realtimeButton);
+		actionPanel.add(mapButton);
 		
 		add(actionPanel, BorderLayout.SOUTH);
 	}
@@ -443,6 +501,8 @@ public class DataChooser extends JPanel
 						{
 							sds.establish();
 							channels = sds.getChannels();
+							Swarm.config.getMetadata(channels, sds);
+							Swarm.getApplication().getMapFrame().reset();
 							sds.close();
 						} 
 						catch (Exception e)
@@ -588,7 +648,7 @@ public class DataChooser extends JPanel
 
 	public void setNearest(final String channel)
 	{
-		if (channel.equals(lastNearest))
+		if (channel == null || channel.equals(lastNearest))
 			return;
 		
 		SwingUtilities.invokeLater(new Runnable()
