@@ -48,6 +48,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
@@ -55,6 +56,9 @@ import javax.swing.event.InternalFrameEvent;
  * The wave clipboard internal frame.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2006/06/14 19:19:31  dcervelli
+ * Major 1.3.4 changes.
+ *
  * Revision 1.11  2006/06/05 18:06:49  dcervelli
  * Major 1.3 changes.
  *
@@ -136,6 +140,8 @@ public class WaveClipboardFrame extends JInternalFrame
 	private HelicorderViewPanelListener linkListener;
 
 	private boolean heliLinked = true;
+	
+	private Throbber throbber;
 	
 	public WaveClipboardFrame()
 	{
@@ -262,7 +268,8 @@ public class WaveClipboardFrame extends JInternalFrame
 						
 						sortChannelsByNearest();
 					}
-				}); 
+				});
+		sortButton.setEnabled(false);
 		toolbar.add(sortButton);
 		
 		toolbar.addSeparator();
@@ -435,6 +442,11 @@ public class WaveClipboardFrame extends JInternalFrame
 				});
 		Util.mapKeyStrokeToButton(this, "DELETE", "remove", removeButton);
 		toolbar.add(removeButton);
+		
+		toolbar.add(Box.createHorizontalGlue());
+		
+		throbber = new Throbber();
+		toolbar.add(throbber);
 	}
 	
 	private void createListeners()
@@ -734,6 +746,7 @@ public class WaveClipboardFrame extends JInternalFrame
 	{
 		boolean enable = (waves == null || waves.size() == 0);
 		saveButton.setEnabled(!enable);
+		sortButton.setEnabled(!enable);
 		saveAllButton.setEnabled(!enable);
 		syncButton.setEnabled(!enable);
 		removeAllButton.setEnabled(!enable);
@@ -764,9 +777,11 @@ public class WaveClipboardFrame extends JInternalFrame
 					}
 				});
 		
+		WaveViewPanel s = selected;
 		removeWaves();
 		for (WaveViewPanel wave : sorted)
 			addWave(wave);
+		select(s);
 	}
 	
 	public synchronized void syncChannels()
@@ -798,6 +813,17 @@ public class WaveClipboardFrame extends JInternalFrame
 					}
 				};
 		worker.start();	
+	}
+	
+	public void setStatusText(final String s)
+	{
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				statusLabel.setText(s);
+			}
+		});
 	}
 	
 	public WaveViewPanel getSelected()
@@ -832,62 +858,21 @@ public class WaveClipboardFrame extends JInternalFrame
 	        	ar.createVerticalGridLines((double[])stt[0]);
 	        
 	        ar.createBottomTickLabels((double[])stt[0], (String[])stt[1]);
-	        
-//	        double[] bt = (double[])stt[0];
-//	        String[] labels = (String[])stt[1];
-//	        for (int i = 0; i < bt.length; i++)
-//	        {
-//	            TextRenderer tr = new TextRenderer();
-//                tr.text = labels[i];
-//	            tr.x = (float)fr.getXPixel(bt[i]);
-//	            tr.y = fr.getGraphY() + fr.getGraphHeight() - 10;
-//	            tr.color = Color.BLACK;
-//	            tr.horizJustification = TextRenderer.CENTER;
-//	            tr.vertJustification = TextRenderer.TOP;
-//	            tr.font = TextRenderer.SMALL_FONT;
-//	            ar.addPostRenderer(tr);
-//	        }
+	        int vTicks = fr.getGraphHeight() / 24;
+	        fr.createDefaultYAxis(vTicks, false);
 	        
 	        ar.addPostRenderer(label);
-//			fr.createEmptyAxis();
-//			AxisRenderer ar = fr.getAxis();
-//			ar.createDefault();
-//			ar.setBackgroundColor(Color.WHITE);
-//			ar.addPostRenderer(new TextRenderer(fr.getGraphX() + 3, fr.getGraphY() + 11, "2STA CHA NW", Color.BLACK));
-//			int hTicks = fr.getGraphWidth() / 108;
-//			int vTicks = fr.getGraphHeight() / 24;
-//			double[] t = SmartTick.autoTick(fr.getMinYAxis(), fr.getMaxYAxis(), vTicks, false);
-////	        String[] labels = null;
-////	        if (yAxisMult != 1 || yAxisOffset != 0)
-////	        {
-////	        	labels = new String[t.length];
-////	        	for (int i = 0; i < t.length; i++)
-////	        	{
-////	        		double exp = Data.getExp(t[i]);
-////	        		labels[i] = (exp >= 5 ? numberFormat.format(t[i] / Math.pow(10, exp)) + "e" + numberFormat.format(exp) : numberFormat.format(t[i]));
-////	        		t[i] = (t[i] - yAxisOffset) / yAxisMult;
-////	        	}
-////	        }
-//	        ar.createLeftTicks(t);
-////	        axis.createLeftTickLabels(t, labels);
-//	        ar.createRightTicks(t);
-//	        ar.createHorizontalGridLines(t);
-//			ar.create
-////			this.createDefaultAxis(hTicks, vTicks);
-//			this.setXAxisToTime(hTicks, false);
-//			this.getAxis().setInnerLeftLabelAsText(yLabel, -46);
-//			if (title != null)
-//				this.getAxis().setLeftLabelAsText(title, -56);
 		}
 	}
 	
 	public synchronized void addWave(final WaveViewPanel p)
 	{
-		p.setDisplayTitle(true);
+//		p.setDisplayTitle(true);
 		p.addListener(new WaveViewPanelAdapter()
 				{
 					public void mousePressed(MouseEvent e)
 					{
+						requestFocusInWindow();
 						select(p);
 					}
 					
@@ -897,10 +882,10 @@ public class WaveClipboardFrame extends JInternalFrame
 						addHistory(p, t);
 					}
 				});
-		p.setOffsets(4, 0, 3, 18);
+		p.setOffsets(54, 7, 7, 18);
 		p.setStatusLabel(statusLabel);
 		p.setAllowDragging(true);
-		p.setFrameDecorator(new ClipboardWaveDecorator(p));
+//		p.setFrameDecorator(new ClipboardWaveDecorator(p));
 		waveBox.add(p);	
 		waves.add(p);
 		resizeWaves();
@@ -939,6 +924,7 @@ public class WaveClipboardFrame extends JInternalFrame
 		}
 		
 		p.getDataSource().close();
+		setStatusText(" ");
 		waveBox.remove(i);
 		waves.remove(p);
 		histories.remove(p);
@@ -1055,8 +1041,8 @@ public class WaveClipboardFrame extends JInternalFrame
 				dt = (et - st);	
 			}
 			
-			double tzo = Swarm.config.timeZoneOffset;
-			double nst = j2k - tzo * 3600 - dt / 2;
+			double tzo = Time.getTimeZoneOffset(Swarm.config.getTimeZone(wvp.getChannel()));
+			double nst = j2k - tzo - dt / 2;
 			double net = nst + dt;
 
 			fetchNewWave(wvp, nst, net);
@@ -1106,13 +1092,19 @@ public class WaveClipboardFrame extends JInternalFrame
 		}
 	}
 	
-	/** This isn't right, this should be a method of waveviewpanel */
+	public Throbber getThrobber()
+	{
+		return throbber;
+	}
+	
+	// This isn't right, this should be a method of waveviewpanel 
 	private void fetchNewWave(final WaveViewPanel wvp, final double nst, final double net)
 	{
 		final SwingWorker worker = new SwingWorker()
 				{
 					public Object construct()
 					{
+						throbber.increment();
 //						disableNavigationButtons();
 //						System.out.println(waveViewPanel.getDataSource().getClass());
 						SeismicDataSource sds = wvp.getDataSource();
@@ -1128,6 +1120,7 @@ public class WaveClipboardFrame extends JInternalFrame
 					
 					public void finished()
 					{
+						throbber.decrement();
 						repaint();	
 					}
 				};
