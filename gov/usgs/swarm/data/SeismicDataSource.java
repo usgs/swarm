@@ -13,6 +13,9 @@ import javax.swing.Icon;
  * Base class for seismic data sources.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/06/05 18:07:03  dcervelli
+ * Major 1.3 changes.
+ *
  * Revision 1.2  2006/04/15 16:00:13  dcervelli
  * 1.3 changes (renaming, new datachooser, different config).
  *
@@ -40,6 +43,8 @@ abstract public class SeismicDataSource
 {
 	protected String name = "Unnamed Data Source";
 	
+	protected boolean storeInUserConfig = true;
+	
 	abstract public List<String> getChannels();
 	
 	abstract public Wave getWave(String station, double t1, double t2);
@@ -47,6 +52,16 @@ abstract public class SeismicDataSource
 	
 	public void notifyDataNotNeeded(String station, double t1, double t2)
 	{}
+	
+	public void setStoreInUserConfig(boolean b)
+	{
+		storeInUserConfig = b;
+	}
+	
+	public boolean isStoreInUserConfig()
+	{
+		return storeInUserConfig;
+	}
 	
 	/**
 	 * Is this data source active; that is, is new data being added in real-time
