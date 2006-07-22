@@ -18,6 +18,9 @@ import javax.swing.event.MenuListener;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/06/14 19:19:31  dcervelli
+ * Major 1.3.4 changes.
+ *
  * Revision 1.1  2006/04/17 04:16:36  dcervelli
  * More 1.3 changes.
  *
@@ -38,6 +41,7 @@ public class SwarmMenu extends JMenuBar
 	private JMenuItem fullScreen;
 	private JCheckBoxMenuItem clipboard;
 	private JCheckBoxMenuItem chooser;
+	private JCheckBoxMenuItem map;
 	
 	private JMenu helpMenu;
 	private JMenuItem about;
@@ -121,6 +125,18 @@ public class SwarmMenu extends JMenuBar
 		clipboard.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, KeyEvent.CTRL_DOWN_MASK));
 		windowMenu.add(clipboard);
 		
+		map = new JCheckBoxMenuItem("Map");
+		map.setMnemonic('M');
+		map.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						Swarm.getApplication().setMapVisible(!Swarm.getApplication().isMapVisible());
+					}
+				});
+		map.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, KeyEvent.CTRL_DOWN_MASK));
+		windowMenu.add(map);
+		
 		windowMenu.addSeparator();
 		
 		tileHelicorders = new JMenuItem("Tile Helicorders");
@@ -165,6 +181,7 @@ public class SwarmMenu extends JMenuBar
 					{
 						clipboard.setSelected(Swarm.getApplication().isClipboardVisible());
 						chooser.setSelected(Swarm.getApplication().isChooserVisible());
+						map.setSelected(Swarm.getApplication().isMapVisible());
 					}
 
 					public void menuDeselected(MenuEvent e)
