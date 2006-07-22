@@ -2,7 +2,6 @@ package gov.usgs.swarm;
 
 import gov.usgs.math.Filter;
 import gov.usgs.plot.FrameDecorator;
-import gov.usgs.plot.FrameRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.swarm.WaveViewSettings.ViewType;
@@ -30,6 +29,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
+import java.util.TimeZone;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -44,6 +44,9 @@ import javax.swing.event.EventListenerList;
  * TODO: move filter method
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2006/06/14 19:19:31  dcervelli
+ * Major 1.3.4 changes.
+ *
  * Revision 1.18  2006/06/05 18:06:49  dcervelli
  * Major 1.3 changes.
  *
@@ -159,9 +162,9 @@ public class WaveViewPanel extends JComponent
 	 * when the plot is on the clipboard or monitor. */
 	private boolean displayTitle;
 	
-	/** The frame renderers whose axis the title will be attached to if the title is 
+	/** The frame renderer whose axis the title will be attached to if the title is 
 	 * to be displayed. */
-	private FrameRenderer titleFrame;
+//	private FrameRenderer titleFrame;
 	
 	private Color backgroundColor;
 //	private DateFormat dateFormat;
@@ -190,6 +193,8 @@ public class WaveViewPanel extends JComponent
 	
 	private double mark1 = Double.NaN;
 	private double mark2 = Double.NaN;
+	
+	private double cursorMark = Double.NaN;
 	
 	/** Constructs a WaveViewPanel with default settings.
 	 */	
@@ -369,7 +374,8 @@ public class WaveViewPanel extends JComponent
 					
 					public void mouseExited(MouseEvent e)
 					{
-						dragging = false;	
+						Swarm.getApplication().fireTimeChanged(Double.NaN);
+						dragging = false;
 						repaint();
 					}
 				});
@@ -590,12 +596,14 @@ public class WaveViewPanel extends JComponent
 			double yi = y * -t[2] + t[3];
 			if (timeSeries)
 			{
+				Swarm.getApplication().fireTimeChanged(j2k);
 				String utc = Time.format(DATE_FORMAT, Util.j2KToDate(j2k));
-				double tzo = Swarm.config.timeZoneOffset;
+				TimeZone tz = Swarm.config.getTimeZone(channel);
+				double tzo = Time.getTimeZoneOffset(tz, j2k);
 				if (tzo != 0)
 				{
-					String tza = Swarm.config.timeZoneAbbr;
-					status = Time.format(DATE_FORMAT, Util.j2KToDate(j2k + tzo * 3600)) + " (" + tza + "), " +
+					String tza = tz.getDisplayName(tz.inDaylightTime(Util.j2KToDate(j2k)), TimeZone.SHORT);
+					status = Time.format(DATE_FORMAT, Util.j2KToDate(j2k + tzo)) + " (" + tza + "), " +
 							utc + " (UTC)";
 				}
 				else
@@ -770,6 +778,9 @@ public class WaveViewPanel extends JComponent
 			if (!Double.isNaN(mark2))
 				paintMark(g2, mark2);
 			
+			if (!Double.isNaN(cursorMark))
+				paintCursor(g2);
+			
 			if (allowClose)
 			{
 				if (closeImg == null)
@@ -906,14 +917,16 @@ public class WaveViewPanel extends JComponent
 		waveRenderer.setWave(wv);
 		waveRenderer.setRemoveBias(settings.removeBias);
 		waveRenderer.setAutoScale(true);
+//		waveRenderer.setB
 		if (channel != null && displayTitle)
 			waveRenderer.setTitle(channel);
 		waveRenderer.update();
+//		waveRenderer.getAxis().setBackgroundColor(backgroundColor);
 	    plot.addRenderer(waveRenderer);
 		if (settings.filterOn)
 			plot.addRenderer(getFilterLabel());
 		translation = waveRenderer.getDefaultTranslation();
-		titleFrame = waveRenderer;
+//		titleFrame = waveRenderer;
 	}
 	
 	/** Plots frequency spectra.
@@ -942,7 +955,7 @@ public class WaveViewPanel extends JComponent
 		if (settings.filterOn)
 			plot.addRenderer(getFilterLabel());
 		translation = spectraRenderer.getDefaultTranslation();
-		titleFrame = spectraRenderer;
+//		titleFrame = spectraRenderer;
 		plot.addRenderer(spectraRenderer);
 	}
 
@@ -977,7 +990,7 @@ public class WaveViewPanel extends JComponent
 		if (settings.filterOn)
 			plot.addRenderer(getFilterLabel());
 		translation = spectrogramRenderer.getDefaultTranslation();
-		titleFrame = spectrogramRenderer;
+//		titleFrame = spectrogramRenderer;
 	}
 
 	/** Paints the zoom drag box. 
@@ -994,7 +1007,25 @@ public class WaveViewPanel extends JComponent
 		g2.setPaint(pnt);
 	}
 	
+	private static final Color DARK_RED = new Color(168, 0, 0);
 	private static final Color DARK_GREEN = new Color(0, 168, 0);
+	
+	public void setCursorMark(double j2k)
+	{
+		cursorMark = j2k;
+		repaint();
+	}
+	
+	private void paintCursor(Graphics2D g2)
+	{
+		if (Double.isNaN(cursorMark) || cursorMark < startTime || cursorMark > endTime)
+			return;
+		
+		double[] t = getTranslation();
+		double x = (cursorMark - t[1]) / t[0];
+		g2.setColor(DARK_RED);
+		g2.draw(new Line2D.Double(x, yOffset, x, getSize().height - yOffset));
+	}
 	
 	private void paintMark(Graphics2D g2, double j2k)
 	{
