@@ -1,8 +1,8 @@
 package gov.usgs.swarm;
  
-import gov.usgs.earthworm.Menu;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
+import gov.usgs.swarm.map.MapFrame;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.ui.GlobalKeyManager;
@@ -37,6 +37,7 @@ import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.event.EventListenerList;
 
 import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
 
@@ -48,6 +49,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: chooser visibility
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.23  2006/06/14 19:19:31  dcervelli
+ * Major 1.3.4 changes.
+ *
  * Revision 1.22  2006/06/05 18:06:49  dcervelli
  * Major 1.3 changes.
  *
@@ -161,9 +165,10 @@ public class Swarm extends JFrame
 	private int frameCount = 0;
 	
 	private WaveClipboardFrame waveClipboard;
+	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "1.3.4.20060614";
+	private static final String VERSION = "2.0.0.20060722-";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -177,6 +182,8 @@ public class Swarm extends JFrame
 	private AbstractAction toggleFullScreenAction;
 	
 	private long lastUITime;
+	
+	private EventListenerList timeListeners = new EventListenerList();
 	
 	public static Config config;
 	
@@ -313,6 +320,11 @@ public class Swarm extends JFrame
 		return waveClipboard;	
 	}
 	
+	public MapFrame getMapFrame()
+	{
+		return mapFrame;
+	}
+	
 	public DataChooser getDataChooser()
 	{
 		return chooser;
@@ -403,6 +415,10 @@ public class Swarm extends JFrame
 		desktop.add(waveClipboard);
 		waveClipboard.setVisible(config.clipboardVisible);
 		
+		mapFrame = new MapFrame();
+		desktop.add(mapFrame);
+		mapFrame.setVisible(config.mapVisible);
+		
 		swarmMenu = new SwarmMenu();
 		this.setJMenuBar(swarmMenu);
 		
@@ -413,6 +429,24 @@ public class Swarm extends JFrame
 					"This is just for your information, Swarm will not be affected by this.", "System Clock", JOptionPane.INFORMATION_MESSAGE);
 	}
 
+	public void addTimeListener(TimeListener tl)
+	{
+		timeListeners.add(TimeListener.class, tl);
+	}
+	
+	public void removeTimeListener(TimeListener tl)
+	{
+		timeListeners.remove(TimeListener.class, tl);
+	}
+	
+	public void fireTimeChanged(double j2k)
+	{
+		Object[] ls = timeListeners.getListenerList();
+		for (int i = ls.length - 2; i >= 0; i -= 2)
+		    if (ls[i] == TimeListener.class)
+		        ((TimeListener)ls[i + 1]).timeChanged(j2k);
+	}
+	
 	public void setChooserVisible(boolean vis)
 	{
 		if (vis)
@@ -434,6 +468,19 @@ public class Swarm extends JFrame
 	public boolean isChooserVisible()
 	{
 		return getContentPane() == split;
+	}
+	
+	public boolean isMapVisible()
+	{
+		return mapFrame.isVisible();
+	}
+	
+	public void setMapVisible(boolean vis)
+	{
+		mapFrame.setVisible(vis);
+		
+		if (vis)
+			mapFrame.toFront();
 	}
 	
 	public boolean isClipboardVisible()
@@ -532,6 +579,18 @@ public class Swarm extends JFrame
 			config.clipboardMaximized = false;
 		}
 		
+		if (mapFrame.isMaximum())
+			config.mapMaximized = true;
+		else
+		{
+			config.mapVisible = mapFrame.isVisible();
+			config.mapX = mapFrame.getX();
+			config.mapY = mapFrame.getY();
+			config.mapWidth = mapFrame.getWidth();
+			config.mapHeight = mapFrame.getHeight();
+			config.mapMaximized = false;
+		}
+		
 		config.chooserDividerLocation = split.getDividerLocation();
 		config.chooserVisible = isChooserVisible();
 		
@@ -581,6 +640,7 @@ public class Swarm extends JFrame
 					public Object construct()
 					{
 //						double now = CurrentTime.nowJ2K();
+						waveClipboard.getThrobber().increment();
 						Wave sw = source.getWave(channel, fst, fet);
 						wvp.setWave(sw, fst, fet);
 						return null;
@@ -588,6 +648,7 @@ public class Swarm extends JFrame
 					
 					public void finished()
 					{
+						waveClipboard.getThrobber().decrement();
 						waveClipboard.setVisible(true);
 						waveClipboard.toFront();
 						try
@@ -623,13 +684,13 @@ public class Swarm extends JFrame
 		addInternalFrame(frame);
 		return frame;
 	}
-
 	
 	public HelicorderViewerFrame openHelicorder(SeismicDataSource source, String channel)
 	{
 		source.establish();
 		HelicorderViewerFrame frame = new HelicorderViewerFrame(source, channel);
 		frame.getHelicorderViewPanel().addListener(waveClipboard.getLinkListener());
+		frame.getHelicorderViewPanel().addListener(mapFrame.getLinkListener());
 		addInternalFrame(frame);
 		return frame;
 	}
@@ -769,6 +830,7 @@ public class Swarm extends JFrame
 		toggleFullScreenMode();
 	}
 	
+	// TODO: make listener based
 	public void optionsChanged()
 	{
 		for (JInternalFrame frame : frames)
@@ -777,6 +839,7 @@ public class Swarm extends JFrame
 			{
 				HelicorderViewerFrame hvf = (HelicorderViewerFrame)frame;
 				hvf.getHelicorderViewPanel().cursorChanged();
+				hvf.getHelicorderViewPanel().invalidateImage();
 			}
 		}
 	}
