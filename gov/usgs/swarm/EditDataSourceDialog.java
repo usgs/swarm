@@ -1,7 +1,6 @@
 package gov.usgs.swarm;
 
 import gov.usgs.util.GridBagHelper;
-import gov.usgs.util.ui.BaseDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -27,6 +26,9 @@ import javax.swing.border.EmptyBorder;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/06/14 19:19:31  dcervelli
+ * Major 1.3.4 changes.
+ *
  * Revision 1.4  2006/06/05 18:06:49  dcervelli
  * Major 1.3 changes.
  *
