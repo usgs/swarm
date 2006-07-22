@@ -1,10 +1,16 @@
 package gov.usgs.swarm;
 
 import java.awt.BorderLayout;
+import java.util.Arrays;
+import java.util.TimeZone;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
@@ -13,6 +19,9 @@ import com.jgoodies.forms.layout.FormLayout;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/06/05 18:06:49  dcervelli
+ * Major 1.3 changes.
+ *
  * @author Dan Cervelli
  */
 public class OptionsDialog extends SwarmDialog
@@ -24,9 +33,12 @@ public class OptionsDialog extends SwarmDialog
 	private JCheckBox durationEnabled;
 	private JTextField durationA;
 	private JTextField durationB;
-	private JTextField timeZoneOffset;
-	private JTextField timeZoneAbbr;
 	private JCheckBox useLargeCursor;
+	
+	private JCheckBox tzInstrument;
+	private JRadioButton tzLocal;
+	private JRadioButton tzSpecific;
+	private JComboBox timeZones;
 	
 	public OptionsDialog()
 	{
@@ -40,10 +52,14 @@ public class OptionsDialog extends SwarmDialog
 	{
 		durationEnabled = new JCheckBox("Enabled");
 		durationA = new JTextField();
-		durationB = new JTextField();;
-		timeZoneOffset = new JTextField();;
-		timeZoneAbbr = new JTextField();;
+		durationB = new JTextField();
 		useLargeCursor = new JCheckBox("Large Helicorder Cursor");
+		tzInstrument = new JCheckBox("Use instrument time zone if available");
+		tzLocal = new JRadioButton("Use local machine time zone:");
+		tzSpecific = new JRadioButton("Use specific time zone:");
+		String[] tzs = TimeZone.getAvailableIDs();
+		Arrays.sort(tzs);
+		timeZones = new JComboBox(tzs);
 	}
 	
 	protected void createUI()
@@ -59,10 +75,23 @@ public class OptionsDialog extends SwarmDialog
 		builder.setDefaultDialogBorder();
 		
 		builder.appendSeparator("Time Zone");
-		builder.append("Abbreviation:", timeZoneAbbr);
+		
+		builder.append(tzInstrument, 7);
+		builder.nextLine();
+		TimeZone local = TimeZone.getDefault();
+		ButtonGroup tzGroup = new ButtonGroup();
+		tzGroup.add(tzLocal);
+		builder.append(tzLocal, 7);
+		builder.append("   ");
+		builder.append(new JLabel(local.getID()), 5);
 		builder.nextLine();
 		
-		builder.append("Offset (hrs):", timeZoneOffset);
+		tzGroup.add(tzSpecific);
+		builder.append(tzSpecific, 7);
+		builder.nextLine();
+		
+		builder.append("   ");
+		builder.append(timeZones, 5);
 		builder.nextLine();
 		
 		builder.appendSeparator("Duration Magnitude");
@@ -81,12 +110,16 @@ public class OptionsDialog extends SwarmDialog
 	
 	public void setCurrentValues()
 	{
-		timeZoneAbbr.setText(Swarm.config.timeZoneAbbr);
-		timeZoneOffset.setText(Double.toString(Swarm.config.timeZoneOffset));
 		useLargeCursor.setSelected(Swarm.config.useLargeCursor);
 		durationA.setText(Double.toString(Swarm.config.durationA));
 		durationB.setText(Double.toString(Swarm.config.durationB));
 		durationEnabled.setSelected(Swarm.config.durationEnabled);
+		tzInstrument.setSelected(Swarm.config.useInstrumentTimeZone);
+		if (Swarm.config.useLocalTimeZone)
+			tzLocal.setSelected(true);
+		else
+			tzSpecific.setSelected(true);
+		timeZones.setSelectedItem(Swarm.config.specificTimeZone.getID());
 	}
 	
 	public boolean allowOK()
@@ -94,17 +127,6 @@ public class OptionsDialog extends SwarmDialog
 		String message = null;
 		try
 		{
-			
-			message = "The time zone abbreviation must be between 1 and 4 characters.";
-			String tz = timeZoneAbbr.getText();
-			if (tz == null || tz.length() > 4 || tz.length() < 1)
-				throw new IllegalArgumentException();
-		
-			message = "The time zone offset must be between -13 and 13.";
-			double tzo = Double.parseDouble(timeZoneOffset.getText().trim());
-			if (tzo > 13 || tzo < -13)
-				throw new IllegalArgumentException();
-			
 			message = "The duration magnitude constants must be numbers.";
 			Double.parseDouble(durationA.getText().trim());
 			Double.parseDouble(durationB.getText().trim());
@@ -120,18 +142,13 @@ public class OptionsDialog extends SwarmDialog
 	
 	public void wasOK()
 	{
-		double tzo = 9999;
-		try { tzo = Double.parseDouble(timeZoneOffset.getText().trim()); } catch (Exception e) {}
-		if (tzo == 9999 || tzo > 13 || tzo < -13)
-			JOptionPane.showMessageDialog(this, "Time Zone Offset has an illegal value.", "Options Error", JOptionPane.ERROR_MESSAGE);
-		else
-			Swarm.config.timeZoneOffset = tzo;
-			
-		Swarm.config.timeZoneAbbr = timeZoneAbbr.getText().trim();
 		Swarm.config.useLargeCursor = useLargeCursor.isSelected();
 		Swarm.config.durationEnabled = durationEnabled.isSelected();
 		Swarm.config.durationA = Double.parseDouble(durationA.getText().trim());
 		Swarm.config.durationB = Double.parseDouble(durationB.getText().trim());
+		Swarm.config.useInstrumentTimeZone = tzInstrument.isSelected();
+		Swarm.config.useLocalTimeZone = tzLocal.isSelected();
+		Swarm.config.specificTimeZone = TimeZone.getTimeZone((String)timeZones.getSelectedItem());
 		
 		Swarm.getApplication().optionsChanged();
 	}

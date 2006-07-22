@@ -1,6 +1,7 @@
 package gov.usgs.swarm;
 
 import gov.usgs.util.GridBagHelper;
+import gov.usgs.util.Time;
 import gov.usgs.util.Util;
 
 import java.awt.BorderLayout;
@@ -29,6 +30,9 @@ import javax.swing.border.TitledBorder;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2006/06/14 19:19:31  dcervelli
+ * Major 1.3.4 changes.
+ *
  * Revision 1.13  2006/06/05 18:06:49  dcervelli
  * Major 1.3 changes.
  *
@@ -380,8 +384,8 @@ public class HelicorderViewerSettingsDialog extends SwarmDialog
 			bottomTime.setText("Now");
 		else
 		{
-			double tzo = Swarm.config.timeZoneOffset;
-			bottomTime.setText(dateFormat.format(Util.j2KToDate(bt + tzo * 3600)));
+			double tzo = Time.getTimeZoneOffset(Swarm.config.getTimeZone(settings.channel));
+			bottomTime.setText(dateFormat.format(Util.j2KToDate(bt + tzo)));
 		}
 		
 		refreshInterval.setText(Integer.toString(settings.refreshInterval));
@@ -418,8 +422,8 @@ public class HelicorderViewerSettingsDialog extends SwarmDialog
 				if (t.length() == 8)
 					t = t + "2359";
 				Date bt = dateFormat.parse(t);
-				double tzo = Swarm.config.timeZoneOffset;
-				settings.setBottomTime(Util.dateToJ2K(bt) - tzo * 3600);
+				double tzo = Time.getTimeZoneOffset(Swarm.config.getTimeZone(settings.channel));
+				settings.setBottomTime(Util.dateToJ2K(bt) - tzo);
 			}
 			settings.forceCenter = removeDrift.isSelected();
 			settings.showClip = showClip.isSelected();

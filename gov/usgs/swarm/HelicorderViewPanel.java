@@ -1,6 +1,7 @@
 package gov.usgs.swarm;
 
 import gov.usgs.plot.Plot;
+import gov.usgs.util.Time;
 import gov.usgs.util.Util;
 import gov.usgs.vdx.data.heli.HelicorderData;
 import gov.usgs.vdx.data.heli.plot.HelicorderRenderer;
@@ -36,6 +37,9 @@ import javax.swing.event.EventListenerList;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2006/07/04 21:04:31  cervelli
+ * Fixed a bug where a null Metadata object caused a null pointer exception.
+ *
  * Revision 1.16  2006/06/14 19:19:31  dcervelli
  * Major 1.3.4 changes.
  *
@@ -169,9 +173,9 @@ public class HelicorderViewPanel extends JComponent
 	public void fireInsetCreated(double st, double et)
 	{
 		Object[] ls = listeners.getListenerList();
-	     for (int i = ls.length - 2; i >= 0; i -= 2)
-	         if (ls[i] == HelicorderViewPanelListener.class)
-	             ((HelicorderViewPanelListener)ls[i + 1]).insetCreated(st, et);
+		for (int i = ls.length - 2; i >= 0; i -= 2)
+		    if (ls[i] == HelicorderViewPanelListener.class)
+		        ((HelicorderViewPanelListener)ls[i + 1]).insetCreated(st, et);
 	}
 	
 	public void cursorChanged()
@@ -212,6 +216,12 @@ public class HelicorderViewPanel extends JComponent
 	public void clearMarks()
 	{
 		startMark = endMark = Double.NaN;
+	}
+	
+	public void setCursorMark(double t)
+	{
+		if (insetWavePanel != null)
+			insetWavePanel.setCursorMark(t);
 	}
 	
 	public void markTime(double t)
@@ -438,11 +448,12 @@ public class HelicorderViewPanel extends JComponent
 				{
 					double j2k = getMouseJ2K(x, y);
 					status = dateFormat.format(Util.j2KToDate(j2k));
-					double tzo = Swarm.config.timeZoneOffset;
+					TimeZone tz = Swarm.config.getTimeZone(parent.getChannel());
+					double tzo = Time.getTimeZoneOffset(tz, j2k);
 					if (tzo != 0)
 					{
-						String tza = Swarm.config.timeZoneAbbr;
-						status = dateFormat.format(Util.j2KToDate(j2k + tzo * 3600)) + " (" + tza + "), " +
+						String tza = tz.getDisplayName(tz.inDaylightTime(Util.j2KToDate(j2k)), TimeZone.SHORT);
+						status = dateFormat.format(Util.j2KToDate(j2k + tzo)) + " (" + tza + "), " +
 								status + " (UTC)";
 					}
 				}
@@ -619,8 +630,7 @@ public class HelicorderViewPanel extends JComponent
 			endTime = time2;
 			heliRenderer.setData(heliData);
 			heliRenderer.setTimeChunk(settings.timeChunk);
-			heliRenderer.setTimeZoneOffset(Swarm.config.timeZoneOffset);
-			heliRenderer.setTimeZoneAbbr(Swarm.config.timeZoneAbbr);
+			heliRenderer.setTimeZone(Swarm.config.getTimeZone(parent.getChannel()));
 			heliRenderer.setForceCenter(settings.forceCenter);
 			heliRenderer.setClipBars(settings.clipBars);
 			heliRenderer.setShowClip(settings.showClip);
@@ -698,7 +708,7 @@ public class HelicorderViewPanel extends JComponent
 			heliRenderer.setHelicorderExtents(startTime, endTime, -1 * Math.abs((settings.barRange - offset) / multiplier), Math.abs((settings.barRange - offset) / multiplier));
 		}
 		
-		
+		heliRenderer.setTimeZone(Swarm.config.getTimeZone(parent.getChannel()));
 		heliRenderer.setClipValue(settings.clipValue);
 		heliRenderer.createDefaultAxis();
 		translation = heliRenderer.getTranslationInfo(false);
