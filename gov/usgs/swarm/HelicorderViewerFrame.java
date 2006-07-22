@@ -55,6 +55,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * TODO: change slider checkbox
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2006/06/14 19:19:31  dcervelli
+ * Major 1.3.4 changes.
+ *
  * Revision 1.16  2006/06/05 18:06:49  dcervelli
  * Major 1.3 changes.
  *
@@ -177,14 +180,17 @@ public class HelicorderViewerFrame extends JInternalFrame
 	
 	protected Throbber throbber;
 	
+	private TimeListener timeListener;
+	
 	public HelicorderViewerFrame(SeismicDataSource sds, String ch)
 	{
 		super(ch + ", [" + sds + "]", true, true, true, true);
 		Swarm.getApplication().touchUITime();
-		settings = new HelicorderViewerSettings();
+		channel = ch;
+		settings = new HelicorderViewerSettings(channel);
 		waveViewSettings = new WaveViewSettings();
 		dataSource = sds.getCopy();
-		channel = ch;
+		
 //		SwingUtilities.invokeLater(new Runnable() 
 //				{
 //					public void run()
@@ -211,14 +217,6 @@ public class HelicorderViewerFrame extends JInternalFrame
 		setSize(800, 750);
 		setContentPane(mainPanel);
 //		createWiggler();
-		addInternalFrameListener(new InternalFrameAdapter()
-				{
-					public void internalFrameActivated(InternalFrameEvent e)
-					{
-						if (channel != null)
-							Swarm.getApplication().getDataChooser().setNearest(channel);
-					}
-				});
 		setVisible(true);
 	}
 
@@ -480,14 +478,30 @@ public class HelicorderViewerFrame extends JInternalFrame
 	
 	private void createListeners()
 	{
+		timeListener = new TimeListener()
+				{
+					public void timeChanged(double j2k)
+					{
+						helicorderViewPanel.setCursorMark(j2k);
+					}
+				};
+		Swarm.getApplication().addTimeListener(timeListener);
+		
 		this.addInternalFrameListener(new InternalFrameAdapter()
 				{
+					public void internalFrameActivated(InternalFrameEvent e)
+					{
+						if (channel != null)
+							Swarm.getApplication().getDataChooser().setNearest(channel);
+					}
+					
 					public void internalFrameClosing(InternalFrameEvent e)
 					{
 						dispose();
 						throbber.close();
 						refreshThread.kill();
 						Swarm.getApplication().removeInternalFrame(HelicorderViewerFrame.this);
+						Swarm.getApplication().removeTimeListener(timeListener);
 						dataSource.notifyDataNotNeeded(channel, helicorderViewPanel.getStartTime(), helicorderViewPanel.getEndTime());
 						dataSource.close();
 						if (wigglerPanel != null)
@@ -624,7 +638,6 @@ public class HelicorderViewerFrame extends JInternalFrame
 
 	public void setFullScreen(boolean full)
 	{
-		System.out.println("evd: " + SwingUtilities.isEventDispatchThread());
 		fullScreen = full;
 		
 		this.setResizable(!fullScreen);
@@ -733,11 +746,15 @@ public class HelicorderViewerFrame extends JInternalFrame
 							hd = dataSource.getHelicorder(channel, before - tc, end + tc);
 							success = true;
 						}
-    					catch (RuntimeException e)
+    					catch (Throwable e)
 						{
     						e.printStackTrace();
-    						System.err.println("Error: " + e.getMessage());
+    						System.err.println("getHelicorder() Error: " + e.getMessage());
 						}
+    					finally
+    					{
+    						working = false;
+    					}
 						return null;
 					}
 					
@@ -746,7 +763,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 						lastRefreshTime = System.currentTimeMillis();
 						throbber.decrement();
 						setNavigationButtonsEnabled(true);
-						working = false;
+//						working = false;
 						if (success)
 						{
 							if (hd != null && hd.getEndTime() < before && !dataSource.isActiveSource())
@@ -849,6 +866,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		}	
 	}
 	
+	// TODO: refactor out some functions
 	private class SaveButtonActionListener implements ActionListener
 	{
 	    public void actionPerformed(ActionEvent e)
@@ -950,8 +968,9 @@ public class HelicorderViewerFrame extends JInternalFrame
 						width - HelicorderViewPanel.X_OFFSET - HelicorderViewPanel.RIGHT_WIDTH,
 						height - HelicorderViewPanel.Y_OFFSET - HelicorderViewPanel.BOTTOM_HEIGHT);
 				heliRenderer.setHelicorderExtents(before,end , -1 * Math.abs(settings.barRange), Math.abs(settings.barRange));
-				heliRenderer.setTimeZoneOffset(Swarm.config.timeZoneOffset);
-				heliRenderer.setTimeZoneAbbr(Swarm.config.timeZoneAbbr);
+				heliRenderer.setTimeZone(Swarm.config.getTimeZone(channel));
+//				heliRenderer.setTimeZoneOffset(Swarm.config.timeZoneOffset);
+//				heliRenderer.setTimeZoneAbbr(Swarm.config.timeZoneAbbr);
 				heliRenderer.setForceCenter(settings.forceCenter);
 				heliRenderer.setClipBars(settings.clipBars);
 				heliRenderer.setShowClip(settings.showClip);
