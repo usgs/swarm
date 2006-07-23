@@ -32,6 +32,9 @@ public class DefaultMetadata
 		{
 			entries = new ArrayList<Entry>();
 			ResourceReader rr = ResourceReader.getResourceReader("DefaultLatLon.config");
+			if (rr == null)
+				return null;
+			
 			String s = null;
 			while ((s = rr.nextLine()) != null)
 			{
