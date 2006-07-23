@@ -58,6 +58,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/07/22 20:22:30  cervelli
+ * Many changes for map integration.
+ *
  * Revision 1.4  2006/06/14 19:19:31  dcervelli
  * Major 1.3.4 changes.
  *
@@ -348,7 +351,7 @@ public class DataChooser extends JPanel
 					}
 				});
 		
-		mapButton = new JButton(Images.getIcon("geosort"));
+		mapButton = new JButton(Images.getIcon("earth"));
 		mapButton.setFocusable(false);
 		mapButton.setToolTipText("Open map interface"); 
 		mapButton.addActionListener(new ActionListener()
@@ -557,10 +560,11 @@ public class DataChooser extends JPanel
 							if (ns.compareToIgnoreCase(s) <= 0)
 								break;
 						}
+						
 						ServerNode node = new ServerNode(source);
 						node.add(new MessageNode(OPENING_MESSAGE));
-
 						((DefaultTreeModel)dataTree.getModel()).insertNodeInto(node, rootNode, i);
+						((DefaultTreeModel)dataTree.getModel()).reload();
 					}
 				});
 	}
