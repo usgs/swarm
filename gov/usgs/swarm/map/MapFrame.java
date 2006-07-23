@@ -72,7 +72,7 @@ public class MapFrame extends JInternalFrame implements Runnable
 	
 	private void createUI()
 	{
-		setFrameIcon(Images.getIcon("geosort"));
+		setFrameIcon(Images.getIcon("earth"));
 		setSize(Swarm.config.mapWidth, Swarm.config.mapHeight);
 		setLocation(Swarm.config.mapX, Swarm.config.mapY);
 		setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);
