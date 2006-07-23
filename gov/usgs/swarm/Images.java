@@ -11,6 +11,9 @@ import javax.swing.ImageIcon;
  * TODO: make images static final, don't use map 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2006/06/14 19:19:31  dcervelli
+ * Major 1.3.4 changes.
+ *
  * Revision 1.10  2006/04/17 04:16:36  dcervelli
  * More 1.3 changes.
  *
@@ -100,6 +103,7 @@ public class Images
 		imageMap.put("redbullet", "images/redbullet.gif");
 		imageMap.put("helilink", "images/helicorderlink.gif");
 		imageMap.put("geosort", "images/geosort.gif");
+		imageMap.put("earth" , "images/earth.gif");
 		
 		imageMap.put("throbber_off", "images/throbber_off.gif");
 		imageMap.put("throbber_0", "images/throbber_0.gif");
