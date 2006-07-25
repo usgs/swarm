@@ -377,7 +377,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 		
 	}
 	
-	private class MapWaveDecorator implements FrameDecorator
+	private class MapWaveDecorator extends FrameDecorator
 	{
 		private WaveViewPanel panel;
 		

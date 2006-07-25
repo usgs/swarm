@@ -1,10 +1,5 @@
 package gov.usgs.swarm;
 
-import gov.usgs.plot.AxisRenderer;
-import gov.usgs.plot.FrameDecorator;
-import gov.usgs.plot.FrameRenderer;
-import gov.usgs.plot.SmartTick;
-import gov.usgs.plot.TextRenderer;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.Time;
@@ -56,6 +51,9 @@ import javax.swing.event.InternalFrameEvent;
  * The wave clipboard internal frame.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2006/07/22 20:31:43  cervelli
+ * Added throbber and status bar.
+ *
  * Revision 1.12  2006/06/14 19:19:31  dcervelli
  * Major 1.3.4 changes.
  *
@@ -831,7 +829,8 @@ public class WaveClipboardFrame extends JInternalFrame
 		return selected;
 	}
 	
-	private class ClipboardWaveDecorator implements FrameDecorator
+	/*
+	private class ClipboardWaveDecorator extends FrameDecorator
 	{
 		private WaveViewPanel panel;
 		
@@ -864,6 +863,7 @@ public class WaveClipboardFrame extends JInternalFrame
 	        ar.addPostRenderer(label);
 		}
 	}
+	*/
 	
 	public synchronized void addWave(final WaveViewPanel p)
 	{

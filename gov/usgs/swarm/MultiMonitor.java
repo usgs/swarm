@@ -46,6 +46,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: up/down arrows
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2006/07/22 20:28:39  cervelli
+ * Added up/down to move selection, delete to remove selection.
+ *
  * Revision 1.10  2006/06/14 19:19:31  dcervelli
  * Major 1.3.4 changes.
  *
@@ -359,7 +362,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		this.setDefaultCloseOperation(JInternalFrame.HIDE_ON_CLOSE);
 	}
 	
-	private class MonitorWaveDecorator implements FrameDecorator
+	private class MonitorWaveDecorator extends FrameDecorator
 	{
 		private WaveViewPanel panel;
 		
