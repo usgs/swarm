@@ -44,6 +44,9 @@ import javax.swing.event.EventListenerList;
  * TODO: move filter method
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2006/07/22 20:32:36  cervelli
+ * Time zones and red line.
+ *
  * Revision 1.19  2006/06/14 19:19:31  dcervelli
  * Major 1.3.4 changes.
  *
@@ -589,14 +592,14 @@ public class WaveViewPanel extends JComponent
 		String status = null;
 		Dimension size = getSize();
 		double[] t = getTranslation();
+		double j2k = Double.NaN;
 		if (t != null && y > yOffset && y < (size.height - bottomHeight) 
 			&& x > xOffset && x < size.width - rightWidth)
 		{
-			double j2k = x * t[0] + t[1];
+			j2k = x * t[0] + t[1];
 			double yi = y * -t[2] + t[3];
 			if (timeSeries)
 			{
-				Swarm.getApplication().fireTimeChanged(j2k);
 				String utc = Time.format(DATE_FORMAT, Util.j2KToDate(j2k));
 				TimeZone tz = Swarm.config.getTimeZone(channel);
 				double tzo = Time.getTimeZoneOffset(tz, j2k);
@@ -629,7 +632,11 @@ public class WaveViewPanel extends JComponent
 			}
 		}
 		else
+		{
 			status = " ";
+		}
+
+		Swarm.getApplication().fireTimeChanged(j2k);
 		
 		if (status == null)
 			status = " ";
@@ -1024,7 +1031,7 @@ public class WaveViewPanel extends JComponent
 		double[] t = getTranslation();
 		double x = (cursorMark - t[1]) / t[0];
 		g2.setColor(DARK_RED);
-		g2.draw(new Line2D.Double(x, yOffset, x, getSize().height - yOffset));
+		g2.draw(new Line2D.Double(x, yOffset + 1, x, getSize().height - yOffset));
 	}
 	
 	private void paintMark(Graphics2D g2, double j2k)
