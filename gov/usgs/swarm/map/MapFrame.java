@@ -29,7 +29,7 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
 /**
- * 
+ * $Log: not supported by cvs2svn $
  * @author Dan Cervelli
  */
 public class MapFrame extends JInternalFrame implements Runnable
@@ -53,7 +53,7 @@ public class MapFrame extends JInternalFrame implements Runnable
 	private double endTime = Double.NaN;
 	private double startTime = Double.NaN;
 	
-	private int refreshInterval = 250;
+	private int refreshInterval = 1000;
 	
 	private HelicorderViewPanelListener linkListener;
 	
