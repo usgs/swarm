@@ -1,6 +1,7 @@
 package gov.usgs.swarm;
 
 import gov.usgs.plot.Plot;
+import gov.usgs.swarm.data.GulperListener;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.GridBagHelper;
@@ -55,6 +56,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * TODO: change slider checkbox
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2006/07/22 20:25:04  cervelli
+ * TimeListener changes, potential fix for stalled helicorder in kiosk mode bug.
+ *
  * Revision 1.17  2006/06/14 19:19:31  dcervelli
  * Major 1.3.4 changes.
  *
@@ -163,6 +167,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 	private WaveViewSettings waveViewSettings;
 	private HelicorderViewerSettings settings;
 	
+	private boolean gulperWorking;
 	private boolean working;
 	private JLabel statusLabel;
 	
@@ -180,7 +185,11 @@ public class HelicorderViewerFrame extends JInternalFrame
 	
 	protected Throbber throbber;
 	
+	private boolean noData = false;
+	
 	private TimeListener timeListener;
+	
+	public GulperListener gulperListener;
 	
 	public HelicorderViewerFrame(SeismicDataSource sds, String ch)
 	{
@@ -191,15 +200,8 @@ public class HelicorderViewerFrame extends JInternalFrame
 		waveViewSettings = new WaveViewSettings();
 		dataSource = sds.getCopy();
 		
-//		SwingUtilities.invokeLater(new Runnable() 
-//				{
-//					public void run()
-//					{
-						createUI();
-						getHelicorder();
-//						
-//					}
-//				});
+		createUI();
+		getHelicorder();
 		
 		refreshThread = new RefreshThread();
 	}
@@ -253,6 +255,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 					{
 						HelicorderViewerSettingsDialog hvsd = HelicorderViewerSettingsDialog.getInstance(settings, waveViewSettings);
 						hvsd.setVisible(true);
+						noData = false;
 						getHelicorder();
 					}
 				});
@@ -525,6 +528,36 @@ public class HelicorderViewerFrame extends JInternalFrame
 						repaint();
 					}
 				});
+		
+		gulperListener = new GulperListener()
+				{
+					public void gulperStarted()
+					{
+						gulperWorking = true;
+						throbber.increment();
+					}
+					
+					public void gulperStopped(boolean killed)
+					{
+						if (killed)
+							noData = true;
+						else
+						{
+							gulperWorking = false;
+							throbber.decrement();
+							HelicorderData hd = helicorderViewPanel.getData();
+							if (hd == null || hd.rows() == 0)
+								noData = true;
+							repaintHelicorder();
+						}
+					}
+
+					public void gulperGulped(double t1, double t2, boolean success)
+					{
+						if (success)
+							getHelicorder();
+					}
+				};
 	}
 	
 	public HelicorderViewPanel getHelicorderViewPanel()
@@ -715,11 +748,14 @@ public class HelicorderViewerFrame extends JInternalFrame
 
 	public boolean isWorking()
 	{
-		return working;	
+		return working || gulperWorking;	
 	}
 
 	public void getHelicorder()
 	{
+		if (noData)
+			return;
+		
     	final SwingWorker worker = new SwingWorker() 
     			{
     				private double end;
@@ -743,7 +779,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 							if (helicorderViewPanel != null)
 								tc = settings.timeChunk;
 							
-							hd = dataSource.getHelicorder(channel, before - tc, end + tc);
+							hd = dataSource.getHelicorder(channel, before - tc, end + tc, gulperListener);
 							success = true;
 						}
     					catch (Throwable e)
@@ -960,7 +996,8 @@ public class HelicorderViewerFrame extends JInternalFrame
 				Double before = end - settings.span * 60;
 				int tc = 30;
 				
-				HelicorderData heliData = dataSource.getHelicorder(channel, before - tc, end + tc);
+				// TODO: this should use existing data.
+				HelicorderData heliData = dataSource.getHelicorder(channel, before - tc, end + tc, null);
 				HelicorderRenderer heliRenderer = new HelicorderRenderer(heliData, settings.timeChunk);
 								
 				heliRenderer.setChannel(channel);

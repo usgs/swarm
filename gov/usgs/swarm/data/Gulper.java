@@ -4,6 +4,10 @@ import gov.usgs.swarm.Swarm;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.vdx.data.wave.Wave;
 
+/**
+ * $Log: not supported by cvs2svn $
+ * @author Dan Cervelli
+ */
 public class Gulper extends Thread
 {
 	private SeismicDataSource gulpSource;

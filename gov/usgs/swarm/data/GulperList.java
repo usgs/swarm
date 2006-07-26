@@ -3,6 +3,10 @@ package gov.usgs.swarm.data;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * $Log: not supported by cvs2svn $
+ * @author Dan Cervelli
+ */
 public class GulperList
 {
 	private Map<String, Gulper> gulpers;

@@ -1,7 +1,7 @@
 package gov.usgs.swarm.data;
 
 /**
- * 
+ * $Log: not supported by cvs2svn $
  * @author Dan Cervelli
  */
 public interface GulperListener

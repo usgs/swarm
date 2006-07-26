@@ -20,6 +20,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * so I had to add some hacky code for the CachePurgeActions.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/06/05 18:07:03  dcervelli
+ * Major 1.3 changes.
+ *
  * Revision 1.3  2006/04/15 16:00:13  dcervelli
  * 1.3 changes (renaming, new datachooser, different config).
  *
@@ -154,7 +157,7 @@ public class CachedDataSource extends SeismicDataSource
 	// this version, the one that implements SeismicDataSource, will only composite
 	// a Helicorder from the cache.  If you want to try and fill data on either side use
 	// the version below
-	public synchronized HelicorderData getHelicorder(String station, double t1, double t2)
+	public synchronized HelicorderData getHelicorder(String station, double t1, double t2, GulperListener gl)
 	{
 //		Vector helis = (Vector)helicorderCache.get(station);
 		List<CachedHelicorder> helis = helicorderCache.get(station);
@@ -232,13 +235,13 @@ public class CachedDataSource extends SeismicDataSource
 				if (t1 < ch.t1 && t2 > ch.t2)
 				{
 					//System.out.println("cache is centered chunk");
-					HelicorderData nhd = source.getHelicorder(station, t1, ch.t1);
+					HelicorderData nhd = source.getHelicorder(station, t1, ch.t1, null);
 					if (nhd != null)
 						hd = ch.helicorder.combine(nhd);
 					else
 						hd = ch.helicorder;
 					
-					nhd = source.getHelicorder(station, ch.t2, t2);
+					nhd = source.getHelicorder(station, ch.t2, t2, null);
 					if (nhd != null)
 						hd = hd.combine(nhd);
 					
@@ -250,7 +253,7 @@ public class CachedDataSource extends SeismicDataSource
 				if (t1 < ch.t1 && t2 > ch.t1 && t2 <= ch.t2)
 				{
 					//System.out.println("cache overlaps on right side");
-					HelicorderData nhd = source.getHelicorder(station, t1, ch.t1);
+					HelicorderData nhd = source.getHelicorder(station, t1, ch.t1, null);
 					if (nhd != null)
 					{
 						hd = ch.helicorder.combine(nhd);
@@ -269,7 +272,7 @@ public class CachedDataSource extends SeismicDataSource
 				if (t1 > ch.t1 && t1 < ch.t2 && t2 > ch.t2)
 				{
 					//System.out.println("cache overlaps on left side");	
-					HelicorderData nhd = source.getHelicorder(station, ch.t2, t2);
+					HelicorderData nhd = source.getHelicorder(station, ch.t2, t2, null);
 					if (nhd != null)
 					{
 						hd = ch.helicorder.combine(nhd);

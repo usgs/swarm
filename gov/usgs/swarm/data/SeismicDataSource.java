@@ -13,6 +13,9 @@ import javax.swing.Icon;
  * Base class for seismic data sources.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/07/22 20:20:16  cervelli
+ * Added variable for determining if source should be saved in user config.
+ *
  * Revision 1.3  2006/06/05 18:07:03  dcervelli
  * Major 1.3 changes.
  *
@@ -47,8 +50,17 @@ abstract public class SeismicDataSource
 	
 	abstract public List<String> getChannels();
 	
+	/**
+	 * Either returns the wave successfully or null if the data source could
+	 * not get the wave.
+	 * 
+	 * @param station
+	 * @param t1
+	 * @param t2
+	 * @return
+	 */
 	abstract public Wave getWave(String station, double t1, double t2);
-	abstract public HelicorderData getHelicorder(String station, double t1, double t2);
+	abstract public HelicorderData getHelicorder(String station, double t1, double t2, GulperListener gl);
 	
 	public void notifyDataNotNeeded(String station, double t1, double t2)
 	{}
@@ -174,6 +186,10 @@ abstract public class SeismicDataSource
 		else if (type.equals("sac"))
 		{
 			sds = new SACDataSource(params);
+		}
+		else if (type.equals("dhi"))
+		{
+			sds = new DHIDataSource(params);
 		}
 		sds.setName(name);
 		return sds;

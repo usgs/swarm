@@ -33,7 +33,7 @@ import org.apache.log4j.SimpleLayout;
 import org.apache.log4j.varia.NullAppender;
 
 /**
- * 
+ * $Log: not supported by cvs2svn $
  * @author Dan Cervelli
  */
 public class DHIDataSource extends SeismicDataSource

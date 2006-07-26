@@ -17,6 +17,9 @@ import java.util.List;
  * DirectWinstonSource.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/06/05 18:07:03  dcervelli
+ * Major 1.3 changes.
+ *
  * Revision 1.2  2006/04/15 16:00:13  dcervelli
  * 1.3 changes (renaming, new datachooser, different config).
  *
@@ -87,7 +90,7 @@ public class DirectWWSSource extends SeismicDataSource
 		return result;
 	}
 	
-	public synchronized HelicorderData getHelicorder(String station, double t1, double t2)
+	public synchronized HelicorderData getHelicorder(String station, double t1, double t2, GulperListener gl)
 	{
 		CachedDataSource cache = Swarm.getCache();
 		HelicorderData hd = cache.getHelicorder(station, t1, t2, this);

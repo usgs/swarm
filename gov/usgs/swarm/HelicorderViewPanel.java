@@ -37,6 +37,9 @@ import javax.swing.event.EventListenerList;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2006/07/22 20:27:32  cervelli
+ * Time zone changes.
+ *
  * Revision 1.17  2006/07/04 21:04:31  cervelli
  * Fixed a bug where a null Metadata object caused a null pointer exception.
  *
@@ -401,6 +404,11 @@ public class HelicorderViewPanel extends JComponent
 		return insetWavePanel != null;	
 	}
 
+	public HelicorderData getData()
+	{
+		return heliData;
+	}
+	
 	public double getStartTime()
 	{
 		return startTime;	
@@ -770,7 +778,7 @@ public class HelicorderViewPanel extends JComponent
 		if (heliData == null)
 		{
 			if (parent.isWorking())
-				g2.drawString("Retrieving data...", d.width / 2 - 50, d.height / 2);
+				g2.drawString("Attempting to retrieving data...", d.width / 2 - 75, d.height / 2);
 			else
 				g2.drawString("No helicorder data.", d.width / 2 - 50, d.height / 2);
 		}

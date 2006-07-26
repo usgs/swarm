@@ -20,6 +20,9 @@ import java.util.Map;
  * Earthworm Wave Server.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/06/05 18:07:03  dcervelli
+ * Major 1.3 changes.
+ *
  * Revision 1.3  2006/04/15 16:00:13  dcervelli
  * 1.3 changes (renaming, new datachooser, different config).
  *
@@ -177,7 +180,7 @@ public class WaveServerSource extends SeismicDataSource
 		return getMenuList(menu.getSortedItems());
 	}
 	
-	public synchronized HelicorderData getHelicorder(String station, double t1, double t2)
+	public synchronized HelicorderData getHelicorder(String station, double t1, double t2, GulperListener gl)
 	{
 		double now = CurrentTime.getInstance().nowJ2K();
 		// if a time later than now has been asked for make sure to get the latest 
@@ -185,7 +188,7 @@ public class WaveServerSource extends SeismicDataSource
 			getWave(station, now - 2*60, now);	
 		
 		CachedDataSource cache = Swarm.getCache();
-		HelicorderData hd = cache.getHelicorder(station, t1, t2);	
+		HelicorderData hd = cache.getHelicorder(station, t1, t2, gl);	
 
 		if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 0))
 			requestGulper(station, t1, t2);
@@ -254,7 +257,7 @@ public class WaveServerSource extends SeismicDataSource
 	
 	class Gulper extends Thread
 	{
-		private WaveServerSource gulpSource;
+		private SeismicDataSource gulpSource;
 		private String channel;
 		private double lastTime;
 		private double goalTime;
@@ -275,7 +278,8 @@ public class WaveServerSource extends SeismicDataSource
 			update(t1, t2);
 			
 			gulpSource = new WaveServerSource(params);
-			gulpSource.setTimeout(30*1000);
+			((WaveServerSource)gulpSource).setTimeout(30*1000);
+			
 			start();
 			System.out.println("Gulper started for " + channel);
 		}

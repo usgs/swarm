@@ -21,6 +21,9 @@ import java.util.StringTokenizer;
  * be made a descendant of WaveServerSource. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/06/05 18:07:03  dcervelli
+ * Major 1.3 changes.
+ *
  * Revision 1.5  2006/04/17 03:35:20  dcervelli
  * Unsynchronized close() to avoid blocking in the event thread.
  *
@@ -101,6 +104,7 @@ public class WWSSource extends SeismicDataSource
 	
 	public void establish()
 	{
+		System.out.println("establish");
 		if (!established)
 		{
 			protocolVersion = winstonClient.getProtocolVersion();
@@ -187,7 +191,7 @@ public class WWSSource extends SeismicDataSource
 		return wave;
 	}
 	
-	public synchronized HelicorderData getHelicorder(String station, double t1, double t2)
+	public synchronized HelicorderData getHelicorder(String station, double t1, double t2, GulperListener gl)
 	{
 		CachedDataSource cache = Swarm.getCache();
 		HelicorderData hd = cache.getHelicorder(station, t1, t2, this);
