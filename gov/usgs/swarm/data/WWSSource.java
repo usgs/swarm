@@ -21,6 +21,9 @@ import java.util.StringTokenizer;
  * be made a descendant of WaveServerSource. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/07/26 00:36:02  cervelli
+ * Changes for new gulper system.
+ *
  * Revision 1.6  2006/06/05 18:07:03  dcervelli
  * Major 1.3 changes.
  *
@@ -90,9 +93,10 @@ public class WWSSource extends SeismicDataSource
 //		protocolVersion = winstonClient.getProtocolVersion();
 	}
 	
-	public WWSSource(WWSSource wss)
+	public WWSSource(WWSSource wws)
 	{
-		this(wss.params);
+		this(wws.params);
+		protocolVersion = wws.protocolVersion;
 		//server = wss.server;
 		//waveServer = new WaveServer(server);
 	}
