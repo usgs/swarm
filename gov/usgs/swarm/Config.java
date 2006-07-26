@@ -6,15 +6,18 @@ import gov.usgs.util.Util;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.TreeMap;
 
 /**
  * Swarm configuration class. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/07/22 20:21:59  cervelli
+ * Many Swarm 2.0 changes: time zones, map parameters, data sources, etc.
+ *
  * Revision 1.4  2006/06/14 19:19:31  dcervelli
  * Major 1.3.4 changes.
  *
@@ -85,6 +88,7 @@ public class Config
 	public double mapScale;
 	public double mapLongitude;
 	public double mapLatitude;
+	public String mapPath;
 	
 	public Map<String, SeismicDataSource> sources;
 	
@@ -201,7 +205,8 @@ public class Config
 		clipboardWidth = Util.stringToInt(config.getString("clipboardSizeX"), 600);
 		clipboardHeight = Util.stringToInt(config.getString("clipboardSizeY"), 700);
 		clipboardMaximized = Util.stringToBoolean(config.getString("clipboardMaximized"), false);
-		
+
+		mapPath = Util.stringToString(config.getString("mapPath"), "mapdata");
 		mapVisible = Util.stringToBoolean(config.getString("mapVisible"), true);
 		mapX = Util.stringToInt(config.getString("mapX"), 10);
 		mapY = Util.stringToInt(config.getString("mapY"), 10);
@@ -213,7 +218,7 @@ public class Config
 		mapLongitude = Util.stringToDouble(config.getString("mapLongitude"), 0);
 		mapLatitude = Util.stringToDouble(config.getString("mapLatitude"), 0);
 		
-		sources = new TreeMap<String, SeismicDataSource>();
+		sources = new HashMap<String, SeismicDataSource>();
 		List<String> servers = config.getList("server");
 		if (servers != null)
 		{
@@ -317,6 +322,7 @@ public class Config
 		config.put("clipboardSizeY", Integer.toString(clipboardHeight));
 		config.put("clipboardMaximized", Boolean.toString(clipboardMaximized));
 		
+		config.put("mapPath", mapPath);
 		config.put("mapVisible", Boolean.toString(mapVisible));
 		config.put("mapX", Integer.toString(mapX));
 		config.put("mapY", Integer.toString(mapY));
