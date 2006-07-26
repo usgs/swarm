@@ -30,6 +30,9 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/07/26 00:39:09  cervelli
+ * Changed refresh interval.
+ *
  * @author Dan Cervelli
  */
 public class MapFrame extends JInternalFrame implements Runnable
@@ -39,9 +42,13 @@ public class MapFrame extends JInternalFrame implements Runnable
 	private JPanel mainPanel;
 	private JButton optionsButton;
 	private JLabel statusLabel;
+	private JToggleButton linkButton;
 	private JButton compXButton;
 	private JButton expXButton;
-	private JToggleButton linkButton;
+	private JButton forwardTimeButton;
+	private JButton backTimeButton;
+	private JButton gotoButton;
+	private JButton timeHistoryButton;
 	
 	private Thread updateThread;
 	
@@ -50,8 +57,9 @@ public class MapFrame extends JInternalFrame implements Runnable
 	private Throbber throbber;
 	
 	private int spanIndex = 3;
-	private double endTime = Double.NaN;
-	private double startTime = Double.NaN;
+	private boolean realtime = true;
+//	private double endTime = Double.NaN;
+//	private double startTime = Double.NaN;
 	
 	private int refreshInterval = 1000;
 	
@@ -62,6 +70,7 @@ public class MapFrame extends JInternalFrame implements Runnable
 	public MapFrame()
 	{
 		super("Map", true, true, true, true);
+		this.setFocusable(true);
 		Swarm.getApplication().touchUITime();
 
 		createUI();
@@ -82,6 +91,50 @@ public class MapFrame extends JInternalFrame implements Runnable
 		}
 		mainPanel = new JPanel(new BorderLayout());
 
+		createToolbar();
+		
+		mainPanel.add(toolbar, BorderLayout.NORTH);
+		
+		mapPanel = new MapPanel(this);
+		Border border = BorderFactory.createCompoundBorder(
+				BorderFactory.createEmptyBorder(0, 2, 0, 3), 
+				LineBorder.createGrayLineBorder());
+		mapPanel.setBorder(border);
+		mainPanel.add(mapPanel, BorderLayout.CENTER);
+		statusLabel = new JLabel(" ");
+		statusLabel.setBorder(BorderFactory.createEmptyBorder(1, 5, 1, 1));
+		mainPanel.add(statusLabel, BorderLayout.SOUTH);
+		setContentPane(mainPanel);
+		
+		this.addInternalFrameListener(new InternalFrameAdapter()
+				{
+					public void internalFrameClosing(InternalFrameEvent e)
+					{
+						setVisible(false);
+					}
+				});
+		
+		linkListener = new HelicorderViewPanelListener() 
+		{
+			public void insetCreated(double st, double et)
+			{
+				if (heliLinked)
+				{
+					if (!realtime)
+						mapPanel.timePush();
+					
+					realtime = false;
+					mapPanel.setTimes(st, et);
+				}
+			}
+		};
+		
+//		mainPanel.addKeyListener(mapPanel.getKeyListener());		
+		setVisible(true);
+	}
+	
+	private void createToolbar()
+	{
 		toolbar = SwarmUtil.createToolBar();
 		optionsButton = SwarmUtil.createToolBarButton(
 				Images.getIcon("settings"),
@@ -100,14 +153,19 @@ public class MapFrame extends JInternalFrame implements Runnable
 		
 		linkButton = SwarmUtil.createToolBarToggleButton(
 				Images.getIcon("helilink"),
-				"Synchronize times with helicorder wave",
+				"Synchronize times with helicorder wave (H)",
 				new ActionListener()
 				{
 						public void actionPerformed(ActionEvent e)
 						{
 							heliLinked = linkButton.isSelected();
+							if (heliLinked == false)
+							{
+								realtime = true;
+							}
 						}
 				});
+		Util.mapKeyStrokeToButton(this, "H", "helilink", linkButton);
 		linkButton.setSelected(heliLinked);
 		toolbar.add(linkButton);
 		
@@ -137,8 +195,7 @@ public class MapFrame extends JInternalFrame implements Runnable
 						mapPanel.zoom(2);
 					}
 				});
-		Util.mapKeyStrokeToButton(this, "EQUALS", "zoomout1", zoomIn);
-		Util.mapKeyStrokeToButton(this, "shift EQUALS", "zoomout2", zoomIn);
+		Util.mapKeyStrokeToButton(this, "MINUS", "zoomout1", zoomOut);
 		toolbar.add(zoomOut);
 		
 		JButton backButton = SwarmUtil.createToolBarButton(
@@ -148,13 +205,60 @@ public class MapFrame extends JInternalFrame implements Runnable
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						mapPanel.back();
+						mapPanel.mapPop();
 					}
 				});
-		Util.mapKeyStrokeToButton(this, "BACK_SPACE", "back", backButton);
+		Util.mapKeyStrokeToButton(this, "ctrl BACK_SPACE", "mapback1", backButton);
 		toolbar.add(backButton);
 		
 		toolbar.addSeparator();
+		
+		backTimeButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("left"),
+				"Scroll back time 20% (Left arrow)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						realtime = false;
+						mapPanel.shiftTime(-0.20);
+//						if (selected != null)
+//							shiftTime(selected, -0.20);						
+					}
+				});
+		Util.mapKeyStrokeToButton(this, "LEFT", "backward1", backTimeButton);
+		toolbar.add(backTimeButton);
+		
+		forwardTimeButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("right"),
+				"Scroll forward time 20% (Right arrow)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						realtime = false;
+						mapPanel.shiftTime(0.20);
+//						if (selected != null)
+//							shiftTime(selected, 0.20);
+					}
+				});
+		toolbar.add(forwardTimeButton);
+		Util.mapKeyStrokeToButton(this, "RIGHT", "forward1", forwardTimeButton);
+		
+		gotoButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("gototime"),
+				"Go to time (Ctrl-G)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+//						String t = JOptionPane.showInputDialog(Swarm.getApplication(), "Input time in 'YYYYMMDDhhmm[ss]' format:", "Go to Time", JOptionPane.PLAIN_MESSAGE);
+//						if (selected != null && t != null)
+//							gotoTime(selected, t);
+					}
+				});
+		toolbar.add(gotoButton);
+		Util.mapKeyStrokeToButton(this, "ctrl G", "goto", gotoButton);
 		
 		compXButton = SwarmUtil.createToolBarButton(
 				Images.getIcon("xminus"),
@@ -163,11 +267,19 @@ public class MapFrame extends JInternalFrame implements Runnable
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						if (spanIndex != 0)
-							spanIndex--;
+						if (realtime)
+						{
+							if (spanIndex != 0)
+								spanIndex--;
+						}
+						else
+						{
+							mapPanel.scaleTime(0.20);
+						}
 					}
 				});
 		toolbar.add(compXButton);
+		Util.mapKeyStrokeToButton(this, "alt LEFT", "compx", compXButton);
 		
 		expXButton = SwarmUtil.createToolBarButton(
 				Images.getIcon("xplus"),
@@ -176,51 +288,38 @@ public class MapFrame extends JInternalFrame implements Runnable
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						if (spanIndex < MultiMonitor.SPANS.length - 1)
-							spanIndex++;
+						if (realtime)
+						{
+							if (spanIndex < MultiMonitor.SPANS.length - 1)
+								spanIndex++;
+						}
+						else
+						{
+							mapPanel.scaleTime(-0.20);
+						}
 					}
 				});
 		toolbar.add(expXButton);
+		Util.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expXButton);
+		
+		timeHistoryButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("back"),
+				"Last time settings",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						realtime = false;
+						mapPanel.timePop();
+					}
+				});		
+		Util.mapKeyStrokeToButton(this, "BACK_SPACE", "back", timeHistoryButton);
+		toolbar.add(timeHistoryButton);
+		toolbar.addSeparator();
 		
 		toolbar.add(Box.createHorizontalGlue());
 		throbber = new Throbber();
 		toolbar.add(throbber);
-		
-		mainPanel.add(toolbar, BorderLayout.NORTH);
-		
-		mapPanel = new MapPanel(this);
-		Border border = BorderFactory.createCompoundBorder(
-				BorderFactory.createEmptyBorder(0, 2, 0, 3), 
-				LineBorder.createGrayLineBorder());
-		mapPanel.setBorder(border);
-		mainPanel.add(mapPanel, BorderLayout.CENTER);
-		statusLabel = new JLabel(" ");
-		statusLabel.setBorder(BorderFactory.createEmptyBorder(1, 5, 1, 1));
-		mainPanel.add(statusLabel, BorderLayout.SOUTH);
-		setContentPane(mainPanel);
-		
-		this.addInternalFrameListener(new InternalFrameAdapter()
-				{
-					public void internalFrameClosing(InternalFrameEvent e)
-					{
-						setVisible(false);
-					}
-				});
-		
-		linkListener = new HelicorderViewPanelListener() 
-		{
-			public void insetCreated(double st, double et)
-			{
-				if (heliLinked)
-				{
-					endTime = et;
-					startTime = st;
-//					repositionWaves(st, et);
-				}
-			}
-		};
-		
-		setVisible(true);
 	}
 	
 	public Throbber getThrobber()
@@ -268,15 +367,11 @@ public class MapFrame extends JInternalFrame implements Runnable
 		{
 			try
 			{
-				if (this.isVisible())
+				if (this.isVisible() && realtime)
 				{
-					double end = endTime;
-					double start = startTime;
-					if (Double.isNaN(end))
-						end = CurrentTime.getInstance().nowJ2K();
-					if (Double.isNaN(start))
-						start = end - MultiMonitor.SPANS[spanIndex];
-					mapPanel.refresh(start, end);
+					double end = CurrentTime.getInstance().nowJ2K();
+					double start = end - MultiMonitor.SPANS[spanIndex];
+					mapPanel.setTimes(start, end);
 				}
 				
 				Thread.sleep(refreshInterval);

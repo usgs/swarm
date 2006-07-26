@@ -11,6 +11,7 @@ import gov.usgs.swarm.Images;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwingWorker;
+import gov.usgs.swarm.Throbber;
 import gov.usgs.swarm.TimeListener;
 import gov.usgs.swarm.map.MapMiniPanel.Position;
 import gov.usgs.util.Util;
@@ -24,6 +25,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -39,8 +42,10 @@ import java.awt.image.RenderedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 import javax.swing.JComponent;
@@ -51,6 +56,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/07/26 00:39:36  cervelli
+ * New resetImage() behavior.
+ *
  * @author Dan Cervelli
  */
 public class MapPanel extends JPanel
@@ -76,30 +84,43 @@ public class MapPanel extends JPanel
 	private MapRenderer renderer;
 
 	private Map<Double, MapMiniPanel> miniPanels;
+	private List<MapMiniPanel> visiblePanels;
 	
 	private Point mouseDown;
 	private Rectangle dragRectangle;
 	
 	private MapFrame parent;
 	
-	private Stack<double[]> history;
+	private Stack<double[]> mapHistory;
+	private Stack<double[]> timeHistory;
 	
 	private int missing;
+	
+	private Set<MapMiniPanel> selectedPanels;
+	
+	private double startTime;
+	private double endTime;
 	
 	public MapPanel(MapFrame f)
 	{
 		parent = f;
-		history = new Stack<double[]>();
+		mapHistory = new Stack<double[]>();
+		timeHistory = new Stack<double[]>();
 		lines = new ArrayList<Line2D.Double>();
 		miniPanels = Collections.synchronizedMap(new HashMap<Double, MapMiniPanel>());
+		visiblePanels = Collections.synchronizedList(new ArrayList<MapMiniPanel>());
+		selectedPanels = new HashSet<MapMiniPanel>();
 		createUI();
 	}
 	
 	private void createUI()
 	{
-		images = GeoImageSet.loadMapPacks("c:\\mapdata");
-		
-//		images = new GeoImageSet("c:\\mapdata\\index.txt");
+		images = GeoImageSet.loadMapPacks(Swarm.config.mapPath);
+		if (images == null)
+		{
+			System.out.println("No map images found.");
+			images = new GeoImageSet();
+		}
 
 		center = new Point2D.Double(Swarm.config.mapLongitude, Swarm.config.mapLatitude);
 		scale = Swarm.config.mapScale;
@@ -124,9 +145,10 @@ public class MapPanel extends JPanel
 				{
 					public void mousePressed(MouseEvent e)
 					{
+						requestFocusInWindow();
 						if (SwingUtilities.isRightMouseButton(e))
 						{
-							push();
+							mapPush();
 							center = getLonLat(e.getX(), e.getY());
 							resetImage();
 						}
@@ -151,7 +173,7 @@ public class MapPanel extends JPanel
 							int dy = y2 - y1;
 							if (dx > 3 && dy > 3)
 							{
-								push();
+								mapPush();
 								double xs = (double)dx / (double)(getWidth() - INSET * 2);
 								double ys = (double)dy / (double)(getHeight() - INSET * 2);
 								scale = scale * Math.max(xs, ys);
@@ -209,32 +231,138 @@ public class MapPanel extends JPanel
 					}
 				});
 		
+		addKeyListener(new KeyListener()
+				{
+					public void keyPressed(KeyEvent e)
+					{
+						if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_A)
+						{
+							System.out.println("select all");
+							deselectAllPanels();
+							synchronized (visiblePanels)
+							{
+								for (MapMiniPanel panel : visiblePanels)
+								{
+									if (panel.isWaveVisible())
+										addSelectedPanel(panel);
+								}
+							}
+						}
+					}
+		
+					public void keyReleased(KeyEvent e)
+					{
+					}
+		
+					public void keyTyped(KeyEvent e)
+					{
+					}
+				});
+
+		
 		pane.add(mapImagePanel, new Integer(10));
 		add(pane, BorderLayout.CENTER);
 		resetImage();
 	}
-	
-	public void push()
+
+	public Throbber getThrobber()
 	{
-		history.push(new double[] { center.x, center.y, scale });
+		return parent.getThrobber();
 	}
 	
-	public void back()
+	public synchronized void deselectAllPanels()
 	{
-		if (!history.isEmpty())
+		for (MapMiniPanel panel : selectedPanels)
+			panel.setSelected(false);
+		selectedPanels.clear();
+	}
+	
+	public synchronized void deselectPanel(MapMiniPanel p)
+	{
+		if (selectedPanels.contains(p))
 		{
-			double[] last = history.pop();
+			p.setSelected(false);
+			selectedPanels.remove(p);
+		}
+	}
+	
+	public synchronized void addSelectedPanel(MapMiniPanel p)
+	{
+		p.setSelected(true);
+		selectedPanels.add(p);
+	}
+	
+	public synchronized void setSelectedPanel(MapMiniPanel p)
+	{
+		deselectAllPanels();
+		p.setSelected(true);
+		selectedPanels.add(p);
+	}
+	
+	public void mapPush()
+	{
+		mapHistory.push(new double[] { center.x, center.y, scale });
+	}
+	
+	public void mapPop()
+	{
+		if (!mapHistory.isEmpty())
+		{
+			double[] last = mapHistory.pop();
 			center = new Point2D.Double(last[0], last[1]);
 			scale = last[2];
 			resetImage();
 		}
 	}
 	
+	public void timePush()
+	{
+		timeHistory.push(new double[] { startTime, endTime });
+	}
+	
+	public void timePop()
+	{
+		if (!timeHistory.isEmpty())
+		{
+			double[] t = timeHistory.pop();
+			setTimes(t[0], t[1]);
+		}
+	}
+	
 	public void zoom(double f)
 	{
-		push();
+		mapPush();
 		scale *= f;
 		resetImage();
+	}
+	
+	public double getStartTime()
+	{
+		return startTime;
+	}
+	
+	public double getEndTime()
+	{
+		return endTime;
+	}
+	
+	public void scaleTime(double pct)
+	{
+		timePush();
+		double dt = (endTime - startTime) * (1 - pct);
+		double mt = (endTime - startTime) / 2 + startTime;
+		startTime = mt - dt / 2;
+		endTime = mt + dt / 2;
+		setTimes(startTime, endTime);
+	}
+	
+	public void shiftTime(double pct)
+	{
+		timePush();
+		double dt = (endTime - startTime) * pct;
+		startTime += dt;
+		endTime += dt;
+		setTimes(startTime, endTime);
 	}
 	
 //	public void clear()
@@ -261,7 +389,7 @@ public class MapPanel extends JPanel
 	
 	public Point2D.Double getLonLat(int x, int y)
 	{
-		if (range == null || projection == null || image == null)
+		if (range == null || projection == null || image == null || renderer == null)
 			return null;
 		int tx = x - INSET - getInsets().left;
 		int ty = y - INSET - getInsets().top;
@@ -279,24 +407,20 @@ public class MapPanel extends JPanel
 		return pt;
 	}
 	
-	public void refresh(double st, double et)
+	public void setTimes(double st, double et)
 	{
-//		throbber.increment();
-//		double now = CurrentTime.getInstance().nowJ2K();
-//		double start = now - 1 * 60;
-		
-		// TODO: synch
-//		synchronized (miniPanels)
-//		{
-			for (MapMiniPanel panel : miniPanels.values())
-				panel.updateWave(st, et);
-//		}
-//		throbber.decrement();
+		startTime = st;
+		endTime = et;
+		synchronized (visiblePanels)
+		{
+			for (MapMiniPanel panel : visiblePanels)
+				panel.updateWave(startTime, endTime);
+		}
 	}
 	
 	public void setCenterAndScale(GeoRange gr)
 	{
-		push();
+		mapPush();
 		int width = mapImagePanel.getWidth() - (INSET * 2);
 		int height = mapImagePanel.getHeight() - (INSET * 2);
 		center = gr.getCenter();
@@ -329,6 +453,7 @@ public class MapPanel extends JPanel
 				ym = scale * (double)height;
 			}
 			range = new GeoRange(projection, center, xm, ym);
+//			range = projection.getGeoRange(center, xm, ym);
 		}
 		else
 		{
@@ -337,6 +462,7 @@ public class MapPanel extends JPanel
 			tm.setOrigin(center);
 			projection = tm;
 			range = new GeoRange(projection, center, xm, ym);
+//			range = projection.getGeoRange(center, xm, ym);
 		}
     }
 	
@@ -450,88 +576,94 @@ public class MapPanel extends JPanel
 		{
 			public Object construct()
 			{
-//				clear();
-//				synchronized (miniPanels)
-//				{
-					// TODO: don't recreate every time
-					FontRenderContext frc = new FontRenderContext(new AffineTransform(), false, false);
-					
-					GeneralPath boxes = new GeneralPath();
-					missing = 0;
-					for (MapMiniPanel panel : miniPanels.values())
+				lines.clear();
+				// TODO: don't recreate every time
+				FontRenderContext frc = new FontRenderContext(new AffineTransform(), false, false);
+				
+				GeneralPath boxes = new GeneralPath();
+				missing = 0;
+				for (MapMiniPanel panel : miniPanels.values())
+				{
+					if (panel.getPosition() == MapMiniPanel.Position.MANUAL_SET)
+						panel.setPosition(Position.MANUAL_UNSET);
+					else
+						panel.setPosition(Position.UNSET);
+				}
+				for (Metadata md : Swarm.config.metadata.values())
+				{
+					if (!range.contains(new Point2D.Double(md.longitude, md.latitude)))
 					{
-						if (panel.getPosition() == MapMiniPanel.Position.MANUAL_SET)
-							panel.setPosition(Position.MANUAL_UNSET);
-						else
-							panel.setPosition(Position.UNSET);
-					}
-					for (Metadata md : Swarm.config.metadata.values())
-					{
-						if (!range.contains(new Point2D.Double(md.longitude, md.latitude)))
+						MapMiniPanel mmp = miniPanels.get(md.getLocationHashCode());
+						if (mmp != null)
 						{
 							miniPanels.remove(md.getLocationHashCode());
-						}
-						else
-						{
-							MapMiniPanel cmp = miniPanels.get(md.getLocationHashCode());
-							Point2D.Double xy = getXY(md.longitude, md.latitude);
-							int iconX = (int)xy.x - 8;
-							int iconY = (int)xy.y - 8;
-							if (cmp == null || cmp.getPosition() == Position.UNSET || cmp.getPosition() == Position.MANUAL_UNSET)
-							{
-								final JLabel icon = new JLabel(Images.getIcon("bullet"));
-								icon.setBounds(iconX, iconY, 16, 16);
-								compsToAdd.add(icon);
-								if (cmp == null)
-									cmp = new MapMiniPanel(MapPanel.this);
-							}
-							
-							if (cmp.getPosition() == Position.UNSET || cmp.getPosition() == Position.MANUAL_UNSET)
-							{
-								int w = (int)Math.round(MapMiniPanel.FONT.getStringBounds(md.scnl.station + 6, frc).getWidth());
-								int locX = (int)xy.x;
-								int locY = (int)xy.y;
-								Point pt = null;
-								if (cmp.getPosition() == Position.MANUAL_UNSET)
-								{
-									Point2D.Double mp = cmp.getManualPosition();
-									Point2D.Double xy2 = getXY(mp.x, mp.y);
-									locX = (int)xy2.x;
-									locY = (int)xy2.y;
-									cmp.setPosition(Position.MANUAL_SET);
-									pt = new Point(locX, locY);
-								}
-								else
-									pt = getLabelPosition(boxes, locX, locY, w, MapMiniPanel.LABEL_HEIGHT);
-								
-								if (pt != null)
-								{
-									locX = pt.x;
-									locY = pt.y;
-									boxes.append(new Rectangle(locX, locY, w, MapMiniPanel.LABEL_HEIGHT), false);
-									cmp.setLocation(locX, locY);
-									if (cmp.getPosition() == Position.UNSET)
-										cmp.setPosition(Position.AUTOMATIC);
-				
-									Line2D.Double line = new Line2D.Double(locX, locY, iconX + 8, iconY + 8);
-									cmp.setLine(line);
-									cmp.adjustLine();
-									linesToAdd.add(line);
-									
-									compsToAdd.add(cmp);
-									miniPanels.put(md.getLocationHashCode(), cmp);
-								}
-								else
-								{
-									missing++;
-									cmp.setPosition(Position.HIDDEN);
-								}
-							}
-							cmp.addMetadata(md);
+							deselectPanel(mmp);
 						}
 					}
-//				}
+					else
+					{
+						MapMiniPanel cmp = miniPanels.get(md.getLocationHashCode());
+						Point2D.Double xy = getXY(md.longitude, md.latitude);
+						int iconX = (int)xy.x - 8;
+						int iconY = (int)xy.y - 8;
+						if (cmp == null || cmp.getPosition() == Position.UNSET || cmp.getPosition() == Position.MANUAL_UNSET)
+						{
+							final JLabel icon = new JLabel(Images.getIcon("bullet"));
+							icon.setBounds(iconX, iconY, 16, 16);
+							compsToAdd.add(icon);
+							if (cmp == null)
+								cmp = new MapMiniPanel(MapPanel.this);
+						}
+						
+						if (cmp.getPosition() == Position.UNSET || cmp.getPosition() == Position.MANUAL_UNSET)
+						{
+							int w = (int)Math.round(MapMiniPanel.FONT.getStringBounds(md.scnl.station + 6, frc).getWidth());
+							int locX = (int)xy.x;
+							int locY = (int)xy.y;
+							Point pt = null;
+							if (cmp.getPosition() == Position.MANUAL_UNSET)
+							{
+								Point2D.Double mp = cmp.getManualPosition();
+								Point2D.Double xy2 = mp;//getXY(mp.x, mp.y);
+								locX = (int)xy2.x;
+								locY = (int)xy2.y;
+								cmp.setPosition(Position.MANUAL_SET);
+								pt = new Point(locX, locY);
+							}
+							else
+								pt = getLabelPosition(boxes, locX, locY, w, MapMiniPanel.LABEL_HEIGHT);
+							
+							if (pt != null)
+							{
+								locX = pt.x;
+								locY = pt.y;
+								boxes.append(new Rectangle(locX, locY, w, MapMiniPanel.LABEL_HEIGHT), false);
+								cmp.setLocation(locX, locY);
+								if (cmp.getPosition() == Position.UNSET)
+									cmp.setPosition(Position.AUTOMATIC);
+			
+								Line2D.Double line = new Line2D.Double(locX, locY, iconX + 8, iconY + 8);
+								cmp.setLine(line);
+								cmp.adjustLine();
+								linesToAdd.add(line);
+								
+								compsToAdd.add(cmp);
+								miniPanels.put(md.getLocationHashCode(), cmp);
+							}
+							else
+							{
+								missing++;
+								cmp.setPosition(Position.HIDDEN);
+							}
+						}
+						cmp.addMetadata(md);
+					}
+				}
 				
+				visiblePanels.clear();
+				for (MapMiniPanel mp : miniPanels.values())
+					visiblePanels.add(mp);
+					
 				return null;
 			}
 			
@@ -572,6 +704,7 @@ public class MapPanel extends JPanel
 				g2.drawImage(mapImage, 0, 0, null);
 				
 				g.setColor(Color.BLACK);
+				// TODO: synch
 				for (Line2D.Double line : lines)
 					g2.draw(line);
 				
