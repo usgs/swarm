@@ -3,6 +3,7 @@ package gov.usgs.swarm;
 import gov.usgs.plot.map.GeoRange;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.Pair;
+import gov.usgs.util.Util;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -15,6 +16,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -58,6 +60,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/07/23 04:33:31  cervelli
+ * Changed map icon, fixed bug on new data source.
+ *
  * Revision 1.5  2006/07/22 20:22:30  cervelli
  * Many changes for map integration.
  *
@@ -575,7 +580,9 @@ public class DataChooser extends JPanel
 				{
 					public void run()
 					{
-						for (String key : servers.keySet())
+						List<String> list = Collections.list(Collections.enumeration(servers.keySet()));
+						Collections.sort(list, Util.getIgnoreCaseStringComparator());
+						for (String key : list)
 						{
 							SeismicDataSource sds = servers.get(key);
 							ServerNode node = new ServerNode(sds);
