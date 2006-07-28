@@ -15,6 +15,9 @@ import java.util.TimeZone;
  * Swarm configuration class. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/07/26 22:39:10  cervelli
+ * Added mapPath.
+ *
  * Revision 1.5  2006/07/22 20:21:59  cervelli
  * Many Swarm 2.0 changes: time zones, map parameters, data sources, etc.
  *
@@ -97,6 +100,7 @@ public class Config
 	public static Config createConfig(String[] args)
 	{
 		String configFile = System.getProperty("user.home") + File.separatorChar + DEFAULT_CONFIG_FILE;
+		System.out.println("config: " + configFile);
 		  
 		int n = args.length - 1;
 		if (n >= 0 && !args[n].startsWith("-"))
