@@ -1,6 +1,6 @@
 package gov.usgs.swarm.map;
 
-import gov.usgs.plot.map.GeoRange;
+import gov.usgs.proj.GeoRange;
 import gov.usgs.swarm.HelicorderViewPanelListener;
 import gov.usgs.swarm.Images;
 import gov.usgs.swarm.MultiMonitor;
@@ -30,6 +30,9 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/07/26 22:41:00  cervelli
+ * Bunch more development for 2.0.
+ *
  * Revision 1.3  2006/07/26 00:39:09  cervelli
  * Changed refresh interval.
  *

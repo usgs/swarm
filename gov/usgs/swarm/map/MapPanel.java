@@ -1,9 +1,10 @@
 package gov.usgs.swarm.map;
 
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.TextRenderer;
 import gov.usgs.plot.map.GeoImageSet;
-import gov.usgs.plot.map.GeoRange;
 import gov.usgs.plot.map.MapRenderer;
+import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.Mercator;
 import gov.usgs.proj.Projection;
 import gov.usgs.proj.TransverseMercator;
@@ -19,6 +20,7 @@ import gov.usgs.util.Util;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -56,6 +58,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/07/26 22:41:00  cervelli
+ * Bunch more development for 2.0.
+ *
  * Revision 1.2  2006/07/26 00:39:36  cervelli
  * New resetImage() behavior.
  *
@@ -100,6 +105,8 @@ public class MapPanel extends JPanel
 	
 	private double startTime;
 	private double endTime;
+	
+	private double[] extents;
 	
 	public MapPanel(MapFrame f)
 	{
@@ -438,6 +445,7 @@ public class MapPanel extends JPanel
 	
 	public void pickMapParameters(int width, int height)
     {
+		extents = null;
 		double xm = scale * (double)width;
 		double ym = scale * (double)height;
 		
@@ -452,8 +460,8 @@ public class MapPanel extends JPanel
 				scale = xm / width;
 				ym = scale * (double)height;
 			}
-			range = new GeoRange(projection, center, xm, ym);
-//			range = projection.getGeoRange(center, xm, ym);
+//			range = new GeoRange(projection, center, xm, ym);
+			range = projection.getGeoRange(center, xm, ym);
 		}
 		else
 		{
@@ -461,8 +469,10 @@ public class MapPanel extends JPanel
 			TransverseMercator tm = new TransverseMercator();
 			tm.setOrigin(center);
 			projection = tm;
-			range = new GeoRange(projection, center, xm, ym);
-//			range = projection.getGeoRange(center, xm, ym);
+//			range = new GeoRange(projection, center, xm, ym);
+			System.out.println("xm: " + xm + " ym: " + ym);
+			range = projection.getGeoRange(center, xm, ym);
+			extents = new double[] {-xm / 2, xm / 2, -ym / 2, ym / 2};
 		}
     }
 	
@@ -534,15 +544,23 @@ public class MapPanel extends JPanel
 				
 				MapRenderer mr = new MapRenderer(range, projection);
 				image = images.getMapBackground(projection, range, width, scale);
+				System.out.println("WH: " + image.getWidth() + " " + image.getHeight() + " " + width + " " + height);
 				mr.setLocation(INSET, INSET, width);
 				mr.setMapImage(image);
 				mr.createGraticule(6, true);
 				mr.createBox(6);
+				mr.createScaleRenderer(1 / projection.getScale(center), INSET, 14);
+				TextRenderer tr = new TextRenderer(mapImagePanel.getWidth() - INSET, 14, projection.getName() + " Projection");
+				tr.antiAlias = false;
+				tr.font = new Font("Arial", Font.PLAIN, 10);
+				tr.horizJustification = TextRenderer.RIGHT;
+				mr.addRenderer(tr);
 				renderer = mr;
 				
 				Plot plot = new Plot();
 				plot.setSize(mapImagePanel.getWidth(), mapImagePanel.getHeight());
 				plot.addRenderer(renderer);
+				
 				mapImage = plot.getAsBufferedImage(false);
 				
 				return null;
