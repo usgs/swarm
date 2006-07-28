@@ -1,6 +1,6 @@
 package gov.usgs.swarm;
 
-import gov.usgs.plot.map.GeoRange;
+import gov.usgs.proj.GeoRange;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.Pair;
 import gov.usgs.util.Util;
@@ -60,6 +60,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/07/26 22:39:31  cervelli
+ * Now sorts case insensitive.
+ *
  * Revision 1.6  2006/07/23 04:33:31  cervelli
  * Changed map icon, fixed bug on new data source.
  *
@@ -398,6 +401,7 @@ public class DataChooser extends JPanel
 										maxLat += 0.1;
 									}
 									GeoRange gr = new GeoRange(minLon, maxLon, minLat, maxLat);
+									Swarm.getApplication().setMapVisible(true);
 									Swarm.getApplication().getMapFrame().setView(gr);
 								}
 								return null;
