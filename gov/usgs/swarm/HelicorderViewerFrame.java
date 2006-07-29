@@ -14,13 +14,10 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 
 import javax.swing.BorderFactory;
@@ -56,6 +53,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * TODO: change slider checkbox
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2006/07/26 00:37:36  cervelli
+ * Changes for new gulper system.
+ *
  * Revision 1.18  2006/07/22 20:25:04  cervelli
  * TimeListener changes, potential fix for stalled helicorder in kiosk mode bug.
  *
@@ -138,10 +138,6 @@ public class HelicorderViewerFrame extends JInternalFrame
 	// seconds
 	public static final int[] zoomValues = new int[] {1, 2, 5, 10, 20, 30, 60, 120, 300};
 	
-	//autoScaleSliderButton state
-	protected static final int zoomSelected = ItemEvent.DESELECTED;
-	protected static final int clippingSelected = ItemEvent.SELECTED;
-	
 	private RefreshThread refreshThread;
 	private SeismicDataSource dataSource;
 	private String channel;
@@ -158,6 +154,8 @@ public class HelicorderViewerFrame extends JInternalFrame
 	private JButton removeWave; 
 	private JButton saveWave;
 	private JFileChooser chooser;
+	private JButton scaleButton;
+	private boolean scaleClipState;
 	protected JToggleButton autoScaleSliderButton;
 	protected int autoScaleSliderButtonState;
 	protected JSlider autoScaleSlider;
@@ -426,32 +424,35 @@ public class HelicorderViewerFrame extends JInternalFrame
 
 		toolBar.addSeparator();
 		
-		autoScaleSliderButton = new JCheckBox(Images.getIcon("wavezoom"));
-		autoScaleSliderButton.setFocusable(false);
-		autoScaleSliderButton.setSelectedIcon(Images.getIcon("waveclip"));
-		autoScaleSliderButton.setMargin(new Insets(0,0,0,0));
-		autoScaleSliderButton.addItemListener(new ItemListener()
+		scaleButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("wavezoom"),
+				"Toggle between adjusting helicoder scale and clip",
+				new ActionListener()
 				{
-					public void itemStateChanged(ItemEvent e)
+					public void actionPerformed(ActionEvent e)
 					{
-
-						autoScaleSliderButtonState = e.getStateChange();
-						if (autoScaleSliderButtonState == zoomSelected) 
+						scaleClipState = !scaleClipState;
+						if (scaleClipState) 
 						{
 							autoScaleSlider.setValue(40 - (new Double(settings.barMult * 4).intValue()));
+							scaleButton.setIcon(Images.getIcon("waveclip"));
+							autoScaleSlider.setToolTipText("Adjust helicorder clip");
 						} 
-						else if (autoScaleSliderButtonState == clippingSelected)
+						else 
 						{
 							autoScaleSlider.setValue(settings.clipBars / 3);
+							scaleButton.setIcon(Images.getIcon("wavezoom"));
+							autoScaleSlider.setToolTipText("Adjust helicorder scale");
 						}
 						
 						settings.notifyView();
 					}
 				});
-		autoScaleSliderButtonState = zoomSelected;
-		toolBar.add(autoScaleSliderButton);
+		scaleButton.setSelected(true);
+		toolBar.add(scaleButton);
 
 		autoScaleSlider = new JSlider(1, 39, (int) (10 - settings.barMult) * 4);
+		autoScaleSlider.setToolTipText("Adjust helicorder scale");
 		autoScaleSlider.setFocusable(false);
 		autoScaleSlider.setPreferredSize(new Dimension(100, 20));
 		autoScaleSlider.setMaximumSize(new Dimension(100, 20));
@@ -463,10 +464,10 @@ public class HelicorderViewerFrame extends JInternalFrame
 						settings.autoScale = true;
 						if (!autoScaleSlider.getValueIsAdjusting()) 
 						{
-							if (autoScaleSliderButtonState == zoomSelected)
-								settings.barMult = 10 - ( new Integer(autoScaleSlider.getValue()).doubleValue() / 4);
-							else if (autoScaleSliderButtonState == clippingSelected)
+							if (scaleClipState)
 								settings.clipBars = autoScaleSlider.getValue() * 3;
+							else
+								settings.barMult = 10 - ( new Integer(autoScaleSlider.getValue()).doubleValue() / 4);
 							repaintHelicorder();
 						}
 					}
@@ -662,8 +663,8 @@ public class HelicorderViewerFrame extends JInternalFrame
 						backButton.setEnabled(b);
 						compY.setEnabled(b);
 						expY.setEnabled(b);
-						autoScaleSliderButton.setEnabled(b);
-						autoScaleSlider.setEnabled(b);
+//						autoScaleSliderButton.setEnabled(b);
+//						autoScaleSlider.setEnabled(b);
 						saveWave.setEnabled(b);
 					}
 				});
