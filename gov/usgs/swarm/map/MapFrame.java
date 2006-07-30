@@ -7,18 +7,29 @@ import gov.usgs.swarm.MultiMonitor;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.Throbber;
+import gov.usgs.swarm.map.MapPanel.DragMode;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;
+import gov.usgs.util.png.PngEncoder;
+import gov.usgs.util.png.PngEncoderB;
 
 import java.awt.BorderLayout;
+import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
@@ -30,6 +41,9 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/07/28 14:51:55  cervelli
+ * Changes for moved GeoRange.
+ *
  * Revision 1.4  2006/07/26 22:41:00  cervelli
  * Bunch more development for 2.0.
  *
@@ -52,6 +66,10 @@ public class MapFrame extends JInternalFrame implements Runnable
 	private JButton backTimeButton;
 	private JButton gotoButton;
 	private JButton timeHistoryButton;
+	private JButton captureButton;
+	
+	private JToggleButton dragButton;
+	private JToggleButton rulerButton;
 	
 	private Thread updateThread;
 	
@@ -174,6 +192,38 @@ public class MapFrame extends JInternalFrame implements Runnable
 		
 		toolbar.addSeparator();
 		
+		dragButton = SwarmUtil.createToolBarToggleButton(
+				Images.getIcon("dragbox"),
+				"Zoom into box (B)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						mapPanel.setDragMode(DragMode.BOX);
+					}
+				});		
+		Util.mapKeyStrokeToButton(this, "B", "box", dragButton);
+		dragButton.setSelected(true);
+		toolbar.add(dragButton);
+		
+		rulerButton = SwarmUtil.createToolBarToggleButton(
+				Images.getIcon("ruler"),
+				"Measure distances (R)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						mapPanel.setDragMode(DragMode.RULER);
+					}
+				});		
+		Util.mapKeyStrokeToButton(this, "M", "measure", rulerButton);
+		toolbar.add(rulerButton);
+		toolbar.addSeparator();
+		
+		ButtonGroup group = new ButtonGroup();
+		group.add(dragButton);
+		group.add(rulerButton);
+		
 		JButton zoomIn = SwarmUtil.createToolBarButton(
 				Images.getIcon("zoomplus"),
 				"Zoom in (+)",
@@ -202,8 +252,8 @@ public class MapFrame extends JInternalFrame implements Runnable
 		toolbar.add(zoomOut);
 		
 		JButton backButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("back"), 
-				"Last map view (Backspace)", 
+				Images.getIcon("geoback"), 
+				"Last map view (Ctrl-backspace)", 
 				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
@@ -265,7 +315,7 @@ public class MapFrame extends JInternalFrame implements Runnable
 		
 		compXButton = SwarmUtil.createToolBarButton(
 				Images.getIcon("xminus"),
-				"Shrink time axis",
+				"Shrink time axis (Alt-left arrow",
 				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
@@ -286,7 +336,7 @@ public class MapFrame extends JInternalFrame implements Runnable
 		
 		expXButton = SwarmUtil.createToolBarButton(
 				Images.getIcon("xplus"),
-				"Expand time axis",
+				"Expand time axis (Alt-right arrow)",
 				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
@@ -306,8 +356,8 @@ public class MapFrame extends JInternalFrame implements Runnable
 		Util.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expXButton);
 		
 		timeHistoryButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("back"),
-				"Last time settings",
+				Images.getIcon("timeback"),
+				"Last time settings (Backspace)",
 				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
@@ -320,9 +370,63 @@ public class MapFrame extends JInternalFrame implements Runnable
 		toolbar.add(timeHistoryButton);
 		toolbar.addSeparator();
 		
+		captureButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("camera"),
+				"Save map image (P)",
+				new CaptureActionListener());
+		Util.mapKeyStrokeToButton(this, "P", "capture", captureButton);
+		toolbar.add(captureButton);
+		
+		toolbar.addSeparator();
+		
 		toolbar.add(Box.createHorizontalGlue());
 		throbber = new Throbber();
 		toolbar.add(throbber);
+	}
+	
+	class CaptureActionListener implements ActionListener
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			JFileChooser chooser = Swarm.getApplication().getFileChooser();
+			File lastPath = new File(Swarm.config.lastPath);
+			chooser.setCurrentDirectory(lastPath);
+			chooser.setSelectedFile(new File("map.png"));
+			int result = chooser.showSaveDialog(Swarm.getApplication());
+			File f = null;
+			if (result == JFileChooser.APPROVE_OPTION) 
+			{						 
+				f = chooser.getSelectedFile();
+
+				if (f.exists()) 
+				{
+					int choice = JOptionPane.showConfirmDialog(Swarm.getApplication(), "File exists, overwrite?", "Confirm", JOptionPane.YES_NO_OPTION);
+					if (choice != JOptionPane.YES_OPTION) 
+						return;
+			    }
+				Swarm.config.lastPath = f.getParent();
+			}
+			if (f == null)
+				return;
+			
+			Insets i = mapPanel.getInsets();
+			BufferedImage image = new BufferedImage(mapPanel.getWidth() - i.left - i.right, mapPanel.getHeight() - i.top - i.bottom, BufferedImage.TYPE_4BYTE_ABGR);
+			Graphics g = image.getGraphics();
+			g.translate(-i.left, -i.top);
+			mapPanel.paint(g);
+			try
+	        {
+	            PngEncoderB png = new PngEncoderB(image, false, PngEncoder.FILTER_NONE, 7);
+	            FileOutputStream out = new FileOutputStream(f);
+	            byte[] bytes = png.pngEncode();
+	            out.write(bytes);
+	            out.close();
+	        }
+	        catch (Exception ex)
+	        {
+	            ex.printStackTrace();
+	        }
+		}
 	}
 	
 	public Throbber getThrobber()

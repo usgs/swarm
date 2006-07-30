@@ -19,6 +19,7 @@ import gov.usgs.util.Util;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -58,6 +59,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/07/28 14:52:12  cervelli
+ * Changes for moved GeoRange.
+ *
  * Revision 1.3  2006/07/26 22:41:00  cervelli
  * Bunch more development for 2.0.
  *
@@ -68,6 +72,11 @@ import javax.swing.SwingUtilities;
  */
 public class MapPanel extends JPanel
 {
+	public enum DragMode
+	{
+		BOX, RULER;
+	}
+	
 	private static final long serialVersionUID = 1L;
 
 	private static final int INSET = 30;
@@ -90,8 +99,10 @@ public class MapPanel extends JPanel
 
 	private Map<Double, MapMiniPanel> miniPanels;
 	private List<MapMiniPanel> visiblePanels;
-	
+
+	private DragMode dragMode = DragMode.BOX;
 	private Point mouseDown;
+	private Point mouseNow;
 	private Rectangle dragRectangle;
 	
 	private MapFrame parent;
@@ -106,8 +117,6 @@ public class MapPanel extends JPanel
 	private double startTime;
 	private double endTime;
 	
-	private double[] extents;
-	
 	public MapPanel(MapFrame f)
 	{
 		parent = f;
@@ -117,6 +126,10 @@ public class MapPanel extends JPanel
 		miniPanels = Collections.synchronizedMap(new HashMap<Double, MapMiniPanel>());
 		visiblePanels = Collections.synchronizedList(new ArrayList<MapMiniPanel>());
 		selectedPanels = new HashSet<MapMiniPanel>();
+		
+		Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
+		this.setCursor(crosshair);
+		
 		createUI();
 	}
 	
@@ -169,7 +182,7 @@ public class MapPanel extends JPanel
 					
 					public void mouseReleased(MouseEvent e)
 					{
-						if (dragRectangle != null)
+						if (dragMode == DragMode.BOX && dragRectangle != null)
 						{
 							Point mouseUp = e.getPoint();
 							int x1 = Math.min(mouseUp.x, mouseDown.x);
@@ -188,9 +201,11 @@ public class MapPanel extends JPanel
 								resetImage();
 							}
 							dragRectangle = null;
-							repaint();
+							
 						}
-						
+						mouseDown = null;
+						mouseNow = null;
+						repaint();
 					}
 				});
 		
@@ -205,14 +220,29 @@ public class MapPanel extends JPanel
 					
 					public void mouseDragged(MouseEvent e)
 					{
-						if (dragRectangle != null)
+						mouseNow = e.getPoint();
+						Point2D.Double lonLat = getLonLat(e.getX(), e.getY());
+						if (dragMode == DragMode.BOX)
 						{
-							dragRectangle.setFrameFromDiagonal(mouseDown, e.getPoint());
-							repaint();
+							if (lonLat != null)
+//								parent.setStatusText(Util.longitudeToString(latLon.x) + " " + Util.latitudeToString(latLon.y));
+								parent.setStatusText(Util.lonLatToString(lonLat));
 						}
-						Point2D.Double latLon = getLonLat(e.getX(), e.getY());
-						if (latLon != null)
-							parent.setStatusText(Util.longitudeToString(latLon.x) + " " + Util.latitudeToString(latLon.y));
+						else if (dragMode == DragMode.RULER)
+						{
+							Point2D.Double origin = getLonLat(mouseDown.x, mouseDown.y);
+							double d = Projection.distanceBetween(origin, lonLat);
+							double az = Projection.azimuthTo(origin, lonLat);
+							String label = "m";
+							if (d > 10000)
+							{
+								d /= 1000;
+								label = "km";
+							}
+							parent.setStatusText(String.format("%s to %s, distance: %.1f %s, azimuth: %.2f%c", 
+									Util.lonLatToString(origin), Util.lonLatToString(lonLat), d, label, az, Util.DEGREE_SYMBOL));
+						}
+						repaint();
 					}
 				});
 		
@@ -304,6 +334,11 @@ public class MapPanel extends JPanel
 		deselectAllPanels();
 		p.setSelected(true);
 		selectedPanels.add(p);
+	}
+	
+	public void setDragMode(DragMode mode)
+	{
+		dragMode = mode;
 	}
 	
 	public void mapPush()
@@ -445,7 +480,6 @@ public class MapPanel extends JPanel
 	
 	public void pickMapParameters(int width, int height)
     {
-		extents = null;
 		double xm = scale * (double)width;
 		double ym = scale * (double)height;
 		
@@ -472,7 +506,6 @@ public class MapPanel extends JPanel
 //			range = new GeoRange(projection, center, xm, ym);
 			System.out.println("xm: " + xm + " ym: " + ym);
 			range = projection.getGeoRange(center, xm, ym);
-			extents = new double[] {-xm / 2, xm / 2, -ym / 2, ym / 2};
 		}
     }
 	
@@ -728,7 +761,21 @@ public class MapPanel extends JPanel
 				
 				g.setColor(Color.RED);
 				if (dragRectangle != null)
-					g2.draw(dragRectangle);
+				{
+					if (dragMode == DragMode.BOX && mouseNow != null)
+					{
+						dragRectangle.setFrameFromDiagonal(mouseDown, mouseNow);
+						g2.draw(dragRectangle);
+					}
+					else if (dragMode == DragMode.RULER && mouseDown != null && mouseNow != null)
+					{
+						g2.drawLine(
+								mouseDown.x - MapPanel.this.getInsets().left, 
+								mouseDown.y - MapPanel.this.getInsets().top,
+								mouseNow.x - MapPanel.this.getInsets().left,
+								mouseNow.y - MapPanel.this.getInsets().top);
+					}
+				}
 			}
 		}
 	}
