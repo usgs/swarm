@@ -5,9 +5,11 @@ import gov.usgs.swarm.HelicorderViewPanelListener;
 import gov.usgs.swarm.Images;
 import gov.usgs.swarm.MultiMonitor;
 import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.SwarmFrame;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.Throbber;
 import gov.usgs.swarm.map.MapPanel.DragMode;
+import gov.usgs.util.ConfigFile;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;
 import gov.usgs.util.png.PngEncoder;
@@ -18,6 +20,7 @@ import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,6 +44,9 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/07/30 16:16:09  cervelli
+ * Added ruler.
+ *
  * Revision 1.5  2006/07/28 14:51:55  cervelli
  * Changes for moved GeoRange.
  *
@@ -52,7 +58,7 @@ import javax.swing.event.InternalFrameEvent;
  *
  * @author Dan Cervelli
  */
-public class MapFrame extends JInternalFrame implements Runnable
+public class MapFrame extends SwarmFrame implements Runnable
 {
 	private static final long serialVersionUID = 1L;
 	private JToolBar toolbar;
@@ -79,8 +85,6 @@ public class MapFrame extends JInternalFrame implements Runnable
 	
 	private int spanIndex = 3;
 	private boolean realtime = true;
-//	private double endTime = Double.NaN;
-//	private double startTime = Double.NaN;
 	
 	private int refreshInterval = 1000;
 	
@@ -98,6 +102,24 @@ public class MapFrame extends JInternalFrame implements Runnable
 		
 		updateThread = new Thread(this);
 		updateThread.start();
+	}
+	
+	public void saveLayout(ConfigFile cf, String prefix)
+	{
+		super.saveLayout(cf, prefix);
+		cf.put(prefix + ".longitude", Double.toString(mapPanel.getCenter().x));
+		cf.put(prefix + ".latitude", Double.toString(mapPanel.getCenter().y));
+		cf.put(prefix + ".scale", Double.toString(mapPanel.getScale()));
+	}
+	
+	public void processLayout(ConfigFile cf)
+	{
+		processStandardLayout(cf);
+		double lon = Double.parseDouble(cf.getString("longitude"));
+		double lat = Double.parseDouble(cf.getString("latitude"));
+		Point2D.Double c = new Point2D.Double(lon, lat);
+		double scale = Double.parseDouble(cf.getString("scale"));
+		mapPanel.setCenterAndScale(c, scale);
 	}
 	
 	private void createUI()

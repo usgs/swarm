@@ -21,6 +21,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +50,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: chooser visibility
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.24  2006/07/22 20:30:05  cervelli
+ * Map, time zones, time listeners.
+ *
  * Revision 1.23  2006/06/14 19:19:31  dcervelli
  * Major 1.3.4 changes.
  *
@@ -168,7 +172,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.0.0.20060722-";
+	private static final String VERSION = "2.0.0.20060730-";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -422,7 +426,11 @@ public class Swarm extends JFrame
 		swarmMenu = new SwarmMenu();
 		this.setJMenuBar(swarmMenu);
 		
+		for (SwarmLayout sl : config.layouts)
+			swarmMenu.addLayout(sl);
+		
 		this.setVisible(true);
+		
 		long offset = CurrentTime.getInstance().getOffset();
 		if (Math.abs(offset) > 10 * 60 * 1000)
 			JOptionPane.showMessageDialog(this, "You're system clock is off by more than 10 minutes.\n" + 
@@ -695,6 +703,55 @@ public class Swarm extends JFrame
 		return frame;
 	}
 	
+	public SwarmLayout getCurrentLayout()
+	{
+		ConfigFile cf = new ConfigFile();
+		cf.put("name", "Current Layout");
+		
+		SwarmLayout sl = new SwarmLayout(cf);
+		int i = 0;
+		for (JInternalFrame frame : frames)
+		{
+			if (frame instanceof HelicorderViewerFrame)
+			{
+				HelicorderViewerFrame hvf = (HelicorderViewerFrame)frame;
+				hvf.saveLayout(cf, "helicorder-" + i);
+			}
+		}
+		
+		mapFrame.saveLayout(cf, "map");
+		
+		return sl;
+	}
+	
+	public void removeAllFrames()
+	{
+		Runnable r = new Runnable() 
+				{
+					public void run()
+					{
+						Iterator<JInternalFrame> it = frames.iterator();
+						while (it.hasNext())
+						{
+							JInternalFrame frame = it.next();
+							if (frame instanceof HelicorderViewerFrame ||
+									frame instanceof WaveViewerFrame ||
+									frame instanceof MultiMonitor)
+							{
+								try { frame.setClosed(true); } catch (Exception e) {}
+							}
+						}
+					}
+				};
+		
+		if (SwingUtilities.isEventDispatchThread())
+			r.run();
+		else
+		{
+			try	{ SwingUtilities.invokeAndWait(r); } catch (Exception e) {}
+		}
+	}
+	
 	public void removeInternalFrame(final JInternalFrame f)
 	{
 		SwingUtilities.invokeLater(new Runnable() 
@@ -711,10 +768,16 @@ public class Swarm extends JFrame
 	
 	public void addInternalFrame(final JInternalFrame f)
 	{
+		addInternalFrame(f, true);
+	}
+	
+	public void addInternalFrame(final JInternalFrame f, boolean setLoc)
+	{
 		frames.add(f);
 		frameCount++;			
 		frameCount = frameCount % 10;
-		f.setLocation(frameCount * 24, frameCount * 24);
+		if (setLoc)
+			f.setLocation(frameCount * 24, frameCount * 24);
 		SwingUtilities.invokeLater(new Runnable()
 				{
 					public void run()

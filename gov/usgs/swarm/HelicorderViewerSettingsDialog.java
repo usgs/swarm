@@ -30,6 +30,9 @@ import javax.swing.border.TitledBorder;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2006/07/22 20:26:25  cervelli
+ * Time zone changes.
+ *
  * Revision 1.14  2006/06/14 19:19:31  dcervelli
  * Major 1.3.4 changes.
  *
@@ -288,7 +291,7 @@ public class HelicorderViewerSettingsDialog extends SwarmDialog
 		otherPanel.add(refreshInterval, GridBagHelper.set(c, "x=2;y=0;w=1;h=1;f=h;wx=0;a=e"));
 		otherPanel.add(scrollLabel, GridBagHelper.set(c, "x=0;y=1;w=2;h=1;wx=1;a=w;f=n"));
 		otherPanel.add(scrollSize, GridBagHelper.set(c, "x=2;y=1;w=1;h=1;f=h;wx=0;a=e"));
-		removeDrift = new JCheckBox("Force Center");
+		removeDrift = new JCheckBox("Force center");
 		otherPanel.add(removeDrift, GridBagHelper.set(c, "x=0;y=2;w=3;h=1;f=h;wx=0;a=w"));
 
 		otherPanel.add(autoScale, GridBagHelper.set(c, "x=0;y=6;w=3;h=1;f=h;wx=0;a=w"));

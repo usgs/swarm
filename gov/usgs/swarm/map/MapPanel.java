@@ -59,6 +59,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/07/30 16:16:22  cervelli
+ * Added ruler.
+ *
  * Revision 1.4  2006/07/28 14:52:12  cervelli
  * Changes for moved GeoRange.
  *
@@ -460,6 +463,23 @@ public class MapPanel extends JPanel
 		}
 	}
 	
+	public Point2D.Double getCenter()
+	{
+		return center;
+	}
+	
+	public double getScale()
+	{
+		return scale;
+	}
+	
+	public void setCenterAndScale(Point2D.Double c, double s)
+	{
+		center = c;
+		scale = s;
+		resetImage();
+	}
+	
 	public void setCenterAndScale(GeoRange gr)
 	{
 		mapPush();
@@ -640,6 +660,7 @@ public class MapPanel extends JPanel
 					else
 						panel.setPosition(Position.UNSET);
 				}
+				// TODO: synch problem
 				for (Metadata md : Swarm.config.metadata.values())
 				{
 					if (!range.contains(new Point2D.Double(md.longitude, md.latitude)))

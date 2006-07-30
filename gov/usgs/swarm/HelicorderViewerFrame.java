@@ -3,6 +3,7 @@ package gov.usgs.swarm;
 import gov.usgs.plot.Plot;
 import gov.usgs.swarm.data.GulperListener;
 import gov.usgs.swarm.data.SeismicDataSource;
+import gov.usgs.util.ConfigFile;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.GridBagHelper;
 import gov.usgs.util.Util;
@@ -49,10 +50,10 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
 /**
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
- * TODO: slider tooltip
- * TODO: change slider checkbox
- * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2006/07/29 17:16:48  cervelli
+ * Made clip/scale toggle a proper button and added tool tips to it and the slider.
+ *
  * Revision 1.19  2006/07/26 00:37:36  cervelli
  * Changes for new gulper system.
  *
@@ -124,7 +125,7 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  *
  * @author Dan Cervelli
  */
-public class HelicorderViewerFrame extends JInternalFrame 
+public class HelicorderViewerFrame extends SwarmFrame
 {
 	public static final long serialVersionUID = -1;
 		
@@ -140,7 +141,6 @@ public class HelicorderViewerFrame extends JInternalFrame
 	
 	private RefreshThread refreshThread;
 	private SeismicDataSource dataSource;
-	private String channel;
 	private JPanel mainPanel;
 	private JToolBar toolBar;
 	private JButton settingsButton;
@@ -152,7 +152,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 	private JButton expY;
 	private JButton clipboard;
 	private JButton removeWave; 
-	private JButton saveWave;
+	private JButton capture;
 	private JFileChooser chooser;
 	private JButton scaleButton;
 	private boolean scaleClipState;
@@ -189,19 +189,46 @@ public class HelicorderViewerFrame extends JInternalFrame
 	
 	public GulperListener gulperListener;
 	
+	public HelicorderViewerFrame(ConfigFile cf)
+	{
+		super("<layout>", true, true, true, true);
+		Swarm.getApplication().touchUITime();
+		String channel = cf.getString("channel");
+		SeismicDataSource sds = Swarm.config.getSource(cf.getString("source"));
+		dataSource = sds.getCopy();
+		setTitle(channel + ", [" + dataSource + "]");
+		settings = new HelicorderViewerSettings(channel);
+		settings.set(cf);
+		waveViewSettings = new WaveViewSettings();
+		
+		createUI();
+		processStandardLayout(cf);
+		setVisible(true);
+		getHelicorder();
+		refreshThread = new RefreshThread();
+	}
+	
 	public HelicorderViewerFrame(SeismicDataSource sds, String ch)
 	{
 		super(ch + ", [" + sds + "]", true, true, true, true);
 		Swarm.getApplication().touchUITime();
-		channel = ch;
-		settings = new HelicorderViewerSettings(channel);
+		settings = new HelicorderViewerSettings(ch);
 		waveViewSettings = new WaveViewSettings();
 		dataSource = sds.getCopy();
 		
 		createUI();
+		setVisible(true);
 		getHelicorder();
-		
 		refreshThread = new RefreshThread();
+	}
+	
+	public void saveLayout(ConfigFile cf, String prefix)
+	{
+		super.saveLayout(cf, prefix);
+		cf.put("helicorder", prefix);
+		cf.put(prefix + ".source", dataSource.getName());
+//		cf.put(prefix + ".channel", settings.channel);
+		settings.save(cf, prefix);
 	}
 	
 	public void createUI()
@@ -217,7 +244,6 @@ public class HelicorderViewerFrame extends JInternalFrame
 		setSize(800, 750);
 		setContentPane(mainPanel);
 //		createWiggler();
-		setVisible(true);
 	}
 
 	private void createStatusLabel()
@@ -416,11 +442,11 @@ public class HelicorderViewerFrame extends JInternalFrame
 
 		toolBar.addSeparator();
 		
-		saveWave = SwarmUtil.createToolBarButton(
+		capture = SwarmUtil.createToolBarButton(
 				Images.getIcon("camera"),
 				"Save helicorder image",
-				new SaveButtonActionListener());
-		toolBar.add(saveWave);
+				new CaptureActionListener());
+		toolBar.add(capture);
 
 		toolBar.addSeparator();
 		
@@ -495,8 +521,8 @@ public class HelicorderViewerFrame extends JInternalFrame
 				{
 					public void internalFrameActivated(InternalFrameEvent e)
 					{
-						if (channel != null)
-							Swarm.getApplication().getDataChooser().setNearest(channel);
+						if (settings.channel != null)
+							Swarm.getApplication().getDataChooser().setNearest(settings.channel);
 					}
 					
 					public void internalFrameClosing(InternalFrameEvent e)
@@ -506,7 +532,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 						refreshThread.kill();
 						Swarm.getApplication().removeInternalFrame(HelicorderViewerFrame.this);
 						Swarm.getApplication().removeTimeListener(timeListener);
-						dataSource.notifyDataNotNeeded(channel, helicorderViewPanel.getStartTime(), helicorderViewPanel.getEndTime());
+						dataSource.notifyDataNotNeeded(settings.channel, helicorderViewPanel.getStartTime(), helicorderViewPanel.getEndTime(), gulperListener);
 						dataSource.close();
 						if (wigglerPanel != null)
 							wigglerPanel.kill();
@@ -576,7 +602,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 	
 	public void createWiggler()
 	{
-		wigglerPanel = new WigglerPanel(dataSource, channel);
+		wigglerPanel = new WigglerPanel(dataSource, settings.channel);
 		heliPanel.add(wigglerPanel, BorderLayout.SOUTH);
 		wigglerPanel.setPreferredSize(new Dimension(this.getSize().width, 75));
 	}
@@ -665,7 +691,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 						expY.setEnabled(b);
 //						autoScaleSliderButton.setEnabled(b);
 //						autoScaleSlider.setEnabled(b);
-						saveWave.setEnabled(b);
+						capture.setEnabled(b);
 					}
 				});
 	}
@@ -754,6 +780,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 
 	public void getHelicorder()
 	{
+		System.out.println("getHelicorder");
 		if (noData)
 			return;
 		
@@ -772,6 +799,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 	    					throbber.increment();
 	    					working = true;
 							end = settings.getBottomTime();
+							System.out.println("bt: " + end);
 							if (Double.isNaN(end))
 								end = CurrentTime.getInstance().nowJ2K();
 							
@@ -780,8 +808,15 @@ public class HelicorderViewerFrame extends JInternalFrame
 							if (helicorderViewPanel != null)
 								tc = settings.timeChunk;
 							
-							hd = dataSource.getHelicorder(channel, before - tc, end + tc, gulperListener);
-							success = true;
+							if (!HelicorderViewerFrame.this.isClosed)
+							{
+								hd = dataSource.getHelicorder(settings.channel, before - tc, end + tc, gulperListener);
+								success = true;
+							}
+							else
+							{
+								success = false;
+							}
 						}
     					catch (Throwable e)
 						{
@@ -823,7 +858,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 
 	public Wave getWave(double t1, double t2)
 	{
-		return dataSource.getWave(channel, t1, t2);	
+		return dataSource.getWave(settings.channel, t1, t2);	
 	}
 
 	public SeismicDataSource getDataSource()
@@ -831,10 +866,10 @@ public class HelicorderViewerFrame extends JInternalFrame
 		return dataSource;	
 	}
 	
-	public String getChannel()
-	{
-		return channel;	
-	}
+//	public String getChannel()
+//	{
+//		return channel;	
+//	}
 
 	private class RefreshThread extends Thread
 	{
@@ -842,7 +877,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 		
 		public RefreshThread()
 		{
-			super("HeliRefresh-" + channel);
+			super("HeliRefresh-" + settings.channel);
 			this.setPriority(Thread.MIN_PRIORITY);
 			start();
 		}
@@ -904,7 +939,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 	}
 	
 	// TODO: refactor out some functions
-	private class SaveButtonActionListener implements ActionListener
+	private class CaptureActionListener implements ActionListener
 	{
 	    public void actionPerformed(ActionEvent e)
 		{
@@ -959,7 +994,7 @@ public class HelicorderViewerFrame extends JInternalFrame
 
 			chooser.setAccessory(imagePanel);
 			
-			String fn = channel.replace(' ', '_') + ".png";
+			String fn = settings.channel.replace(' ', '_') + ".png";
 			chooser.setSelectedFile(new File (chooser.getCurrentDirectory().getAbsoluteFile(), fn));
 			
 			int result = chooser.showSaveDialog(Swarm.getApplication());
@@ -998,22 +1033,22 @@ public class HelicorderViewerFrame extends JInternalFrame
 				int tc = 30;
 				
 				// TODO: this should use existing data.
-				HelicorderData heliData = dataSource.getHelicorder(channel, before - tc, end + tc, null);
+				HelicorderData heliData = dataSource.getHelicorder(settings.channel, before - tc, end + tc, null);
 				HelicorderRenderer heliRenderer = new HelicorderRenderer(heliData, settings.timeChunk);
 								
-				heliRenderer.setChannel(channel);
+				heliRenderer.setChannel(settings.channel);
 				heliRenderer.setLocation(HelicorderViewPanel.X_OFFSET, HelicorderViewPanel.Y_OFFSET, 
 						width - HelicorderViewPanel.X_OFFSET - HelicorderViewPanel.RIGHT_WIDTH,
 						height - HelicorderViewPanel.Y_OFFSET - HelicorderViewPanel.BOTTOM_HEIGHT);
 				heliRenderer.setHelicorderExtents(before,end , -1 * Math.abs(settings.barRange), Math.abs(settings.barRange));
-				heliRenderer.setTimeZone(Swarm.config.getTimeZone(channel));
+				heliRenderer.setTimeZone(Swarm.config.getTimeZone(settings.channel));
 //				heliRenderer.setTimeZoneOffset(Swarm.config.timeZoneOffset);
 //				heliRenderer.setTimeZoneAbbr(Swarm.config.timeZoneAbbr);
 				heliRenderer.setForceCenter(settings.forceCenter);
 				heliRenderer.setClipBars(settings.clipBars);
 				heliRenderer.setShowClip(settings.showClip);
 				heliRenderer.setClipValue(settings.clipValue);
-				heliRenderer.setChannel(channel);
+				heliRenderer.setChannel(settings.channel);
 				heliRenderer.setLargeChannelDisplay(includeChannel.isSelected());
 				heliRenderer.createDefaultAxis();
 				plot.addRenderer(heliRenderer);

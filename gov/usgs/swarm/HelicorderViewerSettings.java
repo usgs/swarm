@@ -1,11 +1,16 @@
 package gov.usgs.swarm;
 
+import gov.usgs.util.ConfigFile;
+
 /**
  * Settings for a helicorder.
  * 
  * TODO: eliminate this class in favor of vdx.HelicorderSettings
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/07/22 20:25:58  cervelli
+ * Added variable for the panel to apply settings to.
+ *
  * Revision 1.6  2006/04/15 15:58:52  dcervelli
  * 1.3 changes (renaming, new datachooser, different config).
  *
@@ -88,6 +93,45 @@ public class HelicorderViewerSettings
 	public double getBottomTime()
 	{
 		return bottomTime;
+	}
+	
+	public void set(ConfigFile cf)
+	{
+		timeChunk = Integer.parseInt(cf.getString("timeChunk"));
+		span = Integer.parseInt(cf.getString("span"));
+		waveZoomOffset = Integer.parseInt(cf.getString("waveZoomOffset"));
+		refreshInterval = Integer.parseInt(cf.getString("refreshInterval"));
+		scrollSize = Integer.parseInt(cf.getString("scrollSize"));
+		clipValue = Integer.parseInt(cf.getString("clipValue"));
+		clipBars = Integer.parseInt(cf.getString("clipBars"));
+		barRange = Integer.parseInt(cf.getString("barRange"));
+		alertClipTimeout = Integer.parseInt(cf.getString("alertClipTimeout"));
+		setBottomTime(Double.parseDouble(cf.getString("bottomTime")));
+		barMult = Double.parseDouble(cf.getString("barMult"));
+		forceCenter = Boolean.parseBoolean(cf.getString("forceCenter"));
+		autoScale = Boolean.parseBoolean(cf.getString("autoScale"));
+		showClip = Boolean.parseBoolean(cf.getString("showClip"));
+		alertClip = Boolean.parseBoolean(cf.getString("alertClip"));
+	}
+	
+	public void save(ConfigFile cf, String prefix)
+	{
+		cf.put(prefix + ".channel", channel);
+		cf.put(prefix + ".timeChunk", Integer.toString(timeChunk));
+		cf.put(prefix + ".span", Integer.toString(span));
+		cf.put(prefix + ".waveZoomOffset", Integer.toString(waveZoomOffset));
+		cf.put(prefix + ".refreshInterval", Integer.toString(refreshInterval));
+		cf.put(prefix + ".scrollSize", Integer.toString(scrollSize));
+		cf.put(prefix + ".clipValue", Integer.toString(clipValue));
+		cf.put(prefix + ".clipBars", Integer.toString(clipBars));
+		cf.put(prefix + ".barRange", Integer.toString(barRange));
+		cf.put(prefix + ".alertClipTimeout", Integer.toString(alertClipTimeout));
+		cf.put(prefix + ".bottomTime", Double.toString(bottomTime));
+		cf.put(prefix + ".barMult", Double.toString(barMult));
+		cf.put(prefix + ".forceCenter", Boolean.toString(forceCenter));
+		cf.put(prefix + ".autoScale", Boolean.toString(autoScale));
+		cf.put(prefix + ".showClip", Boolean.toString(showClip));
+		cf.put(prefix + ".alertClip", Boolean.toString(alertClip));
 	}
 	
 	public void parseSettingsString(String o)

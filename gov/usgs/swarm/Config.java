@@ -6,6 +6,7 @@ import gov.usgs.util.Util;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,9 @@ import java.util.TimeZone;
  * Swarm configuration class. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/07/28 15:02:03  cervelli
+ * Outputs config file path.
+ *
  * Revision 1.6  2006/07/26 22:39:10  cervelli
  * Added mapPath.
  *
@@ -97,6 +101,8 @@ public class Config
 	
 	public Map<String, Metadata> metadata;
 	
+	public List<SwarmLayout> layouts;
+	
 	public static Config createConfig(String[] args)
 	{
 		String configFile = System.getProperty("user.home") + File.separatorChar + DEFAULT_CONFIG_FILE;
@@ -122,6 +128,7 @@ public class Config
 		Config config = new Config(cf);
 		config.metadata = Metadata.loadMetadata(Metadata.DEFAULT_METADATA_FILENAME);
 		config.loadDataSources();
+		config.loadLayouts();
 		return config;
 	}
 	
@@ -141,6 +148,33 @@ public class Config
 		}
 	}
 
+	private void loadLayouts()
+	{
+		layouts = new ArrayList<SwarmLayout>();
+		
+		File[] files = new File("layouts").listFiles();
+		if (files == null)
+			return;
+		
+		for (File f : files)
+		{
+			if (!f.isDirectory())
+			{
+				SwarmLayout sl = SwarmLayout.createSwarmLayout(f.getPath());
+				if (sl != null)
+				{
+					layouts.add(sl);
+				}
+			}
+		}
+		Collections.sort(layouts);
+	}
+	
+	public void addLayout(SwarmLayout sl)
+	{
+		layouts.add(sl);
+	}
+	
 	public void getMetadata(List<String> channels, SeismicDataSource source)
 	{
 		for (String ch : channels)

@@ -37,6 +37,9 @@ import javax.swing.event.EventListenerList;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2006/07/30 16:15:04  cervelli
+ * Fixed grammatical error.
+ *
  * Revision 1.19  2006/07/26 00:37:36  cervelli
  * Changes for new gulper system.
  *
@@ -459,7 +462,7 @@ public class HelicorderViewPanel extends JComponent
 				{
 					double j2k = getMouseJ2K(x, y);
 					status = dateFormat.format(Util.j2KToDate(j2k));
-					TimeZone tz = Swarm.config.getTimeZone(parent.getChannel());
+					TimeZone tz = Swarm.config.getTimeZone(settings.channel);
 					double tzo = Time.getTimeZoneOffset(tz, j2k);
 					if (tzo != 0)
 					{
@@ -558,7 +561,7 @@ public class HelicorderViewPanel extends JComponent
 		
 //		insetWavePanel.setHelicorderPanel(this);
 		insetWavePanel.setMarks(startMark, endMark);
-		insetWavePanel.setChannel(parent.getChannel());
+		insetWavePanel.setChannel(settings.channel);
 		insetWavePanel.setDataSource(parent.getDataSource());
 		insetWavePanel.setStatusLabel(parent.getStatusLabel());
 		
@@ -641,7 +644,7 @@ public class HelicorderViewPanel extends JComponent
 			endTime = time2;
 			heliRenderer.setData(heliData);
 			heliRenderer.setTimeChunk(settings.timeChunk);
-			heliRenderer.setTimeZone(Swarm.config.getTimeZone(parent.getChannel()));
+			heliRenderer.setTimeZone(Swarm.config.getTimeZone(settings.channel));
 			heliRenderer.setForceCenter(settings.forceCenter);
 			heliRenderer.setClipBars(settings.clipBars);
 			heliRenderer.setShowClip(settings.showClip);
@@ -696,13 +699,13 @@ public class HelicorderViewPanel extends JComponent
 	    
 		double offset = 0;
 		double multiplier = 1;
-		Metadata md = Swarm.config.metadata.get(parent.getChannel());
+		Metadata md = Swarm.config.metadata.get(settings.channel);
 		if (md != null)
 		{
 			offset = md.offset;
 			multiplier = md.multiplier;
 		}
-//		Calibration cal = Swarm.getApplication().getCalibration(parent.getChannel());
+//		Calibration cal = Swarm.getApplication().getCalibration(settings.channel);
 //		if (cal == null)
 //			cal = Calibration.IDENTITY;
 		
@@ -719,14 +722,14 @@ public class HelicorderViewPanel extends JComponent
 			heliRenderer.setHelicorderExtents(startTime, endTime, -1 * Math.abs((settings.barRange - offset) / multiplier), Math.abs((settings.barRange - offset) / multiplier));
 		}
 		
-		heliRenderer.setTimeZone(Swarm.config.getTimeZone(parent.getChannel()));
+		heliRenderer.setTimeZone(Swarm.config.getTimeZone(settings.channel));
 		heliRenderer.setClipValue(settings.clipValue);
 		heliRenderer.createDefaultAxis();
 		translation = heliRenderer.getTranslationInfo(false);
 		heliRenderer.setLargeChannelDisplay(fullScreen);
 		
 		if (md == null || md.alias == null)
-			heliRenderer.setChannel(parent.getChannel());
+			heliRenderer.setChannel(settings.channel);
 		else
 			heliRenderer.setChannel(md.alias);
 		
