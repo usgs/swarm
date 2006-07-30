@@ -5,6 +5,9 @@ import java.util.Map;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/07/26 00:36:02  cervelli
+ * Changes for new gulper system.
+ *
  * @author Dan Cervelli
  */
 public class GulperList
@@ -30,6 +33,7 @@ public class GulperList
 		Gulper g = gulpers.get(key);
 		if (g != null)
 		{
+			g.addListener(gl);
 			g.update(t1, t2);	
 		}
 		else
@@ -49,11 +53,11 @@ public class GulperList
 		return g;
 	}
 
-	public synchronized void killGulper(String key)
+	public synchronized void killGulper(String key, GulperListener gl)
 	{
 		Gulper g = gulpers.get(key);
 		if (g != null)
-			g.kill();	
+			g.kill(gl);	
 	}
 	
 	/**

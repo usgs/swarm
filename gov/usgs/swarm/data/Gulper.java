@@ -4,8 +4,14 @@ import gov.usgs.swarm.Swarm;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.vdx.data.wave.Wave;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/07/26 00:36:03  cervelli
+ * Changes for new gulper system.
+ *
  * @author Dan Cervelli
  */
 public class Gulper extends Thread
@@ -17,7 +23,7 @@ public class Gulper extends Thread
 	private double goalTime;
 	private boolean killed;
 	private String key;
-	private GulperListener listener;
+	private Set<GulperListener> listeners;
 	
 	public static final int GULP_SIZE = 30 * 60;
 	public static final int WAIT_INTERVAL = 1 * 1000;
@@ -27,7 +33,8 @@ public class Gulper extends Thread
 		gulperList = gl;
 		gulpSource = source;
 		key = k;
-		listener = glnr;
+		listeners = new HashSet<GulperListener>();
+		addListener(glnr);
 		channel = ch;
 		lastTime = t2;
 		
@@ -40,6 +47,16 @@ public class Gulper extends Thread
 		start();
 		System.out.println("Gulper started for " + channel);
 	}
+
+	public synchronized void addListener(GulperListener gl)
+	{
+		listeners.add(gl);
+	}
+	
+	public synchronized void removeListener(GulperListener gl)
+	{
+		listeners.remove(gl);
+	}
 	
 	public String getChannel()
 	{
@@ -51,11 +68,15 @@ public class Gulper extends Thread
 		return key;
 	}
 	
-	public void kill()
+	public void kill(GulperListener gl)
 	{
 		System.out.println("kill!");
-		killed = true;	
-		interrupt();
+		removeListener(gl);
+		if (listeners.size() == 0)
+		{
+			killed = true;	
+			interrupt();
+		}
 	}
 	
 	public void update(double t1, double t2)
@@ -72,10 +93,27 @@ public class Gulper extends Thread
 		}
 	}
 	
+	private synchronized void fireStarted()
+	{
+		for (GulperListener listener : listeners)
+			listener.gulperStarted();
+	}
+	
+	private synchronized void fireGulped(double t1, double t2, boolean success)
+	{
+		for (GulperListener listener : listeners)
+			listener.gulperGulped(t1, t2, success);
+	}
+	
+	private synchronized void fireStopped(boolean killed)
+	{
+		for (GulperListener listener : listeners)
+			listener.gulperStopped(killed);
+	}
+	
 	public void run()
 	{
-		if (listener != null)
-			listener.gulperStarted();
+		fireStarted();
 		
 		while (lastTime > goalTime && !killed)
 		{
@@ -85,8 +123,7 @@ public class Gulper extends Thread
 				double t2 = lastTime;
 				System.out.println("gulper: getWave");
 				Wave w = gulpSource.getWave(channel, t1, t2);
-				if (listener != null)
-					listener.gulperGulped(t1, t2, w != null && !killed);
+				fireGulped(t1, t2, w != null && !killed);
 				update(goalTime, lastTime - GULP_SIZE + 10);
 			}
 			catch (Exception e)
@@ -108,8 +145,7 @@ public class Gulper extends Thread
 			
 		gulperList.removeGulper(this);
 		
-		if (listener != null)
-			listener.gulperStopped(killed);
+		fireStopped(killed);
 	}
 	
 	public String toString()
