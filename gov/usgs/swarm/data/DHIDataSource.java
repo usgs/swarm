@@ -34,6 +34,9 @@ import org.apache.log4j.varia.NullAppender;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/07/26 00:36:02  cervelli
+ * Changes for new gulper system.
+ *
  * @author Dan Cervelli
  */
 public class DHIDataSource extends SeismicDataSource
@@ -230,9 +233,9 @@ public class DHIDataSource extends SeismicDataSource
 		return wave;
 	}
 	
-	public synchronized void notifyDataNotNeeded(String station, double t1, double t2)
+	public synchronized void notifyDataNotNeeded(String station, double t1, double t2, GulperListener gl)
 	{
-		GulperList.getInstance().killGulper("dhi:" + station);
+		GulperList.getInstance().killGulper("dhi:" + station, gl);
 	}
 	
 	public synchronized boolean isActiveSource()

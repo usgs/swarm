@@ -13,6 +13,9 @@ import javax.swing.Icon;
  * Base class for seismic data sources.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/07/26 00:36:01  cervelli
+ * Changes for new gulper system.
+ *
  * Revision 1.4  2006/07/22 20:20:16  cervelli
  * Added variable for determining if source should be saved in user config.
  *
@@ -62,7 +65,7 @@ abstract public class SeismicDataSource
 	abstract public Wave getWave(String station, double t1, double t2);
 	abstract public HelicorderData getHelicorder(String station, double t1, double t2, GulperListener gl);
 	
-	public void notifyDataNotNeeded(String station, double t1, double t2)
+	public void notifyDataNotNeeded(String station, double t1, double t2, GulperListener gl)
 	{}
 	
 	public void setStoreInUserConfig(boolean b)
