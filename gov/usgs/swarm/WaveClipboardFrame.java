@@ -51,6 +51,9 @@ import javax.swing.event.InternalFrameEvent;
  * The wave clipboard internal frame.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2006/07/25 05:16:13  cervelli
+ * Change for FrameDecorator being class instead of interface.
+ *
  * Revision 1.13  2006/07/22 20:31:43  cervelli
  * Added throbber and status bar.
  *
@@ -273,7 +276,7 @@ public class WaveClipboardFrame extends JInternalFrame
 		toolbar.addSeparator();
 		
 		removeAllButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("delete"),
+				Images.getIcon("deleteall"),
 				"Remove all waves from clipboard",
 				new ActionListener()
 				{
