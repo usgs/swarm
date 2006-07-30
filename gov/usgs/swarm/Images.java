@@ -11,6 +11,9 @@ import javax.swing.ImageIcon;
  * TODO: make images static final, don't use map 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2006/07/30 16:15:30  cervelli
+ * New icons.
+ *
  * Revision 1.12  2006/07/23 03:42:39  cervelli
  * Added Earth image.
  *
@@ -71,8 +74,9 @@ public class Images
 		imageMap.put("crosshair", "images/crosshair.gif");
 		imageMap.put("close_view", "images/closeview.gif");
 		imageMap.put("delete", "images/delete.gif");
+		imageMap.put("deleteall", "images/deleteall.gif");
 		imageMap.put("new_delete", "images/delete.gif");
-		imageMap.put("gototime", "images/date.gif");
+		imageMap.put("gototime", "images/gototime.gif");
 		imageMap.put("heli", "images/helicorder.gif"); 
 		imageMap.put("left", "images/left.gif");
 		imageMap.put("maximize","images/maximize.png"); 
