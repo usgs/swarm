@@ -60,6 +60,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/07/28 14:49:32  cervelli
+ * Map button makes sure that the map frame is visible.
+ *
  * Revision 1.7  2006/07/26 22:39:31  cervelli
  * Now sorts case insensitive.
  *
@@ -179,20 +182,24 @@ public class DataChooser extends JPanel
 						List<ServerNode> servers = getSelectedServers();
 						if (servers != null)
 						{
-							String selected = servers.get(0).getSource().toConfigString();
-							EditDataSourceDialog d = new EditDataSourceDialog(selected);
-							d.setVisible(true);
-							String eds = d.getResult();
-							if (eds != null)
+							SeismicDataSource sds = servers.get(0).getSource();
+							if (sds.isStoreInUserConfig())
 							{
-								SeismicDataSource newSource = SeismicDataSource.getDataSource(eds);
-								if (newSource == null)
-									return;
-								removeServer(servers.get(0));
-								String svn = eds.substring(0, eds.indexOf(";"));
-								Swarm.config.removeSource(svn);
-								Swarm.config.addSource(newSource);
-								insertServer(newSource);
+								String selected = servers.get(0).getSource().toConfigString();
+								EditDataSourceDialog d = new EditDataSourceDialog(selected);
+								d.setVisible(true);
+								String eds = d.getResult();
+								if (eds != null)
+								{
+									SeismicDataSource newSource = SeismicDataSource.getDataSource(eds);
+									if (newSource == null)
+										return;
+									removeServer(servers.get(0));
+									String svn = eds.substring(0, eds.indexOf(";"));
+									Swarm.config.removeSource(svn);
+									Swarm.config.addSource(newSource);
+									insertServer(newSource);
+								}
 							}
 						}
 					}	
@@ -871,7 +878,20 @@ public class DataChooser extends JPanel
 		
 		public Icon getIcon()
 		{
-			return broken ? Images.getIcon("broken_server") : Images.getIcon("server");
+			if (!broken)
+			{
+				if (source.isStoreInUserConfig())
+					return Images.getIcon("server");
+				else
+					return Images.getIcon("locked_server");
+			}
+			else
+			{
+				if (source.isStoreInUserConfig())
+					return Images.getIcon("broken_server");
+				else
+					return Images.getIcon("broken_locked_server");
+			}
 		}
 		
 		public String getLabel()
