@@ -11,6 +11,9 @@ import javax.swing.ImageIcon;
  * TODO: make images static final, don't use map 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2006/07/23 03:42:39  cervelli
+ * Added Earth image.
+ *
  * Revision 1.11  2006/06/14 19:19:31  dcervelli
  * Major 1.3.4 changes.
  *
@@ -59,6 +62,8 @@ public class Images
 		imageMap.put("swarm", "images/swarm.gif");
 		imageMap.put("camera", "images/camera.gif");
 		imageMap.put("back", "images/back.gif");
+		imageMap.put("geoback", "images/geoback.gif");
+		imageMap.put("timeback", "images/timeback.gif");
 		imageMap.put("clipboard", "images/clipboard.gif");
 		imageMap.put("down", "images/down.gif");
 		imageMap.put("clock", "images/date.gif");
@@ -104,6 +109,11 @@ public class Images
 		imageMap.put("helilink", "images/helicorderlink.gif");
 		imageMap.put("geosort", "images/geosort.gif");
 		imageMap.put("earth" , "images/earth.gif");
+		imageMap.put("locked_server", "images/locked_server.gif");
+		imageMap.put("broken_locked_server", "images/broken_locked_server.gif");
+		imageMap.put("pin", "images/pin.gif");
+		imageMap.put("ruler", "images/ruler.gif");
+		imageMap.put("dragbox", "images/dragbox.gif");
 		
 		imageMap.put("throbber_off", "images/throbber_off.gif");
 		imageMap.put("throbber_0", "images/throbber_0.gif");
