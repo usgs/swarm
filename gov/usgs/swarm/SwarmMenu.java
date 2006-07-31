@@ -11,6 +11,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
@@ -18,6 +19,9 @@ import javax.swing.event.MenuListener;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/07/22 20:31:00  cervelli
+ * Added Window>Map menu item.
+ *
  * Revision 1.2  2006/06/14 19:19:31  dcervelli
  * Major 1.3.4 changes.
  *
@@ -35,6 +39,10 @@ public class SwarmMenu extends JMenuBar
 	private JMenu editMenu;
 	private JMenuItem options;
 	
+	private JMenu layoutMenu;
+	private JMenuItem saveLayout;
+	private JMenuItem removeLayouts;
+	
 	private JMenu windowMenu;
 	private JMenuItem tileWaves;
 	private JMenuItem tileHelicorders;
@@ -42,6 +50,7 @@ public class SwarmMenu extends JMenuBar
 	private JCheckBoxMenuItem clipboard;
 	private JCheckBoxMenuItem chooser;
 	private JCheckBoxMenuItem map;
+	private JMenuItem closeAll;
 	
 	private JMenu helpMenu;
 	private JMenuItem about;
@@ -49,13 +58,16 @@ public class SwarmMenu extends JMenuBar
 	private AboutDialog aboutDialog;
 	
 	private Map<JInternalFrame, InternalFrameMenuItem> windows;
+	private Map<SwarmLayout, JMenuItem> layouts;
 	
 	public SwarmMenu()
 	{
 		super();
 		windows = new HashMap<JInternalFrame, InternalFrameMenuItem>();
+		layouts = new HashMap<SwarmLayout, JMenuItem>();
 		createFileMenu();
 		createEditMenu();
+		createLayoutMenu();
 		createWindowMenu();
 		createHelpMenu();
 	}
@@ -95,6 +107,78 @@ public class SwarmMenu extends JMenuBar
 		add(editMenu);
 	}
 	
+	private void createLayoutMenu()
+	{
+		layoutMenu = new JMenu("Layout");
+		layoutMenu.setMnemonic('L');
+		
+		saveLayout = new JMenuItem("Save Layout...");
+		saveLayout.setMnemonic('S');
+		saveLayout.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						SwarmLayout sl = Swarm.getApplication().getCurrentLayout();
+						String name = JOptionPane.showInputDialog("Enter a name for this layout:");
+						if (name != null)
+						{
+							sl.setName(name);
+							sl.save();
+							addLayout(sl);
+							Swarm.config.addLayout(sl);
+						}
+					}
+				});
+		saveLayout.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK));
+		layoutMenu.add(saveLayout);
+		
+		removeLayouts = new JMenuItem("Remove Layout...");
+		removeLayouts.setEnabled(false);
+		removeLayouts.setMnemonic('R');
+		removeLayouts.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+					}
+				});
+		layoutMenu.add(removeLayouts);
+		layoutMenu.addSeparator();
+		add(layoutMenu);
+	}
+	
+	public void addLayout(final SwarmLayout sl)
+	{
+		JMenuItem mi = new JMenuItem(sl.getName());
+		mi.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						sl.process();
+					}
+				});
+		int i;
+		for (i = 3; i < layoutMenu.getItemCount(); i++)
+		{
+			JMenuItem m = layoutMenu.getItem(i);
+			System.out.println(m.getText() + " " + sl.getName());
+			if (m.getText().compareToIgnoreCase(sl.getName()) >= 0)
+			{
+				layoutMenu.add(mi, i);
+				break;
+			}
+		}
+		if (i == layoutMenu.getItemCount())
+			layoutMenu.add(mi, i);
+		layouts.put(sl, mi);
+	}
+	
+	public void removeLayout(SwarmLayout sl)
+	{
+		JMenuItem mi = layouts.get(sl);
+		layoutMenu.remove(mi);
+		layouts.remove(sl);
+	}
+	
 	private void createWindowMenu()
 	{
 		windowMenu = new JMenu("Window");
@@ -111,7 +195,6 @@ public class SwarmMenu extends JMenuBar
 				});
 		chooser.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, KeyEvent.CTRL_DOWN_MASK));
 		windowMenu.add(chooser);
-		
 		
 		clipboard = new JCheckBoxMenuItem("Wave Clipboard");
 		clipboard.setMnemonic('W');
@@ -192,6 +275,17 @@ public class SwarmMenu extends JMenuBar
 				});
 
 		windowMenu.addSeparator();
+		
+		closeAll = new JMenuItem("Close All");
+		closeAll.setMnemonic('C');
+		closeAll.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						Swarm.getApplication().removeAllFrames();
+					}
+				});
+		windowMenu.add(closeAll);
 		
 		add(windowMenu);
 	}
