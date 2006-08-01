@@ -1,10 +1,17 @@
 package gov.usgs.swarm;
  
+import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
+import gov.usgs.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.swarm.map.MapFrame;
+import gov.usgs.swarm.wave.MultiMonitor;
+import gov.usgs.swarm.wave.WaveClipboardFrame;
+import gov.usgs.swarm.wave.WaveViewPanel;
+import gov.usgs.swarm.wave.WaveViewerFrame;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.CurrentTime;
+import gov.usgs.util.Log;
 import gov.usgs.util.ui.GlobalKeyManager;
 import gov.usgs.vdx.data.wave.Wave;
 
@@ -24,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -50,6 +58,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: chooser visibility
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.25  2006/07/30 22:43:03  cervelli
+ * Changes for layouts.
+ *
  * Revision 1.24  2006/07/22 20:30:05  cervelli
  * Map, time zones, time listeners.
  *
@@ -172,7 +183,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.0.0.20060730-";
+	private static final String VERSION = "2.0.0.20060801-alpha-1";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -191,9 +202,12 @@ public class Swarm extends JFrame
 	
 	public static Config config;
 	
+	public static Logger logger;
+	
 	public Swarm(String[] args)
 	{
 		super(TITLE + " [" + VERSION + "]");
+		logger = Log.getLogger("gov.usgs.swarm");
 		setIconImage(Images.getIcon("swarm").getImage());
 
 		monitors = new HashMap<String, MultiMonitor>();
@@ -211,6 +225,7 @@ public class Swarm extends JFrame
 	private void checkJavaVersion()
 	{
 		String version = System.getProperty("java.version");
+		logger.fine("java.version: " + version);
 		if (version.startsWith("1.1") || version.startsWith("1.2") || version.startsWith("1.3") || version.startsWith("1.4"))
 		{
 			JOptionPane.showMessageDialog(this, TITLE + " " + VERSION + " requires at least Java version 1.5 or above.", "Error",
@@ -247,16 +262,16 @@ public class Swarm extends JFrame
 					}
 				});
 				
-		m.getInputMap().put(KeyStroke.getKeyStroke("control F12"), "flushcache");
-		m.getActionMap().put("flushcache", new AbstractAction()
-				{
-					private static final long serialVersionUID = -1;
-					public void actionPerformed(ActionEvent e)
-					{
-						if (cache != null)
-							cache.flush();
-					}
-				});
+//		m.getInputMap().put(KeyStroke.getKeyStroke("control F12"), "flushcache");
+//		m.getActionMap().put("flushcache", new AbstractAction()
+//				{
+//					private static final long serialVersionUID = -1;
+//					public void actionPerformed(ActionEvent e)
+//					{
+//						if (cache != null)
+//							cache.flush();
+//					}
+//				});
 
 		m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0), "fullScreenToggle");
 		m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, InputEvent.CTRL_DOWN_MASK), "fullScreenToggle");
@@ -669,6 +684,12 @@ public class Swarm extends JFrame
 				};
 		worker.start();
 	}
+
+	public void removeMonitor(MultiMonitor mm)
+	{
+		removeInternalFrame(mm);
+		monitors.remove(mm.getDataSource().getName());
+	}
 	
 	public void monitorChannelSelected(SeismicDataSource source, String channel)
 	{
@@ -678,10 +699,8 @@ public class Swarm extends JFrame
 			monitor = new MultiMonitor(source);
 			monitors.put(source.getName(), monitor);
 			addInternalFrame(monitor);
-		}
-	
-		if (!monitor.isVisible())
 			monitor.setVisible(true);
+		}
 		
 		monitor.addChannel(channel);
 	}
@@ -697,8 +716,7 @@ public class Swarm extends JFrame
 	{
 		source.establish();
 		HelicorderViewerFrame frame = new HelicorderViewerFrame(source, channel);
-		frame.getHelicorderViewPanel().addListener(waveClipboard.getLinkListener());
-		frame.getHelicorderViewPanel().addListener(mapFrame.getLinkListener());
+		frame.addLinkListeners();
 		addInternalFrame(frame);
 		return frame;
 	}
@@ -708,6 +726,8 @@ public class Swarm extends JFrame
 		ConfigFile cf = new ConfigFile();
 		cf.put("name", "Current Layout");
 		
+		chooser.saveLayout(cf, "chooser");
+		
 		SwarmLayout sl = new SwarmLayout(cf);
 		int i = 0;
 		for (JInternalFrame frame : frames)
@@ -715,7 +735,7 @@ public class Swarm extends JFrame
 			if (frame instanceof HelicorderViewerFrame)
 			{
 				HelicorderViewerFrame hvf = (HelicorderViewerFrame)frame;
-				hvf.saveLayout(cf, "helicorder-" + i);
+				hvf.saveLayout(cf, "helicorder-" + i++);
 			}
 		}
 		
@@ -879,6 +899,11 @@ public class Swarm extends JFrame
 		}
 	}
 
+	public void setFrameLayer(JInternalFrame c, int layer)
+	{
+		desktop.setLayer(c, layer, 0);
+	}
+	
 	public void parseKiosk()
 	{
 		String[] kiosks = config.kiosk.split(",");
