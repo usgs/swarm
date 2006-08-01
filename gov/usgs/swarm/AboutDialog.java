@@ -16,6 +16,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
@@ -23,6 +24,9 @@ import javax.swing.border.LineBorder;
  * A class that shows an about dialog with some extra controls.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/04/17 04:16:36  dcervelli
+ * More 1.3 changes.
+ *
  * Revision 1.2  2006/04/15 15:58:52  dcervelli
  * 1.3 changes (renaming, new datachooser, different config).
  *
@@ -34,7 +38,7 @@ import javax.swing.border.LineBorder;
  *
  * @author Dan Cervelli
  */
-public class AboutDialog extends JDialog
+public class AboutDialog extends JDialog implements Runnable
 {
 	private static final long serialVersionUID = -1;
 	private static final int WIDTH = 240;
@@ -48,6 +52,10 @@ public class AboutDialog extends JDialog
 	private JButton gcButton;
 	private ImageIcon background;
 	private JButton okButton;
+	
+	private Thread updateThread;
+	
+	private boolean kill = false;
 	
 	/**
 	 * Construct an about dialog.
@@ -94,7 +102,8 @@ public class AboutDialog extends JDialog
 		mainPanel.add(panel, BorderLayout.CENTER);
 		mainPanel.setSize(224, 100);
 		mainPanel.setLocation(5, 94);
-		panel.setBackground(new Color(255, 255, 0, 210));
+//		panel.setBackground(new Color(255, 255, 0, 210));
+		panel.setBackground(new Color(255, 255, 0));
 		mainPanel.setBackground(new Color(0, 0, 0, 0));
 		this.getLayeredPane().add(mainPanel);
 		this.getLayeredPane().setLayer(mainPanel, JLayeredPane.PALETTE_LAYER.intValue());
@@ -125,6 +134,7 @@ public class AboutDialog extends JDialog
 					public void actionPerformed(ActionEvent e)
 					{
 						dispose();
+						kill = true;
 					}
 				});
 		
@@ -137,7 +147,7 @@ public class AboutDialog extends JDialog
 					{
 						System.gc();
 						update();
-						repaint();
+//						repaint();
 					}
 				});
 		
@@ -161,16 +171,45 @@ public class AboutDialog extends JDialog
 		//return Long.toString(bytes);
 	}
 	
+	public void setVisible(boolean v)
+	{
+		updateThread = new Thread(this, "About");
+		updateThread.start();
+		super.setVisible(v);
+	}
+	
+	public void run()
+	{
+		while (!kill)
+		{
+			try
+			{
+				update();
+				Thread.sleep(500);
+			}
+			catch (Exception e) {}
+		}
+		kill = false;
+		System.out.println("About died");
+	}
+	
 	/**
 	 * Updates the memory information displayed in the dialog.
 	 */
 	public void update()
 	{
-		Runtime r = Runtime.getRuntime();
-		freeMemory.setText(toByteString(r.freeMemory()));
-		totalMemory.setText(toByteString(r.totalMemory()));
-		usedMemory.setText(toByteString(r.totalMemory() - r.freeMemory()));
-		maxMemory.setText(toByteString(r.maxMemory()));
-		cacheMemory.setText(toByteString(Swarm.getCache().getSize()));
+		SwingUtilities.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						Runtime r = Runtime.getRuntime();
+						freeMemory.setText(toByteString(r.freeMemory()));
+						totalMemory.setText(toByteString(r.totalMemory()));
+						usedMemory.setText(toByteString(r.totalMemory() - r.freeMemory()));
+						maxMemory.setText(toByteString(r.maxMemory()));
+						cacheMemory.setText(toByteString(Swarm.getCache().getSize()));
+						repaint();
+					}
+				});
 	}
 }
