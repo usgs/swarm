@@ -16,6 +16,9 @@ import java.util.TimeZone;
  * Swarm configuration class. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/07/30 22:43:03  cervelli
+ * Changes for layouts.
+ *
  * Revision 1.7  2006/07/28 15:02:03  cervelli
  * Outputs config file path.
  *
@@ -41,6 +44,7 @@ import java.util.TimeZone;
  */
 public class Config
 {
+	private static String DEFAULT_SERVER = "Alaska Volcano Observatory;wws:pubavo1.wr.usgs.gov:16022:10000:1";
 	private static String DEFAULT_CONFIG_FILE = "Swarm.config";
 	private static String DEFAULT_DATA_SOURCES_FILE = "DataSources.config";
 	
@@ -99,19 +103,22 @@ public class Config
 	
 	public Map<String, SeismicDataSource> sources;
 	
-	public Map<String, Metadata> metadata;
+	private Map<String, Metadata> metadata;
+	private Map<String, Metadata> defaultMetadata;
 	
 	public List<SwarmLayout> layouts;
 	
 	public static Config createConfig(String[] args)
 	{
+		Swarm.logger.fine("user.home: " + System.getProperty("user.home"));
 		String configFile = System.getProperty("user.home") + File.separatorChar + DEFAULT_CONFIG_FILE;
-		System.out.println("config: " + configFile);
-		  
+		
 		int n = args.length - 1;
 		if (n >= 0 && !args[n].startsWith("-"))
 			configFile = args[n];
 
+		Swarm.logger.fine("using config: " + configFile);
+		
 		ConfigFile cf = new ConfigFile(configFile);
 		cf.put("configFile", configFile, false);
 		   
@@ -121,12 +128,13 @@ public class Config
 			{
 				String key = args[i].substring(2, args[i].indexOf('='));
 				String val = args[i].substring(args[i].indexOf('=') + 1);
-				System.out.println(key + " = " + val);
+				Swarm.logger.fine("command line: " + key + " = " + val);
 				cf.put(key, val, false);
 			}
 		}
 		Config config = new Config(cf);
-		config.metadata = Metadata.loadMetadata(Metadata.DEFAULT_METADATA_FILENAME);
+		config.defaultMetadata = Metadata.loadMetadata(Metadata.DEFAULT_METADATA_FILENAME);
+		config.metadata = Collections.synchronizedMap(new HashMap<String, Metadata>());
 		config.loadDataSources();
 		config.loadLayouts();
 		return config;
@@ -175,20 +183,38 @@ public class Config
 		layouts.add(sl);
 	}
 	
-	public void getMetadata(List<String> channels, SeismicDataSource source)
+	public Map<String, Metadata> getMetadata()
+	{
+		return metadata;
+	}
+	
+	public Metadata getMetadata(String channel)
+	{
+		return getMetadata(channel, false);
+	}
+	
+	public Metadata getMetadata(String channel, boolean create)
+	{
+		Metadata md = metadata.get(channel);
+		
+		if (md == null)
+			md = defaultMetadata.get(channel);
+		
+		if (md == null && create)
+			md = new Metadata(channel);
+		
+		if (md != null)
+			metadata.put(channel, md);
+		
+		return md;
+	}
+	
+	public void assignMetadataSource(List<String> channels, SeismicDataSource source)
 	{
 		for (String ch : channels)
 		{
-			Metadata md = metadata.get(ch);
-			if (md == null)
-			{
-				md = DefaultMetadata.getMetadata(ch);
-				if (md != null)
-					metadata.put(ch, md);
-			}
-			
-			if (md != null)
-				md.source = source;
+			Metadata md = getMetadata(ch, true);
+			md.source = source;
 		}
 	}
 	
@@ -202,10 +228,10 @@ public class Config
 	{
 		configFilename = config.getString("configFile");
 		
-		windowX = Util.stringToInt(config.getString("windowX"), 50);
-		windowY = Util.stringToInt(config.getString("windowY"), 50);
-		windowWidth = Util.stringToInt(config.getString("windowSizeX"), 800);
-		windowHeight = Util.stringToInt(config.getString("windowSizeY"), 600);
+		windowX = Util.stringToInt(config.getString("windowX"), 10);
+		windowY = Util.stringToInt(config.getString("windowY"), 10);
+		windowWidth = Util.stringToInt(config.getString("windowSizeX"), 1000);
+		windowHeight = Util.stringToInt(config.getString("windowSizeY"), 700);
 		windowMaximized = Util.stringToBoolean(config.getString("windowMaximized"), false);
 		
 		chooserDividerLocation = Util.stringToInt(config.getString("chooserDividerLocation"), 200);
@@ -258,14 +284,18 @@ public class Config
 		
 		sources = new HashMap<String, SeismicDataSource>();
 		List<String> servers = config.getList("server");
-		if (servers != null)
+		if (servers != null && servers.size() > 0)
 		{
-			
 			for (String server : servers)
 			{
 				SeismicDataSource sds = SeismicDataSource.getDataSource(server);
 				sources.put(sds.getName(), sds);
 			}
+		}
+		else
+		{
+			SeismicDataSource sds = SeismicDataSource.getDataSource(DEFAULT_SERVER);
+			sources.put(sds.getName(), sds);
 		}
 	}
 	

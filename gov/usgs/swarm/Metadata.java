@@ -4,6 +4,7 @@ import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Pair;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,6 +18,9 @@ import java.util.TimeZone;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/07/22 20:27:56  cervelli
+ * Time zone changes, added data source field.
+ *
  * Revision 1.1  2006/06/14 19:19:31  dcervelli
  * Major 1.3.4 changes.
  *
@@ -26,19 +30,20 @@ public class Metadata implements Comparable<Metadata>
 {
 	public static final String DEFAULT_METADATA_FILENAME = "SwarmMetadata.config";
 	
-	public SCNL scnl;
+	private SCNL scnl;
 	
-	public String channel = null;
+	private String channel = null;
 	
-	public String alias = null;
-	public String unit = null;
+	private String alias = null;
+	private String unit = null;
 
-	public double multiplier = 1;
-	public double offset = 0;
+	private double multiplier = 1;
+	private double offset = 0;
+	private boolean linearSet = false;
 	
-	public double longitude = Double.NaN;
-	public double latitude = Double.NaN;
-	public double height = Double.NaN;
+	private double longitude = Double.NaN;
+	private double latitude = Double.NaN;
+	private double height = Double.NaN;
 	
 	public SeismicDataSource source;
 	
@@ -47,6 +52,103 @@ public class Metadata implements Comparable<Metadata>
 	public Set<String> groups = null;
 	
 	public Map<String, String> ancillaryMetadata = null;
+	
+	public Metadata()
+	{}
+	
+	public Metadata(String ch)
+	{
+		updateChannel(ch);
+	}
+	
+	public void updateChannel(String ch)
+	{
+		if (channel == null)
+		{
+			channel = ch;
+			scnl = new SCNL(channel);
+		}
+	}
+	
+	public void updateAlias(String a)
+	{
+		if (alias == null)
+			alias = a;
+	}
+	
+	public void updateUnits(String u)
+	{
+		if (unit == null)
+			unit = u;
+	}
+	
+	public void updateLinearCoeffecients(double mult, double off)
+	{
+		if (!linearSet)
+		{
+			multiplier = mult;
+			offset = off;
+			linearSet = true;
+		}
+	}
+	
+	public void updateLongitude(double lon)
+	{
+		if (Double.isNaN(longitude))
+			longitude = lon;
+	}
+	
+	public void updateLatitude(double lat)
+	{
+		if (Double.isNaN(latitude))
+			latitude = lat;
+	}
+	
+	public void updateHeight(double h)
+	{
+		if (Double.isNaN(height))
+			height = h;
+	}
+	
+	public double getMultiplier()
+	{
+		return multiplier;
+	}
+	
+	public double getOffset()
+	{
+		return offset;
+	}
+	
+	public String getAlias()
+	{
+		return alias;
+	}
+	
+	public String getUnit()
+	{
+		return unit;
+	}
+	
+	public String getChannel()
+	{
+		return channel;
+	}
+	
+	public SCNL getSCNL()
+	{
+		return scnl;
+	}
+	
+	public double getLongitude()
+	{
+		return longitude;
+	}
+	
+	public double getLatitude()
+	{
+		return latitude;
+	}
 	
 	public void interpret(String s)
 	{
@@ -136,6 +238,7 @@ public class Metadata implements Comparable<Metadata>
 		return data;
 	}
 	
+	// TODO: use Projection.distanceTo
 	public double distanceTo(Metadata other)
 	{
 		if (other == null || Double.isNaN(latitude) || Double.isNaN(longitude) || Double.isNaN(other.latitude) || Double.isNaN(other.longitude))
@@ -196,5 +299,10 @@ public class Metadata implements Comparable<Metadata>
 	public int compareTo(Metadata o)
 	{
 		return channel.compareTo(o.channel);
+	}
+	
+	public Point2D.Double getLonLat()
+	{
+		return new Point2D.Double(longitude, latitude);
 	}
 }
