@@ -20,6 +20,9 @@ import java.util.Map;
  * Earthworm Wave Server.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/07/30 22:45:30  cervelli
+ * Uses new gulper.
+ *
  * Revision 1.5  2006/07/26 00:36:03  cervelli
  * Changes for new gulper system.
  *
@@ -181,12 +184,13 @@ public class WaveServerSource extends SeismicDataSource
 	public synchronized List<String> getChannels()
 	{
 		Menu menu = getMenu();
-		return getMenuList(menu.getSortedItems());
+		List<String> channels = getMenuList(menu.getSortedItems());
+		Swarm.config.assignMetadataSource(channels, this);
+		return channels;
 	}
 	
 	public synchronized HelicorderData getHelicorder(String station, double t1, double t2, GulperListener gl)
 	{
-		Thread.dumpStack();
 		double now = CurrentTime.getInstance().nowJ2K();
 		// if a time later than now has been asked for make sure to get the latest 
 		if ((t2 - now) >= -20)
@@ -196,7 +200,7 @@ public class WaveServerSource extends SeismicDataSource
 		HelicorderData hd = cache.getHelicorder(station, t1, t2, (GulperListener)null);	
 
 		if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10))
-			GulperList.getInstance().requestGulper("ws:" + station, gl, this, station, t1, t2);
+			GulperList.getInstance().requestGulper("ws:" + station, gl, this.getCopy(), station, t1, t2);
 		return hd;
 	}
 	

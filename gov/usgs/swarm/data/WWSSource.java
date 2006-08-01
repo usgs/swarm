@@ -2,11 +2,14 @@ package gov.usgs.swarm.data;
 
 import gov.usgs.earthworm.Menu;
 import gov.usgs.earthworm.MenuItem;
+import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;
 import gov.usgs.vdx.data.heli.HelicorderData;
 import gov.usgs.vdx.data.wave.Wave;
+import gov.usgs.winston.Channel;
+import gov.usgs.winston.Instrument;
 import gov.usgs.winston.server.WWSClient;
 
 import java.util.ArrayList;
@@ -21,6 +24,9 @@ import java.util.StringTokenizer;
  * be made a descendant of WaveServerSource. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/07/30 22:46:46  cervelli
+ * Copies name during clone.
+ *
  * Revision 1.8  2006/07/26 22:40:40  cervelli
  * Gets protocolVersion when cloning.
  *
@@ -112,7 +118,6 @@ public class WWSSource extends SeismicDataSource
 	
 	public void establish()
 	{
-		System.out.println("establish");
 		if (!established)
 		{
 			protocolVersion = winstonClient.getProtocolVersion();
@@ -223,8 +228,29 @@ public class WWSSource extends SeismicDataSource
 	
 	public synchronized List<String> getChannels()
 	{
-		Menu menu = winstonClient.getMenuSCNL();
-		return getMenuList(menu.getSortedItems());
+		if (protocolVersion == 1)
+		{
+			Menu menu = winstonClient.getMenuSCNL();
+			List<String> channels = getMenuList(menu.getSortedItems());
+			Swarm.config.assignMetadataSource(channels, this);
+			return channels;
+		}
+		else
+		{
+			List<Channel> channels = winstonClient.getChannels();
+			List<String> result = new ArrayList<String>(channels.size());
+			for (Channel ch : channels)
+			{
+				String code = ch.getCode().replace('$', ' ');
+				Metadata md = Swarm.config.getMetadata(code, true);
+				Instrument ins = ch.getInstrument();
+				md.updateLongitude(ins.getLongitude());
+				md.updateLatitude(ins.getLatitude());
+				md.source = this;
+				result.add(code);
+			}
+			return result;
+		}
 	}
 	
 	public synchronized boolean isActiveSource()

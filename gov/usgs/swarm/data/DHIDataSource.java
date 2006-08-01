@@ -13,7 +13,6 @@ import edu.iris.Fissures.IfSeismogramDC.RequestFilter;
 import edu.iris.Fissures.model.AllVTFactory;
 import edu.sc.seis.fissuresUtil.namingService.FissuresNamingService;
 import gov.usgs.swarm.Metadata;
-import gov.usgs.swarm.SCNL;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.vdx.data.heli.HelicorderData;
@@ -34,6 +33,9 @@ import org.apache.log4j.varia.NullAppender;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/07/30 22:46:24  cervelli
+ * Change for gulper.
+ *
  * Revision 1.2  2006/07/26 00:36:02  cervelli
  * Changes for new gulper system.
  *
@@ -128,16 +130,10 @@ public class DHIDataSource extends SeismicDataSource
 		            			loc = " " + loc;
 		            		
 		            		String ch = s.get_code() + " " + c.get_code() + " " + network + loc;
-		            		Metadata md = Swarm.config.metadata.get(ch);
-		            		if (md == null)
-		            		{
-		            			md = new Metadata();
-		            			md.channel = ch;
-		            			md.scnl = new SCNL(ch);
-		            			md.longitude = s.my_location.longitude;
-		            			md.latitude = s.my_location.latitude;
-		            			Swarm.config.metadata.put(ch, md);
-		            		}
+		            		Metadata md = Swarm.config.getMetadata(ch, true);
+	            			md.updateLongitude(s.my_location.longitude);
+	            			md.updateLatitude(s.my_location.latitude);
+	            			md.source = this;
 		            		result.add(ch);
 		            		idMap.put(ch, c.get_id());
 		            	}
