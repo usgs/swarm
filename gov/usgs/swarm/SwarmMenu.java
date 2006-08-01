@@ -1,5 +1,7 @@
 package gov.usgs.swarm;
 
+import gov.usgs.swarm.data.CachedDataSource;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -19,6 +21,9 @@ import javax.swing.event.MenuListener;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/07/31 15:56:18  cervelli
+ * Added Layout menu.
+ *
  * Revision 1.3  2006/07/22 20:31:00  cervelli
  * Added Window>Map menu item.
  *
@@ -34,6 +39,7 @@ public class SwarmMenu extends JMenuBar
 {
 	private static final long serialVersionUID = 1L;
 	private JMenu fileMenu;
+	private JMenuItem clearCache;
 	private JMenuItem exit;
 	
 	private JMenu editMenu;
@@ -76,6 +82,21 @@ public class SwarmMenu extends JMenuBar
 	{
 		fileMenu = new JMenu("File");
 		fileMenu.setMnemonic('F');
+		clearCache = new JMenuItem("Clear Cache");
+		clearCache.setMnemonic('C');
+		clearCache.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						CachedDataSource cache = Swarm.getCache();
+						if (cache != null)
+							cache.flush();
+					}
+				});
+		clearCache.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F12, KeyEvent.CTRL_DOWN_MASK));
+		fileMenu.add(clearCache);
+		fileMenu.addSeparator();
+		
 		exit = new JMenuItem("Exit");
 		exit.setMnemonic('x');
 		exit.addActionListener(new ActionListener()
@@ -87,6 +108,21 @@ public class SwarmMenu extends JMenuBar
 				});
 		fileMenu.add(exit);
 		add(fileMenu);
+		
+		fileMenu.addMenuListener(new MenuListener()
+				{
+					public void menuSelected(MenuEvent e)
+					{
+						CachedDataSource cache = Swarm.getCache();
+						clearCache.setEnabled(!cache.isEmpty());
+					}
+		
+					public void menuDeselected(MenuEvent e)
+					{}
+					
+					public void menuCanceled(MenuEvent e)
+					{}
+				});
 	}
 	
 	private void createEditMenu()
@@ -160,7 +196,6 @@ public class SwarmMenu extends JMenuBar
 		for (i = 3; i < layoutMenu.getItemCount(); i++)
 		{
 			JMenuItem m = layoutMenu.getItem(i);
-			System.out.println(m.getText() + " " + sl.getName());
 			if (m.getText().compareToIgnoreCase(sl.getName()) >= 0)
 			{
 				layoutMenu.add(mi, i);
