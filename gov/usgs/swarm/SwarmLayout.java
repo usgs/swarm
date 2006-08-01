@@ -1,5 +1,6 @@
 package gov.usgs.swarm;
 
+import gov.usgs.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.util.ConfigFile;
 
 import java.io.File;
@@ -8,6 +9,9 @@ import java.util.List;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/07/30 22:42:19  cervelli
+ * Initial commit.
+ *
  * @author Dan Cervelli
  */
 public class SwarmLayout implements Comparable<SwarmLayout>
@@ -17,7 +21,6 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 	public SwarmLayout(ConfigFile c)
 	{
 		config = c;
-		System.out.println("SwarmLayout: " + config.getName());
 	}
 	
 	public static SwarmLayout createSwarmLayout(String fn)
@@ -40,7 +43,6 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 		String pre = "layouts" + File.separatorChar;
 		String post = ".config";
 		fn =  pre + n + post;
-		System.out.println("file name: " + fn);
 		boolean exists = new File(fn).exists();
 		int i = 0;
 		while (exists)
@@ -66,10 +68,17 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 	public void process()
 	{
 		Swarm.getApplication().removeAllFrames();
+		processChooser();
 		processMap();
 		processWaves();
 		processHelicorders();
 		processMonitors();
+	}
+	
+	private void processChooser()
+	{
+		ConfigFile cf = config.getSubConfig("chooser");
+		Swarm.getApplication().getDataChooser().processLayout(cf);
 	}
 	
 	private void processWaves()
@@ -99,6 +108,7 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 			ConfigFile cf = config.getSubConfig(heli);
 			// check source now
 			HelicorderViewerFrame hvf = new HelicorderViewerFrame(cf);
+			hvf.addLinkListeners();
 			Swarm.getApplication().addInternalFrame(hvf, false);
 		}
 	}
