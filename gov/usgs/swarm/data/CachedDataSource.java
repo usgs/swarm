@@ -1,5 +1,6 @@
 package gov.usgs.swarm.data;
  
+import gov.usgs.swarm.Swarm;
 import gov.usgs.vdx.data.heli.HelicorderData;
 import gov.usgs.vdx.data.wave.Wave;
 
@@ -20,6 +21,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * so I had to add some hacky code for the CachePurgeActions.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/07/26 00:36:02  cervelli
+ * Changes for new gulper system.
+ *
  * Revision 1.4  2006/06/05 18:07:03  dcervelli
  * Major 1.3 changes.
  *
@@ -57,7 +61,7 @@ public class CachedDataSource extends SeismicDataSource
 	{
 		helicorderCache = new HashMap<String, List<CachedHelicorder>>();
 		waveCache = new HashMap<String, List<CachedWave>>();	
-		maxSize = Runtime.getRuntime().maxMemory() / 2;
+		maxSize = Runtime.getRuntime().maxMemory() / 6;
 		createPurgeActions();
 	}
 
@@ -498,6 +502,11 @@ public class CachedDataSource extends SeismicDataSource
 		return size;
 	}
 	
+	public boolean isEmpty()
+	{
+		return helicorderCache.size() + waveCache.size() == 0;
+	}
+	
 	public void flush()
 	{
 		//enforceSize();
@@ -560,6 +569,7 @@ public class CachedDataSource extends SeismicDataSource
 		while (target > 0 && i < purgeActions.length)
 		{
 			long chunk = purgeActions[i].purge();
+			Swarm.logger.finer("purged " + chunk + " bytes from cache");
 			target -= chunk;
 			i++;
 		}
