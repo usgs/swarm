@@ -1,16 +1,19 @@
 package gov.usgs.swarm.map;
 
 import gov.usgs.proj.GeoRange;
-import gov.usgs.swarm.HelicorderViewPanelListener;
 import gov.usgs.swarm.Images;
-import gov.usgs.swarm.MultiMonitor;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmFrame;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.Throbber;
+import gov.usgs.swarm.heli.HelicorderViewPanelListener;
 import gov.usgs.swarm.map.MapPanel.DragMode;
+import gov.usgs.swarm.wave.MultiMonitor;
+import gov.usgs.swarm.wave.WaveViewPanel;
+import gov.usgs.swarm.wave.WaveViewSettingsToolbar;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.CurrentTime;
+import gov.usgs.util.Time;
 import gov.usgs.util.Util;
 import gov.usgs.util.png.PngEncoder;
 import gov.usgs.util.png.PngEncoderB;
@@ -20,6 +23,8 @@ import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -44,6 +49,9 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/07/30 22:47:04  cervelli
+ * Changes for layouts.
+ *
  * Revision 1.6  2006/07/30 16:16:09  cervelli
  * Added ruler.
  *
@@ -73,9 +81,13 @@ public class MapFrame extends SwarmFrame implements Runnable
 	private JButton gotoButton;
 	private JButton timeHistoryButton;
 	private JButton captureButton;
+	private JButton clipboardButton;
 	
 	private JToggleButton dragButton;
 	private JToggleButton rulerButton;
+	
+	private WaveViewSettingsToolbar waveToolbar;
+	private WaveViewPanel selected;
 	
 	private Thread updateThread;
 	
@@ -149,6 +161,15 @@ public class MapFrame extends SwarmFrame implements Runnable
 		mainPanel.add(statusLabel, BorderLayout.SOUTH);
 		setContentPane(mainPanel);
 		
+		this.addComponentListener(new ComponentAdapter()
+				{
+					public void componentShown(ComponentEvent e)
+					{
+						if (!mapPanel.imageValid())
+							mapPanel.resetImage();
+					}
+				});
+		
 		this.addInternalFrameListener(new InternalFrameAdapter()
 				{
 					public void internalFrameClosing(InternalFrameEvent e)
@@ -158,19 +179,19 @@ public class MapFrame extends SwarmFrame implements Runnable
 				});
 		
 		linkListener = new HelicorderViewPanelListener() 
-		{
-			public void insetCreated(double st, double et)
-			{
-				if (heliLinked)
 				{
-					if (!realtime)
-						mapPanel.timePush();
-					
-					realtime = false;
-					mapPanel.setTimes(st, et);
-				}
-			}
-		};
+					public void insetCreated(double st, double et)
+					{
+						if (heliLinked)
+						{
+							if (!realtime)
+								mapPanel.timePush();
+							
+							realtime = false;
+							mapPanel.setTimes(st, et);
+						}
+					}
+				};
 		
 //		mainPanel.addKeyListener(mapPanel.getKeyListener());		
 		setVisible(true);
@@ -327,9 +348,17 @@ public class MapFrame extends SwarmFrame implements Runnable
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-//						String t = JOptionPane.showInputDialog(Swarm.getApplication(), "Input time in 'YYYYMMDDhhmm[ss]' format:", "Go to Time", JOptionPane.PLAIN_MESSAGE);
-//						if (selected != null && t != null)
-//							gotoTime(selected, t);
+						String t = JOptionPane.showInputDialog(Swarm.getApplication(), "Input time in 'YYYYMMDDhhmm[ss]' format:", "Go to Time", JOptionPane.PLAIN_MESSAGE);
+						if (t != null)
+						{
+							if (t.length() == 12)
+								t = t + "30";
+							
+							double j2k = Time.parse("yyyyMMddHHmmss", t);
+							realtime = false;
+							mapPanel.gotoTime(j2k);
+							
+						}
 					}
 				});
 		toolbar.add(gotoButton);
@@ -390,6 +419,25 @@ public class MapFrame extends SwarmFrame implements Runnable
 				});		
 		Util.mapKeyStrokeToButton(this, "BACK_SPACE", "back", timeHistoryButton);
 		toolbar.add(timeHistoryButton);
+		toolbar.addSeparator();
+		
+		waveToolbar = new WaveViewSettingsToolbar(null, toolbar, this);
+
+		clipboardButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("clipboard"),
+				"Copy inset to clipboard (C or Ctrl-C)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						mapPanel.wavesToClipboard();
+					}
+				});
+//		clipboardButton.setEnabled(false);
+		Util.mapKeyStrokeToButton(this, "control C", "clipboard1", clipboardButton);
+		Util.mapKeyStrokeToButton(this, "C", "clipboard2", clipboardButton);
+		toolbar.add(clipboardButton);
+		
 		toolbar.addSeparator();
 		
 		captureButton = SwarmUtil.createToolBarButton(
@@ -456,6 +504,12 @@ public class MapFrame extends SwarmFrame implements Runnable
 		return throbber;
 	}
 	
+	public void setSelectedWave(WaveViewPanel wvp)
+	{
+		selected = wvp;
+		waveToolbar.setSettings(selected.getSettings());
+	}
+	
 	public void setView(GeoRange gr)
 	{
 		double lr1 = gr.getLonRange();
@@ -473,16 +527,19 @@ public class MapFrame extends SwarmFrame implements Runnable
 					public void run()
 					{
 						String missing = "";
-						if (mapPanel.getMissing() > 0)
+						if (mapPanel.getMissing() == 1)
+							missing = "(" + mapPanel.getMissing() + " channel hidden) ";
+						else if (mapPanel.getMissing() > 1)
 							missing = "(" + mapPanel.getMissing() + " channels hidden) ";
 						statusLabel.setText(missing + t);
+						statusLabel.repaint();
 					}
 				});
 	}
 	
-	public void reset()
+	public void reset(boolean doMap)
 	{
-		mapPanel.resetImage();
+		mapPanel.resetImage(doMap);
 	}
 	
 	public HelicorderViewPanelListener getLinkListener()
