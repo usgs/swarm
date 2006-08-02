@@ -18,6 +18,7 @@ import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.map.MapMiniPanel.Position;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.swarm.wave.WaveViewPanel;
+import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Util;
 
 import java.awt.BorderLayout;
@@ -62,6 +63,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/08/01 23:45:09  cervelli
+ * More development.
+ *
  * Revision 1.6  2006/07/30 22:47:04  cervelli
  * Changes for layouts.
  *
@@ -107,6 +111,7 @@ public class MapPanel extends JPanel
 	private MapRenderer renderer;
 
 	private Map<Double, MapMiniPanel> miniPanels;
+	private Map<Double, ConfigFile> layouts;
 	private List<MapMiniPanel> visiblePanels;
 
 	private DragMode dragMode = DragMode.BOX;
@@ -134,6 +139,7 @@ public class MapPanel extends JPanel
 		timeHistory = new Stack<double[]>();
 		lines = new ArrayList<Line2D.Double>();
 		miniPanels = Collections.synchronizedMap(new HashMap<Double, MapMiniPanel>());
+		layouts = Collections.synchronizedMap(new HashMap<Double, ConfigFile>());
 		visiblePanels = Collections.synchronizedList(new ArrayList<MapMiniPanel>());
 		selectedPanels = new HashSet<MapMiniPanel>();
 		
@@ -141,6 +147,46 @@ public class MapPanel extends JPanel
 		this.setCursor(crosshair);
 		
 		createUI();
+	}
+	
+	public void saveLayout(ConfigFile cf, String prefix)
+	{
+		cf.put(prefix + ".longitude", Double.toString(center.x));
+		cf.put(prefix + ".latitude", Double.toString(center.y));
+		cf.put(prefix + ".scale", Double.toString(scale));
+		synchronized (visiblePanels)
+		{
+			int waves = 0;
+			for (MapMiniPanel panel : visiblePanels)
+			{
+				if (panel.isWaveVisible())
+				{
+					cf.put(prefix + ".wave-" + waves + ".hash", Double.toString(panel.getActiveMetadata().getLocationHashCode()));
+					panel.saveLayout(cf, prefix + ".wave-" + waves++);
+				}
+			}
+			cf.put(prefix + ".waves", Integer.toString(waves));
+		}
+	}
+	
+	public void processLayout(ConfigFile cf)
+	{
+		int waves = Integer.parseInt(cf.getString("waves"));
+		for (int i = 0; i < waves; i++)
+		{
+			String w = "wave-" + i;
+			double hash = Double.parseDouble(cf.getString(w + ".hash"));
+			ConfigFile scf = cf.getSubConfig(w);
+			layouts.put(hash, scf);
+		}
+		
+		double lon = Double.parseDouble(cf.getString("longitude"));
+		double lat = Double.parseDouble(cf.getString("latitude"));
+		Point2D.Double c = new Point2D.Double(lon, lat);
+		double sc = Double.parseDouble(cf.getString("scale"));
+		setCenterAndScale(c, sc);
+		
+		System.out.println("processLayout done");
 	}
 	
 	private void createUI()
@@ -482,6 +528,8 @@ public class MapPanel extends JPanel
 	
 	public Point2D.Double getXY(double lon, double lat)
 	{
+		if (range == null || projection == null || image == null || renderer == null)
+			return null;
 		Point2D.Double xy = projection.forward(new Point2D.Double(lon, lat));
 		double[] ext = range.getProjectedExtents(projection);
 		double dx = (ext[1] - ext[0]);
@@ -519,8 +567,12 @@ public class MapPanel extends JPanel
 		synchronized (visiblePanels)
 		{
 			for (MapMiniPanel panel : visiblePanels)
-				panel.updateWave(startTime, endTime);
+			{
+				if (panel.updateWave(startTime, endTime))
+					panel.repaint();
+			}
 		}
+//		repaint();
 	}
 	
 	public Point2D.Double getCenter()
@@ -637,6 +689,28 @@ public class MapPanel extends JPanel
 	public void resetImage()
 	{
 		resetImage(true);
+	}
+	
+	private void checkLayouts()
+	{
+		if (layouts.size() == 0)
+			return;
+		
+		System.out.println("checkLayouts");
+		Set<Double> ks = layouts.keySet();
+		Set<Double> toRemove = new HashSet<Double>();
+		for (double hash : ks)
+		{
+			MapMiniPanel mmp = miniPanels.get(hash);
+			if (mmp != null)
+			{
+				mmp.processLayout(layouts.get(hash));
+				System.out.println(mmp);
+				toRemove.add(hash);
+			}
+		}
+		for (double hash : toRemove)
+			layouts.remove(hash);
 	}
 	
 	public void resetImage(final boolean doMap)
@@ -829,7 +903,9 @@ public class MapPanel extends JPanel
 				}
 				lines = linesToAdd;
 				parent.setStatusText(" ");
+				checkLayouts();
 				repaint();
+				System.out.println("placeMiniPanels done");
 			}
 		};
 		worker.start();
