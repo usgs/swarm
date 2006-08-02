@@ -13,6 +13,9 @@ import javax.swing.Icon;
  * Base class for seismic data sources.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/07/30 22:45:49  cervelli
+ * Change for gulper.
+ *
  * Revision 1.5  2006/07/26 00:36:01  cervelli
  * Changes for new gulper system.
  *
@@ -50,6 +53,8 @@ abstract public class SeismicDataSource
 	protected String name = "Unnamed Data Source";
 	
 	protected boolean storeInUserConfig = true;
+
+	protected boolean useCache = true;
 	
 	abstract public List<String> getChannels();
 	
@@ -76,6 +81,16 @@ abstract public class SeismicDataSource
 	public boolean isStoreInUserConfig()
 	{
 		return storeInUserConfig;
+	}
+	
+	public void setUseCache(boolean b)
+	{
+		useCache = b;
+	}
+	
+	public boolean isUseCache()
+	{
+		return useCache;
 	}
 	
 	/**
