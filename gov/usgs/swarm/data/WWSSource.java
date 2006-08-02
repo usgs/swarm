@@ -24,6 +24,9 @@ import java.util.StringTokenizer;
  * be made a descendant of WaveServerSource. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/08/01 23:44:07  cervelli
+ * New metadata system changes.
+ *
  * Revision 1.9  2006/07/30 22:46:46  cervelli
  * Copies name during clone.
  *
@@ -177,8 +180,9 @@ public class WWSSource extends SeismicDataSource
 	
 	public synchronized Wave getWave(String station, double t1, double t2)
 	{
-		CachedDataSource cache = Swarm.getCache();
-		Wave wave = cache.getWave(station, t1, t2);
+		Wave wave = null;
+		if (useCache)
+			wave = Swarm.getCache().getWave(station, t1, t2);
 		if (wave == null)
 		{
 			String[] scnl = parseSCNL(station);
@@ -195,7 +199,8 @@ public class WWSSource extends SeismicDataSource
 				return null;
 			
 			wave.register();
-			cache.putWave(station, wave);
+			if (useCache)
+				Swarm.getCache().putWave(station, wave);
 		}
 		else
 		{
@@ -229,6 +234,7 @@ public class WWSSource extends SeismicDataSource
 	public synchronized List<String> getChannels()
 	{
 		if (protocolVersion == 1)
+//		if (true)
 		{
 			Menu menu = winstonClient.getMenuSCNL();
 			List<String> channels = getMenuList(menu.getSortedItems());
