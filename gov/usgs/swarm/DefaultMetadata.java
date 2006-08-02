@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * 
+ * $Log: not supported by cvs2svn $
  * @author Dan Cervelli
  */
 public class DefaultMetadata
@@ -53,11 +53,9 @@ public class DefaultMetadata
 		if (i >= 0)
 		{
 			Entry e = entries.get(i);
-			md = new Metadata();
-			md.channel = ch;
-			md.scnl = new SCNL(ch);
-			md.longitude = e.longitude;
-			md.latitude = e.latitude;
+			md = new Metadata(ch);
+			md.updateLongitude(e.longitude);
+			md.updateLatitude(e.latitude);
 		}
 		return md;
 	}
