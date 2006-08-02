@@ -10,6 +10,7 @@ import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.wave.WaveViewPanel;
+import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Util;
 import gov.usgs.vdx.data.wave.Wave;
 
@@ -33,8 +34,8 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JComponent;
@@ -44,6 +45,9 @@ import javax.swing.JRadioButtonMenuItem;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/08/01 23:45:09  cervelli
+ * More development.
+ *
  * Revision 1.4  2006/07/26 22:41:00  cervelli
  * Bunch more development for 2.0.
  *
@@ -60,7 +64,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	private static final int SIZES[] = new int[] { 100, 150, 200, 250, 300, 350, 400, 450, 500, 550};
 	private int sizeIndex = 4;
 	private Metadata activeMetadata;
-	private SortedSet<Metadata> metadataList;
+	private SortedMap<String, Metadata> metadataList;
 	private WaveViewPanel wavePanel;
 	private boolean waveVisible = false;
 	private Line2D.Double line;
@@ -91,7 +95,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	public MapMiniPanel(MapPanel p)
 	{
 		parent = p;
-		metadataList = new TreeSet<Metadata>();
+		metadataList = new TreeMap<String, Metadata>();
 		setSize(labelWidth, LABEL_HEIGHT);
 		setCursor(Cursor.getDefaultCursor());
 		addMouseMotionListener(this);
@@ -119,6 +123,40 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 		setLayout(null);
 	}
 
+	public void saveLayout(ConfigFile cf, String prefix)
+	{
+		cf.put(prefix + ".sizeIndex", Integer.toString(sizeIndex));
+		cf.put(prefix + ".activeChannel", activeMetadata.getChannel());
+		int x = -1;
+		int y = -1;
+		if (position == Position.MANUAL_SET)
+		{
+			x = (int)manualPositionXY.x;
+			y = (int)manualPositionXY.y;
+		}
+		cf.put(prefix + ".x", Integer.toString(x));
+		cf.put(prefix + ".y", Integer.toString(y));
+		wavePanel.getSettings().save(cf, prefix + ".settings");
+	}
+	
+	public void processLayout(ConfigFile cf)
+	{
+		int x = Integer.parseInt(cf.getString("x"));
+		int y = Integer.parseInt(cf.getString("y"));
+		setManualPosition(new Point2D.Double(x, y));
+		position = Position.MANUAL_SET;
+		sizeIndex = Integer.parseInt(cf.getString("sizeIndex"));
+		setLocation(x, y);
+		if (wavePanel == null)
+			createWaveViewPanel();
+		wavePanel.getSettings().set(cf.getSubConfig("settings"));
+		activeMetadata = metadataList.get(cf.getString("activeChannel"));
+		if (!waveVisible)
+			toggleWave();
+		else
+			resetWave();
+	}
+	
 	public Metadata getActiveMetadata()
 	{
 		return activeMetadata;
@@ -126,7 +164,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	
 	public void addMetadata(Metadata md)
 	{
-		metadataList.add(md);
+		metadataList.put(md.getChannel(), md);
 //		Collections.sort(metadataList);
 //		activeMetadata = metadataList.get(metadataList.size() - 1);
 		// TODO: should be intelligently chosen
@@ -276,10 +314,10 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 			updateWave(wavePanel.getStartTime(), wavePanel.getEndTime());
 	}
 	
-	public void updateWave(final double st, final double et)
+	public boolean updateWave(final double st, final double et)
 	{			
 		if (!waveVisible || activeMetadata.source == null)
-			return;
+			return false;
 		
 		final SwingWorker worker = new SwingWorker()
 				{
@@ -289,8 +327,34 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 						wavePanel.setWorking(true);
 						wavePanel.setDataSource(activeMetadata.source);
 						wavePanel.setChannel(activeMetadata.getChannel());
-						Wave sw = activeMetadata.source.getWave(activeMetadata.getChannel(), st, et);
-						wavePanel.setWave(sw, st, et);
+						Wave cw = wavePanel.getWave();
+						// TODO: unify this and the monitor code
+						if (cw != null && cw.overlaps(st, et))
+						{
+							boolean before = activeMetadata.source.isUseCache();
+							activeMetadata.source.setUseCache(false);
+							if (cw.getEndTime() < et)
+							{
+								Wave w2 = activeMetadata.source.getWave(activeMetadata.getChannel(), cw.getEndTime() - 10, et);
+								if (w2 != null)
+									cw = cw.combine(w2);
+							}
+							if (cw.getStartTime() > st)
+							{
+								Wave w2 = activeMetadata.source.getWave(activeMetadata.getChannel(), st, cw.getStartTime() + 10);
+								if (w2 != null)
+									cw = cw.combine(w2);
+							}
+							cw = cw.subset(st, Math.min(et, cw.getEndTime()));
+							activeMetadata.source.setUseCache(before);
+						}
+						else
+							cw = null;
+						
+						if (cw == null)
+							cw = activeMetadata.source.getWave(activeMetadata.getChannel(), st, et);
+						
+						wavePanel.setWave(cw, st, et);
 						return null;
 					}
 					
@@ -298,11 +362,12 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 					{
 						parent.getThrobber().decrement();
 						wavePanel.setWorking(false);
-						repaint();	
+//						repaint();	
 					}
 				};
 		
 		worker.start();
+		return true;
 	}
 	
 	public void toggleWave()
@@ -346,7 +411,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	{
 		popup = new JPopupMenu();
 		ButtonGroup group = new ButtonGroup();
-		for (final Metadata md : metadataList)
+		for (final Metadata md : metadataList.values())
 		{
 			JRadioButtonMenuItem rmi = new JRadioButtonMenuItem(md.getChannel());
 			rmi.addActionListener(new ActionListener()
