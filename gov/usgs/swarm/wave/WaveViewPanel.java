@@ -26,6 +26,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Paint;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -48,6 +50,9 @@ import javax.swing.event.EventListenerList;
  * TODO: move filter method
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/01 23:45:23  cervelli
+ * Moved package.
+ *
  * Revision 1.21  2006/07/25 05:17:06  cervelli
  * Red line disappears when outside of plot box.
  *
@@ -253,6 +258,13 @@ public class WaveViewPanel extends JComponent
 		displayTitle = p.displayTitle;
 		backgroundColor = p.backgroundColor;
 		setupMouseHandler();
+		addComponentListener(new ComponentAdapter()
+				{
+					public void componentResized(ComponentEvent e)
+					{
+						createImage();
+					}
+				});
 		processSettings();
 	}
 
@@ -457,7 +469,6 @@ public class WaveViewPanel extends JComponent
 							sw = ((CachedDataSource)source).getBestWave(channel, st, et);
 						else
 							sw = source.getWave(channel, st, et);
-						System.out.println(sw);
 						setWave(sw, st, et);
 						return null;
 					}
@@ -559,10 +570,10 @@ public class WaveViewPanel extends JComponent
 		processSettings();	
 	}
 	
-	public void invalidateImage()
-	{
-		image = null;
-	}
+//	public void invalidateImage()
+//	{
+////		image = null;
+//	}
 	
 	public boolean isTimeSeries()
 	{
@@ -585,7 +596,8 @@ public class WaveViewPanel extends JComponent
 	public void setBackgroundColor(Color c)
 	{
 		backgroundColor = c;
-		invalidateImage();
+		createImage();
+//		invalidateImage();
 	}
 	
 	/** Processes the mouse position variables when the cursor is over the panel.
@@ -691,12 +703,62 @@ public class WaveViewPanel extends JComponent
 		processSettings();
 	}
 	
+	private synchronized void setImage(BufferedImage bi)
+	{
+		image = bi;
+	}
+	
+	private synchronized BufferedImage getImage()
+	{
+		return image;
+	}
+	
+	private void createImage()
+	{
+		final Runnable r = new Runnable()
+				{
+					public void run()
+					{
+						if (getWidth() != 0 && getHeight() != 0)
+						{
+							BufferedImage bi = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+							Graphics2D ig = (Graphics2D)bi.getGraphics();
+							constructPlot(ig);
+							setImage(bi);
+						}
+					}
+				};
+		
+		if (SwingUtilities.isEventDispatchThread())
+		{
+			SwingWorker worker = new SwingWorker()
+					{
+						public Object construct()
+						{
+							r.run();
+							return null;
+						}
+						
+						public void finished()
+						{
+							repaint();
+						}
+					};
+			worker.start();
+		}
+		else
+			r.run();
+	}
+	
+	/** Does NOT call repaint for efficiency purposes, that is left to the 
+	 * container.
+	 */
 	private void processSettings()
 	{
 		if (wave == null || wave.buffer == null || wave.buffer.length == 0)
 			return;
 
-		invalidateImage();		
+//		invalidateImage();		
 		
 		if (settings.maxFreq > wave.getSamplingRate() / 2)
 		{
@@ -709,9 +771,19 @@ public class WaveViewPanel extends JComponent
 			
 		timeSeries = !(settings.viewType == ViewType.SPECTRA);
 		
+		createImage();
+		
+//		if (getWidth() != 0 && getHeight() != 0)
+//		{
+//			BufferedImage bi = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+//			Graphics2D ig = (Graphics2D)bi.getGraphics();
+//			constructPlot(ig);
+//			setImage(bi);
+//		}
+		
 //		repaint();
-		if (getParent() != null)
-			getParent().repaint();
+//		if (getParent() != null)
+//			getParent().repaint();
 	}
 
 	private void filter(Wave w)
@@ -774,15 +846,9 @@ public class WaveViewPanel extends JComponent
 		}
 		else
 		{
-			if (image == null || image.getWidth() != dim.width || image.getHeight() != dim.height)
-			{
-				image = new BufferedImage(dim.width, dim.height, BufferedImage.TYPE_4BYTE_ABGR);
-				Graphics2D ig = (Graphics2D)image.getGraphics();
-				constructPlot(ig);
-			}
-
-			if (image != null)
-				g2.drawImage(image, 0, 0, null);
+			BufferedImage bi = getImage();
+			if (bi != null)
+				g2.drawImage(bi, 0, 0, null);
 
 			if (dragging)
 				paintDragBox(g2);
@@ -829,7 +895,7 @@ public class WaveViewPanel extends JComponent
 	/** Constructs the plot on the specified graphics context.
 	 * @param g2 the graphics context
 	 */
-	private void constructPlot(Graphics2D g2)
+	private synchronized void constructPlot(Graphics2D g2)
 	{
 		Dimension dim = this.getSize();		
 		
