@@ -9,9 +9,7 @@ import gov.usgs.swarm.Images;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.Throbber;
-import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
-import gov.usgs.util.CodeTimer;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;
 import gov.usgs.vdx.data.wave.Wave;
@@ -20,6 +18,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -31,7 +30,6 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
@@ -51,6 +49,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: up/down arrows
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/01 23:45:23  cervelli
+ * Moved package.
+ *
  * Revision 1.12  2006/07/25 05:15:36  cervelli
  * Change for FrameDecorator being class instead of interface.
  *
@@ -110,19 +111,17 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	
 	public final static int[] SPANS = new int[] {15, 30, 60, 120, 180, 240, 300, 600, 15*60, 20*60, 30*60, 60*60};
 	private int spanIndex = 1;
-	private List<String> channels;
 	private List<WaveViewPanel> panels;
 	private SeismicDataSource dataSource;
 
 	private JToolBar toolbar;
 	private JButton settingsButton;
 	private JButton removeButton;
+	private JPanel wavePanel;
 	private JPanel mainPanel;
 	private JButton compXButton;
 	private JButton expXButton;
 	private JButton optionsButton;
-	
-	private Box waveBox;
 	
 	private long refreshInterval = 1000;
 	
@@ -140,23 +139,21 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		super("Monitor, [" + sds.getName() + "]", true, true, true, true);
 		this.setFrameIcon(new ImageIcon(getClass().getClassLoader().getResource(Images.get("monitor"))));
 		dataSource = sds;
-		channels = new ArrayList<String>();
+		dataSource.setUseCache(false);
 		panels = new ArrayList<WaveViewPanel>();
-		waveBox = new Box(BoxLayout.Y_AXIS);
-//		waveBox.setBackground(Color.RED);
 		createUI();
 		refreshThread = new Thread(this);
 		refreshThread.start();
 	}
 	
-	public SeismicDataSource getDataSource()
-	{
-		return dataSource;
-	}
-	
 	public void setDataSource(SeismicDataSource sds)
 	{
 		dataSource = sds;
+	}
+	
+	public SeismicDataSource getDataSource()
+	{
+		return dataSource;
 	}
 	
 	public long getRefreshInterval()
@@ -191,11 +188,6 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		this.setSize(600, 700);
 		this.setLocation(100, 0);
 		mainPanel = new JPanel(new BorderLayout());
-//		mainPanel.setBackground(Color.RED);
-		Border border = BorderFactory.createCompoundBorder(
-				BorderFactory.createEmptyBorder(0, 2, 0, 3), 
-				LineBorder.createGrayLineBorder());
-//		mainPanel.setBorder(border);
 		
 		toolbar = SwarmUtil.createToolBar();
 
@@ -271,9 +263,9 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 						if (selectedIndex >= 0)
 						{
 							removeWaveAtIndex(selectedIndex);
-							if (channels.size() == 0)
+							if (panels.size() == 0)
 								selectedIndex = -1;
-							else if (channels.size() == selectedIndex)
+							else if (panels.size() == selectedIndex)
 								selectedIndex--;
 							if (selectedIndex != -1)
 								select(panels.get(selectedIndex));
@@ -312,23 +304,24 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 					}
 				});
 		
-		toolbar.add(Box.createHorizontalGlue());
-		
+		toolbar.add(Box.createHorizontalGlue());		
 		throbber = new Throbber();
 		toolbar.add(throbber);
 		
 		mainPanel.add(toolbar, BorderLayout.NORTH);
-		mainPanel.add(waveBox, BorderLayout.CENTER);
+		wavePanel = new JPanel();
+		wavePanel.setLayout(null);
 		
-//		waveBox.setBorder(LineBorder.createGrayLineBorder());
-		border = BorderFactory.createCompoundBorder(
+		Border border = BorderFactory.createCompoundBorder(
 				BorderFactory.createEmptyBorder(0, 2, 3, 3), 
 				LineBorder.createGrayLineBorder());
-		waveBox.setBorder(border);
+		wavePanel.setBorder(border);
+		
+		mainPanel.add(wavePanel, BorderLayout.CENTER);
 
 		createListeners();
 		this.setContentPane(mainPanel);
-//		this.setVisible(true);
+		this.setVisible(true);
 	}
 	
 	private void createListeners()
@@ -367,11 +360,8 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 						selectedIndex = -1;
 						dataSource.close();
 						panels.clear();
-						channels.clear();
-						waveBox.removeAll();
-//						Swarm.getApplication().removeInternalFrame(MultiMonitor.this);
+						wavePanel.removeAll();
 						Swarm.getApplication().removeMonitor(MultiMonitor.this);
-//						MultiMonitor.this.setVisible(true);
 					}
 			  });
 
@@ -425,14 +415,14 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	
 	public synchronized void addChannel(String ch)
 	{
-		channels.add(ch);
 		final WaveViewPanel panel = new WaveViewPanel();
+		panel.setChannel(ch);
 		panel.setOffsets(-1, 0, 0, 0);
 		panel.setWorking(true);
 		panel.setDisplayTitle(true);
 		panel.setFrameDecorator(new MonitorWaveDecorator(panel));
 		panels.add(panel);
-		waveBox.add(panel);
+		wavePanel.add(panel);
 		panel.addListener(new WaveViewPanelAdapter()
 				{
 					public void mousePressed(MouseEvent e)
@@ -450,7 +440,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		{
 			WaveViewPanel panel = panels.get(selectedIndex);
 			panel.setBackgroundColor(BACKGROUND_COLOR);
-			panel.invalidateImage();
+//			panel.invalidateImage();
 			panel.repaint();
 		}
 	}
@@ -466,7 +456,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 				selectedIndex = i;
 				Swarm.getApplication().getDataChooser().setNearest(panel.getChannel());
 				panel.setBackgroundColor(SELECT_COLOR);
-				panel.invalidateImage();
+//				panel.invalidateImage();
 				panel.repaint();
 				break;
 			}
@@ -477,24 +467,25 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	public void removeWaveAtIndex(int i)
 	{
 		WaveViewPanel wvp = panels.get(i);
-		channels.remove(i);
 		panels.remove(i);
-		waveBox.remove(wvp);
+		wavePanel.remove(wvp);
 		resizeWaves();
 	}
 	
 	private void resizeWaves()
 	{
-		if (panels.size () == 0 || waveBox == null)
+		if (panels.size () == 0 || wavePanel == null)
 		{
 			repaint();
 			return;
 		}
-		int ah = waveBox.getHeight() - 5;
+		Insets insets = wavePanel.getInsets();
+		int ah = wavePanel.getHeight() - insets.top - insets.bottom;
 		double dy = ((double)ah / (double)panels.size());
 		int wh = (int)Math.round(dy);
 		int th = wh * panels.size();
 		int dh = th - ah;
+		int rh = insets.top;
 		for (int i = 0; i < panels.size(); i++)
 		{
 			WaveViewPanel wvp = panels.get(i);
@@ -509,25 +500,25 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 				awh--;
 				dh--;
 			}
-			wvp.setSize(this.getWidth(), awh);
+			wvp.setSize(wavePanel.getWidth() - insets.left - insets.right, awh);
+			wvp.setLocation(insets.left, rh);
+			rh += awh;
 		}
-		waveBox.validate();
 		repaint();
 	}
 	
 	public synchronized void refresh()
 	{
-		System.out.println("refresh start");
 		throbber.increment();
-		CachedDataSource cache = Swarm.getCache();
+//		CachedDataSource cache = Swarm.getCache();
 		double now = CurrentTime.getInstance().nowJ2K();
 		double start = now - SPANS[spanIndex];
-		for (int i = 0; i < channels.size(); i++)
+		for (int i = 0; i < panels.size(); i++)
 		{
 			WaveViewPanel waveViewPanel = panels.get(i);
-			String channel = channels.get(i);
-			CodeTimer ct = new CodeTimer("getWave");
-			Wave sw = cache.getBestWave(channel, start, now);
+			String channel = waveViewPanel.getChannel();
+//			Wave sw = cache.getBestWave(channel, start, now);
+			Wave sw = waveViewPanel.getWave();
 			if (sw != null) 
 			{
 				if (sw.getEndTime() < now)
@@ -542,48 +533,33 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 					if (w2 != null)
 						sw = sw.combine(w2);
 				}
+				sw = sw.subset(start, sw.getEndTime());
+//				System.out.println(sw);
 			}
-//			Wave sw = null;
+			
 			// something bad happened above, just get the whole wave
 			if (sw == null)
 				sw = dataSource.getWave(channel, start, now);
-			ct.stop();
-			waveViewPanel.setWorking(true);
+//			waveViewPanel.setWorking(true);
 			waveViewPanel.setWave(sw, start, now);
-			waveViewPanel.setChannel(channel);
-			waveViewPanel.setDataSource(dataSource);
-			waveViewPanel.setWorking(false);
+			waveViewPanel.repaint();
+//			waveViewPanel.setChannel(channel);
+//			waveViewPanel.setDataSource(dataSource);
+//			waveViewPanel.setWorking(false);
 		}
 		if (!this.isVisible())
 			dataSource.close();
 		throbber.decrement();
-		System.out.println("refresh stop");
 	}
 	
 	public void run()
 	{
-		boolean firstResize = false;
 		while (true)
 		{
 			try
 			{
-				if (!firstResize)
-				{
-					if (waveBox.getHeight() != 0)
-					{
-						resizeWaves();
-						firstResize = true;
-					}
-				}
 				if (this.isVisible())
-				{
 					refresh();
-					for (int i = 0; i < channels.size(); i++)
-					{
-						WaveViewPanel waveViewPanel = panels.get(i);
-						waveViewPanel.repaint();
-					}
-				}
 				
 				Thread.sleep(refreshInterval);
 			}
@@ -597,7 +573,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	public void paint(Graphics g)
 	{
 		super.paint(g);
-		if (channels.size() == 0)
+		if (panels.size() == 0)
 		{
 			Dimension dim = this.getSize();
 			g.setColor(Color.black);
