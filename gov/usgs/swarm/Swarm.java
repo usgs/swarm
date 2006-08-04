@@ -58,6 +58,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: chooser visibility
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.27  2006/08/04 18:37:07  cervelli
+ * Version bump for alpha release 1.
+ *
  * Revision 1.26  2006/08/01 23:41:32  cervelli
  * Many 2.0 changes.
  *
@@ -440,6 +443,7 @@ public class Swarm extends JFrame
 		mapFrame = new MapFrame();
 		desktop.add(mapFrame);
 		mapFrame.setVisible(config.mapVisible);
+		mapFrame.toFront();
 		
 		swarmMenu = new SwarmMenu();
 		this.setJMenuBar(swarmMenu);
