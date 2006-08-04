@@ -62,6 +62,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/01 23:44:22  cervelli
+ * Moved package.
+ *
  * Revision 1.21  2006/07/30 22:43:03  cervelli
  * Changes for layouts.
  *
@@ -218,6 +221,8 @@ public class HelicorderViewerFrame extends SwarmFrame
 		waveViewSettings.set(cf.getSubConfig("wave"));
 		
 		createUI();
+		boolean pinned = Boolean.parseBoolean(cf.getString("pinned"));
+		setPinned(pinned);
 		processStandardLayout(cf);
 		setVisible(true);
 		getHelicorder();
@@ -243,14 +248,16 @@ public class HelicorderViewerFrame extends SwarmFrame
 		super.saveLayout(cf, prefix);
 		cf.put("helicorder", prefix);
 		cf.put(prefix + ".source", dataSource.getName());
-//		cf.put(prefix + ".channel", settings.channel);
+		cf.put(prefix + ".pinned", Boolean.toString(pinButton.isSelected()));
 		settings.save(cf, prefix);
 		waveViewSettings.save(cf, prefix + ".wave");
 	}
 	
 	public void createUI()
 	{
+//		setOpaque(false);
 		mainPanel = new JPanel(new BorderLayout());
+//		mainPanel.setBackground(new Color(255, 255, 255, 128));
 		createHeliPanel();
 		createToolBar();
 		createStatusLabel();
@@ -281,6 +288,10 @@ public class HelicorderViewerFrame extends SwarmFrame
 		helicorderViewPanel = new HelicorderViewPanel(this);
 		settings.view = helicorderViewPanel;
 		heliPanel = new JPanel(new BorderLayout());
+//		heliPanel.setBackground(new Color(255, 0, 255, 128));
+//		heliPanel.setBackground(null);
+//		heliPanel.setOpaque(false);
+//		mainPanel.setBackground(null);
 		border = BorderFactory.createCompoundBorder(
 				BorderFactory.createEmptyBorder(0, 2, 0, 3), 
 				LineBorder.createGrayLineBorder());
@@ -300,8 +311,7 @@ public class HelicorderViewerFrame extends SwarmFrame
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						int layer = pinButton.isSelected() ? JLayeredPane.MODAL_LAYER : JLayeredPane.DEFAULT_LAYER;
-						Swarm.getApplication().setFrameLayer(HelicorderViewerFrame.this, layer);
+						setPinned(pinButton.isSelected());
 						/*
 						if (hidden)
 						{
@@ -604,6 +614,16 @@ public class HelicorderViewerFrame extends SwarmFrame
 				{
 					public void componentResized(ComponentEvent e)
 					{
+						/*
+						if (getWidth() < 500)
+						{
+							// remove toolbar
+							mainPanel.remove(toolBar);
+							mainPanel.remove(statusLabel);
+							heliPanel.setBorder(null);
+							mainPanel.validate();
+						}
+						*/
 						helicorderViewPanel.setResized(true);
 						repaintHelicorder();
 						repaint();
@@ -652,6 +672,13 @@ public class HelicorderViewerFrame extends SwarmFrame
 			removeWiggler();
 		if (settings.showWiggler && wigglerPanel == null)
 			createWiggler();
+	}
+	
+	public void setPinned(boolean b)
+	{
+		pinButton.setSelected(b);
+		int layer = b ? JLayeredPane.MODAL_LAYER : JLayeredPane.DEFAULT_LAYER;
+		Swarm.getApplication().setFrameLayer(HelicorderViewerFrame.this, layer);
 	}
 	
 	public void createWiggler()
