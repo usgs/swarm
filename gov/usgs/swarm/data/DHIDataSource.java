@@ -33,6 +33,9 @@ import org.apache.log4j.varia.NullAppender;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/08/01 23:44:07  cervelli
+ * New metadata system changes.
+ *
  * Revision 1.3  2006/07/30 22:46:24  cervelli
  * Change for gulper.
  *
@@ -181,7 +184,6 @@ public class DHIDataSource extends SeismicDataSource
 		        String st1 = gov.usgs.util.Time.format("yyyy-MM-dd", t1) + "T" + gov.usgs.util.Time.format("HH:mm:ss.SSS", t1) + "0Z";
 		        String st2 = gov.usgs.util.Time.format("yyyy-MM-dd", t2) + "T" + gov.usgs.util.Time.format("HH:mm:ss.SSS", t2) + "0Z";
 		        
-		        System.out.println(st1 + " " + st2);
 		        Time start = new Time(st1, -1);
 		        Time end = new Time(st2, -1);
 		        
@@ -189,10 +191,6 @@ public class DHIDataSource extends SeismicDataSource
 		        seismogramRequest[0] = new RequestFilter(cid,
 		                                                 start,
 		                                                 end);
-		        System.out.println("getWave: "+seismogramRequest[0].channel_id.network_id.network_code+"."
-		                    +seismogramRequest[0].channel_id.station_code+"."
-		                    +seismogramRequest[0].channel_id.site_code+"."
-		                    +seismogramRequest[0].channel_id.channel_code);
 		        
 		        LocalSeismogram[] seis = seisDC.retrieve_seismograms(seismogramRequest);
 		        ArrayList<Wave> waves = new ArrayList<Wave>();
@@ -200,7 +198,7 @@ public class DHIDataSource extends SeismicDataSource
 		        {
 			        for (int i = 0; i < seis.length; i++)
 			        {
-			            System.out.println("seis[" + i + "] has " + seis[i].num_points
+			            Swarm.logger.finer("seis[" + i + "] has " + seis[i].num_points
 			                    + " points and starts at " + seis[i].begin_time.date_time + " " + 
 			                    (seis[i].sampling_info.numPoints / seis[i].sampling_info.interval.value * 1000));
 			            
