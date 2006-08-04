@@ -21,6 +21,9 @@ import javax.swing.event.MenuListener;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/08/01 23:41:14  cervelli
+ * Clear cache menu item.
+ *
  * Revision 1.4  2006/07/31 15:56:18  cervelli
  * Added Layout menu.
  *
@@ -56,6 +59,7 @@ public class SwarmMenu extends JMenuBar
 	private JCheckBoxMenuItem clipboard;
 	private JCheckBoxMenuItem chooser;
 	private JCheckBoxMenuItem map;
+	private JMenuItem mapToFront;
 	private JMenuItem closeAll;
 	
 	private JMenu helpMenu;
@@ -255,6 +259,17 @@ public class SwarmMenu extends JMenuBar
 		map.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, KeyEvent.CTRL_DOWN_MASK));
 		windowMenu.add(map);
 		
+		mapToFront = new JMenuItem("Bring Map to Front");
+		mapToFront.setMnemonic('F');
+		mapToFront.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						Swarm.getApplication().setMapVisible(true);
+					}
+				});
+		mapToFront.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0));
+		windowMenu.add(mapToFront);
 		windowMenu.addSeparator();
 		
 		tileHelicorders = new JMenuItem("Tile Helicorders");
