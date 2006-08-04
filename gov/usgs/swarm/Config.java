@@ -16,6 +16,9 @@ import java.util.TimeZone;
  * Swarm configuration class. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/08/04 18:34:45  cervelli
+ * Changed default servers.
+ *
  * Revision 1.9  2006/08/01 23:38:12  cervelli
  * New metadata system.
  *
@@ -271,22 +274,22 @@ public class Config
 		alertClipTimeout = Util.stringToInt(config.getString("alertClipTimeout"), 5);
 		
 		clipboardVisible = Util.stringToBoolean(config.getString("clipboardVisible"), true);
-		clipboardX = Util.stringToInt(config.getString("clipboardX"), 5);
-		clipboardY = Util.stringToInt(config.getString("clipboardY"), 5);
+		clipboardX = Util.stringToInt(config.getString("clipboardX"), 25);
+		clipboardY = Util.stringToInt(config.getString("clipboardY"), 25);
 		clipboardWidth = Util.stringToInt(config.getString("clipboardSizeX"), 600);
-		clipboardHeight = Util.stringToInt(config.getString("clipboardSizeY"), 700);
+		clipboardHeight = Util.stringToInt(config.getString("clipboardSizeY"), 600);
 		clipboardMaximized = Util.stringToBoolean(config.getString("clipboardMaximized"), false);
 
 		mapPath = Util.stringToString(config.getString("mapPath"), "mapdata");
 		mapVisible = Util.stringToBoolean(config.getString("mapVisible"), true);
-		mapX = Util.stringToInt(config.getString("mapX"), 10);
-		mapY = Util.stringToInt(config.getString("mapY"), 10);
+		mapX = Util.stringToInt(config.getString("mapX"), 5);
+		mapY = Util.stringToInt(config.getString("mapY"), 5);
 		mapWidth = Util.stringToInt(config.getString("mapWidth"), 600);
-		mapHeight = Util.stringToInt(config.getString("mapHeight"), 400);
+		mapHeight = Util.stringToInt(config.getString("mapHeight"), 510);
 		mapMaximized = Util.stringToBoolean(config.getString("mapMaximized"), false);
 	
 		mapScale = Util.stringToDouble(config.getString("mapScale"), 80000);
-		mapLongitude = Util.stringToDouble(config.getString("mapLongitude"), 0);
+		mapLongitude = Util.stringToDouble(config.getString("mapLongitude"), -180);
 		mapLatitude = Util.stringToDouble(config.getString("mapLatitude"), 0);
 		
 		sources = new HashMap<String, SeismicDataSource>();
