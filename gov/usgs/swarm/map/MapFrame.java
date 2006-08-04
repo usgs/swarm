@@ -25,6 +25,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -48,6 +49,9 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/08/02 23:34:56  cervelli
+ * Layout changes.
+ *
  * Revision 1.8  2006/08/01 23:45:09  cervelli
  * More development.
  *
@@ -76,6 +80,7 @@ public class MapFrame extends SwarmFrame implements Runnable
 	private JButton optionsButton;
 	private JLabel statusLabel;
 	private JToggleButton linkButton;
+	private JToggleButton realtimeButton;
 	private JButton compXButton;
 	private JButton expXButton;
 	private JButton forwardTimeButton;
@@ -183,7 +188,7 @@ public class MapFrame extends SwarmFrame implements Runnable
 							if (!realtime)
 								mapPanel.timePush();
 							
-							realtime = false;
+							setRealtime(false);
 							mapPanel.setTimes(st, et);
 						}
 					}
@@ -211,6 +216,19 @@ public class MapFrame extends SwarmFrame implements Runnable
 		
 		toolbar.addSeparator();
 		
+		realtimeButton = SwarmUtil.createToolBarToggleButton(
+				Images.getIcon("clock"),
+				"Realtime mode",
+				new ActionListener()
+				{
+						public void actionPerformed(ActionEvent e)
+						{
+							setRealtime(realtimeButton.isSelected());
+						}
+				});
+		realtimeButton.setSelected(realtime);
+		toolbar.add(realtimeButton);
+		
 		linkButton = SwarmUtil.createToolBarToggleButton(
 				Images.getIcon("helilink"),
 				"Synchronize times with helicorder wave (H)",
@@ -219,10 +237,6 @@ public class MapFrame extends SwarmFrame implements Runnable
 						public void actionPerformed(ActionEvent e)
 						{
 							heliLinked = linkButton.isSelected();
-							if (heliLinked == false)
-							{
-								realtime = true;
-							}
 						}
 				});
 		Util.mapKeyStrokeToButton(this, "H", "helilink", linkButton);
@@ -230,6 +244,21 @@ public class MapFrame extends SwarmFrame implements Runnable
 		toolbar.add(linkButton);
 		
 		toolbar.addSeparator();
+
+		JButton earthButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("earth"),
+				"Zoom out to full scale (Home)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						Point2D.Double c = new Point2D.Double(mapPanel.getCenter().x, 0);
+						mapPanel.setCenterAndScale(c, 100000);
+//						mapPanel.setDragMode(DragMode.BOX);
+					}
+				});		
+		Util.mapKeyStrokeToButton(this, "HOME", "home", earthButton);
+		toolbar.add(earthButton);
 		
 		dragButton = SwarmUtil.createToolBarToggleButton(
 				Images.getIcon("dragbox"),
@@ -312,7 +341,7 @@ public class MapFrame extends SwarmFrame implements Runnable
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						realtime = false;
+						setRealtime(false);
 						mapPanel.shiftTime(-0.20);
 //						if (selected != null)
 //							shiftTime(selected, -0.20);						
@@ -328,7 +357,7 @@ public class MapFrame extends SwarmFrame implements Runnable
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						realtime = false;
+						setRealtime(false);
 						mapPanel.shiftTime(0.20);
 //						if (selected != null)
 //							shiftTime(selected, 0.20);
@@ -351,7 +380,7 @@ public class MapFrame extends SwarmFrame implements Runnable
 								t = t + "30";
 							
 							double j2k = Time.parse("yyyyMMddHHmmss", t);
-							realtime = false;
+							setRealtime(false);
 							mapPanel.gotoTime(j2k);
 							
 						}
@@ -409,8 +438,8 @@ public class MapFrame extends SwarmFrame implements Runnable
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						realtime = false;
-						mapPanel.timePop();
+						if (mapPanel.timePop())
+							setRealtime(false);
 					}
 				});		
 		Util.mapKeyStrokeToButton(this, "BACK_SPACE", "back", timeHistoryButton);
@@ -493,6 +522,12 @@ public class MapFrame extends SwarmFrame implements Runnable
 	            ex.printStackTrace();
 	        }
 		}
+	}
+	
+	public void setRealtime(boolean b)
+	{
+		realtime = b;
+		realtimeButton.setSelected(realtime);
 	}
 	
 	public Throbber getThrobber()
