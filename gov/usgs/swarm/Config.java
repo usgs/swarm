@@ -16,6 +16,9 @@ import java.util.TimeZone;
  * Swarm configuration class. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/08/01 23:38:12  cervelli
+ * New metadata system.
+ *
  * Revision 1.8  2006/07/30 22:43:03  cervelli
  * Changes for layouts.
  *
@@ -44,7 +47,11 @@ import java.util.TimeZone;
  */
 public class Config
 {
-	private static String DEFAULT_SERVER = "Alaska Volcano Observatory;wws:pubavo1.wr.usgs.gov:16022:10000:1";
+	private static String[] DEFAULT_SERVERS = new String[] {
+				"AVO Winston;wws:pubavo1.wr.usgs.gov:16022:10000:1",
+				"IRIS DMC - New Zealand;dhi:NZ"
+			};
+	
 	private static String DEFAULT_CONFIG_FILE = "Swarm.config";
 	private static String DEFAULT_DATA_SOURCES_FILE = "DataSources.config";
 	
@@ -294,8 +301,11 @@ public class Config
 		}
 		else
 		{
-			SeismicDataSource sds = SeismicDataSource.getDataSource(DEFAULT_SERVER);
-			sources.put(sds.getName(), sds);
+			for (String s : DEFAULT_SERVERS)
+			{
+				SeismicDataSource sds = SeismicDataSource.getDataSource(s);
+				sources.put(sds.getName(), sds);
+			}
 		}
 	}
 	
@@ -329,8 +339,8 @@ public class Config
 		if (useInstrumentTimeZone && channel != null)
 		{
 			Metadata md = metadata.get(channel);
-			if (md != null && md.timeZone != null)
-				return md.timeZone;
+			if (md != null && md.getTimeZone() != null)
+				return md.getTimeZone();
 		}
 		
 		if (useLocalTimeZone)
