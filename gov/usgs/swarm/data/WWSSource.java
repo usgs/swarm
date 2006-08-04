@@ -24,6 +24,9 @@ import java.util.StringTokenizer;
  * be made a descendant of WaveServerSource. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2006/08/02 23:33:05  cervelli
+ * Change for useCache variable.
+ *
  * Revision 1.10  2006/08/01 23:44:07  cervelli
  * New metadata system changes.
  *
@@ -241,7 +244,7 @@ public class WWSSource extends SeismicDataSource
 			Swarm.config.assignMetadataSource(channels, this);
 			return channels;
 		}
-		else
+		else if (protocolVersion == 2)
 		{
 			List<Channel> channels = winstonClient.getChannels();
 			List<String> result = new ArrayList<String>(channels.size());
@@ -257,6 +260,34 @@ public class WWSSource extends SeismicDataSource
 			}
 			return result;
 		}
+		else if (protocolVersion == 3)
+		{
+			List<Channel> channels = winstonClient.getChannels(true);
+			List<String> result = new ArrayList<String>(channels.size());
+			for (Channel ch : channels)
+			{
+				String code = ch.getCode().replace('$', ' ');
+				Metadata md = Swarm.config.getMetadata(code, true);
+				Instrument ins = ch.getInstrument();
+				md.updateLongitude(ins.getLongitude());
+				md.updateLatitude(ins.getLatitude());
+				List<String> groups = ch.getGroups();
+				if (groups != null)
+				{
+					for (String g : groups)
+						md.addGroup(g);
+				}
+				md.updateLinearCoefficients(ch.getLinearA(), ch.getLinearB());
+				md.updateAlias(ch.getAlias());
+				md.updateUnits(ch.getUnit());
+				md.updateTimeZone(ch.getInstrument().getTimeZone());
+				md.source = this;
+				result.add(code);
+			}
+			return result;
+		}
+		else 
+			return null;
 	}
 	
 	public synchronized boolean isActiveSource()
