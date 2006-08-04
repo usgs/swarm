@@ -7,6 +7,7 @@ import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.swarm.Images;
 import gov.usgs.swarm.Metadata;
+import gov.usgs.swarm.SCNL;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.wave.WaveViewPanel;
@@ -45,6 +46,9 @@ import javax.swing.JRadioButtonMenuItem;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/08/02 23:35:20  cervelli
+ * Layout changes, wave caching.
+ *
  * Revision 1.5  2006/08/01 23:45:09  cervelli
  * More development.
  *
@@ -64,6 +68,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	private static final int SIZES[] = new int[] { 100, 150, 200, 250, 300, 350, 400, 450, 500, 550};
 	private int sizeIndex = 4;
 	private Metadata activeMetadata;
+	private boolean activeMetadataChosen = false;
 	private SortedMap<String, Metadata> metadataList;
 	private WaveViewPanel wavePanel;
 	private boolean waveVisible = false;
@@ -91,6 +96,9 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	private Position position = Position.UNSET;
 //	private Point2D.Double manualPosition;
 	private Point2D.Double manualPositionXY;
+	
+	private double[] pendingRequest;
+	private boolean working;
 	
 	public MapMiniPanel(MapPanel p)
 	{
@@ -170,6 +178,28 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 		// TODO: should be intelligently chosen
 		if (activeMetadata == null)
 			activeMetadata = md;
+		if (!activeMetadataChosen)
+		{
+			SCNL as = activeMetadata.getSCNL();
+			SCNL ms = md.getSCNL();
+			if (ms.channel.endsWith("Z"))
+			{
+				if (as.channel.endsWith("Z"))
+				{
+					if (ms.channel.charAt(0) < as.channel.charAt(0))
+					{
+						activeMetadata = md;
+					}
+					else if (ms.channel.charAt(0) == as.channel.charAt(0))
+					{
+						if (as.location != null && ms.location == null)
+							activeMetadata = md;
+					}
+				}
+				else
+					activeMetadata = md;
+			}
+		}
 		popup = null;
 	}
 	
@@ -314,10 +344,57 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 			updateWave(wavePanel.getStartTime(), wavePanel.getEndTime());
 	}
 	
+	private synchronized boolean isWorking()
+	{
+		return working;
+	}
+	
+	private synchronized void setWorking(boolean b)
+	{
+		working = b;
+	}
+	
+	private synchronized void setPendingRequest(double st, double et)
+	{
+		if (Double.isNaN(st))
+			pendingRequest = null;
+		else
+			pendingRequest = new double[] { st, et };
+	}
+	
+	private synchronized double[] getPendingRequest()
+	{
+		return pendingRequest;
+	}
+	
 	public boolean updateWave(final double st, final double et)
+	{
+		return updateWave(st, et, false);
+	}
+	
+	/**
+	 * @param st
+	 * @param et
+	 * @param reenter
+	 * @return
+	 */
+	public boolean updateWave(final double st, final double et, boolean reenter)
 	{			
 		if (!waveVisible || activeMetadata.source == null)
 			return false;
+		
+		if (isWorking() && !reenter)
+		{
+			setPendingRequest(st, et);
+			return false;
+		}
+		else
+			setWorking(true);
+		
+		if (reenter)
+		{
+			setPendingRequest(Double.NaN, Double.NaN);
+		}
 		
 		final SwingWorker worker = new SwingWorker()
 				{
@@ -360,6 +437,14 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 					
 					public void finished()
 					{
+						double[] pr = getPendingRequest();
+						if (pr != null)
+						{
+							repaint();
+							updateWave(pr[0], pr[1], true);
+						}
+						else
+							setWorking(false);
 						parent.getThrobber().decrement();
 						wavePanel.setWorking(false);
 //						repaint();	
@@ -419,6 +504,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 						public void actionPerformed(ActionEvent e)
 						{
 							changeChannel(md);
+							activeMetadataChosen = true;
 						}
 					});
 			group.add(rmi);
