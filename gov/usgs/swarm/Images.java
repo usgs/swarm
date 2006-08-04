@@ -11,6 +11,9 @@ import javax.swing.ImageIcon;
  * TODO: make images static final, don't use map 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2006/07/30 22:41:55  cervelli
+ * Added deleteall and gototime icons.
+ *
  * Revision 1.13  2006/07/30 16:15:30  cervelli
  * New icons.
  *
@@ -87,7 +90,7 @@ public class Images
 		imageMap.put("save", "images/save.gif");
 		imageMap.put("saveall", "images/saveall.gif");
 		imageMap.put("settings", "images/settings.gif");
-		imageMap.put("spectra", "images/spectra.png");
+		imageMap.put("spectra", "images/spectra.gif");
 		imageMap.put("spectrogram", "images/spectrogram.png");
 		imageMap.put("up", "images/up.gif");
 		imageMap.put("wave", "images/wave.gif");
