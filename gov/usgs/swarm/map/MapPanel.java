@@ -63,6 +63,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/08/02 23:35:50  cervelli
+ * Layout changes, repaint reductions.
+ *
  * Revision 1.7  2006/08/01 23:45:09  cervelli
  * More development.
  *
@@ -446,7 +449,7 @@ public class MapPanel extends JPanel
 		mapHistory.push(new double[] { center.x, center.y, scale });
 	}
 	
-	public void mapPop()
+	public boolean mapPop()
 	{
 		if (!mapHistory.isEmpty())
 		{
@@ -454,7 +457,10 @@ public class MapPanel extends JPanel
 			center = new Point2D.Double(last[0], last[1]);
 			scale = last[2];
 			resetImage();
+			return true;
 		}
+		else
+			return false;
 	}
 	
 	public void timePush()
@@ -462,13 +468,16 @@ public class MapPanel extends JPanel
 		timeHistory.push(new double[] { startTime, endTime });
 	}
 	
-	public void timePop()
+	public boolean timePop()
 	{
 		if (!timeHistory.isEmpty())
 		{
 			double[] t = timeHistory.pop();
 			setTimes(t[0], t[1]);
+			return true;
 		}
+		else
+			return false;
 	}
 	
 	public void zoom(double f)
@@ -784,6 +793,7 @@ public class MapPanel extends JPanel
 	 */
 	private void placeMiniPanels()
 	{
+		// TODO: abort if renderer not going
 		final List<JComponent> compsToAdd = new ArrayList<JComponent>();
 		final List<Line2D.Double> linesToAdd = new ArrayList<Line2D.Double>();
 		
