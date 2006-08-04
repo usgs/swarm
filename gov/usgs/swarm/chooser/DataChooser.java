@@ -68,6 +68,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/01 23:42:54  cervelli
+ * Moved package and changes for layouts.
+ *
  * Revision 1.9  2006/07/30 16:14:35  cervelli
  * New icons for locked sources.
  *
@@ -687,6 +690,19 @@ public class DataChooser extends JPanel
 				{
 					public void mouseClicked(MouseEvent e)
 					{
+						if (e.getClickCount() == 1)
+						{
+							TreePath path = dataTree.getSelectionPath();
+							if (path != null)
+							{
+								DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
+								if (node instanceof ChannelNode)
+								{
+									ChannelNode cn = (ChannelNode)node;
+									setNearest(cn.getChannel());
+								}
+							}
+						}
 						if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e))
 						{
 							TreePath path = dataTree.getSelectionPath();
@@ -798,9 +814,9 @@ public class DataChooser extends JPanel
 							allNode.add(newNode);
 							
 							Metadata md = Swarm.config.getMetadata(channel);
-							if (md != null && md.groups != null)
+							if (md != null && md.getGroups() != null)
 							{
-								Set<String> groups = md.groups;
+								Set<String> groups = md.getGroups();
 								for (String g : groups)
 								{
 									GroupNode gn = rootMap.get(g);
