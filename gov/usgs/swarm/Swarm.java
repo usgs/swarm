@@ -58,6 +58,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: chooser visibility
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.26  2006/08/01 23:41:32  cervelli
+ * Many 2.0 changes.
+ *
  * Revision 1.25  2006/07/30 22:43:03  cervelli
  * Changes for layouts.
  *
@@ -183,7 +186,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.0.0.20060801-alpha-1";
+	private static final String VERSION = "2.0.0.20060804-alpha-1";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
