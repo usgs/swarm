@@ -63,6 +63,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/08/04 18:42:19  cervelli
+ * Pop functions return true/false stating whether or not the pop was successful.
+ *
  * Revision 1.8  2006/08/02 23:35:50  cervelli
  * Layout changes, repaint reductions.
  *
@@ -90,7 +93,7 @@ public class MapPanel extends JPanel
 {
 	public enum DragMode
 	{
-		BOX, RULER;
+		DRAG_MAP, BOX, RULER;
 	}
 	
 	private static final long serialVersionUID = 1L;
@@ -117,7 +120,7 @@ public class MapPanel extends JPanel
 	private Map<Double, ConfigFile> layouts;
 	private List<MapMiniPanel> visiblePanels;
 
-	private DragMode dragMode = DragMode.BOX;
+	private DragMode dragMode = DragMode.DRAG_MAP;
 	private Point mouseDown;
 	private Point mouseNow;
 	private Rectangle dragRectangle;
@@ -135,6 +138,10 @@ public class MapPanel extends JPanel
 	private double startTime;
 	private double endTime;
 	
+	private Dragger dragger;
+	private int dragDX = Integer.MAX_VALUE;
+	private int dragDY = Integer.MAX_VALUE;
+	
 	public MapPanel(MapFrame f)
 	{
 		parent = f;
@@ -150,6 +157,58 @@ public class MapPanel extends JPanel
 		this.setCursor(crosshair);
 		
 		createUI();
+		dragger = new Dragger();
+	}
+	
+	private class Dragger extends Thread
+	{
+		private long timeTillReset;
+		
+		public Dragger()
+		{
+			start();
+		}
+		
+		public synchronized void setTimeTillReset(long d)
+		{
+			timeTillReset = d;
+			interrupt();
+		}
+		
+		private synchronized void shiftImage()
+		{
+			int dx = mouseDown.x - mouseNow.x;
+			int dy = mouseDown.y - mouseNow.y;
+			center = getLonLat(getWidth() / 2 + dx, getHeight() / 2 + dy);
+			mouseDown = mouseNow;
+			resetImage();	
+		}
+		
+		public void run()
+		{
+			while (true)
+			{
+				try
+				{
+					if (timeTillReset <= 0)
+						Thread.sleep(100000);
+					else
+					{
+						Thread.sleep(timeTillReset);
+						System.out.println("reset");
+						if (timeTillReset > 0)
+							shiftImage();
+						timeTillReset = 0;
+					}
+				}
+				catch (InterruptedException e)
+				{}
+				catch (Throwable e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	public void saveLayout(ConfigFile cf, String prefix)
@@ -188,8 +247,6 @@ public class MapPanel extends JPanel
 		Point2D.Double c = new Point2D.Double(lon, lat);
 		double sc = Double.parseDouble(cf.getString("scale"));
 		setCenterAndScale(c, sc);
-		
-		System.out.println("processLayout done");
 	}
 	
 	private void createUI()
@@ -248,6 +305,15 @@ public class MapPanel extends JPanel
 					
 					public void mouseReleased(MouseEvent e)
 					{
+						dragger.setTimeTillReset(0);
+						if (dragMode == DragMode.DRAG_MAP)
+						{
+							dragDX = mouseDown.x - mouseNow.x;
+							dragDY = mouseDown.y - mouseNow.y;
+							System.out.println("set");
+							center = getLonLat(getWidth() / 2 + dragDX, getHeight() / 2 + dragDY);
+							resetImage();
+						}
 						if (dragMode == DragMode.BOX && dragRectangle != null)
 						{
 							Point mouseUp = e.getPoint();
@@ -286,6 +352,7 @@ public class MapPanel extends JPanel
 					
 					public void mouseDragged(MouseEvent e)
 					{
+						dragger.setTimeTillReset(100);
 						mouseNow = e.getPoint();
 						Point2D.Double lonLat = getLonLat(e.getX(), e.getY());
 						if (dragMode == DragMode.BOX)
@@ -705,7 +772,6 @@ public class MapPanel extends JPanel
 		if (layouts.size() == 0)
 			return;
 		
-		System.out.println("checkLayouts");
 		Set<Double> ks = layouts.keySet();
 		Set<Double> toRemove = new HashSet<Double>();
 		for (double hash : ks)
@@ -714,12 +780,22 @@ public class MapPanel extends JPanel
 			if (mmp != null)
 			{
 				mmp.processLayout(layouts.get(hash));
-				System.out.println(mmp);
 				toRemove.add(hash);
 			}
 		}
 		for (double hash : toRemove)
 			layouts.remove(hash);
+	}
+	
+	private int entries = 0;
+	private synchronized void addEntries(int d)
+	{
+		entries += d;
+	}
+	
+	private synchronized int getEntries()
+	{
+		return entries;
 	}
 	
 	public void resetImage(final boolean doMap)
@@ -733,6 +809,7 @@ public class MapPanel extends JPanel
 			{
 				if (doMap)
 				{					
+					addEntries(1);
 					Swarm.config.mapScale = scale;
 					Swarm.config.mapLongitude = center.x;
 					Swarm.config.mapLatitude = center.y;
@@ -768,6 +845,14 @@ public class MapPanel extends JPanel
 					plot.addRenderer(renderer);
 					
 					mapImage = plot.getAsBufferedImage(false);
+					addEntries(-1);
+					if (getEntries() == 0)
+					{
+						dragDX = Integer.MAX_VALUE;
+						dragDY = Integer.MAX_VALUE;
+						System.out.println("clear");
+					}
+					System.out.println("mapImage changed");
 				}
 				return null;
 			}
@@ -793,6 +878,9 @@ public class MapPanel extends JPanel
 	 */
 	private void placeMiniPanels()
 	{
+		if (image == null || renderer == null)
+			return;
+		
 		// TODO: abort if renderer not going
 		final List<JComponent> compsToAdd = new ArrayList<JComponent>();
 		final List<Line2D.Double> linesToAdd = new ArrayList<Line2D.Double>();
@@ -915,7 +1003,6 @@ public class MapPanel extends JPanel
 				parent.setStatusText(" ");
 				checkLayouts();
 				repaint();
-				System.out.println("placeMiniPanels done");
 			}
 		};
 		worker.start();
@@ -935,8 +1022,23 @@ public class MapPanel extends JPanel
 			}
 			else
 			{
+				System.out.println("paint");
 				Graphics2D g2 = (Graphics2D)g;
-				g2.drawImage(mapImage, 0, 0, null);
+//				g2.drawImage(mapImage, 0, 0, null);
+				if (dragMode == DragMode.DRAG_MAP && mouseDown != null && mouseNow != null)
+				{
+					int dx = mouseDown.x - mouseNow.x;
+					int dy = mouseDown.y - mouseNow.y;
+					g2.drawImage(mapImage, -dx, -dy, null);
+				}
+				else if (dragDX != Integer.MAX_VALUE && dragDY != Integer.MAX_VALUE)
+				{
+					g2.drawImage(mapImage, -dragDX, -dragDY, null);
+				}
+				else
+				{
+					g2.drawImage(mapImage, 0, 0, null);
+				}
 				
 				g.setColor(Color.BLACK);
 				for (Line2D.Double line : lines)
