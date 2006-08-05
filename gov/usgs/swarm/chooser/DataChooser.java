@@ -60,14 +60,15 @@ import javax.swing.tree.TreePath;
 
 /**
  * 
- * TODO: edit source
- * TODO: toolbar
  * TODO: tooltip over data source describes data source
  * TODO: refresh data source
  * TODO: error box on failed open
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/08/04 18:37:40  cervelli
+ * New group system and single click to change nearest dialog.
+ *
  * Revision 1.1  2006/08/01 23:42:54  cervelli
  * Moved package and changes for layouts.
  *
@@ -308,15 +309,15 @@ public class DataChooser extends JPanel
 								{
 									public Object construct()
 									{
-										List<Pair<ServerNode, ChannelNode>> channels = getSelections();
+										List<Pair<ServerNode, String>> channels = getSelections();
 										if (channels != null)
 										{
 //											Pair<ServerNode, ChannelNode> ch1 = channels.get(0);
 //											if (ch1 != null)
 //												setNearest(ch1.item2.getChannel());
-											for (Pair<ServerNode, ChannelNode> pair : channels)
+											for (Pair<ServerNode, String> pair : channels)
 											{
-												Swarm.getApplication().openHelicorder(pair.item1.getSource(), pair.item2.getChannel());
+												Swarm.getApplication().openHelicorder(pair.item1.getSource(), pair.item2);
 											}
 										}
 										return null;
@@ -337,12 +338,12 @@ public class DataChooser extends JPanel
 								{
 									public Object construct()
 									{
-										List<Pair<ServerNode, ChannelNode>> channels = getSelections();
+										List<Pair<ServerNode, String>> channels = getSelections();
 										if (channels != null)
 										{
-											for (Pair<ServerNode, ChannelNode> pair : channels)
+											for (Pair<ServerNode, String> pair : channels)
 											{
-												Swarm.getApplication().openRealtimeWave(pair.item1.getSource(), pair.item2.getChannel());
+												Swarm.getApplication().openRealtimeWave(pair.item1.getSource(), pair.item2);
 											}
 										}
 										return null;
@@ -363,12 +364,12 @@ public class DataChooser extends JPanel
 								{
 									public Object construct()
 									{
-										List<Pair<ServerNode, ChannelNode>> channels = getSelections();
+										List<Pair<ServerNode, String>> channels = getSelections();
 										if (channels != null)
 										{
-											for (Pair<ServerNode, ChannelNode> pair : channels)
+											for (Pair<ServerNode, String> pair : channels)
 											{
-												Swarm.getApplication().loadClipboardWave(pair.item1.getSource(), pair.item2.getChannel());
+												Swarm.getApplication().loadClipboardWave(pair.item1.getSource(), pair.item2);
 											}
 										}
 										Swarm.getApplication().getWaveClipboard().requestFocusInWindow();
@@ -390,12 +391,12 @@ public class DataChooser extends JPanel
 						{
 							public Object construct()
 							{
-								List<Pair<ServerNode, ChannelNode>> channels = getSelections();
+								List<Pair<ServerNode, String>> channels = getSelections();
 								if (channels != null)
 								{
-									for (Pair<ServerNode, ChannelNode> pair : channels)
+									for (Pair<ServerNode, String> pair : channels)
 									{
-										Swarm.getApplication().monitorChannelSelected(pair.item1.getSource(), pair.item2.getChannel());
+										Swarm.getApplication().monitorChannelSelected(pair.item1.getSource(), pair.item2);
 									}
 								}
 								return null;
@@ -416,15 +417,15 @@ public class DataChooser extends JPanel
 						{
 							public Object construct()
 							{
-								List<Pair<ServerNode, ChannelNode>> channels = getSelections();
+								List<Pair<ServerNode, String>> channels = getSelections();
 								double minLon = Double.MAX_VALUE;
 								double maxLon = -Double.MAX_VALUE;
 								double minLat = Double.MAX_VALUE;
 								double maxLat = -Double.MAX_VALUE;
 								boolean found = false;
-								for (Pair<ServerNode, ChannelNode> pair : channels)
+								for (Pair<ServerNode, String> pair : channels)
 								{
-									Metadata md = Swarm.config.getMetadata(pair.item2.getChannel());
+									Metadata md = Swarm.config.getMetadata(pair.item2);
 									double lon = md.getLongitude();
 									double lat = md.getLatitude();
 									if (md != null && !Double.isNaN(lon) && !Double.isNaN(lat))
@@ -449,6 +450,7 @@ public class DataChooser extends JPanel
 										maxLat += 0.1;
 									}
 									GeoRange gr = new GeoRange(minLon, maxLon, minLat, maxLat);
+									System.out.println(gr);
 									Swarm.getApplication().setMapVisible(true);
 									Swarm.getApplication().getMapFrame().setView(gr);
 								}
@@ -496,7 +498,7 @@ public class DataChooser extends JPanel
 		return servers;
 	}
 	
-	private List<Pair<ServerNode, ChannelNode>> getSelections()
+	private List<Pair<ServerNode, String>> getSelections()
 	{
 		TreePath[] paths = dataTree.getSelectionPaths();
 		return getSelectedLeaves(paths);
@@ -789,6 +791,10 @@ public class DataChooser extends JPanel
 		
 	}
 	
+	/**
+	 * @param node
+	 * @param channels
+	 */
 	private void populateServer(final ServerNode node, final List<String> channels)
 	{
 		if (channels == null)
@@ -799,17 +805,15 @@ public class DataChooser extends JPanel
 					public void run()
 					{
 						TreeMap<String, GroupNode> rootMap = new TreeMap<String, GroupNode>();
+						HashMap<String, GroupNode> groupMap = new HashMap<String, GroupNode>();
+						HashSet<GroupNode> openGroups = new HashSet<GroupNode>();
 						
-//						DefaultMutableTreeNode allNode = new DefaultMutableTreeNode(GROUP_CHAR + Messages.getString("DataChooser.allGroup")); //$NON-NLS-1$
 						GroupNode allNode = new GroupNode(Messages.getString("DataChooser.allGroup")); //$NON-NLS-1$
-//						DefaultMutableTreeNode rootNode = getServerNode(server);
-//						DefaultMutableTreeNode rootNode = getServerNode(server);
 						ChooserNode rootNode = node;
 						rootNode.removeAllChildren();
 						rootNode.add(allNode);
 						for (String channel : channels)
 						{
-//							DefaultMutableTreeNode node = new DefaultMutableTreeNode(CHANNEL_CHAR + channel);
 							ChannelNode newNode = new ChannelNode(channel);
 							allNode.add(newNode);
 							
@@ -819,48 +823,112 @@ public class DataChooser extends JPanel
 								Set<String> groups = md.getGroups();
 								for (String g : groups)
 								{
-									GroupNode gn = rootMap.get(g);
-//										DefaultMutableTreeNode rn = (DefaultMutableTreeNode)rootMap.get(g);
+									boolean forceOpen = false;
+									String[] ss = g.split("\\^");
+									if (ss[0].endsWith("!"))
+									{
+										ss[0] = ss[0].substring(0, ss[0].length() - 1);
+										forceOpen = true;
+									}
+									GroupNode gn = rootMap.get(ss[0]);
 									if (gn == null)
 									{
-										gn = new GroupNode(g);
-										rootMap.put(g, gn);
+										gn = new GroupNode(ss[0]);
+										rootMap.put(ss[0], gn);
+									}
+									if (forceOpen)
+										openGroups.add(gn);
+									GroupNode cn = gn;
+									String cs = ss[0];
+									for (int i = 1; i < ss.length; i++)
+									{
+										boolean fo = false;
+										if (ss[i].endsWith("!"))
+										{
+											ss[i] = ss[i].substring(0, ss[i].length() - 1);
+											fo = true;
+										}
+										cs += "^" + ss[i];
+										GroupNode nn = groupMap.get(cs);
+										if (nn == null)
+										{
+											nn = new GroupNode(ss[i]);
+											groupMap.put(cs, nn);
+											int j = 0;
+											for (j = 0; j < cn.getChildCount(); j++)
+											{
+												if (cn.getChildAt(j) instanceof GroupNode)
+												{
+													GroupNode ogn = (GroupNode)cn.getChildAt(j);
+													if (nn.name.compareToIgnoreCase(ogn.name) <= 0)
+														break;
+												}
+											}
+											if (j >= cn.getChildCount())
+												cn.add(nn);
+											else
+												cn.insert(nn, j);
+										}
+										if (fo)
+											openGroups.add(nn);
+										
+										cn = nn;
 									}
 									ChannelNode ln = new ChannelNode(channel);
-									gn.add(ln);
+									cn.add(ln);
 								}
 							}
-							else
-							{
+//							else
+//							{
 								nearestPaths.put(channel, new TreePath(newNode.getPath()));
-							}
+//							}
 						}
 						
 						for (String key : rootMap.keySet())
 						{
 							GroupNode n = rootMap.get(key);
 							rootNode.add(n);
-							for (int i = 0; i < n.getChildCount(); i++)
-							{
-								ChannelNode cn = (ChannelNode)n.getChildAt(i);
-								nearestPaths.put(cn.getChannel(), new TreePath(cn.getPath()));
-							}
+//							for (int i = 0; i < n.getChildCount(); i++)
+//							{
+//								ChannelNode cn = (ChannelNode)n.getChildAt(i);
+//								nearestPaths.put(cn.getChannel(), new TreePath(cn.getPath()));
+//							}
 						}
 						
 						((DefaultTreeModel)dataTree.getModel()).reload(rootNode);
+						
+						for (GroupNode gn : openGroups)
+						{
+							dataTree.expandPath(new TreePath(gn.getPath()));
+						}
 						nearestList.repaint();
 					}
 				});	
 	}
 	
 //	private Set<String> getSelectedLeaves(TreePath[] paths)
-	private List<Pair<ServerNode, ChannelNode>> getSelectedLeaves(TreePath[] paths)
+	private Set<String> getGroupChannels(GroupNode gn)
+	{
+		HashSet<String> channels = new HashSet<String>();
+		for (Enumeration e = gn.children() ; e.hasMoreElements() ;) 
+		{
+			ChooserNode n = (ChooserNode)e.nextElement();
+			if (n instanceof ChannelNode)
+				channels.add(((ChannelNode)n).channel);
+			else if (n instanceof GroupNode)
+				channels.addAll(getGroupChannels((GroupNode)n));
+		}
+		
+		return channels;
+	}
+	
+	private List<Pair<ServerNode, String>> getSelectedLeaves(TreePath[] paths)
 	{
 		if (paths == null)
 			return null;
 			
 		boolean countExceeded = false;
-		List<Pair<ServerNode, ChannelNode>> selections = new ArrayList<Pair<ServerNode, ChannelNode>>();
+		List<Pair<ServerNode, String>> selections = new ArrayList<Pair<ServerNode, String>>();
 		for (int i = 0; i < paths.length; i++)
 		{
 			TreePath path = paths[i];
@@ -873,25 +941,13 @@ public class DataChooser extends JPanel
 			ChooserNode node = (ChooserNode)path.getLastPathComponent();
 			if (node.isLeaf() && node instanceof ChannelNode)
 			{
-				selections.add(new Pair<ServerNode, ChannelNode>(serverNode, (ChannelNode)node));
+				selections.add(new Pair<ServerNode, String>(serverNode, ((ChannelNode)node).channel));
 			}
 			else if (!node.isLeaf())
 			{
-				for (Enumeration e = node.children() ; e.hasMoreElements() ;) 
-				{
-					ChooserNode node2 = (ChooserNode)e.nextElement();
-					if (node2.isLeaf() && node2 instanceof ChannelNode)
-					{
-						selections.add(new Pair<ServerNode, ChannelNode>(serverNode, (ChannelNode)node2));
-//						if (channels.size() <= MAX_CHANNELS_AT_ONCE)
-//							channels.add(server + ";" + node2.toString()); //$NON-NLS-1$
-//						else
-//						{
-//							countExceeded = true;
-//							break;
-//						}
-					}
-				}
+				Set<String> channels = getGroupChannels((GroupNode)node);
+				for (String ch : channels)
+					selections.add(new Pair<ServerNode, String>(serverNode, ch));
 			}
 			
 //			if (countExceeded)
