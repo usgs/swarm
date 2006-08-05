@@ -18,6 +18,9 @@ import java.util.TimeZone;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/08/01 23:38:37  cervelli
+ * New metadata system.
+ *
  * Revision 1.2  2006/07/22 20:27:56  cervelli
  * Time zone changes, added data source field.
  *
@@ -47,9 +50,10 @@ public class Metadata implements Comparable<Metadata>
 	
 	public SeismicDataSource source;
 	
-	public TimeZone timeZone = TimeZone.getTimeZone("UTC");
+	private TimeZone timeZone = TimeZone.getTimeZone("UTC");
+	private boolean tzSet = false;
 	
-	public Set<String> groups = null;
+	private Set<String> groups = null;
 	
 	public Map<String, String> ancillaryMetadata = null;
 	
@@ -59,6 +63,15 @@ public class Metadata implements Comparable<Metadata>
 	public Metadata(String ch)
 	{
 		updateChannel(ch);
+	}
+	
+	public void updateTimeZone(String tz)
+	{
+		if (!tzSet && tz != null && tz.length() >= 1)
+		{
+			timeZone = TimeZone.getTimeZone(tz);
+			tzSet = true;
+		}
 	}
 	
 	public void updateChannel(String ch)
@@ -82,12 +95,14 @@ public class Metadata implements Comparable<Metadata>
 			unit = u;
 	}
 	
-	public void updateLinearCoeffecients(double mult, double off)
+	public void updateLinearCoefficients(double mult, double off)
 	{
 		if (!linearSet)
 		{
-			multiplier = mult;
-			offset = off;
+			if (!Double.isNaN(mult))
+				multiplier = mult;
+			if (!Double.isNaN(off))
+				offset = off;
 			linearSet = true;
 		}
 	}
@@ -108,6 +123,11 @@ public class Metadata implements Comparable<Metadata>
 	{
 		if (Double.isNaN(height))
 			height = h;
+	}
+	
+	public TimeZone getTimeZone()
+	{
+		return timeZone;
 	}
 	
 	public double getMultiplier()
@@ -150,6 +170,18 @@ public class Metadata implements Comparable<Metadata>
 		return latitude;
 	}
 	
+	public void addGroup(String g)
+	{
+		if (groups == null)
+			groups = new HashSet<String>();
+		groups.add(g);
+	}
+	
+	public Set<String> getGroups()
+	{
+		return groups;
+	}
+	
 	public void interpret(String s)
 	{
 		String[] kv = new String[2];
@@ -189,9 +221,7 @@ public class Metadata implements Comparable<Metadata>
 		}
 		else if (kv[0].equals("Group"))
 		{
-			if (groups == null)
-				groups = new HashSet<String>();
-			groups.add(kv[1]);	
+			addGroup(kv[1]);	
 		}
 		else
 		{
