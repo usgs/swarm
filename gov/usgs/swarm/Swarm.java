@@ -12,6 +12,7 @@ import gov.usgs.swarm.wave.WaveViewerFrame;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Log;
+import gov.usgs.util.Util;
 import gov.usgs.util.ui.GlobalKeyManager;
 import gov.usgs.vdx.data.wave.Wave;
 
@@ -58,6 +59,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: chooser visibility
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.28  2006/08/04 21:17:45  cervelli
+ * Make the map go to front on startup.
+ *
  * Revision 1.27  2006/08/04 18:37:07  cervelli
  * Version bump for alpha release 1.
  *
@@ -189,7 +193,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.0.0.20060804-alpha-1";
+	private static final String VERSION = "2.0.0.20060806-alpha-1";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -238,6 +242,9 @@ public class Swarm extends JFrame
 					JOptionPane.ERROR_MESSAGE);
 			System.exit(-1);
 		}
+		
+		Runtime rt = Runtime.getRuntime();
+		logger.fine("maximum heap size: " + Util.numBytesToString(rt.maxMemory()));
 	}
 	
 	private void setupGlobalKeys()
@@ -943,11 +950,7 @@ public class Swarm extends JFrame
 	{
 		try 
 		{
-			// JDK 1.5 by default has an ugly theme, this line uses the one from 1.4
-//			PlasticLookAndFeel.setTabStyle(PlasticLookAndFeel.TAB_STYLE_METAL_VALUE);
 			UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
-//			UIManager.setLookAndFeel("net.java.plaf.windows.WindowsLookAndFeel");
-//			MetalLookAndFeel.setCurrentTheme(new DefaultMetalTheme());
 		}
 		catch (Exception e) { }
 		
