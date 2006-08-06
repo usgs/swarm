@@ -11,6 +11,9 @@ import javax.swing.ImageIcon;
  * TODO: make images static final, don't use map 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2006/08/04 18:30:37  cervelli
+ * Replaced spectra icon.
+ *
  * Revision 1.14  2006/07/30 22:41:55  cervelli
  * Added deleteall and gototime icons.
  *
@@ -121,6 +124,7 @@ public class Images
 		imageMap.put("pin", "images/pin.gif");
 		imageMap.put("ruler", "images/ruler.gif");
 		imageMap.put("dragbox", "images/dragbox.gif");
+		imageMap.put("drag", "images/drag.gif");
 		
 		imageMap.put("throbber_off", "images/throbber_off.gif");
 		imageMap.put("throbber_0", "images/throbber_0.gif");

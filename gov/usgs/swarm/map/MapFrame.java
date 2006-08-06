@@ -49,6 +49,9 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/08/04 18:40:46  cervelli
+ * Realtime and earth buttons.
+ *
  * Revision 1.9  2006/08/02 23:34:56  cervelli
  * Layout changes.
  *
@@ -91,6 +94,7 @@ public class MapFrame extends SwarmFrame implements Runnable
 	private JButton clipboardButton;
 	
 	private JToggleButton dragButton;
+	private JToggleButton dragZoomButton;
 	private JToggleButton rulerButton;
 	
 	private WaveViewSettingsToolbar waveToolbar;
@@ -261,6 +265,20 @@ public class MapFrame extends SwarmFrame implements Runnable
 		toolbar.add(earthButton);
 		
 		dragButton = SwarmUtil.createToolBarToggleButton(
+				Images.getIcon("drag"),
+				"Drag map (D)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						mapPanel.setDragMode(DragMode.DRAG_MAP);
+					}
+				});		
+		Util.mapKeyStrokeToButton(this, "D", "drag", dragButton);
+		dragButton.setSelected(true);
+		toolbar.add(dragButton);
+		
+		dragZoomButton = SwarmUtil.createToolBarToggleButton(
 				Images.getIcon("dragbox"),
 				"Zoom into box (B)",
 				new ActionListener()
@@ -270,13 +288,13 @@ public class MapFrame extends SwarmFrame implements Runnable
 						mapPanel.setDragMode(DragMode.BOX);
 					}
 				});		
-		Util.mapKeyStrokeToButton(this, "B", "box", dragButton);
-		dragButton.setSelected(true);
-		toolbar.add(dragButton);
+		Util.mapKeyStrokeToButton(this, "B", "box", dragZoomButton);
+		dragZoomButton.setSelected(false);
+		toolbar.add(dragZoomButton);
 		
 		rulerButton = SwarmUtil.createToolBarToggleButton(
 				Images.getIcon("ruler"),
-				"Measure distances (R)",
+				"Measure distances (M)",
 				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
@@ -290,6 +308,7 @@ public class MapFrame extends SwarmFrame implements Runnable
 		
 		ButtonGroup group = new ButtonGroup();
 		group.add(dragButton);
+		group.add(dragZoomButton);
 		group.add(rulerButton);
 		
 		JButton zoomIn = SwarmUtil.createToolBarButton(
