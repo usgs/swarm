@@ -50,6 +50,9 @@ import javax.swing.event.EventListenerList;
  * TODO: move filter method
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/08/02 23:33:57  cervelli
+ * Now constructs wave outside of the event thread.
+ *
  * Revision 1.1  2006/08/01 23:45:23  cervelli
  * Moved package.
  *
@@ -861,14 +864,14 @@ public class WaveViewPanel extends JComponent
 			
 			if (!Double.isNaN(cursorMark))
 				paintCursor(g2);
+		}
+		
+		if (allowClose)
+		{
+			if (closeImg == null)
+				closeImg = Images.getIcon("close_view").getImage();
 			
-			if (allowClose)
-			{
-				if (closeImg == null)
-					closeImg = Images.getIcon("close_view").getImage();
-				
-				g2.drawImage(closeImg, dim.width - 17, 3, null);
-			}
+			g2.drawImage(closeImg, dim.width - 17, 3, null);
 		}
 	}
 
@@ -986,7 +989,7 @@ public class WaveViewPanel extends JComponent
 		
 //		System.out.println(channel);
 		
-		if (md != null)
+		if (md != null && md.getUnit() != null)
 			waveRenderer.setYLabel(md.getUnit());
 		else
 			waveRenderer.setYLabel("Counts");
@@ -1026,6 +1029,9 @@ public class WaveViewPanel extends JComponent
 	    if (spectraRenderer == null)
 	        spectraRenderer = new SpectraRenderer();
 	    
+	    if (decorator != null)
+			spectraRenderer.setFrameDecorator(decorator);
+	    
 	    spectraRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset, this.getHeight() - bottomHeight - yOffset);
 	    spectraRenderer.setWave(wv);
 	    spectraRenderer.setAutoScale(settings.autoScalePower);
@@ -1056,6 +1062,9 @@ public class WaveViewPanel extends JComponent
 	    
 	    if (spectrogramRenderer == null)
 	        spectrogramRenderer = new SpectrogramRenderer();
+	    
+	    if (decorator != null)
+			spectrogramRenderer.setFrameDecorator(decorator);
 	    
 	    spectrogramRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset, this.getHeight() - bottomHeight - yOffset);
 	    spectrogramRenderer.setWave(wv);
