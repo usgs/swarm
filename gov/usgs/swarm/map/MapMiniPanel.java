@@ -3,6 +3,7 @@ package gov.usgs.swarm.map;
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.FrameDecorator;
 import gov.usgs.plot.FrameRenderer;
+import gov.usgs.plot.RectangleRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.swarm.Images;
@@ -33,8 +34,11 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -46,6 +50,9 @@ import javax.swing.JRadioButtonMenuItem;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/08/04 18:41:28  cervelli
+ * Non reentrant updateWave() and auto channel picking.
+ *
  * Revision 1.6  2006/08/02 23:35:20  cervelli
  * Layout changes, wave caching.
  *
@@ -62,11 +69,15 @@ import javax.swing.JRadioButtonMenuItem;
  */
 public class MapMiniPanel extends JComponent implements MouseListener, MouseMotionListener, MouseWheelListener
 {
+	private static final Color BACKGROUND_COLOR = new Color(255, 255, 255, 64);
+	private static final Color LABEL_BACKGROUND_COLOR = new Color(255, 255, 255, 192);
 	private static final long serialVersionUID = 1L;
 	public static final Font FONT = Font.decode("dialog-PLAIN-10");
-	public static final int LABEL_HEIGHT = 13;
-	private static final int SIZES[] = new int[] { 100, 150, 200, 250, 300, 350, 400, 450, 500, 550};
-	private int sizeIndex = 4;
+	private int labelHeight = 13;
+	private int labelFontSize = 10;
+	private int timeFontSize = 10;
+	private static final int SIZES[] = new int[] { 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700};
+	private int sizeIndex = 3;
 	private Metadata activeMetadata;
 	private boolean activeMetadataChosen = false;
 	private SortedMap<String, Metadata> metadataList;
@@ -104,7 +115,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	{
 		parent = p;
 		metadataList = new TreeMap<String, Metadata>();
-		setSize(labelWidth, LABEL_HEIGHT);
+		setSize(labelWidth, labelHeight);
 		setCursor(Cursor.getDefaultCursor());
 		addMouseMotionListener(this);
 		addMouseListener(this);
@@ -317,15 +328,18 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 		
 		removeAll();
 		int w = SIZES[sizeIndex];
-		int h = (int)Math.round(w * 80 / 300);
+		int h = (int)Math.round((double)w * 80.0 / 300.0);
 		setSize(w, h);
+		timeFontSize = Math.min(11, Math.max(9, (int)Math.round((double)h / 10.0)));
+		labelFontSize = Math.max(10, (int)Math.round((double)h / 8.0));
+		labelHeight = labelFontSize + 4;
 
-		wavePanel.setOffsets(0, 0, 0, 0);
-		wavePanel.setSize(w - 1, h - 13);
+		wavePanel.setOffsets(13, 0, 0, timeFontSize + 4);
+		wavePanel.setSize(w - 1, h - labelHeight);
 		wavePanel.setBackgroundColor(WAVE_BACKGROUND);
 //		wavePanel.setFrameDecorator(new MapWaveDecorator(wavePanel));
 		wavePanel.setFrameDecorator(new MapWaveDecorator());
-		wavePanel.setLocation(0, LABEL_HEIGHT - 1);
+		wavePanel.setLocation(0, labelHeight - 1);
 		add(wavePanel);
 		
 		if (close == null)
@@ -485,7 +499,9 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 		else
 		{
 			parent.deselectPanel(this);
-			setSize(labelWidth, LABEL_HEIGHT);
+			labelFontSize = 10;
+			labelHeight = 13;
+			setSize(labelWidth, labelHeight);
 		}
 		adjustLine();
 		getParent().repaint();
@@ -556,13 +572,14 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 		}
 		
 		g2.setColor(titleBackground);
-		g2.fillRect(0, 0, getWidth() - 1, LABEL_HEIGHT - 1);
+		g2.fillRect(0, 0, getWidth() - 1, labelHeight - 1);
 		
 		super.paint(g);
 
-		g2.setFont(FONT);
+		Font font = Font.decode("dialog-BOLD-" + labelFontSize);
+		g2.setFont(font);
 		g2.setColor(Color.BLACK);
-		g2.drawString(label, 2, 10);
+		g2.drawString(label, 2, labelFontSize);
 		g2.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
 	}
 
@@ -691,30 +708,26 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	// TODO: could be singleton to reduce garbage
 	private class MapWaveDecorator extends FrameDecorator
 	{
-//		private WaveViewPanel panel;
+		private Font font;
+		private FontRenderContext frc = new FontRenderContext(new AffineTransform(), false, false);
 		
 		public MapWaveDecorator()
 		{}
-		
-//		public MapWaveDecorator(WaveViewPanel wvp)
-//		{
-//			panel = wvp;
-//		}
-		
-		public void decorate(FrameRenderer fr)
+
+		private void createAxis(FrameRenderer fr)
 		{
 			fr.createEmptyAxis();
 			AxisRenderer ar = fr.getAxis();
 			ar.createDefault();
-			ar.setBackgroundColor(new Color(255, 255, 255, 64));
-			
-//			TextRenderer label = new TextRenderer(fr.getGraphX() + 4, fr.getGraphY() + 14, panel.getChannel(), Color.BLACK);
-//			label.backgroundColor = Color.WHITE;
-			
-			int hTicks = fr.getGraphWidth() / 54;
+			ar.setBackgroundColor(BACKGROUND_COLOR);
+		}
+		
+		private void setTimeAxis(FrameRenderer fr)
+		{
+			int hTicks = 6;
 			Object[] stt = SmartTick.autoTimeTick(fr.getMinXAxis(), fr.getMaxXAxis(), hTicks);
 	        if (stt != null)
-	        	ar.createVerticalGridLines((double[])stt[0]);
+	        	fr.getAxis().createVerticalGridLines((double[])stt[0]);
 	        
 	        double[] bt = (double[])stt[0];
 	        String[] labels = (String[])stt[1];
@@ -723,15 +736,134 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	            TextRenderer tr = new TextRenderer();
                 tr.text = labels[i];
 	            tr.x = (float)fr.getXPixel(bt[i]);
-	            tr.y = fr.getGraphY() + fr.getGraphHeight() - 10 ;
+	            tr.y = fr.getGraphY() + fr.getGraphHeight() + timeFontSize + 2;
 	            tr.color = Color.BLACK;
 	            tr.horizJustification = TextRenderer.CENTER;
-	            tr.vertJustification = TextRenderer.TOP;
-	            tr.font = TextRenderer.SMALL_FONT;
-	            ar.addPostRenderer(tr);
+	            tr.font = font;
+	            fr.getAxis().addPostRenderer(tr);
 	        }
+		}
+		
+		private void setLinearAxis(FrameRenderer fr, boolean log)
+		{
+			int hTicks = 6;
+			double[] stt = SmartTick.autoTick(fr.getMinXAxis(), fr.getMaxXAxis(), hTicks, false, false);
+	        if (stt != null)
+	        	fr.getAxis().createVerticalGridLines(stt);
 	        
-//	        ar.addPostRenderer(label);
+	        for (int i = 0; i < stt.length; i++)
+	        {
+	            TextRenderer tr = new TextRenderer();
+	            double val = stt[i];
+	            if (log)
+	            	val = Math.pow(10, val);
+                tr.text = String.format("%.0f", val);
+	            tr.x = (float)fr.getXPixel(stt[i]);
+	            if (tr.x >= getWidth() - 3)
+	            	tr.x -= 5;
+	            tr.y = fr.getGraphY() + fr.getGraphHeight() + timeFontSize + 2;
+	            tr.color = Color.BLACK;
+	            tr.horizJustification = TextRenderer.CENTER;
+	            tr.font = font;
+	            fr.getAxis().addPostRenderer(tr);
+	        }
+		}
+		
+		private void setLeftLabel(FrameRenderer fr, String label)
+		{
+			TextRenderer tr = new TextRenderer();
+	        tr.color = Color.BLACK;
+	        tr.text = label;
+	        tr.x = 4;
+	        tr.y = fr.getGraphY() + fr.getGraphHeight() / 2 + 8;
+	        tr.horizJustification = TextRenderer.CENTER;
+	        tr.orientation = -90.0f;
+	        fr.getAxis().addPostRenderer(tr);
+		}
+
+		private void setMinMaxBoxes(FrameRenderer fr)
+		{
+			AxisRenderer ar = fr.getAxis();
+			TextRenderer ultr = new TextRenderer();
+	        ultr.color = Color.BLACK;
+	        ultr.text = String.format("%.0f", fr.getMaxY());
+	        ultr.horizJustification = TextRenderer.RIGHT;
+	        ultr.y = fr.getGraphY() + timeFontSize;
+	        ultr.font = font;
+	        
+	        TextRenderer lltr = new TextRenderer();
+	        lltr.color = Color.BLACK;
+	        lltr.text = String.format("%.0f", fr.getMinY());
+	        lltr.horizJustification = TextRenderer.RIGHT;
+	        lltr.y = fr.getGraphY() + fr.getGraphHeight() - 1;
+	        lltr.font = font;
+
+	        int w = (int)Math.round(Math.max(font.getStringBounds(ultr.text, frc).getWidth(), font.getStringBounds(lltr.text, frc).getWidth())) + 3;
+	        ultr.backgroundWidth = w;
+	        lltr.backgroundWidth = w;
+	        ultr.x = fr.getGraphX() + w;
+	        lltr.x = fr.getGraphX() + w;
+	        
+	        RectangleRenderer ulrr = new RectangleRenderer();
+	        ulrr.rect = new Rectangle2D.Double(fr.getGraphX(), fr.getGraphY(), w + 1, timeFontSize + 2);
+	        ulrr.color = Color.BLACK;
+	        ulrr.backgroundColor = LABEL_BACKGROUND_COLOR;
+	        RectangleRenderer llrr = new RectangleRenderer();
+	        llrr.rect = new Rectangle2D.Double(fr.getGraphX(), fr.getGraphY() + fr.getGraphHeight() - timeFontSize - 2, w + 1, timeFontSize + 2);
+	        llrr.color = Color.BLACK;
+	        llrr.backgroundColor = LABEL_BACKGROUND_COLOR;
+	        ar.addPostRenderer(ulrr);
+	        ar.addPostRenderer(llrr);
+	        ar.addPostRenderer(ultr);
+	        ar.addPostRenderer(lltr);
+		}
+		
+		public void decorateWave(FrameRenderer fr)
+		{
+			createAxis(fr);
+			setTimeAxis(fr);
+	        String label = "Counts";
+	        if (activeMetadata.getUnit() != null)
+				label = activeMetadata.getUnit();
+	        setLeftLabel(fr, label);
+	        setMinMaxBoxes(fr);
+		}
+		
+		public void decorateSpectra(FrameRenderer fr)
+		{
+			createAxis(fr);
+			setLinearAxis(fr, wavePanel.getSettings().logFreq);
+			if (wavePanel.getSettings().logPower)
+				setLeftLabel(fr, "log(P)");
+			else
+				setLeftLabel(fr, "Power");
+	        setMinMaxBoxes(fr);
+		}
+		
+		public void decorateSpectrogram(FrameRenderer fr)
+		{
+			createAxis(fr);
+			setTimeAxis(fr);
+	        String label = "Freq";
+	        setLeftLabel(fr, label);
+	        setMinMaxBoxes(fr);
+		}
+		
+		public void decorate(FrameRenderer fr)
+		{
+			font = Font.decode("dialog-PLAIN-" + timeFontSize);
+			switch (wavePanel.getSettings().viewType)
+			{
+				case WAVE:
+					decorateWave(fr);
+					break;
+				case SPECTRA:
+					decorateSpectra(fr);
+					break;
+				case SPECTROGRAM:
+					decorateSpectrogram(fr);
+					break;
+			}
 		}
 	}
 
