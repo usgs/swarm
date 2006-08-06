@@ -63,6 +63,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/08/05 22:24:19  cervelli
+ * Prototype, buggy draggable map implementation.
+ *
  * Revision 1.9  2006/08/04 18:42:19  cervelli
  * Pop functions return true/false stating whether or not the pop was successful.
  *
@@ -138,7 +141,7 @@ public class MapPanel extends JPanel
 	private double startTime;
 	private double endTime;
 	
-	private Dragger dragger;
+//	private Dragger dragger;
 	private int dragDX = Integer.MAX_VALUE;
 	private int dragDY = Integer.MAX_VALUE;
 	
@@ -157,59 +160,59 @@ public class MapPanel extends JPanel
 		this.setCursor(crosshair);
 		
 		createUI();
-		dragger = new Dragger();
+//		dragger = new Dragger();
 	}
 	
-	private class Dragger extends Thread
-	{
-		private long timeTillReset;
-		
-		public Dragger()
-		{
-			start();
-		}
-		
-		public synchronized void setTimeTillReset(long d)
-		{
-			timeTillReset = d;
-			interrupt();
-		}
-		
-		private synchronized void shiftImage()
-		{
-			int dx = mouseDown.x - mouseNow.x;
-			int dy = mouseDown.y - mouseNow.y;
-			center = getLonLat(getWidth() / 2 + dx, getHeight() / 2 + dy);
-			mouseDown = mouseNow;
-			resetImage();	
-		}
-		
-		public void run()
-		{
-			while (true)
-			{
-				try
-				{
-					if (timeTillReset <= 0)
-						Thread.sleep(100000);
-					else
-					{
-						Thread.sleep(timeTillReset);
-						System.out.println("reset");
-						if (timeTillReset > 0)
-							shiftImage();
-						timeTillReset = 0;
-					}
-				}
-				catch (InterruptedException e)
-				{}
-				catch (Throwable e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+//	private class Dragger extends Thread
+//	{
+//		private long timeTillReset;
+//		
+//		public Dragger()
+//		{
+//			start();
+//		}
+//		
+//		public synchronized void setTimeTillReset(long d)
+//		{
+//			timeTillReset = d;
+//			interrupt();
+//		}
+//		
+//		private synchronized void shiftImage()
+//		{
+//			int dx = mouseDown.x - mouseNow.x;
+//			int dy = mouseDown.y - mouseNow.y;
+//			center = getLonLat(getWidth() / 2 + dx, getHeight() / 2 + dy);
+//			mouseDown = mouseNow;
+//			resetImage();	
+//		}
+//		
+//		public void run()
+//		{
+//			while (true)
+//			{
+//				try
+//				{
+//					if (timeTillReset <= 0)
+//						Thread.sleep(100000);
+//					else
+//					{
+//						Thread.sleep(timeTillReset);
+//						System.out.println("reset");
+//						if (timeTillReset > 0)
+//							shiftImage();
+//						timeTillReset = 0;
+//					}
+//				}
+//				catch (InterruptedException e)
+//				{}
+//				catch (Throwable e)
+//				{
+//					e.printStackTrace();
+//				}
+//			}
+//		}
+//	}
 	
 	public void saveLayout(ConfigFile cf, String prefix)
 	{
@@ -305,8 +308,8 @@ public class MapPanel extends JPanel
 					
 					public void mouseReleased(MouseEvent e)
 					{
-						dragger.setTimeTillReset(0);
-						if (dragMode == DragMode.DRAG_MAP)
+//						dragger.setTimeTillReset(0);
+						if (dragMode == DragMode.DRAG_MAP && mouseDown != null && mouseNow != null)
 						{
 							dragDX = mouseDown.x - mouseNow.x;
 							dragDY = mouseDown.y - mouseNow.y;
@@ -347,15 +350,25 @@ public class MapPanel extends JPanel
 					{
 						Point2D.Double latLon = getLonLat(e.getX(), e.getY());
 						if (latLon != null)
-							parent.setStatusText(Util.longitudeToString(latLon.x) + " " + Util.latitudeToString(latLon.y));
+							parent.setStatusText(Util.lonLatToString(latLon));
 					}
 					
 					public void mouseDragged(MouseEvent e)
 					{
-						dragger.setTimeTillReset(100);
+//						dragger.setTimeTillReset(100);
 						mouseNow = e.getPoint();
 						Point2D.Double lonLat = getLonLat(e.getX(), e.getY());
-						if (dragMode == DragMode.BOX)
+						if (dragMode == DragMode.DRAG_MAP)
+						{
+							if (SwingUtilities.isLeftMouseButton(e) && pane.getComponentCount() != 1)
+							{
+								lines.clear();
+								pane.removeAll();
+								pane.add(mapImagePanel, new Integer(10));
+								repaint();
+							}
+						}
+						else if (dragMode == DragMode.BOX)
 						{
 							if (lonLat != null)
 //								parent.setStatusText(Util.longitudeToString(latLon.x) + " " + Util.latitudeToString(latLon.y));
@@ -787,17 +800,6 @@ public class MapPanel extends JPanel
 			layouts.remove(hash);
 	}
 	
-	private int entries = 0;
-	private synchronized void addEntries(int d)
-	{
-		entries += d;
-	}
-	
-	private synchronized int getEntries()
-	{
-		return entries;
-	}
-	
 	public void resetImage(final boolean doMap)
 	{
 		if (!parent.isVisible() || mapImagePanel.getHeight() == 0 || mapImagePanel.getWidth() == 0)
@@ -809,7 +811,6 @@ public class MapPanel extends JPanel
 			{
 				if (doMap)
 				{					
-					addEntries(1);
 					Swarm.config.mapScale = scale;
 					Swarm.config.mapLongitude = center.x;
 					Swarm.config.mapLatitude = center.y;
@@ -845,13 +846,8 @@ public class MapPanel extends JPanel
 					plot.addRenderer(renderer);
 					
 					mapImage = plot.getAsBufferedImage(false);
-					addEntries(-1);
-					if (getEntries() == 0)
-					{
-						dragDX = Integer.MAX_VALUE;
-						dragDY = Integer.MAX_VALUE;
-						System.out.println("clear");
-					}
+					dragDX = Integer.MAX_VALUE;
+					dragDY = Integer.MAX_VALUE;
 					System.out.println("mapImage changed");
 				}
 				return null;
@@ -881,7 +877,6 @@ public class MapPanel extends JPanel
 		if (image == null || renderer == null)
 			return;
 		
-		// TODO: abort if renderer not going
 		final List<JComponent> compsToAdd = new ArrayList<JComponent>();
 		final List<Line2D.Double> linesToAdd = new ArrayList<Line2D.Double>();
 		
@@ -947,13 +942,13 @@ public class MapPanel extends JPanel
 									pt = new Point(locX, locY);
 								}
 								else
-									pt = getLabelPosition(boxes, locX, locY, w, MapMiniPanel.LABEL_HEIGHT);
+									pt = getLabelPosition(boxes, locX, locY, w, 13);
 								
 								if (pt != null)
 								{
 									locX = pt.x;
 									locY = pt.y;
-									boxes.append(new Rectangle(locX, locY, w, MapMiniPanel.LABEL_HEIGHT), false);
+									boxes.append(new Rectangle(locX, locY, w, 13), false);
 									cmp.setLocation(locX, locY);
 									if (cmp.getPosition() == Position.UNSET)
 										cmp.setPosition(Position.AUTOMATIC);
@@ -1022,7 +1017,6 @@ public class MapPanel extends JPanel
 			}
 			else
 			{
-				System.out.println("paint");
 				Graphics2D g2 = (Graphics2D)g;
 //				g2.drawImage(mapImage, 0, 0, null);
 				if (dragMode == DragMode.DRAG_MAP && mouseDown != null && mouseNow != null)
