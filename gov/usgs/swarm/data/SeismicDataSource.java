@@ -8,11 +8,15 @@ import gov.usgs.vdx.data.wave.Wave;
 import java.util.List;
 
 import javax.swing.Icon;
+import javax.swing.event.EventListenerList;
 
 /**
  * Base class for seismic data sources.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/08/02 23:32:44  cervelli
+ * Added useCache variable.
+ *
  * Revision 1.6  2006/07/30 22:45:49  cervelli
  * Change for gulper.
  *
@@ -56,6 +60,8 @@ abstract public class SeismicDataSource
 
 	protected boolean useCache = true;
 	
+	protected EventListenerList listeners = new EventListenerList();
+	
 	abstract public List<String> getChannels();
 	
 	/**
@@ -69,6 +75,24 @@ abstract public class SeismicDataSource
 	 */
 	abstract public Wave getWave(String station, double t1, double t2);
 	abstract public HelicorderData getHelicorder(String station, double t1, double t2, GulperListener gl);
+	
+	public void addListener(SeismicDataSourceListener l)
+	{
+		listeners.add(SeismicDataSourceListener.class, l);
+	}
+	
+	public void removeListener(SeismicDataSourceListener l)
+	{
+		listeners.remove(SeismicDataSourceListener.class, l);
+	}
+	
+	public void fireChannelsUpdated()
+	{
+		Object[] ls = listeners.getListenerList();
+		for (int i = ls.length - 2; i >= 0; i -= 2)
+		    if (ls[i] == SeismicDataSourceListener.class)
+		        ((SeismicDataSourceListener)ls[i + 1]).channelsUpdated();
+	}
 	
 	public void notifyDataNotNeeded(String station, double t1, double t2, GulperListener gl)
 	{}
@@ -107,6 +131,8 @@ abstract public class SeismicDataSource
 	 * Close the data source.
 	 */
 	public void close() {}
+	
+	public void remove() {}
 
 	/**
 	 * Get a copy of the data source.  The default implementation returns an
@@ -208,6 +234,10 @@ abstract public class SeismicDataSource
 		else if (type.equals("dhi"))
 		{
 			sds = new DHIDataSource(params);
+		}
+		else if (type.equals("file"))
+		{
+			sds = Swarm.getApplication().fileSource;
 		}
 		sds.setName(name);
 		return sds;
