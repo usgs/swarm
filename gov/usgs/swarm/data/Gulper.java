@@ -9,6 +9,9 @@ import java.util.Set;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/07/30 22:45:12  cervelli
+ * Fixes bug with multiple helicorders using the same gulper.
+ *
  * Revision 1.2  2006/07/26 00:36:03  cervelli
  * Changes for new gulper system.
  *
@@ -45,7 +48,7 @@ public class Gulper extends Thread
 		update(t1, t2);
 		
 		start();
-		System.out.println("Gulper started for " + channel);
+		Swarm.logger.finer("gulper started for " + channel);
 	}
 
 	public synchronized void addListener(GulperListener gl)
@@ -70,7 +73,6 @@ public class Gulper extends Thread
 	
 	public void kill(GulperListener gl)
 	{
-		System.out.println("kill!");
 		removeListener(gl);
 		if (listeners.size() == 0)
 		{
@@ -121,12 +123,11 @@ public class Gulper extends Thread
 			{
 				double t1 = lastTime - GULP_SIZE;
 				double t2 = lastTime;
-				System.out.println("gulper: getWave");
 				Wave w = gulpSource.getWave(channel, t1, t2);
 				fireGulped(t1, t2, w != null && !killed);
 				update(goalTime, lastTime - GULP_SIZE + 10);
 			}
-			catch (Exception e)
+			catch (Throwable e)
 			{
 				System.err.println("Exception during gulp:");
 				e.printStackTrace();	
@@ -139,9 +140,9 @@ public class Gulper extends Thread
 		gulpSource.close();
 		
 		if (killed)
-			System.out.println("Gulper killed");
+			Swarm.logger.finest("gulper killed");
 		else
-			System.out.println("Gulper finished");
+			Swarm.logger.finest("gulper finished");
 			
 		gulperList.removeGulper(this);
 		
