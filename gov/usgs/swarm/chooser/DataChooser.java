@@ -7,7 +7,9 @@ import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.SwingWorker;
+import gov.usgs.swarm.data.FileDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
+import gov.usgs.swarm.data.SeismicDataSourceListener;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Pair;
 import gov.usgs.util.Util;
@@ -66,6 +68,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/08/05 22:22:33  cervelli
+ * New group system.
+ *
  * Revision 1.2  2006/08/04 18:37:40  cervelli
  * New group system and single click to change nearest dialog.
  *
@@ -138,10 +143,16 @@ public class DataChooser extends JPanel
 	
 	private Set<String> openedSources;
 	
+	private ServerNode filesNode;
+	private boolean filesNodeInTree = false;
+	
 	public DataChooser()
 	{
 		super(new BorderLayout());
 
+		filesNode = new ServerNode(Swarm.getFileSource());
+		filesNode.getSource().addListener(new FileSourceListener());
+		
 		nearestPaths = new HashMap<String, TreePath>();
 		openedSources = new HashSet<String>();
 		
@@ -156,6 +167,34 @@ public class DataChooser extends JPanel
 		setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 0));
 		
 		addServers(Swarm.config.sources);
+	}
+	
+	private class FileSourceListener implements SeismicDataSourceListener
+	{
+		public void channelsUpdated()
+		{
+			List<String> ch = filesNode.getSource().getChannels();
+			if (ch == null && filesNodeInTree)
+			{
+				removeServer(filesNode);
+				filesNodeInTree = false;
+			}
+			else if (ch != null)
+			{
+				if (!filesNodeInTree)
+					rootNode.insert(filesNode, 0);
+				
+				((DefaultTreeModel)dataTree.getModel()).reload();
+				populateServer(filesNode, ch, true);
+				
+//				dataTree.expandPath(new TreePath(filesNode.getFirstChild()));
+				
+				filesNodeInTree = true;	
+			}
+		}
+		
+		public void channelsProgress(double p)
+		{}
 	}
 	
 	public void saveLayout(ConfigFile cf, String prefix)
@@ -192,7 +231,6 @@ public class DataChooser extends JPanel
 										EditDataSourceDialog d = new EditDataSourceDialog(null);
 										d.setVisible(true);
 										String nds = d.getResult();
-										System.out.println(nds);
 										if (nds != null)
 										{
 											SeismicDataSource source = SeismicDataSource.getDataSource(nds);
@@ -225,7 +263,6 @@ public class DataChooser extends JPanel
 								EditDataSourceDialog d = new EditDataSourceDialog(selected);
 								d.setVisible(true);
 								String eds = d.getResult();
-								System.out.println(eds);
 								if (eds != null)
 								{
 									SeismicDataSource newSource = SeismicDataSource.getDataSource(eds);
@@ -590,7 +627,7 @@ public class DataChooser extends JPanel
 						{
 							source.setBroken(false);
 							((DefaultTreeModel)dataTree.getModel()).reload(source);
-							populateServer(source, channels);
+							populateServer(source, channels, false);
 						}
 						else
 						{
@@ -795,7 +832,7 @@ public class DataChooser extends JPanel
 	 * @param node
 	 * @param channels
 	 */
-	private void populateServer(final ServerNode node, final List<String> channels)
+	private void populateServer(final ServerNode node, final List<String> channels, final boolean expandAll)
 	{
 		if (channels == null)
 			return;
@@ -901,6 +938,10 @@ public class DataChooser extends JPanel
 						{
 							dataTree.expandPath(new TreePath(gn.getPath()));
 						}
+						if (expandAll)
+						{
+							dataTree.expandPath(new TreePath(allNode.getPath()));
+						}
 						nearestList.repaint();
 					}
 				});	
@@ -1000,19 +1041,26 @@ public class DataChooser extends JPanel
 		
 		public Icon getIcon()
 		{
-			if (!broken)
+			if (source instanceof FileDataSource)
 			{
-				if (source.isStoreInUserConfig())
-					return Images.getIcon("server");
-				else
-					return Images.getIcon("locked_server");
+				return Images.getIcon("wave_folder");
 			}
 			else
 			{
-				if (source.isStoreInUserConfig())
-					return Images.getIcon("broken_server");
+				if (!broken)
+				{
+					if (source.isStoreInUserConfig())
+						return Images.getIcon("server");
+					else
+						return Images.getIcon("locked_server");
+				}
 				else
-					return Images.getIcon("broken_locked_server");
+				{
+					if (source.isStoreInUserConfig())
+						return Images.getIcon("broken_server");
+					else
+						return Images.getIcon("broken_locked_server");
+				}
 			}
 		}
 		
