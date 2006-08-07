@@ -2,6 +2,7 @@ package gov.usgs.swarm;
  
 import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.CachedDataSource;
+import gov.usgs.swarm.data.FileDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.swarm.map.MapFrame;
@@ -59,6 +60,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: chooser visibility
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.29  2006/08/06 20:03:32  cervelli
+ * Outputs max memory to log.
+ *
  * Revision 1.28  2006/08/04 21:17:45  cervelli
  * Make the map go to front on startup.
  *
@@ -193,7 +197,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.0.0.20060806-alpha-1";
+	private static final String VERSION = "2.0.0.20060807-alpha-1";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -214,10 +218,18 @@ public class Swarm extends JFrame
 	
 	public static Logger logger;
 	
+	public FileDataSource fileSource;
+	
 	public Swarm(String[] args)
 	{
 		super(TITLE + " [" + VERSION + "]");
 		logger = Log.getLogger("gov.usgs.swarm");
+		logger.fine("Swarm version: " + VERSION);
+		String[] ss = Util.getVersion("gov.usgs.swarm");
+		if (ss == null)
+			logger.fine("no build version information available");
+		else
+			logger.fine("build version/date: " + ss[0] + "/" + ss[1]);
 		setIconImage(Images.getIcon("swarm").getImage());
 
 		monitors = new HashMap<String, MultiMonitor>();
@@ -347,6 +359,11 @@ public class Swarm extends JFrame
 		return application.cache;
 	}
 	
+	public static FileDataSource getFileSource()
+	{
+		return application.fileSource;
+	}
+	
 	public WaveClipboardFrame getWaveClipboard()
 	{
 		return waveClipboard;	
@@ -435,6 +452,8 @@ public class Swarm extends JFrame
 			this.setExtendedState(Frame.MAXIMIZED_BOTH);
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		fileSource = new FileDataSource();
 		
 		chooser = new DataChooser();
 		split = SwarmUtil.createStrippedSplitPane(JSplitPane.HORIZONTAL_SPLIT, chooser, desktop);
@@ -705,7 +724,7 @@ public class Swarm extends JFrame
 		monitors.remove(mm.getDataSource().getName());
 	}
 	
-	public void monitorChannelSelected(SeismicDataSource source, String channel)
+	public MultiMonitor getMonitor(SeismicDataSource source)
 	{
 		MultiMonitor monitor = monitors.get(source.getName());
 		if (monitor == null)
@@ -713,9 +732,14 @@ public class Swarm extends JFrame
 			monitor = new MultiMonitor(source);
 			monitors.put(source.getName(), monitor);
 			addInternalFrame(monitor);
-			monitor.setVisible(true);
 		}
-		
+		return monitor;
+	}
+	
+	public void monitorChannelSelected(SeismicDataSource source, String channel)
+	{
+		MultiMonitor monitor = getMonitor(source);
+		monitor.setVisible(true);
 		monitor.addChannel(channel);
 	}
 
@@ -750,6 +774,11 @@ public class Swarm extends JFrame
 			{
 				HelicorderViewerFrame hvf = (HelicorderViewerFrame)frame;
 				hvf.saveLayout(cf, "helicorder-" + i++);
+			}
+			else if (frame instanceof MultiMonitor)
+			{
+				MultiMonitor mm = (MultiMonitor)frame;
+				mm.saveLayout(cf, "monitor-" + i++);
 			}
 		}
 		
