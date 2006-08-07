@@ -50,6 +50,9 @@ import javax.swing.JRadioButtonMenuItem;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/08/06 20:05:26  cervelli
+ * Decorators for each wave type and scaling fonts.
+ *
  * Revision 1.7  2006/08/04 18:41:28  cervelli
  * Non reentrant updateWave() and auto channel picking.
  *
@@ -355,7 +358,10 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	{
 		activeMetadata = md;
 		if (wavePanel != null)
+		{
+			wavePanel.setWave(null, 0, 0);
 			updateWave(wavePanel.getStartTime(), wavePanel.getEndTime());
+		}
 	}
 	
 	private synchronized boolean isWorking()
@@ -786,14 +792,16 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 			AxisRenderer ar = fr.getAxis();
 			TextRenderer ultr = new TextRenderer();
 	        ultr.color = Color.BLACK;
-	        ultr.text = String.format("%.0f", fr.getMaxY());
+	        double m = activeMetadata.getMultiplier();
+	        double b = activeMetadata.getOffset();
+	        ultr.text = String.format("%.0f", fr.getMaxY() * m + b);
 	        ultr.horizJustification = TextRenderer.RIGHT;
 	        ultr.y = fr.getGraphY() + timeFontSize;
 	        ultr.font = font;
 	        
 	        TextRenderer lltr = new TextRenderer();
 	        lltr.color = Color.BLACK;
-	        lltr.text = String.format("%.0f", fr.getMinY());
+	        lltr.text = String.format("%.0f", fr.getMinY() * m + b);
 	        lltr.horizJustification = TextRenderer.RIGHT;
 	        lltr.y = fr.getGraphY() + fr.getGraphHeight() - 1;
 	        lltr.font = font;
