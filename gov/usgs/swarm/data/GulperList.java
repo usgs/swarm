@@ -5,6 +5,9 @@ import java.util.Map;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/07/30 22:45:12  cervelli
+ * Fixes bug with multiple helicorders using the same gulper.
+ *
  * Revision 1.2  2006/07/26 00:36:02  cervelli
  * Changes for new gulper system.
  *
@@ -38,10 +41,8 @@ public class GulperList
 		}
 		else
 		{
-			System.out.println("Gulp: " + (t2 - t1));
 			if (t2 - t1 < Gulper.GULP_SIZE)
 			{
-				System.out.println("Getting wave instead of gulping");
 				source.getWave(ch, t1, t2);
 			}
 			else
