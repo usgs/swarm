@@ -7,9 +7,11 @@ import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.swarm.Images;
 import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.SwarmFrame;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.Throbber;
 import gov.usgs.swarm.data.SeismicDataSource;
+import gov.usgs.util.ConfigFile;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;
 import gov.usgs.vdx.data.wave.Wave;
@@ -24,8 +26,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -49,6 +57,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: up/down arrows
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/08/02 23:34:28  cervelli
+ * Eliminated box.
+ *
  * Revision 1.1  2006/08/01 23:45:23  cervelli
  * Moved package.
  *
@@ -105,7 +116,7 @@ import javax.swing.event.InternalFrameEvent;
  *
  * @author Dan Cervelli
  */
-public class MultiMonitor extends JInternalFrame implements Runnable
+public class MultiMonitor extends SwarmFrame
 {
 	public static final long serialVersionUID = -1;
 	
@@ -123,10 +134,6 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	private JButton expXButton;
 	private JButton optionsButton;
 	
-	private long refreshInterval = 1000;
-	
-	private Thread refreshThread;
-	
 	private int selectedIndex = -1;
 	
 	private static final Color SELECT_COLOR = new Color(204, 204, 255);
@@ -134,16 +141,69 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	
 	private Throbber throbber;
 	
+	private Map<String, Wave> waveMap;
+	
+	private Timer timer;
+	private long slideInterval = 100;
+	private long refreshInterval = 1000;
+	private SlideTask slideTask;
+	private RefreshTask refreshTask;
+	
 	public MultiMonitor(SeismicDataSource sds)
 	{
 		super("Monitor, [" + sds.getName() + "]", true, true, true, true);
+		waveMap = Collections.synchronizedMap(new HashMap<String, Wave>());
 		this.setFrameIcon(new ImageIcon(getClass().getClassLoader().getResource(Images.get("monitor"))));
 		dataSource = sds;
 		dataSource.setUseCache(false);
 		panels = new ArrayList<WaveViewPanel>();
 		createUI();
-		refreshThread = new Thread(this);
-		refreshThread.start();
+		timer = new Timer("Monitor Timer [" + sds.getName() + "]");
+		slideTask = new SlideTask();
+		refreshTask = new RefreshTask();
+		setIntervals();
+	}
+
+	public void saveLayout(ConfigFile cf, String prefix)
+	{
+		cf.put("monitor", prefix);
+		super.saveLayout(cf, prefix);
+		cf.put(prefix + ".source", dataSource.getName());
+		for (int i = 0; i < panels.size(); i++)
+		{
+			String p = prefix + ".wave-" + i;
+			WaveViewPanel wvp = panels.get(i);
+			cf.put(p + ".channel", wvp.getChannel());
+			wvp.getSettings().save(cf, p);
+		}
+		cf.put(prefix + ".waves", Integer.toString(panels.size()));
+		cf.put(prefix + ".spanIndex", Integer.toString(spanIndex));
+		cf.put(prefix + ".slideInterval", Long.toString(slideInterval));
+		cf.put(prefix + ".refreshInterval", Long.toString(refreshInterval));
+	}
+	
+	public void processLayout(ConfigFile cf)
+	{
+		processStandardLayout(cf);
+		spanIndex = Integer.parseInt(cf.getString("spanIndex"));
+		slideInterval = Long.parseLong(cf.getString("slideInterval"));
+		refreshInterval = Long.parseLong(cf.getString("refreshInterval"));
+		int waves = Integer.parseInt(cf.getString("waves"));
+		for (int i = 0; i < waves; i++)
+		{
+			String w = "wave-" + i;
+			String channel = cf.getString(w + ".channel");
+			ConfigFile scf = cf.getSubConfig(w);
+			WaveViewPanel wvp = addChannel(channel);
+			wvp.getSettings().set(scf);
+		}
+	}
+	
+	private void setIntervals()
+	{
+		timer.purge();
+		timer.schedule(slideTask, 0, slideInterval);
+		timer.schedule(refreshTask, 0, refreshInterval);
 	}
 	
 	public void setDataSource(SeismicDataSource sds)
@@ -309,7 +369,8 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		toolbar.add(throbber);
 		
 		mainPanel.add(toolbar, BorderLayout.NORTH);
-		wavePanel = new JPanel();
+//		wavePanel = new JPanel();
+		wavePanel = new WavePanel();
 		wavePanel.setLayout(null);
 		
 		Border border = BorderFactory.createCompoundBorder(
@@ -324,21 +385,57 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		this.setVisible(true);
 	}
 	
+	private class WavePanel extends JPanel
+	{
+		private static final long serialVersionUID = 1L;
+		private BufferedImage image;
+		
+		public WavePanel()
+		{
+			addComponentListener(new ComponentAdapter()
+			{
+				public void componentMoved(ComponentEvent e)
+				{
+					resizeWaves();
+				}
+				
+				public void componentResized(ComponentEvent e)
+				{
+					createImage();
+					resizeWaves();
+				}
+			});
+		}
+		
+		public synchronized BufferedImage getImage()
+		{
+			return image;
+		}
+		
+		private synchronized void createImage()
+		{
+			image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+		}
+		
+		public void paint(Graphics g)
+		{
+			if (image == null || panels.size() == 0)
+			{
+				super.paint(g);
+				Dimension dim = this.getSize();
+				g.setColor(Color.black);
+				g.drawString("Monitor empty.", dim.width / 2 - 40, dim.height / 2);	
+			}
+			else
+			{
+				super.paint(image.getGraphics());
+				g.drawImage(image, 0, 0, null);
+			}
+		}
+	}
+	
 	private void createListeners()
 	{
-		this.addComponentListener(new ComponentAdapter()
-				{
-					public void componentMoved(ComponentEvent e)
-					{
-						resizeWaves();
-					}
-					
-					public void componentResized(ComponentEvent e)
-					{
-						resizeWaves();
-					}
-				});
-		
 		this.addInternalFrameListener(new InternalFrameAdapter()
 			  {
 					public void internalFrameActivated(InternalFrameEvent e)
@@ -358,6 +455,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 					public void internalFrameClosing(InternalFrameEvent e)
 					{
 						selectedIndex = -1;
+						timer.cancel();
 						dataSource.close();
 						panels.clear();
 						wavePanel.removeAll();
@@ -382,9 +480,6 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 			fr.createEmptyAxis();
 			AxisRenderer ar = fr.getAxis();
 			ar.createDefault();
-			ar.setBackgroundColor(Color.WHITE);
-			if (selectedIndex != -1 && panels.get(selectedIndex) == panel)
-				ar.setBackgroundColor(SELECT_COLOR);
 				
 			TextRenderer label = new TextRenderer(fr.getGraphX() + 2, fr.getGraphY() + 12, panel.getChannel(), Color.BLACK);
 			label.backgroundColor = new Color(255, 255, 255, 210);
@@ -412,8 +507,9 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	        ar.addPostRenderer(label);
 		}
 	}
-	
-	public synchronized void addChannel(String ch)
+
+	// TODO: add sorted
+	public synchronized WaveViewPanel addChannel(String ch)
 	{
 		final WaveViewPanel panel = new WaveViewPanel();
 		panel.setChannel(ch);
@@ -432,6 +528,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 					}
 				});
 		resizeWaves();
+		return panel;
 	}
 	
 	public void deselect()
@@ -467,6 +564,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	public void removeWaveAtIndex(int i)
 	{
 		WaveViewPanel wvp = panels.get(i);
+		waveMap.remove(wvp.getChannel());
 		panels.remove(i);
 		wavePanel.remove(wvp);
 		resizeWaves();
@@ -474,7 +572,7 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 	
 	private void resizeWaves()
 	{
-		if (panels.size () == 0 || wavePanel == null)
+		if (panels.size() == 0 || wavePanel == null || wavePanel.getWidth() <= 0 || wavePanel.getHeight() <= 0)
 		{
 			repaint();
 			return;
@@ -507,77 +605,112 @@ public class MultiMonitor extends JInternalFrame implements Runnable
 		repaint();
 	}
 	
-	public synchronized void refresh()
+	private boolean sliding = false;
+	private synchronized void slide()
 	{
-		throbber.increment();
-//		CachedDataSource cache = Swarm.getCache();
-		double now = CurrentTime.getInstance().nowJ2K();
-		double start = now - SPANS[spanIndex];
-		for (int i = 0; i < panels.size(); i++)
-		{
-			WaveViewPanel waveViewPanel = panels.get(i);
-			String channel = waveViewPanel.getChannel();
-//			Wave sw = cache.getBestWave(channel, start, now);
-			Wave sw = waveViewPanel.getWave();
-			if (sw != null) 
-			{
-				if (sw.getEndTime() < now)
+		if (sliding)
+			return;
+		
+		Runnable r = new Runnable()
 				{
-					Wave w2 = dataSource.getWave(channel, sw.getEndTime() - 10, now);
-					if (w2 != null)
-						sw = sw.combine(w2);
-				}
-				if (sw.getStartTime() > start)
-				{
-					Wave w2 = dataSource.getWave(channel, start, sw.getStartTime() + 10);
-					if (w2 != null)
-						sw = sw.combine(w2);
-				}
-				sw = sw.subset(start, sw.getEndTime());
-//				System.out.println(sw);
-			}
-			
-			// something bad happened above, just get the whole wave
-			if (sw == null)
-				sw = dataSource.getWave(channel, start, now);
-//			waveViewPanel.setWorking(true);
-			waveViewPanel.setWave(sw, start, now);
-			waveViewPanel.repaint();
-//			waveViewPanel.setChannel(channel);
-//			waveViewPanel.setDataSource(dataSource);
-//			waveViewPanel.setWorking(false);
-		}
-		if (!this.isVisible())
-			dataSource.close();
-		throbber.decrement();
-	}
-	
-	public void run()
-	{
-		while (true)
-		{
-			try
-			{
-				if (this.isVisible())
-					refresh();
+					public void run()
+					{
+						sliding = true;
+						double now = CurrentTime.getInstance().nowJ2K();
+						double start = now - SPANS[spanIndex];
+						for (int i = 0; i < panels.size(); i++)
+						{
+							WaveViewPanel waveViewPanel = panels.get(i);
+							Wave wave = waveMap.get(waveViewPanel.getChannel());
+							waveViewPanel.setWave(wave, start, now);
+						}
+						wavePanel.repaint();
+						sliding = false;
+					}
+				};
 				
-				Thread.sleep(refreshInterval);
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
+		Thread worker = new Thread(r);
+		worker.start();
+	}
+	
+	private void refresh()
+	{
+		if (throbber.getCount() >= 1)
+			return;
+		
+		Runnable r = new Runnable()
+				{
+					public void run()
+					{
+						throbber.increment();
+						String channel = null;
+						
+						double now = CurrentTime.getInstance().nowJ2K();
+						double start = now - SPANS[spanIndex];
+						for (int i = 0; i < panels.size(); i++)
+						{
+							WaveViewPanel wvp = panels.get(i);
+							wvp.setWorking(true);
+							channel = wvp.getChannel();
+							try
+							{
+								Wave sw = waveMap.get(channel);
+								if (sw != null) 
+								{
+									if (sw.getEndTime() < now)
+									{
+										Wave w2 = dataSource.getWave(channel, sw.getEndTime() - 10, now);
+										if (w2 != null)
+											sw = sw.combine(w2);
+									}
+									if (sw.getStartTime() > start)
+									{
+										Wave w2 = dataSource.getWave(channel, start, sw.getStartTime() + 10);
+										if (w2 != null)
+											sw = sw.combine(w2);
+									}
+									sw = sw.subset(start, sw.getEndTime());
+								}
+								
+								// something bad happened above, just get the whole wave
+								if (sw == null)
+									sw = dataSource.getWave(channel, start, now);
+								if (sw != null)
+								{
+									waveMap.put(channel, sw);
+								}
+							}
+							catch (Throwable t)
+							{
+								System.out.println(channel);
+								t.printStackTrace();
+							}
+							wvp.setWorking(false);
+						}
+						
+						throbber.decrement();
+					}
+				};
+	
+		Thread worker = new Thread(r);
+		worker.start();
+	}
+	
+	private class SlideTask extends TimerTask
+	{
+		public void run()
+		{
+			if (panels.size() > 0)
+				slide();
 		}
 	}
 	
-	public void paint(Graphics g)
+	private class RefreshTask extends TimerTask
 	{
-		super.paint(g);
-		if (panels.size() == 0)
+		public void run()
 		{
-			Dimension dim = this.getSize();
-			g.setColor(Color.black);
-			g.drawString("Monitor empty.", dim.width / 2 - 40, dim.height / 2);	
+			if (panels.size() > 0)
+				refresh();
 		}
 	}
 }
