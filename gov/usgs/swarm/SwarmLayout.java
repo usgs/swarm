@@ -1,6 +1,8 @@
 package gov.usgs.swarm;
 
+import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.heli.HelicorderViewerFrame;
+import gov.usgs.swarm.wave.MultiMonitor;
 import gov.usgs.util.ConfigFile;
 
 import java.io.File;
@@ -9,6 +11,9 @@ import java.util.List;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/08/01 23:39:09  cervelli
+ * Sets layout info for the chooser.
+ *
  * Revision 1.1  2006/07/30 22:42:19  cervelli
  * Initial commit.
  *
@@ -94,7 +99,18 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 	
 	private void processMonitors()
 	{
+		List<String> monitors = config.getList("monitor");
+		if (monitors == null)
+			return;
 		
+		for (String monitor : monitors)
+		{
+			ConfigFile cf = config.getSubConfig(monitor);
+			SeismicDataSource sds = Swarm.config.getSource(cf.getString("source"));
+			MultiMonitor mm = Swarm.getApplication().getMonitor(sds);
+			mm.processLayout(cf);
+			mm.setVisible(true);
+		}
 	}
 	
 	private void processHelicorders()
