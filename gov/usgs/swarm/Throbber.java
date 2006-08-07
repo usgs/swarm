@@ -8,6 +8,9 @@ import javax.swing.SwingUtilities;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/04/17 04:16:36  dcervelli
+ * More 1.3 changes.
+ *
  * @author Dan Cervelli
  */
 public class Throbber extends JLabel implements Runnable
@@ -41,12 +44,17 @@ public class Throbber extends JLabel implements Runnable
 		thread.start();
 	}
 
-	public void increment()
+	public synchronized int getCount()
+	{
+		return onCount;
+	}
+	
+	public synchronized void increment()
 	{
 		onCount++;
 	}
 	
-	public void decrement()
+	public synchronized void decrement()
 	{
 		onCount--;
 		if (onCount <= 0)
