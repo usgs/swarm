@@ -21,6 +21,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * so I had to add some hacky code for the CachePurgeActions.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/08/01 23:43:48  cervelli
+ * Changed memory usage.
+ *
  * Revision 1.5  2006/07/26 00:36:02  cervelli
  * Changes for new gulper system.
  *
@@ -49,13 +52,13 @@ import cern.colt.matrix.DoubleMatrix2D;
  */
 public class CachedDataSource extends SeismicDataSource
 {
-	private static final int MAX_WAVE_SIZE = 1000000;
-	private long maxSize;
+	protected static final int MAX_WAVE_SIZE = 1000000;
+	protected long maxSize;
 	
-	private Map<String, List<CachedHelicorder>> helicorderCache;
-	private Map<String, List<CachedWave>> waveCache;
+	protected Map<String, List<CachedHelicorder>> helicorderCache;
+	protected Map<String, List<CachedWave>> waveCache;
 	
-	private CachePurgeAction[] purgeActions;
+	protected CachePurgeAction[] purgeActions;
 	
 	public CachedDataSource()
 	{
@@ -90,7 +93,7 @@ public class CachedDataSource extends SeismicDataSource
 					maxT = Math.max(maxT, cw.t2);
 				}
 			}
-			
+
 			if (parts.size() == 1)
 				return parts.get(0);
 			
