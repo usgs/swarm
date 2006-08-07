@@ -5,10 +5,12 @@ import gov.usgs.swarm.data.CachedDataSource;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -21,6 +23,9 @@ import javax.swing.event.MenuListener;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/08/04 21:18:02  cervelli
+ * Map to front item.
+ *
  * Revision 1.5  2006/08/01 23:41:14  cervelli
  * Clear cache menu item.
  *
@@ -42,6 +47,8 @@ public class SwarmMenu extends JMenuBar
 {
 	private static final long serialVersionUID = 1L;
 	private JMenu fileMenu;
+	private JMenuItem openFile;
+	private JMenuItem closeFiles;
 	private JMenuItem clearCache;
 	private JMenuItem exit;
 	
@@ -86,6 +93,42 @@ public class SwarmMenu extends JMenuBar
 	{
 		fileMenu = new JMenu("File");
 		fileMenu.setMnemonic('F');
+		
+		openFile = new JMenuItem("Open File...");
+		openFile.setMnemonic('O');
+		openFile.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						JFileChooser chooser = Swarm.getApplication().getFileChooser();
+						chooser.resetChoosableFileFilters();
+						chooser.setFileFilter(chooser.getAcceptAllFileFilter());
+						File lastPath = new File(Swarm.config.lastPath);
+						chooser.setCurrentDirectory(lastPath);
+						chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+						chooser.setMultiSelectionEnabled(true);
+						int result = chooser.showOpenDialog(Swarm.getApplication());
+						if (result == JFileChooser.APPROVE_OPTION)
+						{
+							File[] fs = chooser.getSelectedFiles();
+							Swarm.getFileSource().openFiles(fs);
+						}
+					}
+				});
+		openFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
+		fileMenu.add(openFile);
+		
+		closeFiles = new JMenuItem("Close Files");
+		closeFiles.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						Swarm.getFileSource().flush();
+					}
+				});
+		closeFiles.setMnemonic('l');
+		fileMenu.add(closeFiles);
+		
 		clearCache = new JMenuItem("Clear Cache");
 		clearCache.setMnemonic('C');
 		clearCache.addActionListener(new ActionListener()
@@ -128,7 +171,7 @@ public class SwarmMenu extends JMenuBar
 					{}
 				});
 	}
-	
+
 	private void createEditMenu()
 	{
 		editMenu = new JMenu("Edit");
