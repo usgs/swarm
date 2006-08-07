@@ -50,6 +50,9 @@ import javax.swing.event.EventListenerList;
  * TODO: move filter method
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/08/06 20:06:09  cervelli
+ * Added decorator stuff for specta/spectrogram.
+ *
  * Revision 1.2  2006/08/02 23:33:57  cervelli
  * Now constructs wave outside of the event thread.
  *
@@ -148,7 +151,7 @@ public class WaveViewPanel extends JComponent
 	/** The amount of padding space on the bottom. */
 	private int bottomHeight = 20;
 	
-	private Plot plot;
+//	private Plot plot;
 	private FrameDecorator decorator;
 	private SliceWaveRenderer waveRenderer;
 	private SpectrogramRenderer spectrogramRenderer;
@@ -898,11 +901,12 @@ public class WaveViewPanel extends JComponent
 	/** Constructs the plot on the specified graphics context.
 	 * @param g2 the graphics context
 	 */
-	private synchronized void constructPlot(Graphics2D g2)
+//	private synchronized void constructPlot(Graphics2D g2)
+	private void constructPlot(Graphics2D g2)
 	{
 		Dimension dim = this.getSize();		
 		
-		plot = new Plot();
+		Plot plot = new Plot();
 		plot.setBackgroundColor(backgroundColor);
 		plot.setSize(dim);
 		Wave renderWave = wave;
@@ -917,13 +921,13 @@ public class WaveViewPanel extends JComponent
 		switch (settings.viewType)
 		{
 			case WAVE:
-				plotWave(renderWave);
+				plotWave(plot, renderWave);
 				break;
 			case SPECTRA:
-				plotSpectra(renderWave);
+				plotSpectra(plot, renderWave);
 				break;
 			case SPECTROGRAM:
-				plotSpectrogram(renderWave);
+				plotSpectrogram(plot, renderWave);
 				break;
 		}
 
@@ -936,7 +940,7 @@ public class WaveViewPanel extends JComponent
 	/** Plots a wave.
 	 * @param renderWave the wave to plot
 	 */
-	private void plotWave(Wave renderWave)
+	private void plotWave(Plot plot, Wave renderWave)
 	{
 	    if (renderWave == null || renderWave.samples() == 0)
 			return;
@@ -1018,7 +1022,7 @@ public class WaveViewPanel extends JComponent
 	/** Plots frequency spectra.
 	 * @param renderWave the wave to plot
 	 */
-	private void plotSpectra(Wave renderWave)
+	private void plotSpectra(Plot plot, Wave renderWave)
 	{
 		if (renderWave == null || renderWave.samples() == 0)
 			return;
@@ -1052,7 +1056,7 @@ public class WaveViewPanel extends JComponent
 	 *  TODO: Fix logPower.
 	 * @param renderWave the wave to plot
 	 */
-	private void plotSpectrogram(Wave renderWave)
+	private void plotSpectrogram(Plot plot, Wave renderWave)
 	{
 	    if (renderWave == null || renderWave.samples() == 0)
 			return;
