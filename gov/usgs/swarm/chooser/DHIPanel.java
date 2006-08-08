@@ -1,40 +1,178 @@
 package gov.usgs.swarm.chooser;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import gov.usgs.swarm.Swarm;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/01 23:43:13  cervelli
+ * Moved package and new data source panel system.
+ *
  * @author Dan Cervelli
  */
 public class DHIPanel extends DataSourcePanel
 {
-	private JTextField network;
+	private JComboBox netDC;
+	private JComboBox netDNS;
+	private JComboBox seisDC;
+	private JComboBox seisDNS;
+	private JComboBox network;
+	private JTextField gulperSize;
+	private JTextField gulperDelay;
+	private JButton nwButton;
+	private JButton dcButton;
 	
 	public DHIPanel()
 	{
 		super("dhi", "DMC");
 	}
 	
+	private String checkComboBox(JComboBox box, String name)
+	{
+		String val = (String)box.getSelectedItem();
+		if (val == null || val.length() == 0)
+			return "There is an error with the " + name + ".";
+		else
+			return null;
+	}
+	
 	public boolean allowOK(boolean edit)
 	{
-		return true;
-	}
+		String message = null;
+		message = checkComboBox(netDC, "Network DC");
+		if (message == null)
+			message = checkComboBox(netDNS, "Network DNS");
+		if (message == null)
+			message = checkComboBox(seisDC, "Seismogram DC");
+		if (message == null)
+			message = checkComboBox(seisDNS, "Seismogram DNS");
+		if (message == null)
+			message = checkComboBox(network, "Network");
+		
+		double gs = -1;
+		try { gs = Double.parseDouble(gulperSize.getText()); } catch (Exception e) {}
+		if (gs <= 0)
+			message = "The gulper size must be greater than 0 minutes.";
+		
+		double gd = -1;
+		try { gd = Double.parseDouble(gulperDelay.getText()); } catch (Exception e) {}
+		if (gd < 0)
+			message = "The gulper delay must be greater than or equal to 0 seconds.";
 
+		if (message != null)
+		{
+			JOptionPane.showMessageDialog(Swarm.getApplication(), message, "Error", JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
+		else
+			return true;
+	}
+	
+	private void createFields()
+	{
+		netDC = new JComboBox();
+		netDC.setEditable(true);
+		netDNS = new JComboBox();
+		netDNS.setEditable(true);
+		seisDC = new JComboBox();
+		seisDC.setEditable(true);
+		seisDNS = new JComboBox();
+		seisDNS.setEditable(true);
+		network = new JComboBox();
+		network.setEditable(true);
+		gulperSize = new JTextField();
+		gulperDelay = new JTextField();
+		dcButton = new JButton("Query for DCs");
+		dcButton.setEnabled(false);
+		nwButton = new JButton("Query for Networks");
+		nwButton.setEnabled(false);
+		
+		String ndns = "edu/iris/dmc";
+		String ndc = "IRIS_NetworkDC";
+		String sdns = "edu/iris/dmc";
+		String sdc = "IRIS_BudDataCenter";
+		String nw = null;
+		String gs = "60";
+		String gd = "1.0";
+		if (source != null && source.indexOf(";dhi:") != -1)
+		{
+			String[] ss = source.substring(source.indexOf(";dhi:") + 5).split(":");
+			ndns = ss[0];
+			ndc = ss[1];
+			sdns = ss[2];
+			sdc = ss[3];
+			nw = ss[4];
+			gs = String.format("%.0f", Integer.parseInt(ss[5]) / 60.0);
+			gd = String.format("%.1f", Integer.parseInt(ss[6]) / 1000.0);
+		}
+		netDC.addItem(ndc);
+		netDNS.addItem(ndns);
+		seisDC.addItem(sdc);
+		seisDNS.addItem(sdns);
+		if (nw != null)
+			network.addItem(nw);
+		gulperSize.setText(gs);
+		gulperDelay.setText(gd);
+	}
+	
 	protected void createPanel()
 	{
-		panel = new JPanel();
-		JLabel info = new JLabel("<html>Use this type of data source to connect to the IRIS DMC/BUD.<br>This panel needs work.</html>");
-		panel.add(info);
-		panel.add(new JLabel("Network:"));
-		network = new JTextField(4);
-		panel.add(network);
+		createFields();
+		FormLayout layout = new FormLayout(
+				"right:max(20dlu;pref), 3dlu, 30dlu, 0dlu, 55dlu, 3dlu, right:max(20dlu;pref), 3dlu, 85dlu", 
+				"");
+		
+		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+		builder.setDefaultDialogBorder();
+		builder.append("Network DC:");
+		builder.append(netDC, 3);
+		builder.append("DNS:");
+		builder.append(netDNS);
+		builder.nextLine();
+
+		builder.append("Seismogram DC:");
+		builder.append(seisDC, 3);
+		builder.append("DNS:");
+		builder.append(seisDNS);
+		builder.nextLine();
+		
+		builder.append("Network:");
+		builder.append(network);
+		builder.nextLine();
+		
+		builder.append("Gulp size:");
+		builder.append(gulperSize);
+		builder.append(" minutes");
+		builder.append(" ");
+		builder.append(dcButton);
+		builder.nextLine();
+		
+		builder.append("Gulp delay:");
+		builder.append(gulperDelay);
+		builder.append(" seconds");
+		builder.append(" ");
+		builder.append(nwButton);
+		
+		panel = builder.getPanel();
 	}
 
 	public String wasOK()
 	{
-		return "dhi:" + network.getText();
+		int gs = (int)(Double.parseDouble(gulperSize.getText()) * 60);
+		int gd = (int)(Double.parseDouble(gulperDelay.getText()) * 1000);
+		String result = String.format("dhi:%s:%s:%s:%s:%s:%d:%d",
+				netDNS.getSelectedItem(), netDC.getSelectedItem(),
+				seisDNS.getSelectedItem(), seisDC.getSelectedItem(),
+				network.getSelectedItem(),
+				gs, gd);
+		return result;
 	}
 
 }
