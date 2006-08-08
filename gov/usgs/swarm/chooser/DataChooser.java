@@ -24,6 +24,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -68,6 +69,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/08/07 22:35:10  cervelli
+ * File source.
+ *
  * Revision 1.3  2006/08/05 22:22:33  cervelli
  * New group system.
  *
@@ -455,39 +459,17 @@ public class DataChooser extends JPanel
 							public Object construct()
 							{
 								List<Pair<ServerNode, String>> channels = getSelections();
-								double minLon = Double.MAX_VALUE;
-								double maxLon = -Double.MAX_VALUE;
-								double minLat = Double.MAX_VALUE;
-								double maxLat = -Double.MAX_VALUE;
-								boolean found = false;
+								GeoRange gr = new GeoRange();
 								for (Pair<ServerNode, String> pair : channels)
 								{
 									Metadata md = Swarm.config.getMetadata(pair.item2);
-									double lon = md.getLongitude();
-									double lat = md.getLatitude();
-									if (md != null && !Double.isNaN(lon) && !Double.isNaN(lat))
-									{
-										minLon = Math.min(minLon, lon);
-										minLat = Math.min(minLat, lat);
-										maxLon = Math.max(maxLon, lon);
-										maxLat = Math.max(maxLat, lat);
-										found = true;
-									}
+									Point2D.Double pt = md.getLonLat();
+									if (pt != null && !Double.isNaN(pt.x) && !Double.isNaN(pt.y))
+										gr.includePoint(pt);
 								}
-								if (found)
+								gr.padPercent(0.4, 0.4);
+								if (gr.isValid())
 								{
-									if (minLon == maxLon)
-									{
-										minLon -= 0.1;
-										maxLon += 0.1;
-									}
-									if (minLat == maxLat)
-									{
-										minLat -= 0.1;
-										maxLat += 0.1;
-									}
-									GeoRange gr = new GeoRange(minLon, maxLon, minLat, maxLat);
-									System.out.println(gr);
 									Swarm.getApplication().setMapVisible(true);
 									Swarm.getApplication().getMapFrame().setView(gr);
 								}
