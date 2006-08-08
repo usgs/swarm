@@ -9,6 +9,9 @@ import java.util.Set;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/08/07 22:36:54  cervelli
+ * Removed chatter, now catches Throwable.
+ *
  * Revision 1.3  2006/07/30 22:45:12  cervelli
  * Fixes bug with multiple helicorders using the same gulper.
  *
@@ -28,11 +31,13 @@ public class Gulper extends Thread
 	private String key;
 	private Set<GulperListener> listeners;
 	
-	public static final int GULP_SIZE = 30 * 60;
-	public static final int WAIT_INTERVAL = 1 * 1000;
+	private int gulpSize;
+	private int gulpDelay;
 	
-	public Gulper(GulperList gl, String k, GulperListener glnr, SeismicDataSource source, String ch, double t1, double t2)
+	public Gulper(GulperList gl, String k, GulperListener glnr, SeismicDataSource source, String ch, double t1, double t2, int size, int delay)
 	{
+		gulpSize = size;
+		gulpDelay = delay;
 		gulperList = gl;
 		gulpSource = source;
 		key = k;
@@ -88,9 +93,9 @@ public class Gulper extends Thread
 			lastTime = t2;
 		goalTime = t1;
 
-		while (cache.inHelicorderCache(channel, lastTime - GULP_SIZE, lastTime) && lastTime > goalTime && !killed)
+		while (cache.inHelicorderCache(channel, lastTime - gulpSize, lastTime) && lastTime > goalTime && !killed)
 		{
-			lastTime -= GULP_SIZE;
+			lastTime -= gulpSize;
 			lastTime += 10;	
 		}
 	}
@@ -121,11 +126,11 @@ public class Gulper extends Thread
 		{
 			try
 			{
-				double t1 = lastTime - GULP_SIZE;
+				double t1 = lastTime - gulpSize;
 				double t2 = lastTime;
 				Wave w = gulpSource.getWave(channel, t1, t2);
 				fireGulped(t1, t2, w != null && !killed);
-				update(goalTime, lastTime - GULP_SIZE + 10);
+				update(goalTime, lastTime - gulpSize + 10);
 			}
 			catch (Throwable e)
 			{
@@ -134,7 +139,7 @@ public class Gulper extends Thread
 			}
 			
 			if (!killed)
-				try { Thread.sleep(WAIT_INTERVAL); } catch (Exception e) {}
+				try { Thread.sleep(gulpDelay); } catch (Exception e) {}
 		}	
 		
 		gulpSource.close();

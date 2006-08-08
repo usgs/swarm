@@ -20,6 +20,9 @@ import java.util.Map;
  * Earthworm Wave Server.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/08/01 23:44:07  cervelli
+ * New metadata system changes.
+ *
  * Revision 1.6  2006/07/30 22:45:30  cervelli
  * Uses new gulper.
  *
@@ -60,6 +63,9 @@ public class WaveServerSource extends SeismicDataSource
 	
 	private String server;
 	private int port;
+	
+	private int gulpSize = 30 * 60;
+	private int gulpDelay = 1 * 1000;
 	
 	private static Map<String, Boolean> scnlSources = new HashMap<String, Boolean>();
 	
@@ -200,7 +206,7 @@ public class WaveServerSource extends SeismicDataSource
 		HelicorderData hd = cache.getHelicorder(station, t1, t2, (GulperListener)null);	
 
 		if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10))
-			GulperList.getInstance().requestGulper("ws:" + station, gl, this.getCopy(), station, t1, t2);
+			GulperList.getInstance().requestGulper("ws:" + station, gl, this.getCopy(), station, t1, t2, gulpSize, gulpDelay);
 		return hd;
 	}
 	

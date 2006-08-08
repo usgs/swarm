@@ -5,6 +5,9 @@ import java.util.Map;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/08/07 22:36:23  cervelli
+ * Removed chatter.
+ *
  * Revision 1.3  2006/07/30 22:45:12  cervelli
  * Fixes bug with multiple helicorders using the same gulper.
  *
@@ -31,7 +34,7 @@ public class GulperList
 		return gulperList;
 	}
 	
-	public synchronized Gulper requestGulper(String key, GulperListener gl, SeismicDataSource source, String ch, double t1, double t2)
+	public synchronized Gulper requestGulper(String key, GulperListener gl, SeismicDataSource source, String ch, double t1, double t2, int size, int delay)
 	{
 		Gulper g = gulpers.get(key);
 		if (g != null)
@@ -41,13 +44,13 @@ public class GulperList
 		}
 		else
 		{
-			if (t2 - t1 < Gulper.GULP_SIZE)
+			if (t2 - t1 < size)
 			{
 				source.getWave(ch, t1, t2);
 			}
 			else
 			{
-				g = new Gulper(this, key, gl, source, ch, t1, t2);
+				g = new Gulper(this, key, gl, source, ch, t1, t2, size, delay);
 				gulpers.put(key, g);
 			}
 		}
