@@ -19,6 +19,9 @@ import javax.swing.border.EmptyBorder;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/01 23:43:13  cervelli
+ * Moved package and new data source panel system.
+ *
  * @author Dan Cervelli
  */
 public class EditDataSourceDialog extends SwarmDialog
@@ -68,8 +71,8 @@ public class EditDataSourceDialog extends SwarmDialog
 		
 		String src = null;
 		if (source != null)
-			src = source.substring(source.indexOf(';'), source.indexOf(':'));
-		
+			src = source.substring(source.indexOf(';') + 1, source.indexOf(':'));
+
 		tabPane = new JTabbedPane();
 		for (DataSourcePanel dsp : panels)
 		{
