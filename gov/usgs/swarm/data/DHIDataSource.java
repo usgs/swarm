@@ -33,6 +33,9 @@ import org.apache.log4j.varia.NullAppender;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/08/04 21:21:09  cervelli
+ * Got rid of some useless output.
+ *
  * Revision 1.4  2006/08/01 23:44:07  cervelli
  * New metadata system changes.
  *
@@ -46,63 +49,79 @@ import org.apache.log4j.varia.NullAppender;
  */
 public class DHIDataSource extends SeismicDataSource
 {
+	protected static final String NAMING_SERVICE_URL = "corbaloc:iiop:dmc.iris.washington.edu:6371/NameService";
 	protected String network;
 	
+	protected String networkDC;
+	protected String networkDNS;
+	protected String seismoDC;
+	protected String seismoDNS;
+	
+	protected int gulpSize = 30 * 60;
+	protected int gulpDelay = 1 * 1000;
+	
+	// TODO: static maps for netDC, seisDC?
 	protected Map<String, ChannelId> idMap;
-	protected org.omg.CORBA_2_3.ORB orb;
 	protected FissuresNamingService namingService;
 	protected NetworkDCOperations netDC;
 	protected DataCenter seisDC;
 	
-	private static Logger logger;
+	protected static org.omg.CORBA_2_3.ORB orb;
+	protected static Logger logger;
 	
 	public DHIDataSource(String nw)
 	{
-		network = nw;
+		String[] ss = nw.split(":");
+		networkDNS = ss[0];
+		networkDC = ss[1];
+		seismoDNS = ss[2];
+		seismoDC = ss[3];
+		network = ss[4];
+		gulpSize = Integer.parseInt(ss[5]);
+		gulpDelay = Integer.parseInt(ss[6]);
 	}
 	
 	public void establish()
 	{
+		if (logger == null)
+		{
+			BasicConfigurator.configure(new NullAppender());
+			logger = Logger.getLogger(DHIDataSource.class);
+			logger.addAppender(new ConsoleAppender(new SimpleLayout()));
+		}
 		if (orb == null)
 		{
-			if (logger == null)
-			{
-				BasicConfigurator.configure(new NullAppender());
-				logger = Logger.getLogger(DHIDataSource.class);
-				logger.addAppender(new ConsoleAppender(new SimpleLayout()));
-			}
-			try
-			{
-				/* Alternate form of resetting timeout:
-				//===================================================================
-				// set a timeout for response from the server
-				//===================================================================
-				org.omg.CORBA.Any ULongAny = orb.create_any();
-				// time out if no response in 10 minutes
-				if( debug ) System.out.println("Setting wait to: "+wait+" ms");
-				ULongAny.insert_ulong( wait ); 
-				org.omg.CORBA.Policy[] policies = new org.omg.CORBA.Policy[1];
-				policies[0] = orb.create_policy(com.ooc.OB.TIMEOUT_POLICY_ID.value, ULongAny);
-				org.omg.CORBA.PolicyManager pm =
-					org.omg.CORBA.PolicyManagerHelper.narrow(
-						orb.resolve_initial_references("ORBPolicyManager"));
-				pm.add_policy_overrides(policies);
-				 */
-		        Properties prop = new Properties();
-		        prop.setProperty("com.sun.CORBA.transport.ORBTCPReadTimeouts", "100:60000:180000:20");
-		        orb = (org.omg.CORBA_2_3.ORB)org.omg.CORBA.ORB.init(new String[] {}, prop);
-		        new AllVTFactory().register(orb);
-		        namingService = new FissuresNamingService(orb);
-		        namingService.setNameServiceCorbaLoc("corbaloc:iiop:dmc.iris.washington.edu:6371/NameService");
-		        netDC = namingService.getNetworkDC("edu/iris/dmc",
-		        		"IRIS_NetworkDC");
-		        seisDC = namingService.getSeismogramDC("edu/iris/dmc",
-	            		"IRIS_BudDataCenter");
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
+			Properties prop = new Properties();
+			/* Alternate form of setting timeout:
+			//===================================================================
+			// set a timeout for response from the server
+			//===================================================================
+			org.omg.CORBA.Any ULongAny = orb.create_any();
+			// time out if no response in 10 minutes
+			if( debug ) System.out.println("Setting wait to: "+wait+" ms");
+			ULongAny.insert_ulong( wait ); 
+			org.omg.CORBA.Policy[] policies = new org.omg.CORBA.Policy[1];
+			policies[0] = orb.create_policy(com.ooc.OB.TIMEOUT_POLICY_ID.value, ULongAny);
+			org.omg.CORBA.PolicyManager pm =
+				org.omg.CORBA.PolicyManagerHelper.narrow(
+					orb.resolve_initial_references("ORBPolicyManager"));
+			pm.add_policy_overrides(policies);
+			 */
+	        prop.setProperty("com.sun.CORBA.transport.ORBTCPReadTimeouts", "100:60000:180000:20");
+	        orb = (org.omg.CORBA_2_3.ORB)org.omg.CORBA.ORB.init(new String[] {}, prop);
+		}
+		
+		try
+		{
+	        new AllVTFactory().register(orb);
+	        namingService = new FissuresNamingService(orb);
+	        namingService.setNameServiceCorbaLoc(NAMING_SERVICE_URL);
+	        netDC = namingService.getNetworkDC(networkDNS, networkDC);
+	        seisDC = namingService.getSeismogramDC(seismoDNS, seismoDC);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 	
@@ -119,7 +138,7 @@ public class DHIDataSource extends SeismicDataSource
 	        {
 	        	if (s.effective_time.end_time.date_time.startsWith("25"))
 	        	{
-	        		System.out.println(s.name);
+	        		Swarm.logger.finest("dhi channel: " + s.name);
 		        	Channel[] channels = net.retrieve_for_station(s.get_id());
 		            for (Channel c : channels)
 		            {
@@ -167,7 +186,7 @@ public class DHIDataSource extends SeismicDataSource
 		HelicorderData hd = cache.getHelicorder(station, t1, t2, (GulperListener)null);	
 
 		if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10))
-			GulperList.getInstance().requestGulper("dhi:" + station, gl, this, station, t1, t2);
+			GulperList.getInstance().requestGulper("dhi:" + station, gl, this, station, t1, t2, gulpSize, gulpDelay);
 
 		return hd;
 	}
@@ -239,7 +258,7 @@ public class DHIDataSource extends SeismicDataSource
 	
 	public String toConfigString()
 	{
-		return name + ";dhi:" + network;
+		return String.format("%s;dhi:%s:%s:%s:%s:%s:%d:%d",
+				name, networkDNS, networkDC, seismoDNS, seismoDC, network, gulpSize, gulpDelay);
 	}
-
 }
