@@ -3,7 +3,7 @@ package gov.usgs.swarm.wave;
 import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.FrameDecorator;
 import gov.usgs.plot.FrameRenderer;
-import gov.usgs.plot.SmartTick;
+import gov.usgs.plot.RectangleRenderer;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.swarm.Images;
 import gov.usgs.swarm.Swarm;
@@ -13,12 +13,15 @@ import gov.usgs.swarm.Throbber;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.CurrentTime;
+import gov.usgs.util.Time;
 import gov.usgs.util.Util;
 import gov.usgs.vdx.data.wave.Wave;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -26,6 +29,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,6 +63,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: up/down arrows
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/08/07 22:39:11  cervelli
+ * New monitor timing system, layouts.
+ *
  * Revision 1.2  2006/08/02 23:34:28  cervelli
  * Eliminated box.
  *
@@ -134,6 +143,8 @@ public class MultiMonitor extends SwarmFrame
 	private JButton expXButton;
 	private JButton optionsButton;
 	
+	private int bottomLabelHeight = 20;
+	
 	private int selectedIndex = -1;
 	
 	private static final Color SELECT_COLOR = new Color(204, 204, 255);
@@ -144,7 +155,7 @@ public class MultiMonitor extends SwarmFrame
 	private Map<String, Wave> waveMap;
 	
 	private Timer timer;
-	private long slideInterval = 100;
+	private long slideInterval = 500;
 	private long refreshInterval = 1000;
 	private SlideTask slideTask;
 	private RefreshTask refreshTask;
@@ -430,6 +441,20 @@ public class MultiMonitor extends SwarmFrame
 			{
 				super.paint(image.getGraphics());
 				g.drawImage(image, 0, 0, null);
+				g.setColor(Color.WHITE);
+				Insets insets = wavePanel.getInsets();
+				int y = getHeight() - bottomLabelHeight - insets.top - insets.bottom;
+				g.fillRect(insets.left, y, getWidth() - insets.left - insets.right, bottomLabelHeight + 1);
+				g.setColor(Color.BLACK);
+				g.drawLine(insets.left, y, getWidth() - insets.left - 1, y);
+				double now = CurrentTime.getInstance().nowJ2K();
+				String tf = Time.format("HH:mm:ss", now);
+				Font font = Font.decode("dialog-BOLD-" + (bottomLabelHeight - 2));
+				g.setFont(font);
+				FontMetrics fm = g.getFontMetrics();
+				g.drawString(tf, getWidth() - fm.stringWidth(tf) - 4, getHeight() - 7);
+				tf = Time.format("HH:mm:ss", now - SPANS[spanIndex]);
+				g.drawString(tf, 4, getHeight() - 7);
 			}
 		}
 	}
@@ -469,6 +494,7 @@ public class MultiMonitor extends SwarmFrame
 	private class MonitorWaveDecorator extends FrameDecorator
 	{
 		private WaveViewPanel panel;
+		private FontRenderContext frc = new FontRenderContext(new AffineTransform(), false, false);
 		
 		public MonitorWaveDecorator(WaveViewPanel wvp)
 		{
@@ -481,29 +507,45 @@ public class MultiMonitor extends SwarmFrame
 			AxisRenderer ar = fr.getAxis();
 			ar.createDefault();
 				
-			TextRenderer label = new TextRenderer(fr.getGraphX() + 2, fr.getGraphY() + 12, panel.getChannel(), Color.BLACK);
-			label.backgroundColor = new Color(255, 255, 255, 210);
+			int fs = Math.min(36, fr.getGraphHeight() / 2);
+			Font font = Font.decode("dialog-BOLD-" + fs);
+//			TextRenderer label = new TextRenderer(fr.getGraphX() + 5, fr.getGraphHeight() / 5 + fs, panel.getChannel(), Color.BLACK);
+			TextRenderer label = new TextRenderer(fr.getGraphX() + 5, fr.getGraphY() + fs + 2, panel.getChannel(), Color.BLACK);
+			label.font = font;
+			label.color = Color.BLACK;
+//			label.backgroundColor = new Color(255, 255, 255, 210);
 			
-			int hTicks = fr.getGraphWidth() / 108;
-			Object[] stt = SmartTick.autoTimeTick(fr.getMinXAxis(), fr.getMaxXAxis(), hTicks);
-	        if (stt != null)
-	        	ar.createVerticalGridLines((double[])stt[0]);
+			RectangleRenderer rr = new RectangleRenderer();
+			rr.rect = new Rectangle2D.Double();
+			rr.rect.setFrame(font.getStringBounds(panel.getChannel(), frc));
+			rr.rect.x = 3;
+			rr.rect.width += 3;
+//			rr.rect.y = fr.getGraphHeight() / 5;
+			rr.rect.y = 3;
+	        rr.color = Color.GRAY;
+	        rr.backgroundColor = new Color(255, 255, 255, 210);
+			
+//			int hTicks = fr.getGraphWidth() / 108;
+//			Object[] stt = SmartTick.autoTimeTick(fr.getMinXAxis(), fr.getMaxXAxis(), hTicks);
+//	        if (stt != null)
+//	        	ar.createVerticalGridLines((double[])stt[0]);
+//	        
+//	        double[] bt = (double[])stt[0];
+//	        String[] labels = (String[])stt[1];
+//	        for (int i = 0; i < bt.length; i++)
+//	        {
+//	            TextRenderer tr = new TextRenderer();
+//                tr.text = labels[i];
+//	            tr.x = (float)fr.getXPixel(bt[i]);
+//	            tr.y = fr.getGraphY() + fr.getGraphHeight() - 10;
+//	            tr.color = Color.BLACK;
+//	            tr.horizJustification = TextRenderer.CENTER;
+//	            tr.vertJustification = TextRenderer.TOP;
+//	            tr.font = TextRenderer.SMALL_FONT;
+//	            ar.addPostRenderer(tr);
+//	        }
 	        
-	        double[] bt = (double[])stt[0];
-	        String[] labels = (String[])stt[1];
-	        for (int i = 0; i < bt.length; i++)
-	        {
-	            TextRenderer tr = new TextRenderer();
-                tr.text = labels[i];
-	            tr.x = (float)fr.getXPixel(bt[i]);
-	            tr.y = fr.getGraphY() + fr.getGraphHeight() - 10;
-	            tr.color = Color.BLACK;
-	            tr.horizJustification = TextRenderer.CENTER;
-	            tr.vertJustification = TextRenderer.TOP;
-	            tr.font = TextRenderer.SMALL_FONT;
-	            ar.addPostRenderer(tr);
-	        }
-	        
+	        ar.addPostRenderer(rr);
 	        ar.addPostRenderer(label);
 		}
 	}
@@ -578,7 +620,7 @@ public class MultiMonitor extends SwarmFrame
 			return;
 		}
 		Insets insets = wavePanel.getInsets();
-		int ah = wavePanel.getHeight() - insets.top - insets.bottom;
+		int ah = wavePanel.getHeight() - insets.top - insets.bottom - bottomLabelHeight;
 		double dy = ((double)ah / (double)panels.size());
 		int wh = (int)Math.round(dy);
 		int th = wh * panels.size();
