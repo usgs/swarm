@@ -27,6 +27,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.FileOutputStream;
 
@@ -49,6 +50,9 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2006/08/06 20:03:56  cervelli
+ * Added drag button.
+ *
  * Revision 1.10  2006/08/04 18:40:46  cervelli
  * Realtime and earth buttons.
  *
@@ -145,10 +149,7 @@ public class MapFrame extends SwarmFrame implements Runnable
 		setSize(Swarm.config.mapWidth, Swarm.config.mapHeight);
 		setLocation(Swarm.config.mapX, Swarm.config.mapY);
 		setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);
-		if (Swarm.config.mapMaximized)
-		{
-			try { setMaximum(true); } catch (Exception e) {}
-		}
+
 		mainPanel = new JPanel(new BorderLayout());
 
 		createToolbar();
@@ -200,6 +201,16 @@ public class MapFrame extends SwarmFrame implements Runnable
 		
 //		mainPanel.addKeyListener(mapPanel.getKeyListener());		
 		setVisible(true);
+	}
+
+	public void setMaximum(boolean max) throws PropertyVetoException
+	{
+		if (max)
+		{
+			Swarm.config.mapX = getX();
+			Swarm.config.mapY = getY();
+		}
+		super.setMaximum(max);
 	}
 	
 	private void createToolbar()
