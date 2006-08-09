@@ -27,6 +27,9 @@ import javax.swing.event.InternalFrameEvent;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/01 23:45:23  cervelli
+ * Moved package.
+ *
  * Revision 1.9  2006/06/14 19:19:31  dcervelli
  * Major 1.3.4 changes.
  *
@@ -178,6 +181,7 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 					
 					public void internalFrameClosing(InternalFrameEvent e)
 					{
+						throbber.close();
 						kill();	
 						Swarm.getApplication().removeInternalFrame(WaveViewerFrame.this);
 						dataSource.close();
