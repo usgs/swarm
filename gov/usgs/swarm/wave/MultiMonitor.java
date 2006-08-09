@@ -63,6 +63,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: up/down arrows
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/08/08 14:31:41  cervelli
+ * Bigger labels and time labels.
+ *
  * Revision 1.3  2006/08/07 22:39:11  cervelli
  * New monitor timing system, layouts.
  *
@@ -479,11 +482,14 @@ public class MultiMonitor extends SwarmFrame
 					
 					public void internalFrameClosing(InternalFrameEvent e)
 					{
+						throbber.close();
 						selectedIndex = -1;
 						timer.cancel();
 						dataSource.close();
 						panels.clear();
 						wavePanel.removeAll();
+						waveMap.clear();
+						dispose();
 						Swarm.getApplication().removeMonitor(MultiMonitor.this);
 					}
 			  });
