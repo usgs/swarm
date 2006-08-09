@@ -63,6 +63,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2006/08/07 22:38:47  cervelli
+ * Map push on drag.
+ *
  * Revision 1.11  2006/08/06 20:05:49  cervelli
  * Draggable maps.
  *
@@ -303,6 +306,8 @@ public class MapPanel extends JPanel
 						}
 						else
 						{
+							if (dragMode == DragMode.DRAG_MAP)
+								setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
 							mouseDown = e.getPoint();
 							dragRectangle = new Rectangle();
 							dragRectangle.setFrameFromDiagonal(mouseDown, mouseDown);	
@@ -314,6 +319,7 @@ public class MapPanel extends JPanel
 //						dragger.setTimeTillReset(0);
 						if (dragMode == DragMode.DRAG_MAP && mouseDown != null && mouseNow != null)
 						{
+							setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 							mapPush();
 							dragDX = mouseDown.x - mouseNow.x;
 							dragDY = mouseDown.y - mouseNow.y;
