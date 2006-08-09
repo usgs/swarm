@@ -26,8 +26,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Paint;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -50,6 +48,9 @@ import javax.swing.event.EventListenerList;
  * TODO: move filter method
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/08/07 22:39:47  cervelli
+ * Desynchronized constructPlot() to avoid deadlock.
+ *
  * Revision 1.3  2006/08/06 20:06:09  cervelli
  * Added decorator stuff for specta/spectrogram.
  *
@@ -264,13 +265,6 @@ public class WaveViewPanel extends JComponent
 		displayTitle = p.displayTitle;
 		backgroundColor = p.backgroundColor;
 		setupMouseHandler();
-		addComponentListener(new ComponentAdapter()
-				{
-					public void componentResized(ComponentEvent e)
-					{
-						createImage();
-					}
-				});
 		processSettings();
 	}
 
@@ -602,8 +596,6 @@ public class WaveViewPanel extends JComponent
 	public void setBackgroundColor(Color c)
 	{
 		backgroundColor = c;
-		createImage();
-//		invalidateImage();
 	}
 	
 	/** Processes the mouse position variables when the cursor is over the panel.
@@ -719,7 +711,7 @@ public class WaveViewPanel extends JComponent
 		return image;
 	}
 	
-	private void createImage()
+	public void createImage()
 	{
 		final Runnable r = new Runnable()
 				{
@@ -731,6 +723,7 @@ public class WaveViewPanel extends JComponent
 							Graphics2D ig = (Graphics2D)bi.getGraphics();
 							constructPlot(ig);
 							setImage(bi);
+							repaint();
 						}
 					}
 				};
@@ -746,9 +739,7 @@ public class WaveViewPanel extends JComponent
 						}
 						
 						public void finished()
-						{
-							repaint();
-						}
+						{}
 					};
 			worker.start();
 		}
@@ -902,7 +893,7 @@ public class WaveViewPanel extends JComponent
 	 * @param g2 the graphics context
 	 */
 //	private synchronized void constructPlot(Graphics2D g2)
-	private void constructPlot(Graphics2D g2)
+	private synchronized void constructPlot(Graphics2D g2)
 	{
 		Dimension dim = this.getSize();		
 		
