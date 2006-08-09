@@ -42,12 +42,15 @@ import java.util.TimeZone;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
@@ -59,6 +62,9 @@ import javax.swing.event.InternalFrameEvent;
  * The wave clipboard internal frame.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/08/09 05:08:54  cervelli
+ * Override setMaximum to eliminate quirk when saving maximized clipboard.
+ *
  * Revision 1.1  2006/08/01 23:45:23  cervelli
  * Moved package.
  *
@@ -130,6 +136,7 @@ public class WaveClipboardFrame extends JInternalFrame
 	private JPanel mainPanel;
 	private JLabel statusLabel;
 	private JToggleButton linkButton;
+	private JButton sizeButton;
 	private JButton syncButton;
 	private JButton sortButton;
 	private JButton removeAllButton;
@@ -150,6 +157,8 @@ public class WaveClipboardFrame extends JInternalFrame
 	private JButton backButton;
 	private JButton gotoButton;
 	
+	private JPopupMenu popup;
+	
 	private Map<WaveViewPanel, Stack<double[]>> histories;
 	
 	private HelicorderViewPanelListener linkListener;
@@ -157,6 +166,8 @@ public class WaveClipboardFrame extends JInternalFrame
 	private boolean heliLinked = true;
 	
 	private Throbber throbber;
+	
+	private int waveHeight = -1;
 	
 	public WaveClipboardFrame()
 	{
@@ -200,14 +211,15 @@ public class WaveClipboardFrame extends JInternalFrame
 		waveBox = new Box(BoxLayout.Y_AXIS);
 		scrollPane = new JScrollPane(waveBox);
 		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollPane.getVerticalScrollBar().setUnitIncrement(40);
-		
 		mainPanel.add(scrollPane, BorderLayout.CENTER);
+		
 		statusLabel = new JLabel(" ");
-		statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 1, 1));
+		statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 1));
 		mainPanel.add(statusLabel, BorderLayout.SOUTH);
 		
-		mainPanel.setBorder(BorderFactory.createEmptyBorder(0, 2, 3, 2));
+		mainPanel.setBorder(BorderFactory.createEmptyBorder(0, 2, 1, 2));
 		this.setContentPane(mainPanel);
 		
 		createListeners();
@@ -283,6 +295,18 @@ public class WaveClipboardFrame extends JInternalFrame
 		toolbar.add(sortButton);
 		
 		toolbar.addSeparator();
+		
+		sizeButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("resize"),
+				"Set clipboard wave size",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						doSizePopup(sizeButton.getX(), sizeButton.getY() + 2 * sizeButton.getHeight());
+					}
+				}); 
+		toolbar.add(sizeButton);
 		
 		removeAllButton = SwarmUtil.createToolBarButton(
 				Images.getIcon("deleteall"),
@@ -493,6 +517,57 @@ public class WaveClipboardFrame extends JInternalFrame
 						resizeWaves();
 					}
 				});
+	}
+	
+	private int calculateWaveHeight()
+	{
+		if (waveHeight > 0)
+			return waveHeight;
+		
+		int w = scrollPane.getViewport().getSize().width;
+		int h = (int)Math.round((double)w * 60.0 / 300.0);
+		h = Math.min(200, h);
+		h = Math.max(h, 80);
+		return h;
+	}
+	
+	private void setWaveHeight(int s)
+	{
+		waveHeight = s;
+		resizeWaves();
+	}
+	
+	private void doSizePopup(int x, int y)
+	{
+		if (popup == null)
+		{
+			final String[] labels = new String[] { "Auto", null, "Tiny", "Small", "Medium", "Large" };
+			final int[] sizes = new int[] { -1, -1, 50, 100, 160, 230 };
+			popup = new JPopupMenu();
+			ButtonGroup group = new ButtonGroup();
+			for (int i = 0; i < labels.length; i++)
+			{
+				if (labels[i] != null)
+				{
+					final int size = sizes[i];
+					JRadioButtonMenuItem mi = new JRadioButtonMenuItem(labels[i]);
+					mi.addActionListener(new ActionListener()
+							{
+								public void actionPerformed(ActionEvent e)
+								{
+									setWaveHeight(size);
+								}
+							});
+					if (waveHeight == size)
+						mi.setSelected(true);
+					group.add(mi);
+					popup.add(mi);
+				}
+				else
+					popup.addSeparator();
+			}
+		}
+		popup.show(this, x, y);
 	}
 	
 	private class OpenActionListener implements ActionListener
@@ -879,7 +954,6 @@ public class WaveClipboardFrame extends JInternalFrame
 	
 	public synchronized void addWave(final WaveViewPanel p)
 	{
-//		p.setDisplayTitle(true);
 		p.addListener(new WaveViewPanelAdapter()
 				{
 					public void mousePressed(MouseEvent e)
@@ -898,27 +972,30 @@ public class WaveClipboardFrame extends JInternalFrame
 		p.setStatusLabel(statusLabel);
 		p.setAllowDragging(true);
 //		p.setFrameDecorator(new ClipboardWaveDecorator(p));
+		int w = scrollPane.getViewport().getSize().width;
+		p.setSize(w, calculateWaveHeight());
+		p.createImage();
 		waveBox.add(p);	
 		waves.add(p);
-		resizeWaves();
-		
-		select(p);
 		doButtonEnables();
+		waveBox.validate();
 	}
 	
 	public synchronized void select(final WaveViewPanel p)
 	{
+		if (selected == p)
+			return;
+		
 		if (selected != null)
 		{
 			selected.setBackgroundColor(BACKGROUND_COLOR);
-			selected.invalidate();
+			selected.createImage();
 		}
 		selected = p;
 		Swarm.getApplication().getDataChooser().setNearest(selected.getChannel());
 		selected.setBackgroundColor(SELECT_COLOR);
-		selected.invalidate();
+		selected.createImage();
 		waveToolbar.setSettings(selected.getSettings());
-		waveBox.repaint();
 	}
 	
 	public synchronized void remove(WaveViewPanel p)
@@ -947,7 +1024,7 @@ public class WaveClipboardFrame extends JInternalFrame
 			select(waves.get(i));
 		}
 		doButtonEnables();
-		resizeWaves();
+		waveBox.validate();
 	}
 	
 	public synchronized void moveDown(WaveViewPanel p)
@@ -964,7 +1041,6 @@ public class WaveClipboardFrame extends JInternalFrame
 		if (selected != null)
 			selected.requestFocus();
 		repaint();
-		
 	}
 	
 	public synchronized void moveUp(WaveViewPanel p)
@@ -985,18 +1061,27 @@ public class WaveClipboardFrame extends JInternalFrame
 	
 	public void resizeWaves()
 	{
-		waveBox.validate();
-		for (WaveViewPanel wave : waves)
-		{
-			wave.setSize(waveBox.getSize().width, 100);
-		}
-		scrollPane.validate();
-		for (WaveViewPanel wave : waves)
-		{
-			wave.setSize(scrollPane.getViewport().getSize().width, 100);
-		}
-		this.validate();
-		repaint();
+		SwingWorker worker = new SwingWorker()
+				{
+					public Object construct()
+					{
+						int w = scrollPane.getViewport().getSize().width;
+						for (WaveViewPanel wave : waves)
+						{
+							wave.setSize(w, calculateWaveHeight());
+							wave.createImage();
+						}
+						return null;
+					}
+					
+					public void finished()
+					{
+						waveBox.validate();
+						validate();
+						repaint();
+					}
+				};
+		worker.start();
 	}
 	 
 	public void removeWaves()
@@ -1127,6 +1212,7 @@ public class WaveClipboardFrame extends JInternalFrame
 						else
 							sw = sds.getWave(wvp.getChannel(), nst, net);
 						wvp.setWave(sw, nst, net);
+						wvp.repaint();
 						return null;
 					}
 					
