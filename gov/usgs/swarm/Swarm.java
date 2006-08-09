@@ -60,6 +60,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: chooser visibility
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.30  2006/08/07 22:34:13  cervelli
+ * File source, monitor layouts, version info.
+ *
  * Revision 1.29  2006/08/06 20:03:32  cervelli
  * Outputs max memory to log.
  *
@@ -465,10 +468,19 @@ public class Swarm extends JFrame
 		waveClipboard = new WaveClipboardFrame();
 		desktop.add(waveClipboard);
 		waveClipboard.setVisible(config.clipboardVisible);
+		if (Swarm.config.clipboardMaximized)
+		{
+			try { waveClipboard.setMaximum(true); } catch (Exception e) {}
+		}
 		
 		mapFrame = new MapFrame();
 		desktop.add(mapFrame);
 		mapFrame.setVisible(config.mapVisible);
+		if (Swarm.config.mapMaximized)
+		{
+			try { mapFrame.setMaximum(true); } catch (Exception e) {}
+		}
+		
 		mapFrame.toFront();
 		
 		swarmMenu = new SwarmMenu();
@@ -720,8 +732,9 @@ public class Swarm extends JFrame
 
 	public void removeMonitor(MultiMonitor mm)
 	{
-		removeInternalFrame(mm);
 		monitors.remove(mm.getDataSource().getName());
+		removeInternalFrame(mm);
+		mm = null;
 	}
 	
 	public MultiMonitor getMonitor(SeismicDataSource source)
