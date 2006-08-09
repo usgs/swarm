@@ -20,6 +20,9 @@ import java.util.Map;
  * Earthworm Wave Server.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/08/08 22:22:20  cervelli
+ * Configurable gulper parameters.
+ *
  * Revision 1.7  2006/08/01 23:44:07  cervelli
  * New metadata system changes.
  *
@@ -75,8 +78,9 @@ public class WaveServerSource extends SeismicDataSource
 		String[] ss = params.split(":");
 		server = ss[0];
 		port = Integer.parseInt(ss[1]);
-		if (ss.length == 3)
-			timeout = Integer.parseInt(ss[2]);
+		timeout = Integer.parseInt(ss[2]);
+		gulpSize = Integer.parseInt(ss[3]);
+		gulpDelay = Integer.parseInt(ss[4]);
 		
 		waveServer = new WaveServer(server, port);
 		setTimeout(timeout);
@@ -95,7 +99,7 @@ public class WaveServerSource extends SeismicDataSource
 
 	public String toConfigString()
 	{
-		return String.format("%s;ws:%s:%d:%d", name, server, port, timeout);
+		return String.format("%s;ws:%s:%d:%d:%d:%d", name, server, port, timeout, gulpSize, gulpDelay);
 	}
 	
 	public boolean isSCNL(String p)
