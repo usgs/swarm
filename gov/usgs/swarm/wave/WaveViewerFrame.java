@@ -27,6 +27,9 @@ import javax.swing.event.InternalFrameEvent;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/08/09 05:09:18  cervelli
+ * Closes throbber to eliminate memory leak.
+ *
  * Revision 1.1  2006/08/01 23:45:23  cervelli
  * Moved package.
  *
@@ -201,12 +204,13 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 		throbber.increment();
 		double now = CurrentTime.getInstance().nowJ2K();
 		Wave sw = dataSource.getWave(channel, now - SPANS[spanIndex], now);
-		System.out.println(sw);
+//		System.out.println(sw);
 		waveViewPanel.setWorking(true);
 		waveViewPanel.setWave(sw, now - SPANS[spanIndex], now);
 		waveViewPanel.setChannel(channel);
 		waveViewPanel.setDataSource(dataSource);
 		waveViewPanel.setWorking(false);
+		waveViewPanel.repaint();
 		throbber.decrement();
 	}
 	
