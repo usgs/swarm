@@ -16,6 +16,9 @@ import java.util.TimeZone;
  * Swarm configuration class. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2006/08/04 21:17:22  cervelli
+ * Changed default values for a few items.
+ *
  * Revision 1.10  2006/08/04 18:34:45  cervelli
  * Changed default servers.
  *
@@ -52,7 +55,7 @@ public class Config
 {
 	private static String[] DEFAULT_SERVERS = new String[] {
 				"AVO Winston;wws:pubavo1.wr.usgs.gov:16022:10000:1",
-				"IRIS DMC - New Zealand;dhi:NZ"
+				"IRIS DMC - New Zealand;dhi:edu/iris/dmc:IRIS_NetworkDC:edu/iris/dmc:IRIS_BudDataCenter:NZ:3600:1000"
 			};
 	
 	private static String DEFAULT_CONFIG_FILE = "Swarm.config";
@@ -85,7 +88,6 @@ public class Config
 	public String kiosk;
 	
 	public boolean saveConfig;
-	public String groupConfigFile;
 	
 	public int chooserDividerLocation;
 	public boolean chooserVisible;
@@ -153,7 +155,6 @@ public class Config
 	private void loadDataSources()
 	{
 		ConfigFile cf = new ConfigFile(DEFAULT_DATA_SOURCES_FILE);
-//		cf.getList("server");
 		List<String> servers = cf.getList("server");
 		if (servers != null)
 		{
@@ -262,7 +263,6 @@ public class Config
 		
 		kiosk = Util.stringToString(config.getString("kiosk"), "false");
 		
-		groupConfigFile = Util.stringToString(config.getString("groupConfigFile"), "SwarmGroups.config");
 		saveConfig = Util.stringToBoolean(config.getString("saveConfig"), true);
 		
 		durationEnabled = Util.stringToBoolean(config.getString("durationEnabled"), false);
@@ -385,7 +385,6 @@ public class Config
 		
 		config.put("kiosk", kiosk);
 
-		config.put("groupConfigFile", groupConfigFile);
 		config.put("saveConfig", Boolean.toString(saveConfig));
 		
 		config.put("durationEnabled", Boolean.toString(durationEnabled));
