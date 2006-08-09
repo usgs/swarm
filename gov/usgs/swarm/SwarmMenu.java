@@ -15,7 +15,6 @@ import javax.swing.JInternalFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
@@ -23,6 +22,9 @@ import javax.swing.event.MenuListener;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/08/07 22:33:10  cervelli
+ * Open file items.
+ *
  * Revision 1.6  2006/08/04 21:18:02  cervelli
  * Map to front item.
  *
@@ -201,15 +203,7 @@ public class SwarmMenu extends JMenuBar
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						SwarmLayout sl = Swarm.getApplication().getCurrentLayout();
-						String name = JOptionPane.showInputDialog("Enter a name for this layout:");
-						if (name != null)
-						{
-							sl.setName(name);
-							sl.save();
-							addLayout(sl);
-							Swarm.config.addLayout(sl);
-						}
+						Swarm.getApplication().saveLayout();
 					}
 				});
 		saveLayout.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK));
