@@ -1,21 +1,19 @@
 package gov.usgs.swarm.chooser;
 
 import gov.usgs.swarm.Swarm;
-import gov.usgs.util.GridBagHelper;
-
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JSeparator;
 import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/01 23:43:13  cervelli
+ * Moved package and new data source panel system.
+ *
  * @author Dan Cervelli
  */
 public class WaveServerPanel extends DataSourcePanel
@@ -23,60 +21,76 @@ public class WaveServerPanel extends DataSourcePanel
 	private JTextField wsHost;
 	private JTextField wsPort;
 	private JTextField wsTimeout;
+	private JTextField gulperSize;
+	private JTextField gulperDelay;
 	
 	public WaveServerPanel()
 	{
-		super("ws", "Wave Server");
+		super("ws", "Earthworm Wave Server");
+	}
+	
+	private void createFields()
+	{
+		wsHost = new JTextField();
+		wsPort = new JTextField();
+		wsTimeout = new JTextField();
+		gulperSize = new JTextField();
+		gulperDelay = new JTextField();
+		String h = "";
+		String p = "16022";
+		String t = "2.0";
+		String gs = "30";
+		String gd = "1.0";
+		if (source != null && source.indexOf(";ws:") != -1)
+		{
+			String[] ss = source.substring(source.indexOf(";ws:") + 4).split(":");
+			h = ss[0];
+			p = ss[1];
+			t = String.format("%.1f", Integer.parseInt(ss[2]) / 1000.0);
+			gs = String.format("%.0f", Integer.parseInt(ss[3]) / 60.0);
+			gd = String.format("%.1f", Integer.parseInt(ss[4]) / 1000.0);
+		}
+		wsHost.setText(h);
+		wsPort.setText(p);
+		wsTimeout.setText(t);
+		gulperSize.setText(gs);
+		gulperDelay.setText(gd);
 	}
 	
 	protected void createPanel()
 	{
-		String wsh = "";
-		String wsp = "16022";
-		String wsto = "2";
-		if (source != null && source.indexOf(";ws:") != -1)
-		{
-			String s = source.substring(source.indexOf(";ws:") + 4);
-//			String[] ss = Util.splitString(s, ":");
-			String[] ss = s.split(":");
-//			wsh = source.substring(source.indexOf(";ws:") + 4, source.indexOf(':', source.indexOf("ws:") + 4));
-			wsh = ss[0];
-			wsp = ss[1];
-			wsto = Double.toString(Double.parseDouble(ss[2]) / 1000);
-		}
-		panel = new JPanel(new GridBagLayout());
-		panel.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
-		GridBagConstraints c = new GridBagConstraints();
+		createFields();
+		FormLayout layout = new FormLayout(
+				"right:max(20dlu;pref), 3dlu, 40dlu, 0dlu, 126dlu", 
+				"");
 		
-		wsHost = new JTextField(20);
-//		wsHost.setMinimumSize(new Dimension(180, 20));
-		wsHost.setText(wsh);
-		wsPort = new JTextField("16022", 5);
-//		wsPort.setMinimumSize(new Dimension(50, 20));
-		wsPort.setText(wsp);
+		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+		builder.setDefaultDialogBorder();
+		builder.append(new JLabel("Use this data source to connect to an Earthworm Wave Server (EWS)."), 5);
+		builder.nextLine();
+		builder.appendSeparator();
+		builder.append("IP Address or Host Name:");
+		builder.append(wsHost, 3);
+		builder.nextLine();
+		builder.append("Port:");
+		builder.append(wsPort);
+		builder.append(" Earthworm default: 16022");
+		builder.nextLine();
+
+		builder.append("Timeout:");
+		builder.append(wsTimeout);
+		builder.append(" seconds");
+		builder.nextLine();
 		
-		wsTimeout = new JTextField("2", 5);
-//		wsTimeout.setMinimumSize(new Dimension(50, 20));
-		wsTimeout.setText(wsto);
+		builder.append("Gulp size:");
+		builder.append(gulperSize);
+		builder.append(" minutes");
+		builder.nextLine();
 		
-		JLabel info = new JLabel("<html>Use this type of data source to connect to a Earthworm Wave Server.<br>The default Wave Server port is 16022.</html>");
-		panel.add(info, GridBagHelper.set(c, "x=0;y=0;w=2;h=1;ix=4;iy=4;wy=0.0;f=b"));
-		
-		panel.add(new JSeparator(), GridBagHelper.set(c, "x=0;y=1;w=2;h=1;ix=4;iy=4;wy=0;wx=1.0;f=h"));
-		JLabel ipLabel = new JLabel("IP address or host name:");
-		ipLabel.setHorizontalAlignment(JLabel.RIGHT);
-		panel.add(ipLabel, GridBagHelper.set(c, "x=0;y=2;a=e;w=1;h=1;wx=0;wy=0;f=h;i=0,0,0,8"));
-		panel.add(wsHost, GridBagHelper.set(c, "x=1;y=2;a=w;w=1;h=1;wx=1;i=0,0,0,0;f=n"));
-		
-		JLabel portLabel = new JLabel("Port:");
-		portLabel.setHorizontalAlignment(JLabel.RIGHT);
-		panel.add(portLabel, GridBagHelper.set(c, "x=0;y=3;a=ne;w=1;h=1;wx=0;wy=0.0;i=0,0,0,8"));
-		panel.add(wsPort, GridBagHelper.set(c, "x=1;y=3;a=nw;w=1;h=1;wx=1;i=0,0,0,0"));
-		
-		JLabel toLabel = new JLabel("Timeout, seconds:");
-		toLabel.setHorizontalAlignment(JLabel.RIGHT);
-		panel.add(toLabel, GridBagHelper.set(c, "x=0;y=4;a=ne;w=1;h=1;wx=0;wy=1;i=0,0,0,8"));
-		panel.add(wsTimeout, GridBagHelper.set(c, "x=1;y=4;a=nw;w=1;h=1;wx=1;i=0,0,0,0"));
+		builder.append("Gulp delay:");
+		builder.append(gulperDelay);
+		builder.append(" seconds");
+		panel = builder.getPanel();
 	}
 	
 	public boolean allowOK(boolean edit)
@@ -95,6 +109,16 @@ public class WaveServerPanel extends DataSourcePanel
 		if (to <= 0)
 			message = "There is an error with the Wave Server time out (must be > 0).";
 		
+		double gs = -1;
+		try { gs = Double.parseDouble(gulperSize.getText()); } catch (Exception e) {}
+		if (gs <= 0)
+			message = "The gulper size must be greater than 0 minutes.";
+		
+		double gd = -1;
+		try { gd = Double.parseDouble(gulperDelay.getText()); } catch (Exception e) {}
+		if (gd < 0)
+			message = "The gulper delay must be greater than or equal to 0 seconds.";
+		
 		if (message != null)
 		{
 			JOptionPane.showMessageDialog(Swarm.getApplication(), message, "Error", JOptionPane.ERROR_MESSAGE);
@@ -107,7 +131,12 @@ public class WaveServerPanel extends DataSourcePanel
 	public String wasOK()
 	{
 		int timeout = (int)(Double.parseDouble(wsTimeout.getText()) * 1000);
-		return "ws:" + wsHost.getText() + ":" + wsPort.getText() + ":" + timeout;
+		int gs = (int)(Double.parseDouble(gulperSize.getText()) * 60);
+		int gd = (int)(Double.parseDouble(gulperDelay.getText()) * 1000);
+		String result = String.format("ws:%s:%s:%d:%d:%d",
+				wsHost.getText(), wsPort.getText(),
+				timeout, gs, gd);
+		return result;
 	}
 	
 }
