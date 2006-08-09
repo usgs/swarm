@@ -24,6 +24,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -58,6 +59,9 @@ import javax.swing.event.InternalFrameEvent;
  * The wave clipboard internal frame.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/01 23:45:23  cervelli
+ * Moved package.
+ *
  * Revision 1.15  2006/07/30 22:44:03  cervelli
  * Icon change.
  *
@@ -205,11 +209,6 @@ public class WaveClipboardFrame extends JInternalFrame
 		
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(0, 2, 3, 2));
 		this.setContentPane(mainPanel);
-		
-		if (Swarm.config.clipboardMaximized)
-		{
-			try { this.setMaximum(true); } catch (Exception e) {}
-		}
 		
 		createListeners();
 	}
@@ -1138,6 +1137,16 @@ public class WaveClipboardFrame extends JInternalFrame
 					}
 				};
 		worker.start();	
+	}
+
+	public void setMaximum(boolean max) throws PropertyVetoException
+	{
+		if (max)
+		{
+			Swarm.config.clipboardX = getX();
+			Swarm.config.clipboardY = getY();
+		}
+		super.setMaximum(max);
 	}
 	
 	public void paint(Graphics g)
