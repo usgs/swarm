@@ -1,23 +1,20 @@
 package gov.usgs.swarm.chooser;
 
 import gov.usgs.swarm.Swarm;
-import gov.usgs.util.GridBagHelper;
-
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JSeparator;
 import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/01 23:43:13  cervelli
+ * Moved package and new data source panel system.
+ *
  * @author Dan Cervelli
  */
 public class WWSPanel extends DataSourcePanel
@@ -29,65 +26,63 @@ public class WWSPanel extends DataSourcePanel
 
 	public WWSPanel()
 	{
-		super("wws", "WWS");
+		super("wws", "Winston Wave Server");
+	}
+
+	private void createFields()
+	{
+		wwsHost = new JTextField();
+		wwsPort = new JTextField();
+		wwsTimeout = new JTextField();
+		wwsCompress = new JCheckBox();
+		String h = "";
+		String p = "16022";
+		String t = "2.0";
+		boolean wscomp = true;
+		if (source != null && source.indexOf(";wws:") != -1)
+		{
+			String[] ss = source.substring(source.indexOf(";wws:") + 5).split(":");
+			h = ss[0];
+			p = ss[1];
+			t = String.format("%.1f", Integer.parseInt(ss[2]) / 1000.0);
+			wscomp = ss[3].equals("1");
+		}
+		wwsHost.setText(h);
+		wwsPort.setText(p);
+		wwsTimeout.setText(t);
+		wwsCompress.setSelected(wscomp);
 	}
 	
 	protected void createPanel()
 	{
-		String wsh = "";
-		String wsp = "16022";
-		String wsto = "10";
-		boolean wscomp = false;
-		if (source != null && source.indexOf(";wws:") != -1)
-		{
-			String s = source.substring(source.indexOf(";wws:") + 5);
-			String[] ss = s.split(":");
-			wsh = ss[0];
-			wsp = ss[1];
-			wsto = Double.toString(Double.parseDouble(ss[2]) / 1000);
-			wscomp = ss[3].equals("1");
-		}
-		panel = new JPanel(new GridBagLayout());
-		panel.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
-		GridBagConstraints c = new GridBagConstraints();
+		createFields();
+		FormLayout layout = new FormLayout(
+				"right:max(20dlu;pref), 3dlu, 40dlu, 0dlu, 126dlu", 
+				"");
 		
-		wwsHost = new JTextField(20);
-		wwsHost.setMinimumSize(new Dimension(180, 20));
-		wwsHost.setText(wsh);
-		wwsPort = new JTextField("16022", 5);
-		wwsPort.setMinimumSize(new Dimension(50, 20));
-		wwsPort.setText(wsp);
-		
-		wwsTimeout = new JTextField("10", 5);
-		wwsTimeout.setMinimumSize(new Dimension(50, 20));
-		wwsTimeout.setText(wsto);
+		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+		builder.setDefaultDialogBorder();
+		builder.append(new JLabel("Use this data source to connect to a Winston Wave Server (WWS)."), 5);
+		builder.nextLine();
+		builder.appendSeparator();
+		builder.append("IP Address or Host Name:");
+		builder.append(wwsHost, 3);
+		builder.nextLine();
+		builder.append("Port:");
+		builder.append(wwsPort);
+		builder.append(" Winston default: 16022");
+		builder.nextLine();
 
-		wwsCompress = new JCheckBox();
-		wwsCompress.setSelected(wscomp);
+		builder.append("Timeout:");
+		builder.append(wwsTimeout);
+		builder.append(" seconds");
+		builder.nextLine();
 		
-		JLabel info = new JLabel("<html>Use this type of data source to connect to a Winston Wave Server (WWS).<br>The default WWS port is 16022.</html>");
-		panel.add(info, GridBagHelper.set(c, "x=0;y=0;w=2;h=1;ix=4;iy=4;wy=0.0;f=b"));
+		builder.append("Use Compression:");
+		builder.append(wwsCompress);
+		builder.nextLine();
 		
-		panel.add(new JSeparator(), GridBagHelper.set(c, "x=0;y=1;w=2;h=1;ix=4;iy=4;wy=0;wx=1.0;f=h"));
-		JLabel ipLabel = new JLabel("IP address or host name:");
-		ipLabel.setHorizontalAlignment(JLabel.RIGHT);
-		panel.add(ipLabel, GridBagHelper.set(c, "x=0;y=2;a=e;w=1;h=1;wx=0;wy=0;f=h;i=0,0,0,8"));
-		panel.add(wwsHost, GridBagHelper.set(c, "x=1;y=2;a=w;w=1;h=1;wx=1;i=0,0,0,0;f=n"));
-		
-		JLabel portLabel = new JLabel("Port:");
-		portLabel.setHorizontalAlignment(JLabel.RIGHT);
-		panel.add(portLabel, GridBagHelper.set(c, "x=0;y=3;a=ne;w=1;h=1;wx=0;wy=0.0;i=0,0,0,8"));
-		panel.add(wwsPort, GridBagHelper.set(c, "x=1;y=3;a=nw;w=1;h=1;wx=1;i=0,0,0,0"));
-		
-		JLabel toLabel = new JLabel("Timeout, seconds:");
-		toLabel.setHorizontalAlignment(JLabel.RIGHT);
-		panel.add(toLabel, GridBagHelper.set(c, "x=0;y=4;a=ne;w=1;h=1;wx=0;wy=0;i=0,0,0,8"));
-		panel.add(wwsTimeout, GridBagHelper.set(c, "x=1;y=4;a=nw;w=1;h=1;wx=1;i=0,0,0,0"));
-		
-		JLabel compLabel = new JLabel("Use compression:");
-		compLabel.setHorizontalAlignment(JLabel.RIGHT);
-		panel.add(compLabel, GridBagHelper.set(c, "x=0;y=5;a=ne;w=1;h=1;wx=0;wy=1;i=0,0,0,8"));
-		panel.add(wwsCompress, GridBagHelper.set(c, "x=1;y=5;a=nw;w=1;h=1;wx=1;i=0,0,0,0"));
+		panel = builder.getPanel();
 	}
 	
 	public boolean allowOK(boolean edit)
@@ -118,7 +113,10 @@ public class WWSPanel extends DataSourcePanel
 	public String wasOK()
 	{	
 		int timeout = (int)(Double.parseDouble(wwsTimeout.getText()) * 1000);
-		return "wws:" + wwsHost.getText() + ":" + wwsPort.getText() + ":" + timeout + ":" + (wwsCompress.isSelected() ? "1" : "0");
+		String result = String.format("wws:%s:%s:%d:%s",
+				wwsHost.getText(), wwsPort.getText(), timeout, 
+				(wwsCompress.isSelected() ? "1" : "0"));
+		return result;
 	}
 
 }
