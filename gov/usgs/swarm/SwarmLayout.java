@@ -11,6 +11,9 @@ import java.util.List;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/08/07 22:33:26  cervelli
+ * Saves monitor layout.
+ *
  * Revision 1.2  2006/08/01 23:39:09  cervelli
  * Sets layout info for the chooser.
  *
@@ -94,7 +97,15 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 	private void processMap()
 	{
 		ConfigFile cf = config.getSubConfig("map");
-		Swarm.getApplication().getMapFrame().processLayout(cf);
+		if (cf.getString("x") != null)
+		{
+			Swarm.getApplication().getMapFrame().setVisible(true);
+			Swarm.getApplication().getMapFrame().processLayout(cf);
+		}
+		else
+		{
+			Swarm.getApplication().getMapFrame().setVisible(false);
+		}
 	}
 	
 	private void processMonitors()
@@ -107,9 +118,12 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 		{
 			ConfigFile cf = config.getSubConfig(monitor);
 			SeismicDataSource sds = Swarm.config.getSource(cf.getString("source"));
-			MultiMonitor mm = Swarm.getApplication().getMonitor(sds);
-			mm.processLayout(cf);
-			mm.setVisible(true);
+			if (sds != null)
+			{
+				MultiMonitor mm = Swarm.getApplication().getMonitor(sds);
+				mm.processLayout(cf);
+				mm.setVisible(true);
+			}
 		}
 	}
 	
@@ -122,10 +136,13 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 		for (String heli : helis)
 		{
 			ConfigFile cf = config.getSubConfig(heli);
-			// check source now
-			HelicorderViewerFrame hvf = new HelicorderViewerFrame(cf);
-			hvf.addLinkListeners();
-			Swarm.getApplication().addInternalFrame(hvf, false);
+			SeismicDataSource sds = Swarm.config.getSource(cf.getString("source"));
+			if (sds != null)
+			{
+				HelicorderViewerFrame hvf = new HelicorderViewerFrame(cf);
+				hvf.addLinkListeners();
+				Swarm.getApplication().addInternalFrame(hvf, false);
+			}
 		}
 	}
 
