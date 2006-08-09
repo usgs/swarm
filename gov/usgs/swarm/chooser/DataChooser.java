@@ -69,6 +69,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/08/08 22:20:12  cervelli
+ * Fixes -180/180 map bug.
+ *
  * Revision 1.4  2006/08/07 22:35:10  cervelli
  * File source.
  *
@@ -212,8 +215,17 @@ public class DataChooser extends JPanel
 		List<String> srcs = cf.getList("source");
 		for (String src : srcs)
 		{
+//			System.out.println(src);
 			if (!isSourceOpened(src))
-				openSource(Swarm.config.getSource(src));
+			{
+				List<String> chs = openSource(Swarm.config.getSource(src));
+				if (chs == null)
+				{
+					JOptionPane.showMessageDialog(Swarm.getApplication(), 
+							"The data source '" + src + "' could not be opened.", 
+							"Error", JOptionPane.ERROR_MESSAGE);
+				}
+			}
 		}
 	}
 	
@@ -460,16 +472,24 @@ public class DataChooser extends JPanel
 							{
 								List<Pair<ServerNode, String>> channels = getSelections();
 								GeoRange gr = new GeoRange();
+								int nc = 0;
 								for (Pair<ServerNode, String> pair : channels)
 								{
 									Metadata md = Swarm.config.getMetadata(pair.item2);
 									Point2D.Double pt = md.getLonLat();
 									if (pt != null && !Double.isNaN(pt.x) && !Double.isNaN(pt.y))
-										gr.includePoint(pt);
+									{
+										nc++;
+										gr.includePoint(pt, 0.0001);
+									}
 								}
-								gr.padPercent(0.4, 0.4);
+								if (nc == 1)
+									gr.pad(0.1275, 0.1275);
+								else
+									gr.padPercent(0.4, 0.4);
 								if (gr.isValid())
 								{
+//									System.out.println(gr);
 									Swarm.getApplication().setMapVisible(true);
 									Swarm.getApplication().getMapFrame().setView(gr);
 								}
@@ -574,7 +594,7 @@ public class DataChooser extends JPanel
 	}
 	
 	// TODO: use dataSourceSelected
-	public List<String> openSource(SeismicDataSource sds)
+	private List<String> openSource(SeismicDataSource sds)
 	{
 		List<String> channels = null;
 		try
@@ -586,7 +606,9 @@ public class DataChooser extends JPanel
 			openedSources.add(sds.getName());
 		} 
 		catch (Exception e)
-		{}	
+		{
+//			e.printStackTrace();
+		}	
 		return channels;
 	}
 	
@@ -978,9 +1000,11 @@ public class DataChooser extends JPanel
 		}
 		
 		if (countExceeded)
+		{
 			JOptionPane.showMessageDialog(Swarm.getApplication(), 
 					Messages.getString("DataChooser.maxChannelsAtOnceError") + MAX_CHANNELS_AT_ONCE, //$NON-NLS-1$ 
 					Messages.getString("DataChooser.errorBoxTitle"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$
+		}
 		
 		return selections;
 	}
