@@ -11,6 +11,9 @@ import javax.swing.ImageIcon;
  * TODO: make images static final, don't use map 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2006/08/06 20:02:50  cervelli
+ * Added drag button.
+ *
  * Revision 1.15  2006/08/04 18:30:37  cervelli
  * Replaced spectra icon.
  *
@@ -125,6 +128,8 @@ public class Images
 		imageMap.put("ruler", "images/ruler.gif");
 		imageMap.put("dragbox", "images/dragbox.gif");
 		imageMap.put("drag", "images/drag.gif");
+		imageMap.put("alarm", "images/alarm.gif");
+		imageMap.put("resize", "images/resize.gif");
 		
 		imageMap.put("throbber_off", "images/throbber_off.gif");
 		imageMap.put("throbber_0", "images/throbber_0.gif");
