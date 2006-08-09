@@ -63,6 +63,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: up/down arrows
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/08/09 05:08:03  cervelli
+ * Clears map and disposes to avoid memory leak.
+ *
  * Revision 1.4  2006/08/08 14:31:41  cervelli
  * Bigger labels and time labels.
  *
@@ -139,6 +142,7 @@ public class MultiMonitor extends SwarmFrame
 
 	private JToolBar toolbar;
 	private JButton settingsButton;
+//	private JButton alarmButton;
 	private JButton removeButton;
 	private JPanel wavePanel;
 	private JPanel mainPanel;
@@ -173,8 +177,6 @@ public class MultiMonitor extends SwarmFrame
 		panels = new ArrayList<WaveViewPanel>();
 		createUI();
 		timer = new Timer("Monitor Timer [" + sds.getName() + "]");
-		slideTask = new SlideTask();
-		refreshTask = new RefreshTask();
 		setIntervals();
 	}
 
@@ -215,7 +217,13 @@ public class MultiMonitor extends SwarmFrame
 	
 	private void setIntervals()
 	{
+		if (slideTask != null)
+			slideTask.cancel();
+		if (refreshTask != null)
+			refreshTask.cancel();
 		timer.purge();
+		slideTask = new SlideTask();
+		refreshTask = new RefreshTask();
 		timer.schedule(slideTask, 0, slideInterval);
 		timer.schedule(refreshTask, 0, refreshInterval);
 	}
@@ -228,6 +236,11 @@ public class MultiMonitor extends SwarmFrame
 	public SeismicDataSource getDataSource()
 	{
 		return dataSource;
+	}
+	
+	public long getSlideInterval()
+	{
+		return slideInterval;
 	}
 	
 	public long getRefreshInterval()
@@ -243,6 +256,13 @@ public class MultiMonitor extends SwarmFrame
 	public void setRefreshInterval(long ms)
 	{
 		refreshInterval = ms;
+		setIntervals();
+	}
+	
+	public void setSlideInterval(long ms)
+	{
+		slideInterval = ms;
+		setIntervals();
 	}
 	
 	public void setSpan(int span)
@@ -324,6 +344,18 @@ public class MultiMonitor extends SwarmFrame
 					}
 				});
 		toolbar.add(settingsButton);
+		
+//		alarmButton = SwarmUtil.createToolBarButton(
+//				Images.getIcon("alarm"),
+//				"Settings for wave alarm",
+//				new ActionListener()
+//				{
+//					public void actionPerformed(ActionEvent e)
+//					{
+//						System.out.println("alarm");
+//					}
+//				});
+//		toolbar.add(alarmButton);
 		
 		toolbar.addSeparator();
 		
