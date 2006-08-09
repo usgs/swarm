@@ -4,6 +4,7 @@ import gov.usgs.swarm.Swarm;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
@@ -12,6 +13,9 @@ import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/08/08 22:20:29  cervelli
+ * First good working version of this panel.
+ *
  * Revision 1.1  2006/08/01 23:43:13  cervelli
  * Moved package and new data source panel system.
  *
@@ -126,11 +130,14 @@ public class DHIPanel extends DataSourcePanel
 	{
 		createFields();
 		FormLayout layout = new FormLayout(
-				"right:max(20dlu;pref), 3dlu, 30dlu, 0dlu, 55dlu, 3dlu, right:max(20dlu;pref), 3dlu, 85dlu", 
+				"right:max(20dlu;pref), 3dlu, 40dlu, 0dlu, 45dlu, 3dlu, right:max(20dlu;pref), 3dlu, 85dlu", 
 				"");
 		
 		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 		builder.setDefaultDialogBorder();
+		builder.append(new JLabel("Use this data source to connect to a Data Management Center (DMC)."), 9);
+		builder.nextLine();
+		builder.appendSeparator();
 		builder.append("Network DC:");
 		builder.append(netDC, 3);
 		builder.append("DNS:");
