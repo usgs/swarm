@@ -1,25 +1,25 @@
 package gov.usgs.swarm.wave;
 
 import gov.usgs.swarm.Swarm;
-import gov.usgs.util.GridBagHelper;
-import gov.usgs.util.ui.BaseDialog;
+import gov.usgs.swarm.SwarmDialog;
 
 import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * A dialog for Monitor Mode Settings.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/01 23:45:23  cervelli
+ * Moved package.
+ *
  * Revision 1.3  2006/06/05 18:06:49  dcervelli
  * Major 1.3 changes.
  *
@@ -40,12 +40,9 @@ import javax.swing.border.TitledBorder;
  *
  * @author Dan Cervelli
  */
-public class MultiMonitorSettingsDialog extends BaseDialog
+public class MultiMonitorSettingsDialog extends SwarmDialog
 {
 	public static final long serialVersionUID = -1;
-	
-	private static final int WIDTH = 280;
-	private static final int HEIGHT = 160;	
 	
 	private MultiMonitor monitor;
 	
@@ -53,13 +50,60 @@ public class MultiMonitorSettingsDialog extends BaseDialog
 	
 	private JComboBox spanList;
 	private JTextField refreshInterval;
+	private JTextField slideInterval;
 	
 	private static MultiMonitorSettingsDialog dialog;
 	
 	private MultiMonitorSettingsDialog()
 	{
-		super(Swarm.getApplication(), "Monitor Settings", true, WIDTH, HEIGHT);
-		createSettingsUI();	
+		super(Swarm.getApplication(), "Monitor Settings", true);
+		createUI();
+//		setToCurrent();
+//		setCurrentValues();
+		setSizeAndLocation();
+//		
+//		super(Swarm.getApplication(), "Monitor Settings", true, WIDTH, HEIGHT);
+//		createSettingsUI();	
+	}
+	
+	private void createFields()
+	{
+		int[] values = MultiMonitor.SPANS;
+		String[] spans = new String[values.length];
+		for (int i = 0; i < spans.length; i++)
+			spans[i] = Integer.toString(values[i]);
+		spanList = new JComboBox(spans);
+		refreshInterval = new JTextField();
+		slideInterval = new JTextField();
+	}
+	
+	protected void createUI()
+	{
+		super.createUI();
+		createFields();
+		
+		FormLayout layout = new FormLayout(
+				"right:max(30dlu;pref), 3dlu, 40dlu, 3dlu, 40dlu", 
+				"");
+		
+		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+		builder.setDefaultDialogBorder();
+		
+		builder.append("Time Span:");
+		builder.append(spanList);
+		builder.append(" seconds");
+		builder.nextLine();
+		builder.append("Refresh Interval:");
+		builder.append(refreshInterval);
+		builder.append(" seconds");
+		builder.nextLine();
+		builder.append("Redraw Interval:");
+		builder.append(slideInterval);
+		builder.append(" seconds");
+		builder.nextLine();
+		
+		dialogPanel = builder.getPanel();
+		mainPanel.add(dialogPanel, BorderLayout.CENTER);
 	}
 	
 	public static MultiMonitorSettingsDialog getInstance(MultiMonitor mm)
@@ -85,34 +129,10 @@ public class MultiMonitorSettingsDialog extends BaseDialog
 		setToCurrent();
 	}
 	
-	private void createSettingsUI()
-	{
-		dialogPanel = new JPanel(new GridBagLayout());
-
-		int[] values = MultiMonitor.SPANS;
-		String[] spans = new String[values.length];
-		for (int i = 0; i < spans.length; i++)
-			spans[i] = Integer.toString(values[i]);
-		
-		spanList = new JComboBox(spans);
-		JLabel spanLabel = new JLabel("Span, seconds: ");
-		
-		refreshInterval = new JTextField();
-		JLabel intervalLabel = new JLabel("Refresh interval, seconds:");
-		
-		GridBagConstraints c = new GridBagConstraints();
-		dialogPanel.setBorder(new TitledBorder(new EtchedBorder(), "Options"));
-		dialogPanel.add(spanLabel, GridBagHelper.set(c, "x=0;y=0;w=2;h=1;a=w;wx=1;ix=12;iy=2;f=n;i=0,4,0,4"));
-		dialogPanel.add(spanList, GridBagHelper.set(c, "x=2;y=0;w=1;h=1;f=h;wx=0;a=e"));
-		dialogPanel.add(intervalLabel, GridBagHelper.set(c, "x=0;y=1;w=2;h=1;wx=1;a=w;f=n"));
-		dialogPanel.add(refreshInterval, GridBagHelper.set(c, "x=2;y=1;w=1;h=1;f=h;wx=0;a=e"));
-		
-		mainPanel.add(dialogPanel, BorderLayout.CENTER);
-	}
-	
 	public void setToCurrent()
 	{
-		refreshInterval.setText(Long.toString(monitor.getRefreshInterval() / 1000));
+		slideInterval.setText(Double.toString(monitor.getSlideInterval() / 1000.0));
+		refreshInterval.setText(Double.toString(monitor.getRefreshInterval() / 1000.0));
 		String span = Integer.toString(monitor.getSpan());
 		spanList.setSelectedItem(span);
 	}
@@ -122,7 +142,8 @@ public class MultiMonitorSettingsDialog extends BaseDialog
 		try
 		{
 			monitor.setSpan(Integer.parseInt(spanList.getSelectedItem().toString()));
-			monitor.setRefreshInterval(Integer.parseInt(refreshInterval.getText()) * 1000);
+			monitor.setRefreshInterval(Math.round(Double.parseDouble(refreshInterval.getText()) * 1000));
+			monitor.setSlideInterval(Math.round(Double.parseDouble(slideInterval.getText()) * 1000));
 		}
 		catch (Exception e)
 		{
@@ -138,7 +159,12 @@ public class MultiMonitorSettingsDialog extends BaseDialog
 		try
 		{
 			message = "Invalid refresh interval; legal values are between 0 and 3600, 0 to refresh continuously.";
-			int ri = Integer.parseInt(refreshInterval.getText());
+			double ri = Double.parseDouble(refreshInterval.getText());
+			if (ri < 0 || ri > 3600)
+				throw new NumberFormatException();
+			
+			message = "Invalid redraw interval; legal values are between 0 and 3600, 0 to refresh continuously.";
+			ri = Double.parseDouble(refreshInterval.getText());
 			if (ri < 0 || ri > 3600)
 				throw new NumberFormatException();
 			
