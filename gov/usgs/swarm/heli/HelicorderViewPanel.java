@@ -44,6 +44,9 @@ import javax.swing.event.EventListenerList;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/01 23:44:22  cervelli
+ * Moved package.
+ *
  * Revision 1.21  2006/07/30 22:43:03  cervelli
  * Changes for layouts.
  *
@@ -161,11 +164,13 @@ public class HelicorderViewPanel extends JComponent
 	
 	public HelicorderViewPanel(HelicorderViewerFrame hvf)
 	{
+//		setBackground(new Color(255, 255, 255, 128));
 		parent = hvf;
 		dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 		plot = new Plot();
 		plot.setBackgroundColor(BACKGROUND_COLOR);
+//		plot.setBackgroundColor(null);
 		settings = hvf.getHelicorderViewerSettings();
 		heliRenderer = new HelicorderRenderer();
 		heliRenderer.setExtents(0, 1, Double.MAX_VALUE, -Double.MAX_VALUE);
@@ -735,16 +740,16 @@ public class HelicorderViewPanel extends JComponent
 		heliRenderer.setTimeZone(Swarm.config.getTimeZone(settings.channel));
 		heliRenderer.setClipValue(settings.clipValue);
 		heliRenderer.createDefaultAxis();
-		translation = heliRenderer.getTranslationInfo(false);
-		heliRenderer.setLargeChannelDisplay(fullScreen);
 		
 		if (md == null || md.getAlias() == null)
 			heliRenderer.setChannel(settings.channel);
 		else
 			heliRenderer.setChannel(md.getAlias());
 		
+		translation = heliRenderer.getTranslationInfo(false);
+		heliRenderer.setLargeChannelDisplay(fullScreen);
+		
 		plot.render(ig);
-
 	}
 	
 	public void setFullScreen(boolean b)
