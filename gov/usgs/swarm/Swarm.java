@@ -60,6 +60,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: chooser visibility
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.31  2006/08/09 05:10:41  cervelli
+ * Maximize clipboard and map here (after setVisible(true)) to avoid UI bug.
+ *
  * Revision 1.30  2006/08/07 22:34:13  cervelli
  * File source, monitor layouts, version info.
  *
@@ -200,7 +203,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.0.0.20060807-alpha-1";
+	private static final String VERSION = "2.0.0.20060809-alpha-3";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -289,15 +292,31 @@ public class Swarm extends JFrame
 							cache.output();
 					}
 				});
+		
+		m.getInputMap().put(KeyStroke.getKeyStroke("ctrl L"), "savelayout");
+		m.getActionMap().put("savelayout", new AbstractAction()
+				{
+					private static final long serialVersionUID = -1;
+					public void actionPerformed(ActionEvent e)
+					{
+						saveLayout();
+					}
+				});
 				
-//		m.getInputMap().put(KeyStroke.getKeyStroke("control F12"), "flushcache");
-//		m.getActionMap().put("flushcache", new AbstractAction()
+//		m.getInputMap().put(KeyStroke.getKeyStroke("control M"), "memory");
+//		m.getActionMap().put("memory", new AbstractAction()
 //				{
 //					private static final long serialVersionUID = -1;
 //					public void actionPerformed(ActionEvent e)
 //					{
-//						if (cache != null)
-//							cache.flush();
+//						List<MemoryPoolMXBean> pools = ManagementFactory.getMemoryPoolMXBeans();
+//						for (MemoryPoolMXBean p: pools) 
+//						{
+//							System.out.println("Memory type="+p.getType()+" Memory usage="+p.getUsage());
+//							p.
+//						}
+////						if (cache != null)
+////							cache.flush();
 //					}
 //				});
 
@@ -305,15 +324,14 @@ public class Swarm extends JFrame
 		m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, InputEvent.CTRL_DOWN_MASK), "fullScreenToggle");
 		m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SLASH, InputEvent.CTRL_DOWN_MASK), "fullScreenToggle");
 		toggleFullScreenAction = new AbstractAction()
-		{
-			private static final long serialVersionUID = -1;
-		
-			public void actionPerformed(ActionEvent e)
-			{
-				toggleFullScreenMode();					
-				Swarm.this.requestFocus();
-			}	
-		};
+				{
+					private static final long serialVersionUID = -1;
+				
+					public void actionPerformed(ActionEvent e)
+					{
+						toggleFullScreenMode();					
+					}	
+				};
 		m.getActionMap().put("fullScreenToggle", toggleFullScreenAction);	
 	}
 	
@@ -571,6 +589,7 @@ public class Swarm extends JFrame
 	
 	public void toggleFullScreenMode()
 	{
+		requestFocus();
 		fullScreen = !fullScreen;
 		setFullScreenMode(fullScreen);
 	}
@@ -639,25 +658,25 @@ public class Swarm extends JFrame
 			config.clipboardMaximized = true;
 		else
 		{
-			config.clipboardVisible = isClipboardVisible();
 			config.clipboardX = waveClipboard.getX();
 			config.clipboardY = waveClipboard.getY();
 			config.clipboardWidth = waveClipboard.getWidth();
 			config.clipboardHeight = waveClipboard.getHeight();
 			config.clipboardMaximized = false;
 		}
+		config.clipboardVisible = isClipboardVisible();
 		
 		if (mapFrame.isMaximum())
 			config.mapMaximized = true;
 		else
 		{
-			config.mapVisible = mapFrame.isVisible();
 			config.mapX = mapFrame.getX();
 			config.mapY = mapFrame.getY();
 			config.mapWidth = mapFrame.getWidth();
 			config.mapHeight = mapFrame.getHeight();
 			config.mapMaximized = false;
 		}
+		config.mapVisible = mapFrame.isVisible();
 		
 		config.chooserDividerLocation = split.getDividerLocation();
 		config.chooserVisible = isChooserVisible();
@@ -772,6 +791,21 @@ public class Swarm extends JFrame
 		return frame;
 	}
 	
+	public void saveLayout()
+	{
+		SwarmLayout sl = Swarm.getApplication().getCurrentLayout();
+		String name = JOptionPane.showInputDialog(
+				Swarm.getApplication(), "Enter a name for this layout:", 
+				"Save Layout", JOptionPane.INFORMATION_MESSAGE);
+		if (name != null)
+		{
+			sl.setName(name);
+			sl.save();
+			swarmMenu.addLayout(sl);
+			Swarm.config.addLayout(sl);
+		}
+	}
+	
 	public SwarmLayout getCurrentLayout()
 	{
 		ConfigFile cf = new ConfigFile();
@@ -795,7 +829,8 @@ public class Swarm extends JFrame
 			}
 		}
 		
-		mapFrame.saveLayout(cf, "map");
+		if (mapFrame.isVisible())
+			mapFrame.saveLayout(cf, "map");
 		
 		return sl;
 	}
