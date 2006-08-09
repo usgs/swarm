@@ -10,6 +10,9 @@ import javax.swing.JInternalFrame;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/07/30 22:42:19  cervelli
+ * Initial commit.
+ *
  * @author Dan Cervelli
  */
 public class SwarmFrame extends JInternalFrame
@@ -29,6 +32,9 @@ public class SwarmFrame extends JInternalFrame
 		int w = Integer.parseInt(cf.getString("w"));
 		int h = Integer.parseInt(cf.getString("h"));
 		setSize(w, h);
+		
+		boolean m = Boolean.parseBoolean(cf.getString("maximized"));
+		try { setMaximum(m); } catch (Exception e) {}
 	}
 	
 	public void saveLayout(ConfigFile cf, String prefix)
@@ -40,5 +46,7 @@ public class SwarmFrame extends JInternalFrame
 		Dimension d = getSize();
 		cf.put(prefix + ".w", Integer.toString(d.width));
 		cf.put(prefix + ".h", Integer.toString(d.height));
+		
+		cf.put(prefix + ".maximized", Boolean.toString(isMaximum()));
 	}
 }
