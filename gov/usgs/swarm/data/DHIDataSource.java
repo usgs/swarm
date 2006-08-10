@@ -33,6 +33,9 @@ import org.apache.log4j.varia.NullAppender;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/08/08 22:21:30  cervelli
+ * Configurable network/seismogram DC/DNS and gulper variables.
+ *
  * Revision 1.5  2006/08/04 21:21:09  cervelli
  * Got rid of some useless output.
  *
@@ -60,13 +63,12 @@ public class DHIDataSource extends SeismicDataSource
 	protected int gulpSize = 30 * 60;
 	protected int gulpDelay = 1 * 1000;
 	
-	// TODO: static maps for netDC, seisDC?
 	protected Map<String, ChannelId> idMap;
 	protected FissuresNamingService namingService;
 	protected NetworkDCOperations netDC;
 	protected DataCenter seisDC;
-	
-	protected static org.omg.CORBA_2_3.ORB orb;
+
+	protected org.omg.CORBA_2_3.ORB orb;
 	protected static Logger logger;
 	
 	public DHIDataSource(String nw)
@@ -116,8 +118,8 @@ public class DHIDataSource extends SeismicDataSource
 	        new AllVTFactory().register(orb);
 	        namingService = new FissuresNamingService(orb);
 	        namingService.setNameServiceCorbaLoc(NAMING_SERVICE_URL);
-	        netDC = namingService.getNetworkDC(networkDNS, networkDC);
-	        seisDC = namingService.getSeismogramDC(seismoDNS, seismoDC);
+        	netDC = namingService.getNetworkDC(networkDNS, networkDC);
+        	seisDC = namingService.getSeismogramDC(seismoDNS, seismoDC);
 		}
 		catch (Exception e)
 		{
@@ -228,9 +230,12 @@ public class DHIDataSource extends SeismicDataSource
 			            double j2k = gov.usgs.util.Time.parse("yyyy-MM-dd HH:mm:ss.SSS", t);
 			            wave.setStartTime(j2k);
 			            wave.setSamplingRate((seis[i].sampling_info.numPoints / seis[i].sampling_info.interval.value * 1000));
+			            wave.register();
 			            waves.add(wave);
+//			            System.out.println(wave);
 			        }
 		        }
+//		        Collections.sort(waves);
 		        wave = Wave.join(waves);
 		        if (wave != null)
 		        {
