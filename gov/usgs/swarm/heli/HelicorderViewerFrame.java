@@ -62,6 +62,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/08/04 18:40:14  cervelli
+ * Pinned saved to layout.
+ *
  * Revision 1.1  2006/08/01 23:44:22  cervelli
  * Moved package.
  *
@@ -1001,7 +1004,8 @@ public class HelicorderViewerFrame extends SwarmFrame
 					try
 					{
 						double bt = settings.getBottomTime();
-						if (dataSource.isActiveSource() || Double.isNaN(bt) || CurrentTime.getInstance().nowJ2K() < bt)
+//						if (dataSource.isActiveSource() || Double.isNaN(bt) || CurrentTime.getInstance().nowJ2K() < bt)
+						if (dataSource.isActiveSource() && Double.isNaN(bt))
 						{
 							if (!working)
 								getHelicorder();
