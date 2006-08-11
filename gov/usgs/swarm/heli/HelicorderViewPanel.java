@@ -1,6 +1,11 @@
 package gov.usgs.swarm.heli;
 
+import gov.usgs.plot.AxisRenderer;
+import gov.usgs.plot.FrameDecorator;
+import gov.usgs.plot.FrameRenderer;
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.SmartTick;
+import gov.usgs.plot.TextRenderer;
 import gov.usgs.swarm.Images;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
@@ -17,6 +22,7 @@ import gov.usgs.vdx.data.wave.Wave;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -34,6 +40,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TimeZone;
 
 import javax.swing.JComponent;
@@ -44,6 +51,9 @@ import javax.swing.event.EventListenerList;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/08/09 21:51:52  cervelli
+ * Minor formatting changes.
+ *
  * Revision 1.1  2006/08/01 23:44:22  cervelli
  * Moved package.
  *
@@ -131,7 +141,7 @@ public class HelicorderViewPanel extends JComponent
 	public static final int Y_OFFSET = 10;
 	public static final int RIGHT_WIDTH = 70;
 	public static final int BOTTOM_HEIGHT = 35;
-	public static final int INSET_HEIGHT = 200;
+	private int insetHeight = 200;
 	
 	private Plot plot;
 	private HelicorderRenderer heliRenderer;
@@ -155,6 +165,8 @@ public class HelicorderViewPanel extends JComponent
 	private int insetY;
 	
 	private boolean fullScreen;
+	
+	private boolean minimal;
 	
 	private double startMark = Double.NaN;
 	private double endMark = Double.NaN;
@@ -549,7 +561,7 @@ public class HelicorderViewPanel extends JComponent
 				return;
 			
 			loadInsetWave(nst, net);
-			int height = INSET_HEIGHT;
+			int height = insetHeight;
 			
 			if (row * translation[2] + translation[3] > height + translation[3])
 			{
@@ -581,7 +593,8 @@ public class HelicorderViewPanel extends JComponent
 		insetWavePanel.setStatusLabel(parent.getStatusLabel());
 		
 		Dimension d = getSize();
-		int height = INSET_HEIGHT;
+		insetHeight = getHeight() / 4;
+		int height = insetHeight;
 		int row = heliRenderer.getRow(j2k);
 		
 		insetWavePanel.setSize(d.width + 2, height);
@@ -695,7 +708,7 @@ public class HelicorderViewPanel extends JComponent
 	
 	public void setResized(boolean b)
 	{
-		resized = b;	
+		resized = b;
 	}
 
 	private void createImage()
@@ -723,8 +736,11 @@ public class HelicorderViewPanel extends JComponent
 //		Calibration cal = Swarm.getApplication().getCalibration(settings.channel);
 //		if (cal == null)
 //			cal = Calibration.IDENTITY;
-		
-		heliRenderer.setLocation(X_OFFSET, Y_OFFSET, d.width - X_OFFSET - RIGHT_WIDTH, d.height - Y_OFFSET - BOTTOM_HEIGHT);
+
+		if (minimal)
+			heliRenderer.setLocation(X_OFFSET / 2, Y_OFFSET, d.width - X_OFFSET - 5, d.height - Y_OFFSET - BOTTOM_HEIGHT / 2);
+		else
+			heliRenderer.setLocation(X_OFFSET, Y_OFFSET, d.width - X_OFFSET - RIGHT_WIDTH, d.height - Y_OFFSET - BOTTOM_HEIGHT);
 		
 		if (settings.autoScale)
 		{
@@ -739,7 +755,14 @@ public class HelicorderViewPanel extends JComponent
 		
 		heliRenderer.setTimeZone(Swarm.config.getTimeZone(settings.channel));
 		heliRenderer.setClipValue(settings.clipValue);
-		heliRenderer.createDefaultAxis();
+		if (minimal)
+		{
+//			System.out.println("minimal");
+//			heliRenderer.createMinimumAxis();
+			heliRenderer.setFrameDecorator(new SmallDecorator());
+		}
+		else
+			heliRenderer.createDefaultAxis();
 		
 		if (md == null || md.getAlias() == null)
 			heliRenderer.setChannel(settings.channel);
@@ -752,9 +775,108 @@ public class HelicorderViewPanel extends JComponent
 		plot.render(ig);
 	}
 	
+	class SmallDecorator extends FrameDecorator
+	{
+		public void decorate(FrameRenderer fr)
+		{
+			HelicorderRenderer hr = (HelicorderRenderer)fr;
+			AxisRenderer axis = new AxisRenderer(fr);
+			axis.createDefault();
+			fr.setAxis(axis);
+			
+			int minutes = (int)Math.round(settings.timeChunk / 60.0);
+			int majorTicks = minutes;
+			if (minutes > 30 && minutes < 180)
+				majorTicks = minutes / 5;
+			else if (minutes >= 180 && minutes < 360)
+				majorTicks = minutes / 10;
+			else if (minutes >= 360)
+				majorTicks = minutes / 20;
+			double[] mjt = SmartTick.intervalTick(0, settings.timeChunk, majorTicks);
+			
+			axis.createBottomTicks(null, mjt);
+			axis.createTopTicks(null, mjt);
+			axis.createVerticalGridLines(mjt);
+			
+			int bc = Math.round(settings.timeChunk / 5) + 2;
+			String[] btl = new String[bc];
+			double[] btlv = new double[bc];
+			btl[0] = "+";
+			btlv[0] = 30;
+			for (int i = 0, j = 1; i < mjt.length; i++)
+			{
+				long m = Math.round(mjt[i] / 60.0);
+				if (m % 5 == 0)
+				{
+					btl[j] = Long.toString(m);
+					btlv[j++] = mjt[i];
+				}
+			}
+			axis.createBottomTickLabels(btlv, btl);
+			
+			int numRows = hr.getNumRows();
+	 		double[] labelPosLR = new double[numRows];
+	 		String[] leftLabelText = new String[numRows];
+	 		String[] rightLabelText = new String[numRows];
+			DateFormat timeFormat = new SimpleDateFormat("HH:mm");
+			DateFormat dayFormat = new SimpleDateFormat("MM-dd");
+			timeFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+			dayFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+			
+			TimeZone timeZone = Swarm.config.getTimeZone(settings.channel);
+			boolean dst = timeZone.inDaylightTime(Util.j2KToDate(hr.getViewEndTime()));
+			double timeOffset = Time.getTimeZoneOffset(timeZone, dst);
+			
+			double pixelsPast = 0;
+			double pixelsPerRow = fr.getGraphHeight() / numRows;
+			String lastfdr = "";
+	 		for (int i = numRows - 1; i >= 0; i--)
+	 		{
+	 			pixelsPast += pixelsPerRow;
+	 			labelPosLR[i] = i + 0.5;
+	 			java.util.Date dtz = Util.j2KToDate(hr.getHelicorderMaxX() - (i + 1) * settings.timeChunk + timeOffset);
+		 		String ftl = timeFormat.format(dtz);
+				leftLabelText[i] = null;
+	 			if (pixelsPast > 20)
+	 			{
+	 				leftLabelText[i] = ftl;
+		 			pixelsPast = 0;
+		 		}
+	 			
+	 			String fdr = dayFormat.format(new Date(dtz.getTime() + settings.timeChunk * 1000));
+	 			if (!fdr.equals(lastfdr))
+	 			{
+	 				rightLabelText[i] = fdr;
+	 				lastfdr = fdr;
+	 			}
+	 		}
+
+			axis.createLeftTickLabels(labelPosLR, leftLabelText);
+			axis.createRightTickLabels(labelPosLR, rightLabelText);
+			
+			TextRenderer tr = new TextRenderer(3, fr.getGraphY() + fr.getGraphHeight() + 14, timeZone.getDisplayName(dst, TimeZone.SHORT));
+			tr.font = Font.decode("dialog-PLAIN-9");
+			tr.antiAlias = false;
+			axis.addPostRenderer(tr);
+			
+			double[] hg = new double[numRows - 1];
+			for(int i = 0; i < numRows - 1; i++)
+				hg[i] = i + 1.0;
+				
+			axis.createHorizontalGridLines(hg); 
+
+			axis.setBackgroundColor(Color.white);
+		}
+	}
+	
 	public void setFullScreen(boolean b)
 	{
 		fullScreen = b;		
+	}
+	
+	public void setMinimal(boolean b)
+	{
+		minimal = b;
 	}
 	
 	private void drawMark(Graphics2D g2, double t, Color color)
@@ -819,11 +941,12 @@ public class HelicorderViewPanel extends JComponent
 			int row = heliRenderer.getRow(t);
 			if (resized)
 			{
-				insetWavePanel.setSize(d.width, INSET_HEIGHT);
-				if (row * translation[2] > INSET_HEIGHT + translation[3])
+				insetWavePanel.setSize(d.width, insetHeight);
+				insetWavePanel.createImage();
+				if (row * translation[2] > insetHeight + translation[3])
 				{
 					int y = (int)Math.ceil((row - 1) * translation[2] + translation[3]);
-					insetWavePanel.setLocation(0, y - INSET_HEIGHT);
+					insetWavePanel.setLocation(0, y - insetHeight);
 				}
 				else
 				{
