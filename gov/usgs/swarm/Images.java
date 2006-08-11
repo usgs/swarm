@@ -11,6 +11,9 @@ import javax.swing.ImageIcon;
  * TODO: make images static final, don't use map 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2006/08/09 21:53:53  cervelli
+ * Added resize and alarm icons.
+ *
  * Revision 1.16  2006/08/06 20:02:50  cervelli
  * Added drag button.
  *
@@ -130,6 +133,9 @@ public class Images
 		imageMap.put("drag", "images/drag.gif");
 		imageMap.put("alarm", "images/alarm.gif");
 		imageMap.put("resize", "images/resize.gif");
+		imageMap.put("label_some", "images/label_some.gif");
+		imageMap.put("label_all", "images/label_all.gif");
+		imageMap.put("label_none", "images/label_none.gif");
 		
 		imageMap.put("throbber_off", "images/throbber_off.gif");
 		imageMap.put("throbber_0", "images/throbber_0.gif");
