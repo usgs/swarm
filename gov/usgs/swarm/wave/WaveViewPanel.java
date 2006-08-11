@@ -48,6 +48,9 @@ import javax.swing.event.EventListenerList;
  * TODO: move filter method
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/08/09 21:50:54  cervelli
+ * Changes so clipboard would work again.
+ *
  * Revision 1.4  2006/08/07 22:39:47  cervelli
  * Desynchronized constructPlot() to avoid deadlock.
  *
@@ -217,6 +220,8 @@ public class WaveViewPanel extends JComponent
 	private double mark2 = Double.NaN;
 	
 	private double cursorMark = Double.NaN;
+	
+	private boolean useFilterLabel = true;
 	
 	/** Constructs a WaveViewPanel with default settings.
 	 */	
@@ -723,7 +728,7 @@ public class WaveViewPanel extends JComponent
 							Graphics2D ig = (Graphics2D)bi.getGraphics();
 							constructPlot(ig);
 							setImage(bi);
-							repaint();
+//							repaint();
 						}
 					}
 				};
@@ -739,7 +744,9 @@ public class WaveViewPanel extends JComponent
 						}
 						
 						public void finished()
-						{}
+						{
+							repaint();
+						}
 					};
 			worker.start();
 		}
@@ -869,7 +876,12 @@ public class WaveViewPanel extends JComponent
 		}
 	}
 
-	private TextRenderer getFilterLabel()
+	public void setUseFilterLabel(boolean b)
+	{
+		useFilterLabel = b;
+	}
+	
+	public TextRenderer getFilterLabel()
 	{
 		String ft = "";
 		switch (settings.filter.getType())
@@ -1004,7 +1016,7 @@ public class WaveViewPanel extends JComponent
 		waveRenderer.update();
 //		waveRenderer.getAxis().setBackgroundColor(backgroundColor);
 	    plot.addRenderer(waveRenderer);
-		if (settings.filterOn)
+		if (useFilterLabel && settings.filterOn)
 			plot.addRenderer(getFilterLabel());
 		translation = waveRenderer.getDefaultTranslation();
 //		titleFrame = waveRenderer;
@@ -1036,7 +1048,7 @@ public class WaveViewPanel extends JComponent
 	    spectraRenderer.setMinFreq(settings.minFreq);
 	    double power = spectraRenderer.update(maxSpectraPower);
 	    maxSpectraPower = Math.max(maxSpectraPower, power);
-		if (settings.filterOn)
+		if (useFilterLabel && settings.filterOn)
 			plot.addRenderer(getFilterLabel());
 		translation = spectraRenderer.getDefaultTranslation();
 //		titleFrame = spectraRenderer;
@@ -1074,7 +1086,7 @@ public class WaveViewPanel extends JComponent
 	    double power = spectrogramRenderer.update(maxSpectrogramPower);
 	    maxSpectrogramPower = Math.max(maxSpectrogramPower, power);
 	    plot.addRenderer(spectrogramRenderer);
-		if (settings.filterOn)
+		if (useFilterLabel && settings.filterOn)
 			plot.addRenderer(getFilterLabel());
 		translation = spectrogramRenderer.getDefaultTranslation();
 //		titleFrame = spectrogramRenderer;
