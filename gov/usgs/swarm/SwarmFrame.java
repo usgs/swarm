@@ -2,6 +2,7 @@ package gov.usgs.swarm;
 
 import gov.usgs.util.ConfigFile;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
 
@@ -10,6 +11,9 @@ import javax.swing.JInternalFrame;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/08/09 21:54:22  cervelli
+ * Added maximized variable to layout information.
+ *
  * Revision 1.1  2006/07/30 22:42:19  cervelli
  * Initial commit.
  *
@@ -22,6 +26,8 @@ public class SwarmFrame extends JInternalFrame
 	public SwarmFrame(String title, boolean resizable, boolean closable, boolean maximizable, boolean iconifiable)
 	{
 		super(title, resizable, closable, maximizable, iconifiable);
+		setOpaque(false);
+		setBackground(new Color(255, 255, 255, 0));
 	}
 	
 	protected void processStandardLayout(ConfigFile cf)

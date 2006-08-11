@@ -60,6 +60,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: chooser visibility
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.32  2006/08/09 21:56:41  cervelli
+ * Added ctrl-L to global key listener, moved save layout here, and fixes for maximization state for config file.
+ *
  * Revision 1.31  2006/08/09 05:10:41  cervelli
  * Maximize clipboard and map here (after setVisible(true)) to avoid UI bug.
  *
@@ -203,7 +206,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.0.0.20060809-alpha-3";
+	private static final String VERSION = "2.0.0.20060811-beta-2";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -1028,6 +1031,7 @@ public class Swarm extends JFrame
 		try 
 		{
 			UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
+			UIManager.put("InternalFrame.border", SwarmUtil.getInternalFrameBorder());
 		}
 		catch (Exception e) { }
 		
