@@ -11,6 +11,7 @@ import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.SCNL;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwingWorker;
+import gov.usgs.swarm.map.MapPanel.LabelSetting;
 import gov.usgs.swarm.wave.WaveViewPanel;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Util;
@@ -50,6 +51,9 @@ import javax.swing.JRadioButtonMenuItem;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/08/07 22:38:21  cervelli
+ * Labels apply linear calibration, channel switching redraw fixed.
+ *
  * Revision 1.8  2006/08/06 20:05:26  cervelli
  * Decorators for each wave type and scaling fonts.
  *
@@ -295,6 +299,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 						MapMiniPanel.this.mouseExited(e);
 					}
 				});
+		wavePanel.setUseFilterLabel(false);
 		wavePanel.setDisplayTitle(false);
 		wavePanel.setDataSource(activeMetadata.source);
 		wavePanel.setChannel(activeMetadata.getChannel());
@@ -340,7 +345,6 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 		wavePanel.setOffsets(13, 0, 0, timeFontSize + 4);
 		wavePanel.setSize(w - 1, h - labelHeight);
 		wavePanel.setBackgroundColor(WAVE_BACKGROUND);
-//		wavePanel.setFrameDecorator(new MapWaveDecorator(wavePanel));
 		wavePanel.setFrameDecorator(new MapWaveDecorator());
 		wavePanel.setLocation(0, labelHeight - 1);
 		add(wavePanel);
@@ -351,7 +355,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 		
 		add(close);
 		adjustLine();
-		updateWave(parent.getStartTime(), parent.getEndTime());
+		updateWave(parent.getStartTime(), parent.getEndTime(), true);
 	}
 	
 	public void changeChannel(Metadata md)
@@ -389,7 +393,12 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	
 	public boolean updateWave(final double st, final double et)
 	{
-		return updateWave(st, et, false);
+		return updateWave(st, et, false, false);
+	}
+	
+	public boolean updateWave(final double st, final double et, boolean repaint)
+	{
+		return updateWave(st, et, false, repaint);
 	}
 	
 	/**
@@ -398,8 +407,8 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	 * @param reenter
 	 * @return
 	 */
-	public boolean updateWave(final double st, final double et, boolean reenter)
-	{			
+	public boolean updateWave(final double st, final double et, boolean reenter, final boolean repaint)
+	{	
 		if (!waveVisible || activeMetadata.source == null)
 			return false;
 		
@@ -461,13 +470,14 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 						if (pr != null)
 						{
 							repaint();
-							updateWave(pr[0], pr[1], true);
+							updateWave(pr[0], pr[1], true, repaint);
 						}
 						else
 							setWorking(false);
 						parent.getThrobber().decrement();
 						wavePanel.setWorking(false);
-//						repaint();	
+						if (repaint)
+							wavePanel.repaint();	
 					}
 				};
 		
@@ -481,26 +491,6 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 		if (waveVisible)
 		{
 			resetWave();
-//			setSize(320, 420);
-//			
-//			SeismicDataSource sds = Swarm.config.getSource("pubavo1");
-//			double now = CurrentTime.getInstance().nowJ2K();
-//			double then = now - 6 * 60 * 60;
-//			HelicorderData hd = sds.getHelicorder(channel, then, now);
-//			System.out.println("rows: " + hd.rows());
-//			heliRenderer = new HelicorderRenderer(hd, 15 * 60);
-//			heliRenderer.setLocation(30, 15, 280, 380);
-//			double mean = hd.getMeanMax();
-//			double bias = hd.getBias();
-//			mean = Math.abs(bias - mean);
-//
-//			double clipValue = (int)(21 * mean);
-//			double barRange = (int)(3 * mean);
-//			heliRenderer.setChannel(channel);
-//			heliRenderer.setHelicorderExtents(then, now, -1 * Math.abs(barRange), Math.abs(barRange));
-//			heliRenderer.setClipValue((int)clipValue);
-//			heliRenderer.setShowClip(true);
-//			heliRenderer.createMinimumAxis();
 		}
 		else
 		{
@@ -508,6 +498,8 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 			labelFontSize = 10;
 			labelHeight = 13;
 			setSize(labelWidth, labelHeight);
+			if (parent.getLabelSetting() == LabelSetting.NONE)
+				parent.resetImage(false);
 		}
 		adjustLine();
 		getParent().repaint();
@@ -726,6 +718,15 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 			AxisRenderer ar = fr.getAxis();
 			ar.createDefault();
 			ar.setBackgroundColor(BACKGROUND_COLOR);
+			if (wavePanel.getSettings().filterOn)
+			{
+				TextRenderer tr = wavePanel.getFilterLabel();
+				tr.horizJustification = TextRenderer.RIGHT;
+				tr.x = fr.getGraphWidth() + fr.getGraphX();
+				tr.y = fr.getGraphY() + 11;
+				tr.color = Color.RED;
+				ar.addPostRenderer(tr);
+			}
 		}
 		
 		private void setTimeAxis(FrameRenderer fr)
@@ -787,21 +788,20 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	        fr.getAxis().addPostRenderer(tr);
 		}
 
-		private void setMinMaxBoxes(FrameRenderer fr)
+		private void setMinMaxBoxes(FrameRenderer fr, double min, double max)
 		{
 			AxisRenderer ar = fr.getAxis();
 			TextRenderer ultr = new TextRenderer();
 	        ultr.color = Color.BLACK;
-	        double m = activeMetadata.getMultiplier();
-	        double b = activeMetadata.getOffset();
-	        ultr.text = String.format("%.0f", fr.getMaxY() * m + b);
+	        
+	        ultr.text = String.format("%.0f", max);
 	        ultr.horizJustification = TextRenderer.RIGHT;
 	        ultr.y = fr.getGraphY() + timeFontSize;
 	        ultr.font = font;
 	        
 	        TextRenderer lltr = new TextRenderer();
 	        lltr.color = Color.BLACK;
-	        lltr.text = String.format("%.0f", fr.getMinY() * m + b);
+	        lltr.text = String.format("%.0f", min);
 	        lltr.horizJustification = TextRenderer.RIGHT;
 	        lltr.y = fr.getGraphY() + fr.getGraphHeight() - 1;
 	        lltr.font = font;
@@ -834,7 +834,9 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	        if (activeMetadata.getUnit() != null)
 				label = activeMetadata.getUnit();
 	        setLeftLabel(fr, label);
-	        setMinMaxBoxes(fr);
+	        double m = activeMetadata.getMultiplier();
+	        double b = activeMetadata.getOffset();
+	        setMinMaxBoxes(fr, fr.getMinY() * m + b, fr.getMaxY() * m + b);
 		}
 		
 		public void decorateSpectra(FrameRenderer fr)
@@ -845,7 +847,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 				setLeftLabel(fr, "log(P)");
 			else
 				setLeftLabel(fr, "Power");
-	        setMinMaxBoxes(fr);
+	        setMinMaxBoxes(fr, fr.getMinY(), fr.getMaxY());
 		}
 		
 		public void decorateSpectrogram(FrameRenderer fr)
@@ -854,7 +856,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 			setTimeAxis(fr);
 	        String label = "Freq";
 	        setLeftLabel(fr, label);
-	        setMinMaxBoxes(fr);
+	        setMinMaxBoxes(fr, fr.getMinY(), fr.getMaxY());
 		}
 		
 		public void decorate(FrameRenderer fr)
