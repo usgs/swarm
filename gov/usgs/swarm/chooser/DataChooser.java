@@ -69,6 +69,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/08/09 21:52:51  cervelli
+ * Fixed single station map padding and added alert on bad data source open.
+ *
  * Revision 1.5  2006/08/08 22:20:12  cervelli
  * Fixes -180/180 map bug.
  *
@@ -486,7 +489,7 @@ public class DataChooser extends JPanel
 								if (nc == 1)
 									gr.pad(0.1275, 0.1275);
 								else
-									gr.padPercent(0.4, 0.4);
+									gr.padPercent(1.2, 1.2);
 								if (gr.isValid())
 								{
 //									System.out.println(gr);
