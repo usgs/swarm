@@ -3,6 +3,7 @@ package gov.usgs.swarm.wave;
 import gov.usgs.swarm.Images;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.SwarmFrame;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.Throbber;
@@ -62,6 +63,9 @@ import javax.swing.event.InternalFrameEvent;
  * The wave clipboard internal frame.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/08/09 21:49:46  cervelli
+ * Many changes including resizable waves and permanent scrollbar.
+ *
  * Revision 1.2  2006/08/09 05:08:54  cervelli
  * Override setMaximum to eliminate quirk when saving maximized clipboard.
  *
@@ -122,7 +126,7 @@ import javax.swing.event.InternalFrameEvent;
  *
  * @author Dan Cervelli
  */
-public class WaveClipboardFrame extends JInternalFrame
+public class WaveClipboardFrame extends SwarmFrame
 {
 	public static final long serialVersionUID = -1;
 	private static final Color SELECT_COLOR = new Color(204, 204, 255);
