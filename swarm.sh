@@ -1,1 +1,1 @@
-java -Xmx256M -cp .:lib/usgs.jar:lib/colt.jar:lib/seed-pdcc.jar gov.usgs.swarm.Swarm $*
+java -Xmx256M -jar lib/swarm.jar gov.usgs.swarm.Swarm $*

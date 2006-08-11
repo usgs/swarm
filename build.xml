@@ -1,5 +1,8 @@
 <!--
 $Log: not supported by cvs2svn $
+Revision 1.6  2006/05/24 16:41:15  tparker
+Add looks jar
+
 Revision 1.5  2005/09/22 21:06:40  dcervelli
 Changed classpath, distro files.
 
@@ -37,7 +40,7 @@ Initial commit.
 
 	<target name="help">
 		<echo>
-Available targets:
+Available targets:g
 
 compile [default] -- compiles Java code
 jar -- generates new ${jarfile}
@@ -50,7 +53,7 @@ bin-dist -- generates new binary distribution
 
 	<target name="compile" depends="init" description="compile the source">
 		<ant antfile="${source}/../USGS/buildversion.xml" target="version" dir="${source}/../USGS" inheritAll="true">
-					<property name="version" value="1.1.10"/>
+					<property name="version" value="2.0.0-beta"/>
 					<property name="path" value="../Swarm/gov/usgs/swarm"/>
 					<property name="package" value="gov.usgs.swarm"/>
 		</ant>
@@ -69,38 +72,116 @@ bin-dist -- generates new binary distribution
 
 		<!-- Create the distribution directory structure -->
 		<mkdir dir="${bin-dir}/swarm/" />
-		<mkdir dir="${bin-dir}/swarm/images" />
+		<mkdir dir="${bin-dir}/swarm/layouts" />
+		<mkdir dir="${bin-dir}/swarm/mapdata" />
+		<mkdir dir="${bin-dir}/swarm/mapdata/augustine" />
+		<mkdir dir="${bin-dir}/swarm/mapdata/nasa_2k" />
+		<mkdir dir="${bin-dir}/swarm/mapdata/nasa_240m_D2" />
+		<mkdir dir="${bin-dir}/swarm/mapdata/world" />
 		<mkdir dir="${bin-dir}/swarm/lib" />
-		<mkdir dir="${bin-dir}/swarm/manual" />
-
-		<!-- Copy the distribution files -->
-		<copy todir="${bin-dir}/swarm/lib">
-			<fileset dir="${source}/../USGS/lib">
-				<include name="usgs.jar" />
-			</fileset>
-		</copy>
 		
+		<jar destfile="${bin-dir}/swarm/lib/swarm-bin.jar">
+			<fileset dir="${source}/../VDX">
+				<include name="gov/usgs/vdx/data/BinaryDataSet*.class" />
+				<include name="gov/usgs/vdx/data/GenericDataMatrix*.class" />
+				<include name="gov/usgs/vdx/data/heli/HelicorderData*.class" />
+				<include name="gov/usgs/vdx/data/heli/plot/HelicorderRenderer*.class" />
+				<include name="gov/usgs/vdx/data/hypo/HypocenterList*.class" />
+				<include name="gov/usgs/vdx/data/rsam/RSAMData*.class" />
+				<include name="gov/usgs/vdx/data/wave/SAC*.class" />
+				<include name="gov/usgs/vdx/data/wave/SliceWave*.class" />
+				<include name="gov/usgs/vdx/data/wave/Wave*.class" />
+				<include name="gov/usgs/vdx/data/wave/plot/SliceWaveRenderer*.class" />
+				<include name="gov/usgs/vdx/data/wave/plot/SpectraRenderer*.class" />
+				<include name="gov/usgs/vdx/data/wave/plot/SpectrogramRenderer*.class" />
+			</fileset>
+			<fileset dir="${source}/../Earthworm">
+				<include name="gov/usgs/earthworm/Menu*.class" />
+				<include name="gov/usgs/earthworm/MenuItem*.class" />
+				<include name="gov/usgs/earthworm/Message*.class" />
+				<include name="gov/usgs/earthworm/MessageLogo*.class" />
+				<include name="gov/usgs/earthworm/SCN*.class" />
+				<include name="gov/usgs/earthworm/TraceBuf*.class" />
+				<include name="gov/usgs/earthworm/WaveServer*.class" />
+			</fileset>
+			<fileset dir="${source}/../Plot">
+				<include name="**/**.class" />	
+			</fileset>
+			<fileset dir="${source}/../Swarm">
+				<include name="**/**.class" />	
+				<include name="**/**.properties" />	
+			</fileset>
+			<fileset dir="${source}/../Math">
+				<include name="**/**.class" />	
+			</fileset>
+			<fileset dir="${source}/../Net">
+				<include name="gov/usgs/net/InternetClient*.class" />	
+			</fileset>
+			<fileset dir="${source}/../Util">
+				<include name="**/**.class" />	
+			</fileset>
+			<fileset dir="${source}/../Winston">
+				<include name="gov/usgs/winston/Channel*.class" />
+				<include name="gov/usgs/winston/Instrument*.class" />
+				<include name="gov/usgs/winston/db/Channels*.class" />
+				<include name="gov/usgs/winston/db/Data*.class" />
+				<include name="gov/usgs/winston/db/WinstonDatabase*.class" />
+				<include name="gov/usgs/winston/server/WWSClient*.class" />
+			</fileset>
+			<fileset dir="${source}">
+				<include name="images/*.png" />
+				<include name="images/*.jpg" />
+				<include name="images/*.gif" />
+			</fileset>
+		</jar>
+		
+		<jar manifest="Manifest.txt" destfile="${bin-dir}/swarm/lib/swarm.jar" />
+		
+		<!-- Copy the distribution files -->
 		<copy todir="${bin-dir}/swarm/lib">
 			<fileset dir="${source}/../USGS/contrib">
 				<include name="colt.jar" />
 				<include name="seed-pdcc.jar" />
+				<include name="SeedCodec-1.0.jar" />
+				<include name="looks-2.0.4.jar" />
+				<include name="forms-1.0.7.jar" />
+				<include name="fissuresIDL-1.0.jar" />
+				<include name="fissuresUtil-1.0.16.jar" />
+				<include name="fissuresImpl-1.1.11.jar" />
+				<include name="log4j-1.2.13.jar" />
+				<include name="jai_core.jar" />
+				<include name="jai_codec.jar" />
+				<include name="mlibwrapper_jai.jar" />
+				<include name="mlib_jai.dll" />
+				<include name="mlib_jai_mmx.dll" />
 			</fileset>
 		</copy>
-
-		<copy todir="${bin-dir}/swarm/images">
-			<fileset dir="${source}/images" />
+		
+		<copy todir="${bin-dir}/swarm/layouts">
+			<fileset dir="${source}/layouts" />
 		</copy>
-
-		<copy todir="${bin-dir}/swarm/manual">
-			<fileset dir="${source}/manual" excludes="**/*.bak" />
+		
+		<copy todir="${bin-dir}/swarm/mapdata/augustine">
+			<fileset dir="${source}/mapdata/augustine" />
 		</copy>
-
+		<copy todir="${bin-dir}/swarm/mapdata/nasa_2k">
+			<fileset dir="${source}/mapdata/nasa_2k" />
+		</copy>
+		<copy todir="${bin-dir}/swarm/mapdata/nasa_240m_D2">
+			<fileset dir="${source}/mapdata/nasa_240m_D2" />
+		</copy>
+		<copy todir="${bin-dir}/swarm/mapdata/world">
+			<fileset dir="${source}/mapdata/world" />
+		</copy>
+		
+		<copy todir="${bin-dir}/swarm/" file="${source}/Swarm.jar" />
 		<copy todir="${bin-dir}/swarm/" file="${source}/swarm_console.bat" />
-		<copy todir="${bin-dir}/swarm/" file="${source}/swarm.bat" />
+		<copy todir="${bin-dir}/swarm/" file="${source}/clip.wav" />
+	<!--	<copy todir="${bin-dir}/swarm/" file="${source}/swarm.bat" />  -->
 		<copy todir="${bin-dir}/swarm/" file="${source}/swarm.sh" />
 		
-		<tar destfile="${source}/swarm-bin.tar.gz" basedir="${bin-dir}" compression="gzip" />
-		<zip destfile="${source}/swarm-bin.zip" basedir="${bin-dir}" />
+	<!--	<tar destfile="${source}/swarm-bin.tar.gz" basedir="${bin-dir}" compression="gzip" /> -->
+		<zip compress="true" keepcompression="true" destfile="${source}/swarm-bin.zip" basedir="${bin-dir}" />
 	</target>
 
 </project>
