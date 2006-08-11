@@ -62,6 +62,9 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/08/10 14:32:11  cervelli
+ * Fix for nonupdating IRIS source.
+ *
  * Revision 1.2  2006/08/04 18:40:14  cervelli
  * Pinned saved to layout.
  *
@@ -201,6 +204,7 @@ public class HelicorderViewerFrame extends SwarmFrame
 	protected long lastRefreshTime;
 	
 	private Border border;
+	private Border thinBorder;
 	
 	protected Throbber throbber;
 	
@@ -291,13 +295,11 @@ public class HelicorderViewerFrame extends SwarmFrame
 		helicorderViewPanel = new HelicorderViewPanel(this);
 		settings.view = helicorderViewPanel;
 		heliPanel = new JPanel(new BorderLayout());
-//		heliPanel.setBackground(new Color(255, 0, 255, 128));
-//		heliPanel.setBackground(null);
-//		heliPanel.setOpaque(false);
-//		mainPanel.setBackground(null);
+		thinBorder = LineBorder.createGrayLineBorder(); 
 		border = BorderFactory.createCompoundBorder(
 				BorderFactory.createEmptyBorder(0, 2, 0, 3), 
-				LineBorder.createGrayLineBorder());
+				thinBorder);
+		
 		heliPanel.setBorder(border);
 		heliPanel.add(helicorderViewPanel, BorderLayout.CENTER);
 		mainPanel.add(heliPanel, BorderLayout.CENTER);
@@ -315,24 +317,6 @@ public class HelicorderViewerFrame extends SwarmFrame
 					public void actionPerformed(ActionEvent e)
 					{
 						setPinned(pinButton.isSelected());
-						/*
-						if (hidden)
-						{
-							mainPanel.add(toolBar, BorderLayout.NORTH);
-						}
-						else
-						{
-							mainPanel.remove(toolBar);
-						}
-						hidden = !hidden;
-						mainPanel.invalidate();
-						repaintHelicorder();
-						mainPanel.repaint();
-						*/
-//						HelicorderViewerSettingsDialog hvsd = HelicorderViewerSettingsDialog.getInstance(settings, waveViewSettings);
-//						hvsd.setVisible(true);
-//						noData = false;
-//						getHelicorder();
 					}
 				});
 		toolBar.add(pinButton);
@@ -547,9 +531,9 @@ public class HelicorderViewerFrame extends SwarmFrame
 		autoScaleSlider = new JSlider(1, 39, (int) (10 - settings.barMult) * 4);
 		autoScaleSlider.setToolTipText("Adjust helicorder scale");
 		autoScaleSlider.setFocusable(false);
-		autoScaleSlider.setPreferredSize(new Dimension(100, 20));
-		autoScaleSlider.setMaximumSize(new Dimension(100, 20));
-		autoScaleSlider.setMinimumSize(new Dimension(100, 20));
+		autoScaleSlider.setPreferredSize(new Dimension(80, 20));
+		autoScaleSlider.setMaximumSize(new Dimension(80, 20));
+		autoScaleSlider.setMinimumSize(new Dimension(80, 20));
 		autoScaleSlider.addChangeListener(new ChangeListener()
 				{
 					public void stateChanged(ChangeEvent e)
@@ -617,16 +601,25 @@ public class HelicorderViewerFrame extends SwarmFrame
 				{
 					public void componentResized(ComponentEvent e)
 					{
-						/*
-						if (getWidth() < 500)
+//						if (getWidth() < 500 && toolBar.getParent() != null)
+						if (getWidth() < 530)
 						{
 							// remove toolbar
-							mainPanel.remove(toolBar);
-							mainPanel.remove(statusLabel);
-							heliPanel.setBorder(null);
-							mainPanel.validate();
+//							mainPanel.remove(toolBar);
+//							mainPanel.remove(statusLabel);
+//							heliPanel.setBorder(thinBorder);
+							helicorderViewPanel.setMinimal(true);
+//							mainPanel.validate();
 						}
-						*/
+//						else if (getWidth() >= 500 && toolBar.getParent() == null)
+						else
+						{
+//							mainPanel.add(toolBar, BorderLayout.NORTH);
+//							mainPanel.add(statusLabel, BorderLayout.SOUTH);
+//							heliPanel.setBorder(border);
+							helicorderViewPanel.setMinimal(false);
+//							mainPanel.validate();
+						}
 						helicorderViewPanel.setResized(true);
 						repaintHelicorder();
 						repaint();
