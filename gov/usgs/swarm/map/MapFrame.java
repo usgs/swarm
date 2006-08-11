@@ -8,6 +8,7 @@ import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.Throbber;
 import gov.usgs.swarm.heli.HelicorderViewPanelListener;
 import gov.usgs.swarm.map.MapPanel.DragMode;
+import gov.usgs.swarm.map.MapPanel.LabelSetting;
 import gov.usgs.swarm.wave.MultiMonitor;
 import gov.usgs.swarm.wave.WaveViewPanel;
 import gov.usgs.swarm.wave.WaveViewSettingsToolbar;
@@ -50,6 +51,9 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2006/08/09 05:09:46  cervelli
+ * Override setMaximum to eliminate quirk when saving maximized map.
+ *
  * Revision 1.11  2006/08/06 20:03:56  cervelli
  * Added drag button.
  *
@@ -85,6 +89,7 @@ public class MapFrame extends SwarmFrame implements Runnable
 	private JToolBar toolbar;
 	private JPanel mainPanel;
 	private JButton optionsButton;
+	private JButton labelButton;
 	private JLabel statusLabel;
 	private JToggleButton linkButton;
 	private JToggleButton realtimeButton;
@@ -118,7 +123,7 @@ public class MapFrame extends SwarmFrame implements Runnable
 	private HelicorderViewPanelListener linkListener;
 	
 	private boolean heliLinked = true;
-	
+
 	public MapFrame()
 	{
 		super("Map", true, true, true, true);
@@ -127,7 +132,7 @@ public class MapFrame extends SwarmFrame implements Runnable
 
 		createUI();
 		
-		updateThread = new Thread(this);
+		updateThread = new Thread(this, "Map Update");
 		updateThread.start();
 	}
 	
@@ -141,6 +146,8 @@ public class MapFrame extends SwarmFrame implements Runnable
 	{
 		processStandardLayout(cf);
 		mapPanel.processLayout(cf.getSubConfig("panel"));
+		LabelSetting ls = mapPanel.getLabelSetting();
+		labelButton.setIcon(ls.getIcon());
 	}
 	
 	private void createUI()
@@ -194,7 +201,7 @@ public class MapFrame extends SwarmFrame implements Runnable
 								mapPanel.timePush();
 							
 							setRealtime(false);
-							mapPanel.setTimes(st, et);
+							mapPanel.setTimes(st, et, true);
 						}
 					}
 				};
@@ -228,6 +235,21 @@ public class MapFrame extends SwarmFrame implements Runnable
 					}
 				});
 		toolbar.add(optionsButton);
+		
+		labelButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("label_some"),
+				"Change label settings",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						LabelSetting ls = mapPanel.getLabelSetting().next();
+						labelButton.setIcon(ls.getIcon());
+						mapPanel.setLabelSetting(ls);
+					}
+				});
+//		Util.mapKeyStrokeToButton(this, "L", "label", labelButton);
+		toolbar.add(labelButton);
 		
 		toolbar.addSeparator();
 		
@@ -618,7 +640,7 @@ public class MapFrame extends SwarmFrame implements Runnable
 				{
 					double end = CurrentTime.getInstance().nowJ2K();
 					double start = end - MultiMonitor.SPANS[spanIndex];
-					mapPanel.setTimes(start, end);
+					mapPanel.setTimes(start, end, false);
 				}
 				
 				Thread.sleep(refreshInterval);
