@@ -17,6 +17,7 @@ import gov.usgs.util.Util;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,6 +38,7 @@ import java.util.TreeMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.Icon;
@@ -45,6 +47,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
@@ -62,13 +65,14 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 /**
- * 
  * TODO: tooltip over data source describes data source
  * TODO: refresh data source
- * TODO: error box on failed open
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/08/11 20:59:56  dcervelli
+ * Change default map bounds.
+ *
  * Revision 1.6  2006/08/09 21:52:51  cervelli
  * Fixed single station map padding and added alert on bad data source open.
  *
@@ -118,6 +122,10 @@ import javax.swing.tree.TreePath;
  */
 public class DataChooser extends JPanel
 {
+	public static final int NO_CHANNEL_LIST = -2;
+	public static final int NO_DATA_SOURCE = -1;
+	public static final int OK = 0;
+	
 	private static final long serialVersionUID = 1L;
 	private static final String OPENING_MESSAGE = Messages.getString("DataChooser.treeOpening"); //$NON-NLS-1$
 	
@@ -213,21 +221,18 @@ public class DataChooser extends JPanel
 			cf.put(prefix + ".source", src);
 	}
 	
-	public void processLayout(ConfigFile cf)
+	public void processLayout(ConfigFile cf, ActionListener listener)
 	{
 		List<String> srcs = cf.getList("source");
 		for (String src : srcs)
 		{
-//			System.out.println(src);
 			if (!isSourceOpened(src))
 			{
-				List<String> chs = openSource(Swarm.config.getSource(src));
-				if (chs == null)
-				{
-					JOptionPane.showMessageDialog(Swarm.getApplication(), 
-							"The data source '" + src + "' could not be opened.", 
-							"Error", JOptionPane.ERROR_MESSAGE);
-				}
+				ServerNode node = getServerNode(src);
+				if (node == null)
+					listener.actionPerformed(new ActionEvent(this, NO_DATA_SOURCE, src));
+				else
+					dataSourceSelected(node, listener);
 			}
 		}
 	}
@@ -278,7 +283,6 @@ public class DataChooser extends JPanel
 							if (sds.isStoreInUserConfig())
 							{
 								String selected = servers.get(0).getSource().toConfigString();
-//								EditDataSourceDialog d = new EditDataSourceDialog(selected);
 								EditDataSourceDialog d = new EditDataSourceDialog(selected);
 								d.setVisible(true);
 								String eds = d.getResult();
@@ -368,9 +372,6 @@ public class DataChooser extends JPanel
 										List<Pair<ServerNode, String>> channels = getSelections();
 										if (channels != null)
 										{
-//											Pair<ServerNode, ChannelNode> ch1 = channels.get(0);
-//											if (ch1 != null)
-//												setNearest(ch1.item2.getChannel());
 											for (Pair<ServerNode, String> pair : channels)
 											{
 												Swarm.getApplication().openHelicorder(pair.item1.getSource(), pair.item2);
@@ -492,7 +493,6 @@ public class DataChooser extends JPanel
 									gr.padPercent(1.2, 1.2);
 								if (gr.isValid())
 								{
-//									System.out.println(gr);
 									Swarm.getApplication().setMapVisible(true);
 									Swarm.getApplication().getMapFrame().setView(gr);
 								}
@@ -520,6 +520,19 @@ public class DataChooser extends JPanel
 	public void setDividerLocation(int dl)
 	{
 		split.setDividerLocation(dl);
+	}
+	
+	private ServerNode getServerNode(String svr)
+	{
+		for (int i = 0; i < rootNode.getChildCount(); i++)
+		{
+			ServerNode node = (ServerNode)rootNode.getChildAt(i);
+			if (node.getSource().getName().equals(svr))
+			{
+				return node;
+			}
+		}
+		return null;
 	}
 	
 	private List<ServerNode> getSelectedServers()
@@ -553,8 +566,7 @@ public class DataChooser extends JPanel
 			if (e.isAddedPath())
 			{
 				TreePath[] paths = e.getPaths();
-//				if (paths.length = 2)
-					((JTree)e.getSource()).scrollPathToVisible(paths[0]);
+				((JTree)e.getSource()).scrollPathToVisible(paths[0]);
 			}
 		}
 	}
@@ -583,7 +595,7 @@ public class DataChooser extends JPanel
 			{
 				ServerNode node = (ServerNode)path.getLastPathComponent();
 				if (!isOpened(node))
-					dataSourceSelected(node);
+					dataSourceSelected(node, null);
 			}
 		}
 
@@ -596,7 +608,6 @@ public class DataChooser extends JPanel
 		return openedSources.contains(src);
 	}
 	
-	// TODO: use dataSourceSelected
 	private List<String> openSource(SeismicDataSource sds)
 	{
 		List<String> channels = null;
@@ -606,7 +617,6 @@ public class DataChooser extends JPanel
 			channels = sds.getChannels();
 			Swarm.getApplication().getMapFrame().reset(false);
 			sds.close();
-			openedSources.add(sds.getName());
 		} 
 		catch (Exception e)
 		{
@@ -615,36 +625,87 @@ public class DataChooser extends JPanel
 		return channels;
 	}
 	
-	private void dataSourceSelected(final ServerNode source)
+	private class DataSourceOpener extends SwingWorker
 	{
-		final SwingWorker worker = new SwingWorker()
+		private List<String> channels;
+		private ServerNode source;
+		private ActionListener finishListener;
+		
+		public DataSourceOpener(ServerNode src, ActionListener fl)
+		{
+			source = src;
+			finishListener = fl;
+		}
+		
+		private SeismicDataSourceListener listener = new SeismicDataSourceListener()
 				{
-					private List<String> channels;
-					
-					public Object construct()
+					public void channelsProgress(final double progress)
 					{
-						SeismicDataSource sds = source.getSource();
-						channels = openSource(sds);
-						return null;	
-					}			
-					
-					public void finished()
+						SwingUtilities.invokeLater(new Runnable()
+								{
+									public void run()
+									{
+										DefaultMutableTreeNode node = (DefaultMutableTreeNode)source.getFirstChild();
+										if (node instanceof MessageNode)
+										{
+											source.remove(0);
+											ProgressNode pn = new ProgressNode();
+											source.insert(pn, 0);
+											((DefaultTreeModel)dataTree.getModel()).reload(source);
+											dataTree.expandPath(new TreePath(source.getPath()));
+											dataTree.repaint();
+										}
+										else if (node instanceof ProgressNode)
+										{
+											ProgressNode pn = (ProgressNode)node;
+											pn.setProgress(progress);
+											dataTree.repaint();
+										}
+									}
+								});
+					}
+
+					public void channelsUpdated()
 					{
-						if (channels != null)
-						{
-							source.setBroken(false);
-							((DefaultTreeModel)dataTree.getModel()).reload(source);
-							populateServer(source, channels, false);
-						}
-						else
-						{
-							source.setBroken(true);
-							((DefaultTreeModel)dataTree.getModel()).reload(source);
-							dataTree.collapsePath(new TreePath(source.getPath()));
-						}
 					}
 				};
-		worker.start();
+				
+		public Object construct()
+		{
+			SeismicDataSource sds = source.getSource();
+			sds.addListener(listener);
+			channels = openSource(sds);
+			return null;	
+		}			
+		
+		public void finished()
+		{
+			int id = OK;
+			if (channels != null)
+			{
+				source.setBroken(false);
+				((DefaultTreeModel)dataTree.getModel()).reload(source);
+				populateServer(source, channels, false);
+				id = OK;
+				openedSources.add(source.getSource().getName());
+			}
+			else
+			{
+				source.setBroken(true);
+				((DefaultTreeModel)dataTree.getModel()).reload(source);
+				dataTree.collapsePath(new TreePath(source.getPath()));
+				id = NO_CHANNEL_LIST;
+			}
+			source.getSource().removeListener(listener);
+			if (finishListener != null)
+				finishListener.actionPerformed(new ActionEvent(DataChooser.this, id, source.getSource().getName()));
+		}
+	}
+
+	private void dataSourceSelected(final ServerNode source, ActionListener listener)
+	{
+		DataSourceOpener opener = new DataSourceOpener(source, listener);
+		opener.start();
 	}
 	
 	public void removeServer(final ServerNode node)
@@ -704,20 +765,8 @@ public class DataChooser extends JPanel
 				});
 	}
 	
-//	private DefaultMutableTreeNode getServerNode(String server)
-//	{
-//		for (int i = 0; i < rootNode.getChildCount(); i++)
-//		{
-//			DefaultMutableTreeNode node = (DefaultMutableTreeNode)rootNode.getChildAt(i);
-//			if (node.toString().substring(1).equals(server.substring(1)))
-//				return node;
-//		}
-//		return null;
-//	}
-	
 	private void createTree()
 	{
-//		rootNode = new DefaultMutableTreeNode("root"); //$NON-NLS-1$
 		rootNode = new RootNode(); //$NON-NLS-1$
 		dataTree = new JTree(rootNode);
 		dataTree.setRootVisible(false);
@@ -828,8 +877,6 @@ public class DataChooser extends JPanel
 								dataTree.addSelectionPath(tp);
 							}
 						}
-//						dataTree.addSelectionPath(new TreePath());
-//						System.out.println(e);
 					}
 				});
 		
@@ -954,7 +1001,6 @@ public class DataChooser extends JPanel
 				});	
 	}
 	
-//	private Set<String> getSelectedLeaves(TreePath[] paths)
 	private Set<String> getGroupChannels(GroupNode gn)
 	{
 		HashSet<String> channels = new HashSet<String>();
@@ -1129,6 +1175,16 @@ public class DataChooser extends JPanel
 		{
 			return message;
 		}
+		
+		public void setMessage(String s)
+		{
+			message = s;
+		}
+		
+		public String toString()
+		{
+			return message;
+		}
 	}
 	
 	private class GroupNode extends ChooserNode
@@ -1149,6 +1205,45 @@ public class DataChooser extends JPanel
 		public String getLabel()
 		{
 			return name;
+		}
+	}
+	
+	private class ProgressNode extends ChooserNode
+	{
+		private static final long serialVersionUID = 1L;
+		private double progress;
+		private JProgressBar progressBar;
+		
+		public ProgressNode()
+		{
+			progressBar = new JProgressBar(0, 100);
+			progressBar.setPreferredSize(new Dimension(80, 10));
+		}
+		
+		public Icon getIcon()
+		{
+			return Images.getIcon("warning");
+		}
+		
+		public void setProgress(double p)
+		{
+			progress = p;
+			progressBar.setValue((int)Math.round(p * 100));
+		}
+		
+		public double getProgress()
+		{
+			return progress;
+		}
+		
+		public JProgressBar getProgressBar()
+		{
+			return progressBar;
+		}
+
+		public String getLabel()
+		{
+			return "progress";
 		}
 	}
 	
@@ -1175,11 +1270,31 @@ public class DataChooser extends JPanel
 		public Component getTreeCellRendererComponent(JTree tree, Object value,
 				boolean sel, boolean exp, boolean leaf, int row, boolean focus)
 		{
-			ChooserNode node = (ChooserNode)value; 
-			Icon icon = node.getIcon();
-			super.getTreeCellRendererComponent(tree, node.getLabel(), sel, exp, leaf, row, focus);
-			setIcon(icon);
-			return this;
+			if (value instanceof ProgressNode)
+			{
+				ProgressNode node = (ProgressNode)value;
+				JPanel panel = new JPanel();
+				panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+				panel.setOpaque(false);
+				panel.setBorder(null);
+				panel.setBackground(Color.WHITE);
+				panel.add(new JLabel(node.getIcon()));
+				panel.add(node.getProgressBar());
+				return panel;
+			}
+			else if (value instanceof ChooserNode)
+			{
+				ChooserNode node = (ChooserNode)value; 
+				Icon icon = node.getIcon();
+				super.getTreeCellRendererComponent(tree, node.getLabel(), sel, exp, leaf, row, focus);
+				setIcon(icon);
+				return this;
+			}
+			else
+			{
+				super.getTreeCellRendererComponent(tree, value, sel, exp, leaf, row, focus);
+				return this;
+			}
 		}
 	}
 	
