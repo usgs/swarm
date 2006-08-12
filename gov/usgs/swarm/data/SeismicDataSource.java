@@ -14,6 +14,9 @@ import javax.swing.event.EventListenerList;
  * Base class for seismic data sources.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/08/07 22:36:05  cervelli
+ * Added listener functions.
+ *
  * Revision 1.7  2006/08/02 23:32:44  cervelli
  * Added useCache variable.
  *
@@ -92,6 +95,14 @@ abstract public class SeismicDataSource
 		for (int i = ls.length - 2; i >= 0; i -= 2)
 		    if (ls[i] == SeismicDataSourceListener.class)
 		        ((SeismicDataSourceListener)ls[i + 1]).channelsUpdated();
+	}
+	
+	public void fireChannelsProgress(double p)
+	{
+		Object[] ls = listeners.getListenerList();
+		for (int i = ls.length - 2; i >= 0; i -= 2)
+		    if (ls[i] == SeismicDataSourceListener.class)
+		        ((SeismicDataSourceListener)ls[i + 1]).channelsProgress(p);
 	}
 	
 	public void notifyDataNotNeeded(String station, double t1, double t2, GulperListener gl)
