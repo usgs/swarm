@@ -48,6 +48,9 @@ import javax.swing.event.EventListenerList;
  * TODO: move filter method
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/08/11 21:05:03  dcervelli
+ * More repaint madness and filter labels.
+ *
  * Revision 1.5  2006/08/09 21:50:54  cervelli
  * Changes so clipboard would work again.
  *
@@ -1121,6 +1124,8 @@ public class WaveViewPanel extends JComponent
 			return;
 		
 		double[] t = getTranslation();
+		if (t == null)
+			return;
 		double x = (cursorMark - t[1]) / t[0];
 		g2.setColor(DARK_RED);
 		g2.draw(new Line2D.Double(x, yOffset + 1, x, getSize().height - yOffset));
