@@ -6,11 +6,16 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
 
+import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
+import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/08/11 20:58:33  dcervelli
+ * New internal frame border.
+ *
  * Revision 1.2  2006/08/09 21:54:22  cervelli
  * Added maximized variable to layout information.
  *
@@ -22,6 +27,10 @@ import javax.swing.JInternalFrame;
 public class SwarmFrame extends JInternalFrame
 {
 	private static final long serialVersionUID = 1L;
+	
+	protected JComponent northPane;
+	protected Dimension oldNorthPaneSize;
+	protected boolean fullScreen = false;
 	
 	public SwarmFrame(String title, boolean resizable, boolean closable, boolean maximizable, boolean iconifiable)
 	{
@@ -54,5 +63,31 @@ public class SwarmFrame extends JInternalFrame
 		cf.put(prefix + ".h", Integer.toString(d.height));
 		
 		cf.put(prefix + ".maximized", Boolean.toString(isMaximum()));
+	}
+	
+	protected void setDefaultKioskMode(boolean b)
+	{
+		fullScreen = b;
+		this.setResizable(!fullScreen);
+		this.setIconifiable(!fullScreen);
+		this.setMaximizable(!fullScreen);
+		this.setClosable(!fullScreen);
+		this.putClientProperty("JInternalFrame.isPalette", new Boolean(fullScreen)); 
+		BasicInternalFrameUI ui = (BasicInternalFrameUI)this.getUI();
+		if (fullScreen)
+		{
+			northPane = ui.getNorthPane();
+			oldNorthPaneSize = northPane.getSize();
+			northPane.setVisible(false);
+			northPane.setPreferredSize(new Dimension(0,0));
+		}
+		else
+		{
+			if (northPane != null)
+			{
+				northPane.setVisible(true);
+				northPane.setPreferredSize(oldNorthPaneSize);	
+			}
+		}
 	}
 }

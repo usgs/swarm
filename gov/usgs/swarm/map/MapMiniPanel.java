@@ -11,6 +11,7 @@ import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.SCNL;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwingWorker;
+import gov.usgs.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.swarm.map.MapPanel.LabelSetting;
 import gov.usgs.swarm.wave.WaveViewPanel;
 import gov.usgs.util.ConfigFile;
@@ -51,6 +52,9 @@ import javax.swing.JRadioButtonMenuItem;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/08/11 21:03:24  dcervelli
+ * Changes for better CPU utilization, better filter label.
+ *
  * Revision 1.9  2006/08/07 22:38:21  cervelli
  * Labels apply linear calibration, channel switching redraw fixed.
  *
@@ -604,7 +608,9 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 		{
 			if (activeMetadata.source != null)
 			{
-				Swarm.getApplication().openHelicorder(activeMetadata.source, activeMetadata.getChannel());
+				HelicorderViewerFrame hvf = Swarm.getApplication().openHelicorder(activeMetadata.source, activeMetadata.getChannel());
+				if (Swarm.getApplication().isFullScreenMode())
+					hvf.setPinned(true);
 			}
 		}
 		else if (!waveVisible)

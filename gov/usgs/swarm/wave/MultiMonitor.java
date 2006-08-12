@@ -7,6 +7,7 @@ import gov.usgs.plot.RectangleRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.swarm.Images;
+import gov.usgs.swarm.Kioskable;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmFrame;
@@ -66,6 +67,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: up/down arrows
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/08/11 21:04:17  dcervelli
+ * Monitor beautification.
+ *
  * Revision 1.6  2006/08/09 21:48:45  cervelli
  * Changes for monitor settings dialog.
  *
@@ -137,7 +141,7 @@ import javax.swing.event.InternalFrameEvent;
  *
  * @author Dan Cervelli
  */
-public class MultiMonitor extends SwarmFrame
+public class MultiMonitor extends SwarmFrame implements Kioskable
 {
 	public static final long serialVersionUID = -1;
 	
@@ -176,6 +180,7 @@ public class MultiMonitor extends SwarmFrame
 	private int labelFontSize;
 	private Font font;
 	private FontRenderContext frc = new FontRenderContext(new AffineTransform(), false, false);
+	private Border border;
 	
 	public MultiMonitor(SeismicDataSource sds)
 	{
@@ -429,7 +434,7 @@ public class MultiMonitor extends SwarmFrame
 		wavePanel = new WavePanel();
 		wavePanel.setLayout(null);
 		
-		Border border = BorderFactory.createCompoundBorder(
+		border = BorderFactory.createCompoundBorder(
 				BorderFactory.createEmptyBorder(0, 2, 3, 3), 
 				LineBorder.createGrayLineBorder());
 		wavePanel.setBorder(border);
@@ -826,6 +831,21 @@ public class MultiMonitor extends SwarmFrame
 	
 		Thread worker = new Thread(r);
 		worker.start();
+	}
+	
+	public void setKioskMode(boolean b)
+	{
+		setDefaultKioskMode(b);
+		if (fullScreen)
+		{
+			mainPanel.remove(toolbar);
+			wavePanel.setBorder(null);
+		}
+		else
+		{
+			mainPanel.add(toolbar, BorderLayout.NORTH);
+			wavePanel.setBorder(border);
+		}
 	}
 	
 	private class SlideTask extends TimerTask

@@ -2,6 +2,7 @@ package gov.usgs.swarm.map;
 
 import gov.usgs.proj.GeoRange;
 import gov.usgs.swarm.Images;
+import gov.usgs.swarm.Kioskable;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmFrame;
 import gov.usgs.swarm.SwarmUtil;
@@ -51,6 +52,9 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2006/08/11 21:02:17  dcervelli
+ * Label buttons, changes for better CPU utilization.
+ *
  * Revision 1.12  2006/08/09 05:09:46  cervelli
  * Override setMaximum to eliminate quirk when saving maximized map.
  *
@@ -83,7 +87,7 @@ import javax.swing.event.InternalFrameEvent;
  *
  * @author Dan Cervelli
  */
-public class MapFrame extends SwarmFrame implements Runnable
+public class MapFrame extends SwarmFrame implements Runnable, Kioskable
 {
 	private static final long serialVersionUID = 1L;
 	private JToolBar toolbar;
@@ -123,6 +127,8 @@ public class MapFrame extends SwarmFrame implements Runnable
 	private HelicorderViewPanelListener linkListener;
 	
 	private boolean heliLinked = true;
+
+	private Border border;
 
 	public MapFrame()
 	{
@@ -164,7 +170,7 @@ public class MapFrame extends SwarmFrame implements Runnable
 		mainPanel.add(toolbar, BorderLayout.NORTH);
 		
 		mapPanel = new MapPanel(this);
-		Border border = BorderFactory.createCompoundBorder(
+		border = BorderFactory.createCompoundBorder(
 				BorderFactory.createEmptyBorder(0, 2, 0, 3), 
 				LineBorder.createGrayLineBorder());
 		mapPanel.setBorder(border);
@@ -255,7 +261,7 @@ public class MapFrame extends SwarmFrame implements Runnable
 		
 		realtimeButton = SwarmUtil.createToolBarToggleButton(
 				Images.getIcon("clock"),
-				"Realtime mode",
+				"Realtime mode (N)",
 				new ActionListener()
 				{
 						public void actionPerformed(ActionEvent e)
@@ -263,6 +269,7 @@ public class MapFrame extends SwarmFrame implements Runnable
 							setRealtime(realtimeButton.isSelected());
 						}
 				});
+		Util.mapKeyStrokeToButton(this, "N", "realtime", realtimeButton);
 		realtimeButton.setSelected(realtime);
 		toolbar.add(realtimeButton);
 		
@@ -628,6 +635,22 @@ public class MapFrame extends SwarmFrame implements Runnable
 	public HelicorderViewPanelListener getLinkListener()
 	{
 		return linkListener;
+	}
+	
+	public void setKioskMode(boolean b)
+	{
+		setDefaultKioskMode(b);
+		if (fullScreen)
+		{
+			mainPanel.remove(toolbar);
+			mapPanel.setBorder(null);
+		}
+		else
+		{
+			mainPanel.add(toolbar, BorderLayout.NORTH);
+			mapPanel.setBorder(border);
+		}
+//		mapPanel.requestFocusInWindow();
 	}
 	
 	public void run()

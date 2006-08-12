@@ -2,6 +2,7 @@ package gov.usgs.swarm.heli;
 
 import gov.usgs.plot.Plot;
 import gov.usgs.swarm.Images;
+import gov.usgs.swarm.Kioskable;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmFrame;
 import gov.usgs.swarm.SwarmUtil;
@@ -36,7 +37,6 @@ import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
@@ -56,12 +56,14 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import javax.swing.plaf.basic.BasicInternalFrameUI;
  
 /**
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/08/11 21:01:07  dcervelli
+ * Changes for small helicorder view.
+ *
  * Revision 1.3  2006/08/10 14:32:11  cervelli
  * Fix for nonupdating IRIS source.
  *
@@ -148,7 +150,7 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
  *
  * @author Dan Cervelli
  */
-public class HelicorderViewerFrame extends SwarmFrame
+public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 {
 	public static final long serialVersionUID = -1;
 		
@@ -192,11 +194,6 @@ public class HelicorderViewerFrame extends SwarmFrame
 	private boolean gulperWorking;
 	private boolean working;
 	private JLabel statusLabel;
-	
-	private boolean fullScreen;
-	
-	private JComponent northPane;
-	private Dimension oldNorthPaneSize;
 	
 	private JPanel heliPanel;
 	private WigglerPanel wigglerPanel;
@@ -773,30 +770,17 @@ public class HelicorderViewerFrame extends SwarmFrame
 				});
 	}
 
-	public void setFullScreen(boolean full)
+	public void setKioskMode(boolean b)
 	{
-		fullScreen = full;
-		
-		this.setResizable(!fullScreen);
-		this.setIconifiable(!fullScreen);
-		this.setMaximizable(!fullScreen);
-		this.setClosable(!fullScreen);
-		this.putClientProperty("JInternalFrame.isPalette", new Boolean(fullScreen)); 
+		super.setDefaultKioskMode(b);
 		helicorderViewPanel.setFullScreen(fullScreen);
-		BasicInternalFrameUI ui = (BasicInternalFrameUI)this.getUI();
 		if (fullScreen)
 		{
-			northPane = ui.getNorthPane();
-			oldNorthPaneSize = northPane.getSize();
-			northPane.setVisible(false);
-			northPane.setPreferredSize(new Dimension(0,0));
 			mainPanel.remove(toolBar);
 			heliPanel.setBorder(null);
 		}
 		else
 		{
-			northPane.setVisible(true);
-			northPane.setPreferredSize(oldNorthPaneSize);
 			mainPanel.add(toolBar, BorderLayout.NORTH);
 			heliPanel.setBorder(border);
 		}	

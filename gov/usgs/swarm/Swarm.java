@@ -37,8 +37,6 @@ import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultDesktopManager;
-import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -60,6 +58,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: chooser visibility
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.33  2006/08/11 20:58:23  dcervelli
+ * New internal frame border.
+ *
  * Revision 1.32  2006/08/09 21:56:41  cervelli
  * Added ctrl-L to global key listener, moved save layout here, and fixes for maximization state for config file.
  *
@@ -450,6 +451,7 @@ public class Swarm extends JFrame
 		desktop.setBorder(BorderFactory.createLineBorder(DataChooser.LINE_COLOR));
 		desktop.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
 		// disable dragging in fullscreen mode
+		/*
 		desktop.setDesktopManager(new DefaultDesktopManager()
 				{
 					private static final long serialVersionUID = -1;
@@ -469,7 +471,7 @@ public class Swarm extends JFrame
 							super.dragFrame(f, x, y);
 					}
 				});
-		
+		*/
 		this.setSize(config.windowWidth, config.windowHeight);
 		this.setLocation(config.windowX, config.windowY);
 		if (config.windowMaximized)
@@ -496,6 +498,7 @@ public class Swarm extends JFrame
 		
 		mapFrame = new MapFrame();
 		desktop.add(mapFrame);
+		frames.add(mapFrame);
 		mapFrame.setVisible(config.mapVisible);
 		if (Swarm.config.mapMaximized)
 		{
@@ -632,13 +635,13 @@ public class Swarm extends JFrame
 		this.setVisible(true);
 		for (JInternalFrame frame : frames)
 		{
-			if (frame instanceof HelicorderViewerFrame)
+			if (frame.isVisible() && frame instanceof Kioskable)
 			{
-				HelicorderViewerFrame f = (HelicorderViewerFrame)frame; 
-				f.setFullScreen(full);
+				Kioskable f = (Kioskable)frame; 
+				f.setKioskMode(full);
 			}
 		}
-		tileHelicorders();
+		tileKioskFrames();
 	}
 	
 	public void closeApp()
@@ -906,6 +909,57 @@ public class Swarm extends JFrame
 						catch (Exception e) {}
 					}
 				});
+	}
+	
+	public void tileKioskFrames()
+	{
+		Dimension ds = desktop.getSize();
+
+		ArrayList<JInternalFrame> ks = new ArrayList<JInternalFrame>();
+		for (JInternalFrame frame : frames)
+		{
+			if (frame.isVisible() && frame instanceof Kioskable)
+				ks.add(frame);
+		}
+		
+		if (ks.size() == 0)
+			return;
+		
+		if (ks.size() == 4)
+		{
+		    int w = ds.width / 2;
+		    int h = ds.height / 2;
+		    JInternalFrame hvf0 = ks.get(0);
+		    JInternalFrame hvf1 = ks.get(1);
+		    JInternalFrame hvf2 = ks.get(2);
+		    JInternalFrame hvf3 = ks.get(3);
+		    hvf0.setSize(w, h);
+		    hvf0.setLocation(0, 0);
+		    hvf1.setSize(w, h);
+		    hvf1.setLocation(w, 0);
+		    hvf2.setSize(w, h);
+		    hvf2.setLocation(0, h);
+		    hvf3.setSize(w, h);
+		    hvf3.setLocation(w, h);
+		}
+		else
+		{
+		    int w = ds.width / ks.size();
+			int cx = 0;
+			for (int i = 0; i < ks.size(); i++)
+			{
+				JInternalFrame hvf = ks.get(i);
+				try 
+				{ 
+					hvf.setIcon(false);
+					hvf.setMaximum(false);
+				}
+				catch (Exception e) {}
+				hvf.setSize(w, ds.height);
+				hvf.setLocation(cx, 0);
+				cx += w;
+			}
+		}
 	}
 	
 	public void tileHelicorders()
