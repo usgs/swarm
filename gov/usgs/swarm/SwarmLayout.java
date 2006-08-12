@@ -17,6 +17,9 @@ import javax.swing.JOptionPane;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/08/12 00:34:44  dcervelli
+ * Waits for data sources in background.
+ *
  * Revision 1.4  2006/08/09 21:54:58  cervelli
  * Checks data sources and sets map visibility correctly.
  *
@@ -147,14 +150,17 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 	{
 		ConfigFile cf = config.getSubConfig("chooser");
 		ChooserListener cl = new ChooserListener();
-		for (String src : cf.getList("source"))
-			cl.addSource(src);
-		Swarm.getApplication().getDataChooser().processLayout(cf, cl);
-		while (!cl.finished())
+		List<String> sources = cf.getList("source");
+		if (sources != null)
 		{
-			try { Thread.sleep(100); } catch (Exception e) { e.printStackTrace(); }
+			for (String src : sources)
+				cl.addSource(src);
+			Swarm.getApplication().getDataChooser().processLayout(cf, cl);
+			while (!cl.finished())
+			{
+				try { Thread.sleep(100); } catch (Exception e) { e.printStackTrace(); }
+			}
 		}
-		System.out.println("processChooser done");
 	}
 	
 	private void processWaves()
