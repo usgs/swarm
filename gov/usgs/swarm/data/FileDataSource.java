@@ -10,6 +10,7 @@ import edu.iris.Fissures.seed.director.SeedImportDirector;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmDialog;
+import gov.usgs.swarm.SwingWorker;
 import gov.usgs.util.CodeTimer;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;
@@ -45,6 +46,9 @@ import javax.swing.JScrollPane;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/08/11 21:00:27  dcervelli
+ * New file type selector dialog box.
+ *
  * Revision 1.1  2006/08/07 22:35:27  cervelli
  * Initial commit.
  * 
@@ -67,6 +71,9 @@ public class FileDataSource extends CachedDataSource
 	
 	public void flush()
 	{
+		List<String> channels = getChannels();
+		for (String ch : channels)
+			Swarm.config.removeMetadata(ch);
 		super.flush();
 		openFiles.clear();
 		channelTimes.clear();
@@ -211,130 +218,193 @@ public class FileDataSource extends CachedDataSource
 				
 				Swarm.logger.warning("user input file type: " + fs[i].getPath() + " -> " + ft);
 			}
-
+			
+			switch (ft)
+			{
+				case SAC:
+					openSACFile(fs[i].getPath());
+					break;
+				case SEED:
+					openSeedFile(fs[i].getPath());
+					break;
+				case UNKNOWN:
+					Swarm.logger.warning("unknown file type: " + fs[i].getPath());
+					break;
+			}
 			try
 			{
-				switch (ft)
-				{
-					case SAC:
-						openSACFile(fs[i].getPath());
-						break;
-					case SEED:
-						openSeedFile(fs[i].getPath());
-						break;
-					case UNKNOWN:
-						Swarm.logger.warning("unknown file type: " + fs[i].getPath());
-						break;
-				}
+				
 			}
 			catch (Throwable t)
 			{
-				JOptionPane.showMessageDialog(
-						Swarm.getApplication(),
-						"Could not open file: " + fs[i].getName(), "Error", JOptionPane.ERROR_MESSAGE);
+				
 				t.printStackTrace();
 			}
 		}
 	}
 	
-	public void openSACFile(String fn) throws Throwable
+	public void openSACFile(final String fn)
 	{
 		if (openFiles.contains(fn))
 			return;
 		
-		Swarm.logger.fine("opening SAC file: " + fn);
-		SAC sac = new SAC();
-		sac.read(fn);
-		String channel = sac.getStationInfo();
-		Metadata md = Swarm.config.getMetadata(channel, true);
-		md.addGroup("SAC^" + fn);
-		
-		Wave wave = sac.toWave();
-		updateChannelTimes(channel, wave.getStartTime(), wave.getEndTime());
-		cacheWaveAsHelicorder(channel, wave);
-		putWave(channel, wave);
-		fireChannelsUpdated();
-		openFiles.add(fn);
+		SwingWorker worker = new SwingWorker()
+				{
+					public Object construct()
+					{
+						Object result = null;
+						fireChannelsProgress(fn, 0);
+						try
+						{
+							Swarm.logger.fine("opening SAC file: " + fn);
+							SAC sac = new SAC();
+							sac.read(fn);
+							fireChannelsProgress(fn, 0.5);
+							String channel = sac.getStationInfo();
+							Metadata md = Swarm.config.getMetadata(channel, true);
+							md.addGroup("SAC^" + fn);
+							
+							Wave wave = sac.toWave();
+							updateChannelTimes(channel, wave.getStartTime(), wave.getEndTime());
+							cacheWaveAsHelicorder(channel, wave);
+							putWave(channel, wave);
+							
+							openFiles.add(fn);
+						}
+						catch (Throwable t)
+						{
+							t.printStackTrace();
+							result = t;
+						}
+						fireChannelsProgress(fn, 1);
+						fireChannelsUpdated();
+						return result;
+					}
+					
+					public void finished()
+					{
+						if (getValue() != null)
+						{
+							JOptionPane.showMessageDialog(
+									Swarm.getApplication(),
+									"Could not open SAC file: " + fn, "Error", JOptionPane.ERROR_MESSAGE);
+						}
+					}
+				};
+		worker.start();
 	}
 	
 	// TODO: can optimize memory usage further by added combined parts as you go.
-	public void openSeedFile(String fn) throws Throwable
+	public void openSeedFile(final String fn)
 	{
 		if (openFiles.contains(fn))
 			return;
 		
-		Swarm.logger.fine("opening SEED file: " + fn);
-		Map<String, List<Wave>> tempStationMap = new HashMap<String, List<Wave>>();
-		
-		DataInputStream ls = new DataInputStream(new BufferedInputStream(
-                new FileInputStream(fn)));
-		
-		ImportDirector importDirector = new SeedImportDirector();
-		SeedObjectBuilder objectBuilder = new SeedObjectBuilder();
-		importDirector.assignBuilder(objectBuilder);  // register the builder with the director
-		// begin reading the stream with the construct command
-		importDirector.construct(ls);  // construct SEED objects silently
-		SeedObjectContainer container = (SeedObjectContainer)importDirector.getBuilder().getContainer();
-		
-		Object object;
-		container.iterate();
-		CodeTimer ct = new CodeTimer("seed");
-		while ((object = container.getNext()) != null)
+		SwingWorker worker = new SwingWorker()
 		{
-			Blockette b = (Blockette)object;
-			if (b.getType() != 999)
-				continue;
-			String code = b.getFieldVal(4) + "_" + b.getFieldVal(6) + "_" + b.getFieldVal(7);
-			Metadata md = Swarm.config.getMetadata(code, true);
-			md.addGroup("SEED^" + fn);
-			
-			List<Wave> parts = tempStationMap.get(code);
-            if (parts == null)
-            {
-            	parts = new ArrayList<Wave>();
-            	tempStationMap.put(code, parts);
-            }
-            
-            if (b.getWaveform() != null)
-            {
-                Waveform wf = b.getWaveform();
-            	Wave sw = new Wave();
-                sw.setSamplingRate(getSampleRate(((Integer)b.getFieldVal(10)).intValue(), ((Integer)b.getFieldVal(11)).intValue()));
-                Btime bTime = (Btime)b.getFieldVal(8);
-                sw.setStartTime(Util.dateToJ2K(btimeToDate(bTime)));
-                sw.buffer = wf.getDecodedIntegers();
-                sw.register();
-//	                System.out.println(sw);
-                parts.add(sw);
-            }
-		}
-		ct.mark("read");
-		for (String code : tempStationMap.keySet())
-		{
-			List<Wave> parts = tempStationMap.get(code);
-			ArrayList<Wave> subParts = new ArrayList<Wave>();
-			int ns = 0;
-			int sp = 0;
-			for (int i = 0; i < parts.size(); i++)
+			public Object construct()
 			{
-				ns += parts.get(i).samples();
-				subParts.add(parts.get(i));
-				if (ns > 3600 * 100 || i == parts.size() - 1)
+				Object result = null;
+				try
 				{
-					sp++;
-					Wave wave = Wave.join(subParts);
-					updateChannelTimes(code, wave.getStartTime(), wave.getEndTime());
-	                cacheWaveAsHelicorder(code, wave);
-					putWave(code, wave);
-					ns = 0;
-					subParts.clear();
+					fireChannelsProgress(fn, 0);
+					CodeTimer ct = new CodeTimer("seed");
+					Swarm.logger.fine("opening SEED file: " + fn);
+					Map<String, List<Wave>> tempStationMap = new HashMap<String, List<Wave>>();
+					
+					DataInputStream ls = new DataInputStream(new BufferedInputStream(
+			                new FileInputStream(fn)));
+					ct.mark("dis");
+					ImportDirector importDirector = new SeedImportDirector();
+					SeedObjectBuilder objectBuilder = new SeedObjectBuilder();
+					importDirector.assignBuilder(objectBuilder);  // register the builder with the director
+					// begin reading the stream with the construct command
+					importDirector.construct(ls);  // construct SEED objects silently
+					SeedObjectContainer container = (SeedObjectContainer)importDirector.getBuilder().getContainer();
+					ct.mark("prep");
+					Object object;
+					int total = container.iterate();
+					ct.mark("iterate: " + total);
+					int cnt = 0;
+					while ((object = container.getNext()) != null)
+					{
+						fireChannelsProgress(fn, 0.5 + 0.5 * ((double)cnt / (double)total));
+						cnt++;
+						Blockette b = (Blockette)object;
+						if (b.getType() != 999)
+							continue;
+						String code = b.getFieldVal(4) + "_" + b.getFieldVal(6) + "_" + b.getFieldVal(7);
+						Metadata md = Swarm.config.getMetadata(code, true);
+						md.addGroup("SEED^" + fn);
+						
+						List<Wave> parts = tempStationMap.get(code);
+			            if (parts == null)
+			            {
+			            	parts = new ArrayList<Wave>();
+			            	tempStationMap.put(code, parts);
+			            }
+			            
+			            if (b.getWaveform() != null)
+			            {
+			                Waveform wf = b.getWaveform();
+			            	Wave sw = new Wave();
+			                sw.setSamplingRate(getSampleRate(((Integer)b.getFieldVal(10)).intValue(), ((Integer)b.getFieldVal(11)).intValue()));
+			                Btime bTime = (Btime)b.getFieldVal(8);
+			                sw.setStartTime(Util.dateToJ2K(btimeToDate(bTime)));
+			                sw.buffer = wf.getDecodedIntegers();
+			                sw.register();
+	//			                System.out.println(sw);
+			                parts.add(sw);
+			            }
+					}
+					ct.mark("read: " + cnt);
+					for (String code : tempStationMap.keySet())
+					{
+						List<Wave> parts = tempStationMap.get(code);
+						ArrayList<Wave> subParts = new ArrayList<Wave>();
+						int ns = 0;
+						int sp = 0;
+						for (int i = 0; i < parts.size(); i++)
+						{
+							ns += parts.get(i).samples();
+							subParts.add(parts.get(i));
+							if (ns > 3600 * 100 || i == parts.size() - 1)
+							{
+								sp++;
+								Wave wave = Wave.join(subParts);
+								updateChannelTimes(code, wave.getStartTime(), wave.getEndTime());
+				                cacheWaveAsHelicorder(code, wave);
+								putWave(code, wave);
+								ns = 0;
+								subParts.clear();
+							}
+						}	
+					}
+					ct.mark("insert");
+					ct.stop();
+					openFiles.add(fn);
 				}
-			}	
-		}
-		ct.mark("insert");
-		ct.stop();
-		fireChannelsUpdated();
-		openFiles.add(fn);
+				catch (Throwable t)
+				{
+					t.printStackTrace();
+					result = t;
+				}
+				fireChannelsProgress(fn, 1);
+				fireChannelsUpdated();
+				return result;
+			}
+			
+			public void finished()
+			{
+				if (getValue() != null)
+				{
+					JOptionPane.showMessageDialog(
+							Swarm.getApplication(),
+							"Could not open SEED file: " + fn, "Error", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		};
+		worker.start();
 	}
 	
 	private Date btimeToDate(Btime bt)

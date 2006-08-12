@@ -33,6 +33,9 @@ import org.apache.log4j.varia.NullAppender;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/08/12 00:35:54  dcervelli
+ * Progress indications from getChannels().
+ *
  * Revision 1.7  2006/08/10 14:31:05  cervelli
  * Fixed synch bugs.
  *
@@ -132,7 +135,7 @@ public class DHIDataSource extends SeismicDataSource
 	
 	public List<String> getChannels()
 	{
-		fireChannelsProgress(0);
+		fireChannelsProgress("channels", 0);
 		idMap = new HashMap<String, ChannelId>();
 		ArrayList<String> result = new ArrayList<String>();
 		try
@@ -145,7 +148,7 @@ public class DHIDataSource extends SeismicDataSource
 	        for (Station s : stations)
 	        {
 	        	double p = (double)cnt / (double)ns;
-	        	fireChannelsProgress(p);
+	        	fireChannelsProgress("channels", p);
 	        	cnt++;
 	        	if (s.effective_time.end_time.date_time.startsWith("25"))
 	        	{
@@ -181,7 +184,7 @@ public class DHIDataSource extends SeismicDataSource
 			result = null;
 		}
 		
-		fireChannelsProgress(1);
+		fireChannelsProgress("channels", 1);
 		return result;
 	}
 
