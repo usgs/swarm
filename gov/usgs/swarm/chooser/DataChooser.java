@@ -70,6 +70,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/08/12 00:35:14  dcervelli
+ * Progress bars and modifications for background layouts.
+ *
  * Revision 1.7  2006/08/11 20:59:56  dcervelli
  * Change default map bounds.
  *
@@ -164,6 +167,8 @@ public class DataChooser extends JPanel
 	private ServerNode filesNode;
 	private boolean filesNodeInTree = false;
 	
+	private DefaultTreeModel model;
+	
 	public DataChooser()
 	{
 		super(new BorderLayout());
@@ -189,21 +194,31 @@ public class DataChooser extends JPanel
 	
 	private class FileSourceListener implements SeismicDataSourceListener
 	{
-		public void channelsUpdated()
+		Map<String, ProgressNode> progressNodes;
+		
+		public FileSourceListener()
+		{
+			progressNodes = new HashMap<String, ProgressNode>();
+		}
+		
+		public synchronized void channelsUpdated()
 		{
 			List<String> ch = filesNode.getSource().getChannels();
 			if (ch == null && filesNodeInTree)
 			{
+				filesNode.removeAllChildren();
 				removeServer(filesNode);
 				filesNodeInTree = false;
 			}
 			else if (ch != null)
 			{
 				if (!filesNodeInTree)
-					rootNode.insert(filesNode, 0);
+				{
+					model.insertNodeInto(filesNode, rootNode, 0);
+				}
 				
-				((DefaultTreeModel)dataTree.getModel()).reload();
-				populateServer(filesNode, ch, true);
+//				model.reload(filesNode);
+				populateServer(filesNode, ch, true, true);
 				
 //				dataTree.expandPath(new TreePath(filesNode.getFirstChild()));
 				
@@ -211,8 +226,36 @@ public class DataChooser extends JPanel
 			}
 		}
 		
-		public void channelsProgress(double p)
-		{}
+		public synchronized void channelsProgress(String id, double p)
+		{
+			ProgressNode pn = progressNodes.get(id);
+			boolean ins = false;
+			if (pn == null)
+			{
+				System.out.println("new: " + id);
+				pn = new ProgressNode();
+				progressNodes.put(id, pn);
+				ins = true;
+			}
+			if (!filesNodeInTree)
+			{
+				model.insertNodeInto(filesNode, rootNode, 0);
+				filesNodeInTree = true;
+				ins = true;
+			}
+			pn.setProgress(p);
+			if (ins)
+			{
+				model.insertNodeInto(pn, filesNode, 0);
+				dataTree.expandPath(new TreePath(filesNode.getPath()));
+			}
+			if (p == 1)
+			{
+				progressNodes.remove(id);
+				filesNode.remove(pn);
+			}
+			dataTree.repaint();
+		}
 	}
 	
 	public void saveLayout(ConfigFile cf, String prefix)
@@ -573,7 +616,7 @@ public class DataChooser extends JPanel
 	
 	private void collapseTree(JTree tree)
 	{
-		((DefaultTreeModel)dataTree.getModel()).reload();
+		model.reload();
 	}
 	
 	private boolean isOpened(ChooserNode node)
@@ -639,7 +682,7 @@ public class DataChooser extends JPanel
 		
 		private SeismicDataSourceListener listener = new SeismicDataSourceListener()
 				{
-					public void channelsProgress(final double progress)
+					public void channelsProgress(String id, final double progress)
 					{
 						SwingUtilities.invokeLater(new Runnable()
 								{
@@ -648,10 +691,10 @@ public class DataChooser extends JPanel
 										DefaultMutableTreeNode node = (DefaultMutableTreeNode)source.getFirstChild();
 										if (node instanceof MessageNode)
 										{
-											source.remove(0);
+											model.removeNodeFromParent(node);
 											ProgressNode pn = new ProgressNode();
 											source.insert(pn, 0);
-											((DefaultTreeModel)dataTree.getModel()).reload(source);
+											model.insertNodeInto(pn, source, 0);
 											dataTree.expandPath(new TreePath(source.getPath()));
 											dataTree.repaint();
 										}
@@ -684,15 +727,15 @@ public class DataChooser extends JPanel
 			if (channels != null)
 			{
 				source.setBroken(false);
-				((DefaultTreeModel)dataTree.getModel()).reload(source);
-				populateServer(source, channels, false);
+				model.reload(source);
+				populateServer(source, channels, false, false);
 				id = OK;
 				openedSources.add(source.getSource().getName());
 			}
 			else
 			{
 				source.setBroken(true);
-				((DefaultTreeModel)dataTree.getModel()).reload(source);
+				model.reload(source);
 				dataTree.collapsePath(new TreePath(source.getPath()));
 				id = NO_CHANNEL_LIST;
 			}
@@ -715,7 +758,7 @@ public class DataChooser extends JPanel
 					public void run()
 					{
 						Swarm.config.removeSource(node.getSource().getName());
-						((DefaultTreeModel)dataTree.getModel()).removeNodeFromParent(node);
+						model.removeNodeFromParent(node);
 					}
 				});
 	}
@@ -739,8 +782,8 @@ public class DataChooser extends JPanel
 						
 						ServerNode node = new ServerNode(source);
 						node.add(new MessageNode(OPENING_MESSAGE));
-						((DefaultTreeModel)dataTree.getModel()).insertNodeInto(node, rootNode, i);
-						((DefaultTreeModel)dataTree.getModel()).reload();
+						model.insertNodeInto(node, rootNode, i);
+						model.reload();
 					}
 				});
 	}
@@ -760,7 +803,7 @@ public class DataChooser extends JPanel
 							node.add(new MessageNode(OPENING_MESSAGE));
 							rootNode.add(node);
 						}
-						((DefaultTreeModel)dataTree.getModel()).reload();
+						model.reload();
 					}
 				});
 	}
@@ -772,8 +815,8 @@ public class DataChooser extends JPanel
 		dataTree.setRootVisible(false);
 		dataTree.setBorder(BorderFactory.createEmptyBorder(1, 2, 0, 0));
 		
-		DefaultTreeModel treeModel = new DefaultTreeModel(rootNode);
-		dataTree.setModel(treeModel);
+		model = new DefaultTreeModel(rootNode);
+		dataTree.setModel(model);
 		
 		treeScrollPane = new JScrollPane(dataTree);
 		
@@ -886,7 +929,7 @@ public class DataChooser extends JPanel
 	 * @param node
 	 * @param channels
 	 */
-	private void populateServer(final ServerNode node, final List<String> channels, final boolean expandAll)
+	private void populateServer(final ServerNode node, final List<String> channels, final boolean expandAll, final boolean saveProgress)
 	{
 		if (channels == null)
 			return;
@@ -901,7 +944,19 @@ public class DataChooser extends JPanel
 						
 						GroupNode allNode = new GroupNode(Messages.getString("DataChooser.allGroup")); //$NON-NLS-1$
 						ChooserNode rootNode = node;
-						rootNode.removeAllChildren();
+						if (!saveProgress)
+							rootNode.removeAllChildren();
+						else
+						{
+							for (int i = 0; i < rootNode.getChildCount(); i++)
+							{
+								if (!(rootNode.getChildAt(i) instanceof ProgressNode))
+								{
+									rootNode.remove(i);
+									i--;
+								}
+							}
+						}
 						rootNode.add(allNode);
 						for (String channel : channels)
 						{
@@ -979,6 +1034,8 @@ public class DataChooser extends JPanel
 						{
 							GroupNode n = rootMap.get(key);
 							rootNode.add(n);
+//							int j = rootNode.getChildCount();
+//							model.insertNodeInto(n, rootNode, j - 1);
 //							for (int i = 0; i < n.getChildCount(); i++)
 //							{
 //								ChannelNode cn = (ChannelNode)n.getChildAt(i);
@@ -986,7 +1043,7 @@ public class DataChooser extends JPanel
 //							}
 						}
 						
-						((DefaultTreeModel)dataTree.getModel()).reload(rootNode);
+						model.reload(rootNode);
 						
 						for (GroupNode gn : openGroups)
 						{
