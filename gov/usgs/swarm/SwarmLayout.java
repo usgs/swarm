@@ -1,16 +1,25 @@
 package gov.usgs.swarm;
 
+import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.swarm.wave.MultiMonitor;
 import gov.usgs.util.ConfigFile;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.JOptionPane;
 
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/08/09 21:54:58  cervelli
+ * Checks data sources and sets map visibility correctly.
+ *
  * Revision 1.3  2006/08/07 22:33:26  cervelli
  * Saves monitor layout.
  *
@@ -75,18 +84,77 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 	
 	public void process()
 	{
-		Swarm.getApplication().removeAllFrames();
-		processChooser();
-		processMap();
-		processWaves();
-		processHelicorders();
-		processMonitors();
+		SwingWorker worker = new SwingWorker()
+				{
+					public Object construct()
+					{
+						Swarm.getApplication().removeAllFrames();
+						processChooser();
+						processMap();
+						processWaves();
+						processHelicorders();
+						processMonitors();
+						return null;
+					}
+					
+					public void finished()
+					{
+						System.out.println("layout finished");
+					}
+				};
+		worker.start();
+	}
+	
+	private class ChooserListener implements ActionListener
+	{
+		private List<String> sources;
+		
+		private ChooserListener()
+		{
+			sources = new ArrayList<String>();
+		}
+		
+		public void addSource(String s)
+		{
+			sources.add(s);
+		}
+		
+		public synchronized void actionPerformed(ActionEvent e)
+		{
+			String src = e.getActionCommand();
+			sources.remove(src);
+			if (e.getID() == DataChooser.NO_DATA_SOURCE)
+			{
+				JOptionPane.showMessageDialog(Swarm.getApplication(), 
+						"The data source '" + src + "' does not exist.", 
+						"Error", JOptionPane.ERROR_MESSAGE);
+			}
+			else if (e.getID() == DataChooser.NO_CHANNEL_LIST)
+			{
+				JOptionPane.showMessageDialog(Swarm.getApplication(), 
+						"The data source '" + src + "' could not be opened.", 
+						"Error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		
+		public synchronized boolean finished()
+		{
+			return sources.size() == 0;
+		}
 	}
 	
 	private void processChooser()
 	{
 		ConfigFile cf = config.getSubConfig("chooser");
-		Swarm.getApplication().getDataChooser().processLayout(cf);
+		ChooserListener cl = new ChooserListener();
+		for (String src : cf.getList("source"))
+			cl.addSource(src);
+		Swarm.getApplication().getDataChooser().processLayout(cf, cl);
+		while (!cl.finished())
+		{
+			try { Thread.sleep(100); } catch (Exception e) { e.printStackTrace(); }
+		}
+		System.out.println("processChooser done");
 	}
 	
 	private void processWaves()
@@ -118,7 +186,7 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 		{
 			ConfigFile cf = config.getSubConfig(monitor);
 			SeismicDataSource sds = Swarm.config.getSource(cf.getString("source"));
-			if (sds != null)
+			if (sds != null && Swarm.getApplication().getDataChooser().isSourceOpened(sds.getName()))
 			{
 				MultiMonitor mm = Swarm.getApplication().getMonitor(sds);
 				mm.processLayout(cf);
