@@ -33,6 +33,9 @@ import org.apache.log4j.varia.NullAppender;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/08/10 14:31:05  cervelli
+ * Fixed synch bugs.
+ *
  * Revision 1.6  2006/08/08 22:21:30  cervelli
  * Configurable network/seismogram DC/DNS and gulper variables.
  *
@@ -129,6 +132,7 @@ public class DHIDataSource extends SeismicDataSource
 	
 	public List<String> getChannels()
 	{
+		fireChannelsProgress(0);
 		idMap = new HashMap<String, ChannelId>();
 		ArrayList<String> result = new ArrayList<String>();
 		try
@@ -136,8 +140,13 @@ public class DHIDataSource extends SeismicDataSource
 	        NetworkFinder netFinder = netDC.a_finder();
 	        NetworkAccess net = netFinder.retrieve_by_code(network)[0];
 	        Station[] stations = net.retrieve_stations();
+	        int ns = stations.length;
+	        int cnt = 0;
 	        for (Station s : stations)
 	        {
+	        	double p = (double)cnt / (double)ns;
+	        	fireChannelsProgress(p);
+	        	cnt++;
 	        	if (s.effective_time.end_time.date_time.startsWith("25"))
 	        	{
 	        		Swarm.logger.finest("dhi channel: " + s.name);
@@ -164,13 +173,15 @@ public class DHIDataSource extends SeismicDataSource
 		            }
 	        	}
 	        }
+	        Collections.sort(result);
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
+			result = null;
 		}
-        	
-		Collections.sort(result);
+		
+		fireChannelsProgress(1);
 		return result;
 	}
 
@@ -209,9 +220,7 @@ public class DHIDataSource extends SeismicDataSource
 		        Time end = new Time(st2, -1);
 		        
 		        ChannelId cid = idMap.get(station);
-		        seismogramRequest[0] = new RequestFilter(cid,
-		                                                 start,
-		                                                 end);
+		        seismogramRequest[0] = new RequestFilter(cid, start, end);
 		        
 		        LocalSeismogram[] seis = seisDC.retrieve_seismograms(seismogramRequest);
 		        ArrayList<Wave> waves = new ArrayList<Wave>();
