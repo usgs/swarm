@@ -11,6 +11,9 @@ import javax.swing.ImageIcon;
  * TODO: make images static final, don't use map 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2006/08/11 20:57:36  dcervelli
+ * Added label icons.
+ *
  * Revision 1.17  2006/08/09 21:53:53  cervelli
  * Added resize and alarm icons.
  *
@@ -136,6 +139,8 @@ public class Images
 		imageMap.put("label_some", "images/label_some.gif");
 		imageMap.put("label_all", "images/label_all.gif");
 		imageMap.put("label_none", "images/label_none.gif");
+		imageMap.put("bluebullet", "images/bluebullet.gif");
+		imageMap.put("graybullet", "images/graybullet.gif");
 		
 		imageMap.put("throbber_off", "images/throbber_off.gif");
 		imageMap.put("throbber_0", "images/throbber_0.gif");
