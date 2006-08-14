@@ -17,6 +17,9 @@ import javax.swing.JOptionPane;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/08/12 21:51:04  dcervelli
+ * Fixed bugs with file data sources.
+ *
  * Revision 1.5  2006/08/12 00:34:44  dcervelli
  * Waits for data sources in background.
  *
@@ -75,6 +78,20 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 		config.writeToFile(fn);
 	}
 	
+	public void delete()
+	{
+		try
+		{
+			String fn = config.getName() + ".config";
+			Swarm.logger.fine("deleting file: " + fn);
+			new File(fn).delete();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	public void setName(String s)
 	{
 		config.put("name", s, false);
@@ -102,7 +119,7 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 					
 					public void finished()
 					{
-						System.out.println("layout finished");
+						processKiosk();
 					}
 				};
 		worker.start();
@@ -220,6 +237,15 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 		}
 	}
 
+	private void processKiosk()
+	{
+		String k = config.getString("kiosk");
+		if (k == null)
+			k = "false";
+		boolean kiosk = Boolean.parseBoolean(k);
+		Swarm.getApplication().setFullScreenMode(kiosk);
+	}
+	
 	public int compareTo(SwarmLayout o)
 	{
 		return getName().compareToIgnoreCase(o.getName());
