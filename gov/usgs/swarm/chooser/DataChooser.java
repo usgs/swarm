@@ -70,6 +70,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/08/12 21:51:23  dcervelli
+ * File data source progress indicators.
+ *
  * Revision 1.8  2006/08/12 00:35:14  dcervelli
  * Progress bars and modifications for background layouts.
  *
@@ -232,7 +235,6 @@ public class DataChooser extends JPanel
 			boolean ins = false;
 			if (pn == null)
 			{
-				System.out.println("new: " + id);
 				pn = new ProgressNode();
 				progressNodes.put(id, pn);
 				ins = true;
@@ -277,6 +279,8 @@ public class DataChooser extends JPanel
 				else
 					dataSourceSelected(node, listener);
 			}
+			else
+				listener.actionPerformed(new ActionEvent(this, OK, src));
 		}
 	}
 	
@@ -814,6 +818,7 @@ public class DataChooser extends JPanel
 		dataTree = new JTree(rootNode);
 		dataTree.setRootVisible(false);
 		dataTree.setBorder(BorderFactory.createEmptyBorder(1, 2, 0, 0));
+//		ToolTipManager.sharedInstance().registerComponent(dataTree);
 		
 		model = new DefaultTreeModel(rootNode);
 		dataTree.setModel(model);
@@ -885,7 +890,7 @@ public class DataChooser extends JPanel
 						if (nrst == null)
 							return;
 						lastNearest = channel;
-						nearestLabel.setText("Nearest to " + channel);
+						nearestLabel.setText("Distance to " + channel);
 						DefaultListModel model = (DefaultListModel)nearestList.getModel();
 						model.removeAllElements();
 						for (Pair<Double, String> item : nrst)
@@ -900,7 +905,7 @@ public class DataChooser extends JPanel
 		nearestScrollPane = new JScrollPane(nearestList);
 		nearestPanel = new JPanel(new BorderLayout());
 		nearestPanel.add(nearestScrollPane, BorderLayout.CENTER);
-		nearestLabel = new JLabel("Nearest");
+		nearestLabel = new JLabel("Distance");
 		nearestPanel.add(nearestLabel, BorderLayout.NORTH);
 		nearestList.setCellRenderer(new ListCellRenderer());
 		
@@ -1195,11 +1200,18 @@ public class DataChooser extends JPanel
 		public ChannelNode(String c)
 		{
 			channel = c;
+			setToolTipText(channel + "<br>2nd line: value");
 		}
 		
 		public Icon getIcon()
 		{
-			return Images.getIcon("bullet");
+			Metadata md = Swarm.config.getMetadata(channel);
+			if (md == null || !md.isTouched())
+				return Images.getIcon("graybullet");
+			else if (md.hasLonLat())
+				return Images.getIcon("bluebullet");
+			else
+				return Images.getIcon("bullet");
 		}
 		
 		public String getLabel()
