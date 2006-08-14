@@ -52,6 +52,9 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2006/08/12 21:52:29  dcervelli
+ * New kiosk code.
+ *
  * Revision 1.13  2006/08/11 21:02:17  dcervelli
  * Label buttons, changes for better CPU utilization.
  *
@@ -122,7 +125,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable
 	private int spanIndex = 3;
 	private boolean realtime = true;
 	
-	private int refreshInterval = 1000;
+	private long refreshInterval = 1000;
 	
 	private HelicorderViewPanelListener linkListener;
 	
@@ -236,8 +239,8 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-//						MultiMonitorSettingsDialog mmsd = MultiMonitorSettingsDialog.getInstance(MultiMonitor.this);
-//						mmsd.setVisible(true);
+						MapSettingsDialog msd = MapSettingsDialog.getInstance(MapFrame.this);
+						msd.setVisible(true);
 					}
 				});
 		toolbar.add(optionsButton);
@@ -592,6 +595,21 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable
 	public Throbber getThrobber()
 	{
 		return throbber;
+	}
+	
+	public void setRefreshInterval(long r)
+	{
+		refreshInterval = r;
+	}
+	
+	public long getRefreshInterval()
+	{
+		return refreshInterval;
+	}
+	
+	public MapPanel getMapPanel()
+	{
+		return mapPanel;
 	}
 	
 	public void setSelectedWave(WaveViewPanel wvp)
