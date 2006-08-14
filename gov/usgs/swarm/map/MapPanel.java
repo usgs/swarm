@@ -64,6 +64,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2006/08/11 21:03:54  dcervelli
+ * Label buttons and moved code to avoid deadlock.
+ *
  * Revision 1.13  2006/08/09 21:51:16  cervelli
  * Mouse cursor change on drag.
  *
@@ -722,7 +725,13 @@ public class MapPanel extends JPanel
 		double px = tx * dx + ext[0];
 		double py = ext[3] - ty * dy;
 //		System.out.println(tx + " " + ty + " " + px + " " + py + " " + ext[0] + " " + ext[1] + " " + ext[2] + " " + ext[3]);
+//		
 		Point2D.Double pt = projection.inverse(new Point2D.Double(px, py));
+		pt.x = pt.x % 360;
+		if (pt.x > 180)
+			pt.x -= 360;
+		if (pt.x < -180)
+			pt.x += 360;
 		return pt;
 	}
 	
@@ -735,15 +744,19 @@ public class MapPanel extends JPanel
 	{
 		startTime = st;
 		endTime = et;
+		boolean updated = false;
 		synchronized (visiblePanels)
 		{
 			for (MapMiniPanel panel : visiblePanels)
 			{
-				if (panel.updateWave(startTime, endTime, false, repaint))
-					;
-//					panel.repaint();
+				if (panel.isWaveVisible())
+				{
+					updated = true;
+					panel.updateWave(startTime, endTime, false, repaint);
+				}
 			}
-			repaint();
+			if (updated)
+				repaint();
 		}
 //		repaint();
 	}
