@@ -22,6 +22,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
@@ -46,6 +48,9 @@ import javax.swing.JScrollPane;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/08/12 21:51:53  dcervelli
+ * Addition of id to channelProgress().
+ *
  * Revision 1.2  2006/08/11 21:00:27  dcervelli
  * New file type selector dialog box.
  *
@@ -138,6 +143,17 @@ public class FileDataSource extends CachedDataSource
 			filename.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
 			String[] types = new String[] { "SEED/miniSEED volume", "SAC" };
 			fileTypes = new JList(types);
+			fileTypes.addMouseListener(new MouseAdapter()
+					{
+						public void mouseClicked(MouseEvent e)
+						{
+							if (e.getClickCount() == 2)
+							{
+								if (fileTypes.getSelectedIndex() != -1)
+									okButton.doClick();
+							}
+						}
+					});
 			fileTypes.setSelectedIndex(0);
 			assumeSame = new JCheckBox("Assume all unknown files are of this type", false);
 			JPanel panel = new JPanel(new BorderLayout());
