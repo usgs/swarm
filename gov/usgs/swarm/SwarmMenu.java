@@ -1,20 +1,33 @@
 package gov.usgs.swarm;
 
 import gov.usgs.swarm.data.CachedDataSource;
+import gov.usgs.util.Util;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
@@ -22,6 +35,9 @@ import javax.swing.event.MenuListener;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/08/09 21:55:20  cervelli
+ * Moved layout saving code to Swarm.java.
+ *
  * Revision 1.7  2006/08/07 22:33:10  cervelli
  * Open file items.
  *
@@ -210,12 +226,13 @@ public class SwarmMenu extends JMenuBar
 		layoutMenu.add(saveLayout);
 		
 		removeLayouts = new JMenuItem("Remove Layout...");
-		removeLayouts.setEnabled(false);
 		removeLayouts.setMnemonic('R');
 		removeLayouts.addActionListener(new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
 					{
+						RemoveLayoutDialog d = new RemoveLayoutDialog();
+						d.setVisible(true);
 					}
 				});
 		layoutMenu.add(removeLayouts);
@@ -434,5 +451,54 @@ public class SwarmMenu extends JMenuBar
 		InternalFrameMenuItem mi = windows.get(f);
 		windows.remove(f);
 		windowMenu.remove(mi);
+	}
+	
+	private class RemoveLayoutDialog extends SwarmDialog
+	{
+		private static final long serialVersionUID = 1L;
+		private JList layoutList;
+		private DefaultListModel model;
+		
+		protected RemoveLayoutDialog()
+		{
+			super(Swarm.getApplication(), "Remove Layouts", true);
+			setSizeAndLocation();
+		}
+		
+		protected void createUI()
+		{
+			super.createUI();
+			Set<String> keys = Swarm.config.layouts.keySet();
+			List<String> sls = new ArrayList<String>();
+			sls.addAll(keys);
+			Collections.sort(sls, Util.getIgnoreCaseStringComparator());
+			model = new DefaultListModel();
+			for (String sl : sls)
+				model.addElement(sl);
+			layoutList = new JList(model);
+			JPanel panel = new JPanel(new BorderLayout());
+			panel.setBorder(BorderFactory.createEmptyBorder(5, 9, 5, 9));
+			int h = Math.max(200, Math.min(350, sls.size() * 19));
+			panel.setPreferredSize(new Dimension(200, h));
+			panel.add(new JLabel("Select layouts to remove:"), BorderLayout.NORTH);
+			panel.add(new JScrollPane(layoutList), BorderLayout.CENTER);
+			mainPanel.add(panel, BorderLayout.CENTER);
+		}
+		
+		public void wasOK()
+		{
+			Object[] toRemove = layoutList.getSelectedValues();
+			for (int i = 0; i < toRemove.length; i++)
+			{
+				String key = (String)toRemove[i];
+				SwarmLayout layout = Swarm.config.layouts.get(key);
+				if (layout != null)
+				{
+					JMenuItem mi = layouts.get(layout);
+					layoutMenu.remove(mi);
+					Swarm.config.removeLayout(layout);
+				}
+			}
+		}
 	}
 }
