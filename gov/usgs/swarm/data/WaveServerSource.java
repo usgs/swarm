@@ -20,6 +20,9 @@ import java.util.Map;
  * Earthworm Wave Server.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/08/09 03:44:51  cervelli
+ * Added gulpSize and gulpDelay to config string.
+ *
  * Revision 1.8  2006/08/08 22:22:20  cervelli
  * Configurable gulper parameters.
  *
@@ -165,7 +168,9 @@ public class WaveServerSource extends SeismicDataSource
 	public synchronized Wave getWave(String station, double t1, double t2)
 	{
 		CachedDataSource cache = Swarm.getCache();
-		Wave sw = cache.getWave(station, t1, t2);
+		Wave sw = null;
+		if (useCache)
+			sw = cache.getWave(station, t1, t2);
 		if (sw == null)
 		{
 			String[] ss = station.split(" ");
@@ -181,8 +186,11 @@ public class WaveServerSource extends SeismicDataSource
 				return null;
 			sw.convertToJ2K();
 			sw.register();
-			cache.cacheWaveAsHelicorder(station, sw);
-			cache.putWave(station, sw);
+			if (useCache)
+			{
+				cache.cacheWaveAsHelicorder(station, sw);
+				cache.putWave(station, sw);
+			}
 		}
 		else
 		{
