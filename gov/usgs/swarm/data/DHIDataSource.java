@@ -33,6 +33,9 @@ import org.apache.log4j.varia.NullAppender;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/08/12 21:51:53  dcervelli
+ * Addition of id to channelProgress().
+ *
  * Revision 1.8  2006/08/12 00:35:54  dcervelli
  * Progress indications from getChannels().
  *
@@ -77,6 +80,9 @@ public class DHIDataSource extends SeismicDataSource
 	protected org.omg.CORBA_2_3.ORB orb;
 	protected static Logger logger;
 	
+	public DHIDataSource()
+	{}
+	
 	public DHIDataSource(String nw)
 	{
 		String[] ss = nw.split(":");
@@ -87,6 +93,28 @@ public class DHIDataSource extends SeismicDataSource
 		network = ss[4];
 		gulpSize = Integer.parseInt(ss[5]);
 		gulpDelay = Integer.parseInt(ss[6]);
+	}
+	
+	public SeismicDataSource getCopy()
+	{
+		System.out.println("DHI Copy");
+		DHIDataSource ds = new DHIDataSource();
+		ds.network = network;
+		ds.networkDNS = networkDNS;
+		ds.networkDC = networkDC;
+		ds.name = name;
+		ds.seismoDC = seismoDC;
+		ds.seismoDNS = seismoDNS;
+		ds.gulpSize = gulpSize;
+		ds.gulpDelay = gulpDelay;
+		ds.storeInUserConfig = storeInUserConfig;
+		ds.useCache = true;
+		ds.orb = orb;
+		ds.namingService = namingService;
+		ds.netDC = netDC;
+		ds.seisDC = seisDC;
+		ds.idMap = idMap;
+		return ds;
 	}
 	
 	public void establish()
@@ -210,7 +238,9 @@ public class DHIDataSource extends SeismicDataSource
 	public Wave getWave(String station, double t1, double t2)
 	{
 		CachedDataSource cache = Swarm.getCache();
-		Wave wave = cache.getWave(station, t1, t2);
+		Wave wave = null;
+		if (useCache)
+			wave = cache.getWave(station, t1, t2);
 		if (wave == null)
 		{
 			try
@@ -249,7 +279,7 @@ public class DHIDataSource extends SeismicDataSource
 		        }
 //		        Collections.sort(waves);
 		        wave = Wave.join(waves);
-		        if (wave != null)
+		        if (wave != null && useCache)
 		        {
 			        cache.cacheWaveAsHelicorder(station, wave);
 			        cache.putWave(station, wave);
