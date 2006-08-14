@@ -10,12 +10,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TimeZone;
+import java.util.TreeMap;
 
 /**
  * Swarm configuration class. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2006/08/09 21:53:29  cervelli
+ * Removed groupConfigFile and changed NZ Iris source.
+ *
  * Revision 1.11  2006/08/04 21:17:22  cervelli
  * Changed default values for a few items.
  *
@@ -115,10 +120,11 @@ public class Config
 	
 	public Map<String, SeismicDataSource> sources;
 	
+	// TODO: use ConcurrentHashMap
 	private Map<String, Metadata> metadata;
 	private Map<String, Metadata> defaultMetadata;
 	
-	public List<SwarmLayout> layouts;
+	public SortedMap<String, SwarmLayout> layouts;
 	
 	public static Config createConfig(String[] args)
 	{
@@ -169,7 +175,7 @@ public class Config
 
 	private void loadLayouts()
 	{
-		layouts = new ArrayList<SwarmLayout>();
+		layouts = new TreeMap<String, SwarmLayout>();
 		
 		File[] files = new File("layouts").listFiles();
 		if (files == null)
@@ -182,16 +188,26 @@ public class Config
 				SwarmLayout sl = SwarmLayout.createSwarmLayout(f.getPath());
 				if (sl != null)
 				{
-					layouts.add(sl);
+					layouts.put(sl.getName(), sl);
 				}
 			}
 		}
-		Collections.sort(layouts);
 	}
 	
 	public void addLayout(SwarmLayout sl)
 	{
-		layouts.add(sl);
+		layouts.put(sl.getName(), sl);
+	}
+
+	public void removeLayout(SwarmLayout layout)
+	{
+		layouts.remove(layout.getName());
+		layout.delete();
+	}
+	
+	public void removeMetadata(String ch)
+	{
+		metadata.remove(ch);
 	}
 	
 	public Map<String, Metadata> getMetadata()
