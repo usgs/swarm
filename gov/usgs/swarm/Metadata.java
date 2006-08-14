@@ -18,6 +18,9 @@ import java.util.TimeZone;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/08/05 22:22:06  cervelli
+ * More 2.0 changes.
+ *
  * Revision 1.3  2006/08/01 23:38:37  cervelli
  * New metadata system.
  *
@@ -63,6 +66,13 @@ public class Metadata implements Comparable<Metadata>
 	public Metadata(String ch)
 	{
 		updateChannel(ch);
+	}
+	
+	public boolean isTouched()
+	{
+		return !(alias == null && unit == null && multiplier == 1 && offset == 0 &&
+				Double.isNaN(longitude) && Double.isNaN(latitude) && Double.isNaN(height) &&
+				tzSet == false && groups == null && ancillaryMetadata == null);
 	}
 	
 	public void updateTimeZone(String tz)
@@ -158,6 +168,12 @@ public class Metadata implements Comparable<Metadata>
 	public SCNL getSCNL()
 	{
 		return scnl;
+	}
+	
+	public boolean hasLonLat()
+	{
+		return (!Double.isNaN(longitude) && longitude != -999 &&
+				!Double.isNaN(latitude) && latitude != -999);
 	}
 	
 	public double getLongitude()
