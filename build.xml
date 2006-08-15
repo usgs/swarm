@@ -1,5 +1,8 @@
 <!--
 $Log: not supported by cvs2svn $
+Revision 1.7  2006/08/11 21:17:52  dcervelli
+Swarm 2.0 changes.
+
 Revision 1.6  2006/05/24 16:41:15  tparker
 Add looks jar
 
@@ -53,9 +56,9 @@ bin-dist -- generates new binary distribution
 
 	<target name="compile" depends="init" description="compile the source">
 		<ant antfile="${source}/../USGS/buildversion.xml" target="version" dir="${source}/../USGS" inheritAll="true">
-					<property name="version" value="2.0.0-beta"/>
-					<property name="path" value="../Swarm/gov/usgs/swarm"/>
-					<property name="package" value="gov.usgs.swarm"/>
+			<property name="version" value="2.0.0-beta"/>
+			<property name="path" value="../Swarm/gov/usgs/swarm"/>
+			<property name="package" value="gov.usgs.swarm"/>
 		</ant>
 			
 		<javac srcdir="${source}" destdir="${source}" classpath="${classpath}" debug="on" deprecation="on" />
@@ -174,7 +177,6 @@ bin-dist -- generates new binary distribution
 			<fileset dir="${source}/mapdata/world" />
 		</copy>
 		
-		<copy todir="${bin-dir}/swarm/" file="${source}/Swarm.jar" />
 		<copy todir="${bin-dir}/swarm/" file="${source}/swarm_console.bat" />
 		<copy todir="${bin-dir}/swarm/" file="${source}/clip.wav" />
 	<!--	<copy todir="${bin-dir}/swarm/" file="${source}/swarm.bat" />  -->
