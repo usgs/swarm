@@ -21,6 +21,9 @@ import cern.colt.matrix.DoubleMatrix2D;
  * so I had to add some hacky code for the CachePurgeActions.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/08/07 22:37:30  cervelli
+ * Changed member visibility.
+ *
  * Revision 1.6  2006/08/01 23:43:48  cervelli
  * Changed memory usage.
  *
@@ -325,8 +328,11 @@ public class CachedDataSource extends SeismicDataSource
 				if (join)
 				{
 					Wave newWave = cw.wave.combine(wave);
-					waves.remove(cw);
-					putWave(station, newWave);
+					if (newWave != null)
+					{
+						waves.remove(cw);
+						putWave(station, newWave);
+					}
 					return;
 				}
 			}
