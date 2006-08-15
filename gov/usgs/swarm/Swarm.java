@@ -56,8 +56,12 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  *
  * TODO: resize listener
  * TODO: chooser visibility
+ * TODO: name worker thread for better debugging
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.34  2006/08/12 21:50:22  dcervelli
+ * New kiosk code.
+ *
  * Revision 1.33  2006/08/11 20:58:23  dcervelli
  * New internal frame border.
  *
@@ -207,7 +211,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.0.0.20060811-beta-2";
+	private static final String VERSION = "2.0.0.20060815-beta-4";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -510,7 +514,7 @@ public class Swarm extends JFrame
 		swarmMenu = new SwarmMenu();
 		this.setJMenuBar(swarmMenu);
 		
-		for (SwarmLayout sl : config.layouts)
+		for (SwarmLayout sl : config.layouts.values())
 			swarmMenu.addLayout(sl);
 		
 		this.setVisible(true);
@@ -595,13 +599,16 @@ public class Swarm extends JFrame
 	
 	public void toggleFullScreenMode()
 	{
-		requestFocus();
-		fullScreen = !fullScreen;
-		setFullScreenMode(fullScreen);
+		setFullScreenMode(!fullScreen);
 	}
 	
-	private void setFullScreenMode(boolean full)
+	public void setFullScreenMode(boolean full)
 	{
+		if (fullScreen == full)
+			return;
+		
+		requestFocus();
+		fullScreen = full;
 		this.dispose();
 		this.setUndecorated(full);
 		this.setResizable(!full);
@@ -688,6 +695,7 @@ public class Swarm extends JFrame
 		config.chooserVisible = isChooserVisible();
 		
 		config.nearestDividerLocation = chooser.getDividerLocation();
+		config.kiosk = Boolean.toString(fullScreen);
 		
 		if (config.saveConfig)
 		{
@@ -799,16 +807,32 @@ public class Swarm extends JFrame
 	
 	public void saveLayout()
 	{
-		SwarmLayout sl = Swarm.getApplication().getCurrentLayout();
-		String name = JOptionPane.showInputDialog(
-				Swarm.getApplication(), "Enter a name for this layout:", 
-				"Save Layout", JOptionPane.INFORMATION_MESSAGE);
-		if (name != null)
+		SwarmLayout sl = getCurrentLayout();
+		boolean done = false;
+		while (!done)
 		{
-			sl.setName(name);
-			sl.save();
-			swarmMenu.addLayout(sl);
-			Swarm.config.addLayout(sl);
+			String name = JOptionPane.showInputDialog(
+					Swarm.getApplication(), "Enter a name for this layout:", 
+					"Save Layout", JOptionPane.INFORMATION_MESSAGE);
+			if (name != null)
+			{
+				if (!Swarm.config.layouts.containsKey(name))
+				{
+					sl.setName(name);
+					sl.save();
+					swarmMenu.addLayout(sl);
+					Swarm.config.addLayout(sl);
+					done = true;
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(
+							Swarm.getApplication(), "A layout by that name already exists.", 
+							"Error", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+			else 
+				done = true; // cancelled
 		}
 	}
 	
@@ -816,6 +840,7 @@ public class Swarm extends JFrame
 	{
 		ConfigFile cf = new ConfigFile();
 		cf.put("name", "Current Layout");
+		cf.put("kiosk", Boolean.toString(isFullScreenMode()));
 		
 		chooser.saveLayout(cf, "chooser");
 		
@@ -1052,9 +1077,21 @@ public class Swarm extends JFrame
 		desktop.setLayer(c, layer, 0);
 	}
 	
-	public void parseKiosk()
+	private void parseKiosk()
 	{
 		String[] kiosks = config.kiosk.split(",");
+		if (config.kiosk.startsWith("layout:"))
+		{
+			String layout = config.kiosk.substring(7);
+			SwarmLayout sl = config.layouts.get(layout);
+			if (sl != null)
+			{
+				sl.process();
+			}
+			else
+				Swarm.logger.warning("could not start with layout: " + layout);
+		}
+		boolean set = false;
 		for (int i = 0; i < kiosks.length; i++)
 		{ 
 			String[] ch = kiosks[i].split(";");
@@ -1062,8 +1099,15 @@ public class Swarm extends JFrame
 			if (sds == null)
 				continue;
 			openHelicorder(sds, ch[1]);
+			set = true;
 		}
-		toggleFullScreenMode();
+		if (config.kiosk.equals("true"))
+			set = true;
+		
+		if (set)
+			toggleFullScreenMode();
+		else
+			Swarm.logger.warning("no helicorders, skipping kiosk mode.");
 	}
 	
 	// TODO: make listener based
