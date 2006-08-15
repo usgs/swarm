@@ -23,7 +23,12 @@ import javax.swing.border.LineBorder;
 /**
  * A class that shows an about dialog with some extra controls.
  *
+ * TODO: use SwarmDialog
+ * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/08/01 23:37:51  cervelli
+ * Memory usage continually updates.
+ *
  * Revision 1.3  2006/04/17 04:16:36  dcervelli
  * More 1.3 changes.
  *
@@ -168,7 +173,6 @@ public class AboutDialog extends JDialog implements Runnable
 	{
 		NumberFormat nf = new DecimalFormat("#.##");
 		return nf.format(bytes / 1000000.0) + " MB";
-		//return Long.toString(bytes);
 	}
 	
 	public void setVisible(boolean v)
@@ -190,7 +194,6 @@ public class AboutDialog extends JDialog implements Runnable
 			catch (Exception e) {}
 		}
 		kill = false;
-		System.out.println("About died");
 	}
 	
 	/**
