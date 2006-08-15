@@ -64,6 +64,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2006/08/14 22:46:43  dcervelli
+ * Changes for helicorder slowdown bug.
+ *
  * Revision 1.14  2006/08/11 21:03:54  dcervelli
  * Label buttons and moved code to avoid deadlock.
  *
@@ -1110,6 +1113,74 @@ public class MapPanel extends JPanel
 	{
 		private static final long serialVersionUID = 1L;
 
+		private void paintRadius(Graphics2D g2)
+		{
+			Point2D.Double lonLat = getLonLat(mouseNow.x, mouseNow.y);
+            Point2D.Double origin = getLonLat(mouseDown.x, mouseDown.y);
+            double d = Projection.distanceBetween(origin, lonLat);
+            int n = 720;
+            Point2D.Double[] pts = Projection.getPointsFrom(origin, d, n);
+            GeneralPath gp = new GeneralPath();
+            Point2D.Double xy = getXY(pts[0].x, pts[0].y);
+            Point lastXY = new Point();
+            lastXY.x = (int)Math.round(xy.x);
+            lastXY.y = (int)Math.round(xy.y);
+            gp.moveTo(lastXY.x - 2, lastXY.y - 1);
+            for (int i = 1; i <= pts.length; i++)
+            {
+                xy = getXY(pts[i % n].x, pts[i % n].y);
+                Point thisXY = new Point();
+                thisXY.x = (int)Math.round(xy.x);
+                thisXY.y = (int)Math.round(xy.y);
+                double a = thisXY.x - lastXY.x;
+                double b = thisXY.y - lastXY.y;
+                double dist = Math.sqrt(a * a + b * b);
+                if (dist > 100)
+                    gp.moveTo(thisXY.x - 2, thisXY.y - 1);
+                else
+                    gp.lineTo(thisXY.x - 2, thisXY.y - 1);
+                lastXY = thisXY;
+            }
+            g2.setColor(Color.YELLOW);
+            g2.draw(gp);
+		}
+		
+		private void paintGreatCircleRoute(Graphics2D g2)
+		{
+			Point2D.Double lonLat = getLonLat(mouseNow.x, mouseNow.y);
+            Point2D.Double origin = getLonLat(mouseDown.x, mouseDown.y);
+			GeneralPath gp = new GeneralPath();
+            Point2D.Double xy = getXY(origin.x, origin.y);
+            Point lastXY = new Point();
+            lastXY.x = (int)Math.round(xy.x);
+            lastXY.y = (int)Math.round(xy.y);
+            gp.moveTo(lastXY.x - 2, lastXY.y - 1);
+            double d = Projection.distanceBetween(origin, lonLat);
+            while (d > 20 * 1000)
+            {
+                double az = Projection.azimuthTo(origin, lonLat);
+                Point2D.Double p0 = Projection.getPointFrom(origin, 20 * 1000, az);
+
+                xy = getXY(p0.x, p0.y);
+                Point thisXY = new Point();
+                thisXY.x = (int)Math.round(xy.x);
+                thisXY.y = (int)Math.round(xy.y);
+                double a = thisXY.x - lastXY.x;
+                double b = thisXY.y - lastXY.y;
+                double dist = Math.sqrt(a * a + b * b);
+                if (dist > 100)
+                    gp.moveTo(thisXY.x - 2, thisXY.y - 1);
+                else
+                    gp.lineTo(thisXY.x - 2, thisXY.y - 1);
+                lastXY = thisXY;
+
+                origin = p0;
+                d = Projection.distanceBetween(origin, lonLat);
+            }
+            g2.setColor(Color.GREEN);
+            g2.draw(gp);
+		}
+		
 		public void paint(Graphics g)
 		{
 			super.paint(g);
@@ -1156,6 +1227,9 @@ public class MapPanel extends JPanel
 								mouseDown.y - MapPanel.this.getInsets().top,
 								mouseNow.x - MapPanel.this.getInsets().left,
 								mouseNow.y - MapPanel.this.getInsets().top);
+						
+						paintRadius(g2);
+						paintGreatCircleRoute(g2);
 					}
 				}
 			}
