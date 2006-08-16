@@ -12,6 +12,9 @@ import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/08/09 03:43:42  cervelli
+ * Uses FormLayout.
+ *
  * Revision 1.1  2006/08/01 23:43:13  cervelli
  * Moved package and new data source panel system.
  *
@@ -37,7 +40,7 @@ public class WWSPanel extends DataSourcePanel
 		wwsCompress = new JCheckBox();
 		String h = "";
 		String p = "16022";
-		String t = "2.0";
+		String t = "5.0";
 		boolean wscomp = true;
 		if (source != null && source.indexOf(";wws:") != -1)
 		{
