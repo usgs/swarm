@@ -1,5 +1,8 @@
 <!--
 $Log: not supported by cvs2svn $
+Revision 1.9  2006/08/29 21:24:02  dcervelli
+Changed classpath.
+
 Revision 1.8  2006/08/15 17:55:50  dcervelli
 Added version script.
 
@@ -39,7 +42,7 @@ Initial commit.
 	<description>USGS Swarm Build File</description>
 
 	<property name="source" location="." />
-	<property name="classpath" location="../USGS/contrib/SeedCodec-1.0.jar;../USGS/contrib/fissuresImpl-1.1.11.jar;../USGS/contrib/fissuresUtil-1.0.16.jar;../USGS/contrib/fissuresIDL-1.0.jar;../USGS/lib/winston.jar;../USGS/lib/vdx.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/seed-pdcc.jar;../USGS/contrib/looks-2.0.4.jar;../USGS/contrib/forms-1.0.7.jar"/>
+	<property name="classpath" location="../USGS/contrib/log4j-1.2.13.jar;../USGS/contrib/SeedCodec-1.0.jar;../USGS/contrib/fissuresImpl-1.1.11.jar;../USGS/contrib/fissuresUtil-1.0.16.jar;../USGS/contrib/fissuresIDL-1.0.jar;../USGS/lib/winston.jar;../USGS/lib/vdx.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/seed-pdcc.jar;../USGS/contrib/looks-2.0.4.jar;../USGS/contrib/forms-1.0.7.jar"/>
 	<property name="jarfile" value="swarm.jar" />
 
 	<property name="bin-dir" location="../swarm-bin" />
