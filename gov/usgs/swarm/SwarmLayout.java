@@ -5,6 +5,7 @@ import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.swarm.wave.MultiMonitor;
 import gov.usgs.util.ConfigFile;
+import gov.usgs.util.Util;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,6 +18,9 @@ import javax.swing.JOptionPane;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/08/14 22:43:36  dcervelli
+ * Saves kiosks and allows deletes.
+ *
  * Revision 1.6  2006/08/12 21:51:04  dcervelli
  * Fixed bugs with file data sources.
  *
@@ -242,7 +246,14 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 		String k = config.getString("kiosk");
 		if (k == null)
 			k = "false";
+		int x = Util.stringToInt(config.getString("kioskX"), -1);
+		int y = Util.stringToInt(config.getString("kioskY"), -1);
+		
 		boolean kiosk = Boolean.parseBoolean(k);
+		if (kiosk && x != -1 && y != -1)
+		{
+			Swarm.getApplication().setLocation(x, y);
+		}
 		Swarm.getApplication().setFullScreenMode(kiosk);
 	}
 	
