@@ -59,6 +59,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: name worker thread for better debugging
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.35  2006/08/15 17:53:25  dcervelli
+ * Layout and kiosk changes.
+ *
  * Revision 1.34  2006/08/12 21:50:22  dcervelli
  * New kiosk code.
  *
@@ -805,17 +808,31 @@ public class Swarm extends JFrame
 		return frame;
 	}
 	
+	private String lastLayout = "";
+	
 	public void saveLayout()
 	{
 		SwarmLayout sl = getCurrentLayout();
 		boolean done = false;
 		while (!done)
 		{
-			String name = JOptionPane.showInputDialog(
+			System.out.println("Last Layout: " + lastLayout);
+			String name = (String)JOptionPane.showInputDialog(
 					Swarm.getApplication(), "Enter a name for this layout:", 
-					"Save Layout", JOptionPane.INFORMATION_MESSAGE);
+					"Save Layout", JOptionPane.INFORMATION_MESSAGE, null, null, lastLayout);
 			if (name != null)
 			{
+				if (Swarm.config.layouts.containsKey(name))
+				{
+					int opt = JOptionPane.showConfirmDialog(
+							Swarm.getApplication(), "A layout by that name already exists.  Overwrite?", 
+							"Error", JOptionPane.YES_NO_OPTION);
+					if (opt == JOptionPane.YES_OPTION)
+					{
+						Swarm.config.removeLayout(Swarm.config.layouts.get(name));
+					}
+				}
+				
 				if (!Swarm.config.layouts.containsKey(name))
 				{
 					sl.setName(name);
@@ -823,12 +840,7 @@ public class Swarm extends JFrame
 					swarmMenu.addLayout(sl);
 					Swarm.config.addLayout(sl);
 					done = true;
-				}
-				else
-				{
-					JOptionPane.showMessageDialog(
-							Swarm.getApplication(), "A layout by that name already exists.", 
-							"Error", JOptionPane.ERROR_MESSAGE);
+					lastLayout = name;
 				}
 			}
 			else 
@@ -841,6 +853,8 @@ public class Swarm extends JFrame
 		ConfigFile cf = new ConfigFile();
 		cf.put("name", "Current Layout");
 		cf.put("kiosk", Boolean.toString(isFullScreenMode()));
+		cf.put("kioskX", Integer.toString(getX()));
+		cf.put("kioskY", Integer.toString(getY()));
 		
 		chooser.saveLayout(cf, "chooser");
 		
@@ -1086,6 +1100,7 @@ public class Swarm extends JFrame
 			SwarmLayout sl = config.layouts.get(layout);
 			if (sl != null)
 			{
+				lastLayout = layout;
 				sl.process();
 			}
 			else
