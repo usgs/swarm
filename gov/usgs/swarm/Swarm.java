@@ -59,6 +59,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: name worker thread for better debugging
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.36  2006/08/29 21:14:22  cervelli
+ * Layout stuff
+ *
  * Revision 1.35  2006/08/15 17:53:25  dcervelli
  * Layout and kiosk changes.
  *
@@ -214,7 +217,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.0.0.20060815-beta-4";
+	private static final String VERSION = "2.0.0.20061025-beta-5";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -699,6 +702,8 @@ public class Swarm extends JFrame
 		
 		config.nearestDividerLocation = chooser.getDividerLocation();
 		config.kiosk = Boolean.toString(fullScreen);
+
+		config.userTimes = chooser.getUserTimes();
 		
 		if (config.saveConfig)
 		{
@@ -799,10 +804,10 @@ public class Swarm extends JFrame
 		return frame;
 	}
 	
-	public HelicorderViewerFrame openHelicorder(SeismicDataSource source, String channel)
+	public HelicorderViewerFrame openHelicorder(SeismicDataSource source, String channel, double time)
 	{
 		source.establish();
-		HelicorderViewerFrame frame = new HelicorderViewerFrame(source, channel);
+		HelicorderViewerFrame frame = new HelicorderViewerFrame(source, channel, time);
 		frame.addLinkListeners();
 		addInternalFrame(frame);
 		return frame;
@@ -1113,7 +1118,7 @@ public class Swarm extends JFrame
 			SeismicDataSource sds = config.getSource(ch[0]);
 			if (sds == null)
 				continue;
-			openHelicorder(sds, ch[1]);
+			openHelicorder(sds, ch[1], Double.NaN);
 			set = true;
 		}
 		if (config.kiosk.equals("true"))
