@@ -52,6 +52,9 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2006/08/14 22:45:54  dcervelli
+ * Changes for map settings window.
+ *
  * Revision 1.14  2006/08/12 21:52:29  dcervelli
  * New kiosk code.
  *
@@ -135,7 +138,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable
 
 	public MapFrame()
 	{
-		super("Map", true, true, true, true);
+		super("Map", true, true, true, false);
 		this.setFocusable(true);
 		Swarm.getApplication().touchUITime();
 
