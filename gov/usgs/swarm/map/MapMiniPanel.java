@@ -28,8 +28,6 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -52,6 +50,9 @@ import javax.swing.JRadioButtonMenuItem;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2006/08/12 21:52:29  dcervelli
+ * New kiosk code.
+ *
  * Revision 1.10  2006/08/11 21:03:24  dcervelli
  * Changes for better CPU utilization, better filter label.
  *
@@ -131,25 +132,6 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 		addMouseMotionListener(this);
 		addMouseListener(this);
 		addMouseWheelListener(this);
-		addKeyListener(new KeyListener()
-		{
-			public void keyPressed(KeyEvent e)
-			{
-				System.out.println("keypressed MMP");
-				if (Character.toLowerCase(e.getKeyChar()) == 'r')
-				{
-					getWaveViewPanel().getSettings().resetAutoScaleMemory();
-				}
-			}
-
-			public void keyReleased(KeyEvent e)
-			{
-			}
-
-			public void keyTyped(KeyEvent e)
-			{
-			}
-		});
 		setLayout(null);
 	}
 
@@ -608,7 +590,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 		{
 			if (activeMetadata.source != null)
 			{
-				HelicorderViewerFrame hvf = Swarm.getApplication().openHelicorder(activeMetadata.source, activeMetadata.getChannel());
+				HelicorderViewerFrame hvf = Swarm.getApplication().openHelicorder(activeMetadata.source, activeMetadata.getChannel(), Double.NaN);
 				if (Swarm.getApplication().isFullScreenMode())
 					hvf.setPinned(true);
 			}
