@@ -35,6 +35,9 @@ import javax.swing.event.MenuListener;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/08/14 22:43:52  dcervelli
+ * Remove layout dialog box.
+ *
  * Revision 1.8  2006/08/09 21:55:20  cervelli
  * Moved layout saving code to Swarm.java.
  *
@@ -428,9 +431,11 @@ public class SwarmMenu extends JMenuBar
 					{
 						public void actionPerformed(ActionEvent e)
 						{
-							frame.toFront();
 							try
 							{
+								if (frame.isIcon())
+									frame.setIcon(false);
+								frame.toFront();
 								frame.setSelected(true);
 							}
 							catch (Exception ex) {}
