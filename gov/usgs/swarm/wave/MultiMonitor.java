@@ -67,6 +67,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: up/down arrows
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/08/12 21:52:29  dcervelli
+ * New kiosk code.
+ *
  * Revision 1.7  2006/08/11 21:04:17  dcervelli
  * Monitor beautification.
  *
@@ -622,7 +625,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		panel.setChannel(ch);
 		panel.setOffsets(-1, 0, 0, 0);
 		panel.setWorking(true);
-		panel.setDisplayTitle(true);
+		panel.setDisplayTitle(false);
 		panel.setFrameDecorator(new MonitorWaveDecorator(panel));
 		panels.add(panel);
 		wavePanel.add(panel);
