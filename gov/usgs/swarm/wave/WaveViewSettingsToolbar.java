@@ -19,6 +19,9 @@ import javax.swing.KeyStroke;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/01 23:45:23  cervelli
+ * Moved package.
+ *
  * Revision 1.6  2006/06/05 18:06:49  dcervelli
  * Major 1.3 changes.
  *
@@ -149,6 +152,30 @@ public class WaveViewSettingsToolbar
 					{
 						if (settings != null)
 							settings.resetAutoScaleMemory();
+					}	
+				});
+		
+		keyComp.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke("OPEN_BRACKET"), "yScaleIn");
+		keyComp.getActionMap().put("yScaleIn", new AbstractAction()
+				{
+					public static final long serialVersionUID = -1;
+					public void actionPerformed(ActionEvent e)
+					{
+						if (settings != null)
+							settings.adjustScale(1.0 / 1.25);
+						System.out.println("scale in");
+					}	
+				});
+		
+		keyComp.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke("CLOSE_BRACKET"), "yScaleOut");
+		keyComp.getActionMap().put("yScaleOut", new AbstractAction()
+				{
+					public static final long serialVersionUID = -1;
+					public void actionPerformed(ActionEvent e)
+					{
+						if (settings != null)
+							settings.adjustScale(1.25);
+						System.out.println("scale out");
 					}	
 				});
 				
