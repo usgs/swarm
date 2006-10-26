@@ -48,6 +48,9 @@ import javax.swing.event.EventListenerList;
  * TODO: move filter method
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2006/08/12 00:36:42  dcervelli
+ * Null check on paintCursor().
+ *
  * Revision 1.6  2006/08/11 21:05:03  dcervelli
  * More repaint madness and filter labels.
  *
@@ -387,7 +390,8 @@ public class WaveViewPanel extends JComponent
 						if (SwingUtilities.isLeftMouseButton(e) && dragging)
 						{	
 							dragging = false;
-							fireZoomed(e, getStartTime(), getEndTime());
+							if (j2k1 != j2k2)
+								fireZoomed(e, getStartTime(), getEndTime());
 							zoomDraggedArea();
 							repaint();
 						}
@@ -512,6 +516,16 @@ public class WaveViewPanel extends JComponent
 		statusLabel = l;	
 	}
 
+	public int getXOffset()
+	{
+		return xOffset;
+	}
+	
+	public int getYOffset()
+	{
+		return yOffset;
+	}
+	
 	public WaveViewSettings getSettings()
 	{
 		return settings;
@@ -706,6 +720,21 @@ public class WaveViewPanel extends JComponent
 		maxAmp = -1E300;
 		maxSpectraPower = -1E300;
 		maxSpectrogramPower = -1E300;
+		settings.autoScaleAmp = true;
+		settings.autoScalePower = true;
+		processSettings();
+	}
+	
+	public void adjustScale(double pct)
+	{
+		double maxa = settings.autoScaleAmp ? maxAmp : settings.maxAmp;
+		double mina = settings.autoScaleAmp ? minAmp : settings.minAmp;
+		settings.autoScaleAmp = false;
+		double range = maxa - mina;
+		double center = range / 2 + mina;
+		double newRange = range * pct;
+		settings.minAmp = center - newRange / 2;
+		settings.maxAmp = center + newRange / 2;
 		processSettings();
 	}
 	
@@ -993,11 +1022,9 @@ public class WaveViewPanel extends JComponent
 	    
 		if (waveRenderer == null)
 		    waveRenderer = new SliceWaveRenderer();
-
+		
 		if (decorator != null)
 			waveRenderer.setFrameDecorator(decorator);
-		
-//		System.out.println(channel);
 		
 		if (md != null && md.getUnit() != null)
 			waveRenderer.setYLabel(md.getUnit());
@@ -1005,24 +1032,20 @@ public class WaveViewPanel extends JComponent
 			waveRenderer.setYLabel("Counts");
 		
 		waveRenderer.setYAxisCoefficients(multiplier, offset);
-//		}
 		waveRenderer.setLocation(xOffset, yOffset, this.getWidth() - xOffset - rightWidth, this.getHeight() - yOffset - bottomHeight);
-//		waveRenderer.setYLimits(minAmp, maxAmp);
 		waveRenderer.setYLimits(minY, maxY);
 		waveRenderer.setViewTimes(startTime, endTime);
 		waveRenderer.setWave(wv);
 		waveRenderer.setRemoveBias(settings.removeBias);
 		waveRenderer.setAutoScale(true);
-//		waveRenderer.setB
 		if (channel != null && displayTitle)
 			waveRenderer.setTitle(channel);
+		
 		waveRenderer.update();
-//		waveRenderer.getAxis().setBackgroundColor(backgroundColor);
 	    plot.addRenderer(waveRenderer);
 		if (useFilterLabel && settings.filterOn)
 			plot.addRenderer(getFilterLabel());
 		translation = waveRenderer.getDefaultTranslation();
-//		titleFrame = waveRenderer;
 	}
 	
 	/** Plots frequency spectra.
@@ -1049,12 +1072,15 @@ public class WaveViewPanel extends JComponent
 	    spectraRenderer.setLogFreq(settings.logFreq);
 	    spectraRenderer.setMaxFreq(settings.maxFreq);
 	    spectraRenderer.setMinFreq(settings.minFreq);
+	    if (channel != null && displayTitle)
+			spectraRenderer.setTitle(channel);
+	    
 	    double power = spectraRenderer.update(maxSpectraPower);
 	    maxSpectraPower = Math.max(maxSpectraPower, power);
 		if (useFilterLabel && settings.filterOn)
 			plot.addRenderer(getFilterLabel());
+		
 		translation = spectraRenderer.getDefaultTranslation();
-//		titleFrame = spectraRenderer;
 		plot.addRenderer(spectraRenderer);
 	}
 
@@ -1086,6 +1112,8 @@ public class WaveViewPanel extends JComponent
 	    spectrogramRenderer.setOverlap(settings.spectrogramOverlap);
 	    spectrogramRenderer.setMaxFreq(settings.maxFreq);
 	    spectrogramRenderer.setMinFreq(settings.minFreq);
+	    if (channel != null && displayTitle)
+			spectrogramRenderer.setTitle(channel);
 	    double power = spectrogramRenderer.update(maxSpectrogramPower);
 	    maxSpectrogramPower = Math.max(maxSpectrogramPower, power);
 	    plot.addRenderer(spectrogramRenderer);
@@ -1128,7 +1156,7 @@ public class WaveViewPanel extends JComponent
 			return;
 		double x = (cursorMark - t[1]) / t[0];
 		g2.setColor(DARK_RED);
-		g2.draw(new Line2D.Double(x, yOffset + 1, x, getSize().height - yOffset));
+		g2.draw(new Line2D.Double(x, yOffset + 1, x, getHeight() - bottomHeight - 1));
 	}
 	
 	private void paintMark(Graphics2D g2, double j2k)
@@ -1139,7 +1167,7 @@ public class WaveViewPanel extends JComponent
 		double[] t = getTranslation();
 		double x = (j2k - t[1]) / t[0];
 		g2.setColor(DARK_GREEN);
-		g2.draw(new Line2D.Double(x, yOffset, x, getSize().height - yOffset));
+		g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
 		
 		GeneralPath gp = new GeneralPath();
 		gp.moveTo((float)x, yOffset);
