@@ -7,11 +7,14 @@ import gov.usgs.swarm.SwarmFrame;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.Throbber;
+import gov.usgs.swarm.TimeListener;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.heli.HelicorderViewPanelListener;
 import gov.usgs.util.Time;
 import gov.usgs.util.Util;
+import gov.usgs.util.png.PngEncoder;
+import gov.usgs.util.png.PngEncoderB;
 import gov.usgs.util.ui.ExtensionFileFilter;
 import gov.usgs.vdx.data.wave.SAC;
 import gov.usgs.vdx.data.wave.Wave;
@@ -24,10 +27,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -63,6 +70,9 @@ import javax.swing.event.InternalFrameEvent;
  * The wave clipboard internal frame.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/08/11 21:04:34  dcervelli
+ * Now subclass of SwarmFrame.
+ *
  * Revision 1.3  2006/08/09 21:49:46  cervelli
  * Many changes including resizable waves and permanent scrollbar.
  *
@@ -147,6 +157,7 @@ public class WaveClipboardFrame extends SwarmFrame
 	private JButton saveButton;
 	private JButton saveAllButton;
 	private JButton openButton;
+	private JButton captureButton;
 	private DateFormat saveAllDateFormat;
 	
 	private WaveViewSettingsToolbar waveToolbar;
@@ -160,6 +171,7 @@ public class WaveClipboardFrame extends SwarmFrame
 	private JButton forwardButton;
 	private JButton backButton;
 	private JButton gotoButton;
+	
 	
 	private JPopupMenu popup;
 	
@@ -175,7 +187,7 @@ public class WaveClipboardFrame extends SwarmFrame
 	
 	public WaveClipboardFrame()
 	{
-		super("Wave Clipboard", true, true, true, true);
+		super("Wave Clipboard", true, true, true, false);
 		this.setFocusable(true);
 		saveAllDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 		saveAllDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -197,7 +209,7 @@ public class WaveClipboardFrame extends SwarmFrame
 		return linkListener;
 	}
 	
-	public void createUI()
+	private void createUI()
 	{
 		this.setFrameIcon(Images.getIcon("clipboard"));
 		this.setSize(Swarm.config.clipboardWidth, Swarm.config.clipboardHeight);
@@ -324,6 +336,71 @@ public class WaveClipboardFrame extends SwarmFrame
 				});
 		removeAllButton.setEnabled(false);
 		toolbar.add(removeAllButton);
+		
+		toolbar.addSeparator();
+		captureButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("camera"),
+				"Save clipboard image (P)",
+				new CaptureActionListener());
+		Util.mapKeyStrokeToButton(this, "P", "capture", captureButton);
+		toolbar.add(captureButton);
+	}
+	
+	// TODO: don't write image on event thread
+	// TODO: unify with MapFrame.CaptureActionListener
+	class CaptureActionListener implements ActionListener
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			if (waves == null || waves.size() == 0)
+				return;
+			
+			JFileChooser chooser = Swarm.getApplication().getFileChooser();
+			File lastPath = new File(Swarm.config.lastPath);
+			chooser.setCurrentDirectory(lastPath);
+			chooser.setSelectedFile(new File("clipboard.png"));
+			int result = chooser.showSaveDialog(Swarm.getApplication());
+			File f = null;
+			if (result == JFileChooser.APPROVE_OPTION) 
+			{						 
+				f = chooser.getSelectedFile();
+
+				if (f.exists()) 
+				{
+					int choice = JOptionPane.showConfirmDialog(Swarm.getApplication(), "File exists, overwrite?", "Confirm", JOptionPane.YES_NO_OPTION);
+					if (choice != JOptionPane.YES_OPTION) 
+						return;
+			    }
+				Swarm.config.lastPath = f.getParent();
+			}
+			if (f == null)
+				return;
+
+			int height = 0;
+			int width = waves.get(0).getWidth();
+			for (WaveViewPanel panel : waves)
+				height += panel.getHeight();
+			
+			BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+			Graphics g = image.getGraphics();
+			for (WaveViewPanel panel : waves)
+			{
+				panel.paint(g);
+				g.translate(0, panel.getHeight());
+			}
+			try
+	        {
+	            PngEncoderB png = new PngEncoderB(image, false, PngEncoder.FILTER_NONE, 7);
+	            FileOutputStream out = new FileOutputStream(f);
+	            byte[] bytes = png.pngEncode();
+	            out.write(bytes);
+	            out.close();
+	        }
+	        catch (Exception ex)
+	        {
+	            ex.printStackTrace();
+	        }
+		}
 	}
 	
 	private void createWaveButtons()
@@ -521,6 +598,36 @@ public class WaveClipboardFrame extends SwarmFrame
 						resizeWaves();
 					}
 				});
+		
+		this.addKeyListener(new KeyAdapter()
+				{
+					public void keyPressed(KeyEvent e)
+					{
+						if (e.isShiftDown() && e.getKeyCode() == KeyEvent.VK_R)
+						{
+							resetAllAutoScaleMemory();
+						}
+					}
+				});
+				
+		
+		Swarm.getApplication().addTimeListener(new TimeListener()
+				{
+					public void timeChanged(double j2k)
+					{
+						for (WaveViewPanel panel : waves)
+						{
+							if (panel != null)
+								panel.setCursorMark(j2k);
+						}
+					}
+				});
+	}
+	
+	public void resetAllAutoScaleMemory()
+	{
+		for (WaveViewPanel panel : waves)
+			panel.resetAutoScaleMemory();
 	}
 	
 	private int calculateWaveHeight()
@@ -920,42 +1027,6 @@ public class WaveClipboardFrame extends SwarmFrame
 		return selected;
 	}
 	
-	/*
-	private class ClipboardWaveDecorator extends FrameDecorator
-	{
-		private WaveViewPanel panel;
-		
-		public ClipboardWaveDecorator(WaveViewPanel p)
-		{
-			panel = p;
-		}
-		
-		public void decorate(FrameRenderer fr)
-		{
-			fr.createEmptyAxis();
-			AxisRenderer ar = fr.getAxis();
-			ar.createDefault();
-			ar.setBackgroundColor(Color.WHITE);
-			if (selected == panel)
-				ar.setBackgroundColor(SELECT_COLOR);
-				
-			TextRenderer label = new TextRenderer(fr.getGraphX() + 4, fr.getGraphY() + 14, panel.getChannel(), Color.BLACK);
-			label.backgroundColor = Color.WHITE;
-			
-			int hTicks = fr.getGraphWidth() / 108;
-			Object[] stt = SmartTick.autoTimeTick(fr.getMinXAxis(), fr.getMaxXAxis(), hTicks);
-	        if (stt != null)
-	        	ar.createVerticalGridLines((double[])stt[0]);
-	        
-	        ar.createBottomTickLabels((double[])stt[0], (String[])stt[1]);
-	        int vTicks = fr.getGraphHeight() / 24;
-	        fr.createDefaultYAxis(vTicks, false);
-	        
-	        ar.addPostRenderer(label);
-		}
-	}
-	*/
-	
 	public synchronized void addWave(final WaveViewPanel p)
 	{
 		p.addListener(new WaveViewPanelAdapter()
@@ -975,6 +1046,7 @@ public class WaveClipboardFrame extends SwarmFrame
 		p.setOffsets(54, 7, 7, 18);
 		p.setStatusLabel(statusLabel);
 		p.setAllowDragging(true);
+		p.setDisplayTitle(true);
 //		p.setFrameDecorator(new ClipboardWaveDecorator(p));
 		int w = scrollPane.getViewport().getSize().width;
 		p.setSize(w, calculateWaveHeight());
@@ -983,6 +1055,7 @@ public class WaveClipboardFrame extends SwarmFrame
 		waves.add(p);
 		doButtonEnables();
 		waveBox.validate();
+		select(p);
 	}
 	
 	public synchronized void select(final WaveViewPanel p)
@@ -1029,6 +1102,7 @@ public class WaveClipboardFrame extends SwarmFrame
 		}
 		doButtonEnables();
 		waveBox.validate();
+		repaint();
 	}
 	
 	public synchronized void moveDown(WaveViewPanel p)
