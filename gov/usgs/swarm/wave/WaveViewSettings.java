@@ -6,6 +6,9 @@ import gov.usgs.util.ConfigFile;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/01 23:45:23  cervelli
+ * Moved package.
+ *
  * Revision 1.2  2006/06/05 18:06:49  dcervelli
  * Major 1.3 changes.
  *
@@ -231,6 +234,12 @@ public class WaveViewSettings
 	{
 		if (view != null)
 			view.resetAutoScaleMemory();
+	}
+	
+	public void adjustScale(double pct)
+	{
+		if (view != null)
+			view.adjustScale(pct);
 	}
 	
 	public void notifyView()
