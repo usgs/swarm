@@ -3,6 +3,7 @@ package gov.usgs.swarm.map;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.plot.map.GeoImageSet;
+import gov.usgs.plot.map.GeoLabelSet;
 import gov.usgs.plot.map.MapRenderer;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.Mercator;
@@ -19,6 +20,7 @@ import gov.usgs.swarm.map.MapMiniPanel.Position;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.swarm.wave.WaveViewPanel;
 import gov.usgs.util.ConfigFile;
+import gov.usgs.util.Pair;
 import gov.usgs.util.Util;
 
 import java.awt.BorderLayout;
@@ -64,6 +66,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2006/08/15 17:54:40  dcervelli
+ * Added great circle route and circle drawing functions.
+ *
  * Revision 1.15  2006/08/14 22:46:43  dcervelli
  * Changes for helicorder slowdown bug.
  *
@@ -171,6 +176,7 @@ public class MapPanel extends JPanel
 	private List<Line2D.Double> lines;
 	
 	private GeoImageSet images;
+	private GeoLabelSet labels;
 	private GeoRange range;
 	private Projection projection;
 	private RenderedImage image;
@@ -323,7 +329,12 @@ public class MapPanel extends JPanel
 	
 	private void createUI()
 	{
-		images = GeoImageSet.loadMapPacks(Swarm.config.mapPath);
+		Pair<GeoImageSet, GeoLabelSet> pair = GeoImageSet.loadMapPacks(Swarm.config.mapPath);
+		if (pair != null)
+		{
+			images = pair.item1;
+			labels = pair.item2;
+		}
 		if (images == null)
 		{
 			Swarm.logger.warning("No map images found.");
@@ -501,6 +512,10 @@ public class MapPanel extends JPanel
 										addSelectedPanel(panel);
 								}
 							}
+						}
+						if (e.isShiftDown() && e.getKeyCode() == KeyEvent.VK_R)
+						{
+							resetAllAutoScaleMemory();
 						}
 					}
 		
@@ -875,6 +890,12 @@ public class MapPanel extends JPanel
 		return mapImage != null;
 	}
 	
+	public void resetAllAutoScaleMemory()
+	{
+		for (MapMiniPanel panel : visiblePanels)
+			panel.getWaveViewPanel().resetAutoScaleMemory();
+	}
+	
 	public void resetImage()
 	{
 		resetImage(true);
@@ -931,6 +952,7 @@ public class MapPanel extends JPanel
 					image = images.getMapBackground(projection, range, width, scale);
 					mr.setLocation(INSET, INSET, width);
 					mr.setMapImage(image);
+					mr.setGeoLabelSet(labels);
 					mr.createGraticule(6, true);
 					mr.createBox(6);
 					mr.createScaleRenderer(1 / projection.getScale(center), INSET, 14);
@@ -1208,9 +1230,13 @@ public class MapPanel extends JPanel
 					g2.drawImage(mapImage, 0, 0, null);
 				}
 				
-				g.setColor(Color.BLACK);
+//				g.setColor(Color.WHITE);
+				g.setXORMode(Color.WHITE);
 				for (Line2D.Double line : lines)
+				{
 					g2.draw(line);
+				}
+				g.setPaintMode();
 				
 				g.setColor(Color.RED);
 				if (dragRectangle != null)
