@@ -19,6 +19,9 @@ import javax.swing.border.EmptyBorder;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/08/08 22:20:57  cervelli
+ * Correct tab now chosen when editing.
+ *
  * Revision 1.1  2006/08/01 23:43:13  cervelli
  * Moved package and new data source panel system.
  *
@@ -94,8 +97,6 @@ public class EditDataSourceDialog extends SwarmDialog
 		name = new JTextField(30);
 		namePanel.add(name);
 		name.setText(n);
-		if (edit)
-			name.setEnabled(false);
 		dsPanel.add(namePanel, BorderLayout.NORTH);
 		dsPanel.setBorder(new EmptyBorder(new Insets(10,10,10,10)));
 		mainPanel.add(dsPanel, BorderLayout.CENTER);
