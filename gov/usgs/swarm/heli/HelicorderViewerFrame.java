@@ -61,6 +61,9 @@ import javax.swing.event.InternalFrameEvent;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/08/12 21:52:29  dcervelli
+ * New kiosk code.
+ *
  * Revision 1.4  2006/08/11 21:01:07  dcervelli
  * Changes for small helicorder view.
  *
@@ -233,11 +236,12 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 		refreshThread = new RefreshThread();
 	}
 	
-	public HelicorderViewerFrame(SeismicDataSource sds, String ch)
+	public HelicorderViewerFrame(SeismicDataSource sds, String ch, double bt)
 	{
 		super(ch + ", [" + sds + "]", true, true, true, true);
 		Swarm.getApplication().touchUITime();
 		settings = new HelicorderViewerSettings(ch);
+		settings.setBottomTime(bt);
 		waveViewSettings = new WaveViewSettings();
 		dataSource = sds.getCopy();
 		
