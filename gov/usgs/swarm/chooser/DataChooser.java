@@ -12,6 +12,7 @@ import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.data.SeismicDataSourceListener;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Pair;
+import gov.usgs.util.Time;
 import gov.usgs.util.Util;
 
 import java.awt.BorderLayout;
@@ -26,6 +27,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -39,10 +41,12 @@ import java.util.TreeMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -50,6 +54,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
@@ -70,6 +75,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/08/14 22:44:20  dcervelli
+ * New bullets and changed 'Nearest' to 'Distance'
+ *
  * Revision 1.9  2006/08/12 21:51:23  dcervelli
  * File data source progress indicators.
  *
@@ -135,6 +143,9 @@ public class DataChooser extends JPanel
 	private static final long serialVersionUID = 1L;
 	private static final String OPENING_MESSAGE = Messages.getString("DataChooser.treeOpening"); //$NON-NLS-1$
 	
+	private static final String[] TIME_VALUES = new String[] { "Now" }; //"Today (Local)", "Today (UTC)", 
+			//"Yesterday (Local)", "Yesterday (UTC)" };
+	
 	private static final int MAX_CHANNELS_AT_ONCE = 500;
 	public static final Color LINE_COLOR = new Color(0xac, 0xa8, 0x99);
 	
@@ -157,6 +168,7 @@ public class DataChooser extends JPanel
 	private JButton collapseButton;
 	private JButton deleteButton;
 	
+	private JComboBox timeBox;
 	private JButton heliButton;
 	private JButton clipboardButton;
 	private JButton monitorButton;
@@ -400,10 +412,65 @@ public class DataChooser extends JPanel
 		this.add(toolBar, BorderLayout.NORTH);
 	}
 	
+	private void addTimeToBox(String t)
+	{
+		DefaultComboBoxModel model = (DefaultComboBoxModel)timeBox.getModel();
+		for (int i = 0; i < model.getSize(); i++)
+		{
+			if (model.getElementAt(i).equals(t))
+			{
+				model.removeElementAt(i);
+				break;
+			}
+		}
+		model.insertElementAt(t, 1);
+		timeBox.setSelectedIndex(1);
+	}
+	
+	public String[] getUserTimes()
+	{
+		DefaultComboBoxModel model = (DefaultComboBoxModel)timeBox.getModel();
+		String[] result = new String[model.getSize() - 1];
+		for (int i = 1; i < model.getSize(); i++)
+			result[i - 1] = (String)model.getElementAt(i);
+		return result;
+	}
+	
+	private double getTime()
+	{
+		double j2k = Double.NaN;
+		String t0 = ((JTextField)timeBox.getEditor().getEditorComponent()).getText();
+		if (t0.equals(TIME_VALUES[0]))
+		{
+			// now
+		}
+		else
+		{
+			String t = t0;
+			// custom time
+			if (t.length() == 8)
+				t += "2359";
+			
+			try 
+			{
+				j2k = Time.parseEx("yyyyMMddHHmm", t);
+				addTimeToBox(t0);
+			}
+			catch (ParseException e)
+			{
+				String message = "Invalid time; legal format is 'YYYYMMDD' or 'YYYYMMDDhhmm', using 'Now' instead.";
+				JOptionPane.showMessageDialog(Swarm.getApplication(), 
+						message, "Time Error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		return j2k;
+	}
+	
 	private void createActionBar()
 	{
-		JPanel actionPanel = new JPanel(new GridLayout(1, 4));
-		actionPanel.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
+		JPanel bottomPanel = new JPanel(new GridLayout(2, 1));
+		JPanel actionPanel = new JPanel(new GridLayout(1, 5));
+		bottomPanel.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
 
 		heliButton = new JButton(Images.getIcon("heli")); //$NON-NLS-1$
 		heliButton.setFocusable(false);
@@ -419,9 +486,10 @@ public class DataChooser extends JPanel
 										List<Pair<ServerNode, String>> channels = getSelections();
 										if (channels != null)
 										{
+											double j2k = getTime();
 											for (Pair<ServerNode, String> pair : channels)
 											{
-												Swarm.getApplication().openHelicorder(pair.item1.getSource(), pair.item2);
+												Swarm.getApplication().openHelicorder(pair.item1.getSource(), pair.item2, j2k);
 											}
 										}
 										return null;
@@ -556,7 +624,27 @@ public class DataChooser extends JPanel
 		actionPanel.add(realtimeButton);
 		actionPanel.add(mapButton);
 		
-		add(actionPanel, BorderLayout.SOUTH);
+		JPanel timePanel = new JPanel(new BorderLayout());
+		timeBox = new JComboBox(TIME_VALUES);
+		for (String ut : Swarm.config.userTimes)
+		{
+			if (ut.length() > 0)
+				timeBox.addItem(ut);
+		}
+		timeBox.setEditable(true);
+		timeBox.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						// add items to listbox
+						// timeBox.addItem(timeBox.getSelectedItem());
+					}
+				});
+		timePanel.add(new JLabel("Open to: "), BorderLayout.WEST);
+		timePanel.add(timeBox, BorderLayout.CENTER);
+		bottomPanel.add(timePanel);
+		bottomPanel.add(actionPanel);
+		add(bottomPanel, BorderLayout.SOUTH);
 	}
 	
 	public int getDividerLocation()
@@ -831,6 +919,18 @@ public class DataChooser extends JPanel
 		
 		dataTree.addMouseListener(new MouseAdapter()
 				{
+					public void mousePressed(MouseEvent e)
+					{
+						if (e.isPopupTrigger())
+							doTreePopup(e);
+					}
+					
+					public void mouseReleased(MouseEvent e)
+					{
+						if (e.isPopupTrigger())
+							doTreePopup(e);
+					}
+					
 					public void mouseClicked(MouseEvent e)
 					{
 						if (e.getClickCount() == 1)
@@ -877,6 +977,29 @@ public class DataChooser extends JPanel
 		
 	}
 
+	private void doTreePopup(MouseEvent e)
+	{
+//		JPopupMenu popup = new JPopupMenu();
+//		JMenuItem item;
+//		
+//		System.out.println("tree popup: " + e);
+//		TreePath path = dataTree.getPathForLocation(e.getX(), e.getY());
+//		if (path != null)
+//		{
+//			ChooserNode node = (ChooserNode)path.getLastPathComponent();
+//			item = new JMenuItem("Other");
+//			if (node instanceof ServerNode)
+//				item = new JMenuItem("ServerNode");
+//			else if (node instanceof GroupNode)
+//				item = new JMenuItem("GroupNode");
+//			else if (node instanceof ChannelNode)
+//				item = new JMenuItem("ChannelNode");
+//			popup.add(item);
+//			dataTree.setSelectionPath(path);
+//			popup.show(dataTree, e.getX(), e.getY());
+//		}
+	}
+	
 	public void setNearest(final String channel)
 	{
 		if (channel == null || channel.equals(lastNearest))
@@ -915,8 +1038,9 @@ public class DataChooser extends JPanel
 					{
 						if (!e.getValueIsAdjusting())
 						{
-							dataTree.clearSelection();
 							Object[] sels = nearestList.getSelectedValues();
+							if (sels.length > 0)
+								dataTree.clearSelection();
 							for (Object o : sels)
 							{
 								String ch = (String)o;
@@ -1138,6 +1262,7 @@ public class DataChooser extends JPanel
 		private static final long serialVersionUID = 1L;
 		public Icon getIcon() { return null; }
 		public String getLabel() { return null; }
+//		public JPopupMenu getPopup() { return null; }
 	}
 	
 	private class ServerNode extends ChooserNode
