@@ -18,6 +18,9 @@ import java.util.TreeMap;
  * Swarm configuration class. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2006/08/14 22:42:37  dcervelli
+ * Changed layouts to be a map.
+ *
  * Revision 1.12  2006/08/09 21:53:29  cervelli
  * Removed groupConfigFile and changed NZ Iris source.
  *
@@ -117,6 +120,8 @@ public class Config
 	public double mapLongitude;
 	public double mapLatitude;
 	public String mapPath;
+	
+	public String[] userTimes;
 	
 	public Map<String, SeismicDataSource> sources;
 	
@@ -326,6 +331,8 @@ public class Config
 				sources.put(sds.getName(), sds);
 			}
 		}
+		
+		userTimes = Util.stringToString(config.getString("userTimes"), "").split(",");
 	}
 	
 	public SeismicDataSource getSource(String key)
@@ -437,6 +444,15 @@ public class Config
 		}
 		
 		config.putList("server", servers);
+		
+		StringBuilder utsb = new StringBuilder();
+		for (int i = 0; i < userTimes.length - 1; i++)
+		{
+			utsb.append(userTimes[i]);
+			utsb.append(",");
+		}
+		utsb.append(userTimes[userTimes.length - 1]);
+		config.put("userTimes", utsb.toString());
 		
 		return config;
 	}
