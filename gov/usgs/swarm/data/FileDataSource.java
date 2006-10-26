@@ -48,6 +48,9 @@ import javax.swing.JScrollPane;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2006/08/14 22:45:09  dcervelli
+ * Double-click maps to OK.
+ *
  * Revision 1.3  2006/08/12 21:51:53  dcervelli
  * Addition of id to channelProgress().
  *
@@ -247,15 +250,16 @@ public class FileDataSource extends CachedDataSource
 					Swarm.logger.warning("unknown file type: " + fs[i].getPath());
 					break;
 			}
-			try
-			{
-				
-			}
-			catch (Throwable t)
-			{
-				
-				t.printStackTrace();
-			}
+//			try
+//			{
+//				
+//			}
+//			catch (Throwable t)
+//			{
+//				
+//				t.printStackTrace();
+//			}
+			Swarm.config.lastPath = fs[i].getParent();
 		}
 	}
 	
@@ -349,7 +353,10 @@ public class FileDataSource extends CachedDataSource
 						Blockette b = (Blockette)object;
 						if (b.getType() != 999)
 							continue;
-						String code = b.getFieldVal(4) + "_" + b.getFieldVal(6) + "_" + b.getFieldVal(7);
+						String loc = ("_" + b.getFieldVal(5)).trim();
+						if (loc.length() == 1)
+							loc = "";
+						String code = b.getFieldVal(4) + "_" + b.getFieldVal(6) + "_" + b.getFieldVal(7) + loc;
 						Metadata md = Swarm.config.getMetadata(code, true);
 						md.addGroup("SEED^" + fn);
 						
