@@ -2,6 +2,7 @@ package gov.usgs.swarm;
 
 /**
  * 
+ * $Log: not supported by cvs2svn $
  * @author Dan Cervelli
  */
 public class SCNL
@@ -28,6 +29,6 @@ public class SCNL
 	
 	public String toString()
 	{
-		return station + " " + channel + " " + network + (location != null ? location : "");
+		return station + " " + channel + " " + network + (location != null ? (" " + location) : "");
 	}
 }
