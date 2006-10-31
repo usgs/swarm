@@ -1,2 +1,5 @@
 @echo off
-java -Xmx256M -jar lib/swarm.jar %1 %2 %3 %4 %5 %6 %7 %8 %9
+set OLDPATH=%PATH%
+set PATH=%PATH%;.\lib
+java -Xmx256M -jar lib/Swarm.jar %1 %2 %3 %4 %5 %6 %7 %8 %9
+set PATH=%OLDPATH%
