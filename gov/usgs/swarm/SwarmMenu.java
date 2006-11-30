@@ -35,6 +35,9 @@ import javax.swing.event.MenuListener;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/10/26 00:48:18  dcervelli
+ * Makes sure windows aren't iconified before bringing them to the front.
+ *
  * Revision 1.9  2006/08/14 22:43:52  dcervelli
  * Remove layout dialog box.
  *
@@ -76,8 +79,10 @@ public class SwarmMenu extends JMenuBar
 	private JMenu editMenu;
 	private JMenuItem options;
 	
+	private String lastLayoutName;
 	private JMenu layoutMenu;
 	private JMenuItem saveLayout;
+	private JMenuItem saveLastLayout;
 	private JMenuItem removeLayouts;
 	
 	private JMenu windowMenu;
@@ -222,11 +227,25 @@ public class SwarmMenu extends JMenuBar
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						Swarm.getApplication().saveLayout();
+						Swarm.getApplication().saveLayout(null);
 					}
 				});
 		saveLayout.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK));
 		layoutMenu.add(saveLayout);
+		
+		saveLastLayout = new JMenuItem("Overwrite Last Layout...");
+		saveLastLayout.setMnemonic('L');
+		saveLastLayout.setEnabled(false);
+		saveLastLayout.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						if (lastLayoutName != null)
+							Swarm.getApplication().saveLayout(lastLayoutName);
+					}
+				});
+		saveLastLayout.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK));
+		layoutMenu.add(saveLastLayout);
 		
 		removeLayouts = new JMenuItem("Remove Layout...");
 		removeLayouts.setMnemonic('R');
@@ -243,6 +262,18 @@ public class SwarmMenu extends JMenuBar
 		add(layoutMenu);
 	}
 	
+	public String getLastLayoutName()
+	{
+		return lastLayoutName;
+	}
+	
+	public void setLastLayoutName(String ln)
+	{
+		lastLayoutName = ln;
+		saveLastLayout.setEnabled(true);
+		saveLastLayout.setText("Overwrite Last Layout (" + ln + ")");
+	}
+	
 	public void addLayout(final SwarmLayout sl)
 	{
 		JMenuItem mi = new JMenuItem(sl.getName());
@@ -251,10 +282,11 @@ public class SwarmMenu extends JMenuBar
 					public void actionPerformed(ActionEvent e)
 					{
 						sl.process();
+						setLastLayoutName(sl.getName());
 					}
 				});
 		int i;
-		for (i = 3; i < layoutMenu.getItemCount(); i++)
+		for (i = 4; i < layoutMenu.getItemCount(); i++)
 		{
 			JMenuItem m = layoutMenu.getItem(i);
 			if (m.getText().compareToIgnoreCase(sl.getName()) >= 0)
