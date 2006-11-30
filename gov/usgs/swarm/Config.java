@@ -18,6 +18,9 @@ import java.util.TreeMap;
  * Swarm configuration class. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2006/10/26 00:47:07  dcervelli
+ * Added userTimes variable.
+ *
  * Revision 1.13  2006/08/14 22:42:37  dcervelli
  * Changed layouts to be a map.
  *
@@ -451,7 +454,8 @@ public class Config
 			utsb.append(userTimes[i]);
 			utsb.append(",");
 		}
-		utsb.append(userTimes[userTimes.length - 1]);
+		if (userTimes.length > 0)
+			utsb.append(userTimes[userTimes.length - 1]);
 		config.put("userTimes", utsb.toString());
 		
 		return config;
