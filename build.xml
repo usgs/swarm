@@ -1,5 +1,8 @@
 <!--
 $Log: not supported by cvs2svn $
+Revision 1.10  2006/08/29 21:25:54  dcervelli
+Changed classpath.
+
 Revision 1.9  2006/08/29 21:24:02  dcervelli
 Changed classpath.
 
@@ -72,7 +75,7 @@ bin-dist -- generates new binary distribution
 
 	<target name="jar" depends="compile">
 		<mkdir dir="${source}/../USGS/lib"/>
-		<jar destfile="${source}/../USGS/lib/${jarfile}" basedir="${source}" includes="**/*.class"/>	
+		<jar destfile="${source}/../USGS/lib/${jarfile}" basedir="${source}" target="1.5" includes="**/*.class"/>	
 	</target>
 
 	<target name="bin-dist" depends="init,compile">
