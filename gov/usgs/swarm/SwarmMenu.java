@@ -35,6 +35,9 @@ import javax.swing.event.MenuListener;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2006/11/30 17:40:00  dcervelli
+ * Changes for tweakable layouts.
+ *
  * Revision 1.10  2006/10/26 00:48:18  dcervelli
  * Makes sure windows aren't iconified before bringing them to the front.
  *
@@ -76,7 +79,6 @@ public class SwarmMenu extends JMenuBar
 	private JMenuItem clearCache;
 	private JMenuItem exit;
 	
-	private JMenu editMenu;
 	private JMenuItem options;
 	
 	private String lastLayoutName;
@@ -109,7 +111,6 @@ public class SwarmMenu extends JMenuBar
 		windows = new HashMap<JInternalFrame, InternalFrameMenuItem>();
 		layouts = new HashMap<SwarmLayout, JMenuItem>();
 		createFileMenu();
-		createEditMenu();
 		createLayoutMenu();
 		createWindowMenu();
 		createHelpMenu();
@@ -133,6 +134,7 @@ public class SwarmMenu extends JMenuBar
 						chooser.setCurrentDirectory(lastPath);
 						chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 						chooser.setMultiSelectionEnabled(true);
+						chooser.setDialogTitle("Open Wave as Data Source");
 						int result = chooser.showOpenDialog(Swarm.getApplication());
 						if (result == JFileChooser.APPROVE_OPTION)
 						{
@@ -170,6 +172,20 @@ public class SwarmMenu extends JMenuBar
 		fileMenu.add(clearCache);
 		fileMenu.addSeparator();
 		
+		options = new JMenuItem("Options...");
+		options.setMnemonic('O');
+		options.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						OptionsDialog od = new OptionsDialog();
+						od.setVisible(true);
+					}
+				});
+		fileMenu.add(options);
+		
+		fileMenu.addSeparator();
+		
 		exit = new JMenuItem("Exit");
 		exit.setMnemonic('x');
 		exit.addActionListener(new ActionListener()
@@ -198,24 +214,6 @@ public class SwarmMenu extends JMenuBar
 				});
 	}
 
-	private void createEditMenu()
-	{
-		editMenu = new JMenu("Edit");
-		editMenu.setMnemonic('E');
-		options = new JMenuItem("Options...");
-		options.setMnemonic('O');
-		options.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						OptionsDialog od = new OptionsDialog();
-						od.setVisible(true);
-					}
-				});
-		editMenu.add(options);
-		add(editMenu);
-	}
-	
 	private void createLayoutMenu()
 	{
 		layoutMenu = new JMenu("Layout");
