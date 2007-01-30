@@ -59,6 +59,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: name worker thread for better debugging
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.38  2006/11/30 17:40:17  dcervelli
+ * Changes for tweakable layouts and version bump.
+ *
  * Revision 1.37  2006/10/26 00:47:48  dcervelli
  * Support for opening helicorder to specific time and userTimes config variable.
  *
@@ -220,7 +223,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.0.0.20061130-beta-6";
+	private static final String VERSION = "2.0.0.20070130-beta-6";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
