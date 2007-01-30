@@ -70,6 +70,9 @@ import javax.swing.event.InternalFrameEvent;
  * The wave clipboard internal frame.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/10/26 00:56:10  dcervelli
+ * Camera button, global rescale, red line, labels, non-iconifiable frame, deletion repaint bug fixed.
+ *
  * Revision 1.4  2006/08/11 21:04:34  dcervelli
  * Now subclass of SwarmFrame.
  *
@@ -359,6 +362,7 @@ public class WaveClipboardFrame extends SwarmFrame
 			File lastPath = new File(Swarm.config.lastPath);
 			chooser.setCurrentDirectory(lastPath);
 			chooser.setSelectedFile(new File("clipboard.png"));
+			chooser.setDialogTitle("Save Clipboard Screen Capture");
 			int result = chooser.showSaveDialog(Swarm.getApplication());
 			File f = null;
 			if (result == JFileChooser.APPROVE_OPTION) 
@@ -691,6 +695,7 @@ public class WaveClipboardFrame extends SwarmFrame
 			ExtensionFileFilter sacExt = new ExtensionFileFilter(".sac", "SAC files");
 			chooser.addChoosableFileFilter(txtExt);
 			chooser.addChoosableFileFilter(sacExt);
+			chooser.setDialogTitle("Open Wave");
 			chooser.setFileFilter(chooser.getAcceptAllFileFilter());
 			File lastPath = new File(Swarm.config.lastPath);
 			chooser.setCurrentDirectory(lastPath);
@@ -733,6 +738,7 @@ public class WaveClipboardFrame extends SwarmFrame
 			chooser.resetChoosableFileFilters();
 			chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 			chooser.setMultiSelectionEnabled(false);
+			chooser.setDialogTitle("Save Wave");
 			
 			ExtensionFileFilter txtExt = new ExtensionFileFilter(".txt", "Matlab-readable text files");
 			ExtensionFileFilter sacExt = new ExtensionFileFilter(".sac", "SAC files");
@@ -813,10 +819,13 @@ public class WaveClipboardFrame extends SwarmFrame
 			chooser.resetChoosableFileFilters();
 			chooser.setMultiSelectionEnabled(false);
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			chooser.setDialogTitle("Save SAC File Directory");
 			
 			File lastPath = new File(Swarm.config.lastPath);
 			chooser.setCurrentDirectory(lastPath);
 			int result = chooser.showSaveDialog(Swarm.getApplication());
+			if (result == JFileChooser.CANCEL_OPTION)
+				return;
 			File f = chooser.getSelectedFile();
 			if (f == null)
 			{
@@ -1042,8 +1051,14 @@ public class WaveClipboardFrame extends SwarmFrame
 						double[] t = new double[] {st, et};
 						addHistory(p, t);
 					}
+					
+//					public void waveClosed()
+//					{
+//						System.out.println("closed");
+//					}
 				});
 		p.setOffsets(54, 7, 7, 18);
+		//p.setAllowClose(true);
 		p.setStatusLabel(statusLabel);
 		p.setAllowDragging(true);
 		p.setDisplayTitle(true);
