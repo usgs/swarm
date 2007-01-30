@@ -15,6 +15,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -36,6 +38,9 @@ import javax.swing.border.TitledBorder;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/01 23:44:22  cervelli
+ * Moved package.
+ *
  * Revision 1.16  2006/07/30 22:43:03  cervelli
  * Changes for layouts.
  *
@@ -197,7 +202,16 @@ public class HelicorderViewerSettingsDialog extends SwarmDialog
 		JLabel bottomLabel = new JLabel("View time:");
 		bottomLabel.setLabelFor(bottomTime);
 		bottomLabel.setToolTipText("Format: YYYYMMDDhhmm");
-		
+		bottomTime.addFocusListener(new FocusListener()
+				{
+					public void focusGained(FocusEvent e)
+					{
+						bottomTime.selectAll();
+					}
+					
+					public void focusLost(FocusEvent e)
+					{}
+				});
 		JPanel axisPanel = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		axisPanel.setBorder(new TitledBorder(new EtchedBorder(), "Axes"));
