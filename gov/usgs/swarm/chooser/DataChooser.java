@@ -22,6 +22,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -75,6 +77,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2006/10/26 00:50:25  dcervelli
+ * Fixed bug with disappearing selections after using the nearest box, also added user time window
+ *
  * Revision 1.10  2006/08/14 22:44:20  dcervelli
  * New bullets and changed 'Nearest' to 'Distance'
  *
@@ -639,6 +644,16 @@ public class DataChooser extends JPanel
 						// add items to listbox
 						// timeBox.addItem(timeBox.getSelectedItem());
 					}
+				});
+		timeBox.getEditor().getEditorComponent().addFocusListener(new FocusListener()
+				{
+					public void focusGained(FocusEvent e)
+					{
+						timeBox.getEditor().selectAll();
+					}
+					
+					public void focusLost(FocusEvent e)
+					{}
 				});
 		timePanel.add(new JLabel("Open to: "), BorderLayout.WEST);
 		timePanel.add(timeBox, BorderLayout.CENTER);
