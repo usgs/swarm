@@ -52,6 +52,9 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2006/10/26 00:52:31  dcervelli
+ * Made frame not iconifiable.
+ *
  * Revision 1.15  2006/08/14 22:45:54  dcervelli
  * Changes for map settings window.
  *
@@ -552,6 +555,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable
 			File lastPath = new File(Swarm.config.lastPath);
 			chooser.setCurrentDirectory(lastPath);
 			chooser.setSelectedFile(new File("map.png"));
+			chooser.setDialogTitle("Save Map Screen Capture");
 			int result = chooser.showSaveDialog(Swarm.getApplication());
 			File f = null;
 			if (result == JFileChooser.APPROVE_OPTION) 

@@ -61,6 +61,9 @@ import javax.swing.event.InternalFrameEvent;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/10/26 00:51:56  dcervelli
+ * Change for user specified end times from chooser.
+ *
  * Revision 1.5  2006/08/12 21:52:29  dcervelli
  * New kiosk code.
  *
@@ -1008,6 +1011,8 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 	    public void actionPerformed(ActionEvent e)
 		{
 			chooser = Swarm.getApplication().getFileChooser();
+			chooser.setDialogTitle("Save Helicorder Screen Capture");
+			chooser.setSelectedFile(new File("heli.png"));
 			File lastPath = new File(Swarm.config.lastPath);
 			chooser.setCurrentDirectory(lastPath);
 			
