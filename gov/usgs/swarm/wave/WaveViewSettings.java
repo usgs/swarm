@@ -6,6 +6,9 @@ import gov.usgs.util.ConfigFile;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/10/26 00:57:09  dcervelli
+ * Function for manually adjusting scales.
+ *
  * Revision 1.1  2006/08/01 23:45:23  cervelli
  * Moved package.
  *
@@ -59,6 +62,7 @@ public class WaveViewSettings
 	
 	public boolean removeBias;
 	
+	public boolean useUnits;
 	public boolean logFreq;
 	public boolean logPower;
 	public double minFreq;
@@ -80,6 +84,7 @@ public class WaveViewSettings
 		autoScalePower = true;
 		autoScalePowerMemory = true;
 		maxPower = 40000;
+		useUnits = true;
 		logFreq = false;
 		logPower = true;
 		spectrogramOverlap = 0.2;
@@ -108,6 +113,7 @@ public class WaveViewSettings
 //		color = s.color;
 //		clipColor = s.clipColor;
 		filter = new Butterworth(s.filter);
+		useUnits = s.useUnits;
 		logFreq = s.logFreq;
 		minFreq = s.minFreq;
 		maxFreq = s.maxFreq;
@@ -138,6 +144,7 @@ public class WaveViewSettings
 		autoScaleAmpMemory = Boolean.parseBoolean(cf.getString("autoScaleAmpMemory"));
 		autoScalePower = Boolean.parseBoolean(cf.getString("autoScalePower"));
 		autoScalePowerMemory = Boolean.parseBoolean(cf.getString("autoScalePowerMemory"));
+		useUnits = Boolean.parseBoolean(cf.getString("useUnits"));
 		logFreq = Boolean.parseBoolean(cf.getString("logFreq"));
 		logPower = Boolean.parseBoolean(cf.getString("logPower"));
 		fftSize = cf.getString("fftSize");
@@ -160,6 +167,7 @@ public class WaveViewSettings
 		cf.put(prefix + ".autoScaleAmpMemory", Boolean.toString(autoScaleAmpMemory));
 		cf.put(prefix + ".autoScalePower", Boolean.toString(autoScalePower));
 		cf.put(prefix + ".autoScalePowerMemory", Boolean.toString(autoScalePowerMemory));
+		cf.put(prefix + ".useUnits", Boolean.toString(useUnits));
 		cf.put(prefix + ".logFreq", Boolean.toString(logFreq));
 		cf.put(prefix + ".logPower", Boolean.toString(logPower));
 		cf.put(prefix + ".fftSize", fftSize);

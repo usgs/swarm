@@ -48,6 +48,9 @@ import javax.swing.event.EventListenerList;
  * TODO: move filter method
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2006/10/26 00:56:46  dcervelli
+ * Manual scale adjusting and labeling.
+ *
  * Revision 1.7  2006/08/12 00:36:42  dcervelli
  * Null check on paintCursor().
  *
@@ -986,7 +989,8 @@ public class WaveViewPanel extends JComponent
 	    double offset = 0;
 		double multiplier = 1;
 		Metadata md = Swarm.config.getMetadata(channel);
-		if (md != null)
+
+		if (settings.useUnits && md != null)
 		{
 			offset = md.getOffset();
 			multiplier = md.getMultiplier();
@@ -1025,8 +1029,8 @@ public class WaveViewPanel extends JComponent
 		
 		if (decorator != null)
 			waveRenderer.setFrameDecorator(decorator);
-		
-		if (md != null && md.getUnit() != null)
+
+		if (settings.useUnits && md != null && md.getUnit() != null)
 			waveRenderer.setYLabel(md.getUnit());
 		else
 			waveRenderer.setYLabel("Counts");

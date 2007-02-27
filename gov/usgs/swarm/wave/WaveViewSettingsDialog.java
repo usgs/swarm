@@ -24,6 +24,9 @@ import com.jgoodies.forms.layout.FormLayout;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/01 23:45:23  cervelli
+ * Moved package.
+ *
  * Revision 1.4  2006/06/05 18:06:49  dcervelli
  * Major 1.3 changes.
  *
@@ -41,6 +44,7 @@ public class WaveViewSettingsDialog extends SwarmDialog
 	private ButtonGroup viewGroup;
 	private JRadioButton waveButton;
 	private JCheckBox removeBias;
+	private JCheckBox useUnits;
 	private JRadioButton spectraButton;
 	private JRadioButton spectrogramButton;
 	
@@ -110,6 +114,7 @@ public class WaveViewSettingsDialog extends SwarmDialog
 				break;
 		}
 		removeBias.setSelected(settings.removeBias);
+		useUnits.setSelected(settings.useUnits);
 		
 		if (settings.autoScaleAmp)
 			waveAutoScale.setSelected(true);
@@ -168,6 +173,7 @@ public class WaveViewSettingsDialog extends SwarmDialog
 		
 		waveScaleGroup = new ButtonGroup();
 		removeBias = new JCheckBox("Remove bias");
+		useUnits = new JCheckBox("Use calibrations");
 		waveAutoScale = new JRadioButton("Autoscale");
 		waveManualScale = new JRadioButton("Manual scale");
 		waveScaleGroup.add(waveAutoScale);
@@ -239,7 +245,8 @@ public class WaveViewSettingsDialog extends SwarmDialog
 		builder.append(waveAutoScale);
 		builder.append(waveAutoScaleMemory);
 		builder.nextLine();
-		builder.append(new JLabel(""), 3);
+		//builder.append(new JLabel(""), 3);
+		builder.append(useUnits, 3);
 		builder.append(waveManualScale);
 		builder.nextLine();
 		builder.append(new JLabel(""), 3);
@@ -380,6 +387,7 @@ public class WaveViewSettingsDialog extends SwarmDialog
 				settings.viewType = ViewType.SPECTROGRAM;
 				
 			settings.removeBias = removeBias.isSelected();
+			settings.useUnits = useUnits.isSelected();
 			settings.autoScaleAmp = waveAutoScale.isSelected();
 			settings.autoScaleAmpMemory = waveAutoScaleMemory.isSelected();
 			
