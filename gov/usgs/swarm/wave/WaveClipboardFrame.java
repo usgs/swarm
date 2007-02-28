@@ -70,6 +70,9 @@ import javax.swing.event.InternalFrameEvent;
  * The wave clipboard internal frame.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2007/02/28 20:11:24  dcervelli
+ * Added close icon to clipboard wave.
+ *
  * Revision 1.6  2007/01/30 20:01:19  dcervelli
  * File choosers named.  Canceled Save All doesn't display error message.
  *
@@ -1060,7 +1063,7 @@ public class WaveClipboardFrame extends SwarmFrame
 						remove(p);
 					}
 				});
-		p.setOffsets(54, 7, 21, 18);
+		p.setOffsets(54, 8, 21, 19);
 		p.setAllowClose(true);
 		p.setStatusLabel(statusLabel);
 		p.setAllowDragging(true);
@@ -1068,6 +1071,7 @@ public class WaveClipboardFrame extends SwarmFrame
 //		p.setFrameDecorator(new ClipboardWaveDecorator(p));
 		int w = scrollPane.getViewport().getSize().width;
 		p.setSize(w, calculateWaveHeight());
+		p.setBottomBorderColor(Color.GREEN);
 		p.createImage();
 		waveBox.add(p);	
 		waves.add(p);

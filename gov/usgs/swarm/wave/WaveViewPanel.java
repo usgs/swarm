@@ -48,6 +48,9 @@ import javax.swing.event.EventListenerList;
  * TODO: move filter method
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2007/02/27 20:10:56  cervelli
+ * Added support for turning calibration use on and off.
+ *
  * Revision 1.8  2006/10/26 00:56:46  dcervelli
  * Manual scale adjusting and labeling.
  *
@@ -201,6 +204,7 @@ public class WaveViewPanel extends JComponent
 //	private FrameRenderer titleFrame;
 	
 	private Color backgroundColor;
+	private Color bottomBorderColor;
 //	private DateFormat dateFormat;
 //	private NumberFormat numberFormat;
 	private JLabel statusLabel;
@@ -623,6 +627,11 @@ public class WaveViewPanel extends JComponent
 		backgroundColor = c;
 	}
 	
+	public void setBottomBorderColor(Color c)
+	{
+		bottomBorderColor = c;
+	}
+	
 	/** Processes the mouse position variables when the cursor is over the panel.
 	 * Currently, the only thing this does is set the status bar text.
 	 *
@@ -973,6 +982,11 @@ public class WaveViewPanel extends JComponent
 //			titleFrame.getAxis().setTopLabelAsText(channel);
 
 		plot.render(g2);
+		if (bottomBorderColor != null)
+		{
+			g2.setColor(Color.GRAY);
+			g2.drawLine(0, dim.height - 1, dim.width, dim.height - 1);
+		}
 	}
 
 	/** Plots a wave.
