@@ -70,6 +70,9 @@ import javax.swing.event.InternalFrameEvent;
  * The wave clipboard internal frame.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2007/01/30 20:01:19  dcervelli
+ * File choosers named.  Canceled Save All doesn't display error message.
+ *
  * Revision 1.5  2006/10/26 00:56:10  dcervelli
  * Camera button, global rescale, red line, labels, non-iconifiable frame, deletion repaint bug fixed.
  *
@@ -1052,13 +1055,13 @@ public class WaveClipboardFrame extends SwarmFrame
 						addHistory(p, t);
 					}
 					
-//					public void waveClosed()
-//					{
-//						System.out.println("closed");
-//					}
+					public void waveClosed()
+					{
+						remove(p);
+					}
 				});
-		p.setOffsets(54, 7, 7, 18);
-		//p.setAllowClose(true);
+		p.setOffsets(54, 7, 21, 18);
+		p.setAllowClose(true);
 		p.setStatusLabel(statusLabel);
 		p.setAllowDragging(true);
 		p.setDisplayTitle(true);
