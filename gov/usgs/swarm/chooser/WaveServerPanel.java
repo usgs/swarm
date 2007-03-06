@@ -1,7 +1,11 @@
 package gov.usgs.swarm.chooser;
 
+import java.util.Arrays;
+import java.util.TimeZone;
+
 import gov.usgs.swarm.Swarm;
 
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
@@ -11,6 +15,9 @@ import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2007/03/06 17:54:53  cervelli
+ * Added Wave Server offset to UI
+ *
  * Revision 1.2  2006/08/09 03:43:28  cervelli
  * Uses FormLayout and includes gulper settings.
  *
@@ -26,7 +33,8 @@ public class WaveServerPanel extends DataSourcePanel
 	private JTextField wsTimeout;
 	private JTextField gulperSize;
 	private JTextField gulperDelay;
-	private JTextField wsOffset;
+	//private JTextField wsOffset;
+	private JComboBox wsOffset;
 	
 	public WaveServerPanel()
 	{
@@ -40,14 +48,17 @@ public class WaveServerPanel extends DataSourcePanel
 		wsTimeout = new JTextField();
 		gulperSize = new JTextField();
 		gulperDelay = new JTextField();
-		wsOffset = new JTextField();
+//		wsOffset = new JTextField();
+		String[] tzs = TimeZone.getAvailableIDs();
+		Arrays.sort(tzs);
+		wsOffset = new JComboBox(tzs);
 		
 		String h = "";
 		String p = "16022";
 		String t = "2.0";
 		String gs = "30";
 		String gd = "1.0";
-		String wso = "0";
+		wsOffset.setSelectedItem("UTC");
 		
 		if (source != null && source.indexOf(";ws:") != -1)
 		{
@@ -57,14 +68,16 @@ public class WaveServerPanel extends DataSourcePanel
 			t = String.format("%.1f", Integer.parseInt(ss[2]) / 1000.0);
 			gs = String.format("%.0f", Integer.parseInt(ss[3]) / 60.0);
 			gd = String.format("%.1f", Integer.parseInt(ss[4]) / 1000.0);
-			wso = String.format("%.1f", Integer.parseInt(ss[5]) / 60.0);
+			if (ss.length >= 6)
+				wsOffset.setSelectedItem(ss[5]);
+//			wso = String.format("%.1f", Integer.parseInt(ss[5]) / 60.0);
 		}
 		wsHost.setText(h);
 		wsPort.setText(p);
 		wsTimeout.setText(t);
 		gulperSize.setText(gs);
 		gulperDelay.setText(gd);
-		wsOffset.setText(wso);
+//		wsOffset.setText(wso);
 	}
 	
 	protected void createPanel()
@@ -79,7 +92,7 @@ public class WaveServerPanel extends DataSourcePanel
 		builder.append(new JLabel("Use this data source to connect to an Earthworm Wave Server (EWS)."), 5);
 		builder.nextLine();
 		builder.appendSeparator();
-		builder.append("IP Address or Host Name:");
+		builder.append("IP address or host name:");
 		builder.append(wsHost, 3);
 		builder.nextLine();
 		builder.append("Port:");
@@ -101,9 +114,10 @@ public class WaveServerPanel extends DataSourcePanel
 		builder.append(gulperDelay);
 		builder.append(" seconds");
 		
-		builder.append("Wave Server Offset from UTC:");
-		builder.append(wsOffset);
-		builder.append(" minutes");
+		builder.append("Time zone:");
+		builder.append(wsOffset, 3);
+		builder.nextLine();
+		//builder.append(" minutes");
 		
 		panel = builder.getPanel();
 	}
@@ -148,9 +162,9 @@ public class WaveServerPanel extends DataSourcePanel
 		int timeout = (int)(Double.parseDouble(wsTimeout.getText()) * 1000);
 		int gs = (int)(Double.parseDouble(gulperSize.getText()) * 60);
 		int gd = (int)(Double.parseDouble(gulperDelay.getText()) * 1000);
-		String result = String.format("ws:%s:%s:%d:%d:%d",
+		String result = String.format("ws:%s:%s:%d:%d:%d:%s",
 				wsHost.getText(), wsPort.getText(),
-				timeout, gs, gd);
+				timeout, gs, gd, wsOffset.getSelectedItem());
 		return result;
 	}
 	

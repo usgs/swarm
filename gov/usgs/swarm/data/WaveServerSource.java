@@ -14,12 +14,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
  
 /**
  * An implementation of <code>SeismicDataSource</code> that connects to an
  * Earthworm Wave Server.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/08/14 22:45:28  dcervelli
+ * Adheres to useCache.
+ *
  * Revision 1.9  2006/08/09 03:44:51  cervelli
  * Added gulpSize and gulpDelay to config string.
  *
@@ -73,6 +77,8 @@ public class WaveServerSource extends SeismicDataSource
 	private int gulpSize = 30 * 60;
 	private int gulpDelay = 1 * 1000;
 	
+	private TimeZone timeZone;
+	
 	private static Map<String, Boolean> scnlSources = new HashMap<String, Boolean>();
 	
 	public WaveServerSource(String s)
@@ -84,6 +90,10 @@ public class WaveServerSource extends SeismicDataSource
 		timeout = Integer.parseInt(ss[2]);
 		gulpSize = Integer.parseInt(ss[3]);
 		gulpDelay = Integer.parseInt(ss[4]);
+		if (ss.length >= 6)
+			timeZone = TimeZone.getTimeZone(ss[5]);
+		else
+			timeZone = TimeZone.getTimeZone("UTC");
 		
 		waveServer = new WaveServer(server, port);
 		setTimeout(timeout);
@@ -102,7 +112,7 @@ public class WaveServerSource extends SeismicDataSource
 
 	public String toConfigString()
 	{
-		return String.format("%s;ws:%s:%d:%d:%d:%d", name, server, port, timeout, gulpSize, gulpDelay);
+		return String.format("%s;ws:%s:%d:%d:%d:%d:%s", name, server, port, timeout, gulpSize, gulpDelay, timeZone.getID());
 	}
 	
 	public boolean isSCNL(String p)
@@ -181,10 +191,14 @@ public class WaveServerSource extends SeismicDataSource
 				if (ss.length == 4)
 					loc = ss[3];
 			}
-			sw = waveServer.getRawData(ss[0], ss[1], ss[2], loc, Util.j2KToEW(t1), Util.j2KToEW(t2));
+			double offset = timeZone.getOffset(Util.j2KToDate(t1).getTime());
+			double at1 = Util.j2KToEW(t1) + offset / 1000.0;
+			double at2 = Util.j2KToEW(t2) + offset / 1000.0;
+			sw = waveServer.getRawData(ss[0], ss[1], ss[2], loc, at1, at2);
 			if (sw == null)
 				return null;
 			sw.convertToJ2K();
+			sw.setStartTime(sw.getStartTime() - offset / 1000.0);
 			sw.register();
 			if (useCache)
 			{
