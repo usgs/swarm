@@ -48,6 +48,9 @@ import javax.swing.event.EventListenerList;
  * TODO: move filter method
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2007/02/28 20:32:51  dcervelli
+ * Added border at bottom of wave panel.
+ *
  * Revision 1.9  2007/02/27 20:10:56  cervelli
  * Added support for turning calibration use on and off.
  *
@@ -940,7 +943,7 @@ public class WaveViewPanel extends JComponent
 				ft = "Low pass [" + settings.filter.getCorner1() + " Hz]";
 				break;
 		}
-		TextRenderer tr = new TextRenderer(xOffset, 15, ft);
+		TextRenderer tr = new TextRenderer(xOffset + 5, 148, ft);
 		tr.color = Color.red;
 		return tr;
 	}

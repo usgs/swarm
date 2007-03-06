@@ -67,6 +67,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: up/down arrows
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2006/10/26 00:54:58  dcervelli
+ * Minor cleanup.
+ *
  * Revision 1.8  2006/08/12 21:52:29  dcervelli
  * New kiosk code.
  *
@@ -585,12 +588,23 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 	        
 	        if (panel.getSettings().viewType == ViewType.WAVE && panel.getHeight() > 36)
 	        {
-	        	Metadata md = Swarm.config.getMetadata(panel.getChannel(), true);
-	        	double m = md.getMultiplier();
-		        double b = md.getOffset();
+	        	double m = 1;
+	        	double b = 0;
+	        	String Units = "Counts";
+	        	if (panel.getSettings().useUnits)
+	        	{
+	        		Metadata md = Swarm.config.getMetadata(panel.getChannel(), true);
+	        		m = md.getMultiplier();
+	        		b = md.getOffset();
+	        		Units = md.getUnit();
+	        	}
+	        	
+	        	if (Units == null)
+	        		Units = "Counts";
+
 		        double min = fr.getMinY() * m + b;
 		        double max = fr.getMaxY() * m + b;
-	        	String range = String.format("%.0f / %.0f", min, max);
+	        	String range = String.format("%.0f / %.0f %s", min, max, Units);
 	        	TextRenderer tr = new TextRenderer(fr.getGraphX() + 2, fr.getGraphY() + fr.getGraphHeight() - 2, range);
 	        	int fs = Math.min(10, labelFontSize);
 	        	tr.font = Font.decode("dialog-PLAIN-" + fs);
