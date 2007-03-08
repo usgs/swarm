@@ -1,5 +1,8 @@
 <!--
 $Log: not supported by cvs2svn $
+Revision 1.12  2007/01/29 22:58:26  dcervelli
+Fixed JVM 1.5 target.
+
 Revision 1.11  2007/01/29 22:43:32  dcervelli
 Added JVM 1.5 target.
 
@@ -191,6 +194,7 @@ bin-dist -- generates new binary distribution
 		
 		<copy todir="${bin-dir}/swarm/" file="${source}/swarm_console.bat" />
 		<copy todir="${bin-dir}/swarm/" file="${source}/clip.wav" />
+		<copy todir="${bin-dir}/swarm/" file="${source}/IRIS_networks.txt" />
 	<!--	<copy todir="${bin-dir}/swarm/" file="${source}/swarm.bat" />  -->
 		<copy todir="${bin-dir}/swarm/" file="${source}/swarm.sh" />
 		
