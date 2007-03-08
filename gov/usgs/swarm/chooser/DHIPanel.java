@@ -1,6 +1,7 @@
 package gov.usgs.swarm.chooser;
 
 import gov.usgs.swarm.Swarm;
+import gov.usgs.util.ResourceReader;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -13,6 +14,9 @@ import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/08/09 03:44:18  cervelli
+ * Added description and separator.
+ *
  * Revision 1.2  2006/08/08 22:20:29  cervelli
  * First good working version of this panel.
  *
@@ -91,6 +95,15 @@ public class DHIPanel extends DataSourcePanel
 		seisDNS.setEditable(true);
 		network = new JComboBox();
 		network.setEditable(true);
+		
+		ResourceReader rr = ResourceReader.getResourceReader("IRIS_networks.txt");
+		String s;
+		while ((s = rr.nextLine()) != null)
+		{
+			s = s.trim();
+			if (s.length() > 1 && !s.startsWith("#"))
+				network.addItem(s);
+		}
 		gulperSize = new JTextField();
 		gulperDelay = new JTextField();
 		dcButton = new JButton("Query for DCs");
@@ -121,7 +134,26 @@ public class DHIPanel extends DataSourcePanel
 		seisDC.addItem(sdc);
 		seisDNS.addItem(sdns);
 		if (nw != null)
-			network.addItem(nw);
+		{
+			boolean found = false;
+			for (int i = 0; i < network.getItemCount(); i++)
+			{
+				String item = (String)network.getItemAt(i);
+				if (item.startsWith(nw))
+				{
+					network.setSelectedIndex(i);
+					found = true;
+					break;
+				}
+			}
+		
+			if (!found)
+			{
+				network.insertItemAt(nw, 0);
+				network.setSelectedIndex(0);
+			}
+		}
+		
 		gulperSize.setText(gs);
 		gulperDelay.setText(gd);
 	}
@@ -151,7 +183,7 @@ public class DHIPanel extends DataSourcePanel
 		builder.nextLine();
 		
 		builder.append("Network:");
-		builder.append(network);
+		builder.append(network, 7);
 		builder.nextLine();
 		
 		builder.append("Gulp size:");
@@ -174,10 +206,13 @@ public class DHIPanel extends DataSourcePanel
 	{
 		int gs = (int)(Double.parseDouble(gulperSize.getText()) * 60);
 		int gd = (int)(Double.parseDouble(gulperDelay.getText()) * 1000);
+		String nw = (String)network.getSelectedItem();
+		if (nw.indexOf(",") != -1)
+			nw = nw.substring(0, nw.indexOf(","));
 		String result = String.format("dhi:%s:%s:%s:%s:%s:%d:%d",
 				netDNS.getSelectedItem(), netDC.getSelectedItem(),
 				seisDNS.getSelectedItem(), seisDC.getSelectedItem(),
-				network.getSelectedItem(),
+				nw,
 				gs, gd);
 		return result;
 	}
