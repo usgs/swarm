@@ -14,6 +14,9 @@ import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2007/03/08 23:56:23  dcervelli
+ * Added IRIS network list.
+ *
  * Revision 1.3  2006/08/09 03:44:18  cervelli
  * Added description and separator.
  *
@@ -27,6 +30,7 @@ import com.jgoodies.forms.layout.FormLayout;
  */
 public class DHIPanel extends DataSourcePanel
 {
+	private static final String IRIS_NETWORK_FILE = "IRIS_networks.txt";
 	private JComboBox netDC;
 	private JComboBox netDNS;
 	private JComboBox seisDC;
@@ -96,14 +100,19 @@ public class DHIPanel extends DataSourcePanel
 		network = new JComboBox();
 		network.setEditable(true);
 		
-		ResourceReader rr = ResourceReader.getResourceReader("IRIS_networks.txt");
-		String s;
-		while ((s = rr.nextLine()) != null)
+		ResourceReader rr = ResourceReader.getResourceReader(IRIS_NETWORK_FILE);
+		if (rr != null)
 		{
-			s = s.trim();
-			if (s.length() > 1 && !s.startsWith("#"))
-				network.addItem(s);
+			String s;
+			while ((s = rr.nextLine()) != null)
+			{
+				s = s.trim();
+				if (s.length() > 1 && !s.startsWith("#"))
+					network.addItem(s);
+			}
 		}
+		else
+			Swarm.logger.warning(IRIS_NETWORK_FILE + " is missing.");
 		gulperSize = new JTextField();
 		gulperDelay = new JTextField();
 		dcButton = new JButton("Query for DCs");
