@@ -19,6 +19,7 @@ import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.map.MapMiniPanel.Position;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.swarm.wave.WaveViewPanel;
+import gov.usgs.util.CodeTimer;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Pair;
 import gov.usgs.util.Util;
@@ -66,6 +67,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2006/10/26 00:54:04  dcervelli
+ * Support for map labels and global rescale key.
+ *
  * Revision 1.16  2006/08/15 17:54:40  dcervelli
  * Added great circle route and circle drawing functions.
  *
@@ -341,7 +345,9 @@ public class MapPanel extends JPanel
 			images = new GeoImageSet();
 		}
 		images.setArealCacheSort(false);
-		images.setMaxLoadedImagesSize((int)Math.round((double)Runtime.getRuntime().maxMemory() / 1024.0 / 1024.0 / 16.0));
+		int mp = (int)Math.round((double)Runtime.getRuntime().maxMemory() / 1024.0 / 1024.0 / 8.0);
+//		System.out.println("cache size: " + mp);
+		images.setMaxLoadedImagesSize(mp);
 
 		center = new Point2D.Double(Swarm.config.mapLongitude, Swarm.config.mapLatitude);
 		scale = Swarm.config.mapScale;
@@ -932,6 +938,7 @@ public class MapPanel extends JPanel
 			{
 				if (doMap)
 				{					
+					CodeTimer ct = new CodeTimer("whole map");
 					Swarm.config.mapScale = scale;
 					Swarm.config.mapLongitude = center.x;
 					Swarm.config.mapLatitude = center.y;
@@ -949,8 +956,11 @@ public class MapPanel extends JPanel
 					Swarm.logger.finest("center: " + center.x + " " + center.y);
 					
 					MapRenderer mr = new MapRenderer(range, projection);
+					ct.mark("pre bg");
 					image = images.getMapBackground(projection, range, width, scale);
+					ct.mark("bg");
 					mr.setLocation(INSET, INSET, width);
+//					mr.setLocation(INSET, INSET, image.getWidth());
 					mr.setMapImage(image);
 					mr.setGeoLabelSet(labels);
 					mr.createGraticule(6, true);
@@ -966,11 +976,12 @@ public class MapPanel extends JPanel
 					Plot plot = new Plot();
 					plot.setSize(mapImagePanel.getWidth(), mapImagePanel.getHeight());
 					plot.addRenderer(renderer);
-					
+					ct.mark("pre plot");
 					mapImage = plot.getAsBufferedImage(false);
+					ct.mark("plot");
 					dragDX = Integer.MAX_VALUE;
 					dragDY = Integer.MAX_VALUE;
-					System.out.println("mapImage changed");
+					ct.stop();
 				}
 				return null;
 			}
