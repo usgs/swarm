@@ -18,6 +18,9 @@ import java.util.TimeZone;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/08/14 22:43:18  dcervelli
+ * Added functions to check if fields had been set.
+ *
  * Revision 1.4  2006/08/05 22:22:06  cervelli
  * More 2.0 changes.
  *
@@ -53,7 +56,7 @@ public class Metadata implements Comparable<Metadata>
 	
 	public SeismicDataSource source;
 	
-	private TimeZone timeZone = TimeZone.getTimeZone("UTC");
+	private TimeZone timeZone = null;
 	private boolean tzSet = false;
 	
 	private Set<String> groups = null;
