@@ -59,6 +59,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: name worker thread for better debugging
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.40  2007/03/06 17:54:16  cervelli
+ * Units can now be disabled
+ *
  * Revision 1.39  2007/01/30 20:02:01  dcervelli
  * Version bump.
  *
@@ -226,7 +229,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.0.0.20070306-beta-8";
+	private static final String VERSION = "2.0.0.20070314-beta-9";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -1178,6 +1181,8 @@ public class Swarm extends JFrame
 				HelicorderViewerFrame hvf = (HelicorderViewerFrame)frame;
 				hvf.getHelicorderViewPanel().cursorChanged();
 				hvf.getHelicorderViewPanel().invalidateImage();
+				if (!config.durationEnabled)
+					hvf.getHelicorderViewPanel().clearMarks();
 			}
 		}
 	}
