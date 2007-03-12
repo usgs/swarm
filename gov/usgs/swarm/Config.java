@@ -18,6 +18,9 @@ import java.util.TreeMap;
  * Swarm configuration class. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.15  2006/11/30 17:07:48  dcervelli
+ * Fixed no-close bug.
+ *
  * Revision 1.14  2006/10/26 00:47:07  dcervelli
  * Added userTimes variable.
  *
@@ -367,7 +370,7 @@ public class Config
 	{
 		if (useInstrumentTimeZone && channel != null)
 		{
-			Metadata md = metadata.get(channel);
+			Metadata md = getMetadata(channel, false);
 			if (md != null && md.getTimeZone() != null)
 				return md.getTimeZone();
 		}
