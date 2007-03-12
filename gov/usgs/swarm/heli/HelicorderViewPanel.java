@@ -51,6 +51,9 @@ import javax.swing.event.EventListenerList;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/08/11 21:01:41  dcervelli
+ * Changes for small helicorder view and scaled inset wave.
+ *
  * Revision 1.2  2006/08/09 21:51:52  cervelli
  * Minor formatting changes.
  *
@@ -77,7 +80,7 @@ import javax.swing.event.EventListenerList;
  *
  * Revision 1.15  2006/06/05 18:06:49  dcervelli
  * Major 1.3 changes.
-// *
+ *
  * Revision 1.14  2006/04/17 04:16:36  dcervelli
  * More 1.3 changes.
  *
@@ -170,7 +173,7 @@ public class HelicorderViewPanel extends JComponent
 	
 	private double startMark = Double.NaN;
 	private double endMark = Double.NaN;
-	private int markCount = 0;
+	private double lastMark = Double.NaN;
 		
 	private EventListenerList listeners = new EventListenerList();
 	
@@ -262,23 +265,26 @@ public class HelicorderViewPanel extends JComponent
 	
 	public void markTime(double t)
 	{
-		if (markCount % 2 == 0)
+		if (Double.isNaN(startMark) && Double.isNaN(endMark))
+		{
 			startMark = t;
-		else
+		}
+		else if (!Double.isNaN(startMark) && Double.isNaN(endMark))
+		{
 			endMark = t;
-		
-		markCount++;
-		if (startMark < startTime)
-		{
-			startMark = Double.NaN;
-			markCount = 0;
+			if (endMark < startMark)
+			{
+				double tm = startMark;
+				startMark = endMark;
+				endMark = tm;
+			}
 		}
-		if (endMark > endTime)
+		else
 		{
-			endMark = Double.NaN;
-			if (!Double.isNaN(startMark))
-				markCount = 1;
+			startMark = Math.min(lastMark, t);
+			endMark = Math.max(lastMark, t);
 		}
+		lastMark = t;
 		if (insetWavePanel != null)
 		{
 			insetWavePanel.setMarks(startMark, endMark);
@@ -584,7 +590,23 @@ public class HelicorderViewPanel extends JComponent
 		insetY = my;
 		
 		if (insetWavePanel == null)
+		{
 			insetWavePanel = new WaveViewPanel(parent.getWaveViewSettings());
+			insetWavePanel.addListener(new WaveViewPanelAdapter()
+			{
+				public void waveClosed()
+				{
+					removeWaveInset();
+				}
+				
+				public void waveTimePressed(MouseEvent e, double j2k)
+				{
+					if (Swarm.config.durationEnabled && SwingUtilities.isLeftMouseButton(e))
+						markTime(j2k);
+					insetWavePanel.processMousePosition(e.getX(), e.getY());
+				}
+			});
+		}
 		
 //		insetWavePanel.setHelicorderPanel(this);
 		insetWavePanel.setMarks(startMark, endMark);
@@ -609,20 +631,7 @@ public class HelicorderViewPanel extends JComponent
 			insetWavePanel.setLocation(-1, y);
 		}
 		
-		insetWavePanel.addListener(new WaveViewPanelAdapter()
-				{
-					public void waveClosed()
-					{
-						removeWaveInset();
-					}
-					
-					public void waveTimePressed(MouseEvent e, double j2k)
-					{
-						if (Swarm.config.durationEnabled && SwingUtilities.isLeftMouseButton(e))
-							markTime(j2k);
-						insetWavePanel.processMousePosition(e.getX(), e.getY());
-					}
-				});
+		
 		insetWavePanel.setAllowClose(true);
 		insetWavePanel.setWorking(true);
 
