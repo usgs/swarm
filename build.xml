@@ -1,5 +1,8 @@
 <!--
 $Log: not supported by cvs2svn $
+Revision 1.13  2007/03/08 23:56:55  dcervelli
+Added IRIS_networks.txt to build.
+
 Revision 1.12  2007/01/29 22:58:26  dcervelli
 Fixed JVM 1.5 target.
 
@@ -167,11 +170,6 @@ bin-dist -- generates new binary distribution
 				<include name="fissuresUtil-1.0.16.jar" />
 				<include name="fissuresImpl-1.1.11.jar" />
 				<include name="log4j-1.2.13.jar" />
-				<include name="jai_core.jar" />
-				<include name="jai_codec.jar" />
-				<include name="mlibwrapper_jai.jar" />
-				<include name="mlib_jai.dll" />
-				<include name="mlib_jai_mmx.dll" />
 			</fileset>
 		</copy>
 		
