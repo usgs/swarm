@@ -48,6 +48,9 @@ import javax.swing.event.EventListenerList;
  * TODO: move filter method
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2007/03/06 17:55:40  cervelli
+ * Units can now be disabled
+ *
  * Revision 1.10  2007/02/28 20:32:51  dcervelli
  * Added border at bottom of wave panel.
  *
@@ -1186,6 +1189,9 @@ public class WaveViewPanel extends JComponent
 			return;
 		
 		double[] t = getTranslation();
+		if (t == null)
+			return;
+		
 		double x = (j2k - t[1]) / t[0];
 		g2.setColor(DARK_GREEN);
 		g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
