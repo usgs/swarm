@@ -57,6 +57,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
 
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -67,6 +69,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.18  2007/03/12 21:41:41  dcervelli
+ * Changed default image cache size.
+ *
  * Revision 1.17  2006/10/26 00:54:04  dcervelli
  * Support for map labels and global rescale key.
  *
@@ -216,7 +221,6 @@ public class MapPanel extends JPanel
 	private double startTime;
 	private double endTime;
 	
-//	private Dragger dragger;
 	private int dragDX = Integer.MAX_VALUE;
 	private int dragDY = Integer.MAX_VALUE;
 	
@@ -237,59 +241,8 @@ public class MapPanel extends JPanel
 		this.setCursor(crosshair);
 		
 		createUI();
-//		dragger = new Dragger();
 	}
-	
-//	private class Dragger extends Thread
-//	{
-//		private long timeTillReset;
-//		
-//		public Dragger()
-//		{
-//			start();
-//		}
-//		
-//		public synchronized void setTimeTillReset(long d)
-//		{
-//			timeTillReset = d;
-//			interrupt();
-//		}
-//		
-//		private synchronized void shiftImage()
-//		{
-//			int dx = mouseDown.x - mouseNow.x;
-//			int dy = mouseDown.y - mouseNow.y;
-//			center = getLonLat(getWidth() / 2 + dx, getHeight() / 2 + dy);
-//			mouseDown = mouseNow;
-//			resetImage();	
-//		}
-//		
-//		public void run()
-//		{
-//			while (true)
-//			{
-//				try
-//				{
-//					if (timeTillReset <= 0)
-//						Thread.sleep(100000);
-//					else
-//					{
-//						Thread.sleep(timeTillReset);
-//						System.out.println("reset");
-//						if (timeTillReset > 0)
-//							shiftImage();
-//						timeTillReset = 0;
-//					}
-//				}
-//				catch (InterruptedException e)
-//				{}
-//				catch (Throwable e)
-//				{
-//					e.printStackTrace();
-//				}
-//			}
-//		}
-//	}
+
 	
 	public void saveLayout(ConfigFile cf, String prefix)
 	{
@@ -927,203 +880,251 @@ public class MapPanel extends JPanel
 			layouts.remove(hash);
 	}
 	
+	// thoughts:
+	//  here's what should happen when someone wants to redraw the map
+	//    -- if the underlying map is being redrawn then that happens first
+	//    -- all non-event thread processing should be done in one method
+	//    -- all component adjustments should be done on the event thread 
+	//       after the above is done
+	
+	private BufferedImage updateMapRenderer()
+	{
+		BufferedImage mi = null;
+		CodeTimer ct = new CodeTimer("whole map");
+		try
+		{
+			Swarm.config.mapScale = scale;
+			Swarm.config.mapLongitude = center.x;
+			Swarm.config.mapLatitude = center.y;
+			
+			parent.getThrobber().increment();
+			
+			int width = mapImagePanel.getWidth() - (INSET * 2);
+			int height = mapImagePanel.getHeight() - (INSET * 2);
+			
+			pickMapParameters(width, height);
+			
+			Swarm.logger.finest("map scale: " + scale);
+			Swarm.logger.finest("center: " + center.x + " " + center.y);
+			
+			MapRenderer mr = new MapRenderer(range, projection);
+			ct.mark("pre bg");
+			image = images.getMapBackground(projection, range, width, scale);
+			ct.mark("bg");
+			mr.setLocation(INSET, INSET, width);
+			mr.setMapImage(image);
+			mr.setGeoLabelSet(labels);
+			mr.createGraticule(6, true);
+			mr.createBox(6);
+			mr.createScaleRenderer(1 / projection.getScale(center), INSET, 14);
+			TextRenderer tr = new TextRenderer(mapImagePanel.getWidth() - INSET, 14, projection.getName() + " Projection");
+			tr.antiAlias = false;
+			tr.font = new Font("Arial", Font.PLAIN, 10);
+			tr.horizJustification = TextRenderer.RIGHT;
+			mr.addRenderer(tr);
+			renderer = mr;
+			
+			Plot plot = new Plot();
+			plot.setSize(mapImagePanel.getWidth(), mapImagePanel.getHeight());
+			plot.addRenderer(renderer);
+			ct.mark("pre plot");
+			mi = plot.getAsBufferedImage(false);
+			ct.mark("plot");
+			dragDX = Integer.MAX_VALUE;
+			dragDY = Integer.MAX_VALUE;
+			ct.stop();
+		}
+		catch (Exception e)
+		{
+			Swarm.logger.log(Level.SEVERE, "Exception during map creation.", e);
+		}
+		finally
+		{
+			parent.getThrobber().decrement();
+		}
+		return mi;
+	}
+	
+	private Pair<List<JComponent>, List<Line2D.Double>> updateMiniPanels()
+	{
+		List<JComponent> compsToAdd = new ArrayList<JComponent>();
+		List<Line2D.Double> linesToAdd = new ArrayList<Line2D.Double>();
+
+		FontRenderContext frc = new FontRenderContext(new AffineTransform(), false, false);
+		
+		GeneralPath boxes = new GeneralPath();
+		missing = 0;
+		
+		Map<String, Metadata> allMetadata = Swarm.config.getMetadata();
+		synchronized (allMetadata)
+		{
+			for (MapMiniPanel panel : miniPanels.values())
+			{
+				if (panel.getPosition() == MapMiniPanel.Position.MANUAL_SET)
+					panel.setPosition(Position.MANUAL_UNSET);
+				else
+					panel.setPosition(Position.UNSET);
+			}
+			for (Metadata md : allMetadata.values())
+			{
+				if (!range.contains(new Point2D.Double(md.getLongitude(), md.getLatitude())))
+				{
+					MapMiniPanel mmp = miniPanels.get(md.getLocationHashCode());
+					if (mmp != null)
+					{
+						miniPanels.remove(md.getLocationHashCode());
+						deselectPanel(mmp);
+					}
+				}
+				else
+				{
+					MapMiniPanel cmp = miniPanels.get(md.getLocationHashCode());
+					Point2D.Double xy = getXY(md.getLongitude(), md.getLatitude());
+					int iconX = (int)xy.x - 8;
+					int iconY = (int)xy.y - 8;
+					if (cmp == null || cmp.getPosition() == Position.UNSET || cmp.getPosition() == Position.MANUAL_UNSET)
+					{
+						JLabel icon = new JLabel(Images.getIcon("bullet"));
+						icon.setBounds(iconX, iconY, 16, 16);
+						compsToAdd.add(icon);
+						if (cmp == null)
+							cmp = new MapMiniPanel(MapPanel.this);
+					}
+					
+					if (cmp.getPosition() == Position.UNSET || cmp.getPosition() == Position.MANUAL_UNSET)
+					{
+						if (labelSetting == LabelSetting.NONE && !layouts.containsKey(md.getLocationHashCode()))
+						{
+							if (cmp.getPosition() == Position.UNSET)
+								continue;	
+							if (cmp.getPosition() == Position.MANUAL_UNSET && !cmp.isWaveVisible())
+								continue;
+						}
+						
+						int w = (int)Math.round(MapMiniPanel.FONT.getStringBounds(md.getSCNL().station + 6, frc).getWidth());
+						int locX = (int)xy.x;
+						int locY = (int)xy.y;
+						Point pt = null;
+						if (cmp.getPosition() == Position.MANUAL_UNSET)
+						{
+							Point2D.Double mp = cmp.getManualPosition();
+							Point2D.Double xy2 = mp;//getXY(mp.x, mp.y);
+							locX = (int)xy2.x;
+							locY = (int)xy2.y;
+							cmp.setPosition(Position.MANUAL_SET);
+							pt = new Point(locX, locY);
+						}
+						else
+							pt = getLabelPosition(boxes, locX, locY, w, 13);
+						
+						if (pt == null && labelSetting == LabelSetting.ALL)
+							pt = new Point(locX, locY);
+						
+						if (pt != null)
+						{
+							locX = pt.x;
+							locY = pt.y;
+							boxes.append(new Rectangle(locX, locY, w, 13), false);
+							cmp.setLocation(locX, locY);
+							if (cmp.getPosition() == Position.UNSET)
+								cmp.setPosition(Position.AUTOMATIC);
+		
+							Line2D.Double line = new Line2D.Double(locX, locY, iconX + 8, iconY + 8);
+							cmp.setLine(line);
+							cmp.adjustLine();
+							linesToAdd.add(line);
+							
+							compsToAdd.add(cmp);
+							miniPanels.put(md.getLocationHashCode(), cmp);
+						}
+						else
+						{
+							missing++;
+							cmp.setPosition(Position.HIDDEN);
+						}
+					}
+					cmp.addMetadata(md);
+				}
+			}
+		}
+		return new Pair<List<JComponent>, List<Line2D.Double>>(compsToAdd, linesToAdd);
+	}
+	
+	private Semaphore lock = new Semaphore(1);
+	
+	// this function should not allow reentrancy
 	public void resetImage(final boolean doMap)
 	{
+		// if there's any problem with the container holding the panel, just forget it.
 		if (!parent.isVisible() || mapImagePanel.getHeight() == 0 || mapImagePanel.getWidth() == 0)
 			return;
 		
+		// first, get the map renderer up and running.
+		//  this occurs in the construct() method below which does NOT occur
+		//  on the event thread.
 		final SwingWorker worker = new SwingWorker()
 		{
+			private List<JComponent> compsToAdd;
+			private List<Line2D.Double> linesToAdd;
+			private BufferedImage tempMapImage;
+			
 			public Object construct()
 			{
-				if (doMap)
-				{					
-					CodeTimer ct = new CodeTimer("whole map");
-					Swarm.config.mapScale = scale;
-					Swarm.config.mapLongitude = center.x;
-					Swarm.config.mapLatitude = center.y;
-					
-					parent.getThrobber().increment();
-					
-					int width = mapImagePanel.getWidth() - (INSET * 2);
-					int height = mapImagePanel.getHeight() - (INSET * 2);
-					
-					pickMapParameters(width, height);
-					
-	//				System.out.println("proj: " + projection.getName());
-	//				System.out.println("center: " + center);
-					Swarm.logger.finest("map scale: " + scale);
-					Swarm.logger.finest("center: " + center.x + " " + center.y);
-					
-					MapRenderer mr = new MapRenderer(range, projection);
-					ct.mark("pre bg");
-					image = images.getMapBackground(projection, range, width, scale);
-					ct.mark("bg");
-					mr.setLocation(INSET, INSET, width);
-//					mr.setLocation(INSET, INSET, image.getWidth());
-					mr.setMapImage(image);
-					mr.setGeoLabelSet(labels);
-					mr.createGraticule(6, true);
-					mr.createBox(6);
-					mr.createScaleRenderer(1 / projection.getScale(center), INSET, 14);
-					TextRenderer tr = new TextRenderer(mapImagePanel.getWidth() - INSET, 14, projection.getName() + " Projection");
-					tr.antiAlias = false;
-					tr.font = new Font("Arial", Font.PLAIN, 10);
-					tr.horizJustification = TextRenderer.RIGHT;
-					mr.addRenderer(tr);
-					renderer = mr;
-					
-					Plot plot = new Plot();
-					plot.setSize(mapImagePanel.getWidth(), mapImagePanel.getHeight());
-					plot.addRenderer(renderer);
-					ct.mark("pre plot");
-					mapImage = plot.getAsBufferedImage(false);
-					ct.mark("plot");
-					dragDX = Integer.MAX_VALUE;
-					dragDY = Integer.MAX_VALUE;
-					ct.stop();
+				try
+				{
+					lock.acquire();
 				}
-				return null;
+				catch (InterruptedException ex)
+				{
+					return new Boolean(false);
+				}
+				
+				// if other threads are waiting to update then don't bother
+				// continuing
+				if (lock.hasQueuedThreads())
+				{
+					return new Boolean(false);
+				}
+				
+				if (doMap)
+				{				
+					tempMapImage = updateMapRenderer();
+				}
+				
+				return new Boolean(true);
 			}
 			
 			public void finished()
 			{
-				lines.clear();
-				pane.removeAll();
-				pane.add(mapImagePanel, new Integer(10));
-				placeMiniPanels();
-				repaint();
-				parent.getThrobber().decrement();
-			}
-		};
-		worker.start();
-	}
-	
-	/**
-	 * To be called after the icons and panels have been removed from the 
-	 * pane.
-	 * 
-	 * @return
-	 */
-	private void placeMiniPanels()
-	{
-		if (image == null || renderer == null)
-			return;
-		
-		final List<JComponent> compsToAdd = new ArrayList<JComponent>();
-		final List<Line2D.Double> linesToAdd = new ArrayList<Line2D.Double>();
-
-		// TODO: revisit this
-		SwingUtilities.invokeLater(new Runnable()
+				// if we aborts due to queueing, or in the meantime, another
+				// thread has queued then don't bother finishing, the next thread
+				// will
+				if (((Boolean)this.get()).booleanValue() && !lock.hasQueuedThreads())
 				{
-					public void run()
+					// ideally you'd call updateMiniPanels in construct()
+					// however they set the position of the panels so has to be
+					// done in the event thread
+					// TODO: make changes in updateMiniPanels run in non-event thread
+					Pair<List<JComponent>, List<Line2D.Double>> p = updateMiniPanels();
+					compsToAdd = p.item1;
+					linesToAdd = p.item2;
+					if (doMap && tempMapImage != null)
+						mapImage = tempMapImage;
+					if (lines != null)
+						lines.clear();
+					pane.removeAll();
+					pane.add(mapImagePanel, new Integer(10));
+					
+					///
+					visiblePanels.clear();
+					for (MapMiniPanel mp : miniPanels.values())
+						visiblePanels.add(mp);
+						
+					pane.removeAll();
+					pane.add(mapImagePanel, new Integer(10));
+					int i = 0;
+					if (compsToAdd != null)
 					{
-						// TODO: don't recreate every time
-						FontRenderContext frc = new FontRenderContext(new AffineTransform(), false, false);
-						
-						GeneralPath boxes = new GeneralPath();
-						missing = 0;
-						
-						Map<String, Metadata> allMetadata = Swarm.config.getMetadata();
-						synchronized (allMetadata)
-						{
-							for (MapMiniPanel panel : miniPanels.values())
-							{
-								if (panel.getPosition() == MapMiniPanel.Position.MANUAL_SET)
-									panel.setPosition(Position.MANUAL_UNSET);
-								else
-									panel.setPosition(Position.UNSET);
-							}
-							for (Metadata md : allMetadata.values())
-							{
-								if (!range.contains(new Point2D.Double(md.getLongitude(), md.getLatitude())))
-								{
-									MapMiniPanel mmp = miniPanels.get(md.getLocationHashCode());
-									if (mmp != null)
-									{
-										miniPanels.remove(md.getLocationHashCode());
-										deselectPanel(mmp);
-									}
-								}
-								else
-								{
-									MapMiniPanel cmp = miniPanels.get(md.getLocationHashCode());
-									Point2D.Double xy = getXY(md.getLongitude(), md.getLatitude());
-									int iconX = (int)xy.x - 8;
-									int iconY = (int)xy.y - 8;
-									if (cmp == null || cmp.getPosition() == Position.UNSET || cmp.getPosition() == Position.MANUAL_UNSET)
-									{
-										JLabel icon = new JLabel(Images.getIcon("bullet"));
-										icon.setBounds(iconX, iconY, 16, 16);
-										compsToAdd.add(icon);
-										if (cmp == null)
-											cmp = new MapMiniPanel(MapPanel.this);
-									}
-									
-									if (cmp.getPosition() == Position.UNSET || cmp.getPosition() == Position.MANUAL_UNSET)
-									{
-										if (labelSetting == LabelSetting.NONE && !layouts.containsKey(md.getLocationHashCode()))
-										{
-											if (cmp.getPosition() == Position.UNSET)
-												continue;	
-											if (cmp.getPosition() == Position.MANUAL_UNSET && !cmp.isWaveVisible())
-												continue;
-										}
-										
-										int w = (int)Math.round(MapMiniPanel.FONT.getStringBounds(md.getSCNL().station + 6, frc).getWidth());
-										int locX = (int)xy.x;
-										int locY = (int)xy.y;
-										Point pt = null;
-										if (cmp.getPosition() == Position.MANUAL_UNSET)
-										{
-											Point2D.Double mp = cmp.getManualPosition();
-											Point2D.Double xy2 = mp;//getXY(mp.x, mp.y);
-											locX = (int)xy2.x;
-											locY = (int)xy2.y;
-											cmp.setPosition(Position.MANUAL_SET);
-											pt = new Point(locX, locY);
-										}
-										else
-											pt = getLabelPosition(boxes, locX, locY, w, 13);
-										
-										if (pt == null && labelSetting == LabelSetting.ALL)
-											pt = new Point(locX, locY);
-										
-										if (pt != null)
-										{
-											locX = pt.x;
-											locY = pt.y;
-											boxes.append(new Rectangle(locX, locY, w, 13), false);
-											cmp.setLocation(locX, locY);
-											if (cmp.getPosition() == Position.UNSET)
-												cmp.setPosition(Position.AUTOMATIC);
-						
-											Line2D.Double line = new Line2D.Double(locX, locY, iconX + 8, iconY + 8);
-											cmp.setLine(line);
-											cmp.adjustLine();
-											linesToAdd.add(line);
-											
-											compsToAdd.add(cmp);
-											miniPanels.put(md.getLocationHashCode(), cmp);
-										}
-										else
-										{
-											missing++;
-											cmp.setPosition(Position.HIDDEN);
-										}
-									}
-									cmp.addMetadata(md);
-								}
-							}
-						}
-		
-						visiblePanels.clear();
-						for (MapMiniPanel mp : miniPanels.values())
-							visiblePanels.add(mp);
-							
-						pane.removeAll();
-						pane.add(mapImagePanel, new Integer(10));
-						int i = 0;
 						for (JComponent comp : compsToAdd)
 						{
 							if (comp instanceof JLabel)
@@ -1134,12 +1135,17 @@ public class MapPanel extends JPanel
 								pane.add(comp, new Integer(20));
 							}
 						}
-						lines = linesToAdd;
-						parent.setStatusText(" ");
-						checkLayouts();
-						repaint();
 					}
-				});
+					lines = linesToAdd;
+					parent.setStatusText(" ");
+					checkLayouts();
+					///
+					repaint();
+				}
+				lock.release();
+			}
+		};
+		worker.start();
 	}
 	
 	private class MapImagePanel extends JPanel
@@ -1214,9 +1220,8 @@ public class MapPanel extends JPanel
             g2.draw(gp);
 		}
 		
-		public void paint(Graphics g)
+		public void paintComponent(Graphics g)
 		{
-			super.paint(g);
 			if (renderer == null || mapImage == null)
 			{
 				Dimension d = getSize();
@@ -1225,7 +1230,6 @@ public class MapPanel extends JPanel
 			else
 			{
 				Graphics2D g2 = (Graphics2D)g;
-//				g2.drawImage(mapImage, 0, 0, null);
 				if (dragMode == DragMode.DRAG_MAP && mouseDown != null && mouseNow != null)
 				{
 					int dx = mouseDown.x - mouseNow.x;
@@ -1243,9 +1247,12 @@ public class MapPanel extends JPanel
 				
 //				g.setColor(Color.WHITE);
 				g.setXORMode(Color.WHITE);
-				for (Line2D.Double line : lines)
+				if (lines != null)
 				{
-					g2.draw(line);
+					for (Line2D.Double line : lines)
+					{
+						g2.draw(line);
+					}
 				}
 				g.setPaintMode();
 				
