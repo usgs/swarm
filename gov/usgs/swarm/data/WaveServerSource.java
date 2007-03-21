@@ -21,6 +21,9 @@ import java.util.TimeZone;
  * Earthworm Wave Server.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2007/03/06 20:00:02  dcervelli
+ * Time zone offset.
+ *
  * Revision 1.10  2006/08/14 22:45:28  dcervelli
  * Adheres to useCache.
  *
@@ -239,5 +242,10 @@ public class WaveServerSource extends SeismicDataSource
 	public synchronized void notifyDataNotNeeded(String station, double t1, double t2, GulperListener gl)
 	{
 		GulperList.getInstance().killGulper("ws:" + station, gl);
+	}
+	
+	public synchronized boolean isActiveSource()
+	{
+		return true;	
 	}
 }
