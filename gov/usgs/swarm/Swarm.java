@@ -59,6 +59,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: name worker thread for better debugging
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.41  2007/03/12 22:28:07  dcervelli
+ * Disable magnitude markers when options changed, version bump.
+ *
  * Revision 1.40  2007/03/06 17:54:16  cervelli
  * Units can now be disabled
  *
@@ -229,7 +232,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.0.0.20070314-beta-9";
+	private static final String VERSION = "2.0.0.20070322-beta-10";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
