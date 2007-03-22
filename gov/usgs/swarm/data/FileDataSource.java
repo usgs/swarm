@@ -48,6 +48,9 @@ import javax.swing.JScrollPane;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2006/10/26 00:51:16  dcervelli
+ * Location codes for SEED files.
+ *
  * Revision 1.4  2006/08/14 22:45:09  dcervelli
  * Double-click maps to OK.
  *
@@ -80,8 +83,9 @@ public class FileDataSource extends CachedDataSource
 	public void flush()
 	{
 		List<String> channels = getChannels();
-		for (String ch : channels)
-			Swarm.config.removeMetadata(ch);
+		if (channels != null)
+			for (String ch : channels)
+				Swarm.config.removeMetadata(ch);
 		super.flush();
 		openFiles.clear();
 		channelTimes.clear();
