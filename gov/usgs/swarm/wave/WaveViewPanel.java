@@ -48,6 +48,9 @@ import javax.swing.event.EventListenerList;
  * TODO: move filter method
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2007/03/12 22:29:01  dcervelli
+ * Added null check in paintMark().
+ *
  * Revision 1.11  2007/03/06 17:55:40  cervelli
  * Units can now be disabled
  *
@@ -173,7 +176,6 @@ public class WaveViewPanel extends JComponent
 	/** The amount of padding space on the bottom. */
 	private int bottomHeight = 20;
 	
-//	private Plot plot;
 	private FrameDecorator decorator;
 	private SliceWaveRenderer waveRenderer;
 	private SpectrogramRenderer spectrogramRenderer;
@@ -241,6 +243,8 @@ public class WaveViewPanel extends JComponent
 	private double cursorMark = Double.NaN;
 	
 	private boolean useFilterLabel = true;
+	
+	private Color borderColor;
 	
 	/** Constructs a WaveViewPanel with default settings.
 	 */	
@@ -310,36 +314,36 @@ public class WaveViewPanel extends JComponent
 		listeners.remove(WaveViewPanelListener.class, listener);
 	}
 
-	public void fireZoomed(MouseEvent e, double oldST, double oldET)
+	public void fireZoomed(MouseEvent e, double oldST, double oldET, double newST, double newET)
 	{
 		Object[] ls = listeners.getListenerList();
-	     for (int i = ls.length - 2; i >= 0; i -= 2)
-	         if (ls[i] == WaveViewPanelListener.class)
-	             ((WaveViewPanelListener)ls[i + 1]).waveZoomed(oldST, oldET);
+		for (int i = ls.length - 2; i >= 0; i -= 2)
+			if (ls[i] == WaveViewPanelListener.class)
+				((WaveViewPanelListener)ls[i + 1]).waveZoomed(this, oldST, oldET, newST, newET);
 	}
 	
 	public void fireTimePressed(MouseEvent e, double j2k)
 	{
 		Object[] ls = listeners.getListenerList();
-	     for (int i = ls.length - 2; i >= 0; i -= 2)
-	         if (ls[i] == WaveViewPanelListener.class)
-	             ((WaveViewPanelListener)ls[i + 1]).waveTimePressed(e, j2k);
+		for (int i = ls.length - 2; i >= 0; i -= 2)
+			if (ls[i] == WaveViewPanelListener.class)
+				((WaveViewPanelListener)ls[i + 1]).waveTimePressed(this, e, j2k);
 	}
 	
 	public void fireMousePressed(MouseEvent e)
 	{
-	     Object[] ls = listeners.getListenerList();
-	     for (int i = ls.length - 2; i >= 0; i -= 2)
-	         if (ls[i] == WaveViewPanelListener.class)
-	             ((WaveViewPanelListener)ls[i + 1]).mousePressed(e);
+		Object[] ls = listeners.getListenerList();
+		for (int i = ls.length - 2; i >= 0; i -= 2)
+			if (ls[i] == WaveViewPanelListener.class)
+				((WaveViewPanelListener)ls[i + 1]).mousePressed(this, e, dragging);
 	}
 	
 	public void fireClose()
 	{
-	     Object[] ls = listeners.getListenerList();
-	     for (int i = ls.length - 2; i >= 0; i -= 2)
-	         if (ls[i] == WaveViewPanelListener.class)
-	             ((WaveViewPanelListener)ls[i + 1]).waveClosed();
+		Object[] ls = listeners.getListenerList();
+		for (int i = ls.length - 2; i >= 0; i -= 2)
+			if (ls[i] == WaveViewPanelListener.class)
+				((WaveViewPanelListener)ls[i + 1]).waveClosed(this);
 	}
 	
 	public void setAllowClose(boolean b)
@@ -357,44 +361,44 @@ public class WaveViewPanel extends JComponent
 					{
 						Swarm.getApplication().touchUITime();
 						
-						fireMousePressed(e);
-						
 						double[] t = getTranslation();
-						if (t == null)
-							return;
-						
-						int x = e.getX();
-						double j2k = x * t[0] + t[1];
-						if (timeSeries)
-							System.out.printf("%s UTC: %s j2k: %.3f ew: %.3f\n", channel, Time.format(DATE_FORMAT, Util.j2KToDate(j2k)), j2k, Util.j2KToEW(j2k));
-						
-						if (SwingUtilities.isRightMouseButton(e) )
+						if (t != null)
 						{
-							settings.cycleType();
-						}
-
-						if (timeSeries && j2k >= startTime && j2k <= endTime)
-							fireTimePressed(e, j2k);
-						
-						if (timeSeries && allowDragging && SwingUtilities.isLeftMouseButton(e))
-						{
-							Dimension size = getSize();
-							int y = e.getY();
-							if (t != null && y > yOffset && y < (size.height - bottomHeight) 
-								&& x > xOffset && x < size.width - rightWidth)
+							int x = e.getX();
+							double j2k = x * t[0] + t[1];
+							if (timeSeries)
+								System.out.printf("%s UTC: %s j2k: %.3f ew: %.3f\n", channel, Time.format(DATE_FORMAT, Util.j2KToDate(j2k)), j2k, Util.j2KToEW(j2k));
+							
+							if (SwingUtilities.isRightMouseButton(e) )
 							{
-								j2k1 = j2k2 = j2k;
-							    if (e.isControlDown())
-							    {
-									System.out.println(channel + ": " + Time.format(DATE_FORMAT, Util.j2KToDate(j2k1)));
-							    }
-							    else
-							    {
-									highlightX1 = highlightX2 = x;
-									dragging = true;
-							    }
+								settings.cycleType();
+							}
+	
+							if (timeSeries && j2k >= startTime && j2k <= endTime)
+								fireTimePressed(e, j2k);
+							
+							if (timeSeries && allowDragging && SwingUtilities.isLeftMouseButton(e))
+							{
+								Dimension size = getSize();
+								int y = e.getY();
+								if (t != null && y > yOffset && y < (size.height - bottomHeight) 
+									&& x > xOffset && x < size.width - rightWidth)
+								{
+									j2k1 = j2k2 = j2k;
+								    if (e.isControlDown())
+								    {
+										System.out.println(channel + ": " + Time.format(DATE_FORMAT, Util.j2KToDate(j2k1)));
+								    }
+								    else if (!e.isShiftDown())
+								    {
+										highlightX1 = highlightX2 = x;
+										dragging = true;
+								    }
+								}
 							}
 						}
+						
+						fireMousePressed(e);
 					}
 					
 					public void mouseReleased(MouseEvent e)
@@ -403,9 +407,14 @@ public class WaveViewPanel extends JComponent
 						if (SwingUtilities.isLeftMouseButton(e) && dragging)
 						{	
 							dragging = false;
-							if (j2k1 != j2k2)
-								fireZoomed(e, getStartTime(), getEndTime());
-							zoomDraggedArea();
+							if (j2k1 != j2k2 && source != null)
+							{
+								double st = Math.min(j2k1, j2k2);	
+								double et = Math.max(j2k1, j2k2);
+								zoom(st, et);
+								fireZoomed(e, getStartTime(), getEndTime(), st, et);
+							}
+//							zoomDraggedArea();
 							repaint();
 						}
 						
@@ -477,35 +486,40 @@ public class WaveViewPanel extends JComponent
 				});
 	}
 
-	public void zoomDraggedArea()
+	public void zoom(final double st, final double et)
 	{
-		if (j2k1 == j2k2 || source == null)
-			return;
-		
-		final double st = Math.min(j2k1, j2k2);	
-		final double et = Math.max(j2k1, j2k2);
-		
 		final SwingWorker worker = new SwingWorker()
-				{
-					public Object construct()
-					{
-						Wave sw = null;
-						if (source instanceof CachedDataSource)
-							sw = ((CachedDataSource)source).getBestWave(channel, st, et);
-						else
-							sw = source.getWave(channel, st, et);
-						setWave(sw, st, et);
-						return null;
-					}
-					
-					public void finished()
-					{
-						
-						repaint();	
-					}
-				};
-		worker.start();	
+		{
+			public Object construct()
+			{
+				Wave sw = null;
+				if (source instanceof CachedDataSource)
+					sw = ((CachedDataSource)source).getBestWave(channel, st, et);
+				else
+					sw = source.getWave(channel, st, et);
+				setWave(sw, st, et);
+				return null;
+			}
+			
+			public void finished()
+			{
+				
+				repaint();	
+			}
+		};
+		worker.start();
 	}
+	
+//	public void zoomDraggedArea()
+//	{
+//		if (j2k1 == j2k2 || source == null)
+//			return;
+//		
+//		double st = Math.min(j2k1, j2k2);	
+//		double et = Math.max(j2k1, j2k2);
+//		
+//		zoom(st, et);	
+//	}
 
 	/** Set the working flag.  This flag indicates whether data are being loaded for this panel.
 	 * @param b the working flag state
@@ -636,6 +650,11 @@ public class WaveViewPanel extends JComponent
 	public void setBottomBorderColor(Color c)
 	{
 		bottomBorderColor = c;
+	}
+	
+	public void setBorderColor(Color c)
+	{
+		borderColor = c;
 	}
 	
 	/** Processes the mouse position variables when the cursor is over the panel.
@@ -924,6 +943,16 @@ public class WaveViewPanel extends JComponent
 			
 			g2.drawImage(closeImg, dim.width - 17, 3, null);
 		}
+		if (bottomBorderColor != null)
+		{
+			g2.setColor(bottomBorderColor);
+			g2.drawLine(0, dim.height - 1, dim.width, dim.height - 1);
+		}
+		if (borderColor != null)
+		{
+			g2.setColor(borderColor);
+			g2.drawRect(0, 0, dim.width - 1, dim.height - 2);
+		}
 	}
 
 	public void setUseFilterLabel(boolean b)
@@ -988,11 +1017,7 @@ public class WaveViewPanel extends JComponent
 //			titleFrame.getAxis().setTopLabelAsText(channel);
 
 		plot.render(g2);
-		if (bottomBorderColor != null)
-		{
-			g2.setColor(Color.GRAY);
-			g2.drawLine(0, dim.height - 1, dim.width, dim.height - 1);
-		}
+		
 	}
 
 	/** Plots a wave.
