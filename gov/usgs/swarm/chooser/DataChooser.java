@@ -32,6 +32,7 @@ import java.awt.geom.Point2D;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,6 +78,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2007/01/30 19:59:46  dcervelli
+ * Select all text when open to box focused.
+ *
  * Revision 1.11  2006/10/26 00:50:25  dcervelli
  * Fixed bug with disappearing selections after using the nearest box, also added user time window
  *
@@ -275,6 +279,9 @@ public class DataChooser extends JPanel
 			}
 			dataTree.repaint();
 		}
+
+		public void helicorderProgress(String channel, double progress)
+		{}
 	}
 	
 	public void saveLayout(ConfigFile cf, String prefix)
@@ -542,6 +549,13 @@ public class DataChooser extends JPanel
 									public Object construct()
 									{
 										List<Pair<ServerNode, String>> channels = getSelections();
+										Collections.sort(channels, new Comparator<Pair<ServerNode, String>>()
+												{
+													public int compare(Pair<ServerNode, String> o1, Pair<ServerNode, String> o2)
+													{
+														return o1.item2.compareTo(o2.item2);
+													}
+												});
 										if (channels != null)
 										{
 											for (Pair<ServerNode, String> pair : channels)
@@ -818,6 +832,9 @@ public class DataChooser extends JPanel
 					public void channelsUpdated()
 					{
 					}
+
+					public void helicorderProgress(String channel, double progress)
+					{}
 				};
 				
 		public Object construct()
