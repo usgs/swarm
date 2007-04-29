@@ -14,6 +14,9 @@ import javax.swing.event.EventListenerList;
  * Base class for seismic data sources.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/08/12 21:51:53  dcervelli
+ * Addition of id to channelProgress().
+ *
  * Revision 1.9  2006/08/12 00:36:20  dcervelli
  * Added fireChannelsProgress().
  *
@@ -106,6 +109,14 @@ abstract public class SeismicDataSource
 		for (int i = ls.length - 2; i >= 0; i -= 2)
 		    if (ls[i] == SeismicDataSourceListener.class)
 		        ((SeismicDataSourceListener)ls[i + 1]).channelsProgress(id, p);
+	}
+	
+	public void fireHelicorderProgress(String id, double p)
+	{
+		Object[] ls = listeners.getListenerList();
+		for (int i = ls.length - 2; i >= 0; i -= 2)
+		    if (ls[i] == SeismicDataSourceListener.class)
+		        ((SeismicDataSourceListener)ls[i + 1]).helicorderProgress(id, p);
 	}
 	
 	public void notifyDataNotNeeded(String station, double t1, double t2, GulperListener gl)
