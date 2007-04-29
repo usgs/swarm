@@ -2,6 +2,7 @@ package gov.usgs.swarm.data;
 
 import gov.usgs.earthworm.Menu;
 import gov.usgs.earthworm.MenuItem;
+import gov.usgs.net.ReadListener;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.util.CurrentTime;
@@ -24,6 +25,9 @@ import java.util.StringTokenizer;
  * be made a descendant of WaveServerSource. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.12  2006/08/04 21:21:32  cervelli
+ * New WWS protocol version 3 channels with metadata stuff.
+ *
  * Revision 1.11  2006/08/02 23:33:05  cervelli
  * Change for useCache variable.
  *
@@ -104,6 +108,7 @@ public class WWSSource extends SeismicDataSource
 		compress = ss[3].equals("1");
 		
 		winstonClient = new WWSClient(server, port);
+		
 		setTimeout(timeout);
 //		protocolVersion = winstonClient.getProtocolVersion();
 	}
@@ -212,14 +217,24 @@ public class WWSSource extends SeismicDataSource
 		return wave;
 	}
 	
-	public synchronized HelicorderData getHelicorder(String station, double t1, double t2, GulperListener gl)
+	public synchronized HelicorderData getHelicorder(final String station, double t1, double t2, GulperListener gl)
 	{
 		CachedDataSource cache = Swarm.getCache();
 		HelicorderData hd = cache.getHelicorder(station, t1, t2, this);
 		if (hd == null)
 		{
 			String[] scnl = parseSCNL(station);
+			fireHelicorderProgress(station, -1);
+			winstonClient.setReadListener(new ReadListener()
+					{
+						public void readProgress(double p)
+						{
+							fireHelicorderProgress(station, p);
+						}
+					});
 			hd = winstonClient.getHelicorder(scnl[0], scnl[1], scnl[2], scnl[3], t1, t2, compress);
+			winstonClient.setReadListener(null);
+			fireHelicorderProgress(station, 1.0);
 			
 			if (hd != null && hd.rows() != 0)
 			{
