@@ -51,6 +51,9 @@ import javax.swing.event.EventListenerList;
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2007/03/12 22:28:43  dcervelli
+ * Fixed bad time mark behavior.
+ *
  * Revision 1.3  2006/08/11 21:01:41  dcervelli
  * Changes for small helicorder view and scaled inset wave.
  *
@@ -594,12 +597,12 @@ public class HelicorderViewPanel extends JComponent
 			insetWavePanel = new WaveViewPanel(parent.getWaveViewSettings());
 			insetWavePanel.addListener(new WaveViewPanelAdapter()
 			{
-				public void waveClosed()
+				public void waveClosed(WaveViewPanel src)
 				{
 					removeWaveInset();
 				}
 				
-				public void waveTimePressed(MouseEvent e, double j2k)
+				public void waveTimePressed(WaveViewPanel src, MouseEvent e, double j2k)
 				{
 					if (Swarm.config.durationEnabled && SwingUtilities.isLeftMouseButton(e))
 						markTime(j2k);
@@ -929,10 +932,20 @@ public class HelicorderViewPanel extends JComponent
 		Dimension d = this.getSize();
 		if (heliData == null)
 		{
-			if (parent.isWorking())
-				g2.drawString("Attempting to retrieve data...", d.width / 2 - 75, d.height / 2);
-			else
-				g2.drawString("No helicorder data.", d.width / 2 - 50, d.height / 2);
+//			if (parent.isWorking())
+//				g2.drawString("Attempting to retrieve data...", d.width / 2 - 75, d.height / 2);
+//			else
+			if (!parent.isWorking())
+			{
+//				g2.drawString("The server returned no helicorder data.", d.width / 2 - 150, d.height / 2);
+				parent.setStatus("The server returned no helicorder data.");
+//				double start = settings.getBottomTime() - settings.span * 60;
+//				double end = settings.getBottomTime();
+//				g2.drawString(String.format("Time range: %s to %s", 
+//						Time.format(Time.STANDARD_TIME_FORMAT, start), 
+//						Time.format(Time.STANDARD_TIME_FORMAT, end)),
+//						d.width / 2 - 100, d.height / 2 + 16);
+			}
 		}
 		else if (displayImage != null)
 			g2.drawImage(displayImage, 0, 0, null);
