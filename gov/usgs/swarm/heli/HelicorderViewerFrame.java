@@ -12,6 +12,7 @@ import gov.usgs.swarm.TimeListener;
 import gov.usgs.swarm.WigglerPanel;
 import gov.usgs.swarm.data.GulperListener;
 import gov.usgs.swarm.data.SeismicDataSource;
+import gov.usgs.swarm.data.SeismicDataSourceListener;
 import gov.usgs.swarm.wave.WaveViewSettings;
 import gov.usgs.swarm.wave.WaveViewSettingsToolbar;
 import gov.usgs.util.ConfigFile;
@@ -34,6 +35,7 @@ import java.io.File;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -43,6 +45,7 @@ import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
@@ -61,6 +64,9 @@ import javax.swing.event.InternalFrameEvent;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.7  2007/01/30 20:00:09  dcervelli
+ * File chooser named.
+ *
  * Revision 1.6  2006/10/26 00:51:56  dcervelli
  * Change for user specified end times from chooser.
  *
@@ -210,12 +216,15 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 	private Border thinBorder;
 	
 	protected Throbber throbber;
+	protected JProgressBar progressBar;
 	
 	private boolean noData = false;
 	
 	private TimeListener timeListener;
 	
 	public GulperListener gulperListener;
+	
+	private SeismicDataSourceListener dataListener;
 	
 	public HelicorderViewerFrame(ConfigFile cf)
 	{
@@ -289,9 +298,22 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 	
 	private void createStatusLabel()
 	{
+		JPanel statusPanel = new JPanel();
+		statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.X_AXIS));
 		statusLabel = new JLabel(" ");
-		statusLabel.setBorder(BorderFactory.createEmptyBorder(1, 5, 1, 1));
-		mainPanel.add(statusLabel, BorderLayout.SOUTH);
+		statusLabel.setBorder(BorderFactory.createEmptyBorder(1, 5, 0, 0));
+		statusPanel.setBorder(BorderFactory.createEmptyBorder(1, 0, 1, 3));
+		statusPanel.add(statusLabel);
+		statusPanel.add(Box.createHorizontalGlue());
+		progressBar = new JProgressBar(0, 100);
+		progressBar.setVisible(false);
+		progressBar.setStringPainted(true);
+		progressBar.setPreferredSize(new Dimension(100, 15));
+		progressBar.setSize(new Dimension(100, 15));
+		progressBar.setMaximumSize(new Dimension(100, 15));
+//		progressBar.setMinimumSize(new Dimension(100, 15));
+		statusPanel.add(progressBar);
+		mainPanel.add(statusPanel, BorderLayout.SOUTH);
 	}
 	
 	private void createHeliPanel()
@@ -499,8 +521,9 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 		
 		capture = SwarmUtil.createToolBarButton(
 				Images.getIcon("camera"),
-				"Save helicorder image",
+				"Save helicorder image (P)",
 				new CaptureActionListener());
+		Util.mapKeyStrokeToButton(this, "P", "capture", capture);
 		toolBar.add(capture);
 
 		toolBar.addSeparator();
@@ -659,6 +682,44 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 							getHelicorder();
 					}
 				};
+				
+		dataListener = new SeismicDataSourceListener()
+				{
+
+					public void channelsProgress(String id, double progress)
+					{}
+					public void channelsUpdated()
+					{}
+
+					public void helicorderProgress(String channel, final double progress)
+					{
+						System.out.println("Progress: " + progress);
+//						setStatus("Progress: " + progress);
+						SwingUtilities.invokeLater(new Runnable() {
+								public void run()
+								{
+									if (!progressBar.isVisible())
+										progressBar.setVisible(true);
+									
+									if (progress == -1)
+									{
+										progressBar.setIndeterminate(true);
+										progressBar.setString("Waiting for server");
+									}
+									else if (progress >= 0.0 && progress < 1.0)
+									{
+										progressBar.setIndeterminate(false);
+										progressBar.setValue((int)(progress * 100));
+										progressBar.setString("Downloading");
+									}
+									
+									if (progress == 1.0)
+										progressBar.setVisible(false);
+								}});
+						
+					}
+				};
+		dataSource.addListener(dataListener);
 	}
 	
 	public HelicorderViewPanel getHelicorderViewPanel()
@@ -988,7 +1049,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 					try
 					{
 						double bt = settings.getBottomTime();
-//						if (dataSource.isActiveSource() || Double.isNaN(bt) || CurrentTime.getInstance().nowJ2K() < bt)
 						if (dataSource.isActiveSource() && Double.isNaN(bt))
 						{
 							if (!working)
