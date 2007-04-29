@@ -33,6 +33,9 @@ import org.apache.log4j.varia.NullAppender;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/08/14 22:44:46  dcervelli
+ * Implements getCopy() and adheres to useCache.
+ *
  * Revision 1.9  2006/08/12 21:51:53  dcervelli
  * Addition of id to channelProgress().
  *
@@ -180,7 +183,6 @@ public class DHIDataSource extends SeismicDataSource
 	        	cnt++;
 	        	if (s.effective_time.end_time.date_time.startsWith("25"))
 	        	{
-	        		Swarm.logger.finest("dhi channel: " + s.name);
 		        	Channel[] channels = net.retrieve_for_station(s.get_id());
 		            for (Channel c : channels)
 		            {
@@ -197,6 +199,8 @@ public class DHIDataSource extends SeismicDataSource
 		            		Metadata md = Swarm.config.getMetadata(ch, true);
 	            			md.updateLongitude(s.my_location.longitude);
 	            			md.updateLatitude(s.my_location.latitude);
+	            			md.addGroup(s.name);
+	            			md.updateAlias(s.name);
 	            			md.source = this;
 		            		result.add(ch);
 		            		idMap.put(ch, c.get_id());
