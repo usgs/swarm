@@ -6,6 +6,9 @@ import gov.usgs.util.ConfigFile;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2007/02/27 20:11:06  cervelli
+ * Added support for turning calibration use on and off.
+ *
  * Revision 1.2  2006/10/26 00:57:09  dcervelli
  * Function for manually adjusting scales.
  *
@@ -101,6 +104,11 @@ public class WaveViewSettings
 	
 	public WaveViewSettings(WaveViewSettings s)
 	{
+		copy(s);
+	}
+	
+	public void copy(WaveViewSettings s)
+	{
 		viewType = s.viewType;
 		removeBias = s.removeBias;
 		autoScaleAmp = s.autoScaleAmp;
@@ -121,7 +129,7 @@ public class WaveViewSettings
 		spectrogramOverlap = s.spectrogramOverlap;
 		logPower = s.logPower;
 		zeroPhaseShift = s.zeroPhaseShift;
-		filterOn = s.filterOn;
+		filterOn = s.filterOn;	
 	}
 	
 	public void set(ConfigFile cf)

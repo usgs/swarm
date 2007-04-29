@@ -7,6 +7,8 @@ import gov.usgs.util.Util;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
@@ -19,6 +21,9 @@ import javax.swing.KeyStroke;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2006/10/26 00:57:43  dcervelli
+ * Key mapping for manual zooming.
+ *
  * Revision 1.1  2006/08/01 23:45:23  cervelli
  * Moved package.
  *
@@ -48,11 +53,14 @@ public class WaveViewSettingsToolbar
 	private JToggleButton waveToggle;
 	private JToggleButton spectraToggle;
 	private JToggleButton spectrogramToggle;
+	private ButtonGroup waveTypes;
 	
-	private WaveViewSettings settings;
+	private Set<WaveViewSettings> settingsSet;
+//	private WaveViewSettings settings;
 	
 	public WaveViewSettingsToolbar(WaveViewSettings s, JToolBar dest, JComponent keyComp)
 	{
+		settingsSet = new HashSet<WaveViewSettings>();
 		createUI(dest, keyComp);
 		setSettings(s);
 	}
@@ -66,11 +74,19 @@ public class WaveViewSettingsToolbar
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						if (settings != null)
+						WaveViewSettings s = new WaveViewSettings();
+						WaveViewSettingsDialog wvsd = WaveViewSettingsDialog.getInstance(s, settingsSet.size());
+						wvsd.setVisible(true);
+						for (WaveViewSettings settings : settingsSet)
 						{
-						    WaveViewSettingsDialog wvsd = WaveViewSettingsDialog.getInstance(settings);
-							wvsd.setVisible(true);
+							settings.copy(s);
+							settings.notifyView();
 						}
+//						if (settings != null)
+//						{
+//						    WaveViewSettingsDialog wvsd = WaveViewSettingsDialog.getInstance(settings);
+//							wvsd.setVisible(true);
+//						}
 					}
 				});
 		Util.mapKeyStrokeToButton(keyComp, "shift SLASH", "settings", waveSet);
@@ -83,13 +99,14 @@ public class WaveViewSettingsToolbar
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						if (settings != null)
+//						if (settings != null)
+						for (WaveViewSettings settings : settingsSet)
 							settings.setType(ViewType.WAVE);
 					}
 				});
 		Util.mapKeyStrokeToButton(keyComp, "COMMA", "wave1", waveToggle);
 		Util.mapKeyStrokeToButton(keyComp, "W", "wave2", waveToggle);
-		waveToggle.setSelected(true);
+//		waveToggle.setSelected(true);
 		dest.add(waveToggle);
 		
 		spectraToggle = SwarmUtil.createToolBarToggleButton(
@@ -99,7 +116,8 @@ public class WaveViewSettingsToolbar
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						if (settings != null)
+//						if (settings != null)
+						for (WaveViewSettings settings : settingsSet)
 							settings.setType(ViewType.SPECTRA);
 					}
 				});
@@ -114,7 +132,8 @@ public class WaveViewSettingsToolbar
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						if (settings != null)
+//						if (settings != null)
+						for (WaveViewSettings settings : settingsSet)							
 							settings.setType(ViewType.SPECTROGRAM);
 					}
 				});
@@ -128,7 +147,8 @@ public class WaveViewSettingsToolbar
 					public static final long serialVersionUID = -1;
 					public void actionPerformed(ActionEvent e)
 					{
-						if (settings != null)
+//						if (settings != null)
+						for (WaveViewSettings settings : settingsSet)
 							settings.cycleLogSettings();
 					}	
 				});
@@ -139,7 +159,8 @@ public class WaveViewSettingsToolbar
 					public static final long serialVersionUID = -1;
 					public void actionPerformed(ActionEvent e)
 					{
-						if (settings != null)
+//						if (settings != null)
+						for (WaveViewSettings settings : settingsSet)
 							settings.toggleFilter();
 					}	
 				});				
@@ -150,7 +171,8 @@ public class WaveViewSettingsToolbar
 					public static final long serialVersionUID = -1;
 					public void actionPerformed(ActionEvent e)
 					{
-						if (settings != null)
+//						if (settings != null)
+						for (WaveViewSettings settings : settingsSet)
 							settings.resetAutoScaleMemory();
 					}	
 				});
@@ -161,9 +183,9 @@ public class WaveViewSettingsToolbar
 					public static final long serialVersionUID = -1;
 					public void actionPerformed(ActionEvent e)
 					{
-						if (settings != null)
+//						if (settings != null)
+						for (WaveViewSettings settings : settingsSet)
 							settings.adjustScale(1.0 / 1.25);
-						System.out.println("scale in");
 					}	
 				});
 		
@@ -173,32 +195,73 @@ public class WaveViewSettingsToolbar
 					public static final long serialVersionUID = -1;
 					public void actionPerformed(ActionEvent e)
 					{
-						if (settings != null)
+//						if (settings != null)
+						for (WaveViewSettings settings : settingsSet)
 							settings.adjustScale(1.25);
-						System.out.println("scale out");
 					}	
 				});
 				
-		ButtonGroup waveTypes = new ButtonGroup();
+		waveTypes = new ButtonGroup();
 		waveTypes.add(waveToggle);
 		waveTypes.add(spectraToggle);
 		waveTypes.add(spectrogramToggle);
 	}
 	
-	public void setSettings(WaveViewSettings s)
+	public void clearSettingsSet()
 	{
-		settings = s;
-		if (settings != null)
+		settingsSet.clear();
+	}
+	
+	public void addSettings(WaveViewSettings s)
+	{
+		if (s != null)
 		{
-			settings.toolbar = this;
+			settingsSet.add(s);
+			s.toolbar = this;
 			settingsChanged();
 		}
+//		System.out.println("addSettings " + s + " " + settingsSet.size());
+	}
+	
+	public void removeSettings(WaveViewSettings s)
+	{
+		settingsSet.remove(s);
+		if (s != null)
+		{
+			s.toolbar = null;
+			settingsChanged();
+		}
+//		System.out.println("removeSettings " + s + " " + settingsSet.size());
+	}
+	
+	public void setSettings(WaveViewSettings s)
+	{
+		clearSettingsSet();
+		addSettings(s);
+//		settingsSet.add(s);
+//		settings = s;
 	}
 	
 	public void settingsChanged()
 	{
-		waveToggle.setSelected(settings.viewType == ViewType.WAVE);	
-		spectraToggle.setSelected(settings.viewType == ViewType.SPECTRA);
-		spectrogramToggle.setSelected(settings.viewType == ViewType.SPECTROGRAM);
+		boolean w = false;
+		boolean s = false;
+		boolean sg = false;
+		for (WaveViewSettings set : settingsSet)
+		{
+			if (set.viewType == ViewType.WAVE)
+				w = true;
+			if (set.viewType == ViewType.SPECTRA)
+				s = true;
+			if (set.viewType == ViewType.SPECTROGRAM)
+				sg = true;
+		}
+		waveTypes.clearSelection();
+		waveToggle.setSelected(w && !s && !sg);	
+		spectraToggle.setSelected(!w && s && !sg);
+		spectrogramToggle.setSelected(!w && !s && sg);
+//		waveToggle.setSelected(settings.viewType == ViewType.WAVE);	
+//		spectraToggle.setSelected(settings.viewType == ViewType.SPECTRA);
+//		spectrogramToggle.setSelected(settings.viewType == ViewType.SPECTROGRAM);
 	}
 }

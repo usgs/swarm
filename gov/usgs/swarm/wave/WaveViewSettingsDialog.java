@@ -24,6 +24,9 @@ import com.jgoodies.forms.layout.FormLayout;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  2007/02/27 20:11:16  cervelli
+ * Added support for turning calibration use on and off.
+ *
  * Revision 1.1  2006/08/01 23:45:23  cervelli
  * Moved package.
  *
@@ -40,6 +43,8 @@ public class WaveViewSettingsDialog extends SwarmDialog
 	
 	private static WaveViewSettingsDialog dialog;
 	private WaveViewSettings settings;
+	
+	private JLabel warningLabel;
 	
 	private ButtonGroup viewGroup;
 	private JRadioButton waveButton;
@@ -77,21 +82,38 @@ public class WaveViewSettingsDialog extends SwarmDialog
 	private JTextField corner2;
 	private JSlider order;
 	
+	private int settingsCount;
+	
 	private WaveViewSettingsDialog()
 	{
 		super(Swarm.getApplication(), "Wave Settings", true);
 		createUI();
 		setSizeAndLocation();
 	}
-
+	
 	public static WaveViewSettingsDialog getInstance(WaveViewSettings s)
+	{
+		return getInstance(s, 1);
+	}
+
+	public static WaveViewSettingsDialog getInstance(WaveViewSettings s, int count)
 	{
 		if (dialog == null)
 			dialog = new WaveViewSettingsDialog();
 
 		dialog.setSettings(s);
 		dialog.setToCurrent();
+		dialog.setSettingsCount(count);
 		return dialog;
+	}
+	
+	public void setSettingsCount(int i)
+	{
+		settingsCount = i;
+		if (settingsCount > 1)
+			warningLabel.setText("You are currently configuring the settings for " + settingsCount + " different waves.");
+		else
+			warningLabel.setText(" ");
 	}
 	
 	public void setSettings(WaveViewSettings s)
@@ -163,6 +185,8 @@ public class WaveViewSettingsDialog extends SwarmDialog
 	
 	private void createComponents()
 	{
+		warningLabel = new JLabel(" ");
+		
 		viewGroup = new ButtonGroup();
 		waveButton = new JRadioButton("Wave");
 		spectraButton = new JRadioButton("Spectra");
@@ -310,6 +334,8 @@ public class WaveViewSettingsDialog extends SwarmDialog
 		builder.appendRow("center:20dlu");
 		builder.nextColumn(3);
 		builder.append(order, 4);
+		builder.nextLine();
+		builder.append(warningLabel, 7);
 		builder.nextLine();
 		
 		dialogPanel = builder.getPanel();
