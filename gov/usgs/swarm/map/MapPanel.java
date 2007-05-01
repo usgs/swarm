@@ -69,6 +69,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2007/03/13 20:43:30  dcervelli
+ * Rejiggered the threading of the map updates.
+ *
  * Revision 1.18  2007/03/12 21:41:41  dcervelli
  * Changed default image cache size.
  *
@@ -294,7 +297,7 @@ public class MapPanel extends JPanel
 		}
 		if (images == null)
 		{
-			Swarm.logger.warning("No map images found.");
+			Swarm.logger.warning("No map images found in " + Swarm.config.mapPath + ".");
 			images = new GeoImageSet();
 		}
 		images.setArealCacheSort(false);
