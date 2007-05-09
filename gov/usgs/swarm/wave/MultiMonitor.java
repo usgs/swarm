@@ -67,6 +67,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: up/down arrows
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2007/03/06 17:55:23  cervelli
+ * Units can now be disabled
+ *
  * Revision 1.9  2006/10/26 00:54:58  dcervelli
  * Minor cleanup.
  *
@@ -645,7 +648,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		wavePanel.add(panel);
 		panel.addListener(new WaveViewPanelAdapter()
 				{
-					public void mousePressed(MouseEvent e)
+					public void mousePressed(WaveViewPanel src, MouseEvent e, boolean dragging)
 					{
 						requestFocusInWindow();
 						select(panel);
@@ -812,19 +815,24 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 								Wave sw = waveMap.get(channel);
 								if (sw != null) 
 								{
-									if (sw.getEndTime() < now)
+									if (sw.overlaps(start, now)) // runaway monitor bug fix
 									{
-										Wave w2 = dataSource.getWave(channel, sw.getEndTime() - 10, now);
-										if (w2 != null)
-											sw = sw.combine(w2);
+										if (sw.getEndTime() < now)
+										{
+											Wave w2 = dataSource.getWave(channel, sw.getEndTime() - 10, now);
+											if (w2 != null && sw.overlaps(w2))
+												sw = sw.combine(w2);
+										}
+										if (sw.getStartTime() > start)
+										{
+											Wave w2 = dataSource.getWave(channel, start, sw.getStartTime() + 10);
+											if (w2 != null && sw.overlaps(w2))
+												sw = sw.combine(w2);
+										}
+										sw = sw.subset(start, sw.getEndTime());
 									}
-									if (sw.getStartTime() > start)
-									{
-										Wave w2 = dataSource.getWave(channel, start, sw.getStartTime() + 10);
-										if (w2 != null)
-											sw = sw.combine(w2);
-									}
-									sw = sw.subset(start, sw.getEndTime());
+									else
+										sw = null;
 								}
 								
 								// something bad happened above, just get the whole wave
