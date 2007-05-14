@@ -6,6 +6,9 @@ import gov.usgs.util.ConfigFile;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2007/04/29 21:23:06  dcervelli
+ * Multiselect code support.
+ *
  * Revision 1.3  2007/02/27 20:11:06  cervelli
  * Added support for turning calibration use on and off.
  *
@@ -22,6 +25,8 @@ import gov.usgs.util.ConfigFile;
  */
 public class WaveViewSettings
 {
+	public static final String DEFAULTS_FILENAME = "WaveDefaults.config";
+	
 	public enum ViewType
 	{
 		WAVE("W"),
@@ -76,30 +81,50 @@ public class WaveViewSettings
 	public WaveViewPanel view;
 	public WaveViewSettingsToolbar toolbar;
 	
+	private static WaveViewSettings DEFAULT_WAVE_VIEW_SETTINGS;
+	
+	static
+	{
+		DEFAULT_WAVE_VIEW_SETTINGS = new WaveViewSettings();
+		ConfigFile cf = new ConfigFile(DEFAULTS_FILENAME);
+		if (cf.wasSuccessfullyRead())
+		{
+			ConfigFile sub = cf.getSubConfig("default");
+			DEFAULT_WAVE_VIEW_SETTINGS.set(sub);
+		}
+		else
+		{
+			DEFAULT_WAVE_VIEW_SETTINGS.viewType = ViewType.WAVE;
+			DEFAULT_WAVE_VIEW_SETTINGS.removeBias = true;
+			DEFAULT_WAVE_VIEW_SETTINGS.autoScaleAmp = true;
+			DEFAULT_WAVE_VIEW_SETTINGS.autoScaleAmpMemory = true;
+			DEFAULT_WAVE_VIEW_SETTINGS.maxAmp = 1000;
+			DEFAULT_WAVE_VIEW_SETTINGS.minAmp = -1000;
+			DEFAULT_WAVE_VIEW_SETTINGS.autoScalePower = true;
+			DEFAULT_WAVE_VIEW_SETTINGS.autoScalePowerMemory = true;
+			DEFAULT_WAVE_VIEW_SETTINGS.maxPower = 40000;
+			DEFAULT_WAVE_VIEW_SETTINGS.useUnits = true;
+			DEFAULT_WAVE_VIEW_SETTINGS.logFreq = false;
+			DEFAULT_WAVE_VIEW_SETTINGS.logPower = true;
+			DEFAULT_WAVE_VIEW_SETTINGS.spectrogramOverlap = 0.2;
+			DEFAULT_WAVE_VIEW_SETTINGS.minFreq = 0.75;
+			DEFAULT_WAVE_VIEW_SETTINGS.maxFreq = 25;
+			DEFAULT_WAVE_VIEW_SETTINGS.fftSize = "Auto";
+			DEFAULT_WAVE_VIEW_SETTINGS.filter = new Butterworth();
+			DEFAULT_WAVE_VIEW_SETTINGS.filterOn = false;
+			DEFAULT_WAVE_VIEW_SETTINGS.zeroPhaseShift = true;
+			DEFAULT_WAVE_VIEW_SETTINGS.save(cf, "default");
+			cf.writeToFile(DEFAULTS_FILENAME);
+		}
+	}
+	
 	public WaveViewSettings()
 	{
-		viewType = ViewType.WAVE;
-		removeBias = true;
-		autoScaleAmp = true;
-		autoScaleAmpMemory = true;
-		maxAmp = 1000;
-		minAmp = -1000;
-		autoScalePower = true;
-		autoScalePowerMemory = true;
-		maxPower = 40000;
-		useUnits = true;
-		logFreq = false;
-		logPower = true;
-		spectrogramOverlap = 0.2;
-		minFreq = 0.75;
-		maxFreq = 25;
-		fftSize = "Auto";
-//		color = Color.blue;
-//		clipColor = Color.red;
 		filter = new Butterworth();
-		filterOn = false;
-		zeroPhaseShift = true;
 		view = null;
+		
+		if (DEFAULT_WAVE_VIEW_SETTINGS != null)
+			copy(DEFAULT_WAVE_VIEW_SETTINGS);
 	}
 	
 	public WaveViewSettings(WaveViewSettings s)
