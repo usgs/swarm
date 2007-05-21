@@ -52,6 +52,9 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2007/01/30 20:01:41  dcervelli
+ * File chooser named.
+ *
  * Revision 1.16  2006/10/26 00:52:31  dcervelli
  * Made frame not iconifiable.
  *
@@ -95,6 +98,7 @@ import javax.swing.event.InternalFrameEvent;
  * Changed refresh interval.
  *
  * @author Dan Cervelli
+ * @version $Id: MapFrame.java,v 1.18 2007-05-21 02:58:41 dcervelli Exp $
  */
 public class MapFrame extends SwarmFrame implements Runnable, Kioskable
 {
@@ -652,9 +656,19 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable
 				});
 	}
 	
+	public void reloadImages()
+	{
+		mapPanel.loadMaps(true);
+	}
+	
 	public void reset(boolean doMap)
 	{
 		mapPanel.resetImage(doMap);
+	}
+	
+	public void mapSettingsChanged()
+	{
+		mapPanel.loadMaps(true);
 	}
 	
 	public HelicorderViewPanelListener getLinkListener()
