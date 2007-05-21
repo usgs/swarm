@@ -71,6 +71,9 @@ import javax.swing.event.InternalFrameEvent;
  * The wave clipboard internal frame.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2007/04/29 21:15:41  dcervelli
+ * Multiselect code.
+ *
  * Revision 1.8  2007/02/28 20:32:51  dcervelli
  * Added border at bottom of wave panel.
  *
@@ -148,6 +151,7 @@ import javax.swing.event.InternalFrameEvent;
  * Support for opening and saving SAC files.
  *
  * @author Dan Cervelli
+ * @version $Id: WaveClipboardFrame.java,v 1.10 2007-05-21 02:46:14 dcervelli Exp $
  */
 public class WaveClipboardFrame extends SwarmFrame
 {
@@ -728,29 +732,6 @@ public class WaveClipboardFrame extends SwarmFrame
 						remove(src);
 					}
 				};
-	}
-	
-//	private void setLastClickedIndex(int incoming)
-//	{
-//		if (lastClickedIndex != -1)
-//		{
-//			WaveViewPanel wvp = (WaveViewPanel)waveBox.getComponent(lastClickedIndex);
-//			wvp.setBorderColor(null);
-//			wvp.repaint();
-//		}
-//		if (incoming != -1)
-//		{
-//			WaveViewPanel wvp = (WaveViewPanel)waveBox.getComponent(incoming);
-//			wvp.setBorderColor(Color.BLUE);
-//			wvp.repaint();
-//		}
-//		lastClickedIndex = incoming;
-//	}
-	
-	public void resetAllAutoScaleMemory()
-	{
-		for (WaveViewPanel panel : waves)
-			panel.resetAutoScaleMemory();
 	}
 	
 	private int calculateWaveHeight()
