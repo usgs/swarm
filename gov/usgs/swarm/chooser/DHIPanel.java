@@ -3,6 +3,8 @@ package gov.usgs.swarm.chooser;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.util.ResourceReader;
 
+import java.net.URL;
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -14,6 +16,9 @@ import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.5  2007/03/09 00:06:44  dcervelli
+ * Doesn't crash the panel if the network file is missing.
+ *
  * Revision 1.4  2007/03/08 23:56:23  dcervelli
  * Added IRIS network list.
  *
@@ -27,6 +32,7 @@ import com.jgoodies.forms.layout.FormLayout;
  * Moved package and new data source panel system.
  *
  * @author Dan Cervelli
+ * @version $Id: DHIPanel.java,v 1.6 2007-05-21 02:51:00 dcervelli Exp $
  */
 public class DHIPanel extends DataSourcePanel
 {
@@ -100,7 +106,8 @@ public class DHIPanel extends DataSourcePanel
 		network = new JComboBox();
 		network.setEditable(true);
 		
-		ResourceReader rr = ResourceReader.getResourceReader(IRIS_NETWORK_FILE);
+		URL u = getClass().getClassLoader().getResource(IRIS_NETWORK_FILE);
+		ResourceReader rr = ResourceReader.getResourceReader(u);
 		if (rr != null)
 		{
 			String s;
