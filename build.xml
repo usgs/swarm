@@ -1,5 +1,8 @@
 <!--
 $Log: not supported by cvs2svn $
+Revision 1.14  2007/03/12 21:45:48  dcervelli
+Removed JAI stuff.
+
 Revision 1.13  2007/03/08 23:56:55  dcervelli
 Added IRIS_networks.txt to build.
 
@@ -54,14 +57,15 @@ Initial commit.
 	<description>USGS Swarm Build File</description>
 
 	<property name="source" location="." />
-	<property name="classpath" location="../USGS/contrib/log4j-1.2.13.jar;../USGS/contrib/SeedCodec-1.0.jar;../USGS/contrib/fissuresImpl-1.1.11.jar;../USGS/contrib/fissuresUtil-1.0.16.jar;../USGS/contrib/fissuresIDL-1.0.jar;../USGS/lib/winston.jar;../USGS/lib/vdx.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/seed-pdcc.jar;../USGS/contrib/looks-2.0.4.jar;../USGS/contrib/forms-1.0.7.jar"/>
+	<property name="classpath" location="../USGS/contrib/log4j-1.2.13.jar;../USGS/contrib/SeedCodec-1.0.jar;../USGS/contrib/fissuresImpl-1.1.11.jar;../USGS/contrib/fissuresUtil-1.0.16.jar;../USGS/contrib/fissuresIDL-1.0.jar;../USGS/lib/winston.jar;../USGS/lib/vdx.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/seed-pdcc.jar;../USGS/contrib/looks-2.0.4.jar;../USGS/contrib/forms-1.0.7.jar;../USGS/contrib/jnlp.jar"/>
 	<property name="jarfile" value="swarm.jar" />
 
 	<property name="bin-dir" location="../swarm-bin" />
+	<property name="jnlp-dir" location="../swarm-jnlp" />
 
 	<target name="help">
 		<echo>
-Available targets:g
+Available targets:
 
 compile [default] -- compiles Java code
 jar -- generates new ${jarfile}
@@ -136,7 +140,7 @@ bin-dist -- generates new binary distribution
 				<include name="**/**.class" />	
 			</fileset>
 			<fileset dir="${source}/../Net">
-				<include name="gov/usgs/net/InternetClient*.class" />	
+				<include name="gov/usgs/net/*.class" />	
 			</fileset>
 			<fileset dir="${source}/../Util">
 				<include name="**/**.class" />	
@@ -198,6 +202,47 @@ bin-dist -- generates new binary distribution
 		
 	<!--	<tar destfile="${source}/swarm-bin.tar.gz" basedir="${bin-dir}" compression="gzip" /> -->
 		<zip compress="true" keepcompression="true" destfile="${source}/swarm-bin.zip" basedir="${bin-dir}" />
+	</target>
+	
+	<!-- depends="bin-dist" -->
+	<target name="jnlp-dist" >
+		<delete dir="${jnlp-dir}" />
+		<!-- Create the distribution directory structure -->
+		<mkdir dir="${jnlp-dir}" />
+		<mkdir dir="${jnlp-dir}/swarm/lib/signed" />
+		<copy todir="${jnlp-dir}">
+			<fileset dir="${bin-dir}" />
+		</copy>
+
+		<copy todir="${jnlp-dir}/swarm/lib" file="${source}/swarm_console.bat" />
+		
+		<jar destfile="${jnlp-dir}/swarm/lib/swarm-bin.jar" update="true">			
+			<fileset dir="${source}">
+				<include name="clip.wav" />
+				<include name="IRIS_networks.txt" />
+			</fileset>
+		</jar>
+		
+		<!-- TODO: streamline this somehow -->
+		<signjar destDir="${jnlp-dir}/swarm/lib/signed"
+		    alias="dcervelli" keystore="SwarmKeystore"
+		    storepass="swarmkey"
+		    preservelastmodified="true">
+		  <path>
+		    <fileset dir="${jnlp-dir}/swarm/lib/" includes="**/*.jar" />
+		  </path>
+		  <flattenmapper />
+		</signjar>
+		
+		<copy todir="${jnlp-dir}/swarm/lib" overwrite="true">
+			<fileset dir="${jnlp-dir}/swarm/lib/signed" />
+		</copy>
+		
+		<delete dir="${jnlp-dir}/swarm/lib/signed" />
+		<delete file="${jnlp-dir}/swarm/swarm_console.bat" />
+		<delete file="${jnlp-dir}/swarm/swarm.sh" />
+		<delete file="${jnlp-dir}/swarm/IRIS_networks.txt" />
+		<delete file="${jnlp-dir}/swarm/clip.wav" />
 	</target>
 
 </project>
