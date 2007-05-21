@@ -48,6 +48,9 @@ import javax.swing.event.EventListenerList;
  * TODO: move filter method
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2007/04/29 21:16:45  dcervelli
+ * Bottom borders, multiselect support code.
+ *
  * Revision 1.12  2007/03/12 22:29:01  dcervelli
  * Added null check in paintMark().
  *
@@ -157,6 +160,7 @@ import javax.swing.event.EventListenerList;
  * Some comments.
  *
  * @author Dan Cervelli
+ * @version $Id: WaveViewPanel.java,v 1.14 2007-05-21 02:44:17 dcervelli Exp $
  */
 public class WaveViewPanel extends JComponent
 {
@@ -791,7 +795,7 @@ public class WaveViewPanel extends JComponent
 				{
 					public void run()
 					{
-						if (getWidth() != 0 && getHeight() != 0)
+						if (getWidth() >  0 && getHeight() > 0)
 						{
 							BufferedImage bi = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
 							Graphics2D ig = (Graphics2D)bi.getGraphics();
