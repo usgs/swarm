@@ -21,6 +21,9 @@ import javax.swing.KeyStroke;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.4  2007/05/21 02:43:20  dcervelli
+ * Added an exception check for  1.6 code run on 1.5 JVM.
+ *
  * Revision 1.3  2007/04/29 21:25:35  dcervelli
  * Multiselect code support.
  *
@@ -260,7 +263,7 @@ public class WaveViewSettingsToolbar
 				sg = true;
 		}
 		// TODO: fix for Java 1.5, clearSelection was added in 1.6
-		try { waveTypes.clearSelection(); } catch (Exception e) {}
+		try { waveTypes.clearSelection(); } catch (Throwable e) {}
 		waveToggle.setSelected(w && !s && !sg);	
 		spectraToggle.setSelected(!w && s && !sg);
 		spectrogramToggle.setSelected(!w && !s && sg);
