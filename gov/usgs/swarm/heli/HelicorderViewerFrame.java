@@ -64,6 +64,9 @@ import javax.swing.event.InternalFrameEvent;
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2007/04/29 21:27:01  dcervelli
+ * Progress meter.
+ *
  * Revision 1.7  2007/01/30 20:00:09  dcervelli
  * File chooser named.
  *
@@ -161,6 +164,7 @@ import javax.swing.event.InternalFrameEvent;
  * Support for big red mouse cursor.
  *
  * @author Dan Cervelli
+ * @version $Id: HelicorderViewerFrame.java,v 1.9 2007-05-21 02:48:57 dcervelli Exp $
  */
 public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 {
@@ -174,7 +178,10 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 			240 * 60, 264 * 60, 288 * 60, 312 * 60, 336 * 60};
 	
 	// seconds
-	public static final int[] zoomValues = new int[] {1, 2, 5, 10, 20, 30, 60, 120, 300};
+	public static final int[] zoomValues = new int[] {1, 2, 5, 10, 20, 30, 60, 120, 300, 600};
+	
+//	public static final int[] zoomValues = new int[] {1, 2, 5, 10, 20, 30, 60, 120, 300, 600, 1800, 3600, 3 * 3600, 
+//		6 * 3600, 12 * 3600, 86400};
 	
 	private RefreshThread refreshThread;
 	private SeismicDataSource dataSource;
@@ -302,7 +309,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 		statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.X_AXIS));
 		statusLabel = new JLabel(" ");
 		statusLabel.setBorder(BorderFactory.createEmptyBorder(1, 5, 0, 0));
-		statusPanel.setBorder(BorderFactory.createEmptyBorder(1, 0, 1, 3));
+		statusPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 1, 3));
 		statusPanel.add(statusLabel);
 		statusPanel.add(Box.createHorizontalGlue());
 		progressBar = new JProgressBar(0, 100);
@@ -693,8 +700,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 
 					public void helicorderProgress(String channel, final double progress)
 					{
-						System.out.println("Progress: " + progress);
-//						setStatus("Progress: " + progress);
 						SwingUtilities.invokeLater(new Runnable() {
 								public void run()
 								{
