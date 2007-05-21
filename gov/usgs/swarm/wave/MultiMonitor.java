@@ -27,11 +27,15 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
@@ -52,9 +56,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
@@ -67,6 +71,9 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: up/down arrows
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2007/05/09 21:10:24  dcervelli
+ * Fix for runaway monitor bug.
+ *
  * Revision 1.10  2007/03/06 17:55:23  cervelli
  * Units can now be disabled
  *
@@ -149,6 +156,7 @@ import javax.swing.event.InternalFrameEvent;
  * Added log info and some comments.
  *
  * @author Dan Cervelli
+ * @version $Id: MultiMonitor.java,v 1.12 2007-05-21 02:45:28 dcervelli Exp $
  */
 public class MultiMonitor extends SwarmFrame implements Kioskable
 {
@@ -168,6 +176,8 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 	private JButton compXButton;
 	private JButton expXButton;
 	private JButton optionsButton;
+	private JButton copyButton;
+	private JToggleButton pauseButton;
 	
 	private int bottomLabelHeight = 20;
 	
@@ -190,6 +200,8 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 	private Font font;
 	private FontRenderContext frc = new FontRenderContext(new AffineTransform(), false, false);
 	private Border border;
+	
+	private double pauseStartTime = Double.NaN;
 	
 	public MultiMonitor(SeismicDataSource sds)
 	{
@@ -316,6 +328,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 				{
 					public void actionPerformed(ActionEvent e)
 					{
+						requestFocus();
 						MultiMonitorSettingsDialog mmsd = MultiMonitorSettingsDialog.getInstance(MultiMonitor.this);
 						mmsd.setVisible(true);
 					}
@@ -326,29 +339,50 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		
 		compXButton = SwarmUtil.createToolBarButton(
 				Images.getIcon("xminus"),
-				"Shrink time axis",
+				"Shrink time axis (Alt-left arrow)",
 				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
 					{
+						requestFocus();
 						if (spanIndex != 0)
 							spanIndex--;
 					}
 				});
+		Util.mapKeyStrokeToButton(this, "alt LEFT", "compx", compXButton);
 		toolbar.add(compXButton);
 		
 		expXButton = SwarmUtil.createToolBarButton(
 				Images.getIcon("xplus"),
-				"Expand time axis",
+				"Expand time axis (Alt-right arrow)",
 				new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
 					{
+						requestFocus();
 						if (spanIndex < SPANS.length - 1)
 							spanIndex++;
 					}
 				});
+		Util.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expXButton);
 		toolbar.add(expXButton);
+		
+		pauseButton = SwarmUtil.createToolBarToggleButton(
+				Images.getIcon("pause"),
+				"Pause the monitor (P)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						requestFocus();
+						if (!pauseButton.isSelected())
+							setPauseStartTime(Double.NaN);
+						else
+							setPauseStartTime(getTimeWindow()[0]);
+					}
+				});
+		Util.mapKeyStrokeToButton(this, "P", "pause", pauseButton);
+		toolbar.add(pauseButton);
 		
 		toolbar.addSeparator();
 		
@@ -359,6 +393,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 				{
 					public void actionPerformed(ActionEvent e)
 					{
+						requestFocus();
 						if (selectedIndex >= 0)
 						{
 							WaveViewPanel panel = panels.get(selectedIndex);
@@ -368,6 +403,31 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 					}
 				});
 		toolbar.add(settingsButton);
+	
+		copyButton = SwarmUtil.createToolBarButton(
+				Images.getIcon("clipboard"),
+				"Copy waves to clipboard (C or Ctrl-C)",
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						requestFocus();
+						for (WaveViewPanel panel : panels)
+						{
+							if (panel != null)
+							{
+								WaveViewPanel p =  new WaveViewPanel(panel);
+								p.setDataSource(dataSource.getCopy());
+								WaveClipboardFrame cb = Swarm.getApplication().getWaveClipboard();
+								cb.setVisible(true);
+								cb.addWave(p);
+							}
+						}
+					}
+				});
+		Util.mapKeyStrokeToButton(this, "C", "clipboard1", copyButton);
+		Util.mapKeyStrokeToButton(this, "control C", "clipboard2", copyButton);
+		toolbar.add(copyButton);
 		
 //		alarmButton = SwarmUtil.createToolBarButton(
 //				Images.getIcon("alarm"),
@@ -390,6 +450,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 				{
 					public void actionPerformed(ActionEvent e)
 					{
+						requestFocus();
 						if (selectedIndex >= 0)
 						{
 							removeWaveAtIndex(selectedIndex);
@@ -445,7 +506,9 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		
 		border = BorderFactory.createCompoundBorder(
 				BorderFactory.createEmptyBorder(0, 2, 3, 3), 
-				LineBorder.createGrayLineBorder());
+				BorderFactory.createLineBorder(Color.GRAY, 1));
+				
+//				BorderFactory.createMatteBorder(0, 1, 1, 1, Color.GRAY));
 		wavePanel.setBorder(border);
 		
 		mainPanel.add(wavePanel, BorderLayout.CENTER);
@@ -463,18 +526,18 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		public WavePanel()
 		{
 			addComponentListener(new ComponentAdapter()
-			{
-				public void componentMoved(ComponentEvent e)
-				{
-					resizeWaves();
-				}
-				
-				public void componentResized(ComponentEvent e)
-				{
-					createImage();
-					resizeWaves();
-				}
-			});
+					{
+						public void componentMoved(ComponentEvent e)
+						{
+							resizeWaves();
+						}
+						
+						public void componentResized(ComponentEvent e)
+						{
+							createImage();
+							resizeWaves();
+						}
+					});
 		}
 		
 		public synchronized BufferedImage getImage()
@@ -484,11 +547,15 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		
 		private synchronized void createImage()
 		{
-			image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+			if (getWidth() > 0 && getHeight() > 0)
+				image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
 		}
 		
 		public void paint(Graphics g)
 		{
+			if (getWidth() <= 0 || getHeight() <= 0)
+				return;
+			
 			if (image == null || panels.size() == 0)
 			{
 				super.paint(g);
@@ -507,14 +574,24 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 				g.setColor(Color.GRAY);
 				g.drawLine(insets.left, y, getWidth() - insets.left - 1, y);
 				g.setColor(Color.BLACK);
-				double now = CurrentTime.getInstance().nowJ2K();
+//				double now = CurrentTime.getInstance().nowJ2K();
+				Graphics2D g2 = (Graphics2D)g;
+				Object aa = g2.getRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING);
+				g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+				
+				double[] times = getTimeWindow();
+				double now = times[1];
+				double start = times[0];
+				
 				String tf = Time.format("HH:mm:ss", now);
 				Font font = Font.decode("dialog-BOLD-" + (bottomLabelHeight - 2));
 				g.setFont(font);
 				FontMetrics fm = g.getFontMetrics();
-				g.drawString(tf, getWidth() - fm.stringWidth(tf) - 4, getHeight() - 7);
-				tf = Time.format("HH:mm:ss", now - SPANS[spanIndex]);
-				g.drawString(tf, 4, getHeight() - 7);
+//				System.out.println(insets.bottom);
+				g.drawString(tf, getWidth() - fm.stringWidth(tf) - 4, getHeight() - (insets.bottom + 3));
+				tf = Time.format("HH:mm:ss", start);
+				g.drawString(tf, 4, getHeight() - (insets.bottom + 3));
+				g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, aa);
 			}
 		}
 	}
@@ -552,6 +629,18 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 			  });
 
 		this.setDefaultCloseOperation(JInternalFrame.HIDE_ON_CLOSE);
+		
+		this.addKeyListener(new KeyAdapter()
+				{
+					public void keyPressed(KeyEvent e)
+					{
+						if (e.isShiftDown() && e.getKeyCode() == KeyEvent.VK_R)
+						{
+							for (WaveViewPanel panel : panels)
+								panel.resetAutoScaleMemory();
+						}
+					}
+				});
 	}
 	
 	private class MonitorWaveDecorator extends FrameDecorator
@@ -701,6 +790,14 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		resizeWaves();
 	}
 	
+	public void removeAllWaves()
+	{
+		waveMap.clear();
+		panels.clear();
+		wavePanel.removeAll();
+		resizeWaves();
+	}
+	
 	private void setBackgroundColor(WaveViewPanel wvp, int i)
 	{
 		if (i % 2 == 1)
@@ -763,6 +860,22 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		repaint();
 	}
 	
+	private double[] getTimeWindow()
+	{
+		double[] times = new double[2];
+		if (Double.isNaN(pauseStartTime))
+		{
+			times[1] = CurrentTime.getInstance().nowJ2K();
+			times[0] = times[1] - SPANS[spanIndex];
+		}
+		else
+		{
+			times[0] = pauseStartTime;
+			times[1] = times[0] + SPANS[spanIndex];
+		}
+		return times;
+	}
+	
 	private boolean sliding = false;
 	private synchronized void slide()
 	{
@@ -774,8 +887,11 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 					public void run()
 					{
 						sliding = true;
-						double now = CurrentTime.getInstance().nowJ2K();
-						double start = now - SPANS[spanIndex];
+						double[] times = getTimeWindow();
+						double now = times[1];
+						double start = times[0];
+//						double now = CurrentTime.getInstance().nowJ2K();
+//						double start = now - SPANS[spanIndex];
 						for (int i = 0; i < panels.size(); i++)
 						{
 							WaveViewPanel waveViewPanel = panels.get(i);
@@ -791,6 +907,22 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		worker.start();
 	}
 	
+	/**
+	 * Sets the start time of the monitor if it's paused.  Set to Double.NaN
+	 * to resume.
+	 * @param start
+	 */
+	public void setPauseStartTime(double start)
+	{
+		pauseStartTime = start;
+		pauseButton.setSelected(!Double.isNaN(pauseStartTime));
+	}
+	
+	public double getPauseStartTime()
+	{
+		return pauseStartTime;
+	}
+	
 	private void refresh()
 	{
 		if (throbber.getCount() >= 1)
@@ -803,8 +935,17 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 						throbber.increment();
 						String channel = null;
 						
-						double now = CurrentTime.getInstance().nowJ2K();
-						double start = now - SPANS[spanIndex];
+						double[] times = getTimeWindow();
+						double now = times[1];
+						double start = times[0];
+//						double now = CurrentTime.getInstance().nowJ2K();
+//						double start = now - SPANS[spanIndex];
+//						if (!Double.isNaN(pauseStartTime))
+//						{
+//							start = pauseStartTime;
+//							now = start + SPANS[spanIndex];
+//							System.out.println(start + " " + now);
+//						}
 						for (int i = 0; i < panels.size(); i++)
 						{
 							WaveViewPanel wvp = panels.get(i);
