@@ -11,6 +11,9 @@ import javax.swing.ImageIcon;
  * TODO: make images static final, don't use map 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.19  2006/08/14 22:42:52  dcervelli
+ * Added two more bullets.
+ *
  * Revision 1.18  2006/08/11 20:57:36  dcervelli
  * Added label icons.
  *
@@ -141,6 +144,7 @@ public class Images
 		imageMap.put("label_none", "images/label_none.gif");
 		imageMap.put("bluebullet", "images/bluebullet.gif");
 		imageMap.put("graybullet", "images/graybullet.gif");
+		imageMap.put("pause", "images/pause.gif");
 		
 		imageMap.put("throbber_off", "images/throbber_off.gif");
 		imageMap.put("throbber_0", "images/throbber_0.gif");
