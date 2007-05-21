@@ -21,6 +21,9 @@ import javax.swing.KeyStroke;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2007/04/29 21:25:35  dcervelli
+ * Multiselect code support.
+ *
  * Revision 1.2  2006/10/26 00:57:43  dcervelli
  * Key mapping for manual zooming.
  *
@@ -256,7 +259,8 @@ public class WaveViewSettingsToolbar
 			if (set.viewType == ViewType.SPECTROGRAM)
 				sg = true;
 		}
-		waveTypes.clearSelection();
+		// TODO: fix for Java 1.5, clearSelection was added in 1.6
+		try { waveTypes.clearSelection(); } catch (Exception e) {}
 		waveToggle.setSelected(w && !s && !sg);	
 		spectraToggle.setSelected(!w && s && !sg);
 		spectrogramToggle.setSelected(!w && !s && sg);
