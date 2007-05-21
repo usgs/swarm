@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import javax.jnlp.BasicService;
+import javax.jnlp.ServiceManager;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JDesktopPane;
@@ -59,6 +61,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: name worker thread for better debugging
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.42  2007/03/21 23:53:54  cervelli
+ * version bump
+ *
  * Revision 1.41  2007/03/12 22:28:07  dcervelli
  * Disable magnitude markers when options changed, version bump.
  *
@@ -216,6 +221,7 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * Bumped version, added log.
  *
  * @author Dan Cervelli
+ * @version $Id: Swarm.java,v 1.43 2007-05-21 03:02:41 dcervelli Exp $
  */
 public class Swarm extends JFrame
 {
@@ -232,7 +238,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.0.0.20070322-beta-10";
+	private static final String VERSION = "2.0.0.20070521-beta-11";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -260,6 +266,7 @@ public class Swarm extends JFrame
 		super(TITLE + " [" + VERSION + "]");
 		logger = Log.getLogger("gov.usgs.swarm");
 		logger.fine("Swarm version: " + VERSION);
+		logger.fine("JNLP: " + isJNLP());
 		String[] ss = Util.getVersion("gov.usgs.swarm");
 		if (ss == null)
 			logger.fine("no build version information available");
@@ -374,6 +381,18 @@ public class Swarm extends JFrame
 					}	
 				};
 		m.getActionMap().put("fullScreenToggle", toggleFullScreenAction);	
+	}
+	
+	public boolean isJNLP()
+	{
+		try
+		{
+			BasicService bs = (BasicService)ServiceManager.lookup("javax.jnlp.BasicService");
+			return bs != null;
+		}
+		catch (Throwable e)
+		{}
+		return false;
 	}
 	
 	public void touchUITime()
@@ -1013,6 +1032,19 @@ public class Swarm extends JFrame
 		if (ks.size() == 0)
 			return;
 		
+		int mapCount = 0;
+		int heliCount = 0;
+		int monitorCount = 0;
+		for (JInternalFrame frame : ks)
+		{
+			if (frame instanceof MapFrame)
+				mapCount++;
+			else if (frame instanceof HelicorderViewerFrame)
+				heliCount++;
+			else if (frame instanceof MultiMonitor)
+				monitorCount++;
+		}
+		
 		if (ks.size() == 4)
 		{
 		    int w = ds.width / 2;
@@ -1029,6 +1061,29 @@ public class Swarm extends JFrame
 		    hvf2.setLocation(0, h);
 		    hvf3.setSize(w, h);
 		    hvf3.setLocation(w, h);
+		}
+		else if (ks.size() == 3 && mapCount == 1 && heliCount == 1 && monitorCount == 1)
+		{
+			int w = ds.width / 2;
+		    int h = ds.height / 2;
+		    for (JInternalFrame frame : ks)
+			{
+				if (frame instanceof MapFrame)
+				{
+					frame.setLocation(w, h);
+					frame.setSize(w, h);
+				}
+				else if (frame instanceof HelicorderViewerFrame)
+				{
+					frame.setLocation(0, 0);
+					frame.setSize(w, h * 2);
+				}
+				else if (frame instanceof MultiMonitor)
+				{
+					frame.setLocation(w, 0);
+					frame.setSize(w, h);
+				}
+			}
 		}
 		else
 		{
@@ -1186,6 +1241,11 @@ public class Swarm extends JFrame
 				hvf.getHelicorderViewPanel().invalidateImage();
 				if (!config.durationEnabled)
 					hvf.getHelicorderViewPanel().clearMarks();
+			}
+			else if (frame instanceof MapFrame)
+			{
+				MapFrame mf = (MapFrame)frame;
+				mf.reloadImages();
 			}
 		}
 	}
