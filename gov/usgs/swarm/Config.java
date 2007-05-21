@@ -1,5 +1,6 @@
 package gov.usgs.swarm;
 
+import gov.usgs.plot.map.WMSGeoImageSet;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Util;
@@ -18,6 +19,9 @@ import java.util.TreeMap;
  * Swarm configuration class. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2007/03/12 22:57:08  dcervelli
+ * getTimeZone() uses getMetadata() instead of metadata.get().
+ *
  * Revision 1.15  2006/11/30 17:07:48  dcervelli
  * Fixed no-close bug.
  *
@@ -137,8 +141,16 @@ public class Config
 	
 	public SortedMap<String, SwarmLayout> layouts;
 	
+	public boolean useWMS;
+	public String wmsServer;
+	public String wmsLayer;
+	public String wmsStyles;
+	
+	public String labelSource;
+	
 	public static Config createConfig(String[] args)
 	{
+		Swarm.logger.fine("current directory: " + System.getProperty("user.dir"));
 		Swarm.logger.fine("user.home: " + System.getProperty("user.home"));
 		String configFile = System.getProperty("user.home") + File.separatorChar + DEFAULT_CONFIG_FILE;
 		
@@ -319,6 +331,13 @@ public class Config
 		mapLongitude = Util.stringToDouble(config.getString("mapLongitude"), -180);
 		mapLatitude = Util.stringToDouble(config.getString("mapLatitude"), 0);
 		
+		useWMS = Util.stringToBoolean(config.getString("useWMS"));
+		wmsServer = Util.stringToString(config.getString("wmsServer"), WMSGeoImageSet.DEFAULT_SERVER);
+		wmsLayer = Util.stringToString(config.getString("wmsLayer"), WMSGeoImageSet.DEFAULT_LAYER);
+		wmsStyles = Util.stringToString(config.getString("wmsStyles"), WMSGeoImageSet.DEFAULT_STYLE);
+		
+		labelSource = Util.stringToString(config.getString("labelSource"), "");
+		
 		sources = new HashMap<String, SeismicDataSource>();
 		List<String> servers = config.getList("server");
 		if (servers != null && servers.size() > 0)
@@ -441,6 +460,13 @@ public class Config
 		config.put("mapScale", Double.toString(mapScale));
 		config.put("mapLongitude", Double.toString(mapLongitude));
 		config.put("mapLatitude", Double.toString(mapLatitude));
+		
+		config.put("useWMS", Boolean.toString(useWMS));
+		config.put("wmsServer", wmsServer);
+		config.put("wmsLayer", wmsLayer);
+		config.put("wmsStyles", wmsStyles);
+		
+		config.put("labelSource", labelSource);
 		
 		List<String> servers = new ArrayList<String>(); 
 		for (SeismicDataSource sds : sources.values())
