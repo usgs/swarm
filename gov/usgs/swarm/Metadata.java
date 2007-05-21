@@ -1,5 +1,6 @@
 package gov.usgs.swarm;
 
+import gov.usgs.proj.Projection;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Pair;
@@ -18,6 +19,9 @@ import java.util.TimeZone;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2007/03/12 22:56:24  dcervelli
+ * Default time zone is now null.
+ *
  * Revision 1.5  2006/08/14 22:43:18  dcervelli
  * Added functions to check if fields had been set.
  *
@@ -34,6 +38,7 @@ import java.util.TimeZone;
  * Major 1.3.4 changes.
  *
  * @author Dan Cervelli
+ * @version $Id: Metadata.java,v 1.7 2007-05-21 02:38:12 dcervelli Exp $
  */
 public class Metadata implements Comparable<Metadata>
 {
@@ -286,29 +291,57 @@ public class Metadata implements Comparable<Metadata>
 		
 		return data;
 	}
+
+	public double distanceTo(Point2D.Double pt)
+	{
+		if (pt == null || Double.isNaN(latitude) || Double.isNaN(longitude) || Double.isNaN(pt.x) || Double.isNaN(pt.y))
+			return Double.NaN;
+		
+		return Projection.distanceBetween(new Point2D.Double(longitude, latitude), pt);
+	}
 	
-	// TODO: use Projection.distanceTo
 	public double distanceTo(Metadata other)
 	{
 		if (other == null || Double.isNaN(latitude) || Double.isNaN(longitude) || Double.isNaN(other.latitude) || Double.isNaN(other.longitude))
 			return Double.NaN;
 		
-		double phi1 = Math.toRadians(latitude);
-		double phi2 = Math.toRadians(other.latitude);
-		double lam1 = Math.toRadians(longitude);
-		double lam2 = Math.toRadians(other.longitude);
-		double dlam = lam2 - lam1;
-		
-		double a = Math.cos(phi2) * Math.sin(dlam);
-		double b = Math.cos(phi1) * Math.sin(phi2);
-		double c = Math.sin(phi1) * Math.cos(phi2) * Math.cos(dlam);
-		double d = Math.sin(phi1) * Math.sin(phi2);
-		double e = Math.cos(phi1) * Math.cos(phi2) * Math.cos(dlam);
-		double f = Math.atan2(Math.sqrt(a * a + (b - c) * (b - c)), (d + e));
-		
-		double r = 6372.795;
-		
-		return f * r;
+		return Projection.distanceBetween(new Point2D.Double(longitude, latitude), new Point2D.Double(other.longitude, other.latitude));
+	}
+
+	public static Comparator<Pair<Double, String>> getDistanceComparator()
+	{
+		return new Comparator<Pair<Double, String>>()
+				{
+					public int compare(Pair<Double, String> o1, Pair<Double, String> o2)
+					{
+						if (Math.abs(o1.item1 - o2.item1) < 0.00001)
+							return o1.item2.compareTo(o2.item2);
+						else
+							return Double.compare(o1.item1, o2.item1);
+					}
+				};
+	}
+	
+	public static List<Pair<Double, String>> findNearest(Map<String, Metadata> metadata, Point2D.Double pt, boolean requireDS)
+	{
+		ArrayList<Pair<Double, String>> result = new ArrayList<Pair<Double, String>>();
+		synchronized (metadata)
+		{
+			for (String key : metadata.keySet())
+			{
+				Metadata md = metadata.get(key);
+				if (md.hasLonLat() && (!requireDS || md.source != null))
+				{
+					double d = md.distanceTo(pt);
+					if (!Double.isNaN(d) && d > 0)
+					{
+						result.add(new Pair<Double, String>(new Double(d), md.channel));
+					}
+				}
+			}
+		}
+		Collections.sort(result, getDistanceComparator());
+		return result.size() == 0 ? null : result;
 	}
 	
 	public static List<Pair<Double, String>> findNearest(Map<String, Metadata> metadata, String channel)
@@ -327,16 +360,7 @@ public class Metadata implements Comparable<Metadata>
 				result.add(new Pair<Double, String>(new Double(d), other.channel));
 			}
 		}
-		Collections.sort(result, new Comparator<Pair<Double, String>>()
-				{
-					public int compare(Pair<Double, String> o1, Pair<Double, String> o2)
-					{
-						if (Math.abs(o1.item1 - o2.item1) < 0.00001)
-							return o1.item2.compareTo(o2.item2);
-						else
-							return Double.compare(o1.item1, o2.item1);
-					}
-				});
+		Collections.sort(result, getDistanceComparator());
 		return result.size() == 0 ? null : result;
 	}
 	
