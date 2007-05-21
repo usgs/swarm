@@ -5,6 +5,7 @@ import gov.usgs.plot.TextRenderer;
 import gov.usgs.plot.map.GeoImageSet;
 import gov.usgs.plot.map.GeoLabelSet;
 import gov.usgs.plot.map.MapRenderer;
+import gov.usgs.plot.map.WMSGeoImageSet;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.Mercator;
 import gov.usgs.proj.Projection;
@@ -33,13 +34,14 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.font.FontRenderContext;
@@ -69,6 +71,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.20  2007/05/01 17:52:25  cervelli
+ * Added output of Swarm.config.mapPath to warning when no map images are found.
+ *
  * Revision 1.19  2007/03/13 20:43:30  dcervelli
  * Rejiggered the threading of the map updates.
  *
@@ -124,6 +129,7 @@ import javax.swing.SwingUtilities;
  * New resetImage() behavior.
  *
  * @author Dan Cervelli
+ * @version $Id: MapPanel.java,v 1.21 2007-05-21 02:58:08 dcervelli Exp $
  */
 public class MapPanel extends JPanel
 {
@@ -229,6 +235,8 @@ public class MapPanel extends JPanel
 	
 	private LabelSetting labelSetting = LabelSetting.SOME;
 	
+	private List<? extends ClickableGeoLabel> clickableLabels;
+	
 	public MapPanel(MapFrame f)
 	{
 		parent = f;
@@ -287,14 +295,35 @@ public class MapPanel extends JPanel
 		setCenterAndScale(c, sc);
 	}
 	
-	private void createUI()
+	public void loadMaps(boolean redraw)
 	{
-		Pair<GeoImageSet, GeoLabelSet> pair = GeoImageSet.loadMapPacks(Swarm.config.mapPath);
+		if (images != null)
+		{
+//			if (Swarm.config.useWMS && images instanceof WMSGeoImageSet)
+//				return;
+//			if (!Swarm.config.useWMS && !(images instanceof WMSGeoImageSet))
+//				return;
+		}
+		Pair<GeoImageSet, GeoLabelSet> pair;
+		if (Swarm.config.useWMS)
+		{
+			// TODO: what about GeoLabelSet?
+			WMSGeoImageSet wms = new WMSGeoImageSet();
+			wms.setServer(Swarm.config.wmsServer);
+			wms.setLayer(Swarm.config.wmsLayer);
+			wms.setStyle(Swarm.config.wmsStyles);
+			pair = new Pair<GeoImageSet, GeoLabelSet>(wms, new GeoLabelSet());
+		}
+		else
+		{
+			pair = GeoImageSet.loadMapPacks(Swarm.config.mapPath);
+		}
 		if (pair != null)
 		{
 			images = pair.item1;
 			labels = pair.item2;
 		}
+		
 		if (images == null)
 		{
 			Swarm.logger.warning("No map images found in " + Swarm.config.mapPath + ".");
@@ -304,6 +333,17 @@ public class MapPanel extends JPanel
 		int mp = (int)Math.round((double)Runtime.getRuntime().maxMemory() / 1024.0 / 1024.0 / 8.0);
 //		System.out.println("cache size: " + mp);
 		images.setMaxLoadedImagesSize(mp);
+		
+		
+//		labels.add(gl);
+//		clickableLabels = RSSHypocenters.getHypocenters();
+		if (redraw)
+			resetImage(true);
+	}
+	
+	private void createUI()
+	{
+		loadMaps(false);
 
 		center = new Point2D.Double(Swarm.config.mapLongitude, Swarm.config.mapLatitude);
 		scale = Swarm.config.mapScale;
@@ -331,6 +371,24 @@ public class MapPanel extends JPanel
 						parent.setStatusText(" ");
 					}
 			
+					public void mouseClicked(MouseEvent e)
+					{
+						if (clickableLabels != null)
+						{
+							for (ClickableGeoLabel label : clickableLabels)
+							{
+								Rectangle r = label.getClickBox();
+								Point2D.Double xy = getXY(label.location.x, label.location.y);
+								if (xy != null)
+								{
+									r.translate((int)xy.x, (int)xy.y);
+									if (r.contains(e.getPoint()))
+										label.mouseClicked(e);
+								}
+							}
+						}
+					}
+					
 					public void mousePressed(MouseEvent e)
 					{
 						requestFocusInWindow();
@@ -389,7 +447,7 @@ public class MapPanel extends JPanel
 					}
 				});
 		
-		addMouseMotionListener(new MouseMotionAdapter()
+		addMouseMotionListener(new MouseMotionListener()
 				{
 					public void mouseMoved(MouseEvent e)
 					{
@@ -493,9 +551,25 @@ public class MapPanel extends JPanel
 		
 		pane.add(mapImagePanel, new Integer(10));
 		add(pane, BorderLayout.CENTER);
+		loadLabels();
 //		resetImage();
 	}
 
+	public void loadLabels()
+	{
+		try
+		{
+			Class cl = Class.forName(Swarm.config.labelSource);
+			LabelSource src = (LabelSource)cl.newInstance();
+			clickableLabels = src.getLabels();
+			repaint();
+		}
+		catch (Exception e)
+		{
+			Swarm.logger.log(Level.WARNING, e.getMessage(), e);
+		}
+	}
+	
 	public Throbber getThrobber()
 	{
 		return parent.getThrobber();
@@ -586,7 +660,8 @@ public class MapPanel extends JPanel
 	
 	public void mapPush()
 	{
-		mapHistory.push(new double[] { center.x, center.y, scale });
+		if (center != null)
+			mapHistory.push(new double[] { center.x, center.y, scale });
 	}
 	
 	public boolean mapPop()
@@ -684,17 +759,25 @@ public class MapPanel extends JPanel
 		double dx = (ext[1] - ext[0]);
 		double dy = (ext[3] - ext[2]);
 		Point2D.Double res = new Point2D.Double();
-		res.x = Math.round(((xy.x - ext[0]) / dx) * renderer.getGraphWidth() + INSET + getInsets().left);
-		res.y = Math.round((1 - (xy.y - ext[2]) / dy) * renderer.getGraphHeight() + INSET + getInsets().top);
+//		res.x = Math.round(((xy.x - ext[0]) / dx) * renderer.getGraphWidth() + INSET + getInsets().left);
+//		res.x = Math.round(((xy.x - ext[0]) / dx) * renderer.getGraphWidth() + INSET);
+		res.x = (((xy.x - ext[0]) / dx) * renderer.getGraphWidth() + INSET);
+//		res.y = Math.round((1 - (xy.y - ext[2]) / dy) * renderer.getGraphHeight() + INSET + getInsets().top);
+//		res.y = Math.round((1 - (xy.y - ext[2]) / dy) * renderer.getGraphHeight() + INSET );
+		res.y = ((1 - (xy.y - ext[2]) / dy) * renderer.getGraphHeight() + INSET );
 		return res;
 	}
 	
 	public Point2D.Double getLonLat(int x, int y)
 	{
-		if (range == null || projection == null || image == null || renderer == null)
+//		if (range == null || projection == null || image == null || renderer == null)
+		if (range == null || projection == null || renderer == null)
 			return null;
-		int tx = x - INSET - getInsets().left;
-		int ty = y - INSET - getInsets().top;
+		
+//		int tx = x - INSET - getInsets().left;
+//		int ty = y - INSET - getInsets().top;
+		int tx = x - INSET;
+		int ty = y - INSET;
 		double[] ext = range.getProjectedExtents(projection);
 //		System.out.println("insets: " + getInsets());
 //		System.out.println(image.getWidth() + " " + image.getHeight() + renderer.getWidth() + " " + renderer.getGraphWidth());
@@ -983,6 +1066,8 @@ public class MapPanel extends JPanel
 				{
 					MapMiniPanel cmp = miniPanels.get(md.getLocationHashCode());
 					Point2D.Double xy = getXY(md.getLongitude(), md.getLatitude());
+					if (xy == null)
+						continue;
 					int iconX = (int)xy.x - 8;
 					int iconY = (int)xy.y - 8;
 					if (cmp == null || cmp.getPosition() == Position.UNSET || cmp.getPosition() == Position.MANUAL_UNSET)
@@ -1099,9 +1184,12 @@ public class MapPanel extends JPanel
 			
 			public void finished()
 			{
-				// if we aborts due to queueing, or in the meantime, another
+				// if we abort due to queueing, or, in the meantime, another
 				// thread has queued then don't bother finishing, the next thread
 				// will
+				if (tempMapImage != null)
+					mapImage = tempMapImage;
+				
 				if (((Boolean)this.get()).booleanValue() && !lock.hasQueuedThreads())
 				{
 					// ideally you'd call updateMiniPanels in construct()
@@ -1111,8 +1199,8 @@ public class MapPanel extends JPanel
 					Pair<List<JComponent>, List<Line2D.Double>> p = updateMiniPanels();
 					compsToAdd = p.item1;
 					linesToAdd = p.item2;
-					if (doMap && tempMapImage != null)
-						mapImage = tempMapImage;
+//					if (doMap && tempMapImage != null)
+//						mapImage = tempMapImage;
 					if (lines != null)
 						lines.clear();
 					pane.removeAll();
@@ -1233,10 +1321,12 @@ public class MapPanel extends JPanel
 			else
 			{
 				Graphics2D g2 = (Graphics2D)g;
+				int dx = 0;
+				int dy = 0;
 				if (dragMode == DragMode.DRAG_MAP && mouseDown != null && mouseNow != null)
 				{
-					int dx = mouseDown.x - mouseNow.x;
-					int dy = mouseDown.y - mouseNow.y;
+					dx = mouseDown.x - mouseNow.x;
+					dy = mouseDown.y - mouseNow.y;
 					g2.drawImage(mapImage, -dx, -dy, null);
 				}
 				else if (dragDX != Integer.MAX_VALUE && dragDY != Integer.MAX_VALUE)
@@ -1279,6 +1369,27 @@ public class MapPanel extends JPanel
 						paintGreatCircleRoute(g2);
 					}
 				}
+				
+				Object oldaa = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				AffineTransform at = g2.getTransform();
+				g2.setFont(Font.decode("dialog-plain-12"));
+				if (clickableLabels != null)
+				{
+					for (ClickableGeoLabel label : clickableLabels)
+					{
+						Point2D.Double xy = getXY(label.location.x, label.location.y);
+						if (xy != null)
+						{
+							g2.translate(xy.x - dx, xy.y - dy);
+							label.draw(g2);
+							g2.translate(-xy.x + dx, -xy.y + dy);
+						}
+					}
+				}
+				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldaa);
+				g2.setTransform(at);
+				
 			}
 		}
 	}
