@@ -18,6 +18,9 @@ import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2006/08/14 22:46:04  dcervelli
+ * Initial commit.
+ *
  * @author Dan Cervelli
  */
 public class MapSettingsDialog extends SwarmDialog
@@ -37,6 +40,8 @@ public static final long serialVersionUID = -1;
 	private JRadioButton someLabels;
 	private JRadioButton allLabels;
 	private JRadioButton noLabels;
+	
+	private JTextField labelSource;
 	
 	private static MapSettingsDialog dialog;
 	
@@ -60,6 +65,7 @@ public static final long serialVersionUID = -1;
 		labelGroup.add(someLabels);
 		labelGroup.add(allLabels);
 		labelGroup.add(noLabels);
+		labelSource = new JTextField();
 	}
 	
 	protected void createUI()
@@ -93,7 +99,7 @@ public static final long serialVersionUID = -1;
 		builder.append(refreshInterval);
 		builder.append(" seconds");
 		builder.nextLine();
-		builder.append("Labels:");
+		builder.append("Channel Labels:");
 		builder.append(noLabels);
 		builder.nextLine();
 		builder.append(" ");
@@ -102,6 +108,8 @@ public static final long serialVersionUID = -1;
 		builder.append(" ");
 		builder.append(allLabels);
 		builder.nextLine();
+		builder.append("Click Labels:");
+		builder.append(labelSource, 3);
 		
 		dialogPanel = builder.getPanel();
 		mainPanel.add(dialogPanel, BorderLayout.CENTER);
@@ -150,12 +158,14 @@ public static final long serialVersionUID = -1;
 				noLabels.setSelected(true);
 				break;
 		}
+		labelSource.setText(Swarm.config.labelSource);
 	}
 
 	protected void wasOK()
 	{
 		try
 		{
+			Swarm.config.labelSource = labelSource.getText();
 			MapPanel panel = map.getMapPanel();
 			LabelSetting ls = LabelSetting.ALL;
 			if (someLabels.isSelected())
@@ -169,6 +179,7 @@ public static final long serialVersionUID = -1;
 			double sc = Double.parseDouble(scale.getText());
 			panel.setCenterAndScale(center, sc);
 			map.setRefreshInterval(Math.round(Double.parseDouble(refreshInterval.getText()) * 1000));
+			panel.loadLabels();
 		}
 		catch (Exception e)
 		{
