@@ -1,6 +1,8 @@
 package gov.usgs.swarm;
 
 import java.awt.BorderLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.Arrays;
 import java.util.TimeZone;
 
@@ -19,10 +21,14 @@ import com.jgoodies.forms.layout.FormLayout;
 /**
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/07/22 20:28:57  cervelli
+ * Time zone changes.
+ *
  * Revision 1.5  2006/06/05 18:06:49  dcervelli
  * Major 1.3 changes.
  *
  * @author Dan Cervelli
+ * @version $Id: OptionsDialog.java,v 1.7 2007-05-21 02:38:41 dcervelli Exp $
  */
 public class OptionsDialog extends SwarmDialog
 {
@@ -39,6 +45,15 @@ public class OptionsDialog extends SwarmDialog
 	private JRadioButton tzLocal;
 	private JRadioButton tzSpecific;
 	private JComboBox timeZones;
+	
+	private JRadioButton useMapPacks;
+	private JRadioButton useWMS;
+	private JTextField wmsServer;
+	private JTextField wmsLayer;
+	private JTextField wmsStyles;
+	private JLabel wmsServerLabel;
+	private JLabel wmsLayerLabel;
+	private JLabel wmsStylesLabel;
 	
 	public OptionsDialog()
 	{
@@ -57,9 +72,21 @@ public class OptionsDialog extends SwarmDialog
 		tzInstrument = new JCheckBox("Use instrument time zone if available");
 		tzLocal = new JRadioButton("Use local machine time zone:");
 		tzSpecific = new JRadioButton("Use specific time zone:");
+		ButtonGroup tzGroup = new ButtonGroup();
+		tzGroup.add(tzLocal);
+		tzGroup.add(tzSpecific);
 		String[] tzs = TimeZone.getAvailableIDs();
 		Arrays.sort(tzs);
 		timeZones = new JComboBox(tzs);
+		
+		useMapPacks = new JRadioButton("Use local MapPacks");
+		useWMS = new JRadioButton("Use WMS");
+		ButtonGroup mapGroup = new ButtonGroup();
+		mapGroup.add(useMapPacks);
+		mapGroup.add(useWMS);
+		wmsLayer = new JTextField();
+		wmsServer = new JTextField();
+		wmsStyles = new JTextField();
 	}
 	
 	protected void createUI()
@@ -68,7 +95,7 @@ public class OptionsDialog extends SwarmDialog
 		createFields();
 		
 		FormLayout layout = new FormLayout(
-				"right:max(30dlu;pref), 3dlu, 30dlu, 3dlu, right:max(30dlu;pref), 3dlu, 30dlu", 
+				"right:max(30dlu;pref), 3dlu, 40dlu, 3dlu, right:max(40dlu;pref), 3dlu, 40dlu", 
 				"");
 		
 		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
@@ -79,14 +106,12 @@ public class OptionsDialog extends SwarmDialog
 		builder.append(tzInstrument, 7);
 		builder.nextLine();
 		TimeZone local = TimeZone.getDefault();
-		ButtonGroup tzGroup = new ButtonGroup();
-		tzGroup.add(tzLocal);
+		
 		builder.append(tzLocal, 7);
 		builder.append("   ");
 		builder.append(new JLabel(local.getID()), 5);
 		builder.nextLine();
 		
-		tzGroup.add(tzSpecific);
 		builder.append(tzSpecific, 7);
 		builder.nextLine();
 		
@@ -100,12 +125,53 @@ public class OptionsDialog extends SwarmDialog
 		builder.append("Md=", durationA);
 		builder.append("* Log(t) +", durationB);
 		
+		builder.appendSeparator("Maps");
+		builder.append(useMapPacks, 7);
+		builder.nextLine();
+		builder.append(useWMS, 7);
+		builder.nextLine();
+		wmsServerLabel = new JLabel("Server:");
+		wmsServerLabel.setLabelFor(wmsServer);
+		builder.append(wmsServerLabel);
+		builder.append(wmsServer, 5);
+		builder.nextLine();
+		wmsLayerLabel = new JLabel("Layer:");
+		wmsLayerLabel.setLabelFor(wmsLayer);
+		builder.append(wmsLayerLabel);
+		builder.append(wmsLayer, 5);
+		builder.nextLine();
+		wmsStylesLabel = new JLabel("Styles:");
+		wmsStylesLabel.setLabelFor(wmsStyles);
+		builder.append(wmsStylesLabel);
+		builder.append(wmsStyles, 5);
+		builder.nextLine();
+		
+		useMapPacks.addItemListener(new ItemListener()
+				{
+					public void itemStateChanged(ItemEvent e)
+					{
+						doEnables();
+					}
+				});
+		
 		builder.appendSeparator("Other");
 		builder.append(useLargeCursor, 7);
 		builder.nextLine();
 		
+		
 		dialogPanel = builder.getPanel();
 		mainPanel.add(dialogPanel, BorderLayout.CENTER);
+	}
+	
+	public void doEnables()
+	{
+		boolean state = useMapPacks.isSelected();
+		wmsServer.setEnabled(!state);
+		wmsLayer.setEnabled(!state);
+		wmsStyles.setEnabled(!state);
+		wmsServerLabel.setEnabled(!state);
+		wmsLayerLabel.setEnabled(!state);
+		wmsStylesLabel.setEnabled(!state);
 	}
 	
 	public void setCurrentValues()
@@ -120,6 +186,13 @@ public class OptionsDialog extends SwarmDialog
 		else
 			tzSpecific.setSelected(true);
 		timeZones.setSelectedItem(Swarm.config.specificTimeZone.getID());
+		
+		useMapPacks.setSelected(!Swarm.config.useWMS);
+		useWMS.setSelected(Swarm.config.useWMS);
+		wmsServer.setText(Swarm.config.wmsServer);
+		wmsLayer.setText(Swarm.config.wmsLayer);
+		wmsStyles.setText(Swarm.config.wmsStyles);
+		doEnables();
 	}
 	
 	public boolean allowOK()
@@ -149,6 +222,10 @@ public class OptionsDialog extends SwarmDialog
 		Swarm.config.useInstrumentTimeZone = tzInstrument.isSelected();
 		Swarm.config.useLocalTimeZone = tzLocal.isSelected();
 		Swarm.config.specificTimeZone = TimeZone.getTimeZone((String)timeZones.getSelectedItem());
+		Swarm.config.useWMS = useWMS.isSelected();
+		Swarm.config.wmsServer = wmsServer.getText();
+		Swarm.config.wmsLayer = wmsLayer.getText();
+		Swarm.config.wmsStyles = wmsStyles.getText();
 		
 		Swarm.getApplication().optionsChanged();
 	}
