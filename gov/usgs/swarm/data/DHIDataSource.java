@@ -33,6 +33,9 @@ import org.apache.log4j.varia.NullAppender;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.11  2007/04/29 21:33:04  dcervelli
+ * Adds channels to groups.
+ *
  * Revision 1.10  2006/08/14 22:44:46  dcervelli
  * Implements getCopy() and adheres to useCache.
  *
@@ -169,6 +172,7 @@ public class DHIDataSource extends SeismicDataSource
 		fireChannelsProgress("channels", 0);
 		idMap = new HashMap<String, ChannelId>();
 		ArrayList<String> result = new ArrayList<String>();
+		double now = CurrentTime.getInstance().nowJ2K();
 		try
 		{
 	        NetworkFinder netFinder = netDC.a_finder();
@@ -181,13 +185,22 @@ public class DHIDataSource extends SeismicDataSource
 	        	double p = (double)cnt / (double)ns;
 	        	fireChannelsProgress("channels", p);
 	        	cnt++;
-	        	if (s.effective_time.end_time.date_time.startsWith("25"))
+	        	String t = s.effective_time.end_time.date_time.replaceAll("[-:]", "");
+	        	double j2k = gov.usgs.util.Time.parse(gov.usgs.util.Time.ISO_8601_TIME_FORMAT, t);
+	        	if (j2k >= (now - 3600))
+//	        	if (s.effective_time.end_time.date_time.startsWith("25"))
 	        	{
 		        	Channel[] channels = net.retrieve_for_station(s.get_id());
 		            for (Channel c : channels)
 		            {
+		            	String ch = s.get_code() + " " + c.get_code() + " " + network;
+		            	if (c.sampling_info == null)
+		            		continue;
 		            	double sr = c.sampling_info.numPoints / c.sampling_info.interval.value;
-		            	if (c.effective_time.end_time.date_time.startsWith("25") && sr > 1.0)
+		            	t = s.effective_time.end_time.date_time.replaceAll("[-:]", "");
+			        	j2k = gov.usgs.util.Time.parse(gov.usgs.util.Time.ISO_8601_TIME_FORMAT, t);
+//		            	if (c.effective_time.end_time.date_time.startsWith("25") && sr > 1.0)
+	            		if (j2k >= (now - 3600) && sr > 1.0)
 		            	{
 		            		String loc = c.get_id().site_code;
 		            		if (loc == null || loc.length() <= 0 || loc.equals("  "))
@@ -195,14 +208,15 @@ public class DHIDataSource extends SeismicDataSource
 		            		else
 		            			loc = " " + loc;
 		            		
-		            		String ch = s.get_code() + " " + c.get_code() + " " + network + loc;
+		            		ch = s.get_code() + " " + c.get_code() + " " + network + loc;
 		            		Metadata md = Swarm.config.getMetadata(ch, true);
 	            			md.updateLongitude(s.my_location.longitude);
 	            			md.updateLatitude(s.my_location.latitude);
 	            			md.addGroup(s.name);
 	            			md.updateAlias(s.name);
 	            			md.source = this;
-		            		result.add(ch);
+	            			if (!result.contains(ch))
+	            				result.add(ch);	
 		            		idMap.put(ch, c.get_id());
 		            	}
 		            }
@@ -225,16 +239,20 @@ public class DHIDataSource extends SeismicDataSource
 		double now = CurrentTime.getInstance().nowJ2K();
 		// if a time later than now has been asked for make sure to get the latest
 		// so that, if possible, a small bit of helicorder data will be displayed
-		if ((t2 - now) >= -20)
-		{
-			getWave(station, now - 2*60, now);
-		}
+//		if ((t2 - now) >= -20)
+//		{
+//			getWave(station, now - 2*60, now);
+//		}
 		
 		CachedDataSource cache = Swarm.getCache();
-		HelicorderData hd = cache.getHelicorder(station, t1, t2, (GulperListener)null);	
-
+		HelicorderData hd = cache.getHelicorder(station, t1, t2, (GulperListener)null);
+		
 		if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10))
 			GulperList.getInstance().requestGulper("dhi:" + station, gl, this, station, t1, t2, gulpSize, gulpDelay);
+		
+		// this gets the tail end, replacing commented out section above
+		if (hd != null && hd.getEndTime() < now)
+			getWave(station, hd.getEndTime(), now);
 
 		return hd;
 	}
