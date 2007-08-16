@@ -61,6 +61,9 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: name worker thread for better debugging
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.44  2007/07/10 00:10:34  cervelli
+ * Version bump.
+ *
  * Revision 1.43  2007/05/21 03:02:41  dcervelli
  * Support for 3-up monitor mode and JNLP test.
  *
@@ -224,7 +227,7 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * Bumped version, added log.
  *
  * @author Dan Cervelli
- * @version $Id: Swarm.java,v 1.44 2007-07-10 00:10:34 cervelli Exp $
+ * @version $Id: Swarm.java,v 1.45 2007-08-16 20:17:33 cervelli Exp $
  */
 public class Swarm extends JFrame
 {
@@ -241,7 +244,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.0.0.20070709-beta-12";
+	private static final String VERSION = "2.0.0.20070816-beta-12a";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
