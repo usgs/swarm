@@ -58,7 +58,7 @@ public class WaveServerPanel extends DataSourcePanel
 		
 		String h = "";
 		String p = "16022";
-		String t = "30.0";
+		String t = "2.0";
 		String gs = "30";
 		String gd = "1.0";
 		wsOffset.setSelectedItem("UTC");
