@@ -78,6 +78,9 @@ import javax.swing.tree.TreePath;
  * TODO: confirm box on remove source
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2007/04/29 21:34:00  dcervelli
+ * Sorts servers properly.
+ *
  * Revision 1.12  2007/01/30 19:59:46  dcervelli
  * Select all text when open to box focused.
  *
@@ -1049,7 +1052,7 @@ public class DataChooser extends JPanel
 						DefaultListModel model = (DefaultListModel)nearestList.getModel();
 						model.removeAllElements();
 						for (Pair<Double, String> item : nrst)
-							model.addElement(String.format("%s (%.1f km)", item.item2, item.item1));
+							model.addElement(String.format("%s (%.1f km)", item.item2, item.item1/1000));
 					}
 				});
 	}
