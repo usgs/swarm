@@ -12,6 +12,9 @@ import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2006/08/16 20:59:36  cervelli
+ * Changed default timeout to 5.0 for WWS
+ *
  * Revision 1.2  2006/08/09 03:43:42  cervelli
  * Uses FormLayout.
  *
@@ -40,7 +43,7 @@ public class WWSPanel extends DataSourcePanel
 		wwsCompress = new JCheckBox();
 		String h = "";
 		String p = "16022";
-		String t = "5.0";
+		String t = "15.0";
 		boolean wscomp = true;
 		if (source != null && source.indexOf(";wws:") != -1)
 		{
