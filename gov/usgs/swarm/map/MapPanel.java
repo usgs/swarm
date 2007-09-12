@@ -71,6 +71,9 @@ import javax.swing.SwingUtilities;
 
 /**
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2007/05/21 02:58:08  dcervelli
+ * Clickable labels and other changes including small change to ways coordinates are calculated from screen coordinates.
+ *
  * Revision 1.20  2007/05/01 17:52:25  cervelli
  * Added output of Swarm.config.mapPath to warning when no map images are found.
  *
@@ -129,7 +132,7 @@ import javax.swing.SwingUtilities;
  * New resetImage() behavior.
  *
  * @author Dan Cervelli
- * @version $Id: MapPanel.java,v 1.21 2007-05-21 02:58:08 dcervelli Exp $
+ * @version $Id: MapPanel.java,v 1.22 2007-09-12 22:38:11 tparker Exp $
  */
 public class MapPanel extends JPanel
 {
@@ -566,7 +569,7 @@ public class MapPanel extends JPanel
 		}
 		catch (Exception e)
 		{
-			Swarm.logger.log(Level.WARNING, e.getMessage(), e);
+			Swarm.logger.log(Level.WARNING, e.getMessage());
 		}
 	}
 	
