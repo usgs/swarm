@@ -10,5 +10,6 @@
 	<classpathentry kind="lib" path="/USGS-trunk/contrib/fissuresIDL-1.0.jar"/>
 	<classpathentry kind="lib" path="/USGS-trunk/contrib/log4j-1.2.13.jar"/>
 	<classpathentry kind="lib" path="/USGS-trunk/contrib/fissuresUtil-1.0.16.jar"/>
+	<classpathentry kind="lib" path="/USGS-trunk/contrib/colt.jar"/>
 	<classpathentry kind="output" path="eclipse-bin"/>
 </classpath>
