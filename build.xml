@@ -2,7 +2,7 @@
 	<description>USGS Swarm Build File</description>
 
 	<property name="source" location="." />
-	<property name="classpath" location="../USGS/contrib/log4j-1.2.13.jar;../USGS/contrib/SeedCodec-1.0.jar;../USGS/contrib/fissuresImpl-1.1.11.jar;../USGS/contrib/fissuresUtil-1.0.16.jar;../USGS/contrib/fissuresIDL-1.0.jar;../USGS/lib/winston.jar;../USGS/lib/vdx.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/seed-pdcc.jar;../USGS/contrib/looks-2.0.4.jar;../USGS/contrib/forms-1.0.7.jar;../USGS/contrib/jnlp.jar"/>
+	<property name="classpath" location="../USGS-trunk/contrib/log4j-1.2.13.jar;../USGS-trunk/contrib/SeedCodec-1.0.jar;../USGS-trunk/contrib/fissuresImpl-1.1.11.jar;../USGS-trunk/contrib/fissuresUtil-1.0.16.jar;../USGS-trunk/contrib/fissuresIDL-1.0.jar;../USGS-trunk/lib/winston.jar;../USGS-trunk/lib/vdx.jar;../USGS-trunk/lib/earthworm.jar;../USGS-trunk/lib/math.jar;../USGS-trunk/lib/net.jar;../USGS-trunk/lib/plot.jar;../USGS-trunk/lib/util.jar;../USGS-trunk/contrib/colt.jar;../USGS-trunk/contrib/seed-pdcc.jar;../USGS-trunk/contrib/looks-2.0.4.jar;../USGS-trunk/contrib/forms-1.0.7.jar;../USGS-trunk/contrib/jnlp.jar"/>
 	<property name="jarfile" value="swarm.jar" />
 
 	<property name="bin-dir" location="../swarm-bin" />
@@ -22,9 +22,9 @@ bin-dist -- generates new binary distribution
 	</target>
 
 	<target name="compile" depends="init" description="compile the source">
-		<ant antfile="${source}/../USGS/buildversion.xml" target="version" dir="${source}/../USGS" inheritAll="true">
+		<ant antfile="${source}/../USGS-trunk/buildversion.xml" target="version" dir="${source}/../USGS-trunk" inheritAll="true">
 			<property name="version" value="2.0.0-beta"/>
-			<property name="path" value="../Swarm/gov/usgs/swarm"/>
+			<property name="path" value="../Swarm-trunk/gov/usgs/swarm"/>
 			<property name="package" value="gov.usgs.swarm"/>
 		</ant>
 			
@@ -32,12 +32,12 @@ bin-dist -- generates new binary distribution
 	</target>
 
 	<target name="jar" depends="compile">
-		<mkdir dir="${source}/../USGS/lib"/>
-		<jar destfile="${source}/../USGS/lib/${jarfile}" basedir="${source}" includes="**/*.class"/>	
+		<mkdir dir="${source}/../USGS-trunk/lib"/>
+		<jar destfile="${source}/../USGS-trunk/lib/${jarfile}" basedir="${source}" includes="**/*.class"/>	
 	</target>
 
 	<target name="bin-dist" depends="init,compile">
-		<ant antfile="${source}/../USGS/build.xml" target="jar" dir="${source}/../USGS" />
+		<ant antfile="${source}/../USGS-trunk/build.xml" target="jar" dir="${source}/../USGS-trunk" />
 		<delete dir="${bin-dir}" />
 
 		<!-- Create the distribution directory structure -->
@@ -51,7 +51,7 @@ bin-dist -- generates new binary distribution
 		<mkdir dir="${bin-dir}/swarm/lib" />
 		
 		<jar destfile="${bin-dir}/swarm/lib/swarm-bin.jar">
-			<fileset dir="${source}/../VDX">
+			<fileset dir="${source}/../VDX-trunk">
 				<include name="gov/usgs/vdx/data/BinaryDataSet*.class" />
 				<include name="gov/usgs/vdx/data/GenericDataMatrix*.class" />
 				<include name="gov/usgs/vdx/data/heli/HelicorderData*.class" />
@@ -65,7 +65,7 @@ bin-dist -- generates new binary distribution
 				<include name="gov/usgs/vdx/data/wave/plot/SpectraRenderer*.class" />
 				<include name="gov/usgs/vdx/data/wave/plot/SpectrogramRenderer*.class" />
 			</fileset>
-			<fileset dir="${source}/../Earthworm">
+			<fileset dir="${source}/../Earthworm-trunk">
 				<include name="gov/usgs/earthworm/Menu*.class" />
 				<include name="gov/usgs/earthworm/MenuItem*.class" />
 				<include name="gov/usgs/earthworm/Message*.class" />
@@ -74,23 +74,23 @@ bin-dist -- generates new binary distribution
 				<include name="gov/usgs/earthworm/TraceBuf*.class" />
 				<include name="gov/usgs/earthworm/WaveServer*.class" />
 			</fileset>
-			<fileset dir="${source}/../Plot">
+			<fileset dir="${source}/../Plo-trunkt">
 				<include name="**/**.class" />	
 			</fileset>
-			<fileset dir="${source}/../Swarm">
+			<fileset dir="${source}/../Swarm-trunk">
 				<include name="**/**.class" />	
 				<include name="**/**.properties" />	
 			</fileset>
-			<fileset dir="${source}/../Math">
+			<fileset dir="${source}/../Math-trunk">
 				<include name="**/**.class" />	
 			</fileset>
-			<fileset dir="${source}/../Net">
+			<fileset dir="${source}/../Net-trunk">
 				<include name="gov/usgs/net/*.class" />	
 			</fileset>
-			<fileset dir="${source}/../Util">
+			<fileset dir="${source}/../Util-trunk">
 				<include name="**/**.class" />	
 			</fileset>
-			<fileset dir="${source}/../Winston">
+			<fileset dir="${source}/../Winston-trunk">
 				<include name="gov/usgs/winston/Channel*.class" />
 				<include name="gov/usgs/winston/Instrument*.class" />
 				<include name="gov/usgs/winston/db/Channels*.class" />
@@ -109,7 +109,7 @@ bin-dist -- generates new binary distribution
 		
 		<!-- Copy the distribution files -->
 		<copy todir="${bin-dir}/swarm/lib">
-			<fileset dir="${source}/../USGS/contrib">
+			<fileset dir="${source}/../USGS-trunk/contrib">
 				<include name="colt.jar" />
 				<include name="seed-pdcc.jar" />
 				<include name="SeedCodec-1.0.jar" />
