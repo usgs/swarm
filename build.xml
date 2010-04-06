@@ -1,11 +1,13 @@
 <project name="Swarm" default="compile" basedir=".">
 	<description>USGS Swarm Build File</description>
 
+	<property name="package" value="gov.usgs.swarm"/>
+	<property name="version" value="2.0.0-beta"/>
+	<property name="jarfile" value="swarm.jar" />
 	<property name="source" location="." />
 	<property name="destination" location="classes"/>
 	<property name="classpath" location="../USGS/contrib/log4j-1.2.13.jar;../USGS/contrib/SeedCodec-1.0.jar;../USGS/contrib/fissuresImpl-1.1.11.jar;../USGS/contrib/fissuresUtil-1.0.16.jar;../USGS/contrib/fissuresIDL-1.0.jar;../USGS/lib/winston.jar;../USGS/lib/vdx.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/seed-pdcc.jar;../USGS/contrib/looks-2.0.4.jar;../USGS/contrib/forms-1.0.7.jar;../USGS/contrib/jnlp.jar"/>
-	<property name="jarfile" value="swarm.jar" />
-
+	
 	<property name="dist-basedir" location="../dist" />
 	<property name="dist-dir" value="swarm" />
 	<property name="dist-jarfile" value="swarm-dist.jar"/>
@@ -23,7 +25,7 @@ jar     -- generates new ${jarfile}
 dist    -- generates new binary distribution
 		</echo>
 	</target>
-
+	
 	<target name="init">
 	</target>
 
@@ -32,19 +34,19 @@ dist    -- generates new binary distribution
 		<mkdir  dir="${destination}"/>
 	</target>
 
-	<target name="compile" depends="init" description="compile the source">
+	<target name="compile" depends="clean" description="compile the source">
+		<javac srcdir="${source}" destdir="${destination}" classpath="${classpath}" target="1.5" debug="on"/>
 		<ant antfile="${source}/../USGS/buildversion.xml" target="version" dir="${source}/../USGS" inheritAll="true">
-			<property name="package" value="gov.usgs.swarm"/>
-			<property name="version" value="2.0.0-beta"/>
-			<property name="srcpath" value="../Swarm/gov/usgs/swarm"/>
-			<property name="destpath" value="../Swarm/classes/gov/usgs/swarm"/>
-		</ant>			
-		<javac srcdir="${source}" destdir="${destination}" classpath="${classpath}" target="1.5" debug="on" deprecation="on" />
+			<property name="package" value="${package}"/>
+			<property name="version" value="${version}"/>
+			<property name="srcpath" value="${source}"/>
+			<property name="destpath" value="${destination}"/>
+		</ant>
 	</target>
 
-	<target name="jar" depends="compile">
+	<target name="jar" depends="compile" description="generates new ${jarfile}">
 		<mkdir dir="${source}/../USGS/lib"/>
-		<jar destfile="${source}/../USGS/lib/${jarfile}" basedir="${destination}" includes="**/*.class"/>	
+		<jar destfile="${source}/../USGS/lib/${jarfile}" basedir="${destination}" includes="**/*.class"/>
 	</target>
 	
 	<target name="deploy">
@@ -66,7 +68,7 @@ dist    -- generates new binary distribution
 		<mkdir dir="${dist-basedir}/${dist-dir}/lib" />
 		
 		<jar destfile="${dist-basedir}/${dist-dir}/lib/${dist-jarfile}">
-			<fileset dir="${source}/../VDX/${destination}">
+			<fileset dir="${source}/../VDX/classes">
 				<include name="gov/usgs/vdx/data/BinaryDataSet*.class" />
 				<include name="gov/usgs/vdx/data/GenericDataMatrix*.class" />
 				<include name="gov/usgs/vdx/data/heli/HelicorderData*.class" />
@@ -80,7 +82,7 @@ dist    -- generates new binary distribution
 				<include name="gov/usgs/vdx/data/wave/plot/SpectraRenderer*.class" />
 				<include name="gov/usgs/vdx/data/wave/plot/SpectrogramRenderer*.class" />
 			</fileset>
-			<fileset dir="${source}/../Earthworm/${destination}">
+			<fileset dir="${source}/../Earthworm/classes">
 				<include name="gov/usgs/earthworm/Menu*.class" />
 				<include name="gov/usgs/earthworm/MenuItem*.class" />
 				<include name="gov/usgs/earthworm/Message*.class" />
@@ -89,23 +91,23 @@ dist    -- generates new binary distribution
 				<include name="gov/usgs/earthworm/TraceBuf*.class" />
 				<include name="gov/usgs/earthworm/WaveServer*.class" />
 			</fileset>
-			<fileset dir="${source}/../Plot/${destination}">
+			<fileset dir="${source}/../Plot/classes">
 				<include name="**/**.class" />	
 			</fileset>
-			<fileset dir="${source}/../Swarm/${destination}">
+			<fileset dir="${source}/../Swarm/classes">
 				<include name="**/**.class" />	
 				<include name="**/**.properties" />	
 			</fileset>
-			<fileset dir="${source}/../Math/${destination}">
+			<fileset dir="${source}/../Math/classes">
 				<include name="**/**.class" />	
 			</fileset>
-			<fileset dir="${source}/../Net/${destination}">
+			<fileset dir="${source}/../Net/classes">
 				<include name="gov/usgs/net/*.class" />	
 			</fileset>
-			<fileset dir="${source}/../Util/${destination}">
+			<fileset dir="${source}/../Util/classes">
 				<include name="**/**.class" />	
 			</fileset>
-			<fileset dir="${source}/../Winston/${destination}">
+			<fileset dir="${source}/../Winston/classes">
 				<include name="gov/usgs/winston/Channel*.class" />
 				<include name="gov/usgs/winston/Instrument*.class" />
 				<include name="gov/usgs/winston/db/Channels*.class" />
@@ -160,7 +162,7 @@ dist    -- generates new binary distribution
 		<copy todir="${dist-basedir}/${dist-dir}/" file="${source}/swarm.sh" />
 		<!-- <copy todir="$${dist-basedir}/${dist-dir}/" file="${source}/swarm.bat" />  -->
 		
-		<!-- <tar destfile="${source}/swarm-bin.tar.gz" basedir="${dist-basedir}" compression="gzip" /> -->
+		<tar destfile="${source}/swarm-bin.tar.gz" basedir="${dist-basedir}" compression="gzip" />
 		<zip destfile="${source}/swarm-bin.zip" basedir="${dist-basedir}" compress="true" keepcompression="true" />
 	</target>
 	
