@@ -168,6 +168,10 @@ dist    -- generates new binary distribution
 		
 		<tar destfile="${dist-basedir}/swarm-bin.tar.gz" basedir="${dist-tempdir}" compression="gzip" />
 		<zip destfile="${dist-basedir}/swarm-bin.zip"    basedir="${dist-tempdir}" />
+		
+		<!-- Delete the temporary distribution folder -->
+		<delete dir="${dist-tempdir}" />
+		
 	</target>
 	
 	<target name="jnlp-dist" >
