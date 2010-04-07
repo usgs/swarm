@@ -4,15 +4,17 @@
 	<property name="package" value="gov.usgs.swarm"/>
 	<property name="version" value="2.0.0-beta"/>
 	<property name="jarfile" value="swarm.jar" />
-	<property name="source" location="." />
-	<property name="destination" location="classes"/>
 	<property name="classpath" location="../USGS/contrib/log4j-1.2.13.jar;../USGS/contrib/SeedCodec-1.0.jar;../USGS/contrib/fissuresImpl-1.1.11.jar;../USGS/contrib/fissuresUtil-1.0.16.jar;../USGS/contrib/fissuresIDL-1.0.jar;../USGS/lib/winston.jar;../USGS/lib/vdx.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/seed-pdcc.jar;../USGS/contrib/looks-2.0.4.jar;../USGS/contrib/forms-1.0.7.jar;../USGS/contrib/jnlp.jar"/>
+	<property name="source" location="." />
+	<property name="destination" location="./classes"/>	
+
+	<property name="dist-appdir" value="swarm" />
+	<property name="dist-tempdir" location="./temp" />
+	<property name="dist-basedir" location="./dist" />
+	<property name="dist-jarfile" value="swarm.jar"/>
+	<property name="classdir" value="classes"/>
 	
-	<property name="dist-basedir" location="../dist" />
-	<property name="dist-dir" value="swarm" />
-	<property name="dist-jarfile" value="swarm-dist.jar"/>
-	
-	<property name="jnlp-dir" location="../swarm-jnlp" />
+	<property name="jnlp-dir" location="./swarm-jnlp" />
 
 	<target name="help">
 		<echo>
@@ -21,7 +23,7 @@ help    -- displays this help information
 init    -- 
 clean   -- remove the classes directory
 compile -- compiles Java code
-jar     -- generates new ${jarfile}
+jar     -- generates new jarfile
 dist    -- generates new binary distribution
 		</echo>
 	</target>
@@ -44,31 +46,33 @@ dist    -- generates new binary distribution
 		</ant>
 	</target>
 
-	<target name="jar" depends="compile" description="generates new ${jarfile}">
+	<target name="jar" depends="compile" description="generates new jarfile">
 		<mkdir dir="${source}/../USGS/lib"/>
 		<jar destfile="${source}/../USGS/lib/${jarfile}" basedir="${destination}" includes="**/*.class"/>
 	</target>
 	
 	<target name="deploy">
-		<ant antfile="../USGS/build.xml" target="jar" dir="../USGS" />
+		<ant target="jar" inheritAll="false" antfile="../USGS/build.xml" />
 	</target>
 
 	<target name="dist" depends="deploy">
 		
-		<delete dir="${dist-basedir}/${dist-dir}" />
+		<!-- rebuild the dist dir -->
+		<delete dir="${dist-basedir}"/>
+		<mkdir  dir="${dist-basedir}"/>
 
 		<!-- Create the distribution directory structure -->
-		<mkdir dir="${dist-basedir}/${dist-dir}/" />
-		<mkdir dir="${dist-basedir}/${dist-dir}/layouts" />
-		<mkdir dir="${dist-basedir}/${dist-dir}/mapdata" />
-		<mkdir dir="${dist-basedir}/${dist-dir}/mapdata/augustine" />
-		<mkdir dir="${dist-basedir}/${dist-dir}/mapdata/nasa_2k" />
-		<mkdir dir="${dist-basedir}/${dist-dir}/mapdata/nasa_240m_D2" />
-		<mkdir dir="${dist-basedir}/${dist-dir}/mapdata/world" />
-		<mkdir dir="${dist-basedir}/${dist-dir}/lib" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/layouts" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/mapdata" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/mapdata/augustine" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/mapdata/nasa_2k" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/mapdata/nasa_240m_D2" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/mapdata/world" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/lib" />
 		
-		<jar destfile="${dist-basedir}/${dist-dir}/lib/${dist-jarfile}">
-			<fileset dir="${source}/../VDX/classes">
+		<jar destfile="${dist-tempdir}/${dist-appdir}/lib/${dist-jarfile}">
+			<fileset dir="${source}/../VDX/${classdir}">
 				<include name="gov/usgs/vdx/data/BinaryDataSet*.class" />
 				<include name="gov/usgs/vdx/data/GenericDataMatrix*.class" />
 				<include name="gov/usgs/vdx/data/heli/HelicorderData*.class" />
@@ -82,7 +86,7 @@ dist    -- generates new binary distribution
 				<include name="gov/usgs/vdx/data/wave/plot/SpectraRenderer*.class" />
 				<include name="gov/usgs/vdx/data/wave/plot/SpectrogramRenderer*.class" />
 			</fileset>
-			<fileset dir="${source}/../Earthworm/classes">
+			<fileset dir="${source}/../Earthworm/${classdir}">
 				<include name="gov/usgs/earthworm/Menu*.class" />
 				<include name="gov/usgs/earthworm/MenuItem*.class" />
 				<include name="gov/usgs/earthworm/Message*.class" />
@@ -91,23 +95,23 @@ dist    -- generates new binary distribution
 				<include name="gov/usgs/earthworm/TraceBuf*.class" />
 				<include name="gov/usgs/earthworm/WaveServer*.class" />
 			</fileset>
-			<fileset dir="${source}/../Plot/classes">
+			<fileset dir="${source}/../Plot/${classdir}">
 				<include name="**/**.class" />	
 			</fileset>
-			<fileset dir="${source}/../Swarm/classes">
+			<fileset dir="${source}/../Swarm/${classdir}">
 				<include name="**/**.class" />	
 				<include name="**/**.properties" />	
 			</fileset>
-			<fileset dir="${source}/../Math/classes">
+			<fileset dir="${source}/../Math/${classdir}">
 				<include name="**/**.class" />	
 			</fileset>
-			<fileset dir="${source}/../Net/classes">
+			<fileset dir="${source}/../Net/${classdir}">
 				<include name="gov/usgs/net/*.class" />	
 			</fileset>
-			<fileset dir="${source}/../Util/classes">
+			<fileset dir="${source}/../Util/${classdir}">
 				<include name="**/**.class" />	
 			</fileset>
-			<fileset dir="${source}/../Winston/classes">
+			<fileset dir="${source}/../Winston/${classdir}">
 				<include name="gov/usgs/winston/Channel*.class" />
 				<include name="gov/usgs/winston/Instrument*.class" />
 				<include name="gov/usgs/winston/db/Channels*.class" />
@@ -122,10 +126,10 @@ dist    -- generates new binary distribution
 			</fileset>
 		</jar>
 		
-		<jar manifest="Manifest.txt" destfile="${dist-basedir}/${dist-dir}/lib/${dist-jarfile}" />
+		<jar manifest="Manifest.txt" destfile="${dist-tempdir}/${dist-appdir}/lib/${dist-jarfile}" />
 		
 		<!-- Copy the distribution files -->
-		<copy todir="${dist-basedir}/${dist-dir}/lib">
+		<copy todir="${dist-tempdir}/${dist-appdir}/lib">
 			<fileset dir="${source}/../USGS/contrib">
 				<include name="colt.jar" />
 				<include name="seed-pdcc.jar" />
@@ -139,31 +143,31 @@ dist    -- generates new binary distribution
 			</fileset>
 		</copy>
 		
-		<copy todir="${dist-basedir}/${dist-dir}/layouts">
+		<copy todir="${dist-tempdir}/${dist-appdir}/layouts">
 			<fileset dir="${source}/layouts" />
 		</copy>
 		
-		<copy todir="${dist-basedir}/${dist-dir}/mapdata/augustine">
+		<copy todir="${dist-tempdir}/${dist-appdir}/mapdata/augustine">
 			<fileset dir="${source}/mapdata/augustine" />
 		</copy>
-		<copy todir="${dist-basedir}/${dist-dir}/mapdata/nasa_2k">
+		<copy todir="${dist-tempdir}/${dist-appdir}/mapdata/nasa_2k">
 			<fileset dir="${source}/mapdata/nasa_2k" />
 		</copy>
-		<copy todir="${dist-basedir}/${dist-dir}/mapdata/nasa_240m_D2">
+		<copy todir="${dist-tempdir}/${dist-appdir}/mapdata/nasa_240m_D2">
 			<fileset dir="${source}/mapdata/nasa_240m_D2" />
 		</copy>
-		<copy todir="${dist-basedir}/${dist-dir}/mapdata/world">
+		<copy todir="${dist-tempdir}/${dist-appdir}/mapdata/world">
 			<fileset dir="${source}/mapdata/world" />
 		</copy>
 		
-		<copy todir="${dist-basedir}/${dist-dir}/" file="${source}/swarm_console.bat" />
-		<copy todir="${dist-basedir}/${dist-dir}/" file="${source}/clip.wav" />
-		<copy todir="${dist-basedir}/${dist-dir}/" file="${source}/IRIS_networks.txt" />
-		<copy todir="${dist-basedir}/${dist-dir}/" file="${source}/swarm.sh" />
-		<!-- <copy todir="$${dist-basedir}/${dist-dir}/" file="${source}/swarm.bat" />  -->
+		<copy todir="${dist-tempdir}/${dist-appdir}/" file="${source}/swarm_console.bat" />
+		<copy todir="${dist-tempdir}/${dist-appdir}/" file="${source}/clip.wav" />
+		<copy todir="${dist-tempdir}/${dist-appdir}/" file="${source}/IRIS_networks.txt" />
+		<copy todir="${dist-tempdir}/${dist-appdir}/" file="${source}/swarm.sh" />
+		<!-- <copy todir="${dist-tempdir}/${dist-appdir}/" file="${source}/swarm.bat" />  -->
 		
-		<tar destfile="${source}/swarm-bin.tar.gz" basedir="${dist-basedir}" compression="gzip" />
-		<zip destfile="${source}/swarm-bin.zip" basedir="${dist-basedir}" compress="true" keepcompression="true" />
+		<tar destfile="${dist-basedir}/swarm-bin.tar.gz" basedir="${dist-tempdir}" compression="gzip" />
+		<zip destfile="${dist-basedir}/swarm-bin.zip"    basedir="${dist-tempdir}" />
 	</target>
 	
 	<target name="jnlp-dist" >
