@@ -12,6 +12,7 @@
 	<property name="dist-tempdir" location="./temp" />
 	<property name="dist-basedir" location="./dist" />
 	<property name="dist-jarfile" value="swarm.jar"/>
+	<property name="dist-jarfile-bin" value="swarm-bin.jar"/>
 	<property name="classdir" value="classes"/>
 	
 	<property name="jnlp-dir" location="./swarm-jnlp" />
@@ -71,7 +72,7 @@ dist    -- generates new binary distribution
 		<mkdir dir="${dist-tempdir}/${dist-appdir}/mapdata/world" />
 		<mkdir dir="${dist-tempdir}/${dist-appdir}/lib" />
 		
-		<jar destfile="${dist-tempdir}/${dist-appdir}/lib/${dist-jarfile}">
+		<jar destfile="${dist-tempdir}/${dist-appdir}/lib/${dist-jarfile-bin}">
 			<fileset dir="${source}/../VDX/${classdir}">
 				<include name="gov/usgs/vdx/data/BinaryDataSet*.class" />
 				<include name="gov/usgs/vdx/data/GenericDataMatrix*.class" />
