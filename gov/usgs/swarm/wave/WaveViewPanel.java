@@ -1080,14 +1080,14 @@ public class WaveViewPanel extends JComponent
 			waveRenderer.setFrameDecorator(decorator);
 
 		if (settings.useUnits && md != null && md.getUnit() != null)
-			waveRenderer.setYLabel(md.getUnit());
+			waveRenderer.setYLabelText(md.getUnit());
 		else
-			waveRenderer.setYLabel("Counts");
+			waveRenderer.setYLabelText("Counts");
 		
 		waveRenderer.setYAxisCoefficients(multiplier, offset);
 		waveRenderer.setLocation(xOffset, yOffset, this.getWidth() - xOffset - rightWidth, this.getHeight() - yOffset - bottomHeight);
 		waveRenderer.setYLimits(minY, maxY);
-		waveRenderer.setViewTimes(startTime, endTime);
+		waveRenderer.setViewTimes(startTime, endTime, "");
 		waveRenderer.setWave(wv);
 		waveRenderer.setRemoveBias(settings.removeBias);
 		waveRenderer.setAutoScale(true);
