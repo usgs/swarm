@@ -4,6 +4,7 @@ import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.FrameRenderer;
 import gov.usgs.plot.GradientSpectrum;
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.PlotException;
 import gov.usgs.plot.Spectrum;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.CurrentTime;
@@ -136,7 +137,11 @@ public class WigglerPanel extends JComponent implements Runnable
 		waveRenderer.setLocation(X_OFFSET, Y_OFFSET, getWidth() - RIGHT_WIDTH - X_OFFSET, getHeight() - BOTTOM_HEIGHT - Y_OFFSET);
 		//waveRenderer.getAxis().createDefault();
 		
-		plot.render((Graphics2D)g);
+		try {
+			plot.render((Graphics2D)g);
+		} catch (PlotException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	class AnimatedWaveRenderer extends FrameRenderer

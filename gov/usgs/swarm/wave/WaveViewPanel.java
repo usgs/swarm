@@ -3,6 +3,7 @@ package gov.usgs.swarm.wave;
 import gov.usgs.math.Filter;
 import gov.usgs.plot.FrameDecorator;
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.PlotException;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.swarm.Images;
 import gov.usgs.swarm.Metadata;
@@ -1020,7 +1021,12 @@ public class WaveViewPanel extends JComponent
 //		if (channel != null && displayTitle && titleFrame != null)
 //			titleFrame.getAxis().setTopLabelAsText(channel);
 
-		plot.render(g2);
+			try {
+				plot.render(g2);
+			} catch (PlotException e) {
+				e.printStackTrace();
+			}
+			
 		
 	}
 
