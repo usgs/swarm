@@ -80,7 +80,7 @@ abstract public class SeismicDataSource
 	 * @param station
 	 * @param t1
 	 * @param t2
-	 * @return
+	 * @return wave if possible
 	 */
 	abstract public Wave getWave(String station, double t1, double t2);
 	abstract public HelicorderData getHelicorder(String station, double t1, double t2, GulperListener gl);
