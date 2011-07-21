@@ -11,5 +11,10 @@
 	<classpathentry kind="lib" path="/USGS/contrib/log4j-1.2.13.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/fissuresUtil-1.0.16.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/colt.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Net"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Earthworm"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/VDX"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Util"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Plot"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

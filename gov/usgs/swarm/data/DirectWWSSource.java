@@ -1,6 +1,7 @@
 package gov.usgs.swarm.data;
 
 import gov.usgs.swarm.Swarm;
+import gov.usgs.util.UtilException;
 import gov.usgs.vdx.data.heli.HelicorderData;
 import gov.usgs.vdx.data.wave.Wave;
 import gov.usgs.winston.Channel;
@@ -72,7 +73,10 @@ public class DirectWWSSource extends SeismicDataSource
 		Wave sw = cache.getWave(station, t1, t2);
 		if (sw == null)
 		{
-			sw = data.getWave(station, t1, t2);
+			try{
+				sw = data.getWave(station, t1, t2, 0);
+			} catch (UtilException e){
+			}
 			if (sw != null && !sw.isData())
 				sw = null;
 			if (sw != null && sw.buffer != null && sw.buffer.length > 0)
@@ -96,8 +100,10 @@ public class DirectWWSSource extends SeismicDataSource
 		HelicorderData hd = cache.getHelicorder(station, t1, t2, this);
 		if (hd == null)
 		{
-			hd = data.getHelicorderData(station, t1, t2);
-			
+			try{
+				hd = data.getHelicorderData(station, t1, t2, 0);
+			} catch (UtilException e){
+			}
 			if (hd != null && hd.rows() != 0)
 				cache.putHelicorder(station, hd);
 			else

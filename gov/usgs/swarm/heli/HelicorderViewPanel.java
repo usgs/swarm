@@ -4,6 +4,7 @@ import gov.usgs.plot.AxisRenderer;
 import gov.usgs.plot.FrameDecorator;
 import gov.usgs.plot.FrameRenderer;
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.PlotException;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.TextRenderer;
 import gov.usgs.swarm.Images;
@@ -784,7 +785,11 @@ public class HelicorderViewPanel extends JComponent
 		translation = heliRenderer.getTranslationInfo(false);
 		heliRenderer.setLargeChannelDisplay(fullScreen);
 		
-		plot.render(ig);
+		try {
+			plot.render(ig);
+		} catch (PlotException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	class SmallDecorator extends FrameDecorator

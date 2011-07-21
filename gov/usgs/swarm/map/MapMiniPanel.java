@@ -391,7 +391,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	 * @param st
 	 * @param et
 	 * @param reenter
-	 * @return
+	 * @return success
 	 */
 	public boolean updateWave(final double st, final double et, boolean reenter, final boolean repaint)
 	{	

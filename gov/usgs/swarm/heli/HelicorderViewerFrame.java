@@ -1,6 +1,7 @@
 package gov.usgs.swarm.heli;
 
 import gov.usgs.plot.Plot;
+import gov.usgs.plot.PlotException;
 import gov.usgs.swarm.Images;
 import gov.usgs.swarm.Kioskable;
 import gov.usgs.swarm.Swarm;
@@ -63,7 +64,7 @@ import javax.swing.event.InternalFrameEvent;
 /**
  * <code>JInternalFrame</code> that holds a helicorder.
  * 
- * $Log: not supported by cvs2svn $
+ * $Log: not supported by cvs2svn $f
  * Revision 1.8  2007/04/29 21:27:01  dcervelli
  * Progress meter.
  *
@@ -1188,9 +1189,13 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 				plot.addRenderer(heliRenderer);
 				
 				if (fileFormatCB.getSelectedItem().equals("PS"))
-					plot.writePS(f.getAbsolutePath());					
+					plot.writePS(f.getAbsolutePath());
 				else
-					plot.writePNG(f.getAbsolutePath());
+					try {
+						plot.writePNG(f.getAbsolutePath());
+					} catch (PlotException e1) {
+						e1.printStackTrace();
+					}
 			
 				Swarm.config.lastPath = f.getParent();
 			}
