@@ -262,6 +262,7 @@ public class WaveViewSettingsToolbar
 			if (set.viewType == ViewType.SPECTROGRAM)
 				sg = true;
 		}
+
 		// fix for Java 1.5, clearSelection was added in 1.6
 		try { 
 		//	waveTypes.clearSelection(); 
