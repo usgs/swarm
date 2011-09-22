@@ -244,7 +244,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.0.0.20070816-beta-12a";
+	private static final String VERSION = "2.0.0";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
