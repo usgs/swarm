@@ -101,6 +101,8 @@ dist    -- generates new binary distribution
 			</fileset>
 			<fileset dir="${source}/../Swarm/${classdir}">
 				<include name="**/**.class" />	
+			</fileset>
+			<fileset dir="${source}/../Swarm">
 				<include name="**/**.properties" />	
 			</fileset>
 			<fileset dir="${source}/../Math/${classdir}">
