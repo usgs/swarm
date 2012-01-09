@@ -61,6 +61,10 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: name worker thread for better debugging
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.5   2012/01/09 00:10:34  pcervelli
+ * Changed spectrogram code.  Fixed a bug in the wave settings dialog.
+ * Code needs some work before it's ready for wide distribution.
+ * 
  * Revision 1.44  2007/07/10 00:10:34  cervelli
  * Version bump.
  *
@@ -244,7 +248,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.0.0";
+	private static final String VERSION = "2.1 alpha";
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;

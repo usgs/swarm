@@ -1165,10 +1165,11 @@ public class WaveViewPanel extends JComponent
 	    spectrogramRenderer.setWave(wv);
 	    spectrogramRenderer.setViewStartTime(startTime);
 	    spectrogramRenderer.setViewEndTime(endTime);
+	    System.out.printf("WaveViewPanel (1168): settings.autoScalePower: %s\n",settings.autoScalePower);
 	    spectrogramRenderer.setAutoScale(settings.autoScalePower);
-	    spectrogramRenderer.setFftSize(settings.fftSize);
 	    spectrogramRenderer.setLogPower(settings.logPower);
-	    spectrogramRenderer.setOverlap(settings.spectrogramOverlap);
+
+        spectrogramRenderer.setOverlap(settings.spectrogramOverlap);
 	    spectrogramRenderer.setMaxFreq(settings.maxFreq);
 	    spectrogramRenderer.setMinFreq(settings.minFreq);
 	    if (channel != null && displayTitle)

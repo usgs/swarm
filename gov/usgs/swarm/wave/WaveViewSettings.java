@@ -75,7 +75,7 @@ public class WaveViewSettings
 	public boolean logPower;
 	public double minFreq;
 	public double maxFreq;
-	public String fftSize;
+	public String binSize;
 	public double spectrogramOverlap;
 	
 	public WaveViewPanel view;
@@ -100,7 +100,7 @@ public class WaveViewSettings
 			DEFAULT_WAVE_VIEW_SETTINGS.autoScaleAmpMemory = true;
 			DEFAULT_WAVE_VIEW_SETTINGS.maxAmp = 1000;
 			DEFAULT_WAVE_VIEW_SETTINGS.minAmp = -1000;
-			DEFAULT_WAVE_VIEW_SETTINGS.autoScalePower = true;
+			DEFAULT_WAVE_VIEW_SETTINGS.autoScalePower = false;
 			DEFAULT_WAVE_VIEW_SETTINGS.autoScalePowerMemory = true;
 			DEFAULT_WAVE_VIEW_SETTINGS.maxPower = 40000;
 			DEFAULT_WAVE_VIEW_SETTINGS.useUnits = true;
@@ -109,7 +109,7 @@ public class WaveViewSettings
 			DEFAULT_WAVE_VIEW_SETTINGS.spectrogramOverlap = 0.2;
 			DEFAULT_WAVE_VIEW_SETTINGS.minFreq = 0.75;
 			DEFAULT_WAVE_VIEW_SETTINGS.maxFreq = 25;
-			DEFAULT_WAVE_VIEW_SETTINGS.fftSize = "Auto";
+			DEFAULT_WAVE_VIEW_SETTINGS.binSize = "Auto";
 			DEFAULT_WAVE_VIEW_SETTINGS.filter = new Butterworth();
 			DEFAULT_WAVE_VIEW_SETTINGS.filterOn = false;
 			DEFAULT_WAVE_VIEW_SETTINGS.zeroPhaseShift = true;
@@ -123,8 +123,14 @@ public class WaveViewSettings
 		filter = new Butterworth();
 		view = null;
 		
-		if (DEFAULT_WAVE_VIEW_SETTINGS != null)
+		if (DEFAULT_WAVE_VIEW_SETTINGS != null) {
 			copy(DEFAULT_WAVE_VIEW_SETTINGS);
+			System.out.printf("WaveViewSettings(128): DEFAULT_WAVE_VIEW_SETTINGS is not null\n");
+
+		}
+		else {
+			System.out.printf("WaveViewSettings(132): DEFAULT_WAVE_VIEW_SETTINGS is null\n");
+		}
 	}
 	
 	public WaveViewSettings(WaveViewSettings s)
@@ -150,7 +156,7 @@ public class WaveViewSettings
 		logFreq = s.logFreq;
 		minFreq = s.minFreq;
 		maxFreq = s.maxFreq;
-		fftSize = s.fftSize;
+		binSize = s.binSize;
 		spectrogramOverlap = s.spectrogramOverlap;
 		logPower = s.logPower;
 		zeroPhaseShift = s.zeroPhaseShift;
@@ -180,7 +186,7 @@ public class WaveViewSettings
 		useUnits = Boolean.parseBoolean(cf.getString("useUnits"));
 		logFreq = Boolean.parseBoolean(cf.getString("logFreq"));
 		logPower = Boolean.parseBoolean(cf.getString("logPower"));
-		fftSize = cf.getString("fftSize");
+		binSize = cf.getString("binSize");
 	}
 	
 	public void save(ConfigFile cf, String prefix)
@@ -203,7 +209,7 @@ public class WaveViewSettings
 		cf.put(prefix + ".useUnits", Boolean.toString(useUnits));
 		cf.put(prefix + ".logFreq", Boolean.toString(logFreq));
 		cf.put(prefix + ".logPower", Boolean.toString(logPower));
-		cf.put(prefix + ".fftSize", fftSize);
+		cf.put(prefix + ".binSize", binSize);
 	}
 	
 	public void setType(ViewType t)

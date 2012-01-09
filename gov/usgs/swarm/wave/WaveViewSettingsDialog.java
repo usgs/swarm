@@ -69,7 +69,7 @@ public class WaveViewSettingsDialog extends SwarmDialog
 	private JRadioButton spectraAutoScale;
 	private JRadioButton spectraManualScale;
 	private JCheckBox spectraAutoScaleMemory;
-	private JComboBox fftSize;
+	private JComboBox binSize;
 	private JSlider spectrogramOverlap;
 	
 	private ButtonGroup filterGroup;
@@ -144,6 +144,8 @@ public class WaveViewSettingsDialog extends SwarmDialog
 			waveManualScale.setSelected(true);
 		waveAutoScaleMemory.setSelected(settings.autoScaleAmpMemory);
 
+	    System.out.printf("WaveViewSettingsDialog (148): settings.autoScalePower: %s\n",settings.autoScalePower);
+
 		if (settings.autoScalePower)
 			spectraAutoScale.setSelected(true);
 		else
@@ -154,7 +156,7 @@ public class WaveViewSettingsDialog extends SwarmDialog
 		maxAmp.setText(String.format("%.1f", settings.maxAmp));
 		maxPower.setText(String.format("%.1f", settings.maxPower));
 
-		fftSize.setSelectedItem(settings.fftSize);
+		binSize.setSelectedItem(settings.binSize);
 		minFreq.setText(String.format("%.1f", settings.minFreq));
 		maxFreq.setText(String.format("%.1f", settings.maxFreq));
 		logFreq.setSelected(settings.logFreq);
@@ -217,7 +219,7 @@ public class WaveViewSettingsDialog extends SwarmDialog
 		spectraScaleGroup.add(spectraAutoScale);
 		spectraScaleGroup.add(spectraManualScale);
 		spectraAutoScaleMemory = new JCheckBox("Memory");
-		fftSize = new JComboBox(new String[] {"Auto", "64", "128", "256", "512", "1024", "2048"});
+		binSize = new JComboBox(new String[] {"Auto", "64", "128", "256", "512", "1024", "2048"});
 		spectrogramOverlap = new JSlider(0, 90, 20);
 		spectrogramOverlap.setMajorTickSpacing(15);
 		spectrogramOverlap.setMinorTickSpacing(5);
@@ -310,7 +312,7 @@ public class WaveViewSettingsDialog extends SwarmDialog
 		builder.appendRow("center:20dlu");
 		builder.add(new JLabel("Spectrogram bin:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
 		builder.nextColumn(2);
-		builder.append(fftSize);
+		builder.append(binSize);
 		builder.append(spectrogramOverlap, 3);
 		builder.nextLine();
 		
@@ -419,6 +421,7 @@ public class WaveViewSettingsDialog extends SwarmDialog
 			
 			settings.autoScalePower = spectraAutoScale.isSelected();
 			settings.autoScalePowerMemory = spectraAutoScaleMemory.isSelected();
+			System.out.printf("WaveViewSettingsDialog (424): settings.autoScalePower: %s\n",settings.autoScalePower);
 			settings.maxPower = Double.parseDouble(maxPower.getText());
 			
 			settings.minAmp = Double.parseDouble(minAmp.getText());
@@ -429,7 +432,7 @@ public class WaveViewSettingsDialog extends SwarmDialog
 			if (settings.minFreq < 0)
 				settings.minFreq = 0;
 			
-			settings.fftSize = (String)fftSize.getSelectedItem();
+			settings.binSize = (String)binSize.getSelectedItem();
 			settings.logFreq = logFreq.isSelected();
 			settings.logPower = logPower.isSelected();
 			settings.spectrogramOverlap = spectrogramOverlap.getValue() / 100.0;

@@ -80,7 +80,7 @@ public class WaveViewSettingsToolbar
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						WaveViewSettings s = new WaveViewSettings();
+						WaveViewSettings s = settingsSet.iterator().next();
 						WaveViewSettingsDialog wvsd = WaveViewSettingsDialog.getInstance(s, settingsSet.size());
 						wvsd.setVisible(true);
 						for (WaveViewSettings settings : settingsSet)
