@@ -14,6 +14,7 @@ import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
@@ -80,6 +81,8 @@ public class WaveViewSettingsToolbar
 				{
 					public void actionPerformed(ActionEvent e)
 					{
+						if (settingsSet.size()==0)
+							return;
 						WaveViewSettings s = settingsSet.iterator().next();
 						WaveViewSettingsDialog wvsd = WaveViewSettingsDialog.getInstance(s, settingsSet.size());
 						wvsd.setVisible(true);
@@ -190,8 +193,9 @@ public class WaveViewSettingsToolbar
 					public void actionPerformed(ActionEvent e)
 					{
 //						if (settings != null)
-						for (WaveViewSettings settings : settingsSet)
+						for (WaveViewSettings settings : settingsSet) {
 							settings.adjustScale(1.0 / 1.25);
+						}
 					}	
 				});
 		
