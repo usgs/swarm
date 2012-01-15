@@ -50,36 +50,30 @@ public class WaveViewSettings
 				return WAVE;
 		}
 	}
-	
-	public ViewType viewType;
-	
-	public Butterworth filter;
+		
 	public boolean filterOn;
 	public boolean zeroPhaseShift;
-	
-//	public Color color;
-//	public Color clipColor;
-	
 	public boolean autoScaleAmp;
 	public boolean autoScaleAmpMemory;
-	public double maxAmp;
-	public double minAmp;
 	public boolean autoScalePower;
 	public boolean autoScalePowerMemory;
-	public double maxPower;
-	
+	public boolean useUnits;
+	public boolean logPower;
 	public boolean removeBias;
 	
-	public boolean useUnits;
-	public boolean logFreq;
-	public boolean logPower;
+	public double maxAmp;
+	public double minAmp;
+	public double minPower;
+	public double maxPower;
 	public double minFreq;
 	public double maxFreq;
-	public String binSize;
 	public double spectrogramOverlap;
+	public double binSize;
 	
 	public WaveViewPanel view;
 	public WaveViewSettingsToolbar toolbar;
+	public ViewType viewType;
+	public Butterworth filter;
 	
 	private static WaveViewSettings DEFAULT_WAVE_VIEW_SETTINGS;
 	
@@ -102,14 +96,14 @@ public class WaveViewSettings
 			DEFAULT_WAVE_VIEW_SETTINGS.minAmp = -1000;
 			DEFAULT_WAVE_VIEW_SETTINGS.autoScalePower = false;
 			DEFAULT_WAVE_VIEW_SETTINGS.autoScalePowerMemory = true;
-			DEFAULT_WAVE_VIEW_SETTINGS.maxPower = 40000;
+			DEFAULT_WAVE_VIEW_SETTINGS.minPower = 20;
+			DEFAULT_WAVE_VIEW_SETTINGS.maxPower = 120;
 			DEFAULT_WAVE_VIEW_SETTINGS.useUnits = true;
-			DEFAULT_WAVE_VIEW_SETTINGS.logFreq = false;
 			DEFAULT_WAVE_VIEW_SETTINGS.logPower = true;
-			DEFAULT_WAVE_VIEW_SETTINGS.spectrogramOverlap = 0.2;
+			DEFAULT_WAVE_VIEW_SETTINGS.spectrogramOverlap = 0.859375;
 			DEFAULT_WAVE_VIEW_SETTINGS.minFreq = 0.75;
 			DEFAULT_WAVE_VIEW_SETTINGS.maxFreq = 25;
-			DEFAULT_WAVE_VIEW_SETTINGS.binSize = "Auto";
+			DEFAULT_WAVE_VIEW_SETTINGS.binSize = 2;
 			DEFAULT_WAVE_VIEW_SETTINGS.filter = new Butterworth();
 			DEFAULT_WAVE_VIEW_SETTINGS.filterOn = false;
 			DEFAULT_WAVE_VIEW_SETTINGS.zeroPhaseShift = true;
@@ -123,14 +117,9 @@ public class WaveViewSettings
 		filter = new Butterworth();
 		view = null;
 		
-		if (DEFAULT_WAVE_VIEW_SETTINGS != null) {
+		if (DEFAULT_WAVE_VIEW_SETTINGS != null)
 			copy(DEFAULT_WAVE_VIEW_SETTINGS);
-			System.out.printf("WaveViewSettings(128): DEFAULT_WAVE_VIEW_SETTINGS is not null\n");
 
-		}
-		else {
-			System.out.printf("WaveViewSettings(132): DEFAULT_WAVE_VIEW_SETTINGS is null\n");
-		}
 	}
 	
 	public WaveViewSettings(WaveViewSettings s)
@@ -148,12 +137,10 @@ public class WaveViewSettings
 		minAmp = s.minAmp;
 		autoScalePowerMemory = s.autoScalePowerMemory;
 		autoScalePower = s.autoScalePower;
+		minPower = s.minPower;
 		maxPower = s.maxPower;
-//		color = s.color;
-//		clipColor = s.clipColor;
 		filter = new Butterworth(s.filter);
 		useUnits = s.useUnits;
-		logFreq = s.logFreq;
 		minFreq = s.minFreq;
 		maxFreq = s.maxFreq;
 		binSize = s.binSize;
@@ -172,6 +159,7 @@ public class WaveViewSettings
 		maxAmp = Double.parseDouble(cf.getString("maxAmp"));
 		minAmp = Double.parseDouble(cf.getString("minAmp"));
 		maxPower = Double.parseDouble(cf.getString("maxPower"));
+		minPower = Double.parseDouble(cf.getString("minPower"));
 		minFreq = Double.parseDouble(cf.getString("minFreq"));
 		maxFreq = Double.parseDouble(cf.getString("maxFreq"));
 		spectrogramOverlap = Double.parseDouble(cf.getString("spectrogramOverlap"));
@@ -184,9 +172,9 @@ public class WaveViewSettings
 		autoScalePower = Boolean.parseBoolean(cf.getString("autoScalePower"));
 		autoScalePowerMemory = Boolean.parseBoolean(cf.getString("autoScalePowerMemory"));
 		useUnits = Boolean.parseBoolean(cf.getString("useUnits"));
-		logFreq = Boolean.parseBoolean(cf.getString("logFreq"));
+//		logFreq = Boolean.parseBoolean(cf.getString("logFreq"));
 		logPower = Boolean.parseBoolean(cf.getString("logPower"));
-		binSize = cf.getString("binSize");
+		binSize = Double.parseDouble(cf.getString("binSize"));
 	}
 	
 	public void save(ConfigFile cf, String prefix)
@@ -195,6 +183,7 @@ public class WaveViewSettings
 		filter.save(cf, prefix + ".filter");
 		cf.put(prefix + ".maxAmp", Double.toString(maxAmp));
 		cf.put(prefix + ".minAmp", Double.toString(minAmp));
+		cf.put(prefix + ".minPower", Double.toString(minPower));
 		cf.put(prefix + ".maxPower", Double.toString(maxPower));
 		cf.put(prefix + ".minFreq", Double.toString(minFreq));
 		cf.put(prefix + ".maxFreq", Double.toString(maxFreq));
@@ -207,9 +196,9 @@ public class WaveViewSettings
 		cf.put(prefix + ".autoScalePower", Boolean.toString(autoScalePower));
 		cf.put(prefix + ".autoScalePowerMemory", Boolean.toString(autoScalePowerMemory));
 		cf.put(prefix + ".useUnits", Boolean.toString(useUnits));
-		cf.put(prefix + ".logFreq", Boolean.toString(logFreq));
+//		cf.put(prefix + ".logFreq", Boolean.toString(logFreq));
 		cf.put(prefix + ".logPower", Boolean.toString(logPower));
-		cf.put(prefix + ".binSize", binSize);
+		cf.put(prefix + ".binSize", Double.toString(binSize));
 	}
 	
 	public void setType(ViewType t)
@@ -235,35 +224,40 @@ public class WaveViewSettings
 		notifyView();	
 	}
 
+//	public void cycleLogSettings()
+//	{
+//		if (logFreq && logPower)
+//		{
+//			logFreq = false;
+//			logPower = false;	
+//		}
+//		else if (logFreq)
+//		{
+//			logFreq = true;
+//			logPower = true;
+//		}
+//		else if (logPower)
+//		{
+//			logFreq = true;
+//			logPower = false;	
+//		}
+//		else
+//		{
+//			logPower = true;	
+//		}
+//		notifyView();
+//	}
+	
 	public void cycleLogSettings()
 	{
-		if (logFreq && logPower)
-		{
-			logFreq = false;
-			logPower = false;	
-		}
-		else if (logFreq)
-		{
-			logFreq = true;
-			logPower = true;
-		}
-		else if (logPower)
-		{
-			logFreq = true;
-			logPower = false;	
-		}
-		else
-		{
-			logPower = true;	
-		}
-		notifyView();
+		toggleLogPower();
 	}
 	
-	public void toggleLogFreq()
-	{
-		logFreq = !logFreq;
-		notifyView();	
-	}
+//	public void toggleLogFreq()
+//	{
+//		logFreq = !logFreq;
+//		notifyView();	
+//	}
 	
 	public void toggleLogPower()
 	{
