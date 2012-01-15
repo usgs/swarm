@@ -127,6 +127,7 @@ public class Images
 		imageMap.put("edit_server", "images/edit_server.gif");
 		imageMap.put("bullet", "images/bullet.gif");
 		imageMap.put("honeycomb", "images/honeycomb.jpg");
+		imageMap.put("colorbar", "images/colorbar.png");
 		imageMap.put("redbullet", "images/redbullet.gif");
 		imageMap.put("helilink", "images/helicorderlink.gif");
 		imageMap.put("geosort", "images/geosort.gif");
