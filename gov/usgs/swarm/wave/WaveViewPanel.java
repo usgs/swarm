@@ -201,6 +201,7 @@ public class WaveViewPanel extends JComponent
 	
 	private boolean timeSeries;
 	private String channel;
+	private String channelLabel;
 	
 	private static boolean shownNyquistWarning = false;
 	
@@ -281,6 +282,7 @@ public class WaveViewPanel extends JComponent
 	public WaveViewPanel(WaveViewPanel p)
 	{
 		channel = p.channel;
+		channelLabel = p.channel.split("\\.")[0];
 		source = p.source;
 		startTime = p.startTime;	
 		endTime = p.endTime;
@@ -671,14 +673,25 @@ public class WaveViewPanel extends JComponent
 	public boolean processMousePosition(int x, int y)
 	{
 		String status = null;
+		String unit = null;
+		String waveInfo = null;
+		
 		Dimension size = getSize();
 		double[] t = getTranslation();
 		double j2k = Double.NaN;
-		if (t != null && y > yOffset && y < (size.height - bottomHeight) 
+		if (wave != null && t != null && y > yOffset && y < (size.height - bottomHeight) 
 			&& x > xOffset && x < size.width - rightWidth)
 		{
 			j2k = x * t[0] + t[1];
 			double yi = y * -t[2] + t[3];
+			
+			waveInfo = String.format("[%s - %s (UTC), %d samples (%.2f s), %d samples/s]",
+					  Time.format(DATE_FORMAT, Util.j2KToDate(wave.getStartTime())),
+					  Time.format(DATE_FORMAT, Util.j2KToDate(wave.getEndTime())),
+					  wave.samples(),
+					  wave.samples()/wave.getSamplingRate(),
+					  (int)wave.getSamplingRate());
+			
 			if (timeSeries)
 			{
 				String utc = Time.format(DATE_FORMAT, Util.j2KToDate(j2k));
@@ -692,6 +705,11 @@ public class WaveViewPanel extends JComponent
 				}
 				else
 					status = utc;
+				if (settings.viewType == ViewType.SPECTROGRAM)
+					unit = "Frequency (Hz)";
+				else
+					unit = "Counts";
+				
 				double offset = 0;
 				double multiplier = 1;
 				Metadata md = Swarm.config.getMetadata(channel);
@@ -699,17 +717,21 @@ public class WaveViewPanel extends JComponent
 				{
 					offset = md.getOffset();
 					multiplier = md.getMultiplier();
+					unit = md.getUnit();
 				}
-				status = String.format("%s, Y: %.3f", status, multiplier * yi + offset);
-			}
+							
+//				status = String.format("%s, %s: %.3f", status, unit, multiplier * yi + offset);
+
+				status = String.format("%s, Cursor Position: %s, %s: %.3f", waveInfo, status, unit, multiplier * yi + offset);
+			}		
 			else
 			{
 				double xi = j2k;
-				if (settings.viewType == ViewType.SPECTRA && settings.logFreq)
-					xi = Math.pow(10.0, xi);
+//				if (settings.viewType == ViewType.SPECTRA && settings.logFreq)
+//					xi = Math.pow(10.0, xi);
 				if (settings.viewType == ViewType.SPECTRA && settings.logPower)
 					yi = Math.pow(10.0, yi);
-				status = String.format("X: %.3f, Y: %.3f", xi, yi);
+				status = String.format("%s, Frequency (Hz): %.3f, Power: %.3f", waveInfo, xi, yi);
 			}
 		}
 		else
@@ -777,6 +799,15 @@ public class WaveViewPanel extends JComponent
 		double newRange = range * pct;
 		settings.minAmp = center - newRange / 2;
 		settings.maxAmp = center + newRange / 2;
+		
+		if (settings.viewType == ViewType.SPECTROGRAM) {
+			double maxf = settings.maxFreq * pct;
+			System.out.printf("WaveViewPanel(804): maxf = %f\n", maxf);
+			settings.maxFreq = (maxf > wave.getSamplingRate() /2) ? wave.getSamplingRate() /2 : maxf;
+			System.out.printf("WaveViewPanel(806): settings.maxFreq = %f\n",settings.maxFreq);
+
+		}
+		
 		processSettings();
 	}
 	
@@ -838,14 +869,8 @@ public class WaveViewPanel extends JComponent
 
 //		invalidateImage();		
 		
-		if (settings.maxFreq > wave.getSamplingRate() / 2)
-		{
-			if (!shownNyquistWarning)
-				JOptionPane.showMessageDialog(Swarm.getApplication(), "The maximum frequency was set too high and has been automatically adjusted to the Nyquist frequency. " +
-						"This window will not be shown again.", "Warning", JOptionPane.WARNING_MESSAGE);
-			settings.maxFreq = wave.getSamplingRate() / 2;
-			shownNyquistWarning = true;
-		}
+		if (settings.maxFreq > wave.getNyquist())
+			settings.maxFreq = wave.getNyquist();
 			
 		timeSeries = !(settings.viewType == ViewType.SPECTRA);
 		
@@ -1098,7 +1123,7 @@ public class WaveViewPanel extends JComponent
 		waveRenderer.setRemoveBias(settings.removeBias);
 		waveRenderer.setAutoScale(true);
 		if (channel != null && displayTitle)
-			waveRenderer.setTitle(channel);
+			waveRenderer.setTitle(channelLabel);
 		
 		waveRenderer.update();
 	    plot.addRenderer(waveRenderer);
@@ -1128,11 +1153,11 @@ public class WaveViewPanel extends JComponent
 	    spectraRenderer.setWave(wv);
 	    spectraRenderer.setAutoScale(settings.autoScalePower);
 	    spectraRenderer.setLogPower(settings.logPower);
-	    spectraRenderer.setLogFreq(settings.logFreq);
+//	    spectraRenderer.setLogFreq(settings.logFreq);
 	    spectraRenderer.setMaxFreq(settings.maxFreq);
 	    spectraRenderer.setMinFreq(settings.minFreq);
 	    if (channel != null && displayTitle)
-			spectraRenderer.setTitle(channel);
+			spectraRenderer.setTitle(channelLabel);
 	    
 	    double power = spectraRenderer.update(maxSpectraPower);
 	    maxSpectraPower = Math.max(maxSpectraPower, power);
@@ -1172,10 +1197,21 @@ public class WaveViewPanel extends JComponent
         spectrogramRenderer.setOverlap(settings.spectrogramOverlap);
 	    spectrogramRenderer.setMaxFreq(settings.maxFreq);
 	    spectrogramRenderer.setMinFreq(settings.minFreq);
+	    
+	    spectrogramRenderer.setMaxPower(settings.maxPower);
+	    spectrogramRenderer.setMinPower(settings.minPower);
+	    
+	    spectrogramRenderer.setBinSize((int)Math.pow(2,Math.ceil(Math.log(settings.binSize * wave.getSamplingRate())/Math.log(2))));
+	    
 	    if (channel != null && displayTitle)
-			spectrogramRenderer.setTitle(channel);
-	    double power = spectrogramRenderer.update(maxSpectrogramPower);
-	    maxSpectrogramPower = Math.max(maxSpectrogramPower, power);
+			spectrogramRenderer.setTitle(channelLabel);
+	    
+	    double Power[] = spectrogramRenderer.update();
+	    
+	    settings.minPower = Power[0];
+	    settings.maxPower = Power[1];
+	    
+//	    maxSpectrogramPower = Math.max(maxSpectrogramPower, power);
 	    plot.addRenderer(spectrogramRenderer);
 		if (useFilterLabel && settings.filterOn)
 			plot.addRenderer(getFilterLabel());
