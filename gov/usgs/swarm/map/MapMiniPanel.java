@@ -830,7 +830,8 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 		public void decorateSpectra(FrameRenderer fr)
 		{
 			createAxis(fr);
-			setLinearAxis(fr, wavePanel.getSettings().logFreq);
+//			setLinearAxis(fr, wavePanel.getSettings().logFreq);
+			
 			if (wavePanel.getSettings().logPower)
 				setLeftLabel(fr, "log(P)");
 			else
