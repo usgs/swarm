@@ -59,6 +59,7 @@ public class WaveViewSettings
 	public boolean autoScalePowerMemory;
 	public boolean useUnits;
 	public boolean logPower;
+	public boolean logFreq;
 	public boolean removeBias;
 	
 	public double maxAmp;
@@ -100,8 +101,9 @@ public class WaveViewSettings
 			DEFAULT_WAVE_VIEW_SETTINGS.maxPower = 120;
 			DEFAULT_WAVE_VIEW_SETTINGS.useUnits = true;
 			DEFAULT_WAVE_VIEW_SETTINGS.logPower = true;
+			DEFAULT_WAVE_VIEW_SETTINGS.logFreq = true;
 			DEFAULT_WAVE_VIEW_SETTINGS.spectrogramOverlap = 0.859375;
-			DEFAULT_WAVE_VIEW_SETTINGS.minFreq = 0.75;
+			DEFAULT_WAVE_VIEW_SETTINGS.minFreq = 0;
 			DEFAULT_WAVE_VIEW_SETTINGS.maxFreq = 25;
 			DEFAULT_WAVE_VIEW_SETTINGS.binSize = 2;
 			DEFAULT_WAVE_VIEW_SETTINGS.filter = new Butterworth();
@@ -146,6 +148,7 @@ public class WaveViewSettings
 		binSize = s.binSize;
 		spectrogramOverlap = s.spectrogramOverlap;
 		logPower = s.logPower;
+		logFreq = s.logFreq;
 		zeroPhaseShift = s.zeroPhaseShift;
 		filterOn = s.filterOn;	
 	}
@@ -172,7 +175,7 @@ public class WaveViewSettings
 		autoScalePower = Boolean.parseBoolean(cf.getString("autoScalePower"));
 		autoScalePowerMemory = Boolean.parseBoolean(cf.getString("autoScalePowerMemory"));
 		useUnits = Boolean.parseBoolean(cf.getString("useUnits"));
-//		logFreq = Boolean.parseBoolean(cf.getString("logFreq"));
+		logFreq = Boolean.parseBoolean(cf.getString("logFreq"));
 		logPower = Boolean.parseBoolean(cf.getString("logPower"));
 		binSize = Double.parseDouble(cf.getString("binSize"));
 	}
@@ -196,7 +199,7 @@ public class WaveViewSettings
 		cf.put(prefix + ".autoScalePower", Boolean.toString(autoScalePower));
 		cf.put(prefix + ".autoScalePowerMemory", Boolean.toString(autoScalePowerMemory));
 		cf.put(prefix + ".useUnits", Boolean.toString(useUnits));
-//		cf.put(prefix + ".logFreq", Boolean.toString(logFreq));
+		cf.put(prefix + ".logFreq", Boolean.toString(logFreq));
 		cf.put(prefix + ".logPower", Boolean.toString(logPower));
 		cf.put(prefix + ".binSize", Double.toString(binSize));
 	}
@@ -224,40 +227,22 @@ public class WaveViewSettings
 		notifyView();	
 	}
 
-//	public void cycleLogSettings()
-//	{
-//		if (logFreq && logPower)
-//		{
-//			logFreq = false;
-//			logPower = false;	
-//		}
-//		else if (logFreq)
-//		{
-//			logFreq = true;
-//			logPower = true;
-//		}
-//		else if (logPower)
-//		{
-//			logFreq = true;
-//			logPower = false;	
-//		}
-//		else
-//		{
-//			logPower = true;	
-//		}
-//		notifyView();
-//	}
-	
 	public void cycleLogSettings()
 	{
-		toggleLogPower();
+		
+		if (logFreq == logPower)
+			logPower = !logPower;
+		else
+			logFreq = !logFreq;
+		
+		notifyView();
 	}
 	
-//	public void toggleLogFreq()
-//	{
-//		logFreq = !logFreq;
-//		notifyView();	
-//	}
+	public void toggleLogFreq()
+	{
+		logFreq = !logFreq;
+		notifyView();	
+	}
 	
 	public void toggleLogPower()
 	{
