@@ -157,8 +157,10 @@ public class WaveViewSettingsToolbar
 					public void actionPerformed(ActionEvent e)
 					{
 //						if (settings != null)
-						for (WaveViewSettings settings : settingsSet)
+						for (WaveViewSettings settings : settingsSet) {
+							if (settings.viewType == ViewType.SPECTRA)
 							settings.cycleLogSettings();
+						}
 					}	
 				});
 				
