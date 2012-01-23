@@ -38,7 +38,6 @@ import java.util.TimeZone;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
@@ -201,9 +200,7 @@ public class WaveViewPanel extends JComponent
 	
 	private boolean timeSeries;
 	private String channel;
-	private String channelLabel;
 	
-	private static boolean shownNyquistWarning = false;
 	
 	/** The data source to use for zoom drags.  This should probably be moved from this class
 	 * to follow a stricter interpretation of MVC. */
@@ -282,7 +279,6 @@ public class WaveViewPanel extends JComponent
 	public WaveViewPanel(WaveViewPanel p)
 	{
 		channel = p.channel;
-		channelLabel = p.channel.split("\\.")[0];
 		source = p.source;
 		startTime = p.startTime;	
 		endTime = p.endTime;
@@ -706,8 +702,8 @@ public class WaveViewPanel extends JComponent
 				else
 					status = utc;
 				if (settings.viewType == ViewType.SPECTROGRAM)
-					unit = "Frequency (Hz)";
-				else
+//					unit = "Frequency (Hz)";
+//				else
 					unit = "Counts";
 				
 				double offset = 0;
@@ -727,8 +723,8 @@ public class WaveViewPanel extends JComponent
 			else
 			{
 				double xi = j2k;
-//				if (settings.viewType == ViewType.SPECTRA && settings.logFreq)
-//					xi = Math.pow(10.0, xi);
+				if (settings.viewType == ViewType.SPECTRA && settings.logFreq)
+					xi = Math.pow(10.0, xi);
 				if (settings.viewType == ViewType.SPECTRA && settings.logPower)
 					yi = Math.pow(10.0, yi);
 				status = String.format("%s, Frequency (Hz): %.3f, Power: %.3f", waveInfo, xi, yi);
@@ -1123,7 +1119,7 @@ public class WaveViewPanel extends JComponent
 		waveRenderer.setRemoveBias(settings.removeBias);
 		waveRenderer.setAutoScale(true);
 		if (channel != null && displayTitle)
-			waveRenderer.setTitle(channelLabel);
+			waveRenderer.setTitle(channel);
 		
 		waveRenderer.update();
 	    plot.addRenderer(waveRenderer);
@@ -1153,14 +1149,16 @@ public class WaveViewPanel extends JComponent
 	    spectraRenderer.setWave(wv);
 	    spectraRenderer.setAutoScale(settings.autoScalePower);
 	    spectraRenderer.setLogPower(settings.logPower);
-//	    spectraRenderer.setLogFreq(settings.logFreq);
+	    spectraRenderer.setLogFreq(settings.logFreq);
 	    spectraRenderer.setMaxFreq(settings.maxFreq);
 	    spectraRenderer.setMinFreq(settings.minFreq);
+	    spectraRenderer.setYUnitText("Power");
 	    if (channel != null && displayTitle)
-			spectraRenderer.setTitle(channelLabel);
+			spectraRenderer.setTitle(channel);
 	    
-	    double power = spectraRenderer.update(maxSpectraPower);
-	    maxSpectraPower = Math.max(maxSpectraPower, power);
+//	    double power = spectraRenderer.update(maxSpectraPower);
+	    spectraRenderer.update();
+//	    maxSpectraPower = Math.max(maxSpectraPower, power);
 		if (useFilterLabel && settings.filterOn)
 			plot.addRenderer(getFilterLabel());
 		
@@ -1190,7 +1188,6 @@ public class WaveViewPanel extends JComponent
 	    spectrogramRenderer.setWave(wv);
 	    spectrogramRenderer.setViewStartTime(startTime);
 	    spectrogramRenderer.setViewEndTime(endTime);
-	    System.out.printf("WaveViewPanel (1168): settings.autoScalePower: %s\n",settings.autoScalePower);
 	    spectrogramRenderer.setAutoScale(settings.autoScalePower);
 	    spectrogramRenderer.setLogPower(settings.logPower);
 
@@ -1204,7 +1201,11 @@ public class WaveViewPanel extends JComponent
 	    spectrogramRenderer.setBinSize((int)Math.pow(2,Math.ceil(Math.log(settings.binSize * wave.getSamplingRate())/Math.log(2))));
 	    
 	    if (channel != null && displayTitle)
-			spectrogramRenderer.setTitle(channelLabel);
+			spectrogramRenderer.setTitle(channel);
+    
+    	spectrogramRenderer.setYUnitText("Frequency (Hz)");
+
+
 	    
 	    double Power[] = spectrogramRenderer.update();
 	    
