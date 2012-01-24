@@ -230,7 +230,7 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * Revision 1.2  2004/10/12 23:45:11  cvs
  * Bumped version, added log.
  *
- * @author Dan Cervelli
+ * @author Dan Cervelli, Peter Cervelli, and Thomas Parker.
  * @version $Id: Swarm.java,v 1.45 2007-08-16 20:17:33 cervelli Exp $
  */
 public class Swarm extends JFrame
