@@ -71,6 +71,8 @@ public class WaveViewSettings
 	public double spectrogramOverlap;
 	public double binSize;
 	
+	public int nfft;
+	
 	public WaveViewPanel view;
 	public WaveViewSettingsToolbar toolbar;
 	public ViewType viewType;
@@ -106,6 +108,7 @@ public class WaveViewSettings
 			DEFAULT_WAVE_VIEW_SETTINGS.minFreq = 0;
 			DEFAULT_WAVE_VIEW_SETTINGS.maxFreq = 25;
 			DEFAULT_WAVE_VIEW_SETTINGS.binSize = 2;
+			DEFAULT_WAVE_VIEW_SETTINGS.nfft = 0; // Zero means automatic
 			DEFAULT_WAVE_VIEW_SETTINGS.filter = new Butterworth();
 			DEFAULT_WAVE_VIEW_SETTINGS.filterOn = false;
 			DEFAULT_WAVE_VIEW_SETTINGS.zeroPhaseShift = true;
@@ -146,6 +149,7 @@ public class WaveViewSettings
 		minFreq = s.minFreq;
 		maxFreq = s.maxFreq;
 		binSize = s.binSize;
+		nfft = s.nfft;
 		spectrogramOverlap = s.spectrogramOverlap;
 		logPower = s.logPower;
 		logFreq = s.logFreq;
@@ -178,6 +182,7 @@ public class WaveViewSettings
 		logFreq = Boolean.parseBoolean(cf.getString("logFreq"));
 		logPower = Boolean.parseBoolean(cf.getString("logPower"));
 		binSize = Double.parseDouble(cf.getString("binSize"));
+		nfft = Integer.parseInt(cf.getString("nfft"));
 	}
 	
 	public void save(ConfigFile cf, String prefix)
@@ -202,6 +207,7 @@ public class WaveViewSettings
 		cf.put(prefix + ".logFreq", Boolean.toString(logFreq));
 		cf.put(prefix + ".logPower", Boolean.toString(logPower));
 		cf.put(prefix + ".binSize", Double.toString(binSize));
+		cf.put(prefix + ".nfft", Integer.toString(nfft));
 	}
 	
 	public void setType(ViewType t)
