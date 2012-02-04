@@ -675,18 +675,22 @@ public class WaveViewPanel extends JComponent
 		Dimension size = getSize();
 		double[] t = getTranslation();
 		double j2k = Double.NaN;
+		
 		if (wave != null && t != null && y > yOffset && y < (size.height - bottomHeight) 
 			&& x > xOffset && x < size.width - rightWidth)
 		{
 			j2k = x * t[0] + t[1];
 			double yi = y * -t[2] + t[3];
 			
-			waveInfo = String.format("[%s - %s (UTC), %d samples (%.2f s), %d samples/s]",
+			int[] dataRange = wave.getDataRange();
+			waveInfo = String.format("[%s - %s (UTC), %d samples (%.2f s), %d samples/s, %d, %d]",
 					  Time.format(DATE_FORMAT, Util.j2KToDate(wave.getStartTime())),
 					  Time.format(DATE_FORMAT, Util.j2KToDate(wave.getEndTime())),
 					  wave.samples(),
 					  wave.samples()/wave.getSamplingRate(),
-					  (int)wave.getSamplingRate());
+					  (int)wave.getSamplingRate(),
+					  dataRange[0],dataRange[1]
+					  );
 			
 			if (timeSeries)
 			{
@@ -701,25 +705,30 @@ public class WaveViewPanel extends JComponent
 				}
 				else
 					status = utc;
-				if (settings.viewType == ViewType.SPECTROGRAM)
-//					unit = "Frequency (Hz)";
-//				else
-					unit = "Counts";
 				
 				double offset = 0;
 				double multiplier = 1;
-				Metadata md = Swarm.config.getMetadata(channel);
-				if (md != null)
-				{
-					offset = md.getOffset();
-					multiplier = md.getMultiplier();
-					unit = md.getUnit();
-				}
+				
+				if (settings.viewType == ViewType.SPECTROGRAM)
+					unit = "Frequency (Hz)";
+				else {
+					unit = "Counts";	
+					Metadata md = Swarm.config.getMetadata(channel);
+					if (md != null)
+					{
+						offset = md.getOffset();
+						multiplier = md.getMultiplier();
+						unit = md.getUnit();
+					}
 							
-//				status = String.format("%s, %s: %.3f", status, unit, multiplier * yi + offset);
+				}
 
-				status = String.format("%s, Cursor Position: %s, %s: %.3f", waveInfo, status, unit, multiplier * yi + offset);
-			}		
+//				System.out.printf("Multipler: %f, Offset: %f\n", offset, multiplier);
+				
+				status = String.format("%s, %s: %.3f, %s", status, unit, multiplier * yi + offset, waveInfo);
+
+			}
+			
 			else
 			{
 				double xi = j2k;
@@ -1147,6 +1156,8 @@ public class WaveViewPanel extends JComponent
 	    
 	    spectraRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset, this.getHeight() - bottomHeight - yOffset);
 	    spectraRenderer.setWave(wv);
+	    
+	    
 	    spectraRenderer.setAutoScale(settings.autoScalePower);
 	    spectraRenderer.setLogPower(settings.logPower);
 	    spectraRenderer.setLogFreq(settings.logFreq);
@@ -1186,6 +1197,7 @@ public class WaveViewPanel extends JComponent
 	    
 	    spectrogramRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset, this.getHeight() - bottomHeight - yOffset);
 	    spectrogramRenderer.setWave(wv);
+
 	    spectrogramRenderer.setViewStartTime(startTime);
 	    spectrogramRenderer.setViewEndTime(endTime);
 	    spectrogramRenderer.setAutoScale(settings.autoScalePower);
@@ -1205,7 +1217,7 @@ public class WaveViewPanel extends JComponent
     
     	spectrogramRenderer.setYUnitText("Frequency (Hz)");
 
-
+    	spectrogramRenderer.setNfft(settings.nfft);
 	    
 	    double Power[] = spectrogramRenderer.update();
 	    
