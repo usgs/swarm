@@ -250,6 +250,15 @@ public class Swarm extends JFrame
 	private static final String TITLE = "Swarm";
 	private static final String VERSION = "2.1 alpha";
 	
+	private static final int LEFT = 1;
+	private static final int RIGHT = 2;
+	private static final int TOP = 3;
+	private static final int BOTTOM = 4;
+	private static final int BOTTOM_LEFT = 5;
+	private static final int BOTTOM_RIGHT = 6;
+	private static final int TOP_LEFT = 7;
+	private static final int TOP_RIGHT = 8;
+	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
 	private int oldState = 0;
@@ -360,23 +369,6 @@ public class Swarm extends JFrame
 							saveLayout(ll);
 					}
 				});
-				
-//		m.getInputMap().put(KeyStroke.getKeyStroke("control M"), "memory");
-//		m.getActionMap().put("memory", new AbstractAction()
-//				{
-//					private static final long serialVersionUID = -1;
-//					public void actionPerformed(ActionEvent e)
-//					{
-//						List<MemoryPoolMXBean> pools = ManagementFactory.getMemoryPoolMXBeans();
-//						for (MemoryPoolMXBean p: pools) 
-//						{
-//							System.out.println("Memory type="+p.getType()+" Memory usage="+p.getUsage());
-//							p.
-//						}
-////						if (cache != null)
-////							cache.flush();
-//					}
-//				});
 
 		m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0), "fullScreenToggle");
 		m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, InputEvent.CTRL_DOWN_MASK), "fullScreenToggle");
@@ -390,7 +382,88 @@ public class Swarm extends JFrame
 						toggleFullScreenMode();					
 					}	
 				};
-		m.getActionMap().put("fullScreenToggle", toggleFullScreenAction);	
+		m.getActionMap().put("fullScreenToggle", toggleFullScreenAction);
+		
+		m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.CTRL_DOWN_MASK), "flushRight");
+		m.getActionMap().put("flushRight", new AbstractAction()
+				{
+					private static final long serialVersionUID = -1;
+					public void actionPerformed(ActionEvent e)
+					{
+						flushRight();					
+					}	
+				});
+		
+		m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.CTRL_DOWN_MASK), "flushLeft");
+		m.getActionMap().put("flushLeft", new AbstractAction()
+				{
+					private static final long serialVersionUID = -1;
+					public void actionPerformed(ActionEvent e)
+					{
+						flushLeft();					
+					}	
+				});
+		
+		m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_DOWN_MASK), "flushTop");
+		m.getActionMap().put("flushTop", new AbstractAction()
+				{
+					private static final long serialVersionUID = -1;
+					public void actionPerformed(ActionEvent e)
+					{
+						flushTop();					
+					}	
+				});
+		
+		m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_DOWN_MASK), "flushBottom");
+		m.getActionMap().put("flushBottom", new AbstractAction()
+				{
+					private static final long serialVersionUID = -1;
+					public void actionPerformed(ActionEvent e)
+					{
+						flushBottom();					
+					}	
+				});
+		
+		m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, InputEvent.CTRL_DOWN_MASK), "flushBottomRight");
+		m.getActionMap().put("flushBottomRight", new AbstractAction()
+				{
+					private static final long serialVersionUID = -1;
+					public void actionPerformed(ActionEvent e)
+					{
+						flushBottomRight();					
+					}	
+				});
+		
+		m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_END, InputEvent.CTRL_DOWN_MASK), "flushBottomLeft");
+		m.getActionMap().put("flushBottomLeft", new AbstractAction()
+				{
+					private static final long serialVersionUID = -1;
+					public void actionPerformed(ActionEvent e)
+					{
+						flushBottomLeft();					
+					}	
+				});
+		
+		m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, InputEvent.CTRL_DOWN_MASK), "flushTopRight");
+		m.getActionMap().put("flushTopRight", new AbstractAction()
+				{
+					private static final long serialVersionUID = -1;
+					public void actionPerformed(ActionEvent e)
+					{
+						flushTopRight();					
+					}	
+				});
+		
+		m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, InputEvent.CTRL_DOWN_MASK), "flushTopLeft");
+		m.getActionMap().put("flushTopLeft", new AbstractAction()
+				{
+					private static final long serialVersionUID = -1;
+					public void actionPerformed(ActionEvent e)
+					{
+						flushTopLeft();					
+					}	
+				});
+		
 	}
 	
 	public boolean isJNLP()
@@ -1026,6 +1099,95 @@ public class Swarm extends JFrame
 						catch (Exception e) {}
 					}
 				});
+	}
+	
+	public void flush(int position) {
+		
+		Dimension ds = desktop.getSize();
+		JInternalFrame bingo = null;
+		
+		if (waveClipboard.isSelected()) {
+			bingo = waveClipboard;
+		}
+		else
+			for (JInternalFrame frame : frames)
+				if (frame.isSelected())
+					bingo = frame;
+		
+		if (bingo != null)
+			switch (position) {
+				case LEFT:
+					bingo.setSize(ds.width / 2, ds.height);
+					bingo.setLocation(0, 0);
+					break;
+					
+				case RIGHT:
+					bingo.setSize(ds.width / 2, ds.height);
+					bingo.setLocation(ds.width / 2, 0);
+					break;
+					
+				case TOP:
+					bingo.setSize(ds.width, ds.height / 2);
+					bingo.setLocation(0, 0);
+					break;
+					
+				case BOTTOM:
+					bingo.setSize(ds.width, ds.height / 2);
+					bingo.setLocation(0, ds.height / 2);
+					break;
+					
+				case BOTTOM_LEFT:
+					bingo.setSize(ds.width / 2, ds.height / 2);
+					bingo.setLocation(0, ds.height / 2);
+					break;
+					
+				case BOTTOM_RIGHT:
+					bingo.setSize(ds.width / 2, ds.height / 2);
+					bingo.setLocation(ds.width / 2, ds.height / 2);
+					break;
+					
+				case TOP_LEFT:
+					bingo.setSize(ds.width / 2, ds.height / 2);
+					bingo.setLocation(0, 0);
+					break;
+					
+				case TOP_RIGHT:
+					bingo.setSize(ds.width / 2, ds.height / 2);
+					bingo.setLocation(ds.width / 2, 0);
+					break;
+			}
+	}
+	
+	public void flushLeft() {		
+		flush(LEFT);
+	}
+	
+	public void flushRight() {		
+		flush(RIGHT);
+	}
+	
+	public void flushTop() {		
+		flush(TOP);
+	}
+	
+	public void flushBottom() {		
+		flush(BOTTOM);
+	}
+	
+	public void flushBottomRight() {		
+		flush(BOTTOM_RIGHT);
+	}
+	
+	public void flushBottomLeft() {		
+		flush(BOTTOM_LEFT);
+	}
+	
+	public void flushTopRight() {		
+		flush(TOP_RIGHT);
+	}
+	
+	public void flushTopLeft() {		
+		flush(TOP_LEFT);
 	}
 	
 	public void tileKioskFrames()
