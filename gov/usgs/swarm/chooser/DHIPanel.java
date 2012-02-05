@@ -37,11 +37,11 @@ import com.jgoodies.forms.layout.FormLayout;
 public class DHIPanel extends DataSourcePanel
 {
 	private static final String IRIS_NETWORK_FILE = "IRIS_networks.txt";
-	private JComboBox netDC;
-	private JComboBox netDNS;
-	private JComboBox seisDC;
-	private JComboBox seisDNS;
-	private JComboBox network;
+	private JComboBox<String> netDC;
+	private JComboBox<String> netDNS;
+	private JComboBox<String> seisDC;
+	private JComboBox<String> seisDNS;
+	private JComboBox<String> network;
 	private JTextField gulperSize;
 	private JTextField gulperDelay;
 	private JButton nwButton;
@@ -52,7 +52,7 @@ public class DHIPanel extends DataSourcePanel
 		super("dhi", "DMC");
 	}
 	
-	private String checkComboBox(JComboBox box, String name)
+	private String checkComboBox(JComboBox<String> box, String name)
 	{
 		String val = (String)box.getSelectedItem();
 		if (val == null || val.length() == 0)
@@ -95,15 +95,15 @@ public class DHIPanel extends DataSourcePanel
 	
 	private void createFields()
 	{
-		netDC = new JComboBox();
+		netDC = new JComboBox<String>();
 		netDC.setEditable(true);
-		netDNS = new JComboBox();
+		netDNS = new JComboBox<String>();
 		netDNS.setEditable(true);
-		seisDC = new JComboBox();
+		seisDC = new JComboBox<String>();
 		seisDC.setEditable(true);
-		seisDNS = new JComboBox();
+		seisDNS = new JComboBox<String>();
 		seisDNS.setEditable(true);
-		network = new JComboBox();
+		network = new JComboBox<String>();
 		network.setEditable(true);
 		
 		URL u = getClass().getClassLoader().getResource(IRIS_NETWORK_FILE);
