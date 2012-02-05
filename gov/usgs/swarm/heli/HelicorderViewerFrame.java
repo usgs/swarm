@@ -1100,7 +1100,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 			includeChannel.setSelected(true);
 			
 			JLabel fileFormatLabel = new JLabel("File format:");
-			JComboBox fileFormatCB = new JComboBox();
+			JComboBox<String> fileFormatCB = new JComboBox<String>();
 			fileFormatCB.addItem("PNG");
 			fileFormatCB.addItem("PS");
 			
@@ -1108,7 +1108,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 					{
 						public void actionPerformed(ActionEvent e)
 						{
-							JComboBox source = (JComboBox) e.getSource();
+							JComboBox<String> source = (JComboBox<String>)e.getSource();
 							if (source.getSelectedItem().equals("PS")) {
 								String fn = chooser.getSelectedFile().getName().replaceAll("\\..*$", ".ps");
 								chooser.setSelectedFile(new File (chooser.getCurrentDirectory().getAbsoluteFile(), fn));			
@@ -1151,7 +1151,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 					width = Integer.parseInt(widthTextField.getText());
 					height = Integer.parseInt(heightTextField.getText());
 				}
-				catch (Exception ex) {}
+				catch (Exception ex) {ex.printStackTrace();}
 				if (width <= 0 || height <= 0)
 				{
 					JOptionPane.showMessageDialog(HelicorderViewerFrame.this, "Illegal width or height.", "Error", JOptionPane.ERROR_MESSAGE);
