@@ -491,8 +491,8 @@ public class SwarmMenu extends JMenuBar
 	private class RemoveLayoutDialog extends SwarmDialog
 	{
 		private static final long serialVersionUID = 1L;
-		private JList layoutList;
-		private DefaultListModel model;
+		private JList<String> layoutList;
+		private DefaultListModel<String> model;
 		
 		protected RemoveLayoutDialog()
 		{
@@ -507,10 +507,10 @@ public class SwarmMenu extends JMenuBar
 			List<String> sls = new ArrayList<String>();
 			sls.addAll(keys);
 			Collections.sort(sls, Util.getIgnoreCaseStringComparator());
-			model = new DefaultListModel();
+			model = new DefaultListModel<String>();
 			for (String sl : sls)
 				model.addElement(sl);
-			layoutList = new JList(model);
+			layoutList = new JList<String>(model);
 			JPanel panel = new JPanel(new BorderLayout());
 			panel.setBorder(BorderFactory.createEmptyBorder(5, 9, 5, 9));
 			int h = Math.max(200, Math.min(350, sls.size() * 19));
@@ -522,17 +522,16 @@ public class SwarmMenu extends JMenuBar
 		
 		public void wasOK()
 		{
-			Object[] toRemove = layoutList.getSelectedValues();
-			for (int i = 0; i < toRemove.length; i++)
-			{
-				String key = (String)toRemove[i];
+			List<String> toRemove = layoutList.getSelectedValuesList();
+			
+			for (String key: toRemove) {
 				SwarmLayout layout = Swarm.config.layouts.get(key);
 				if (layout != null)
 				{
 					JMenuItem mi = layouts.get(layout);
 					layoutMenu.remove(mi);
 					Swarm.config.removeLayout(layout);
-				}
+				}				
 			}
 		}
 	}
