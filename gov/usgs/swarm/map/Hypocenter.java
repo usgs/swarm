@@ -37,7 +37,7 @@ public class Hypocenter extends ClickableGeoLabel
 		r.paint = Color.RED;
 		r.color = Color.yellow;
 		r.shape = Geometry.STAR_10;
-		tick = r;
+		marker = r;
 	}
 	
 	@Override

@@ -25,7 +25,7 @@ abstract public class ClickableGeoLabel extends GeoLabel
 	
 	public void draw(Graphics2D g2)
 	{
-		((DataPointRenderer)tick).renderAtOrigin(g2);
+		((DataPointRenderer)marker).renderAtOrigin(g2);
 		g2.setColor(Color.WHITE);
 		g2.drawString(text, 8, -8);
 	}
