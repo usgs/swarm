@@ -6,15 +6,16 @@
 	<classpathentry kind="lib" path="/USGS/contrib/forms-1.0.7.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/looks-2.0.4.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/jnlp.jar"/>
-	<classpathentry kind="lib" path="/USGS/contrib/fissuresImpl-1.1.11.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/fissuresImpl-1.1.13.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/fissuresIDL-1.0.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/log4j-1.2.13.jar"/>
-	<classpathentry kind="lib" path="/USGS/contrib/fissuresUtil-1.0.16.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/fissuresUtil-1.0.18.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/colt.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Net"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Earthworm"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/VDX"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Util"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Plot"/>
+	<classpathentry kind="lib" path="../USGS/contrib/seedCodec-1.0.6.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
