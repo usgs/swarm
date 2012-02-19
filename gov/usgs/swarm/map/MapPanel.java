@@ -1004,7 +1004,8 @@ public class MapPanel extends JPanel
 			mr.setMapImage(image);
 			mr.setGeoLabelSet(labels);
 			mr.createGraticule(6, true);
-			mr.createBox(6);
+			mr.createBox(6); // The black outline of the map
+			mr.createLine("mapdata/lines.txt");
 			mr.createScaleRenderer(1 / projection.getScale(center), INSET, 14);
 			TextRenderer tr = new TextRenderer(mapImagePanel.getWidth() - INSET, 14, projection.getName() + " Projection");
 			tr.antiAlias = false;
