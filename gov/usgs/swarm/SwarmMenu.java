@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -491,8 +492,8 @@ public class SwarmMenu extends JMenuBar
 	private class RemoveLayoutDialog extends SwarmDialog
 	{
 		private static final long serialVersionUID = 1L;
-		private JList<String> layoutList;
-		private DefaultListModel<String> model;
+		private JList layoutList;
+		private DefaultListModel model;
 		
 		protected RemoveLayoutDialog()
 		{
@@ -507,10 +508,10 @@ public class SwarmMenu extends JMenuBar
 			List<String> sls = new ArrayList<String>();
 			sls.addAll(keys);
 			Collections.sort(sls, Util.getIgnoreCaseStringComparator());
-			model = new DefaultListModel<String>();
+			model = new DefaultListModel();
 			for (String sl : sls)
 				model.addElement(sl);
-			layoutList = new JList<String>(model);
+			layoutList = new JList(model);
 			JPanel panel = new JPanel(new BorderLayout());
 			panel.setBorder(BorderFactory.createEmptyBorder(5, 9, 5, 9));
 			int h = Math.max(200, Math.min(350, sls.size() * 19));
@@ -522,7 +523,7 @@ public class SwarmMenu extends JMenuBar
 		
 		public void wasOK()
 		{
-			List<String> toRemove = layoutList.getSelectedValuesList();
+			List<String> toRemove = Arrays.asList((String[])layoutList.getSelectedValues());
 			
 			for (String key: toRemove) {
 				SwarmLayout layout = Swarm.config.layouts.get(key);
