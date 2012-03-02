@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path=""/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/Winston"/>
-	<classpathentry kind="lib" path="/USGS/contrib/forms-1.0.7.jar"/>
-	<classpathentry kind="lib" path="/USGS/contrib/looks-2.0.4.jar"/>
-	<classpathentry kind="lib" path="/USGS/contrib/jnlp.jar"/>
-	<classpathentry kind="lib" path="/USGS/contrib/fissuresImpl-1.1.13.jar"/>
-	<classpathentry kind="lib" path="/USGS/contrib/fissuresIDL-1.0.jar"/>
-	<classpathentry kind="lib" path="/USGS/contrib/log4j-1.2.13.jar"/>
-	<classpathentry kind="lib" path="/USGS/contrib/fissuresUtil-1.0.18.jar"/>
-	<classpathentry kind="lib" path="/USGS/contrib/colt.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/Net"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/Earthworm"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/VDX"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/Util"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/Plot"/>
-	<classpathentry kind="lib" path="../USGS/contrib/seedCodec-1.0.6.jar"/>
 	<classpathentry kind="output" path="classes"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/USGS/contrib/colt.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/fissuresIDL-1.0.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/fissuresImpl-1.1.13.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/fissuresUtil-1.0.18.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/forms-1.0.7.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/jnlp.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/log4j-1.2.13.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/looks-2.0.4.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/seedCodec-1.0.6.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Earthworm"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Net"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Plot"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Util"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/VDX"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Winston"/>
 </classpath>
