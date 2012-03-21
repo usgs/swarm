@@ -1100,7 +1100,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 			includeChannel.setSelected(true);
 			
 			JLabel fileFormatLabel = new JLabel("File format:");
-			JComboBox<String> fileFormatCB = new JComboBox<String>();
+			JComboBox fileFormatCB = new JComboBox();
 			fileFormatCB.addItem("PNG");
 			fileFormatCB.addItem("PS");
 			
@@ -1108,7 +1108,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 					{
 						public void actionPerformed(ActionEvent e)
 						{
-							JComboBox<String> source = (JComboBox<String>)e.getSource();
+							JComboBox source = (JComboBox)e.getSource();
 							if (source.getSelectedItem().equals("PS")) {
 								String fn = chooser.getSelectedFile().getName().replaceAll("\\..*$", ".ps");
 								chooser.setSelectedFile(new File (chooser.getCurrentDirectory().getAbsoluteFile(), fn));			
