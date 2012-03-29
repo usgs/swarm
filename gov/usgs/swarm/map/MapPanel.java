@@ -51,6 +51,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -1005,7 +1006,12 @@ public class MapPanel extends JPanel
 			mr.setGeoLabelSet(labels);
 			mr.createGraticule(6, true);
 			mr.createBox(6); // The black outline of the map
-			mr.createLine("mapdata/lines.txt");
+			
+			File[] files = new File("mapdata/Lines").listFiles();
+			for (File f : files)
+				if (f.isFile())
+					mr.createLine(f.toString());
+			
 			mr.createScaleRenderer(1 / projection.getScale(center), INSET, 14);
 			TextRenderer tr = new TextRenderer(mapImagePanel.getWidth() - INSET, 14, projection.getName() + " Projection");
 			tr.antiAlias = false;
