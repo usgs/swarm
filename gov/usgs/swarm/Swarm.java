@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.jnlp.BasicService;
@@ -248,7 +249,7 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.1 alpha";
+	private static final String VERSION = "2.2 beta";
 	
 	private static final int LEFT = 1;
 	private static final int RIGHT = 2;
@@ -284,6 +285,7 @@ public class Swarm extends JFrame
 	{
 		super(TITLE + " [" + VERSION + "]");
 		logger = Log.getLogger("gov.usgs.swarm");
+		logger.setLevel(Level.ALL);
 		logger.fine("Swarm version: " + VERSION);
 		logger.fine("JNLP: " + isJNLP());
 		String[] ss = Util.getVersion("gov.usgs.swarm");
