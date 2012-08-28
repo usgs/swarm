@@ -1008,9 +1008,10 @@ public class MapPanel extends JPanel
 			mr.createBox(6); // The black outline of the map
 			
 			File[] files = new File("mapdata/Lines").listFiles();
-			for (File f : files)
-				if (f.isFile())
-					mr.createLine(f.toString());
+			if(files != null)
+        for (File f : files)
+          if (f.isFile())
+            mr.createLine(f.toString());
 			
 			mr.createScaleRenderer(1 / projection.getScale(center), INSET, 14);
 			TextRenderer tr = new TextRenderer(mapImagePanel.getWidth() - INSET, 14, projection.getName() + " Projection");
