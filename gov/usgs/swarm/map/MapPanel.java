@@ -1007,11 +1007,14 @@ public class MapPanel extends JPanel
 			mr.createGraticule(6, true);
 			mr.createBox(6); // The black outline of the map
 			
-			File[] files = new File("mapdata/Lines").listFiles();
-			if(files != null)
-        for (File f : files)
-          if (f.isFile())
-            mr.createLine(f.toString());
+      File linedir = new File("mapdata/Lines");   // DCK : deal with missing Lines directory
+      if(linedir != null) {
+        File[] files = new File("mapdata/Lines").listFiles();
+        if(files != null)
+          for (File f : files)
+            if (f.isFile())
+              mr.createLine(f.toString());
+      }
 			
 			mr.createScaleRenderer(1 / projection.getScale(center), INSET, 14);
 			TextRenderer tr = new TextRenderer(mapImagePanel.getWidth() - INSET, 14, projection.getName() + " Projection");
