@@ -50,6 +50,10 @@ public class DataSelectReader extends StringMSeedQueryReader
 			String location, String channel) throws IOException,
 			DataSelectException, SeedFormatException
 	{
+		if (location == null || location.trim().length() == 0)
+		{
+			location = WebServiceUtils.EMPTY_LOC_CODE;
+		}
 		String query = "net=" + network;
 		query += "&sta=" + station;
 		query += "&loc=" + location;

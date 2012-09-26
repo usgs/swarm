@@ -17,6 +17,9 @@ public class WebServiceUtils
 	/** Swarm web services property key prefix. */
 	public final static String SWARM_WS_PROP_KEY_PREFIX = "SWARM_WS_";
 
+	/** Empty location code. */
+	public final static String EMPTY_LOC_CODE = "--";
+
 	/** Default debug level. */
 	private final static Level defaultDebugLevel = Level.FINEST;
 
