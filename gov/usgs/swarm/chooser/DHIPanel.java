@@ -3,8 +3,6 @@ package gov.usgs.swarm.chooser;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.util.ResourceReader;
 
-import java.net.URL;
-
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -106,8 +104,7 @@ public class DHIPanel extends DataSourcePanel
 		network = new JComboBox();
 		network.setEditable(true);
 		
-		URL u = getClass().getClassLoader().getResource(IRIS_NETWORK_FILE);
-		ResourceReader rr = ResourceReader.getResourceReader(u);
+		ResourceReader rr = getResourceReader(IRIS_NETWORK_FILE);
 		if (rr != null)
 		{
 			String s;

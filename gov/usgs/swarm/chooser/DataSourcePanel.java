@@ -1,5 +1,7 @@
 package gov.usgs.swarm.chooser;
 
+import gov.usgs.util.ResourceReader;
+
 import javax.swing.JPanel;
 
 /**
@@ -41,6 +43,18 @@ abstract public class DataSourcePanel
 		return panel;
 	}
 	
+	/**
+	 * Creates a resource reader for the given resource.  If the resource has
+	 * has a local filename then it is read otherwise the class loader is used.
+	 * 
+	 * @param name the resource name
+	 * @return resource reader
+	 */
+	protected ResourceReader getResourceReader(String name)
+	{
+		return ResourceReader.getResourceReader(getClass(), name);
+	}
+
 	abstract protected void createPanel();
 	abstract public boolean allowOK(boolean edit);
 	abstract public String wasOK();
