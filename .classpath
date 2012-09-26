@@ -12,6 +12,9 @@
 	<classpathentry kind="lib" path="/USGS/contrib/log4j-1.2.13.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/looks-2.0.4.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/seedCodec-1.0.6.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/seisFile-1.5.2.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/slf4j-api-1.7.1.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/slf4j-log4j12-1.7.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Earthworm"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Net"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Plot"/>

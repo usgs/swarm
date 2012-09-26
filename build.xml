@@ -2,9 +2,9 @@
 	<description>USGS Swarm Build File</description>
 
 	<property name="package" value="gov.usgs.swarm"/>
-	<property name="version" value="2.1a"/>
+	<property name="version" value="2.3 beta"/>
 	<property name="jarfile" value="swarm.jar" />
-	<property name="classpath" location="../USGS/contrib/jtransforms-2.4.jar;../USGS/contrib/log4j-1.2.13.jar;../USGS/contrib/seedCodec-1.0.6.jar;../USGS/contrib/fissuresImpl-1.1.13.jar;../USGS/contrib/fissuresUtil-1.0.18.jar;../USGS/contrib/fissuresIDL-1.0.jar;../USGS/lib/winston.jar;../USGS/lib/vdx.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/seed-pdcc.jar;../USGS/contrib/looks-2.0.4.jar;../USGS/contrib/forms-1.0.7.jar;../USGS/contrib/jnlp.jar" />
+	<property name="classpath" location="../USGS/contrib/seisFile-1.5.2.jar;../USGS/contrib/slf4j-api-1.7.1.jar;../USGS/contrib/slf4j-log4j12-1.7.1.jar;../USGS/contrib/jtransforms-2.4.jar;../USGS/contrib/log4j-1.2.13.jar;../USGS/contrib/seedCodec-1.0.6.jar;../USGS/contrib/fissuresImpl-1.1.13.jar;../USGS/contrib/fissuresUtil-1.0.18.jar;../USGS/contrib/fissuresIDL-1.0.jar;../USGS/lib/winston.jar;../USGS/lib/vdx.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/seed-pdcc.jar;../USGS/contrib/looks-2.0.4.jar;../USGS/contrib/forms-1.0.7.jar;../USGS/contrib/jnlp.jar" />
 	<property name="source" location="." />
 	<property name="destination" location="./classes"/>	
 
@@ -145,6 +145,9 @@ dist    -- generates new binary distribution
 				<include name="fissuresImpl-1.1.13.jar" />
 				<include name="log4j-1.2.13.jar" />
 				<include name="jtransforms-2.4.jar" />
+				<include name="seisFile-1.5.2.jar" />
+				<include name="slf4j-api-1.7.1.jar" />
+				<include name="slf4j-log4j12-1.7.1.jar" />
 			</fileset>
 		</copy>
 		

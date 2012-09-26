@@ -260,6 +260,10 @@ abstract public class SeismicDataSource
 		{
 			sds = new DHIDataSource(params);
 		}
+		else if (type.equals(WebServicesSource.WEB_SERVICES_CLIENT_CODE))
+		{
+			sds = new WebServicesSource(params);
+		}
 		else if (type.equals("file"))
 		{
 			sds = Swarm.getApplication().fileSource;

@@ -249,7 +249,8 @@ public class Swarm extends JFrame
 	private MapFrame mapFrame;
 	
 	private static final String TITLE = "Swarm";
-	private static final String VERSION = "2.2 beta";
+	private static final String VERSION;
+	private static final String BUILD_DATE;
 	
 	private static final int LEFT = 1;
 	private static final int RIGHT = 2;
@@ -259,6 +260,21 @@ public class Swarm extends JFrame
 	private static final int BOTTOM_RIGHT = 6;
 	private static final int TOP_LEFT = 7;
 	private static final int TOP_RIGHT = 8;
+	
+	static
+	{
+		String[] ss = Util.getVersion("gov.usgs.swarm");
+		if (ss != null && ss.length >= 2)
+		{
+			VERSION = ss[0];
+			BUILD_DATE = ss[1];
+		}
+		else
+		{
+			VERSION = "Development";
+			BUILD_DATE = null;
+		}
+	}
 	
 	private List<JInternalFrame> frames;
 	private boolean fullScreen = false;
@@ -286,13 +302,15 @@ public class Swarm extends JFrame
 		super(TITLE + " [" + VERSION + "]");
 		logger = Log.getLogger("gov.usgs.swarm");
 		logger.setLevel(Level.ALL);
-		logger.fine("Swarm version: " + VERSION);
-		logger.fine("JNLP: " + isJNLP());
-		String[] ss = Util.getVersion("gov.usgs.swarm");
-		if (ss == null)
+		if (BUILD_DATE == null)
+		{
 			logger.fine("no build version information available");
+		}
 		else
-			logger.fine("build version/date: " + ss[0] + "/" + ss[1]);
+		{
+			logger.fine("Swarm version/date: " + VERSION  + "/" + BUILD_DATE);
+		}
+		logger.fine("JNLP: " + isJNLP());
 		setIconImage(Images.getIcon("swarm").getImage());
 
 		monitors = new HashMap<String, MultiMonitor>();
