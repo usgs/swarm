@@ -192,6 +192,7 @@ public class HelicorderViewPanel extends JComponent
 //		plot.setBackgroundColor(null);
 		settings = hvf.getHelicorderViewerSettings();
 		heliRenderer = new HelicorderRenderer();
+    if(Swarm.config.heliColors != null) heliRenderer.setDefaultColors(Swarm.config.heliColors);//DCK: add configured colors
 		heliRenderer.setExtents(0, 1, Double.MAX_VALUE, -Double.MAX_VALUE);
 		plot.addRenderer(heliRenderer);
 		
