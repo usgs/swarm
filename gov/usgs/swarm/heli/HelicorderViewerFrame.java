@@ -1170,6 +1170,8 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 				// TODO: this should use existing data.
 				HelicorderData heliData = dataSource.getHelicorder(settings.channel, before - tc, end + tc, null);
 				HelicorderRenderer heliRenderer = new HelicorderRenderer(heliData, settings.timeChunk);
+        if(Swarm.config.heliColors != null) heliRenderer.setDefaultColors(Swarm.config.heliColors); //DCK: add configured colors
+        
 								
 				heliRenderer.setChannel(settings.channel);
 				heliRenderer.setLocation(HelicorderViewPanel.X_OFFSET, HelicorderViewPanel.Y_OFFSET, 
