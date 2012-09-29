@@ -8,6 +8,7 @@ import gov.usgs.util.Util;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,9 @@ import java.util.TreeMap;
  * Swarm configuration class. 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 1.17  2012/09/11 10:31  dketchum
+ * Add heliColors array to config
+ * 
  * Revision 1.16  2007/03/12 22:57:08  dcervelli
  * getTimeZone() uses getMetadata() instead of metadata.get().
  *
@@ -132,6 +136,8 @@ public class Config
 	public String mapPath;
 	
 	public String[] userTimes;
+  public Color[] heliColors;
+  public String heliColorsString;
 	
 	public Map<String, SeismicDataSource> sources;
 	
@@ -358,6 +364,30 @@ public class Config
 		}
 		
 		userTimes = Util.stringToString(config.getString("userTimes"), "").split(",");
+    
+    heliColorsString = Util.stringToString(config.getString("heliColors"), "");
+    if(heliColorsString != null) {
+      if(heliColorsString.length() > 3) {
+        String [] color = heliColorsString.split(":");
+        heliColors = new Color[color.length];
+        for(int i=0; i<color.length; i++) {
+          String [] parts = color[i].split(",");
+          if(parts.length  == 3 ) {
+            float red=Float.parseFloat(parts[0].trim());
+            float green = Float.parseFloat(parts[1].trim());
+            float blue = Float.parseFloat(parts[2].trim());
+            try {
+              heliColors[i] = new Color(red/256, green/256, blue/256);
+            }
+            catch(RuntimeException e) {
+              heliColors[i] = Color.magenta;
+            }
+          }
+          else heliColors[i] = Color.magenta;   // If the color is illegal, make it magenta
+        }
+      }
+      
+    }
 	}
 	
 	public SeismicDataSource getSource(String key)
@@ -487,6 +517,9 @@ public class Config
 			utsb.append(userTimes[userTimes.length - 1]);
 		config.put("userTimes", utsb.toString());
 		
+    if(heliColorsString != null)
+      if(heliColorsString.length() > 3) 
+        config.put("heliColors", heliColorsString);
 		return config;
 	}
 	
