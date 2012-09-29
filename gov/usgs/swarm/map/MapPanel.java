@@ -1009,7 +1009,7 @@ public class MapPanel extends JPanel
 			
       File linedir = new File("mapdata/Lines");   // DCK : deal with missing Lines directory
       if(linedir != null) {
-        File[] files = new File("mapdata/Lines").listFiles();
+        File[] files = linedir.listFiles();
         if(files != null)
           for (File f : files)
             if (f.isFile())
