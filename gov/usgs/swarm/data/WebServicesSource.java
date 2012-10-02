@@ -100,8 +100,6 @@ public class WebServicesSource extends SeismicDataSource
 	public synchronized List<String> getChannels()
 	{
 		List<String> channels = client.getChannels();
-		Collections.sort(channels);
-		Swarm.config.assignMetadataSource(channels, this);
 		return Collections.unmodifiableList(channels);
 	}
 
@@ -138,22 +136,28 @@ public class WebServicesSource extends SeismicDataSource
 	public synchronized HelicorderData getHelicorder(String station, double t1,
 			double t2, GulperListener gl)
 	{
-		// lifted from gov.usgs.swarm.data.WaveServerSource
+		// lifted from gov.usgs.swarm.data.DHIDataSource
 		double now = CurrentTime.getInstance().nowJ2K();
 		// if a time later than now has been asked for make sure to get the
-		// latest
-		if ((t2 - now) >= -20)
-		{
-			// exit if no wave
-			if (getWave(station, now - 2 * 60, now) == null)
-				return null;
-		}
+		// latest so that, if possible, a small bit of helicorder data will be
+		// displayed
+		// if ((t2 - now) >= -20)
+		// {
+		// getWave(station, now - 2*60, now);
+		// }
+
 		CachedDataSource cache = Swarm.getCache();
 		HelicorderData hd = cache.getHelicorder(station, t1, t2,
 				(GulperListener) null);
+
 		if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10))
 			GulperList.getInstance().requestGulper(getGulperKey(station), gl,
-					getCopy(), station, t1, t2, gulpSize, gulpDelay);
+					this, station, t1, t2, gulpSize, gulpDelay);
+
+		// this gets the tail end, replacing commented out section above
+		if (hd != null && hd.getEndTime() < now)
+			getWave(station, hd.getEndTime(), now);
+
 		return hd;
 	}
 
