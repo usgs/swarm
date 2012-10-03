@@ -27,6 +27,7 @@ public class WebServicesPanel extends DataSourcePanel
 	private static final String WS_NETWORK_FILE = "IRIS_networks.txt";
 	private static final String codeText = ";"
 			+ WebServicesSource.WEB_SERVICES_CLIENT_CODE + ":";
+	private boolean showUrlFieldsFlag = false;
 	private JComboBox network;
 	private JTextField station;
 	private JTextField location;
@@ -41,7 +42,8 @@ public class WebServicesPanel extends DataSourcePanel
 	 */
 	public WebServicesPanel()
 	{
-		super(WebServicesSource.WEB_SERVICES_CLIENT_CODE, "Web Services");
+		super(WebServicesSource.WEB_SERVICES_CLIENT_CODE,
+				WebServicesSource.TAB_TITLE);
 	}
 
 	/**
@@ -145,14 +147,15 @@ public class WebServicesPanel extends DataSourcePanel
 
 		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 		builder.setDefaultDialogBorder();
-		builder.append(new JLabel(
-				"Use this data source to connect to a Web Services Server."),
-				11);
+		builder.append(new JLabel("Use this data source to connect to "
+				+ WebServicesSource.DESCRIPTION + "."), 11);
 		builder.nextLine();
 		builder.appendSeparator();
 
 		JLabel scnlLabel = new JLabel(
-				"<HTML>Station, Channel, Network and Location filters or empty for all."
+				"<HTML>Station, Channel, Network and Location filters or empty for all. Use "
+						+ WebServiceUtils.EMPTY_LOC_CODE
+						+ " for empty location code."
 						+ " Both wildcards (\"?\" for any single character and \"*\" for zero or more characters)"
 						+ " and comma-separated lists are accepted. If all Networks channels will not be displayed on the map.</HTML>");
 		builder.append(scnlLabel, 11);
@@ -173,12 +176,15 @@ public class WebServicesPanel extends DataSourcePanel
 		builder.append("Gulp delay:");
 		builder.append(gulperDelay);
 		builder.append(" seconds");
-		builder.nextLine();
-		builder.append("Dataselect URL");
-		builder.append(wsDataselectUrlField, 9);
-		builder.nextLine();
-		builder.append("Station URL");
-		builder.append(wsStationUrlField, 9);
+		if (showUrlFieldsFlag)
+		{
+			builder.nextLine();
+			builder.append("Dataselect URL");
+			builder.append(wsDataselectUrlField, 9);
+			builder.nextLine();
+			builder.append("Station URL");
+			builder.append(wsStationUrlField, 9);
+		}
 		panel = builder.getPanel();
 	}
 

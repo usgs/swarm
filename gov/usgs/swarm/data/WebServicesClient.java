@@ -10,11 +10,38 @@ import java.util.List;
 
 public class WebServicesClient extends AbstractDataRecordClient
 {
+	/**
+	 * Test flag to use XML instead of text for station details. XML is more
+	 * robust at the cost of a lot of speed. This will crawl if there are many
+	 * networks. To use add "-DSWARM_WS_USE_XML=TRUE" to the Java command line.
+	 */
 	private static boolean useXmlClientFlag = Boolean.valueOf(WebServiceUtils
 			.getProperty(WebServiceUtils.SWARM_WS_PROP_KEY_PREFIX + "USE_XML"));
 
+	/**
+	 * Get the default web services data select URL text.
+	 * 
+	 * @return the default web services data select URL text.
+	 */
+	public static String getDefaultWsDataSelectUrl()
+	{
+		return DataSelectReader.DEFAULT_WS_URL;
+	}
+
+	/**
+	 * Get the default web services station URL text.
+	 * 
+	 * @return the default web services station URL text.
+	 */
+	public static String getDefaultWsStationUrl()
+	{
+		return AbstractWebServiceStationClient.DEFAULT_WS_URL;
+	}
+
+	/** The station client. */
 	private final AbstractWebServiceStationClient stationClient;
 
+	/** The web services data select URL text. */
 	private final String wsDataSelectUrl;
 
 	/**
@@ -24,6 +51,25 @@ public class WebServicesClient extends AbstractDataRecordClient
 	 * @param sta the station filter or empty if none.
 	 * @param loc the location filter or empty if none.
 	 * @param chan the channel filter or empty if none.
+	 */
+	public WebServicesClient(final SeismicDataSource source, String net,
+			String sta, String loc, String chan)
+	{
+		this(source, net, sta, loc, chan, getDefaultWsDataSelectUrl(),
+				getDefaultWsStationUrl());
+	}
+
+	/**
+	 * Creates the web services client.
+	 * 
+	 * @param net the network filter or empty if none.
+	 * @param sta the station filter or empty if none.
+	 * @param loc the location filter or empty if none.
+	 * @param chan the channel filter or empty if none.
+	 * @param wsDataSelectUrl the web services data select URL text.
+	 * @param wsStationUrl the web services station URL text.
+	 * @see #getDefaultWsDataSelectUrl()
+	 * @see #getDefaultWsStationUrl()
 	 */
 	public WebServicesClient(final SeismicDataSource source, String net,
 			String sta, String loc, String chan, String wsDataSelectUrl,
