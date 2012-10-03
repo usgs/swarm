@@ -19,33 +19,68 @@ import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.mseed.SeedRecord;
 
+/**
+ * The data select reader reads data from the web services. This class a based
+ * on the edu.sc.seis.seisFile.dataSelectWS.DataSelectReader class with minor
+ * changes for Swarm.
+ * 
+ * @author Kevin Frechette (ISTI)
+ */
 public class DataSelectReader extends StringMSeedQueryReader
 {
-
+	/** The timeout in milliseconds. */
 	protected int timeoutMillis;
-
+	/** The URL base. */
 	protected String urlBase;
-
+	/** The user agent. */
 	protected String userAgent = "SeisFile/" + BuildVersion.getVersion();
-
+	/** The default web services URL. */
 	public static final String DEFAULT_WS_URL = "http://www.iris.edu/ws/dataselect/query";
 
+	/**
+	 * Create the data select reader with the default URL and timeout.
+	 */
 	public DataSelectReader()
 	{
 		this(DEFAULT_WS_URL);
 	}
 
+	/**
+	 * Create the data select reader with the specified URL and the default
+	 * timeout.
+	 * 
+	 * @param urlBase the URL base.
+	 */
 	public DataSelectReader(String urlBase)
 	{
 		this.urlBase = urlBase;
 	}
 
+	/**
+	 * Create the data select reader with the specified URL and timeout.
+	 * 
+	 * @param urlBase the URL base.
+	 * @param timeoutMillis the timeout in milliseconds.
+	 */
 	public DataSelectReader(String urlBase, int timeoutMillis)
 	{
 		this.urlBase = urlBase;
 		this.timeoutMillis = timeoutMillis;
 	}
 
+	/**
+	 * Create the query. All arguments must be provided.
+	 * 
+	 * @param network the network.
+	 * @param station the station.
+	 * @param location the location or empty for the empty location code.
+	 * @param channel the channel.
+	 * @return the query.
+	 * @throws IOException if an I/O Exception occurs.
+	 * @throws DataSelectException if data select error.
+	 * @throws SeedFormatException if SEED format error.
+	 * @see WebServiceUtils.EMPTY_LOC_CODE
+	 */
 	protected String createQuery(String network, String station,
 			String location, String channel) throws IOException,
 			DataSelectException, SeedFormatException
@@ -61,13 +96,23 @@ public class DataSelectReader extends StringMSeedQueryReader
 		return query;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Create the query. All arguments must be provided.
 	 * 
-	 * @see
-	 * edu.sc.seis.seisFile.dataSelectWS.MSeedQueryReader#createQuery(java.lang
-	 * .String, java.lang.String, java.lang.String, java.lang.String,
-	 * java.util.Date, float)
+	 * @param network the network.
+	 * @param station the station.
+	 * @param location the location or empty for the empty location code.
+	 * @param channel the channel.
+	 * @param begin the begin date.
+	 * @param end the end date.
+	 * @return the query.
+	 * @throws IOException if an I/O Exception occurs.
+	 * @throws DataSelectException if data select error.
+	 * @throws SeedFormatException if SEED format error.
+	 * @see WebServiceUtils.EMPTY_LOC_CODE
+	 * @see edu.sc.seis.seisFile.dataSelectWS.MSeedQueryReader#createQuery(java.lang
+	 *      .String, java.lang.String, java.lang.String, java.lang.String,
+	 *      java.util.Date, float)
 	 */
 	@Override
 	public String createQuery(String network, String station, String location,
@@ -83,16 +128,31 @@ public class DataSelectReader extends StringMSeedQueryReader
 		return query;
 	}
 
+	/**
+	 * Get the timeout in milliseconds.
+	 * 
+	 * @return the timeout in milliseconds.
+	 */
 	public int getTimeoutMillis()
 	{
 		return timeoutMillis;
 	}
 
+	/**
+	 * Get the URL base.
+	 * 
+	 * @return the URL base.
+	 */
 	public String getUrlBase()
 	{
 		return urlBase;
 	}
 
+	/**
+	 * Get the user agent.
+	 * 
+	 * @return the user agent.
+	 */
 	public String getUserAgent()
 	{
 		return userAgent;
@@ -110,7 +170,11 @@ public class DataSelectReader extends StringMSeedQueryReader
 	}
 
 	/*
-	 * (non-Javadoc)
+	 * Read the data records.
+	 * 
+	 * @param query the query.
+	 * 
+	 * @return the data record list.
 	 * 
 	 * @see
 	 * edu.sc.seis.seisFile.dataSelectWS.MSeedQueryReader#read(java.lang.String)
@@ -189,11 +253,21 @@ public class DataSelectReader extends StringMSeedQueryReader
 		return records;
 	}
 
+	/**
+	 * Set the timeout in milliseconds.
+	 * 
+	 * @param timeoutMillis the timeout in milliseconds.
+	 */
 	public void setTimeoutMillis(int timeoutMillis)
 	{
 		this.timeoutMillis = timeoutMillis;
 	}
 
+	/**
+	 * Set the user agent.
+	 * 
+	 * @param userAgent the user agent.
+	 */
 	public void setUserAgent(String userAgent)
 	{
 		this.userAgent = userAgent;
