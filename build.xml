@@ -92,9 +92,10 @@ dist    -- generates new binary distribution
 				<include name="gov/usgs/earthworm/Menu*.class" />
 				<include name="gov/usgs/earthworm/MenuItem*.class" />
 				<include name="gov/usgs/earthworm/Message*.class" />
-				<include name="gov/usgs/earthworm/MessageLogo*.class" />
+				<include name="gov/usgs/earthworm/message/Message*.class" />
+				<include name="gov/usgs/earthworm/message/MessageLogo*.class" />
 				<include name="gov/usgs/earthworm/SCN*.class" />
-				<include name="gov/usgs/earthworm/TraceBuf*.class" />
+				<include name="gov/usgs/earthworm/message/TraceBuf*.class" />
 				<include name="gov/usgs/earthworm/WaveServer*.class" />
 			</fileset>
 			<fileset dir="${source}/../Plot/${classdir}">
