@@ -2,27 +2,13 @@ package gov.usgs.swarm.wave;
 
 import gov.usgs.math.Butterworth;
 import gov.usgs.util.ConfigFile;
+import gov.usgs.util.Util;
  
 /**
- * 
- * $Log: not supported by cvs2svn $
- * Revision 1.4  2007/04/29 21:23:06  dcervelli
- * Multiselect code support.
- *
- * Revision 1.3  2007/02/27 20:11:06  cervelli
- * Added support for turning calibration use on and off.
- *
- * Revision 1.2  2006/10/26 00:57:09  dcervelli
- * Function for manually adjusting scales.
- *
- * Revision 1.1  2006/08/01 23:45:23  cervelli
- * Moved package.
- *
- * Revision 1.2  2006/06/05 18:06:49  dcervelli
- * Major 1.3 changes.
  *
  * @author Dan Cervelli
  */
+
 public class WaveViewSettings
 {
 	public static final String DEFAULTS_FILENAME = "WaveDefaults.config";
@@ -159,30 +145,28 @@ public class WaveViewSettings
 	
 	public void set(ConfigFile cf)
 	{
-//		public ViewType viewType;
 		viewType = ViewType.fromString(cf.getString("viewType"));
 		filter.set(cf.getSubConfig("filter"));
-//		public Butterworth filter;
-		maxAmp = Double.parseDouble(cf.getString("maxAmp"));
-		minAmp = Double.parseDouble(cf.getString("minAmp"));
-		maxPower = Double.parseDouble(cf.getString("maxPower"));
-		minPower = Double.parseDouble(cf.getString("minPower"));
-		minFreq = Double.parseDouble(cf.getString("minFreq"));
-		maxFreq = Double.parseDouble(cf.getString("maxFreq"));
-		spectrogramOverlap = Double.parseDouble(cf.getString("spectrogramOverlap"));
+		maxAmp = Util.stringToDouble(cf.getString("maxAmp"), DEFAULT_WAVE_VIEW_SETTINGS.maxAmp);
+		minAmp = Util.stringToDouble(cf.getString("minAmp"), DEFAULT_WAVE_VIEW_SETTINGS.minAmp);
+		maxPower = Util.stringToDouble(cf.getString("maxPower"), DEFAULT_WAVE_VIEW_SETTINGS.maxPower);
+		minPower = Util.stringToDouble(cf.getString("minPower"), DEFAULT_WAVE_VIEW_SETTINGS.minPower);
+		minFreq = Util.stringToDouble(cf.getString("minFreq"), DEFAULT_WAVE_VIEW_SETTINGS.minFreq);
+		maxFreq = Util.stringToDouble(cf.getString("maxFreq"), DEFAULT_WAVE_VIEW_SETTINGS.maxFreq);
+		spectrogramOverlap = Util.stringToDouble(cf.getString("spectrogramOverlap"), DEFAULT_WAVE_VIEW_SETTINGS.spectrogramOverlap);
 		
-		removeBias = Boolean.parseBoolean(cf.getString("removeBias"));
-		filterOn = Boolean.parseBoolean(cf.getString("filterOn"));
-		zeroPhaseShift = Boolean.parseBoolean(cf.getString("zeroPhaseShift"));
-		autoScaleAmp = Boolean.parseBoolean(cf.getString("autoScaleAmp"));
-		autoScaleAmpMemory = Boolean.parseBoolean(cf.getString("autoScaleAmpMemory"));
-		autoScalePower = Boolean.parseBoolean(cf.getString("autoScalePower"));
-		autoScalePowerMemory = Boolean.parseBoolean(cf.getString("autoScalePowerMemory"));
-		useUnits = Boolean.parseBoolean(cf.getString("useUnits"));
-		logFreq = Boolean.parseBoolean(cf.getString("logFreq"));
-		logPower = Boolean.parseBoolean(cf.getString("logPower"));
-		binSize = Double.parseDouble(cf.getString("binSize"));
-		nfft = Integer.parseInt(cf.getString("nfft"));
+		removeBias = Util.stringToBoolean(cf.getString("removeBias"), DEFAULT_WAVE_VIEW_SETTINGS.removeBias);
+		filterOn = Util.stringToBoolean(cf.getString("filterOn"), DEFAULT_WAVE_VIEW_SETTINGS.filterOn);
+		zeroPhaseShift = Util.stringToBoolean(cf.getString("zeroPhaseShift"), DEFAULT_WAVE_VIEW_SETTINGS.zeroPhaseShift);
+		autoScaleAmp = Util.stringToBoolean(cf.getString("autoScaleAmp"), DEFAULT_WAVE_VIEW_SETTINGS.autoScaleAmp);
+		autoScaleAmpMemory = Util.stringToBoolean(cf.getString("autoScaleAmpMemory"), DEFAULT_WAVE_VIEW_SETTINGS.autoScaleAmpMemory);
+		autoScalePower = Util.stringToBoolean(cf.getString("autoScalePower"), DEFAULT_WAVE_VIEW_SETTINGS.autoScalePower);
+		autoScalePowerMemory = Util.stringToBoolean(cf.getString("autoScalePowerMemory"), DEFAULT_WAVE_VIEW_SETTINGS.autoScalePowerMemory);
+		useUnits = Util.stringToBoolean(cf.getString("useUnits"), DEFAULT_WAVE_VIEW_SETTINGS.useUnits);
+		logFreq = Util.stringToBoolean(cf.getString("logFreq"), DEFAULT_WAVE_VIEW_SETTINGS.logFreq);
+		logPower = Util.stringToBoolean(cf.getString("logPower"), DEFAULT_WAVE_VIEW_SETTINGS.logPower);
+		binSize = Util.stringToDouble(cf.getString("binSize"), DEFAULT_WAVE_VIEW_SETTINGS.binSize);
+		nfft = Util.stringToInt(cf.getString("nfft"), DEFAULT_WAVE_VIEW_SETTINGS.nfft);
 	}
 	
 	public void save(ConfigFile cf, String prefix)
