@@ -38,7 +38,7 @@ dist    -- generates new binary distribution
 	</target>
 
 	<target name="compile" depends="clean" description="compile the source">
-		<javac srcdir="${source}" destdir="${destination}" classpath="${classpath}" target="1.5" debug="on"/>
+		<javac srcdir="${source}" destdir="${destination}" classpath="${classpath}" target="1.5" debug="on" includeantruntime="false"/>
 		<ant antfile="${source}/../USGS/buildversion.xml" target="version" dir="${source}/../USGS" inheritAll="true">
 			<property name="package" value="${package}"/>
 			<property name="version" value="${version}"/>
