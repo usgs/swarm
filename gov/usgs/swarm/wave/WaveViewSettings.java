@@ -69,35 +69,34 @@ public class WaveViewSettings
 	static
 	{
 		DEFAULT_WAVE_VIEW_SETTINGS = new WaveViewSettings();
+		DEFAULT_WAVE_VIEW_SETTINGS.viewType = ViewType.WAVE;
+		DEFAULT_WAVE_VIEW_SETTINGS.removeBias = true;
+		DEFAULT_WAVE_VIEW_SETTINGS.autoScaleAmp = true;
+		DEFAULT_WAVE_VIEW_SETTINGS.autoScaleAmpMemory = true;
+		DEFAULT_WAVE_VIEW_SETTINGS.maxAmp = 1000;
+		DEFAULT_WAVE_VIEW_SETTINGS.minAmp = -1000;
+		DEFAULT_WAVE_VIEW_SETTINGS.autoScalePower = false;
+		DEFAULT_WAVE_VIEW_SETTINGS.autoScalePowerMemory = true;
+		DEFAULT_WAVE_VIEW_SETTINGS.minPower = 20;
+		DEFAULT_WAVE_VIEW_SETTINGS.maxPower = 120;
+		DEFAULT_WAVE_VIEW_SETTINGS.useUnits = true;
+		DEFAULT_WAVE_VIEW_SETTINGS.logPower = true;
+		DEFAULT_WAVE_VIEW_SETTINGS.logFreq = true;
+		DEFAULT_WAVE_VIEW_SETTINGS.spectrogramOverlap = 0.859375;
+		DEFAULT_WAVE_VIEW_SETTINGS.minFreq = 0;
+		DEFAULT_WAVE_VIEW_SETTINGS.maxFreq = 25;
+		DEFAULT_WAVE_VIEW_SETTINGS.binSize = 2;
+		DEFAULT_WAVE_VIEW_SETTINGS.nfft = 0; // Zero means automatic
+		DEFAULT_WAVE_VIEW_SETTINGS.filter = new Butterworth();
+		DEFAULT_WAVE_VIEW_SETTINGS.filterOn = false;
+		DEFAULT_WAVE_VIEW_SETTINGS.zeroPhaseShift = true;
+		
 		ConfigFile cf = new ConfigFile(DEFAULTS_FILENAME);
 		if (cf.wasSuccessfullyRead())
 		{
 			ConfigFile sub = cf.getSubConfig("default");
 			DEFAULT_WAVE_VIEW_SETTINGS.set(sub);
-		}
-		else
-		{
-			DEFAULT_WAVE_VIEW_SETTINGS.viewType = ViewType.WAVE;
-			DEFAULT_WAVE_VIEW_SETTINGS.removeBias = true;
-			DEFAULT_WAVE_VIEW_SETTINGS.autoScaleAmp = true;
-			DEFAULT_WAVE_VIEW_SETTINGS.autoScaleAmpMemory = true;
-			DEFAULT_WAVE_VIEW_SETTINGS.maxAmp = 1000;
-			DEFAULT_WAVE_VIEW_SETTINGS.minAmp = -1000;
-			DEFAULT_WAVE_VIEW_SETTINGS.autoScalePower = false;
-			DEFAULT_WAVE_VIEW_SETTINGS.autoScalePowerMemory = true;
-			DEFAULT_WAVE_VIEW_SETTINGS.minPower = 20;
-			DEFAULT_WAVE_VIEW_SETTINGS.maxPower = 120;
-			DEFAULT_WAVE_VIEW_SETTINGS.useUnits = true;
-			DEFAULT_WAVE_VIEW_SETTINGS.logPower = true;
-			DEFAULT_WAVE_VIEW_SETTINGS.logFreq = true;
-			DEFAULT_WAVE_VIEW_SETTINGS.spectrogramOverlap = 0.859375;
-			DEFAULT_WAVE_VIEW_SETTINGS.minFreq = 0;
-			DEFAULT_WAVE_VIEW_SETTINGS.maxFreq = 25;
-			DEFAULT_WAVE_VIEW_SETTINGS.binSize = 2;
-			DEFAULT_WAVE_VIEW_SETTINGS.nfft = 0; // Zero means automatic
-			DEFAULT_WAVE_VIEW_SETTINGS.filter = new Butterworth();
-			DEFAULT_WAVE_VIEW_SETTINGS.filterOn = false;
-			DEFAULT_WAVE_VIEW_SETTINGS.zeroPhaseShift = true;
+		} else {
 			DEFAULT_WAVE_VIEW_SETTINGS.save(cf, "default");
 			cf.writeToFile(DEFAULTS_FILENAME);
 		}
@@ -107,9 +106,10 @@ public class WaveViewSettings
 	{
 		filter = new Butterworth();
 		view = null;
-		
+System.out.println("21 binSize = " + binSize);
 		if (DEFAULT_WAVE_VIEW_SETTINGS != null)
 			copy(DEFAULT_WAVE_VIEW_SETTINGS);
+System.out.println("23 binSize = " + binSize);
 
 	}
 	
