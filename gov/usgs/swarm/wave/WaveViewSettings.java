@@ -106,11 +106,8 @@ public class WaveViewSettings
 	{
 		filter = new Butterworth();
 		view = null;
-System.out.println("21 binSize = " + binSize);
 		if (DEFAULT_WAVE_VIEW_SETTINGS != null)
 			copy(DEFAULT_WAVE_VIEW_SETTINGS);
-System.out.println("23 binSize = " + binSize);
-
 	}
 	
 	public WaveViewSettings(WaveViewSettings s)
