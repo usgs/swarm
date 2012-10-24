@@ -71,69 +71,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 /**
- * $Log: not supported by cvs2svn $
- * Revision 1.21  2007/05/21 02:58:08  dcervelli
- * Clickable labels and other changes including small change to ways coordinates are calculated from screen coordinates.
- *
- * Revision 1.20  2007/05/01 17:52:25  cervelli
- * Added output of Swarm.config.mapPath to warning when no map images are found.
- *
- * Revision 1.19  2007/03/13 20:43:30  dcervelli
- * Rejiggered the threading of the map updates.
- *
- * Revision 1.18  2007/03/12 21:41:41  dcervelli
- * Changed default image cache size.
- *
- * Revision 1.17  2006/10/26 00:54:04  dcervelli
- * Support for map labels and global rescale key.
- *
- * Revision 1.16  2006/08/15 17:54:40  dcervelli
- * Added great circle route and circle drawing functions.
- *
- * Revision 1.15  2006/08/14 22:46:43  dcervelli
- * Changes for helicorder slowdown bug.
- *
- * Revision 1.14  2006/08/11 21:03:54  dcervelli
- * Label buttons and moved code to avoid deadlock.
- *
- * Revision 1.13  2006/08/09 21:51:16  cervelli
- * Mouse cursor change on drag.
- *
- * Revision 1.12  2006/08/07 22:38:47  cervelli
- * Map push on drag.
- *
- * Revision 1.11  2006/08/06 20:05:49  cervelli
- * Draggable maps.
- *
- * Revision 1.10  2006/08/05 22:24:19  cervelli
- * Prototype, buggy draggable map implementation.
- *
- * Revision 1.9  2006/08/04 18:42:19  cervelli
- * Pop functions return true/false stating whether or not the pop was successful.
- *
- * Revision 1.8  2006/08/02 23:35:50  cervelli
- * Layout changes, repaint reductions.
- *
- * Revision 1.7  2006/08/01 23:45:09  cervelli
- * More development.
- *
- * Revision 1.6  2006/07/30 22:47:04  cervelli
- * Changes for layouts.
- *
- * Revision 1.5  2006/07/30 16:16:22  cervelli
- * Added ruler.
- *
- * Revision 1.4  2006/07/28 14:52:12  cervelli
- * Changes for moved GeoRange.
- *
- * Revision 1.3  2006/07/26 22:41:00  cervelli
- * Bunch more development for 2.0.
- *
- * Revision 1.2  2006/07/26 00:39:36  cervelli
- * New resetImage() behavior.
- *
  * @author Dan Cervelli
- * @version $Id: MapPanel.java,v 1.22 2007-09-12 22:38:11 tparker Exp $
  */
 public class MapPanel extends JPanel
 {
@@ -301,13 +239,6 @@ public class MapPanel extends JPanel
 	
 	public void loadMaps(boolean redraw)
 	{
-		if (images != null)
-		{
-//			if (Swarm.config.useWMS && images instanceof WMSGeoImageSet)
-//				return;
-//			if (!Swarm.config.useWMS && !(images instanceof WMSGeoImageSet))
-//				return;
-		}
 		Pair<GeoImageSet, GeoLabelSet> pair;
 		if (Swarm.config.useWMS)
 		{
@@ -335,12 +266,8 @@ public class MapPanel extends JPanel
 		}
 		images.setArealCacheSort(false);
 		int mp = (int)Math.round((double)Runtime.getRuntime().maxMemory() / 1024.0 / 1024.0 / 8.0);
-//		System.out.println("cache size: " + mp);
 		images.setMaxLoadedImagesSize(mp);
 		
-		
-//		labels.add(gl);
-//		clickableLabels = RSSHypocenters.getHypocenters();
 		if (redraw)
 			resetImage(true);
 	}
@@ -414,7 +341,6 @@ public class MapPanel extends JPanel
 					
 					public void mouseReleased(MouseEvent e)
 					{
-//						dragger.setTimeTillReset(0);
 						setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 						if (dragMode == DragMode.DRAG_MAP && mouseDown != null && mouseNow != null)
 						{
@@ -462,7 +388,6 @@ public class MapPanel extends JPanel
 					
 					public void mouseDragged(MouseEvent e)
 					{
-//						dragger.setTimeTillReset(100);
 						mouseNow = e.getPoint();
 						Point2D.Double lonLat = getLonLat(e.getX(), e.getY());
 						if (dragMode == DragMode.DRAG_MAP)
@@ -478,7 +403,6 @@ public class MapPanel extends JPanel
 						else if (dragMode == DragMode.BOX)
 						{
 							if (lonLat != null)
-//								parent.setStatusText(Util.longitudeToString(latLon.x) + " " + Util.latitudeToString(latLon.y));
 								parent.setStatusText(Util.lonLatToString(lonLat));
 						}
 						else if (dragMode == DragMode.RULER)
@@ -556,14 +480,13 @@ public class MapPanel extends JPanel
 		pane.add(mapImagePanel, new Integer(10));
 		add(pane, BorderLayout.CENTER);
 		loadLabels();
-//		resetImage();
 	}
 
 	public void loadLabels()
 	{
 		try
 		{
-			Class cl = Class.forName(Swarm.config.labelSource);
+			Class<?> cl = Class.forName(Swarm.config.labelSource);
 			LabelSource src = (LabelSource)cl.newInstance();
 			clickableLabels = src.getLabels();
 			repaint();
@@ -744,16 +667,7 @@ public class MapPanel extends JPanel
 		setTimes(startTime, endTime, true);
 	}
 	
-//	public void clear()
-//	{
-//		lines.clear();
-//	}
-	
-//	public void addLine(Line2D.Double line)
-//	{
-//		lines.add(line);
-//	}
-	
+
 	public Point2D.Double getXY(double lon, double lat)
 	{
 		if (range == null || projection == null || image == null || renderer == null)
@@ -763,36 +677,24 @@ public class MapPanel extends JPanel
 		double dx = (ext[1] - ext[0]);
 		double dy = (ext[3] - ext[2]);
 		Point2D.Double res = new Point2D.Double();
-//		res.x = Math.round(((xy.x - ext[0]) / dx) * renderer.getGraphWidth() + INSET + getInsets().left);
-//		res.x = Math.round(((xy.x - ext[0]) / dx) * renderer.getGraphWidth() + INSET);
 		res.x = (((xy.x - ext[0]) / dx) * renderer.getGraphWidth() + INSET);
-//		res.y = Math.round((1 - (xy.y - ext[2]) / dy) * renderer.getGraphHeight() + INSET + getInsets().top);
-//		res.y = Math.round((1 - (xy.y - ext[2]) / dy) * renderer.getGraphHeight() + INSET );
 		res.y = ((1 - (xy.y - ext[2]) / dy) * renderer.getGraphHeight() + INSET );
 		return res;
 	}
 	
 	public Point2D.Double getLonLat(int x, int y)
 	{
-//		if (range == null || projection == null || image == null || renderer == null)
 		if (range == null || projection == null || renderer == null)
 			return null;
 		
-//		int tx = x - INSET - getInsets().left;
-//		int ty = y - INSET - getInsets().top;
 		int tx = x - INSET;
 		int ty = y - INSET;
 		double[] ext = range.getProjectedExtents(projection);
-//		System.out.println("insets: " + getInsets());
-//		System.out.println(image.getWidth() + " " + image.getHeight() + renderer.getWidth() + " " + renderer.getGraphWidth());
 		double dx = (ext[1] - ext[0]) / renderer.getGraphWidth();
 		double dy = (ext[3] - ext[2]) / renderer.getGraphHeight();
-//		double px = (x - INSET) * dx + ext[0];
-//		double py = ext[3] - (y - INSET) * dy;
 		double px = tx * dx + ext[0];
 		double py = ext[3] - ty * dy;
-//		System.out.println(tx + " " + ty + " " + px + " " + py + " " + ext[0] + " " + ext[1] + " " + ext[2] + " " + ext[3]);
-//		
+
 		Point2D.Double pt = projection.inverse(new Point2D.Double(px, py));
 		pt.x = pt.x % 360;
 		if (pt.x > 180)
@@ -825,7 +727,6 @@ public class MapPanel extends JPanel
 			if (updated)
 				repaint();
 		}
-//		repaint();
 	}
 	
 	public Point2D.Double getCenter()
@@ -879,7 +780,6 @@ public class MapPanel extends JPanel
 				scale = xm / width;
 				ym = scale * (double)height;
 			}
-//			range = new GeoRange(projection, center, xm, ym);
 			range = projection.getGeoRange(center, xm, ym);
 		}
 		else
@@ -888,7 +788,6 @@ public class MapPanel extends JPanel
 			TransverseMercator tm = new TransverseMercator();
 			tm.setOrigin(center);
 			projection = tm;
-//			range = new GeoRange(projection, center, xm, ym);
 			range = projection.getGeoRange(center, xm, ym);
 		}
     }
@@ -1213,8 +1112,7 @@ public class MapPanel extends JPanel
 					Pair<List<JComponent>, List<Line2D.Double>> p = updateMiniPanels();
 					compsToAdd = p.item1;
 					linesToAdd = p.item2;
-//					if (doMap && tempMapImage != null)
-//						mapImage = tempMapImage;
+
 					if (lines != null)
 						lines.clear();
 					pane.removeAll();
@@ -1227,7 +1125,6 @@ public class MapPanel extends JPanel
 						
 					pane.removeAll();
 					pane.add(mapImagePanel, new Integer(10));
-					int i = 0;
 					if (compsToAdd != null)
 					{
 						for (JComponent comp : compsToAdd)
@@ -1235,10 +1132,7 @@ public class MapPanel extends JPanel
 							if (comp instanceof JLabel)
 								pane.add(comp, new Integer(15));
 							else
-							{
-								i++;
 								pane.add(comp, new Integer(20));
-							}
 						}
 					}
 					lines = linesToAdd;
@@ -1352,7 +1246,6 @@ public class MapPanel extends JPanel
 					g2.drawImage(mapImage, 0, 0, null);
 				}
 				
-//				g.setColor(Color.WHITE);
 				g.setXORMode(Color.WHITE);
 				if (lines != null)
 				{
