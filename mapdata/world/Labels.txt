@@ -12,4 +12,4 @@
 #
 # Possible font styles are: PLAIN, BOLD, ITALIC
 
-WLWY;-110.287,44.640,o,6,GREEN,1,Consolas,20,PLAIN,RED
+#WLWY;-110.287,44.640,o,6,GREEN,1,Consolas,20,PLAIN,RED
