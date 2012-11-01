@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path=""/>
-	<classpathentry kind="output" path="classes"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/USGS/contrib/colt.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/fissuresIDL-1.0.jar"/>
@@ -14,11 +13,12 @@
 	<classpathentry kind="lib" path="/USGS/contrib/seedCodec-1.0.6.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/seisFile-1.5.2.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/slf4j-api-1.7.1.jar"/>
-	<classpathentry kind="lib" path="/USGS/contrib/slf4j-log4j12-1.7.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Earthworm"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Net"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Plot"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Util"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/VDX"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Winston"/>
+	<classpathentry kind="lib" path="/Users/tomp/Documents/workspace/USGS/contrib/JavaSeedLite.jar"/>
+	<classpathentry kind="output" path="classes"/>
 </classpath>
