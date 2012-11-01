@@ -70,93 +70,8 @@ import javax.swing.event.InternalFrameEvent;
  * TODO: clipboard
  * TODO: up/down arrows
  * 
- * $Log: not supported by cvs2svn $
- * Revision 1.11  2007/05/09 21:10:24  dcervelli
- * Fix for runaway monitor bug.
- *
- * Revision 1.10  2007/03/06 17:55:23  cervelli
- * Units can now be disabled
- *
- * Revision 1.9  2006/10/26 00:54:58  dcervelli
- * Minor cleanup.
- *
- * Revision 1.8  2006/08/12 21:52:29  dcervelli
- * New kiosk code.
- *
- * Revision 1.7  2006/08/11 21:04:17  dcervelli
- * Monitor beautification.
- *
- * Revision 1.6  2006/08/09 21:48:45  cervelli
- * Changes for monitor settings dialog.
- *
- * Revision 1.5  2006/08/09 05:08:03  cervelli
- * Clears map and disposes to avoid memory leak.
- *
- * Revision 1.4  2006/08/08 14:31:41  cervelli
- * Bigger labels and time labels.
- *
- * Revision 1.3  2006/08/07 22:39:11  cervelli
- * New monitor timing system, layouts.
- *
- * Revision 1.2  2006/08/02 23:34:28  cervelli
- * Eliminated box.
- *
- * Revision 1.1  2006/08/01 23:45:23  cervelli
- * Moved package.
- *
- * Revision 1.12  2006/07/25 05:15:36  cervelli
- * Change for FrameDecorator being class instead of interface.
- *
- * Revision 1.11  2006/07/22 20:28:39  cervelli
- * Added up/down to move selection, delete to remove selection.
- *
- * Revision 1.10  2006/06/14 19:19:31  dcervelli
- * Major 1.3.4 changes.
- *
- * Revision 1.9  2006/06/05 18:06:49  dcervelli
- * Major 1.3 changes.
- *
- * Revision 1.8  2006/04/17 04:16:36  dcervelli
- * More 1.3 changes.
- *
- * Revision 1.7  2006/04/13 16:41:33  dcervelli
- * Fixed some bugs with the low bandwidth monitor.
- *
- * Revision 1.6  2006/04/03 05:15:53  dcervelli
- * Reduced bandwidth monitor mode.
- *
- * Revision 1.5  2005/09/02 16:40:17  dcervelli
- * CurrentTime changes.
- *
- * Revision 1.4  2005/08/30 00:34:13  tparker
- * Update to use Images class
- *
- * Revision 1.3  2005/08/27 00:30:15  tparker
- * Tidy code, no functional changes.
- *
- * Revision 1.2  2005/08/27 00:15:08  tparker
- * Create image constants
- *
- * Revision 1.1  2005/08/26 20:40:28  dcervelli
- * Initial avosouth commit.
- *
- * Revision 1.6  2005/05/02 16:22:11  cervelli
- * Moved data classes to separate package.
- *
- * Revision 1.5  2005/04/15 04:36:11  cervelli
- * More JDK 1.5 deprecation stuff.
- *
- * Revision 1.4  2005/04/11 00:22:58  cervelli
- * Removed JDK 1.5 deprecated Dialog.show().
- *
- * Revision 1.3  2004/10/28 20:24:12  cvs
- * Settings button, waves in Box.
- *
- * Revision 1.2  2004/10/12 23:43:15  cvs
- * Added log info and some comments.
  *
  * @author Dan Cervelli
- * @version $Id: MultiMonitor.java,v 1.12 2007-05-21 02:45:28 dcervelli Exp $
  */
 public class MultiMonitor extends SwarmFrame implements Kioskable
 {
@@ -169,7 +84,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 
 	private JToolBar toolbar;
 	private JButton settingsButton;
-//	private JButton alarmButton;
 	private JButton removeButton;
 	private JPanel wavePanel;
 	private JPanel mainPanel;
@@ -184,7 +98,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 	private int selectedIndex = -1;
 	
 	private static final Color SELECT_COLOR = new Color(204, 204, 255);
-//	private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);	
 	
 	private Throbber throbber;
 	
@@ -429,18 +342,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		Util.mapKeyStrokeToButton(this, "control C", "clipboard2", copyButton);
 		toolbar.add(copyButton);
 		
-//		alarmButton = SwarmUtil.createToolBarButton(
-//				Images.getIcon("alarm"),
-//				"Settings for wave alarm",
-//				new ActionListener()
-//				{
-//					public void actionPerformed(ActionEvent e)
-//					{
-//						System.out.println("alarm");
-//					}
-//				});
-//		toolbar.add(alarmButton);
-		
 		toolbar.addSeparator();
 		
 		removeButton = SwarmUtil.createToolBarButton(
@@ -500,7 +401,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		toolbar.add(throbber);
 		
 		mainPanel.add(toolbar, BorderLayout.NORTH);
-//		wavePanel = new JPanel();
 		wavePanel = new WavePanel();
 		wavePanel.setLayout(null);
 		
@@ -508,7 +408,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 				BorderFactory.createEmptyBorder(0, 2, 3, 3), 
 				BorderFactory.createLineBorder(Color.GRAY, 1));
 				
-//				BorderFactory.createMatteBorder(0, 1, 1, 1, Color.GRAY));
 		wavePanel.setBorder(border);
 		
 		mainPanel.add(wavePanel, BorderLayout.CENTER);
@@ -703,21 +602,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 	        	tr.color = Color.BLACK;
 	        	ar.addPostRenderer(tr);
 	        }
-//	        
-//	        double[] bt = (double[])stt[0];
-//	        String[] labels = (String[])stt[1];
-//	        for (int i = 0; i < bt.length; i++)
-//	        {
-//	            TextRenderer tr = new TextRenderer();
-//                tr.text = labels[i];
-//	            tr.x = (float)fr.getXPixel(bt[i]);
-//	            tr.y = fr.getGraphY() + fr.getGraphHeight() - 10;
-//	            tr.color = Color.BLACK;
-//	            tr.horizJustification = TextRenderer.CENTER;
-//	            tr.vertJustification = TextRenderer.TOP;
-//	            tr.font = TextRenderer.SMALL_FONT;
-//	            ar.addPostRenderer(tr);
-//	        }
 	        
 	        ar.addPostRenderer(rr);
 	        ar.addPostRenderer(label);
@@ -753,9 +637,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		{
 			WaveViewPanel panel = panels.get(selectedIndex);
 			setBackgroundColor(panel, selectedIndex);
-//			panel.setBackgroundColor(BACKGROUND_COLOR);
 			panel.createImage();
-//			panel.invalidateImage();
 			panel.repaint();
 		}
 	}
@@ -770,9 +652,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 			{
 				selectedIndex = i;
 				Swarm.getApplication().getDataChooser().setNearest(panel.getChannel());
-//				setBackgroundColor(panel, i);
 				panel.setBackgroundColor(SELECT_COLOR);
-//				panel.invalidateImage();
 				panel.createImage();
 				panel.repaint();
 				break;
@@ -890,8 +770,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 						double[] times = getTimeWindow();
 						double now = times[1];
 						double start = times[0];
-//						double now = CurrentTime.getInstance().nowJ2K();
-//						double start = now - SPANS[spanIndex];
 						for (int i = 0; i < panels.size(); i++)
 						{
 							WaveViewPanel waveViewPanel = panels.get(i);
@@ -938,14 +816,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 						double[] times = getTimeWindow();
 						double now = times[1];
 						double start = times[0];
-//						double now = CurrentTime.getInstance().nowJ2K();
-//						double start = now - SPANS[spanIndex];
-//						if (!Double.isNaN(pauseStartTime))
-//						{
-//							start = pauseStartTime;
-//							now = start + SPANS[spanIndex];
-//							System.out.println(start + " " + now);
-//						}
 						for (int i = 0; i < panels.size(); i++)
 						{
 							WaveViewPanel wvp = panels.get(i);

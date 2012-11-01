@@ -20,36 +20,6 @@ import cern.colt.matrix.DoubleMatrix2D;
  * Note: during the conversion to Java 5 I didn't fully understand generics
  * so I had to add some hacky code for the CachePurgeActions.
  * 
- * $Log: not supported by cvs2svn $
- * Revision 1.7  2006/08/07 22:37:30  cervelli
- * Changed member visibility.
- *
- * Revision 1.6  2006/08/01 23:43:48  cervelli
- * Changed memory usage.
- *
- * Revision 1.5  2006/07/26 00:36:02  cervelli
- * Changes for new gulper system.
- *
- * Revision 1.4  2006/06/05 18:07:03  dcervelli
- * Major 1.3 changes.
- *
- * Revision 1.3  2006/04/15 16:00:13  dcervelli
- * 1.3 changes (renaming, new datachooser, different config).
- *
- * Revision 1.2  2006/04/03 05:16:20  dcervelli
- * Changes for reduced bandwidth monitor mode.
- *
- * Revision 1.1  2005/08/26 20:40:28  dcervelli
- * Initial avosouth commit.
- *
- * Revision 1.1  2005/05/02 16:22:11  cervelli
- * Moved data classes to separate package.
- *
- * Revision 1.3  2004/10/23 19:34:11  cvs
- * Added null pointer check in getBestWave.
- *
- * Revision 1.2  2004/10/12 23:43:15  cvs
- * Added log info and some comments.
  *  
  * @author Dan Cervelli
  */
@@ -384,7 +354,7 @@ public class CachedDataSource extends SeismicDataSource
 		{
 			//Iterator it = helis.iterator();
 			// could be faster if wave vector was known to be sorted by start time
-			int overlaps = 0;
+//			int overlaps = 0;
 			boolean add = true;
 			for (int i = 0; i < helis.size(); i++)
 			{
@@ -396,7 +366,7 @@ public class CachedDataSource extends SeismicDataSource
 					HelicorderData newHeli = ch.helicorder.combine(helicorder);
 					//System.out.println("calling putheli from putheli");
 					putHelicorder(station, newHeli);
-					overlaps++;
+//					overlaps++;
 					helicorder = newHeli;
 					i = 0;
 					add = false;

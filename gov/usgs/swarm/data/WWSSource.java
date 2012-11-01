@@ -161,12 +161,12 @@ public class WWSSource extends SeismicDataSource
 		return scnl;
 	}
 	
-	public List<String> getMenuList(List items)
+	public List<String> getMenuList(List<MenuItem> items)
 	{
 		List<String> list = new ArrayList<String>(items.size());
-		for (Iterator it = items.iterator(); it.hasNext(); )
+		for (Iterator<MenuItem> it = items.iterator(); it.hasNext(); )
 		{
-			MenuItem mi = (MenuItem)it.next();
+			MenuItem mi = it.next();
 			list.add(getFormattedSCNL(mi));
 		}
 		return list;

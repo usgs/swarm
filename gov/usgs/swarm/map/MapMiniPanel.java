@@ -49,33 +49,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 
 /**
- * $Log: not supported by cvs2svn $
- * Revision 1.11  2006/08/12 21:52:29  dcervelli
- * New kiosk code.
- *
- * Revision 1.10  2006/08/11 21:03:24  dcervelli
- * Changes for better CPU utilization, better filter label.
- *
- * Revision 1.9  2006/08/07 22:38:21  cervelli
- * Labels apply linear calibration, channel switching redraw fixed.
- *
- * Revision 1.8  2006/08/06 20:05:26  cervelli
- * Decorators for each wave type and scaling fonts.
- *
- * Revision 1.7  2006/08/04 18:41:28  cervelli
- * Non reentrant updateWave() and auto channel picking.
- *
- * Revision 1.6  2006/08/02 23:35:20  cervelli
- * Layout changes, wave caching.
- *
- * Revision 1.5  2006/08/01 23:45:09  cervelli
- * More development.
- *
- * Revision 1.4  2006/07/26 22:41:00  cervelli
- * Bunch more development for 2.0.
- *
- * Revision 1.3  2006/07/26 00:39:36  cervelli
- * New resetImage() behavior.
  *
  * @author Dan Cervelli
  */
@@ -739,6 +712,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	        }
 		}
 		
+		/*
 		private void setLinearAxis(FrameRenderer fr, boolean log)
 		{
 			int hTicks = 6;
@@ -763,6 +737,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	            fr.getAxis().addPostRenderer(tr);
 	        }
 		}
+		*/
 		
 		private void setLeftLabel(FrameRenderer fr, String label)
 		{

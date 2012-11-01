@@ -20,51 +20,6 @@ import java.util.TimeZone;
  * An implementation of <code>SeismicDataSource</code> that connects to an
  * Earthworm Wave Server.
  * 
- * $Log: not supported by cvs2svn $
- * Revision 1.11  2007/03/06 20:00:02  dcervelli
- * Time zone offset.
- *
- * Revision 1.10  2006/08/14 22:45:28  dcervelli
- * Adheres to useCache.
- *
- * Revision 1.9  2006/08/09 03:44:51  cervelli
- * Added gulpSize and gulpDelay to config string.
- *
- * Revision 1.8  2006/08/08 22:22:20  cervelli
- * Configurable gulper parameters.
- *
- * Revision 1.7  2006/08/01 23:44:07  cervelli
- * New metadata system changes.
- *
- * Revision 1.6  2006/07/30 22:45:30  cervelli
- * Uses new gulper.
- *
- * Revision 1.5  2006/07/26 00:36:03  cervelli
- * Changes for new gulper system.
- *
- * Revision 1.4  2006/06/05 18:07:03  dcervelli
- * Major 1.3 changes.
- *
- * Revision 1.3  2006/04/15 16:00:13  dcervelli
- * 1.3 changes (renaming, new datachooser, different config).
- *
- * Revision 1.2  2005/09/02 16:40:29  dcervelli
- * CurrentTime changes.
- *
- * Revision 1.1  2005/08/26 20:40:28  dcervelli
- * Initial avosouth commit.
- *
- * Revision 1.1  2005/05/02 16:22:10  cervelli
- * Moved data classes to separate package.
- *
- * Revision 1.4  2005/04/25 15:07:55  cervelli
- * Fixed kiosk null pointer bug in isSCNL().
- *
- * Revision 1.3  2005/04/23 15:54:17  cervelli
- * Uses space delimiting instead of underscore.  Handles -- locations better.
- *
- * Revision 1.2  2005/04/16 20:57:18  cervelli
- * SCNL changes.
  *
  * @author Dan Cervelli
  */
@@ -167,12 +122,12 @@ public class WaveServerSource extends SeismicDataSource
 		return scnl;
 	}
 	
-	public List<String> getMenuList(List items)
+	public List<String> getMenuList(List<MenuItem> items)
 	{
 		List<String> list = new ArrayList<String>(items.size());
-		for (Iterator it = items.iterator(); it.hasNext(); )
+		for (Iterator<MenuItem> it = items.iterator(); it.hasNext(); )
 		{
-			MenuItem mi = (MenuItem)it.next();
+			MenuItem mi = it.next();
 			list.add(getFormattedSCNL(mi));
 		}
 		return list;
