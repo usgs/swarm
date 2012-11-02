@@ -112,14 +112,10 @@ public class WaveServerSource extends SeismicDataSource
 	
 	public String getFormattedSCNL(MenuItem mi)
 	{
-		String scnl = mi.getStation() + " " + mi.getChannel() + " " + mi.getNetwork();
 		if (isSCNL(params))
-		{
-			String loc = mi.getLocation();
-			if (loc != null && !loc.equals("--"))
-				scnl = scnl + " " + loc;
-		}
-		return scnl;
+			return mi.getSCNL(" ");
+		else
+			return mi.getSCN(" ");
 	}
 	
 	public List<String> getMenuList(List<MenuItem> items)
@@ -164,10 +160,10 @@ public class WaveServerSource extends SeismicDataSource
 				cache.putWave(station, sw);
 			}
 		}
-		else
-		{
-			//System.out.println("cached");	
-		}
+//		else
+//		{
+//			//System.out.println("cached");	
+//		}
 		return sw;
 	}
 	

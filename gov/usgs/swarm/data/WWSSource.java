@@ -154,11 +154,11 @@ public class WWSSource extends SeismicDataSource
 	
 	public String getFormattedSCNL(MenuItem mi)
 	{
-		String scnl = mi.getStation() + " " + mi.getChannel() + " " + mi.getNetwork();
-		String loc = mi.getLocation();
-		if (loc != null && !loc.equals("--"))
-			scnl = scnl + " " + loc;
-		return scnl;
+//		String scnl = mi.getStation() + " " + mi.getChannel() + " " + mi.getNetwork();
+//		String loc = mi.getLocation();
+//		if (loc != null && !loc.equals("--"))
+//			scnl = scnl + " " + loc;
+		return mi.getSCNSCNL(" ");
 	}
 	
 	public List<String> getMenuList(List<MenuItem> items)
