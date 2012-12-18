@@ -20,7 +20,7 @@ abstract public class SeismicDataSource
 	protected String name = "Unnamed Data Source";
 	protected boolean storeInUserConfig = true;
 	protected boolean useCache = true;
-	public final int minimumRefreshInterval = 1;
+	protected int minimumRefreshInterval = 1;
 	
 	protected EventListenerList listeners = new EventListenerList();
 
@@ -223,5 +223,9 @@ abstract public class SeismicDataSource
 		}
 		sds.setName(name);
 		return sds;
+	}
+	
+	public int getMinimumRefreshInterval() {
+		return minimumRefreshInterval;
 	}
 }

@@ -33,6 +33,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
+import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -899,12 +900,14 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 		{
 			while (!kill)
 			{
+				// enforce a dataSource-specific minimum refresh interval
 				int refreshInterval;
-				if (settings.refreshInterval > dataSource.minimumRefreshInterval)
-					refreshInterval = settings.refreshInterval;
-				else 
-					refreshInterval = dataSource.minimumRefreshInterval;
+				if (settings.refreshInterval == 0 || dataSource.getMinimumRefreshInterval() == 0)
+					refreshInterval = 0;
+				else
+					refreshInterval = Math.max(settings.refreshInterval, dataSource.getMinimumRefreshInterval());
 				
+
 				long lastUI = System.currentTimeMillis() - Swarm.getApplication().getLastUITime();
 				boolean reset = Swarm.config.isKiosk() && lastUI > 10 * 60 * 1000;
 				// TODO: extract magic number
