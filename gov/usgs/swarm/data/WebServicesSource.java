@@ -46,6 +46,9 @@ public class WebServicesSource extends SeismicDataSource
 	private final String wsDataSelectUrl;
 	/** Web Services station URL. */
 	private final String wsStationUrl;
+	
+	/** IRIS prefers a 60 second interval */
+	public static int minimumRefreshInterval = 60;
 
 	/**
 	 * Create a Web Services server source.

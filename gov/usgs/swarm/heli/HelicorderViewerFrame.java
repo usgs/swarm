@@ -63,106 +63,6 @@ import javax.swing.event.InternalFrameEvent;
  
 /**
  * <code>JInternalFrame</code> that holds a helicorder.
- * 
- * $Log: not supported by cvs2svn $f
- * Revision 1.8  2007/04/29 21:27:01  dcervelli
- * Progress meter.
- *
- * Revision 1.7  2007/01/30 20:00:09  dcervelli
- * File chooser named.
- *
- * Revision 1.6  2006/10/26 00:51:56  dcervelli
- * Change for user specified end times from chooser.
- *
- * Revision 1.5  2006/08/12 21:52:29  dcervelli
- * New kiosk code.
- *
- * Revision 1.4  2006/08/11 21:01:07  dcervelli
- * Changes for small helicorder view.
- *
- * Revision 1.3  2006/08/10 14:32:11  cervelli
- * Fix for nonupdating IRIS source.
- *
- * Revision 1.2  2006/08/04 18:40:14  cervelli
- * Pinned saved to layout.
- *
- * Revision 1.1  2006/08/01 23:44:22  cervelli
- * Moved package.
- *
- * Revision 1.21  2006/07/30 22:43:03  cervelli
- * Changes for layouts.
- *
- * Revision 1.20  2006/07/29 17:16:48  cervelli
- * Made clip/scale toggle a proper button and added tool tips to it and the slider.
- *
- * Revision 1.19  2006/07/26 00:37:36  cervelli
- * Changes for new gulper system.
- *
- * Revision 1.18  2006/07/22 20:25:04  cervelli
- * TimeListener changes, potential fix for stalled helicorder in kiosk mode bug.
- *
- * Revision 1.17  2006/06/14 19:19:31  dcervelli
- * Major 1.3.4 changes.
- *
- * Revision 1.16  2006/06/05 18:06:49  dcervelli
- * Major 1.3 changes.
- *
- * Revision 1.15  2006/04/17 04:16:36  dcervelli
- * More 1.3 changes.
- *
- * Revision 1.14  2006/04/15 15:58:52  dcervelli
- * 1.3 changes (renaming, new datachooser, different config).
- *
- * Revision 1.13  2006/03/04 23:03:45  cervelli
- * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
- *
- * Revision 1.12  2006/01/21 11:04:11  tparker
- * Apply alertClip settings
- *
- * Revision 1.11  2005/11/29 00:45:34  tparker
- * Add PS option to "save image"
- *
- * Revision 1.10  2005/09/22 20:57:16  dcervelli
- * Helicorder screenshot cleaned up a bit, autoscale slider size fixed.
- *
- * Revision 1.9  2005/09/13 18:20:59  tparker
- * Display confirm dialog before overwritting png file.
- *
- * Revision 1.8  2005/09/13 17:56:46  dcervelli
- * Uses helicorder rendering constants to position helicorder when saving pngs.
- *
- * Revision 1.7  2005/09/08 20:27:57  tparker
- * Disable save and autoscale controls during rendering
- *
- * Revision 1.6  2005/09/08 18:54:54  tparker
- * Add save image button
- *
- * Revision 1.5  2005/09/02 16:40:05  dcervelli
- * CurrentTime changes and changed enable/disable[xxx] to set[xxx].
- *
- * Revision 1.4  2005/08/30 18:01:39  tparker
- * Add Autoscale Slider to Helicorder Viewer Frame
- *
- * Revision 1.3  2005/08/30 00:33:30  tparker
- * Update to use Images class
- *
- * Revision 1.2  2005/08/26 23:27:03  uid889
- * Create image path constants
- *
- * Revision 1.1  2005/08/26 20:40:28  dcervelli
- * Initial avosouth commit.
- *
- * Revision 1.5  2005/05/02 16:22:11  cervelli
- * Moved data classes to separate package.
- *
- * Revision 1.4  2005/04/13 00:50:02  cervelli
- * Fixed show() call.
- *
- * Revision 1.3  2005/03/27 22:02:16  cervelli
- * Did some cleanup.
- *
- * Revision 1.2  2004/10/28 20:14:41  cvs
- * Support for big red mouse cursor.
  *
  * @author Dan Cervelli
  * @version $Id: HelicorderViewerFrame.java,v 1.9 2007-05-21 02:48:57 dcervelli Exp $
@@ -283,9 +183,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 	
 	public void createUI()
 	{
-//		setOpaque(false);
 		mainPanel = new JPanel(new BorderLayout());
-//		mainPanel.setBackground(new Color(255, 255, 255, 128));
 		createHeliPanel();
 		createToolBar();
 		createStatusLabel();
@@ -295,7 +193,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 		setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
 		setSize(800, 750);
 		setContentPane(mainPanel);
-//		createWiggler();
 	}
 
 	public void addLinkListeners()
@@ -319,7 +216,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 		progressBar.setPreferredSize(new Dimension(100, 15));
 		progressBar.setSize(new Dimension(100, 15));
 		progressBar.setMaximumSize(new Dimension(100, 15));
-//		progressBar.setMinimumSize(new Dimension(100, 15));
 		statusPanel.add(progressBar);
 		mainPanel.add(statusPanel, BorderLayout.SOUTH);
 	}
@@ -636,25 +532,11 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 				{
 					public void componentResized(ComponentEvent e)
 					{
-//						if (getWidth() < 500 && toolBar.getParent() != null)
 						if (getWidth() < 530)
-						{
-							// remove toolbar
-//							mainPanel.remove(toolBar);
-//							mainPanel.remove(statusLabel);
-//							heliPanel.setBorder(thinBorder);
 							helicorderViewPanel.setMinimal(true);
-//							mainPanel.validate();
-						}
-//						else if (getWidth() >= 500 && toolBar.getParent() == null)
 						else
-						{
-//							mainPanel.add(toolBar, BorderLayout.NORTH);
-//							mainPanel.add(statusLabel, BorderLayout.SOUTH);
-//							heliPanel.setBorder(border);
 							helicorderViewPanel.setMinimal(false);
-//							mainPanel.validate();
-						}
+
 						helicorderViewPanel.setResized(true);
 						repaintHelicorder();
 						repaint();
@@ -837,8 +719,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 						backButton.setEnabled(b);
 						compY.setEnabled(b);
 						expY.setEnabled(b);
-//						autoScaleSliderButton.setEnabled(b);
-//						autoScaleSlider.setEnabled(b);
 						capture.setEnabled(b);
 					}
 				});
@@ -968,7 +848,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 						lastRefreshTime = System.currentTimeMillis();
 						throbber.decrement();
 						setNavigationButtonsEnabled(true);
-//						working = false;
 						if (success)
 						{
 							if (hd != null && hd.getEndTime() < before && !dataSource.isActiveSource())
@@ -999,11 +878,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 		return dataSource;	
 	}
 	
-//	public String getChannel()
-//	{
-//		return channel;	
-//	}
-
 	private class RefreshThread extends Thread
 	{
 		private boolean kill = false;
@@ -1025,6 +899,12 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 		{
 			while (!kill)
 			{
+				int refreshInterval;
+				if (settings.refreshInterval > dataSource.minimumRefreshInterval)
+					refreshInterval = settings.refreshInterval;
+				else 
+					refreshInterval = dataSource.minimumRefreshInterval;
+				
 				long lastUI = System.currentTimeMillis() - Swarm.getApplication().getLastUITime();
 				boolean reset = Swarm.config.isKiosk() && lastUI > 10 * 60 * 1000;
 				// TODO: extract magic number
@@ -1040,9 +920,9 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 				try 
 				{ 
 					long now = System.currentTimeMillis();
-					long sleepTime = Math.min(now - lastRefreshTime, settings.refreshInterval * 1000);
+					long sleepTime = Math.min(now - lastRefreshTime, refreshInterval * 1000);
 					
-					if (settings.refreshInterval > 0)
+					if (refreshInterval > 0)
 						Thread.sleep(sleepTime); 
 					else
 						Thread.sleep(30 * 1000);
@@ -1050,7 +930,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 				
 				long now = System.currentTimeMillis();
 				
-				if (!kill && settings.refreshInterval > 0 && (now - lastRefreshTime) > settings.refreshInterval * 1000)
+				if (!kill && refreshInterval > 0 && (now - lastRefreshTime) > refreshInterval * 1000)
 				{
 					try
 					{
@@ -1179,8 +1059,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable
 						height - HelicorderViewPanel.Y_OFFSET - HelicorderViewPanel.BOTTOM_HEIGHT);
 				heliRenderer.setHelicorderExtents(before,end , -1 * Math.abs(settings.barRange), Math.abs(settings.barRange));
 				heliRenderer.setTimeZone(Swarm.config.getTimeZone(settings.channel));
-//				heliRenderer.setTimeZoneOffset(Swarm.config.timeZoneOffset);
-//				heliRenderer.setTimeZoneAbbr(Swarm.config.timeZoneAbbr);
 				heliRenderer.setForceCenter(settings.forceCenter);
 				heliRenderer.setClipBars(settings.clipBars);
 				heliRenderer.setShowClip(settings.showClip);
