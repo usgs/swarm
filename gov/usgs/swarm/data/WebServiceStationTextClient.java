@@ -7,15 +7,14 @@ import java.util.Date;
 import java.util.List;
 
 public class WebServiceStationTextClient extends
-		AbstractWebServiceStationClient
-{
+		AbstractWebServiceStationClient {
 	/**
 	 * Create the web service station client.
 	 * 
-	 * @param baseUrlText the base URL text.
+	 * @param baseUrlText
+	 *            the base URL text.
 	 */
-	public static WebServiceStationTextClient createClient(String[] args)
-	{
+	public static WebServiceStationTextClient createClient(String[] args) {
 		String baseUrlText = getArg(args, 0, DEFAULT_WS_URL);
 		String net = getArg(args, 1);
 		String sta = getArg(args, 2);
@@ -26,36 +25,27 @@ public class WebServiceStationTextClient extends
 				chan, date);
 	}
 
-	public static void main(String[] args)
-	{
+	public static void main(String[] args) {
 		String error = null;
 		WebServiceStationTextClient client = createClient(args);
-		try
-		{
+		try {
 			client.setStationList(createStationList());
 			error = client.fetchStations();
-			if (error == null)
-			{
+			if (error == null) {
 				List<StationInfo> stationList = client.getStationList();
 				System.out.println("station count: " + stationList.size());
-				for (StationInfo station : stationList)
-				{
+				for (StationInfo station : stationList) {
 					System.out.println("station: " + station);
 					client.setCurrentStation(station);
 					error = client.fetchChannels();
 				}
 			}
-		}
-		catch (Exception ex)
-		{
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		if (error != null)
-		{
+		if (error != null) {
 			System.out.println(error);
-		}
-		else
-		{
+		} else {
 			System.out.println("done");
 		}
 	}
@@ -63,30 +53,35 @@ public class WebServiceStationTextClient extends
 	/**
 	 * Create the web service station client.
 	 * 
-	 * @param baseUrlText the base URL text.
-	 * @param net the network or null if none.
-	 * @param sta the station or null if none.
-	 * @param loc the location or null if none.
-	 * @param chan the channel or null if none.
-	 * @param date the date or null if none.
+	 * @param baseUrlText
+	 *            the base URL text.
+	 * @param net
+	 *            the network or null if none.
+	 * @param sta
+	 *            the station or null if none.
+	 * @param loc
+	 *            the location or null if none.
+	 * @param chan
+	 *            the channel or null if none.
+	 * @param date
+	 *            the date or null if none.
 	 */
 	public WebServiceStationTextClient(String baseUrlText, String net,
-			String sta, String loc, String chan, Date date)
-	{
+			String sta, String loc, String chan, Date date) {
 		super(baseUrlText, net, sta, loc, chan, date);
 	}
 
 	/**
 	 * Fetch the stations.
 	 * 
-	 * @param url the URL.
+	 * @param url
+	 *            the URL.
 	 * 
-	 * @throws Exception if an error occurs.
+	 * @throws Exception
+	 *             if an error occurs.
 	 */
-	protected void fetch(URL url) throws Exception
-	{
-		for (String line; (line = getReader().readLine()) != null;)
-		{
+	protected void fetch(URL url) throws Exception {
+		for (String line; (line = getReader().readLine()) != null;) {
 			processLine(line);
 		}
 	}
@@ -96,8 +91,7 @@ public class WebServiceStationTextClient extends
 	 * 
 	 * @return the base URL text.
 	 */
-	protected String getBaseUrlText()
-	{
+	protected String getBaseUrlText() {
 		String urlText = super.getBaseUrlText();
 		urlText = append(urlText, "output", "text");
 		return urlText;
@@ -106,15 +100,15 @@ public class WebServiceStationTextClient extends
 	/**
 	 * Get the column text.
 	 * 
-	 * @param columns the columns.
-	 * @param index the column index or -1 if none.
+	 * @param columns
+	 *            the columns.
+	 * @param index
+	 *            the column index or -1 if none.
 	 * @return the column text or null if none.
 	 */
-	protected String getColumnText(String[] columns, int index)
-	{
+	protected String getColumnText(String[] columns, int index) {
 		String s = null;
-		if (index >= 0 && index < columns.length)
-		{
+		if (index >= 0 && index < columns.length) {
 			s = columns[index];
 		}
 		return s;
@@ -125,43 +119,36 @@ public class WebServiceStationTextClient extends
 	 * 
 	 * @return the line split text.
 	 */
-	protected String getLineSplitText()
-	{
+	protected String getLineSplitText() {
 		return "\\s*\\|\\s*";
 	}
 
 	/**
 	 * Process the line.
 	 * 
-	 * @param line the line of text containing the channel information.
+	 * @param line
+	 *            the line of text containing the channel information.
 	 */
-	protected void processLine(String line)
-	{
+	protected void processLine(String line) {
 		// skip comment line
-		if (line.startsWith("#"))
-		{
+		if (line.startsWith("#")) {
 			return;
 		}
 
 		// skip line if it starts with the separator
-		if (line.matches("^" + getLineSplitText() + ".*"))
-		{
+		if (line.matches("^" + getLineSplitText() + ".*")) {
 			WebServiceUtils.fine("skipping line (" + line + ")");
 			return;
 		}
 
 		final String[] columns = split(line);
 		int minNumColumns;
-		switch (getLevel())
-		{
+		switch (getLevel()) {
 		case STATION:
 			minNumColumns = 6;
-			if (columns.length < minNumColumns)
-			{
+			if (columns.length < minNumColumns) {
 				error.append("invalid line (" + line + ")\n");
-			}
-			else
-			{
+			} else {
 				String network = getColumnText(columns, 0);
 				String station = getColumnText(columns, 1);
 				double latitude = StationInfo.parseDouble(getColumnText(
@@ -175,12 +162,9 @@ public class WebServiceStationTextClient extends
 			break;
 		case CHANNEL:
 			minNumColumns = 6;
-			if (columns.length < minNumColumns)
-			{
+			if (columns.length < minNumColumns) {
 				error.append("invalid line (" + line + ")\n");
-			}
-			else
-			{
+			} else {
 				String network = getColumnText(columns, 0);
 				String station = getColumnText(columns, 1);
 				String location = getColumnText(columns, 2);
@@ -194,17 +178,19 @@ public class WebServiceStationTextClient extends
 						location, latitude, longitude, siteName, groupsType));
 			}
 			break;
+		default:
+			break;
 		}
 	}
 
 	/**
 	 * Split the line.
 	 * 
-	 * @param line the line of text containing the channel information.
+	 * @param line
+	 *            the line of text containing the channel information.
 	 * @return the channel information.
 	 */
-	protected String[] split(String line)
-	{
+	protected String[] split(String line) {
 		return line.split(getLineSplitText());
 	}
 }

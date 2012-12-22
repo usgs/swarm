@@ -47,21 +47,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 /**
- * $Log: not supported by cvs2svn $
- * Revision 1.5  2006/10/26 00:51:16  dcervelli
- * Location codes for SEED files.
- *
- * Revision 1.4  2006/08/14 22:45:09  dcervelli
- * Double-click maps to OK.
- *
- * Revision 1.3  2006/08/12 21:51:53  dcervelli
- * Addition of id to channelProgress().
- *
- * Revision 1.2  2006/08/11 21:00:27  dcervelli
- * New file type selector dialog box.
- *
- * Revision 1.1  2006/08/07 22:35:27  cervelli
- * Initial commit.
  * 
  * @author Dan Cervelli
  */
@@ -205,11 +190,6 @@ public class FileDataSource extends CachedDataSource
 			opened = false;
 		}
 		
-		public boolean isCancelled()
-		{
-			return cancelled;
-		}
-		
 		public void setVisible(boolean b)
 		{
 			if (b)
@@ -253,16 +233,10 @@ public class FileDataSource extends CachedDataSource
 				case UNKNOWN:
 					Swarm.logger.warning("unknown file type: " + fs[i].getPath());
 					break;
+				default:
+					Swarm.logger.warning("Cannot load file type " + ft + ": " + fs[i].getPath());
+					break;
 			}
-//			try
-//			{
-//				
-//			}
-//			catch (Throwable t)
-//			{
-//				
-//				t.printStackTrace();
-//			}
 			Swarm.config.lastPath = fs[i].getParent();
 		}
 	}
@@ -380,7 +354,6 @@ public class FileDataSource extends CachedDataSource
 			                sw.setStartTime(Util.dateToJ2K(btimeToDate(bTime)));
 			                sw.buffer = wf.getDecodedIntegers();
 			                sw.register();
-	//			                System.out.println(sw);
 			                parts.add(sw);
 			            }
 					}
@@ -390,14 +363,12 @@ public class FileDataSource extends CachedDataSource
 						List<Wave> parts = tempStationMap.get(code);
 						ArrayList<Wave> subParts = new ArrayList<Wave>();
 						int ns = 0;
-						int sp = 0;
 						for (int i = 0; i < parts.size(); i++)
 						{
 							ns += parts.get(i).samples();
 							subParts.add(parts.get(i));
 							if (ns > 3600 * 100 || i == parts.size() - 1)
 							{
-								sp++;
 								Wave wave = Wave.join(subParts);
 								updateChannelTimes(code, wave.getStartTime(), wave.getEndTime());
 				                cacheWaveAsHelicorder(code, wave);

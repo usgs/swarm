@@ -438,12 +438,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 						}
 					});
 		}
-		
-		public synchronized BufferedImage getImage()
-		{
-			return image;
-		}
-		
+				
 		private synchronized void createImage()
 		{
 			if (getWidth() > 0 && getHeight() > 0)

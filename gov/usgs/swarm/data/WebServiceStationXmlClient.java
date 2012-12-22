@@ -19,15 +19,14 @@ import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.events.XMLEvent;
 
-public class WebServiceStationXmlClient extends AbstractWebServiceStationClient
-{
+public class WebServiceStationXmlClient extends AbstractWebServiceStationClient {
 	/**
 	 * Create the web service station client.
 	 * 
-	 * @param baseUrlText the base URL text.
+	 * @param baseUrlText
+	 *            the base URL text.
 	 */
-	public static WebServiceStationXmlClient createClient(String[] args)
-	{
+	public static WebServiceStationXmlClient createClient(String[] args) {
 		String baseUrlText = getArg(args, 0, DEFAULT_WS_URL);
 		String net = getArg(args, 1);
 		String sta = getArg(args, 2);
@@ -38,36 +37,27 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient
 				date);
 	}
 
-	public static void main(String[] args)
-	{
+	public static void main(String[] args) {
 		String error = null;
 		WebServiceStationXmlClient client = createClient(args);
-		try
-		{
+		try {
 			client.setStationList(createStationList());
 			error = client.fetchStations();
-			if (error == null)
-			{
+			if (error == null) {
 				List<StationInfo> stationList = client.getStationList();
 				System.out.println("station count: " + stationList.size());
-				for (StationInfo station : stationList)
-				{
+				for (StationInfo station : stationList) {
 					System.out.println("station: " + station);
 					client.setCurrentStation(station);
 					error = client.fetchChannels();
 				}
 			}
-		}
-		catch (Exception ex)
-		{
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		if (error != null)
-		{
+		if (error != null) {
 			System.out.println(error);
-		}
-		else
-		{
+		} else {
 			System.out.println("done");
 		}
 	}
@@ -75,36 +65,37 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient
 	/**
 	 * Create the web service station client.
 	 * 
-	 * @param baseUrlText the base URL text.
-	 * @param net the network or null if none.
-	 * @param sta the station or null if none.
-	 * @param loc the location or null if none.
-	 * @param chan the channel or null if none.
-	 * @param date the date or null if none.
+	 * @param baseUrlText
+	 *            the base URL text.
+	 * @param net
+	 *            the network or null if none.
+	 * @param sta
+	 *            the station or null if none.
+	 * @param loc
+	 *            the location or null if none.
+	 * @param chan
+	 *            the channel or null if none.
+	 * @param date
+	 *            the date or null if none.
 	 */
 	public WebServiceStationXmlClient(String baseUrlText, String net,
-			String sta, String loc, String chan, Date date)
-	{
+			String sta, String loc, String chan, Date date) {
 		super(baseUrlText, net, sta, loc, chan, date);
 	}
 
 	/**
 	 * Check the schema version.
 	 * 
-	 * @param staMessage the station message.
+	 * @param staMessage
+	 *            the station message.
 	 * @return true if match, false otherwise.
 	 */
-	protected boolean checkSchemaVersion(StaMessage staMessage)
-	{
-		try
-		{
-			if (staMessage.checkSchemaVersion())
-			{
+	protected boolean checkSchemaVersion(StaMessage staMessage) {
+		try {
+			if (staMessage.checkSchemaVersion()) {
 				return true;
 			}
-		}
-		catch (Exception ex)
-		{
+		} catch (Exception ex) {
 		}
 		String message = "XM schema of this document ("
 				+ staMessage.getXmlSchemaLocation()
@@ -118,38 +109,33 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient
 	/**
 	 * Fetch the stations.
 	 * 
-	 * @param url the URL.
+	 * @param url
+	 *            the URL.
 	 * 
-	 * @throws Exception if an error occurs.
+	 * @throws Exception
+	 *             if an error occurs.
 	 */
-	protected void fetch(URL url) throws Exception
-	{
+	protected void fetch(URL url) throws Exception {
 		// likely not an error in the http layer, so assume XML is returned
 		XMLInputFactory factory = XMLInputFactory.newInstance();
 		XMLEventReader r = factory.createXMLEventReader(url.toString(),
 				conn.getInputStream());
 		XMLEvent e = r.peek();
-		while (!e.isStartElement())
-		{
+		while (!e.isStartElement()) {
 			e = r.nextEvent(); // eat this one
 			e = r.peek(); // peek at the next
 		}
 		StaMessage staMessage = new StaMessage(r);
 		checkSchemaVersion(staMessage);
 		final NetworkIterator it = staMessage.getNetworks();
-		if (it != null)
-		{
-			while (it.hasNext())
-			{
+		if (it != null) {
+			while (it.hasNext()) {
 				final Network n = it.next();
 				final StationIterator sit = n.getStations();
-				if (sit != null)
-				{
-					while (sit.hasNext())
-					{
+				if (sit != null) {
+					while (sit.hasNext()) {
 						final Station s = sit.next();
-						if (!n.getNetCode().equals(s.getNetCode()))
-						{
+						if (!n.getNetCode().equals(s.getNetCode())) {
 							throw new StationXMLException(
 									"Station in wrong network: "
 											+ n.getNetCode() + " != "
@@ -158,19 +144,16 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient
 
 						}
 						List<StationEpoch> staEpochs = s.getStationEpochs();
-						for (StationEpoch stationEpoch : staEpochs)
-						{
+						for (StationEpoch stationEpoch : staEpochs) {
 							String network = n.getNetCode();
 							String station = s.getStaCode();
 							double latitude = stationEpoch.getLat();
 							double longitude = stationEpoch.getLon();
 							String siteName = null;
-							if (stationEpoch.getSite() != null)
-							{
+							if (stationEpoch.getSite() != null) {
 								siteName = stationEpoch.getSite().getName();
 							}
-							switch (getLevel())
-							{
+							switch (getLevel()) {
 							case STATION:
 								processStation(createStationInfo(station,
 										network, latitude, longitude, siteName));
@@ -178,8 +161,7 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient
 							case CHANNEL:
 								List<Channel> chanList = stationEpoch
 										.getChannelList();
-								for (Channel chan : chanList)
-								{
+								for (Channel chan : chanList) {
 									String location = chan.getLocCode();
 									String channel = chan.getChanCode();
 									processChannel(createChannelInfo(station,
@@ -187,6 +169,8 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient
 											latitude, longitude, siteName,
 											groupsType));
 								}
+								break;
+							default:
 								break;
 							}
 						}
