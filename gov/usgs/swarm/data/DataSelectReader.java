@@ -12,12 +12,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import edu.sc.seis.seisFile.BuildVersion;
 import edu.sc.seis.seisFile.StringMSeedQueryReader;
 import edu.sc.seis.seisFile.dataSelectWS.DataSelectException;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.mseed.SeedRecord;
+import gov.usgs.swarm.Swarm;
 
 /**
  * The data select reader reads data from the web services. This class a based
@@ -33,7 +33,7 @@ public class DataSelectReader extends StringMSeedQueryReader
 	/** The URL base. */
 	protected String urlBase;
 	/** The user agent. */
-	protected String userAgent = "SeisFile/" + BuildVersion.getVersion();
+	protected String userAgent = "Swarm/" + Swarm.getVersion();
 	/** The default web services URL. */
 	public static final String DEFAULT_WS_URL = "http://www.iris.edu/ws/dataselect/query";
 
