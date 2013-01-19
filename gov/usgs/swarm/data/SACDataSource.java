@@ -10,24 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * $Log: not supported by cvs2svn $
- * Revision 1.4  2006/06/05 18:07:03  dcervelli
- * Major 1.3 changes.
- *
- * Revision 1.3  2006/04/15 16:00:13  dcervelli
- * 1.3 changes (renaming, new datachooser, different config).
- *
- * Revision 1.2  2005/09/02 16:40:29  dcervelli
- * CurrentTime changes.
- *
- * Revision 1.1  2005/08/26 20:40:28  dcervelli
- * Initial avosouth commit.
- *
- * Revision 1.1  2005/05/02 16:22:11  cervelli
- * Moved data classes to separate package.
- *
- * Revision 1.1  2004/10/23 19:34:46  cvs
- * Added support for SAC files.
  *
  * @author Dan Cervelli
  */
@@ -51,8 +33,10 @@ public class SACDataSource extends SeismicDataSource
 			sac.read(fn);
 			station = sac.getStationInfo();
 			wave = sac.toWave();
-			Swarm.getCache().cacheWaveAsHelicorder(station, wave);
-			Swarm.getCache().putWave(station, wave);
+
+			CachedDataSource cache = CachedDataSource.getInstance();
+			cache.cacheWaveAsHelicorder(station, wave);
+			cache.putWave(station, wave);
 		}
 		catch (Exception e)
 		{
@@ -69,7 +53,9 @@ public class SACDataSource extends SeismicDataSource
 			t2 = wave.getEndTime();
 			t1 = t2 - dt;
 		}
-		return Swarm.getCache().getHelicorder(station, t1, t2, gl);
+		
+		CachedDataSource cache = CachedDataSource.getInstance();
+		return cache.getHelicorder(station, t1, t2, gl);
 	}
 	
 	public List<String> getChannels()
@@ -81,7 +67,8 @@ public class SACDataSource extends SeismicDataSource
 
 	public Wave getWave(String station, double t1, double t2) 
 	{
-		return Swarm.getCache().getBestWave(station, t1, t2);
+		CachedDataSource cache = CachedDataSource.getInstance();
+		return cache.getBestWave(station, t1, t2);
 	}
 	
 	public String toConfigString()

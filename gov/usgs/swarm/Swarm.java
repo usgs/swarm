@@ -61,178 +61,7 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * TODO: chooser visibility
  * TODO: name worker thread for better debugging
  *
- * $Log: not supported by cvs2svn $
- * Revision 1.5   2012/01/09 00:10:34  pcervelli
- * Changed spectrogram code.  Fixed a bug in the wave settings dialog.
- * Code needs some work before it's ready for wide distribution.
- * 
- * Revision 1.44  2007/07/10 00:10:34  cervelli
- * Version bump.
- *
- * Revision 1.43  2007/05/21 03:02:41  dcervelli
- * Support for 3-up monitor mode and JNLP test.
- *
- * Revision 1.42  2007/03/21 23:53:54  cervelli
- * version bump
- *
- * Revision 1.41  2007/03/12 22:28:07  dcervelli
- * Disable magnitude markers when options changed, version bump.
- *
- * Revision 1.40  2007/03/06 17:54:16  cervelli
- * Units can now be disabled
- *
- * Revision 1.39  2007/01/30 20:02:01  dcervelli
- * Version bump.
- *
- * Revision 1.38  2006/11/30 17:40:17  dcervelli
- * Changes for tweakable layouts and version bump.
- *
- * Revision 1.37  2006/10/26 00:47:48  dcervelli
- * Support for opening helicorder to specific time and userTimes config variable.
- *
- * Revision 1.36  2006/08/29 21:14:22  cervelli
- * Layout stuff
- *
- * Revision 1.35  2006/08/15 17:53:25  dcervelli
- * Layout and kiosk changes.
- *
- * Revision 1.34  2006/08/12 21:50:22  dcervelli
- * New kiosk code.
- *
- * Revision 1.33  2006/08/11 20:58:23  dcervelli
- * New internal frame border.
- *
- * Revision 1.32  2006/08/09 21:56:41  cervelli
- * Added ctrl-L to global key listener, moved save layout here, and fixes for maximization state for config file.
- *
- * Revision 1.31  2006/08/09 05:10:41  cervelli
- * Maximize clipboard and map here (after setVisible(true)) to avoid UI bug.
- *
- * Revision 1.30  2006/08/07 22:34:13  cervelli
- * File source, monitor layouts, version info.
- *
- * Revision 1.29  2006/08/06 20:03:32  cervelli
- * Outputs max memory to log.
- *
- * Revision 1.28  2006/08/04 21:17:45  cervelli
- * Make the map go to front on startup.
- *
- * Revision 1.27  2006/08/04 18:37:07  cervelli
- * Version bump for alpha release 1.
- *
- * Revision 1.26  2006/08/01 23:41:32  cervelli
- * Many 2.0 changes.
- *
- * Revision 1.25  2006/07/30 22:43:03  cervelli
- * Changes for layouts.
- *
- * Revision 1.24  2006/07/22 20:30:05  cervelli
- * Map, time zones, time listeners.
- *
- * Revision 1.23  2006/06/14 19:19:31  dcervelli
- * Major 1.3.4 changes.
- *
- * Revision 1.22  2006/06/05 18:06:49  dcervelli
- * Major 1.3 changes.
- *
- * Revision 1.21  2006/04/17 04:16:36  dcervelli
- * More 1.3 changes.
- *
- * Revision 1.20  2006/04/15 15:58:52  dcervelli
- * 1.3 changes (renaming, new datachooser, different config).
- *
- * Revision 1.19  2006/04/11 17:55:14  dcervelli
- * Duration magnitude option.
- *
- * Revision 1.18  2006/04/08 18:15:16  cervelli
- * Made audible alerts off by default.
- *
- * Revision 1.17  2006/04/02 17:18:18  cervelli
- * Green lines banished, '.sac' extension no longer is automatically appended.
- *
- * Revision 1.16  2006/03/04 23:03:45  cervelli
- * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
- *
- * Revision 1.15  2006/03/02 00:55:02  dcervelli
- * Added calibrations.
- *
- * Revision 1.14  2006/02/05 14:56:50  cervelli
- * Bumped version. Added info about NTP.config to the manual.
- *
- * Revision 1.13  2006/01/26 22:02:55  tparker
- * Add new config file defaults.
- *
- * Revision 1.12  2006/01/25 21:50:10  tparker
- * Cleanup imports
- *
- * Revision 1.11  2006/01/25 00:39:28  tparker
- * Move clipping alert into the heli renderer. In progress...
- *
- * Revision 1.10  2006/01/21 11:04:11  tparker
- * Apply alertClip settings
- *
- * Revision 1.9  2006/01/21 01:29:20  tparker
- * First swipe at adding voice alerting of clipping. A work in progress...
- *
- * Revision 1.8  2005/10/27 16:01:56  cervelli
- * Added release date to Swarm.java
- *
- * Revision 1.7  2005/10/27 15:39:27  dcervelli
- * Fixed showclip typo.
- *
- * Revision 1.6  2005/10/26 16:47:38  cervelli
- * Made showClip variable configurable.  Changed manually slightly.
- *
- * Revision 1.5  2005/10/01 16:16:30  dcervelli
- * Version bump.
- *
- * Revision 1.4  2005/09/23 21:58:02  dcervelli
- * Version bump.
- *
- * Revision 1.3  2005/09/22 21:00:50  dcervelli
- * Many changes (lastUITime, duration magnitudes, version bump, etc.).
- *
- * Revision 1.2  2005/09/02 16:40:17  dcervelli
- * CurrentTime changes.
- *
- * Revision 1.1  2005/08/26 20:40:28  dcervelli
- * Initial avosouth commit.
- *
- * Revision 1.12  2005/05/02 16:22:11  cervelli
- * Moved data classes to separate package.
- *
- * Revision 1.11  2005/04/27 03:52:10  cervelli
- * Peter's configuration changes.
- *
- * Revision 1.10  2005/04/25 22:45:32  cervelli
- * 1.1.12 version bump.
- *
- * Revision 1.9  2005/04/11 00:26:11  cervelli
- * Don't use the stupid JDK 1.5 Swing theme.
- *
- * Revision 1.8  2005/03/28 17:11:20  cervelli
- * Final 1.1.10 version bump.
- *
- * Revision 1.7  2005/03/26 17:29:57  cervelli
- * "--sleep" option.
- *
- * Revision 1.6  2005/03/25 00:49:23  cervelli
- * Initial version to support WWS.
- *
- * Revision 1.5  2005/03/24 20:50:08  cervelli
- * User specified group config file; tile 4 helicorders to quadrants.
- *
- * Revision 1.4  2004/10/28 20:16:51  cvs
- * Big red mouse cursor support and version bump.
- *
- * Revision 1.3  2004/10/23 19:35:30  cvs
- * Version bump.
- *
- * Revision 1.2  2004/10/12 23:45:11  cvs
- * Bumped version, added log.
- *
  * @author Dan Cervelli, Peter Cervelli, and Thomas Parker.
- * @version $Id: Swarm.java,v 1.45 2007-08-16 20:17:33 cervelli Exp $
  */
 public class Swarm extends JFrame
 {
@@ -314,7 +143,7 @@ public class Swarm extends JFrame
 		setIconImage(Images.getIcon("swarm").getImage());
 
 		monitors = new HashMap<String, MultiMonitor>();
-		cache = new CachedDataSource();
+		cache = CachedDataSource.getInstance();
 		frames = new ArrayList<JInternalFrame>();
 		application = this;
 		
@@ -536,11 +365,6 @@ public class Swarm extends JFrame
 	public static String getVersion()
 	{
 		return VERSION;
-	}
-	
-	public static CachedDataSource getCache()
-	{
-		return application.cache;
 	}
 	
 	public static FileDataSource getFileSource()

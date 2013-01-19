@@ -24,63 +24,6 @@ import java.util.StringTokenizer;
  * WaveServerSource with different helicorder functions.  It should probably 
  * be made a descendant of WaveServerSource. 
  * 
- * $Log: not supported by cvs2svn $
- * Revision 1.12  2006/08/04 21:21:32  cervelli
- * New WWS protocol version 3 channels with metadata stuff.
- *
- * Revision 1.11  2006/08/02 23:33:05  cervelli
- * Change for useCache variable.
- *
- * Revision 1.10  2006/08/01 23:44:07  cervelli
- * New metadata system changes.
- *
- * Revision 1.9  2006/07/30 22:46:46  cervelli
- * Copies name during clone.
- *
- * Revision 1.8  2006/07/26 22:40:40  cervelli
- * Gets protocolVersion when cloning.
- *
- * Revision 1.7  2006/07/26 00:36:02  cervelli
- * Changes for new gulper system.
- *
- * Revision 1.6  2006/06/05 18:07:03  dcervelli
- * Major 1.3 changes.
- *
- * Revision 1.5  2006/04/17 03:35:20  dcervelli
- * Unsynchronized close() to avoid blocking in the event thread.
- *
- * Revision 1.4  2006/04/15 16:00:13  dcervelli
- * 1.3 changes (renaming, new datachooser, different config).
- *
- * Revision 1.3  2005/09/02 22:38:54  dcervelli
- * Changes for new GETWAVERAW.
- *
- * Revision 1.2  2005/09/02 16:40:29  dcervelli
- * CurrentTime changes.
- *
- * Revision 1.1  2005/08/26 20:40:28  dcervelli
- * Initial avosouth commit.
- *
- * Revision 1.2  2005/05/08 16:10:48  cervelli
- * Changes for renaming of WWS.
- *
- * Revision 1.1  2005/05/02 16:22:10  cervelli
- * Moved data classes to separate package.
- *
- * Revision 1.5  2005/04/23 15:54:25  cervelli
- * Uses space delimiting instead of underscore.  Handles -- locations better.
- *
- * Revision 1.4  2005/04/16 20:57:30  cervelli
- * SCNL changes.
- *
- * Revision 1.3  2005/04/14 15:37:16  cervelli
- * Doesn't put the latest 30 seconds into the helicorder cache.
- *
- * Revision 1.2  2005/03/25 00:50:11  cervelli
- * Support for enabling/disabling compression.
- *
- * Revision 1.1  2005/03/24 22:06:41  cervelli
- * Initial commit.
  *
  * @author Dan Cervelli
  */
@@ -100,7 +43,6 @@ public class WWSSource extends SeismicDataSource
 	public WWSSource(String s)
 	{
 		params = s;
-//		String[] ss = Util.splitString(params, ":");
 		String[] ss = params.split(":");
 		server = ss[0];
 		port = Integer.parseInt(ss[1]);
@@ -110,7 +52,6 @@ public class WWSSource extends SeismicDataSource
 		winstonClient = new WWSClient(server, port);
 		
 		setTimeout(timeout);
-//		protocolVersion = winstonClient.getProtocolVersion();
 	}
 	
 	public WWSSource(WWSSource wws)
@@ -118,8 +59,6 @@ public class WWSSource extends SeismicDataSource
 		this(wws.params);
 		protocolVersion = wws.protocolVersion;
 		name = wws.name;
-		//server = wss.server;
-		//waveServer = new WaveServer(server);
 	}
  
 	public SeismicDataSource getCopy()
@@ -154,10 +93,6 @@ public class WWSSource extends SeismicDataSource
 	
 	public String getFormattedSCNL(MenuItem mi)
 	{
-//		String scnl = mi.getStation() + " " + mi.getChannel() + " " + mi.getNetwork();
-//		String loc = mi.getLocation();
-//		if (loc != null && !loc.equals("--"))
-//			scnl = scnl + " " + loc;
 		return mi.getSCNSCNL(" ");
 	}
 	
@@ -189,8 +124,11 @@ public class WWSSource extends SeismicDataSource
 	public synchronized Wave getWave(String station, double t1, double t2)
 	{
 		Wave wave = null;
-		if (useCache)
-			wave = Swarm.getCache().getWave(station, t1, t2);
+		if (useCache) {
+			CachedDataSource cache = CachedDataSource.getInstance();
+			wave = cache.getWave(station, t1, t2);
+		}
+
 		if (wave == null)
 		{
 			String[] scnl = parseSCNL(station);
@@ -207,8 +145,10 @@ public class WWSSource extends SeismicDataSource
 				return null;
 			
 			wave.register();
-			if (useCache)
-				Swarm.getCache().putWave(station, wave);
+			if (useCache) {
+				CachedDataSource cache = CachedDataSource.getInstance();
+				cache.putWave(station, wave);
+			}
 		}
 		else
 		{
@@ -219,7 +159,8 @@ public class WWSSource extends SeismicDataSource
 	
 	public synchronized HelicorderData getHelicorder(final String station, double t1, double t2, GulperListener gl)
 	{
-		CachedDataSource cache = Swarm.getCache();
+		CachedDataSource cache = CachedDataSource.getInstance();
+
 		HelicorderData hd = cache.getHelicorder(station, t1, t2, this);
 		if (hd == null)
 		{

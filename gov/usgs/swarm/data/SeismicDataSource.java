@@ -199,7 +199,7 @@ abstract public class SeismicDataSource
 		}
 		else if (type.equals("cache"))
 		{
-			sds = Swarm.getCache();				
+			sds = CachedDataSource.getInstance();
 		}
 		else if (type.equals("seed"))
 		{

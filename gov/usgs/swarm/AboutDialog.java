@@ -1,5 +1,7 @@
 package gov.usgs.swarm;
 
+import gov.usgs.swarm.data.CachedDataSource;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -25,22 +27,6 @@ import javax.swing.border.LineBorder;
  *
  * TODO: use SwarmDialog
  * 
- * $Log: not supported by cvs2svn $
- * Revision 1.4  2006/08/01 23:37:51  cervelli
- * Memory usage continually updates.
- *
- * Revision 1.3  2006/04/17 04:16:36  dcervelli
- * More 1.3 changes.
- *
- * Revision 1.2  2006/04/15 15:58:52  dcervelli
- * 1.3 changes (renaming, new datachooser, different config).
- *
- * Revision 1.1  2005/08/26 20:40:28  dcervelli
- * Initial avosouth commit.
- *
- * Revision 1.2  2004/10/12 23:43:15  cvs
- * Added log info and some comments.
- *
  * @author Dan Cervelli
  */
 public class AboutDialog extends JDialog implements Runnable
@@ -107,7 +93,6 @@ public class AboutDialog extends JDialog implements Runnable
 		mainPanel.add(panel, BorderLayout.CENTER);
 		mainPanel.setSize(224, 100);
 		mainPanel.setLocation(5, 94);
-//		panel.setBackground(new Color(255, 255, 0, 210));
 		panel.setBackground(new Color(255, 255, 0));
 		mainPanel.setBackground(new Color(0, 0, 0, 0));
 		this.getLayeredPane().add(mainPanel);
@@ -159,7 +144,6 @@ public class AboutDialog extends JDialog implements Runnable
 		this.getLayeredPane().add(okButton);
 		this.getLayeredPane().add(gcButton);		
 		
-		//okButton.setBackground(new Color(255, 255, 255, 128));
 		this.getLayeredPane().setLayer(okButton, JLayeredPane.PALETTE_LAYER.intValue());
 		this.getLayeredPane().setLayer(gcButton, JLayeredPane.PALETTE_LAYER.intValue());
 	}
@@ -210,7 +194,9 @@ public class AboutDialog extends JDialog implements Runnable
 						totalMemory.setText(toByteString(r.totalMemory()));
 						usedMemory.setText(toByteString(r.totalMemory() - r.freeMemory()));
 						maxMemory.setText(toByteString(r.maxMemory()));
-						cacheMemory.setText(toByteString(Swarm.getCache().getSize()));
+						
+						CachedDataSource cache = CachedDataSource.getInstance();
+						cacheMemory.setText(toByteString(cache.getSize()));
 						repaint();
 					}
 				});

@@ -34,40 +34,6 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
 /**
- * 
- * $Log: not supported by cvs2svn $
- * Revision 1.11  2006/11/30 17:40:00  dcervelli
- * Changes for tweakable layouts.
- *
- * Revision 1.10  2006/10/26 00:48:18  dcervelli
- * Makes sure windows aren't iconified before bringing them to the front.
- *
- * Revision 1.9  2006/08/14 22:43:52  dcervelli
- * Remove layout dialog box.
- *
- * Revision 1.8  2006/08/09 21:55:20  cervelli
- * Moved layout saving code to Swarm.java.
- *
- * Revision 1.7  2006/08/07 22:33:10  cervelli
- * Open file items.
- *
- * Revision 1.6  2006/08/04 21:18:02  cervelli
- * Map to front item.
- *
- * Revision 1.5  2006/08/01 23:41:14  cervelli
- * Clear cache menu item.
- *
- * Revision 1.4  2006/07/31 15:56:18  cervelli
- * Added Layout menu.
- *
- * Revision 1.3  2006/07/22 20:31:00  cervelli
- * Added Window>Map menu item.
- *
- * Revision 1.2  2006/06/14 19:19:31  dcervelli
- * Major 1.3.4 changes.
- *
- * Revision 1.1  2006/04/17 04:16:36  dcervelli
- * More 1.3 changes.
  *
  * @author Dan Cervelli
  */
@@ -164,7 +130,7 @@ public class SwarmMenu extends JMenuBar
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						CachedDataSource cache = Swarm.getCache();
+						CachedDataSource cache = CachedDataSource.getInstance();
 						if (cache != null)
 							cache.flush();
 					}
@@ -203,7 +169,7 @@ public class SwarmMenu extends JMenuBar
 				{
 					public void menuSelected(MenuEvent e)
 					{
-						CachedDataSource cache = Swarm.getCache();
+						CachedDataSource cache = CachedDataSource.getInstance();
 						clearCache.setEnabled(!cache.isEmpty());
 					}
 		

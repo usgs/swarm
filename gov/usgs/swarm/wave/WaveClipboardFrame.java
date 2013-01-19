@@ -70,99 +70,18 @@ import javax.swing.event.InternalFrameEvent;
 /**
  * The wave clipboard internal frame.
  * 
- * $Log: not supported by cvs2svn $
- * Revision 1.9  2007/04/29 21:15:41  dcervelli
- * Multiselect code.
- *
- * Revision 1.8  2007/02/28 20:32:51  dcervelli
- * Added border at bottom of wave panel.
- *
- * Revision 1.7  2007/02/28 20:11:24  dcervelli
- * Added close icon to clipboard wave.
- *
- * Revision 1.6  2007/01/30 20:01:19  dcervelli
- * File choosers named.  Canceled Save All doesn't display error message.
- *
- * Revision 1.5  2006/10/26 00:56:10  dcervelli
- * Camera button, global rescale, red line, labels, non-iconifiable frame, deletion repaint bug fixed.
- *
- * Revision 1.4  2006/08/11 21:04:34  dcervelli
- * Now subclass of SwarmFrame.
- *
- * Revision 1.3  2006/08/09 21:49:46  cervelli
- * Many changes including resizable waves and permanent scrollbar.
- *
- * Revision 1.2  2006/08/09 05:08:54  cervelli
- * Override setMaximum to eliminate quirk when saving maximized clipboard.
- *
- * Revision 1.1  2006/08/01 23:45:23  cervelli
- * Moved package.
- *
- * Revision 1.15  2006/07/30 22:44:03  cervelli
- * Icon change.
- *
- * Revision 1.14  2006/07/25 05:16:13  cervelli
- * Change for FrameDecorator being class instead of interface.
- *
- * Revision 1.13  2006/07/22 20:31:43  cervelli
- * Added throbber and status bar.
- *
- * Revision 1.12  2006/06/14 19:19:31  dcervelli
- * Major 1.3.4 changes.
- *
- * Revision 1.11  2006/06/05 18:06:49  dcervelli
- * Major 1.3 changes.
- *
- * Revision 1.10  2006/04/17 04:16:36  dcervelli
- * More 1.3 changes.
- *
- * Revision 1.9  2006/04/15 15:58:52  dcervelli
- * 1.3 changes (renaming, new datachooser, different config).
- *
- * Revision 1.8  2006/04/08 01:31:04  dcervelli
- * Error messages on failed saves, bug #34.
- *
- * Revision 1.7  2006/04/02 17:15:23  cervelli
- * Got rid of automatic '.sac' extension at request of John Power
- *
- * Revision 1.6  2005/09/23 21:57:09  dcervelli
- * Uses subset() on save all SAC.
- *
- * Revision 1.5  2005/09/22 20:59:50  dcervelli
- * Multiple SAC save/load fixes.
- *
- * Revision 1.4  2005/08/30 00:34:26  tparker
- * Update to use Images class
- *
- * Revision 1.3  2005/08/27 00:31:20  tparker
- * Tidied code, no functional changes.
- *
- * Revision 1.2  2005/08/26 23:49:04  tparker
- * Create image path constants
- *
- * Revision 1.1  2005/08/26 20:40:28  dcervelli
- * Initial avosouth commit.
- *
- * Revision 1.3  2005/03/27 22:03:46  cervelli
- * Added Save All button.  Moved the Save/Save All/Open ActionListeners into separate
- * internal non-anonymous classes.  Open now opens directories.
- *
- * Revision 1.2  2005/03/24 20:48:31  cervelli
- * Support for opening and saving SAC files.
- *
  * @author Dan Cervelli
- * @version $Id: WaveClipboardFrame.java,v 1.10 2007-05-21 02:46:14 dcervelli Exp $
+ * @version $Id: WaveClipboardFrame.java,v 1.10 2007-05-21 02:46:14 dcervelli
+ *          Exp $
  */
-public class WaveClipboardFrame extends SwarmFrame
-{
+public class WaveClipboardFrame extends SwarmFrame {
 	public static final long serialVersionUID = -1;
 	private static final Color SELECT_COLOR = new Color(200, 220, 241);
 	private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
-		
+
 	private JScrollPane scrollPane;
 	private Box waveBox;
 	private List<WaveViewPanel> waves;
-//	private WaveViewPanel selected;
 	private Set<WaveViewPanel> selectedSet;
 	private JToolBar toolbar;
 	private JPanel mainPanel;
@@ -176,12 +95,12 @@ public class WaveClipboardFrame extends SwarmFrame
 	private JButton saveAllButton;
 	private JButton openButton;
 	private JButton captureButton;
-	private JButton histButton; 
+	private JButton histButton;
 	private DateFormat saveAllDateFormat;
-	
+
 	private WaveViewPanelListener selectListener;
 	private WaveViewSettingsToolbar waveToolbar;
-	
+
 	private JButton upButton;
 	private JButton downButton;
 	private JButton removeButton;
@@ -191,23 +110,22 @@ public class WaveClipboardFrame extends SwarmFrame
 	private JButton forwardButton;
 	private JButton backButton;
 	private JButton gotoButton;
-	
+
 	private JPopupMenu popup;
-	
+
 	private Map<WaveViewPanel, Stack<double[]>> histories;
-	
+
 	private HelicorderViewPanelListener linkListener;
 
 	private boolean heliLinked = true;
-	
+
 	private Throbber throbber;
-	
+
 	private int waveHeight = -1;
-	
+
 	private int lastClickedIndex = -1;
-	
-	public WaveClipboardFrame()
-	{
+
+	public WaveClipboardFrame() {
 		super("Wave Clipboard", true, true, true, false);
 		this.setFocusable(true);
 		selectedSet = new HashSet<WaveViewPanel>();
@@ -216,168 +134,133 @@ public class WaveClipboardFrame extends SwarmFrame
 		waves = new ArrayList<WaveViewPanel>();
 		histories = new HashMap<WaveViewPanel, Stack<double[]>>();
 		createUI();
-		linkListener = new HelicorderViewPanelListener() 
-				{
-					public void insetCreated(double st, double et)
-					{
-						if (heliLinked)
-							repositionWaves(st, et);
-					}
-				};
+		linkListener = new HelicorderViewPanelListener() {
+			public void insetCreated(double st, double et) {
+				if (heliLinked)
+					repositionWaves(st, et);
+			}
+		};
 	}
 
-	public HelicorderViewPanelListener getLinkListener()
-	{
+	public HelicorderViewPanelListener getLinkListener() {
 		return linkListener;
 	}
-	
-	private void createUI()
-	{
+
+	private void createUI() {
 		this.setFrameIcon(Images.getIcon("clipboard"));
 		this.setSize(Swarm.config.clipboardWidth, Swarm.config.clipboardHeight);
 		this.setLocation(Swarm.config.clipboardX, Swarm.config.clipboardY);
 		this.setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);
-		
+
 		toolbar = SwarmUtil.createToolBar();
 		mainPanel = new JPanel(new BorderLayout());
-		
+
 		createMainButtons();
 		createWaveButtons();
 
 		mainPanel.add(toolbar, BorderLayout.NORTH);
-		
+
 		waveBox = new Box(BoxLayout.Y_AXIS);
 		scrollPane = new JScrollPane(waveBox);
-		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPane
+				.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane
+				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollPane.getVerticalScrollBar().setUnitIncrement(40);
 		mainPanel.add(scrollPane, BorderLayout.CENTER);
-		
+
 		statusLabel = new JLabel(" ");
 		statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 1));
 		mainPanel.add(statusLabel, BorderLayout.SOUTH);
-		
+
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(0, 2, 1, 2));
 		this.setContentPane(mainPanel);
-		
+
 		createListeners();
 		doButtonEnables();
 	}
 
-	private void createMainButtons()
-	{
-		openButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("open"),
-				"Open a saved wave",
-				new OpenActionListener());
+	private void createMainButtons() {
+		openButton = SwarmUtil.createToolBarButton(Images.getIcon("open"),
+				"Open a saved wave", new OpenActionListener());
 		toolbar.add(openButton);
 
-		saveButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("save"),
-				"Save selected wave",
-				new SaveActionListener());
+		saveButton = SwarmUtil.createToolBarButton(Images.getIcon("save"),
+				"Save selected wave", new SaveActionListener());
 		saveButton.setEnabled(false);
 		toolbar.add(saveButton);
 
 		saveAllButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("saveall"),
-				"Save all waves",
+				Images.getIcon("saveall"), "Save all waves",
 				new SaveAllActionListener());
 		saveAllButton.setEnabled(false);
 		toolbar.add(saveAllButton);
-		
+
 		toolbar.addSeparator();
-		
+
 		linkButton = SwarmUtil.createToolBarToggleButton(
 				Images.getIcon("helilink"),
-				"Synchronize times with helicorder wave",
-				new ActionListener()
-				{
-						public void actionPerformed(ActionEvent e)
-						{
-							heliLinked = linkButton.isSelected();
-						}
+				"Synchronize times with helicorder wave", new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						heliLinked = linkButton.isSelected();
+					}
 				});
 		linkButton.setSelected(heliLinked);
 		toolbar.add(linkButton);
-		
-		syncButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("clock"),
-				"Synchronize times with selected wave",
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-//						if (selected == null)
-//							return;
-						
+
+		syncButton = SwarmUtil.createToolBarButton(Images.getIcon("clock"),
+				"Synchronize times with selected wave", new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
 						syncChannels();
 					}
-				}); 
+				});
 		syncButton.setEnabled(false);
 		toolbar.add(syncButton);
-		
-		sortButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("geosort"),
-				"Sort waves by nearest to selected wave",
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-//						if (selected == null)
-//							return;
-						
+
+		sortButton = SwarmUtil.createToolBarButton(Images.getIcon("geosort"),
+				"Sort waves by nearest to selected wave", new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
 						sortChannelsByNearest();
 					}
 				});
 		sortButton.setEnabled(false);
 		toolbar.add(sortButton);
-		
+
 		toolbar.addSeparator();
-		
-		sizeButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("resize"),
-				"Set clipboard wave size",
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						doSizePopup(sizeButton.getX(), sizeButton.getY() + 2 * sizeButton.getHeight());
+
+		sizeButton = SwarmUtil.createToolBarButton(Images.getIcon("resize"),
+				"Set clipboard wave size", new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						doSizePopup(sizeButton.getX(), sizeButton.getY() + 2
+								* sizeButton.getHeight());
 					}
-				}); 
+				});
 		toolbar.add(sizeButton);
-		
+
 		removeAllButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("deleteall"),
-				"Remove all waves from clipboard",
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
+				Images.getIcon("deleteall"), "Remove all waves from clipboard",
+				new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
 						removeWaves();
 					}
 				});
 		removeAllButton.setEnabled(false);
 		toolbar.add(removeAllButton);
-		
+
 		toolbar.addSeparator();
-		captureButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("camera"),
-				"Save clipboard image (P)",
-				new CaptureActionListener());
+		captureButton = SwarmUtil.createToolBarButton(Images.getIcon("camera"),
+				"Save clipboard image (P)", new CaptureActionListener());
 		Util.mapKeyStrokeToButton(this, "P", "capture", captureButton);
 		toolbar.add(captureButton);
 	}
-	
+
 	// TODO: don't write image on event thread
 	// TODO: unify with MapFrame.CaptureActionListener
-	class CaptureActionListener implements ActionListener
-	{
-		public void actionPerformed(ActionEvent e)
-		{
+	class CaptureActionListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
 			if (waves == null || waves.size() == 0)
 				return;
-			
+
 			JFileChooser chooser = Swarm.getApplication().getFileChooser();
 			File lastPath = new File(Swarm.config.lastPath);
 			chooser.setCurrentDirectory(lastPath);
@@ -385,16 +268,16 @@ public class WaveClipboardFrame extends SwarmFrame
 			chooser.setDialogTitle("Save Clipboard Screen Capture");
 			int result = chooser.showSaveDialog(Swarm.getApplication());
 			File f = null;
-			if (result == JFileChooser.APPROVE_OPTION) 
-			{						 
+			if (result == JFileChooser.APPROVE_OPTION) {
 				f = chooser.getSelectedFile();
 
-				if (f.exists()) 
-				{
-					int choice = JOptionPane.showConfirmDialog(Swarm.getApplication(), "File exists, overwrite?", "Confirm", JOptionPane.YES_NO_OPTION);
-					if (choice != JOptionPane.YES_OPTION) 
+				if (f.exists()) {
+					int choice = JOptionPane.showConfirmDialog(
+							Swarm.getApplication(), "File exists, overwrite?",
+							"Confirm", JOptionPane.YES_NO_OPTION);
+					if (choice != JOptionPane.YES_OPTION)
 						return;
-			    }
+				}
 				Swarm.config.lastPath = f.getParent();
 			}
 			if (f == null)
@@ -404,395 +287,292 @@ public class WaveClipboardFrame extends SwarmFrame
 			int width = waves.get(0).getWidth();
 			for (WaveViewPanel panel : waves)
 				height += panel.getHeight();
-			
-			BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+
+			BufferedImage image = new BufferedImage(width, height,
+					BufferedImage.TYPE_4BYTE_ABGR);
 			Graphics g = image.getGraphics();
-			for (WaveViewPanel panel : waves)
-			{
+			for (WaveViewPanel panel : waves) {
 				panel.paint(g);
 				g.translate(0, panel.getHeight());
 			}
-			try
-	        {
-	            PngEncoderB png = new PngEncoderB(image, false, PngEncoder.FILTER_NONE, 7);
-	            FileOutputStream out = new FileOutputStream(f);
-	            byte[] bytes = png.pngEncode();
-	            out.write(bytes);
-	            out.close();
-	        }
-	        catch (Exception ex)
-	        {
-	            ex.printStackTrace();
-	        }
+			try {
+				PngEncoderB png = new PngEncoderB(image, false,
+						PngEncoder.FILTER_NONE, 7);
+				FileOutputStream out = new FileOutputStream(f);
+				byte[] bytes = png.pngEncode();
+				out.write(bytes);
+				out.close();
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 	}
-	
-	private void createWaveButtons()
-	{
+
+	private void createWaveButtons() {
 		toolbar.addSeparator();
-		
-		backButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("left"),
-				"Scroll back time 20% (Left arrow)",
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-//						if (selected != null)
-							shiftTime(-0.20);						
+
+		backButton = SwarmUtil.createToolBarButton(Images.getIcon("left"),
+				"Scroll back time 20% (Left arrow)", new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						shiftTime(-0.20);
 					}
 				});
 		Util.mapKeyStrokeToButton(this, "LEFT", "backward1", backButton);
 		toolbar.add(backButton);
-		
-		forwardButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("right"),
-				"Scroll forward time 20% (Right arrow)",
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-//						if (selected != null)
-							shiftTime(0.20);
+
+		forwardButton = SwarmUtil.createToolBarButton(Images.getIcon("right"),
+				"Scroll forward time 20% (Right arrow)", new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						shiftTime(0.20);
 					}
 				});
 		toolbar.add(forwardButton);
 		Util.mapKeyStrokeToButton(this, "RIGHT", "forward1", forwardButton);
-		
-		gotoButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("gototime"),
-				"Go to time (Ctrl-G)",
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						String t = JOptionPane.showInputDialog(Swarm.getApplication(), "Input time in 'YYYYMMDDhhmm[ss]' format:", "Go to Time", JOptionPane.PLAIN_MESSAGE);
-//						if (selected != null && t != null)
+
+		gotoButton = SwarmUtil.createToolBarButton(Images.getIcon("gototime"),
+				"Go to time (Ctrl-G)", new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						String t = JOptionPane.showInputDialog(
+								Swarm.getApplication(),
+								"Input time in 'YYYYMMDDhhmm[ss]' format:",
+								"Go to Time", JOptionPane.PLAIN_MESSAGE);
 						if (t != null)
 							gotoTime(t);
 					}
 				});
 		toolbar.add(gotoButton);
 		Util.mapKeyStrokeToButton(this, "ctrl G", "goto", gotoButton);
-		
-		compXButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("xminus"),
+
+		compXButton = SwarmUtil.createToolBarButton(Images.getIcon("xminus"),
 				"Shrink sample time 20% (Alt-left arrow, +)",
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-//						if (selected != null)
-							scaleTime(0.20);
+				new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						scaleTime(0.20);
 					}
 				});
 		toolbar.add(compXButton);
 		Util.mapKeyStrokeToButton(this, "alt LEFT", "compx", compXButton);
 		Util.mapKeyStrokeToButton(this, "EQUALS", "compx2", compXButton);
 		Util.mapKeyStrokeToButton(this, "shift EQUALS", "compx2", compXButton);
-		
-		expXButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("xplus"),
+
+		expXButton = SwarmUtil.createToolBarButton(Images.getIcon("xplus"),
 				"Expand sample time 20% (Alt-right arrow, -)",
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-//						if (selected != null)
-							scaleTime(-0.20);
+				new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						scaleTime(-0.20);
 					}
 				});
 		toolbar.add(expXButton);
 		Util.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expXButton);
 		Util.mapKeyStrokeToButton(this, "MINUS", "expx", expXButton);
 
-		histButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("timeback"),
-				"Last time settings (Backspace)",
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-//						if (selected != null)
-							back();
+		histButton = SwarmUtil.createToolBarButton(Images.getIcon("timeback"),
+				"Last time settings (Backspace)", new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						back();
 					}
-				});		
+				});
 		Util.mapKeyStrokeToButton(this, "BACK_SPACE", "back", histButton);
 		toolbar.add(histButton);
 		toolbar.addSeparator();
 
 		waveToolbar = new WaveViewSettingsToolbar(null, toolbar, this);
-		
-		copyButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("clipboard"),
+
+		copyButton = SwarmUtil.createToolBarButton(Images.getIcon("clipboard"),
 				"Place another copy of wave on clipboard (C or Ctrl-C)",
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
+				new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
 						// TODO: implement
-//						if (selected != null)
-//						{
-//							WaveViewPanel wvp = new WaveViewPanel(selected); 
-//							wvp.setBackgroundColor(BACKGROUND_COLOR);
-//							addWave(wvp);
-//						}
+						// if (selected != null)
+						// {
+						// WaveViewPanel wvp = new WaveViewPanel(selected);
+						// wvp.setBackgroundColor(BACKGROUND_COLOR);
+						// addWave(wvp);
+						// }
 					}
 				});
 		Util.mapKeyStrokeToButton(this, "C", "clipboard1", copyButton);
 		Util.mapKeyStrokeToButton(this, "control C", "clipboard2", copyButton);
 		toolbar.add(copyButton);
-		
+
 		toolbar.addSeparator();
-		
-		upButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("up"),
-				"Move wave up in clipboard (Up arrow)",
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-//						if (selectedSet.size() == 1)
-//						if (selected != null)
-							moveUp();
+
+		upButton = SwarmUtil.createToolBarButton(Images.getIcon("up"),
+				"Move wave up in clipboard (Up arrow)", new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						moveUp();
 					}
 				});
 		Util.mapKeyStrokeToButton(this, "UP", "up", upButton);
 		toolbar.add(upButton);
-		
-		downButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("down"),
+
+		downButton = SwarmUtil.createToolBarButton(Images.getIcon("down"),
 				"Move wave down in clipboard (Down arrow)",
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-//						if (selected != null)
-//						if (selectedSet)
-							moveDown();
+				new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						moveDown();
 					}
 				});
 		Util.mapKeyStrokeToButton(this, "DOWN", "down", downButton);
 		toolbar.add(downButton);
-		
-		removeButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("delete"),
-				"Remove wave from clipboard (Delete)",
-				new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-//						if (selected != null)
+
+		removeButton = SwarmUtil.createToolBarButton(Images.getIcon("delete"),
+				"Remove wave from clipboard (Delete)", new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
 						remove();
 					}
 				});
 		Util.mapKeyStrokeToButton(this, "DELETE", "remove", removeButton);
 		toolbar.add(removeButton);
-		
+
 		toolbar.add(Box.createHorizontalGlue());
-		
+
 		throbber = new Throbber();
 		toolbar.add(throbber);
-		
-		Util.mapKeyStrokeToAction(this, "control A", "selectAll", new AbstractAction()
-			{
-				private static final long serialVersionUID = 1L;
 
-				public void actionPerformed(ActionEvent e)
-				{
-					for (WaveViewPanel wave : waves)
-						select(wave);
+		Util.mapKeyStrokeToAction(this, "control A", "selectAll",
+				new AbstractAction() {
+					private static final long serialVersionUID = 1L;
+
+					public void actionPerformed(ActionEvent e) {
+						for (WaveViewPanel wave : waves)
+							select(wave);
+					}
+				});
+	}
+
+	private void createListeners() {
+		this.addInternalFrameListener(new InternalFrameAdapter() {
+			public void internalFrameActivated(InternalFrameEvent e) {
+			}
+
+			public void internalFrameDeiconified(InternalFrameEvent e) {
+				resizeWaves();
+			}
+
+			public void internalFrameClosing(InternalFrameEvent e) {
+				setVisible(false);
+			}
+
+			public void internalFrameClosed(InternalFrameEvent e) {
+			}
+		});
+
+		this.addComponentListener(new ComponentAdapter() {
+			public void componentResized(ComponentEvent e) {
+				resizeWaves();
+			}
+		});
+
+		Swarm.getApplication().addTimeListener(new TimeListener() {
+			public void timeChanged(double j2k) {
+				for (WaveViewPanel panel : waves) {
+					if (panel != null)
+						panel.setCursorMark(j2k);
 				}
-			});
-	}
-	
-	private void createListeners()
-	{
-		this.addInternalFrameListener(new InternalFrameAdapter()
-				{
-					public void internalFrameActivated(InternalFrameEvent e)
-					{
-//						if (selected != null)
-//						{
-//							selected.setBackgroundColor(BACKGROUND_COLOR);
-//							Swarm.getApplication().getDataChooser().setNearest(selected.getChannel());
-//						}
-					}
-					
-					public void internalFrameDeiconified(InternalFrameEvent e)
-					{
-						resizeWaves();	
-					}
-					
-					public void internalFrameClosing(InternalFrameEvent e)
-					{
-						setVisible(false);
-					}
-					
-					public void internalFrameClosed(InternalFrameEvent e)
-					{}
-				});
-		
-		this.addComponentListener(new ComponentAdapter()
-				{
-					public void componentResized(ComponentEvent e)
-					{
-						resizeWaves();
-					}
-				});
-		
-//		this.addKeyListener(new KeyAdapter()
-//				{
-//					public void keyPressed(KeyEvent e)
-//					{
-//						if (e.isShiftDown() && e.getKeyCode() == KeyEvent.VK_R)
-//						{
-//							resetAllAutoScaleMemory();
-//						}
-//					}
-//				});
-		
-		Swarm.getApplication().addTimeListener(new TimeListener()
-				{
-					public void timeChanged(double j2k)
-					{
-						for (WaveViewPanel panel : waves)
-						{
-							if (panel != null)
-								panel.setCursorMark(j2k);
+			}
+		});
+
+		selectListener = new WaveViewPanelAdapter() {
+			public void mousePressed(WaveViewPanel src, MouseEvent e,
+					boolean dragging) {
+				requestFocusInWindow();
+				int thisIndex = getWaveIndex(src);
+				if (!e.isControlDown() && !e.isShiftDown() && !e.isAltDown()) {
+					deselectAll();
+					select(src);
+				} else if (e.isControlDown()) {
+					if (selectedSet.contains(src))
+						deselect(src);
+					else
+						select(src);
+				} else if (e.isShiftDown()) {
+					if (lastClickedIndex == -1)
+						select(src);
+					else {
+						deselectAll();
+						int min = Math.min(lastClickedIndex, thisIndex);
+						int max = Math.max(lastClickedIndex, thisIndex);
+						for (int i = min; i <= max; i++) {
+							WaveViewPanel ps = (WaveViewPanel) waveBox
+									.getComponent(i);
+							select(ps);
 						}
 					}
-				});
-		
-		selectListener = new WaveViewPanelAdapter()
-				{
-					public void mousePressed(WaveViewPanel src, MouseEvent e, boolean dragging)
-					{
-						requestFocusInWindow();
-						int thisIndex = getWaveIndex(src);
-//						if (dragging)
-//						{
-//							if (!selectedSet.contains(src))
-//							{
-//								deselectAll();
-//								select(src);
-//							}
-//						}
-//						else
-//						{
-							if (!e.isControlDown() && !e.isShiftDown() && !e.isAltDown())
-							{
-								deselectAll();
-								select(src);
-							}
-							else if (e.isControlDown())
-							{
-								if (selectedSet.contains(src))
-									deselect(src);
-								else
-									select(src);
-							}
-							else if (e.isShiftDown())
-							{
-								if (lastClickedIndex == -1)
-									select(src);
-								else
-								{
-									deselectAll();
-									int min = Math.min(lastClickedIndex, thisIndex);
-									int max = Math.max(lastClickedIndex, thisIndex);
-									for (int i = min; i <= max; i++)
-									{
-										WaveViewPanel ps = (WaveViewPanel)waveBox.getComponent(i);
-										select(ps);
-									}
-								}
-							}
-//						}
-						lastClickedIndex = thisIndex;
-//						setLastClickedIndex(thisIndex);
+				}
+				lastClickedIndex = thisIndex;
+			}
+
+			public void waveZoomed(WaveViewPanel src, double st, double et,
+					double nst, double net) {
+				double[] t = new double[] { st, et };
+				addHistory(src, t);
+				for (WaveViewPanel wvp : selectedSet) {
+					if (wvp != src) {
+						addHistory(wvp, t);
+						wvp.zoom(nst, net);
 					}
-					
-					public void waveZoomed(WaveViewPanel src, double st, double et, double nst, double net)
-					{
-						double[] t = new double[] {st, et};
-						addHistory(src, t);
-						for (WaveViewPanel wvp : selectedSet)
-						{
-							if (wvp != src)
-							{
-								addHistory(wvp, t);
-								wvp.zoom(nst, net);
-							}
-						}
-					}
-					
-					public void waveClosed(WaveViewPanel src)
-					{
-						remove(src);
-					}
-				};
+				}
+			}
+
+			public void waveClosed(WaveViewPanel src) {
+				remove(src);
+			}
+		};
 	}
-	
-	private int calculateWaveHeight()
-	{
+
+	private int calculateWaveHeight() {
 		if (waveHeight > 0)
 			return waveHeight;
-		
+
 		int w = scrollPane.getViewport().getSize().width;
-		int h = (int)Math.round((double)w * 60.0 / 300.0);
+		int h = (int) Math.round((double) w * 60.0 / 300.0);
 		h = Math.min(200, h);
 		h = Math.max(h, 80);
 		return h;
 	}
-	
-	private void setWaveHeight(int s)
-	{
+
+	private void setWaveHeight(int s) {
 		waveHeight = s;
 		resizeWaves();
 	}
-	
-	private void doSizePopup(int x, int y)
-	{
-		if (popup == null)
-		{
-			final String[] labels = new String[] { "Auto", null, "Tiny", "Small", "Medium", "Large" };
+
+	private void doSizePopup(int x, int y) {
+		if (popup == null) {
+			final String[] labels = new String[] { "Auto", null, "Tiny",
+					"Small", "Medium", "Large" };
 			final int[] sizes = new int[] { -1, -1, 50, 100, 160, 230 };
 			popup = new JPopupMenu();
 			ButtonGroup group = new ButtonGroup();
-			for (int i = 0; i < labels.length; i++)
-			{
-				if (labels[i] != null)
-				{
+			for (int i = 0; i < labels.length; i++) {
+				if (labels[i] != null) {
 					final int size = sizes[i];
-					JRadioButtonMenuItem mi = new JRadioButtonMenuItem(labels[i]);
-					mi.addActionListener(new ActionListener()
-							{
-								public void actionPerformed(ActionEvent e)
-								{
-									setWaveHeight(size);
-								}
-							});
+					JRadioButtonMenuItem mi = new JRadioButtonMenuItem(
+							labels[i]);
+					mi.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							setWaveHeight(size);
+						}
+					});
 					if (waveHeight == size)
 						mi.setSelected(true);
 					group.add(mi);
 					popup.add(mi);
-				}
-				else
+				} else
 					popup.addSeparator();
 			}
 		}
 		popup.show(this, x, y);
 	}
-	
-	private class OpenActionListener implements ActionListener
-	{
-	    public void actionPerformed(ActionEvent e)
-		{
+
+	private class OpenActionListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
 			JFileChooser chooser = Swarm.getApplication().getFileChooser();
 			chooser.resetChoosableFileFilters();
-			ExtensionFileFilter txtExt = new ExtensionFileFilter(".txt", "Matlab-readable text files");
-			ExtensionFileFilter sacExt = new ExtensionFileFilter(".sac", "SAC files");
+			ExtensionFileFilter txtExt = new ExtensionFileFilter(".txt",
+					"Matlab-readable text files");
+			ExtensionFileFilter sacExt = new ExtensionFileFilter(".sac",
+					"SAC files");
 			chooser.addChoosableFileFilter(txtExt);
 			chooser.addChoosableFileFilter(sacExt);
 			chooser.setDialogTitle("Open Wave");
@@ -802,252 +582,230 @@ public class WaveClipboardFrame extends SwarmFrame
 			chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 			chooser.setMultiSelectionEnabled(true);
 			int result = chooser.showOpenDialog(Swarm.getApplication());
-			if (result == JFileChooser.APPROVE_OPTION) 
-			{						            
+			if (result == JFileChooser.APPROVE_OPTION) {
 				File[] fs = chooser.getSelectedFiles();
 
-				for (int i = 0; i < fs.length; i++)
-				{
-				    if (fs[i].isDirectory())
-				    {
-				        File[] dfs = fs[i].listFiles();
-				        for (int j = 0; j < dfs.length; j++)
-					        openFile(dfs[j]);
-					    Swarm.config.lastPath = fs[i].getParent();
-				    }
-				    else
-				    {
-				        openFile(fs[i]);
-				        Swarm.config.lastPath = fs[i].getParent();
-				    }
+				for (int i = 0; i < fs.length; i++) {
+					if (fs[i].isDirectory()) {
+						File[] dfs = fs[i].listFiles();
+						for (int j = 0; j < dfs.length; j++)
+							openFile(dfs[j]);
+						Swarm.config.lastPath = fs[i].getParent();
+					} else {
+						openFile(fs[i]);
+						Swarm.config.lastPath = fs[i].getParent();
+					}
 				}
 			}
 		}
 	}
-	
-	private class SaveActionListener implements ActionListener
-	{
-		public void actionPerformed(ActionEvent e)
-		{
+
+	private class SaveActionListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
 			WaveViewPanel selected = getSingleSelected();
 			if (selected == null)
 				return;
-			
+
 			JFileChooser chooser = Swarm.getApplication().getFileChooser();
 			chooser.resetChoosableFileFilters();
 			chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 			chooser.setMultiSelectionEnabled(false);
 			chooser.setDialogTitle("Save Wave");
-			
-			ExtensionFileFilter txtExt = new ExtensionFileFilter(".txt", "Matlab-readable text files");
-			ExtensionFileFilter sacExt = new ExtensionFileFilter(".sac", "SAC files");
+
+			ExtensionFileFilter txtExt = new ExtensionFileFilter(".txt",
+					"Matlab-readable text files");
+			ExtensionFileFilter sacExt = new ExtensionFileFilter(".sac",
+					"SAC files");
 			chooser.addChoosableFileFilter(txtExt);
 			chooser.addChoosableFileFilter(sacExt);
 			chooser.setFileFilter(chooser.getAcceptAllFileFilter());
-			
+
 			File lastPath = new File(Swarm.config.lastPath);
 			chooser.setCurrentDirectory(lastPath);
 			chooser.setSelectedFile(new File(selected.getChannel() + ".txt"));
 			int result = chooser.showSaveDialog(Swarm.getApplication());
-			if (result == JFileChooser.APPROVE_OPTION) 
-			{						            
+			if (result == JFileChooser.APPROVE_OPTION) {
 				File f = chooser.getSelectedFile();
 				String path = f.getPath();
-				if (!(path.endsWith(".txt") || path.endsWith(".sac")))
-				{
-				    if (chooser.getFileFilter() == sacExt)
-				        f = new File(path + ".sac");
-				    else
-				        f = new File(path + ".txt");
+				if (!(path.endsWith(".txt") || path.endsWith(".sac"))) {
+					if (chooser.getFileFilter() == sacExt)
+						f = new File(path + ".sac");
+					else
+						f = new File(path + ".txt");
 				}
 				boolean confirm = true;
-				if (f.exists())
-				{
-				    if (f.isDirectory())
-				    {
-				        JOptionPane.showMessageDialog(Swarm.getApplication(), "You can not select an existing directory.", "Error", JOptionPane.ERROR_MESSAGE);
-					    return;
-				    }
+				if (f.exists()) {
+					if (f.isDirectory()) {
+						JOptionPane.showMessageDialog(Swarm.getApplication(),
+								"You can not select an existing directory.",
+								"Error", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
 					confirm = false;
-					int choice = JOptionPane.showConfirmDialog(Swarm.getApplication(), "File exists, overwrite?", "Confirm", JOptionPane.YES_NO_OPTION);
+					int choice = JOptionPane.showConfirmDialog(
+							Swarm.getApplication(), "File exists, overwrite?",
+							"Confirm", JOptionPane.YES_NO_OPTION);
 					if (choice == JOptionPane.YES_OPTION)
 						confirm = true;
 				}
-				
-				if (confirm)
-				{
-					try
-				    {
+
+				if (confirm) {
+					try {
 						Swarm.config.lastPath = f.getParent();
 						String fn = f.getPath().toLowerCase();
-						if (fn.endsWith(".sac"))
-						{
-						    SAC sac = selected.getWave().toSAC();
-						    String[] scn = selected.getChannel().split(" ");
-						    sac.kstnm = scn[0];
-						    sac.kcmpnm = scn[1];
-						    sac.knetwk = scn[2];
-						    sac.write(f);
-						}
-						else
-						    selected.getWave().exportToText(f.getPath());
-				    }
-					catch (FileNotFoundException ex)
-				    {
-				    	JOptionPane.showMessageDialog(Swarm.getApplication(), 
-				    			"Directory does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
-				    }
-				    catch (IOException ex)
-				    {
-				    	JOptionPane.showMessageDialog(Swarm.getApplication(), 
-				    			"Error writing file.", "Error", JOptionPane.ERROR_MESSAGE);
-				    }
+						if (fn.endsWith(".sac")) {
+							SAC sac = selected.getWave().toSAC();
+							String[] scn = selected.getChannel().split(" ");
+							sac.kstnm = scn[0];
+							sac.kcmpnm = scn[1];
+							sac.knetwk = scn[2];
+							sac.write(f);
+						} else
+							selected.getWave().exportToText(f.getPath());
+					} catch (FileNotFoundException ex) {
+						JOptionPane.showMessageDialog(Swarm.getApplication(),
+								"Directory does not exist.", "Error",
+								JOptionPane.ERROR_MESSAGE);
+					} catch (IOException ex) {
+						JOptionPane.showMessageDialog(Swarm.getApplication(),
+								"Error writing file.", "Error",
+								JOptionPane.ERROR_MESSAGE);
+					}
 				}
 			}
 		}
 	}
-	
-	private class SaveAllActionListener implements ActionListener
-	{
-	    public void actionPerformed(ActionEvent e)
-		{
+
+	private class SaveAllActionListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
 			if (waves.size() <= 0)
 				return;
-			
+
 			JFileChooser chooser = Swarm.getApplication().getFileChooser();
 			chooser.resetChoosableFileFilters();
 			chooser.setMultiSelectionEnabled(false);
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			chooser.setDialogTitle("Save SAC File Directory");
-			
+
 			File lastPath = new File(Swarm.config.lastPath);
 			chooser.setCurrentDirectory(lastPath);
 			int result = chooser.showSaveDialog(Swarm.getApplication());
 			if (result == JFileChooser.CANCEL_OPTION)
 				return;
 			File f = chooser.getSelectedFile();
-			if (f == null)
-			{
-			    JOptionPane.showMessageDialog(Swarm.getApplication(), "You must select a directory.", "Error", JOptionPane.ERROR_MESSAGE);
-			    return;
+			if (f == null) {
+				JOptionPane.showMessageDialog(Swarm.getApplication(),
+						"You must select a directory.", "Error",
+						JOptionPane.ERROR_MESSAGE);
+				return;
 			}
-			if (result == JFileChooser.APPROVE_OPTION) 
-			{	
-				try
-			    {
-				    if (f.exists() && !f.isDirectory())
-				        return;
-				    if (!f.exists())
-				        f.mkdir();
-				    for (WaveViewPanel wvp : waves)
-				    {
-				        Wave sw = wvp.getWave();
-				        
-				        if (sw != null)
-				        {
-				        	sw = sw.subset(wvp.getStartTime(), wvp.getEndTime());
-				            String date = saveAllDateFormat.format(Util.j2KToDate(sw.getStartTime()));
-				            File dir = new File(f.getPath() + File.separatorChar + date);
-				            if (!dir.exists())
-				                dir.mkdir();
-				            
-				            SAC sac = sw.toSAC();
-						    String[] scn = wvp.getChannel().split(" ");
-						    sac.kstnm = scn[0];
-						    sac.kcmpnm = scn[1];
-						    sac.knetwk = scn[2];
-					        sac.write(new File(dir.getPath() + File.separatorChar + wvp.getChannel().replace(' ', '.')));
-				        }
-				    }
-				    Swarm.config.lastPath = f.getPath();
-			    }
-				catch (FileNotFoundException ex)
-			    {
-			    	JOptionPane.showMessageDialog(Swarm.getApplication(), 
-			    			"Directory does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
-			    }
-			    catch (IOException ex)
-			    {
-			    	JOptionPane.showMessageDialog(Swarm.getApplication(), 
-			    			"Error writing file.", "Error", JOptionPane.ERROR_MESSAGE);
-			    }
+			if (result == JFileChooser.APPROVE_OPTION) {
+				try {
+					if (f.exists() && !f.isDirectory())
+						return;
+					if (!f.exists())
+						f.mkdir();
+					for (WaveViewPanel wvp : waves) {
+						Wave sw = wvp.getWave();
+
+						if (sw != null) {
+							sw = sw.subset(wvp.getStartTime(), wvp.getEndTime());
+							String date = saveAllDateFormat.format(Util
+									.j2KToDate(sw.getStartTime()));
+							File dir = new File(f.getPath()
+									+ File.separatorChar + date);
+							if (!dir.exists())
+								dir.mkdir();
+
+							SAC sac = sw.toSAC();
+							String[] scn = wvp.getChannel().split(" ");
+							sac.kstnm = scn[0];
+							sac.kcmpnm = scn[1];
+							sac.knetwk = scn[2];
+							sac.write(new File(dir.getPath()
+									+ File.separatorChar
+									+ wvp.getChannel().replace(' ', '.')));
+						}
+					}
+					Swarm.config.lastPath = f.getPath();
+				} catch (FileNotFoundException ex) {
+					JOptionPane.showMessageDialog(Swarm.getApplication(),
+							"Directory does not exist.", "Error",
+							JOptionPane.ERROR_MESSAGE);
+				} catch (IOException ex) {
+					JOptionPane.showMessageDialog(Swarm.getApplication(),
+							"Error writing file.", "Error",
+							JOptionPane.ERROR_MESSAGE);
+				}
 			}
 		}
 	}
-	
-	private enum FileType 
-	{ 
+
+	private enum FileType {
 		TEXT, SAC, UNKNOWN;
-		
-		public static FileType fromFile(File f)
-		{
+
+		public static FileType fromFile(File f) {
 			if (f.getPath().endsWith(".sac"))
 				return SAC;
-			else if( f.getPath().endsWith(".txt"))
+			else if (f.getPath().endsWith(".txt"))
 				return TEXT;
-			else 
+			else
 				return UNKNOWN;
 		}
 	}
-	
-	private SAC readSAC(File f)
-	{
+
+	private SAC readSAC(File f) {
 		SAC sac = new SAC();
-	    try
-	    {
-	        sac.read(f.getPath());
-	    }
-	    catch (Exception ex)
-	    {
-	    	sac = null;
-	    }
-	    return sac;
+		try {
+			sac.read(f.getPath());
+		} catch (Exception ex) {
+			sac = null;
+		}
+		return sac;
 	}
-	
-	public void openFile(File f)
-	{
+
+	public void openFile(File f) {
 		SAC sac = null;
-	    Wave sw = null;
-	    String channel = f.getName();
-	    FileType ft = FileType.fromFile(f);
-	    switch (ft)
-	    {
-		    case SAC:
-		    	sac = readSAC(f);
-		    	break;
-		    case TEXT:
-		    	sw = Wave.importFromText(f.getPath());
-		    	break;
-		    case UNKNOWN:
-		    	// try SAC
-		    	sac = readSAC(f);
-		    	// try text
-		    	if (sac == null)
-		    		sw = Wave.importFromText(f.getPath());
-		    	break;
-	    }
-	    
-	    if (sac != null)
-    	{
-    		sw = sac.toWave();
-    		channel = sac.getWinstonChannel().replace('$', ' ');
-    	}
-	    
-		if (sw != null)
-		{
+		Wave sw = null;
+		String channel = f.getName();
+		FileType ft = FileType.fromFile(f);
+		switch (ft) {
+		case SAC:
+			sac = readSAC(f);
+			break;
+		case TEXT:
+			sw = Wave.importFromText(f.getPath());
+			break;
+		case UNKNOWN:
+			// try SAC
+			sac = readSAC(f);
+			// try text
+			if (sac == null)
+				sw = Wave.importFromText(f.getPath());
+			break;
+		}
+
+		if (sac != null) {
+			sw = sac.toWave();
+			channel = sac.getWinstonChannel().replace('$', ' ');
+		}
+
+		if (sw != null) {
 			WaveViewPanel wvp = new WaveViewPanel();
 			wvp.setChannel(channel);
-			Swarm.getCache().putWave(channel, sw);
-			wvp.setDataSource(Swarm.getCache());
+			CachedDataSource cache = CachedDataSource.getInstance();
+
+			cache.putWave(channel, sw);
+			wvp.setDataSource(cache);
 			wvp.setWave(sw, sw.getStartTime(), sw.getEndTime());
 			WaveClipboardFrame.this.addWave(new WaveViewPanel(wvp));
-		}
-		else
-			JOptionPane.showMessageDialog(Swarm.getApplication(), "There was an error opening the file, '" + f.getName() + "'.", "Error", JOptionPane.ERROR_MESSAGE);
+		} else
+			JOptionPane.showMessageDialog(Swarm.getApplication(),
+					"There was an error opening the file, '" + f.getName()
+							+ "'.", "Error", JOptionPane.ERROR_MESSAGE);
 	}
-	
-	private void doButtonEnables()
-	{
+
+	private void doButtonEnables() {
 		boolean enable = (waves == null || waves.size() == 0);
 		saveButton.setEnabled(!enable);
 		sortButton.setEnabled(!enable);
@@ -1055,14 +813,14 @@ public class WaveClipboardFrame extends SwarmFrame
 		syncButton.setEnabled(!enable);
 		removeAllButton.setEnabled(!enable);
 		saveAllButton.setEnabled(!enable);
-		
+
 		boolean allowSingle = (selectedSet.size() == 1);
 		upButton.setEnabled(allowSingle);
 		downButton.setEnabled(allowSingle);
 		sortButton.setEnabled(allowSingle);
 		syncButton.setEnabled(allowSingle);
 		saveButton.setEnabled(allowSingle);
-		
+
 		boolean allowMulti = (selectedSet.size() > 0);
 		backButton.setEnabled(allowMulti);
 		expXButton.setEnabled(allowMulti);
@@ -1073,310 +831,233 @@ public class WaveClipboardFrame extends SwarmFrame
 		removeButton.setEnabled(allowMulti);
 		gotoButton.setEnabled(allowMulti);
 	}
-	
-	public synchronized void sortChannelsByNearest()
-	{
+
+	public synchronized void sortChannelsByNearest() {
 		WaveViewPanel p = getSingleSelected();
 		if (p == null)
 			return;
-		
-		ArrayList<WaveViewPanel> sorted = new ArrayList<WaveViewPanel>(waves.size());
+
+		ArrayList<WaveViewPanel> sorted = new ArrayList<WaveViewPanel>(
+				waves.size());
 		for (WaveViewPanel wave : waves)
 			sorted.add(wave);
-		
+
 		final Metadata smd = Swarm.config.getMetadata(p.getChannel());
-		if (smd == null || Double.isNaN(smd.getLongitude()) || Double.isNaN(smd.getLatitude()))
+		if (smd == null || Double.isNaN(smd.getLongitude())
+				|| Double.isNaN(smd.getLatitude()))
 			return;
-		
-		Collections.sort(sorted, new Comparator<WaveViewPanel>()
-				{
-					public int compare(WaveViewPanel wvp1, WaveViewPanel wvp2)
-					{
-						Metadata md = Swarm.config.getMetadata(wvp1.getChannel());
-						double d1 = smd.distanceTo(md);
-						md = Swarm.config.getMetadata(wvp2.getChannel());
-						double d2 = smd.distanceTo(md);
-						return Double.compare(d1, d2);
-					}
-				});
-		
+
+		Collections.sort(sorted, new Comparator<WaveViewPanel>() {
+			public int compare(WaveViewPanel wvp1, WaveViewPanel wvp2) {
+				Metadata md = Swarm.config.getMetadata(wvp1.getChannel());
+				double d1 = smd.distanceTo(md);
+				md = Swarm.config.getMetadata(wvp2.getChannel());
+				double d2 = smd.distanceTo(md);
+				return Double.compare(d1, d2);
+			}
+		});
+
 		removeWaves();
 		for (WaveViewPanel wave : sorted)
 			addWave(wave);
 		select(p);
 	}
-	
-	public synchronized WaveViewPanel getSingleSelected()
-	{
+
+	public synchronized WaveViewPanel getSingleSelected() {
 		if (selectedSet.size() != 1)
 			return null;
-		
+
 		WaveViewPanel p = null;
 		for (WaveViewPanel panel : selectedSet)
 			p = panel;
-		
+
 		return p;
 	}
-	
-	public synchronized void syncChannels()
-	{
+
+	public synchronized void syncChannels() {
 		final WaveViewPanel p = getSingleSelected();
 		if (p == null)
 			return;
-		
+
 		final double st = p.getStartTime();
 		final double et = p.getEndTime();
-		
-		// TODO: thread bug here.  must synch iterator below
-		final SwingWorker worker = new SwingWorker()
-				{
-					public Object construct()
-					{
-						List<WaveViewPanel> copy = null;
-						synchronized (WaveClipboardFrame.this)
-						{
-							copy = new ArrayList<WaveViewPanel>(waves);
+
+		// TODO: thread bug here. must synch iterator below
+		final SwingWorker worker = new SwingWorker() {
+			public Object construct() {
+				List<WaveViewPanel> copy = null;
+				synchronized (WaveClipboardFrame.this) {
+					copy = new ArrayList<WaveViewPanel>(waves);
+				}
+				for (WaveViewPanel wvp : copy) {
+					if (wvp != p) {
+						if (wvp.getDataSource() != null) {
+							addHistory(wvp, new double[] { wvp.getStartTime(),
+									wvp.getEndTime() });
+							Wave sw = wvp.getDataSource().getWave(
+									wvp.getChannel(), st, et);
+							wvp.setWave(sw, st, et);
 						}
-						for (WaveViewPanel wvp : copy)
-						{
-							if (wvp != p)
-							{
-								if (wvp.getDataSource() != null)
-								{
-									addHistory(wvp, new double[] { wvp.getStartTime(), wvp.getEndTime() });
-									Wave sw = wvp.getDataSource().getWave(wvp.getChannel(), st, et);
-									wvp.setWave(sw, st, et);
-								}
-							}
-						}
-						return null;
 					}
-					
-					public void finished()
-					{
-						repaint();	
-					}
-				};
-		worker.start();	
+				}
+				return null;
+			}
+
+			public void finished() {
+				repaint();
+			}
+		};
+		worker.start();
 	}
-	
-	public void setStatusText(final String s)
-	{
-		SwingUtilities.invokeLater(new Runnable()
-		{
-			public void run()
-			{
+
+	public void setStatusText(final String s) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
 				statusLabel.setText(s);
 			}
 		});
 	}
-	
-	public WaveViewPanel getSelected()
-	{
+
+	public WaveViewPanel getSelected() {
 		return null;
-//		return selected;
+		// return selected;
 	}
-	
-	public synchronized void addWave(final WaveViewPanel p)
-	{
+
+	public synchronized void addWave(final WaveViewPanel p) {
 		p.addListener(selectListener);
 		p.setOffsets(54, 8, 21, 19);
 		p.setAllowClose(true);
 		p.setStatusLabel(statusLabel);
 		p.setAllowDragging(true);
 		p.setDisplayTitle(true);
-//		p.setFrameDecorator(new ClipboardWaveDecorator(p));
 		int w = scrollPane.getViewport().getSize().width;
 		p.setSize(w, calculateWaveHeight());
 		p.setBottomBorderColor(Color.GRAY);
 		p.createImage();
-		waveBox.add(p);	
+		waveBox.add(p);
 		waves.add(p);
 		doButtonEnables();
 		waveBox.validate();
-//		select(p);
 	}
-	
-	private synchronized void deselect(final WaveViewPanel p)
-	{
+
+	private synchronized void deselect(final WaveViewPanel p) {
 		selectedSet.remove(p);
 		waveToolbar.removeSettings(p.getSettings());
 		p.setBackgroundColor(BACKGROUND_COLOR);
 		p.createImage();
 		doButtonEnables();
 	}
-	
-	private synchronized void deselectAll()
-	{
+
+	private synchronized void deselectAll() {
 		WaveViewPanel[] panels = selectedSet.toArray(new WaveViewPanel[0]);
 		for (WaveViewPanel p : panels)
 			deselect(p);
 	}
-	
-	private synchronized void select(final WaveViewPanel p)
-	{
+
+	private synchronized void select(final WaveViewPanel p) {
 		if (p == null || selectedSet.contains(p))
 			return;
-		
+
 		selectedSet.add(p);
 		doButtonEnables();
-//		if (selected == p)
-//			return;
-		
-//		if (selected != null)
-//		{
-//			selected.setBackgroundColor(BACKGROUND_COLOR);
-//			selected.createImage();
-//		}
-//		selected = p;
 		p.setBackgroundColor(SELECT_COLOR);
 		Swarm.getApplication().getDataChooser().setNearest(p.getChannel());
-//		selected.setBackgroundColor(SELECT_COLOR);
 		p.createImage();
-//		waveToolbar.setSettings(selected.getSettings());
 		waveToolbar.addSettings(p.getSettings());
 	}
-	
-	private synchronized void remove(WaveViewPanel p)
-	{
+
+	private synchronized void remove(WaveViewPanel p) {
 		int i = 0;
-		for (i = 0; i < waveBox.getComponentCount(); i++)
-		{
+		for (i = 0; i < waveBox.getComponentCount(); i++) {
 			if (p == waveBox.getComponent(i))
 				break;
 		}
-		
+
 		p.removeListener(selectListener);
 		p.getDataSource().close();
 		setStatusText(" ");
 		waveBox.remove(i);
 		waves.remove(p);
 		histories.remove(p);
-//		if (selected == null && waves.size() > 0)
-//		{
-//			if (i >= waves.size())
-//				i = waves.size() - 1;
-//			select(waves.get(i));
-//		}
 		doButtonEnables();
 		waveBox.validate();
 		selectedSet.remove(p);
-		lastClickedIndex = Math.min(lastClickedIndex, waveBox.getComponentCount() - 1);
+		lastClickedIndex = Math.min(lastClickedIndex,
+				waveBox.getComponentCount() - 1);
 		waveToolbar.removeSettings(p.getSettings());
 		repaint();
 	}
-	
-	protected int getWaveIndex(WaveViewPanel p)
-	{
+
+	protected int getWaveIndex(WaveViewPanel p) {
 		int i = 0;
-		for (i = 0; i < waveBox.getComponentCount(); i++)
-		{
+		for (i = 0; i < waveBox.getComponentCount(); i++) {
 			if (p == waveBox.getComponent(i))
 				break;
 		}
 		return i;
 	}
-	
-	public synchronized void remove()
-	{
+
+	public synchronized void remove() {
 		WaveViewPanel[] panels = selectedSet.toArray(new WaveViewPanel[0]);
 		for (WaveViewPanel p : panels)
 			remove(p);
-//		if (selected == p)
-//		{
-//			selected = null;
-//			waveToolbar.setSettings(null);
-//		}
-//		int i = 0;
-//		for (i = 0; i < waveBox.getComponentCount(); i++)
-//		{
-//			if (p == waveBox.getComponent(i))
-//				break;
-//		}
-//		
-//		p.getDataSource().close();
-//		setStatusText(" ");
-//		waveBox.remove(i);
-//		waves.remove(p);
-//		histories.remove(p);
-//		if (selected == null && waves.size() > 0)
-//		{
-//			if (i >= waves.size())
-//				i = waves.size() - 1;
-//			select(waves.get(i));
-//		}
-//		doButtonEnables();
-//		waveBox.validate();
-//		repaint();
 	}
-	
-	public synchronized void moveDown()
-	{
+
+	public synchronized void moveDown() {
 		WaveViewPanel p = getSingleSelected();
 		if (p == null)
 			return;
-		
+
 		int i = waves.indexOf(p);
 		if (i == waves.size() - 1)
 			return;
-			
+
 		waves.remove(i);
 		waves.add(i + 1, p);
 		waveBox.remove(p);
 		waveBox.add(p, i + 1);
 		waveBox.validate();
-//		if (selected != null)
-//			selected.requestFocus();
 		repaint();
 	}
-	
-	public synchronized void moveUp()
-	{
+
+	public synchronized void moveUp() {
 		WaveViewPanel p = getSingleSelected();
 		if (p == null)
 			return;
-		
+
 		int i = waves.indexOf(p);
 		if (i == 0)
 			return;
-			
+
 		waves.remove(i);
 		waves.add(i - 1, p);
 		waveBox.remove(p);
 		waveBox.add(p, i - 1);
 		waveBox.validate();
-//		if (selected != null)
-//			selected.requestFocus();
 		repaint();
 	}
-	
-	public void resizeWaves()
-	{
-		SwingWorker worker = new SwingWorker()
-				{
-					public Object construct()
-					{
-						int w = scrollPane.getViewport().getSize().width;
-						for (WaveViewPanel wave : waves)
-						{
-							wave.setSize(w, calculateWaveHeight());
-							wave.createImage();
-						}
-						return null;
-					}
-					
-					public void finished()
-					{
-						waveBox.validate();
-						validate();
-						repaint();
-					}
-				};
+
+	public void resizeWaves() {
+		SwingWorker worker = new SwingWorker() {
+			public Object construct() {
+				int w = scrollPane.getViewport().getSize().width;
+				for (WaveViewPanel wave : waves) {
+					wave.setSize(w, calculateWaveHeight());
+					wave.createImage();
+				}
+				return null;
+			}
+
+			public void finished() {
+				waveBox.validate();
+				validate();
+				repaint();
+			}
+		};
 		worker.start();
 	}
-	 
-	public void removeWaves()
-	{
+
+	public void removeWaves() {
 		while (waves.size() > 0)
 			remove(waves.get(0));
 
@@ -1385,64 +1066,56 @@ public class WaveClipboardFrame extends SwarmFrame
 		doButtonEnables();
 		repaint();
 	}
-	
-	private void addHistory(WaveViewPanel wvp, double[] t)
-	{
+
+	private void addHistory(WaveViewPanel wvp, double[] t) {
 		Stack<double[]> history = histories.get(wvp);
-		if (history == null)
-		{
+		if (history == null) {
 			history = new Stack<double[]>();
 			histories.put(wvp, history);
 		}
 		history.push(t);
 	}
 
-	public void gotoTime(WaveViewPanel wvp, String t)
-	{
+	public void gotoTime(WaveViewPanel wvp, String t) {
 		double j2k = Double.NaN;
-		try
-		{
+		try {
 			if (t.length() == 12)
 				t = t + "30";
-				
+
 			j2k = Time.parse("yyyyMMddHHmmss", t);
-		}	
-		catch (Exception e)
-		{
-			JOptionPane.showMessageDialog(Swarm.getApplication(), "Illegal time value.", "Error", JOptionPane.ERROR_MESSAGE);
-		}	
-		
-		if (!Double.isNaN(j2k))
-		{
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(Swarm.getApplication(),
+					"Illegal time value.", "Error", JOptionPane.ERROR_MESSAGE);
+		}
+
+		if (!Double.isNaN(j2k)) {
 			double dt = 60;
-			if (wvp.getWave() != null)
-			{
-				double st = wvp.getStartTime();	
+			if (wvp.getWave() != null) {
+				double st = wvp.getStartTime();
 				double et = wvp.getEndTime();
-				double[] ts = new double[] {st, et};
+				double[] ts = new double[] { st, et };
 				addHistory(wvp, ts);
-				dt = (et - st);	
+				dt = (et - st);
 			}
-			
-			double tzo = Time.getTimeZoneOffset(Swarm.config.getTimeZone(wvp.getChannel()));
+
+			double tzo = Time.getTimeZoneOffset(Swarm.config.getTimeZone(wvp
+					.getChannel()));
 			double nst = j2k - tzo - dt / 2;
 			double net = nst + dt;
 
 			fetchNewWave(wvp, nst, net);
-		}	
+		}
 	}
-	
-	public void gotoTime(String t)
-	{
+
+	public void gotoTime(String t) {
 		for (WaveViewPanel p : selectedSet)
 			gotoTime(p, t);
 	}
-	
-	public void scaleTime(WaveViewPanel wvp, double pct)
-	{
-		double st = wvp.getStartTime();	
+
+	public void scaleTime(WaveViewPanel wvp, double pct) {
+		double st = wvp.getStartTime();
 		double et = wvp.getEndTime();
-		double[] t = new double[] {st, et};
+		double[] t = new double[] { st, et };
 		addHistory(wvp, t);
 		double dt = (et - st) * (1 - pct);
 		double mt = (et - st) / 2 + st;
@@ -1451,108 +1124,92 @@ public class WaveClipboardFrame extends SwarmFrame
 		fetchNewWave(wvp, nst, net);
 	}
 
-	public void scaleTime(double pct)
-	{
+	public void scaleTime(double pct) {
 		for (WaveViewPanel p : selectedSet)
 			scaleTime(p, pct);
 	}
-	
-	public void back(WaveViewPanel wvp)
-	{
+
+	public void back(WaveViewPanel wvp) {
 		Stack<double[]> history = histories.get(wvp);
 		if (history == null || history.empty())
 			return;
-			
+
 		final double[] t = history.pop();
 		fetchNewWave(wvp, t[0], t[1]);
 	}
 
-	public void back()
-	{
+	public void back() {
 		for (WaveViewPanel p : selectedSet)
 			back(p);
 	}
-	
-	private void shiftTime(WaveViewPanel wvp, double pct)
-	{
-		double st = wvp.getStartTime();	
+
+	private void shiftTime(WaveViewPanel wvp, double pct) {
+		double st = wvp.getStartTime();
 		double et = wvp.getEndTime();
-		double[] t = new double[] {st, et};
+		double[] t = new double[] { st, et };
 		addHistory(wvp, t);
 		double dt = (et - st) * pct;
 		double nst = st + dt;
 		double net = et + dt;
 		fetchNewWave(wvp, nst, net);
 	}
-	
-	public void shiftTime(double pct)
-	{
+
+	public void shiftTime(double pct) {
 		for (WaveViewPanel p : selectedSet)
 			shiftTime(p, pct);
 	}
-	
-	public void repositionWaves(double st, double et)
-	{
-		for (WaveViewPanel wave : waves)
-		{
+
+	public void repositionWaves(double st, double et) {
+		for (WaveViewPanel wave : waves) {
 			fetchNewWave(wave, st, et);
 		}
 	}
-	
-	public Throbber getThrobber()
-	{
+
+	public Throbber getThrobber() {
 		return throbber;
 	}
-	
-	// This isn't right, this should be a method of waveviewpanel 
-	private void fetchNewWave(final WaveViewPanel wvp, final double nst, final double net)
-	{
-		final SwingWorker worker = new SwingWorker()
-				{
-					public Object construct()
-					{
-						throbber.increment();
-//						disableNavigationButtons();
-//						System.out.println(waveViewPanel.getDataSource().getClass());
-						SeismicDataSource sds = wvp.getDataSource();
-						// Hacky fix for bug #84
-						Wave sw = null;
-						if (sds instanceof CachedDataSource)
-							sw = ((CachedDataSource)sds).getBestWave(wvp.getChannel(), nst, net);
-						else
-							sw = sds.getWave(wvp.getChannel(), nst, net);
-						wvp.setWave(sw, nst, net);
-						wvp.repaint();
-						return null;
-					}
-					
-					public void finished()
-					{
-						throbber.decrement();
-						repaint();	
-					}
-				};
-		worker.start();	
+
+	// TODO: This isn't right, this should be a method of waveviewpanel
+	private void fetchNewWave(final WaveViewPanel wvp, final double nst,
+			final double net) {
+		final SwingWorker worker = new SwingWorker() {
+			public Object construct() {
+				throbber.increment();
+				SeismicDataSource sds = wvp.getDataSource();
+				// Hacky fix for bug #84
+				Wave sw = null;
+				if (sds instanceof CachedDataSource)
+					sw = ((CachedDataSource) sds).getBestWave(wvp.getChannel(),
+							nst, net);
+				else
+					sw = sds.getWave(wvp.getChannel(), nst, net);
+				wvp.setWave(sw, nst, net);
+				wvp.repaint();
+				return null;
+			}
+
+			public void finished() {
+				throbber.decrement();
+				repaint();
+			}
+		};
+		worker.start();
 	}
 
-	public void setMaximum(boolean max) throws PropertyVetoException
-	{
-		if (max)
-		{
+	public void setMaximum(boolean max) throws PropertyVetoException {
+		if (max) {
 			Swarm.config.clipboardX = getX();
 			Swarm.config.clipboardY = getY();
 		}
 		super.setMaximum(max);
 	}
-	
-	public void paint(Graphics g)
-	{
+
+	public void paint(Graphics g) {
 		super.paint(g);
-		if (waves.size() == 0)
-		{
+		if (waves.size() == 0) {
 			Dimension dim = this.getSize();
 			g.setColor(Color.black);
-			g.drawString("Clipboard empty.", dim.width / 2 - 40, dim.height / 2);	
-		}	
+			g.drawString("Clipboard empty.", dim.width / 2 - 40, dim.height / 2);
+		}
 	}
 }

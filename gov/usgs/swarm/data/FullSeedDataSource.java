@@ -27,27 +27,6 @@ import java.util.TimeZone;
 /**
  * Class for loading SEED volumes.
  * 
- * $Log: not supported by cvs2svn $
- * Revision 1.5  2006/06/05 18:07:03  dcervelli
- * Major 1.3 changes.
- *
- * Revision 1.4  2006/04/15 16:00:13  dcervelli
- * 1.3 changes (renaming, new datachooser, different config).
- *
- * Revision 1.3  2005/09/26 15:26:33  dcervelli
- * Fixed bug introduced during change to Java 1.5.
- *
- * Revision 1.2  2005/09/02 16:40:29  dcervelli
- * CurrentTime changes.
- *
- * Revision 1.1  2005/08/26 20:40:28  dcervelli
- * Initial avosouth commit.
- *
- * Revision 1.1  2005/05/02 16:22:10  cervelli
- * Moved data classes to separate package.
- *
- * Revision 1.2  2004/10/23 19:35:20  cvs
- * No longer returns wave list.
  *
  * @author Dan Cervelli
  */
@@ -113,8 +92,11 @@ public class FullSeedDataSource extends SeismicDataSource
 			{
 				List<Wave> parts = tempStationMap.get(key);
 				Wave wave = Wave.join(parts);
-				Swarm.getCache().cacheWaveAsHelicorder(key, wave);
-				Swarm.getCache().putWave(key, wave);
+				
+				CachedDataSource cache = CachedDataSource.getInstance();
+				cache.cacheWaveAsHelicorder(key, wave);
+				cache.putWave(key, wave);
+				
 				stationMap.put(key, wave);
 				stations.add(key);
 			}
@@ -164,7 +146,10 @@ public class FullSeedDataSource extends SeismicDataSource
 			t2 = wave.getEndTime();
 			t1 = t2 - dt;
 		}
-		return Swarm.getCache().getHelicorder(station, t1, t2, gl);
+
+		CachedDataSource cache = CachedDataSource.getInstance();
+
+		return cache.getHelicorder(station, t1, t2, gl);
 	}
 	
 	public List<String> getChannels()
@@ -174,7 +159,9 @@ public class FullSeedDataSource extends SeismicDataSource
 
 	public Wave getWave(String station, double t1, double t2) 
 	{
-		return Swarm.getCache().getBestWave(station, t1, t2);
+		CachedDataSource cache = CachedDataSource.getInstance();
+
+		return cache.getBestWave(station, t1, t2);
 	}
 	
 	public String toConfigString()

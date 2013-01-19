@@ -131,7 +131,8 @@ public class WaveServerSource extends SeismicDataSource
 	
 	public synchronized Wave getWave(String station, double t1, double t2)
 	{
-		CachedDataSource cache = Swarm.getCache();
+		CachedDataSource cache = CachedDataSource.getInstance();
+
 		Wave sw = null;
 		if (useCache)
 			sw = cache.getWave(station, t1, t2);
@@ -160,10 +161,6 @@ public class WaveServerSource extends SeismicDataSource
 				cache.putWave(station, sw);
 			}
 		}
-//		else
-//		{
-//			//System.out.println("cached");	
-//		}
 		return sw;
 	}
 	
@@ -182,7 +179,8 @@ public class WaveServerSource extends SeismicDataSource
 		if ((t2 - now) >= -20)
 			getWave(station, now - 2*60, now);	
 		
-		CachedDataSource cache = Swarm.getCache();
+		CachedDataSource cache = CachedDataSource.getInstance();
+
 		HelicorderData hd = cache.getHelicorder(station, t1, t2, (GulperListener)null);	
 
 		if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10))

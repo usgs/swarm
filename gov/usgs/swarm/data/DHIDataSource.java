@@ -32,36 +32,6 @@ import org.apache.log4j.SimpleLayout;
 import org.apache.log4j.varia.NullAppender;
 
 /**
- * $Log: not supported by cvs2svn $
- * Revision 1.11  2007/04/29 21:33:04  dcervelli
- * Adds channels to groups.
- *
- * Revision 1.10  2006/08/14 22:44:46  dcervelli
- * Implements getCopy() and adheres to useCache.
- *
- * Revision 1.9  2006/08/12 21:51:53  dcervelli
- * Addition of id to channelProgress().
- *
- * Revision 1.8  2006/08/12 00:35:54  dcervelli
- * Progress indications from getChannels().
- *
- * Revision 1.7  2006/08/10 14:31:05  cervelli
- * Fixed synch bugs.
- *
- * Revision 1.6  2006/08/08 22:21:30  cervelli
- * Configurable network/seismogram DC/DNS and gulper variables.
- *
- * Revision 1.5  2006/08/04 21:21:09  cervelli
- * Got rid of some useless output.
- *
- * Revision 1.4  2006/08/01 23:44:07  cervelli
- * New metadata system changes.
- *
- * Revision 1.3  2006/07/30 22:46:24  cervelli
- * Change for gulper.
- *
- * Revision 1.2  2006/07/26 00:36:02  cervelli
- * Changes for new gulper system.
  *
  * @author Dan Cervelli
  */
@@ -134,21 +104,6 @@ public class DHIDataSource extends SeismicDataSource
 		if (orb == null)
 		{
 			Properties prop = new Properties();
-			/* Alternate form of setting timeout:
-			//===================================================================
-			// set a timeout for response from the server
-			//===================================================================
-			org.omg.CORBA.Any ULongAny = orb.create_any();
-			// time out if no response in 10 minutes
-			if( debug ) System.out.println("Setting wait to: "+wait+" ms");
-			ULongAny.insert_ulong( wait ); 
-			org.omg.CORBA.Policy[] policies = new org.omg.CORBA.Policy[1];
-			policies[0] = orb.create_policy(com.ooc.OB.TIMEOUT_POLICY_ID.value, ULongAny);
-			org.omg.CORBA.PolicyManager pm =
-				org.omg.CORBA.PolicyManagerHelper.narrow(
-					orb.resolve_initial_references("ORBPolicyManager"));
-			pm.add_policy_overrides(policies);
-			 */
 	        prop.setProperty("com.sun.CORBA.transport.ORBTCPReadTimeouts", "100:60000:180000:20");
 	        orb = (org.omg.CORBA_2_3.ORB)org.omg.CORBA.ORB.init(new String[] {}, prop);
 		}
@@ -188,7 +143,6 @@ public class DHIDataSource extends SeismicDataSource
 	        	String t = s.effective_time.end_time.date_time.replaceAll("[-:]", "");
 	        	double j2k = gov.usgs.util.Time.parse(gov.usgs.util.Time.ISO_8601_TIME_FORMAT, t);
 	        	if (j2k >= (now - 3600))
-//	        	if (s.effective_time.end_time.date_time.startsWith("25"))
 	        	{
 		        	Channel[] channels = net.retrieve_for_station(s.get_id());
 		            for (Channel c : channels)
@@ -199,7 +153,6 @@ public class DHIDataSource extends SeismicDataSource
 		            	double sr = c.sampling_info.numPoints / c.sampling_info.interval.value;
 		            	t = s.effective_time.end_time.date_time.replaceAll("[-:]", "");
 			        	j2k = gov.usgs.util.Time.parse(gov.usgs.util.Time.ISO_8601_TIME_FORMAT, t);
-//		            	if (c.effective_time.end_time.date_time.startsWith("25") && sr > 1.0)
 	            		if (j2k >= (now - 3600) && sr > 1.0)
 		            	{
 		            		String loc = c.get_id().site_code;
@@ -237,14 +190,8 @@ public class DHIDataSource extends SeismicDataSource
 	public HelicorderData getHelicorder(String station, double t1, double t2, GulperListener gl)
 	{
 		double now = CurrentTime.getInstance().nowJ2K();
-		// if a time later than now has been asked for make sure to get the latest
-		// so that, if possible, a small bit of helicorder data will be displayed
-//		if ((t2 - now) >= -20)
-//		{
-//			getWave(station, now - 2*60, now);
-//		}
-		
-		CachedDataSource cache = Swarm.getCache();
+
+		CachedDataSource cache = CachedDataSource.getInstance();
 		HelicorderData hd = cache.getHelicorder(station, t1, t2, (GulperListener)null);
 		
 		if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10))
@@ -259,7 +206,7 @@ public class DHIDataSource extends SeismicDataSource
 
 	public Wave getWave(String station, double t1, double t2)
 	{
-		CachedDataSource cache = Swarm.getCache();
+		CachedDataSource cache = CachedDataSource.getInstance();
 		Wave wave = null;
 		if (useCache)
 			wave = cache.getWave(station, t1, t2);
@@ -296,10 +243,8 @@ public class DHIDataSource extends SeismicDataSource
 			            wave.setSamplingRate((seis[i].sampling_info.numPoints / seis[i].sampling_info.interval.value * 1000));
 			            wave.register();
 			            waves.add(wave);
-//			            System.out.println(wave);
 			        }
 		        }
-//		        Collections.sort(waves);
 		        wave = Wave.join(waves);
 		        if (wave != null && useCache)
 		        {
