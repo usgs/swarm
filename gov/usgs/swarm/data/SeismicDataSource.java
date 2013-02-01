@@ -24,6 +24,11 @@ abstract public class SeismicDataSource
 	
 	protected EventListenerList listeners = new EventListenerList();
 
+	public IGulper createGulper(GulperList gl, String k, String ch, double t1, double t2, int size, int delay)
+	{
+		return new Gulper(gl, k, this, ch, t1, t2, size, delay);
+	}
+
 	abstract public List<String> getChannels();
 	
 	/**
