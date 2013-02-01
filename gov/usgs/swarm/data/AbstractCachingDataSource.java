@@ -25,12 +25,12 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 	private static final int MAX_WAVE_SIZE = 1000000;
 
 	protected long maxSize;
-	private Map<String, List<CachedHelicorder>> helicorderCache;
-	private Map<String, List<CachedWave>> waveCache;
-	private CachePurgeAction[] purgeActions;
+	protected Map<String, List<CachedHelicorder>> helicorderCache;
+	protected Map<String, List<CachedWave>> waveCache;
+	protected CachePurgeAction[] purgeActions;
 
 	public AbstractCachingDataSource() {
-		super();
+//		super();
 		helicorderCache = new HashMap<String, List<CachedHelicorder>>();
 		waveCache = new HashMap<String, List<CachedWave>>();
 		maxSize = Runtime.getRuntime().maxMemory() / 6;
@@ -244,31 +244,34 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 		return false;
 	}
 
-	public Wave getWave(String station, double t1, double t2) {
-		Wave wave;
+	public synchronized Wave getWave(String station, double t1, double t2) {
 		List<CachedWave> waves = waveCache.get(station);
 		if (waves == null)
 			return null;
 		else {
-			List<Wave> parts = new ArrayList<Wave>();
-			double minT = 1E300;
-			double maxT = -1E300;
 			for (CachedWave cw : waves) {
-				if (cw.wave.overlaps(t1, t2)) {
-					parts.add(cw.wave);
-					minT = Math.min(minT, cw.t1);
-					maxT = Math.max(maxT, cw.t2);
+				if (t1 >= cw.t1 && t2 <= cw.t2) {
+					// there is an intermittent problem here so I will catch
+					// this exception
+					// so the program doesn't lose functionality
+					try {
+						int[] newbuf = new int[(int) ((t2 - t1) * cw.wave
+								.getSamplingRate())];
+						int i = (int) ((t1 - cw.wave.getStartTime()) * cw.wave
+								.getSamplingRate());
+						System.arraycopy(cw.wave.buffer, i, newbuf, 0,
+								newbuf.length);
+						Wave sw = new Wave(newbuf, t1,
+								cw.wave.getSamplingRate());
+						cw.lastAccess = System.currentTimeMillis();
+						return sw;
+					} catch (ArrayIndexOutOfBoundsException e) {
+						return null;
+					}
 				}
 			}
-
-			if (parts.size() == 1)
-				return parts.get(0);
-
-			wave = Wave.join(parts, minT, maxT);
-			if (wave != null)
-				wave = wave.subset(t1, t2);
 		}
-		return wave;
+		return null;
 	}
 
 	public List<String> getChannels() {
@@ -594,7 +597,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 		abstract public int getMemorySize();
 	}
 
-	private class CachedWave extends CacheEntry implements
+	protected class CachedWave extends CacheEntry implements
 			Comparable<CacheEntry> {
 		public Wave wave;
 

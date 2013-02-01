@@ -415,6 +415,34 @@ public class FileDataSource extends AbstractCachingDataSource {
 		return super.getHelicorder(channel, t1, t2, gl);
 	}
 
+	public Wave getWave(String station, double t1, double t2) 
+	{
+		Wave wave;
+		List<CachedWave> waves = waveCache.get(station);
+		if (waves == null)
+			return null;
+		else {
+			List<Wave> parts = new ArrayList<Wave>();
+			double minT = 1E300;
+			double maxT = -1E300;
+			for (CachedWave cw : waves) {
+				if (cw.wave.overlaps(t1, t2)) {
+					parts.add(cw.wave);
+					minT = Math.min(minT, cw.t1);
+					maxT = Math.max(maxT, cw.t2);
+				}
+			}
+
+			if (parts.size() == 1)
+				return parts.get(0);
+
+			wave = Wave.join(parts, minT, maxT);
+			if (wave != null)
+				wave = wave.subset(t1, t2);
+		}
+		return wave;
+	}
+
 	public String toConfigString() {
 		return name + ";file:";
 	}
