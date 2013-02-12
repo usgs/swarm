@@ -30,7 +30,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 	protected CachePurgeAction[] purgeActions;
 
 	public AbstractCachingDataSource() {
-//		super();
+		// super();
 		helicorderCache = new HashMap<String, List<CachedHelicorder>>();
 		waveCache = new HashMap<String, List<CachedWave>>();
 		maxSize = Runtime.getRuntime().maxMemory() / 6;
@@ -53,8 +53,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 		return size;
 	}
 
-	private synchronized <T extends CacheEntry> long getSize(
-			Map<String, List<T>> cache) {
+	private synchronized <T extends CacheEntry> long getSize(Map<String, List<T>> cache) {
 		long size = 0;
 		for (String key : cache.keySet()) {
 			List<T> cwl = cache.get(key);
@@ -97,8 +96,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 		purgeActions = new CachePurgeAction[] {
 				// purge anything that hasn't been hit in 5 minutes
 				new TimeLimitWavePurgeAction(waveCache, 5 * 60 * 1000),
-				new TimeLimitHelicorderPurgeAction(helicorderCache,
-						5 * 60 * 1000),
+				new TimeLimitHelicorderPurgeAction(helicorderCache, 5 * 60 * 1000),
 
 				// cut waves larger than 3 hours in half keeping latest half
 				new HalveLargeWavesPurgeAction(waveCache, 3 * 60 * 60),
@@ -129,8 +127,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 		}
 	}
 
-	private synchronized void putWaveInCache(String channel, Wave wave,
-			List<CachedWave> waves) {
+	private synchronized void putWaveInCache(String channel, Wave wave, List<CachedWave> waves) {
 		if (wave.getMemorySize() > MAX_WAVE_SIZE) {
 			Wave[] splitWaves = wave.split();
 			putWaveInCache(channel, splitWaves[0], waves);
@@ -147,8 +144,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 		enforceSize();
 	}
 
-	public synchronized void putHelicorder(String station,
-			HelicorderData helicorder) {
+	public synchronized void putHelicorder(String station, HelicorderData helicorder) {
 		List<CachedHelicorder> helis = helicorderCache.get(station);
 		if (helis == null) {
 			helis = new ArrayList<CachedHelicorder>();
@@ -166,8 +162,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 			for (int i = 0; i < helis.size(); i++) {
 				CachedHelicorder ch = helis.get(i);
 
-				if (ch.helicorder.overlaps(helicorder)
-						&& helicorder != ch.helicorder) {
+				if (ch.helicorder.overlaps(helicorder) && helicorder != ch.helicorder) {
 					helis.remove(ch);
 					HelicorderData newHeli = ch.helicorder.combine(helicorder);
 					putHelicorder(station, newHeli);
@@ -193,13 +188,12 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 	public synchronized void cacheWaveAsHelicorder(String station, Wave wave) {
 		double st = Math.ceil(wave.getStartTime());
 		double et = Math.floor(wave.getEndTime());
-		if (inHelicorderCache(station, st, et))
+		if (inHelicorderCache(station, st, et) || !(et > st))
 			return;
 
-		int seconds = (int) (Math.floor(wave.getEndTime()) - Math.ceil(wave
-				.getStartTime()));
-		double bi = Math.floor((Math.ceil(wave.getStartTime()) - wave
-				.getStartTime()) * wave.getSamplingRate());
+		int seconds = (int) (et - st);
+
+		double bi = Math.floor((st - wave.getStartTime()) * wave.getSamplingRate());
 		int bufIndex = (int) bi;
 		int sr = (int) wave.getSamplingRate();
 		DoubleMatrix2D data = DoubleFactory2D.dense.make(seconds, 3);
@@ -230,8 +224,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 		return helicorderCache.size() + waveCache.size() == 0;
 	}
 
-	public synchronized boolean inHelicorderCache(String station, double t1,
-			double t2) {
+	public synchronized boolean inHelicorderCache(String station, double t1, double t2) {
 		List<CachedHelicorder> helis = helicorderCache.get(station);
 		if (helis == null)
 			return false;
@@ -255,14 +248,10 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 					// this exception
 					// so the program doesn't lose functionality
 					try {
-						int[] newbuf = new int[(int) ((t2 - t1) * cw.wave
-								.getSamplingRate())];
-						int i = (int) ((t1 - cw.wave.getStartTime()) * cw.wave
-								.getSamplingRate());
-						System.arraycopy(cw.wave.buffer, i, newbuf, 0,
-								newbuf.length);
-						Wave sw = new Wave(newbuf, t1,
-								cw.wave.getSamplingRate());
+						int[] newbuf = new int[(int) ((t2 - t1) * cw.wave.getSamplingRate())];
+						int i = (int) ((t1 - cw.wave.getStartTime()) * cw.wave.getSamplingRate());
+						System.arraycopy(cw.wave.buffer, i, newbuf, 0, newbuf.length);
+						Wave sw = new Wave(newbuf, t1, cw.wave.getSamplingRate());
 						cw.lastAccess = System.currentTimeMillis();
 						return sw;
 					} catch (ArrayIndexOutOfBoundsException e) {
@@ -348,8 +337,8 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 	// a Helicorder from the cache. If you want to try and fill data on either
 	// side use
 	// the version below
-	public synchronized HelicorderData getHelicorder(String station, double t1,
-			double t2, GulperListener gl) {
+	public synchronized HelicorderData getHelicorder(String station, double t1, double t2,
+			GulperListener gl) {
 		List<CachedHelicorder> helis = helicorderCache.get(station);
 		if (helis == null)
 			return null;
@@ -390,8 +379,8 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 		}
 	}
 
-	public synchronized HelicorderData getHelicorder(String station, double t1,
-			double t2, SeismicDataSource source) {
+	public synchronized HelicorderData getHelicorder(String station, double t1, double t2,
+			SeismicDataSource source) {
 		List<CachedHelicorder> helis = helicorderCache.get(station);
 		if (helis == null)
 			return null;
@@ -409,8 +398,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 				// one entry completely within asked for area
 				if (t1 < ch.t1 && t2 > ch.t2) {
 					// System.out.println("cache is centered chunk");
-					HelicorderData nhd = source.getHelicorder(station, t1,
-							ch.t1, null);
+					HelicorderData nhd = source.getHelicorder(station, t1, ch.t1, null);
 					if (nhd != null)
 						hd = ch.helicorder.combine(nhd);
 					else
@@ -427,8 +415,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 				// asked for area is to left but overlaps
 				if (t1 < ch.t1 && t2 > ch.t1 && t2 <= ch.t2) {
 					// System.out.println("cache overlaps on right side");
-					HelicorderData nhd = source.getHelicorder(station, t1,
-							ch.t1, null);
+					HelicorderData nhd = source.getHelicorder(station, t1, ch.t1, null);
 					if (nhd != null) {
 						hd = ch.helicorder.combine(nhd);
 						ch.lastAccess = System.currentTimeMillis();
@@ -443,8 +430,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 				// asked for area is to right but overlaps
 				if (t1 > ch.t1 && t1 < ch.t2 && t2 > ch.t2) {
 					// System.out.println("cache overlaps on left side");
-					HelicorderData nhd = source.getHelicorder(station, ch.t2,
-							t2, null);
+					HelicorderData nhd = source.getHelicorder(station, ch.t2, t2, null);
 					if (nhd != null) {
 						hd = ch.helicorder.combine(nhd);
 						ch.lastAccess = System.currentTimeMillis();
@@ -469,8 +455,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 		System.out.println("Wave Cache Flushed");
 	}
 
-	private <T extends CacheEntry> long outputCache(String type,
-			Map<String, List<T>> cache) {
+	private <T extends CacheEntry> long outputCache(String type, Map<String, List<T>> cache) {
 		long size = 0;
 		System.out.println(type + " cache");
 		for (String key : cache.keySet()) {
@@ -486,8 +471,8 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 		return size;
 	}
 
-	private synchronized <T extends CacheEntry> void removeEntryFromCache(
-			CacheEntry ce, Map<String, List<T>> cache) {
+	private synchronized <T extends CacheEntry> void removeEntryFromCache(CacheEntry ce,
+			Map<String, List<T>> cache) {
 		List<T> cl = cache.get(ce.station);
 		cl.remove(ce);
 		System.out.println("Removed: " + ce.getInfoString());
@@ -512,8 +497,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 				if (cw.wave.getEndTime() - cw.wave.getStartTime() > maxTime) {
 					long before = cw.getMemorySize();
 					double nst = cw.wave.getEndTime()
-							- (cw.wave.getEndTime() - cw.wave.getStartTime())
-							/ 2;
+							- (cw.wave.getEndTime() - cw.wave.getStartTime()) / 2;
 					cw.wave = cw.wave.subset(nst, cw.wave.getEndTime());
 					cw.t1 = cw.wave.getStartTime();
 					cw.t2 = cw.wave.getEndTime();
@@ -553,8 +537,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 		private long interval;
 		private Map<String, List<CachedHelicorder>> cache;
 
-		public TimeLimitHelicorderPurgeAction(
-				Map<String, List<CachedHelicorder>> c, long i) {
+		public TimeLimitHelicorderPurgeAction(Map<String, List<CachedHelicorder>> c, long i) {
 			cache = c;
 			interval = i;
 		}
@@ -597,14 +580,13 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 		abstract public int getMemorySize();
 	}
 
-	protected class CachedWave extends CacheEntry implements
-			Comparable<CacheEntry> {
+	protected class CachedWave extends CacheEntry implements Comparable<CacheEntry> {
 		public Wave wave;
 
 		public String getInfoString() {
 			long ms = System.currentTimeMillis() - lastAccess;
-			return "[" + ms + "ms] " + (t2 - t1) + "s, " + wave.getMemorySize()
-					+ " bytes, " + t1 + " => " + t2;
+			return "[" + ms + "ms] " + (t2 - t1) + "s, " + wave.getMemorySize() + " bytes, " + t1
+					+ " => " + t2;
 		}
 
 		public int getMemorySize() {
@@ -621,9 +603,8 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 
 		public String getInfoString() {
 			long ms = System.currentTimeMillis() - lastAccess;
-			return "[" + ms + "ms] " + (t2 - t1) + "s, "
-					+ helicorder.getMemorySize() + " bytes, " + t1 + " => "
-					+ t2;
+			return "[" + ms + "ms] " + (t2 - t1) + "s, " + helicorder.getMemorySize() + " bytes, "
+					+ t1 + " => " + t2;
 		}
 
 		public int getMemorySize() {
@@ -648,8 +629,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 	private class CompleteHelicorderPurgeAction extends CachePurgeAction {
 		private Map<String, List<CachedHelicorder>> cache;
 
-		public CompleteHelicorderPurgeAction(
-				Map<String, List<CachedHelicorder>> c) {
+		public CompleteHelicorderPurgeAction(Map<String, List<CachedHelicorder>> c) {
 			cache = c;
 		}
 
