@@ -19,6 +19,7 @@ import gov.usgs.vdx.data.wave.Wave;
 
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Image;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -40,6 +41,7 @@ import javax.jnlp.BasicService;
 import javax.jnlp.ServiceManager;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -140,7 +142,7 @@ public class Swarm extends JFrame
 			logger.fine("Swarm version/date: " + VERSION  + "/" + BUILD_DATE);
 		}
 		logger.fine("JNLP: " + isJNLP());
-		setIconImage(Images.getIcon("swarm").getImage());
+		setIconImage(Icons.swarm.getImage());
 
 		monitors = new HashMap<String, MultiMonitor>();
 		cache = CachedDataSource.getInstance();

@@ -1,7 +1,7 @@
 package gov.usgs.swarm.chooser;
 
 import gov.usgs.proj.GeoRange;
-import gov.usgs.swarm.Images;
+import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Messages;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
@@ -228,7 +228,7 @@ public class DataChooser extends JPanel {
 	private void createToolBar() {
 		toolBar = SwarmUtil.createToolBar();
 
-		newButton = SwarmUtil.createToolBarButton(Images.getIcon("new_server"), //$NON-NLS-1$
+		newButton = SwarmUtil.createToolBarButton(Icons.new_server, //$NON-NLS-1$
 				Messages.getString("DataChooser.newSourceToolTip"), //$NON-NLS-1$
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
@@ -252,7 +252,7 @@ public class DataChooser extends JPanel {
 		toolBar.add(newButton);
 
 		editButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("edit_server"), //$NON-NLS-1$
+				Icons.edit_server, //$NON-NLS-1$
 				Messages.getString("DataChooser.editSourceToolTip"), //$NON-NLS-1$
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
@@ -285,7 +285,7 @@ public class DataChooser extends JPanel {
 		toolBar.add(editButton);
 
 		collapseButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("collapse"), //$NON-NLS-1$
+				Icons.collapse, //$NON-NLS-1$
 				Messages.getString("DataChooser.collapseToolTip"), //$NON-NLS-1$		
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
@@ -295,7 +295,7 @@ public class DataChooser extends JPanel {
 		toolBar.add(collapseButton);
 
 		deleteButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("new_delete"), //$NON-NLS-1$
+				Icons.new_delete, //$NON-NLS-1$
 				Messages.getString("DataChooser.removeSourceToolTip"), //$NON-NLS-1$
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
@@ -313,7 +313,7 @@ public class DataChooser extends JPanel {
 		toolBar.add(Box.createHorizontalGlue());
 
 		closeButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("close_view"), "Close data chooser",
+				Icons.close_view, "Close data chooser",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						Swarm.getApplication().setChooserVisible(false);
@@ -372,7 +372,7 @@ public class DataChooser extends JPanel {
 		JPanel actionPanel = new JPanel(new GridLayout(1, 5));
 		bottomPanel.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
 
-		heliButton = new JButton(Images.getIcon("heli")); //$NON-NLS-1$
+		heliButton = new JButton(Icons.heli); //$NON-NLS-1$
 		heliButton.setFocusable(false);
 		heliButton.setToolTipText(Messages
 				.getString("DataChooser.heliButtonToolTip")); //$NON-NLS-1$
@@ -396,7 +396,7 @@ public class DataChooser extends JPanel {
 			}
 		});
 
-		realtimeButton = new JButton(Images.getIcon("wave")); //$NON-NLS-1$
+		realtimeButton = new JButton(Icons.wave); //$NON-NLS-1$
 		realtimeButton.setFocusable(false);
 		realtimeButton.setToolTipText(Messages
 				.getString("DataChooser.waveButtonToolTip")); //$NON-NLS-1$
@@ -418,7 +418,7 @@ public class DataChooser extends JPanel {
 			}
 		});
 
-		clipboardButton = new JButton(Images.getIcon("clipboard")); //$NON-NLS-1$
+		clipboardButton = new JButton(Icons.clipboard); //$NON-NLS-1$
 		clipboardButton.setFocusable(false);
 		clipboardButton.setToolTipText(Messages
 				.getString("DataChooser.clipboardButtonToolTip")); //$NON-NLS-1$
@@ -450,7 +450,7 @@ public class DataChooser extends JPanel {
 			}
 		});
 
-		monitorButton = new JButton(Images.getIcon("monitor")); //$NON-NLS-1$
+		monitorButton = new JButton(Icons.monitor); //$NON-NLS-1$
 		monitorButton.setFocusable(false);
 		monitorButton.setToolTipText(Messages
 				.getString("DataChooser.monitorButtonToolTip")); //$NON-NLS-1$
@@ -472,7 +472,7 @@ public class DataChooser extends JPanel {
 			}
 		});
 
-		mapButton = new JButton(Images.getIcon("earth"));
+		mapButton = new JButton(Icons.earth);
 		mapButton.setFocusable(false);
 		mapButton.setToolTipText("Open map interface");
 		mapButton.addActionListener(new ActionListener() {
@@ -1050,18 +1050,18 @@ public class DataChooser extends JPanel {
 
 		public Icon getIcon() {
 			if (source instanceof FileDataSource) {
-				return Images.getIcon("wave_folder");
+				return Icons.wave_folder;
 			} else {
 				if (!broken) {
 					if (source.isStoreInUserConfig())
-						return Images.getIcon("server");
+						return Icons.server;
 					else
-						return Images.getIcon("locked_server");
+						return Icons.locked_server;
 				} else {
 					if (source.isStoreInUserConfig())
-						return Images.getIcon("broken_server");
+						return Icons.broken_server;
 					else
-						return Images.getIcon("broken_locked_server");
+						return Icons.broken_locked_server;
 				}
 			}
 		}
@@ -1087,11 +1087,11 @@ public class DataChooser extends JPanel {
 		public Icon getIcon() {
 			Metadata md = Swarm.config.getMetadata(channel);
 			if (md == null || !md.isTouched())
-				return Images.getIcon("graybullet");
+				return Icons.graybullet;
 			else if (md.hasLonLat())
-				return Images.getIcon("bluebullet");
+				return Icons.bluebullet;
 			else
-				return Images.getIcon("bullet");
+				return Icons.bullet;
 		}
 
 		public String getLabel() {
@@ -1112,7 +1112,7 @@ public class DataChooser extends JPanel {
 		}
 
 		public Icon getIcon() {
-			return Images.getIcon("warning");
+			return Icons.warning;
 		}
 
 		public String getLabel() {
@@ -1133,7 +1133,7 @@ public class DataChooser extends JPanel {
 		}
 
 		public Icon getIcon() {
-			return Images.getIcon("wave_folder");
+			return Icons.wave_folder;
 		}
 
 		public String getLabel() {
@@ -1151,7 +1151,7 @@ public class DataChooser extends JPanel {
 		}
 
 		public Icon getIcon() {
-			return Images.getIcon("warning");
+			return Icons.warning;
 		}
 
 		public void setProgress(double p) {
@@ -1174,8 +1174,8 @@ public class DataChooser extends JPanel {
 				int index, boolean isSelected, boolean hasFocus) {
 			String ch = (String) value;
 			ch = ch.substring(0, ch.indexOf("(")).trim();
-			Icon icon = nearestPaths.containsKey(ch) ? Images.getIcon("bullet")
-					: Images.getIcon("redbullet");
+			Icon icon = nearestPaths.containsKey(ch) ? Icons.bullet
+					: Icons.redbullet;
 			super.getListCellRendererComponent(list, value, index, isSelected,
 					hasFocus);
 			setIcon(icon);

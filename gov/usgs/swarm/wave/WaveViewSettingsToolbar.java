@@ -1,6 +1,6 @@
 package gov.usgs.swarm.wave;
 
-import gov.usgs.swarm.Images;
+import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.wave.WaveViewSettings.ViewType;
 import gov.usgs.util.Util;
@@ -43,7 +43,7 @@ public class WaveViewSettingsToolbar
 	public void createUI(JToolBar dest, JComponent keyComp)
 	{
 		waveSet = SwarmUtil.createToolBarButton(
-				Images.getIcon("wavesettings"),
+				Icons.wavesettings,
 				"Wave view settings (?)",
 				new ActionListener()
 				{
@@ -65,7 +65,7 @@ public class WaveViewSettingsToolbar
 		dest.add(waveSet);
 		
 		waveToggle = SwarmUtil.createToolBarToggleButton(
-				Images.getIcon("wave"),
+				Icons.wave,
 				"Wave view (W or ,)",
 				new ActionListener()
 				{
@@ -80,7 +80,7 @@ public class WaveViewSettingsToolbar
 		dest.add(waveToggle);
 		
 		spectraToggle = SwarmUtil.createToolBarToggleButton(
-				Images.getIcon("spectra"),
+				Icons.spectra,
 				"Spectra view (S or .)",
 				new ActionListener()
 				{
@@ -95,7 +95,7 @@ public class WaveViewSettingsToolbar
 		dest.add(spectraToggle);
 		
 		spectrogramToggle = SwarmUtil.createToolBarToggleButton(
-				Images.getIcon("spectrogram"),
+				Icons.spectrogram,
 				"Spectrogram view (G or /)",
 				new ActionListener()
 				{

@@ -10,7 +10,7 @@ import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.Mercator;
 import gov.usgs.proj.Projection;
 import gov.usgs.proj.TransverseMercator;
-import gov.usgs.swarm.Images;
+import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwingWorker;
@@ -64,6 +64,7 @@ import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -82,12 +83,12 @@ public class MapPanel extends JPanel
 	
 	public enum LabelSetting
 	{
-		NONE("N", "label_none"), SOME("S", "label_some"), ALL("A", "label_all");
+		NONE("N", Icons.label_none), SOME("S", Icons.label_some), ALL("A", Icons.label_all);
 		
 		public String code;
-		public String image;
+		public ImageIcon image;
 		
-		LabelSetting(String s, String i)
+		LabelSetting(String s, ImageIcon i)
 		{
 			code = s;
 			image = i;
@@ -109,7 +110,7 @@ public class MapPanel extends JPanel
 		
 		public Icon getIcon()
 		{
-			return Images.getIcon(image);
+			return image;
 		}
 		
 		public static LabelSetting fromString(String s)
@@ -985,7 +986,7 @@ public class MapPanel extends JPanel
 					int iconY = (int)xy.y - 8;
 					if (cmp == null || cmp.getPosition() == Position.UNSET || cmp.getPosition() == Position.MANUAL_UNSET)
 					{
-						JLabel icon = new JLabel(Images.getIcon("bullet"));
+						JLabel icon = new JLabel(Icons.bullet);
 						icon.setBounds(iconX, iconY, 16, 16);
 						compsToAdd.add(icon);
 						if (cmp == null)

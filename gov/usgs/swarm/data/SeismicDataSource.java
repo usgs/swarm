@@ -1,6 +1,6 @@
 package gov.usgs.swarm.data;
 
-import gov.usgs.swarm.Images;
+import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.vdx.data.heli.HelicorderData;
 import gov.usgs.vdx.data.wave.Wave;
@@ -153,11 +153,6 @@ abstract public class SeismicDataSource
 	public String getName()
 	{
 		return name;
-	}
-	
-	public Icon getIcon()
-	{
-		return Images.getIcon("wave_server");
 	}
 	
 	public void establish()

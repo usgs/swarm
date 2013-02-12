@@ -1,6 +1,6 @@
 package gov.usgs.swarm.wave;
 
-import gov.usgs.swarm.Images;
+import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmFrame;
@@ -147,7 +147,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 	}
 
 	private void createUI() {
-		this.setFrameIcon(Images.getIcon("clipboard"));
+		this.setFrameIcon(Icons.clipboard);
 		this.setSize(Swarm.config.clipboardWidth, Swarm.config.clipboardHeight);
 		this.setLocation(Swarm.config.clipboardX, Swarm.config.clipboardY);
 		this.setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);
@@ -181,17 +181,17 @@ public class WaveClipboardFrame extends SwarmFrame {
 	}
 
 	private void createMainButtons() {
-		openButton = SwarmUtil.createToolBarButton(Images.getIcon("open"),
+		openButton = SwarmUtil.createToolBarButton(Icons.open,
 				"Open a saved wave", new OpenActionListener());
 		toolbar.add(openButton);
 
-		saveButton = SwarmUtil.createToolBarButton(Images.getIcon("save"),
+		saveButton = SwarmUtil.createToolBarButton(Icons.save,
 				"Save selected wave", new SaveActionListener());
 		saveButton.setEnabled(false);
 		toolbar.add(saveButton);
 
 		saveAllButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("saveall"), "Save all waves",
+				Icons.saveall, "Save all waves",
 				new SaveAllActionListener());
 		saveAllButton.setEnabled(false);
 		toolbar.add(saveAllButton);
@@ -199,7 +199,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 		toolbar.addSeparator();
 
 		linkButton = SwarmUtil.createToolBarToggleButton(
-				Images.getIcon("helilink"),
+				Icons.helilink,
 				"Synchronize times with helicorder wave", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						heliLinked = linkButton.isSelected();
@@ -208,7 +208,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 		linkButton.setSelected(heliLinked);
 		toolbar.add(linkButton);
 
-		syncButton = SwarmUtil.createToolBarButton(Images.getIcon("clock"),
+		syncButton = SwarmUtil.createToolBarButton(Icons.clock,
 				"Synchronize times with selected wave", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						syncChannels();
@@ -217,7 +217,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 		syncButton.setEnabled(false);
 		toolbar.add(syncButton);
 
-		sortButton = SwarmUtil.createToolBarButton(Images.getIcon("geosort"),
+		sortButton = SwarmUtil.createToolBarButton(Icons.geosort,
 				"Sort waves by nearest to selected wave", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						sortChannelsByNearest();
@@ -228,7 +228,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
 		toolbar.addSeparator();
 
-		sizeButton = SwarmUtil.createToolBarButton(Images.getIcon("resize"),
+		sizeButton = SwarmUtil.createToolBarButton(Icons.resize,
 				"Set clipboard wave size", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						doSizePopup(sizeButton.getX(), sizeButton.getY() + 2
@@ -238,7 +238,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 		toolbar.add(sizeButton);
 
 		removeAllButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("deleteall"), "Remove all waves from clipboard",
+				Icons.deleteall, "Remove all waves from clipboard",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						removeWaves();
@@ -248,7 +248,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 		toolbar.add(removeAllButton);
 
 		toolbar.addSeparator();
-		captureButton = SwarmUtil.createToolBarButton(Images.getIcon("camera"),
+		captureButton = SwarmUtil.createToolBarButton(Icons.camera,
 				"Save clipboard image (P)", new CaptureActionListener());
 		Util.mapKeyStrokeToButton(this, "P", "capture", captureButton);
 		toolbar.add(captureButton);
@@ -311,7 +311,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 	private void createWaveButtons() {
 		toolbar.addSeparator();
 
-		backButton = SwarmUtil.createToolBarButton(Images.getIcon("left"),
+		backButton = SwarmUtil.createToolBarButton(Icons.left,
 				"Scroll back time 20% (Left arrow)", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						shiftTime(-0.20);
@@ -320,7 +320,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 		Util.mapKeyStrokeToButton(this, "LEFT", "backward1", backButton);
 		toolbar.add(backButton);
 
-		forwardButton = SwarmUtil.createToolBarButton(Images.getIcon("right"),
+		forwardButton = SwarmUtil.createToolBarButton(Icons.right,
 				"Scroll forward time 20% (Right arrow)", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						shiftTime(0.20);
@@ -329,7 +329,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 		toolbar.add(forwardButton);
 		Util.mapKeyStrokeToButton(this, "RIGHT", "forward1", forwardButton);
 
-		gotoButton = SwarmUtil.createToolBarButton(Images.getIcon("gototime"),
+		gotoButton = SwarmUtil.createToolBarButton(Icons.gototime,
 				"Go to time (Ctrl-G)", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						String t = JOptionPane.showInputDialog(
@@ -343,7 +343,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 		toolbar.add(gotoButton);
 		Util.mapKeyStrokeToButton(this, "ctrl G", "goto", gotoButton);
 
-		compXButton = SwarmUtil.createToolBarButton(Images.getIcon("xminus"),
+		compXButton = SwarmUtil.createToolBarButton(Icons.xminus,
 				"Shrink sample time 20% (Alt-left arrow, +)",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
@@ -355,7 +355,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 		Util.mapKeyStrokeToButton(this, "EQUALS", "compx2", compXButton);
 		Util.mapKeyStrokeToButton(this, "shift EQUALS", "compx2", compXButton);
 
-		expXButton = SwarmUtil.createToolBarButton(Images.getIcon("xplus"),
+		expXButton = SwarmUtil.createToolBarButton(Icons.xplus,
 				"Expand sample time 20% (Alt-right arrow, -)",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
@@ -366,7 +366,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 		Util.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expXButton);
 		Util.mapKeyStrokeToButton(this, "MINUS", "expx", expXButton);
 
-		histButton = SwarmUtil.createToolBarButton(Images.getIcon("timeback"),
+		histButton = SwarmUtil.createToolBarButton(Icons.timeback,
 				"Last time settings (Backspace)", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						back();
@@ -378,7 +378,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
 		waveToolbar = new WaveViewSettingsToolbar(null, toolbar, this);
 
-		copyButton = SwarmUtil.createToolBarButton(Images.getIcon("clipboard"),
+		copyButton = SwarmUtil.createToolBarButton(Icons.clipboard,
 				"Place another copy of wave on clipboard (C or Ctrl-C)",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
@@ -397,7 +397,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
 		toolbar.addSeparator();
 
-		upButton = SwarmUtil.createToolBarButton(Images.getIcon("up"),
+		upButton = SwarmUtil.createToolBarButton(Icons.up,
 				"Move wave up in clipboard (Up arrow)", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						moveUp();
@@ -406,7 +406,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 		Util.mapKeyStrokeToButton(this, "UP", "up", upButton);
 		toolbar.add(upButton);
 
-		downButton = SwarmUtil.createToolBarButton(Images.getIcon("down"),
+		downButton = SwarmUtil.createToolBarButton(Icons.down,
 				"Move wave down in clipboard (Down arrow)",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
@@ -416,7 +416,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 		Util.mapKeyStrokeToButton(this, "DOWN", "down", downButton);
 		toolbar.add(downButton);
 
-		removeButton = SwarmUtil.createToolBarButton(Images.getIcon("delete"),
+		removeButton = SwarmUtil.createToolBarButton(Icons.delete,
 				"Remove wave from clipboard (Delete)", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						remove();

@@ -6,7 +6,7 @@ import gov.usgs.plot.FrameRenderer;
 import gov.usgs.plot.RectangleRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.TextRenderer;
-import gov.usgs.swarm.Images;
+import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Kioskable;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
@@ -120,7 +120,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 	{
 		super("Monitor, [" + sds.getName() + "]", true, true, true, true);
 		waveMap = Collections.synchronizedMap(new HashMap<String, Wave>());
-		this.setFrameIcon(new ImageIcon(getClass().getClassLoader().getResource(Images.get("monitor"))));
+		this.setFrameIcon(Icons.monitor);
 		dataSource = sds;
 		dataSource.setUseCache(false);
 		panels = new ArrayList<WaveViewPanel>();
@@ -235,7 +235,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		toolbar = SwarmUtil.createToolBar();
 
 		optionsButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("settings"),
+				Icons.settings,
 				"Monitor options",
 				new ActionListener()
 				{
@@ -251,7 +251,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		toolbar.addSeparator();
 		
 		compXButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("xminus"),
+				Icons.xminus,
 				"Shrink time axis (Alt-left arrow)",
 				new ActionListener()
 				{
@@ -266,7 +266,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		toolbar.add(compXButton);
 		
 		expXButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("xplus"),
+				Icons.xplus,
 				"Expand time axis (Alt-right arrow)",
 				new ActionListener()
 				{
@@ -281,7 +281,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		toolbar.add(expXButton);
 		
 		pauseButton = SwarmUtil.createToolBarToggleButton(
-				Images.getIcon("pause"),
+				Icons.pause,
 				"Pause the monitor (P)",
 				new ActionListener()
 				{
@@ -300,7 +300,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		toolbar.addSeparator();
 		
 		settingsButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("wavesettings"),
+				Icons.wavesettings,
 				"Settings for selected wave",
 				new ActionListener()
 				{
@@ -318,7 +318,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		toolbar.add(settingsButton);
 	
 		copyButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("clipboard"),
+				Icons.clipboard,
 				"Copy waves to clipboard (C or Ctrl-C)",
 				new ActionListener()
 				{
@@ -345,7 +345,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		toolbar.addSeparator();
 		
 		removeButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("delete"),
+				Icons.delete,
 				"Remove selected wave from monitor",
 				new ActionListener()
 				{

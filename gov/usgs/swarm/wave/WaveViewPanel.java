@@ -5,7 +5,7 @@ import gov.usgs.plot.FrameDecorator;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.plot.TextRenderer;
-import gov.usgs.swarm.Images;
+import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwingWorker;
@@ -49,7 +49,6 @@ import javax.swing.event.EventListenerList;
  * 
  * 
  * @author Dan Cervelli
- * @version $Id: WaveViewPanel.java,v 1.14 2007-05-21 02:44:17 dcervelli Exp $
  */
 public class WaveViewPanel extends JComponent {
 	public static final long serialVersionUID = -1;
@@ -788,7 +787,7 @@ public class WaveViewPanel extends JComponent {
 
 		if (allowClose) {
 			if (closeImg == null)
-				closeImg = Images.getIcon("close_view").getImage();
+				closeImg = Icons.close_view.getImage();
 
 			g2.drawImage(closeImg, dim.width - 17, 3, null);
 		}

@@ -1,6 +1,6 @@
 package gov.usgs.swarm.heli;
 
-import gov.usgs.swarm.Images;
+import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmDialog;
 import gov.usgs.swarm.SwingWorker;
@@ -37,61 +37,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 /**
  * 
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2006/08/01 23:44:22  cervelli
- * Moved package.
- *
- * Revision 1.16  2006/07/30 22:43:03  cervelli
- * Changes for layouts.
- *
- * Revision 1.15  2006/07/22 20:26:25  cervelli
- * Time zone changes.
- *
- * Revision 1.14  2006/06/14 19:19:31  dcervelli
- * Major 1.3.4 changes.
- *
- * Revision 1.13  2006/06/05 18:06:49  dcervelli
- * Major 1.3 changes.
- *
- * Revision 1.12  2006/04/15 15:58:52  dcervelli
- * 1.3 changes (renaming, new datachooser, different config).
- *
- * Revision 1.11  2006/03/04 23:03:45  cervelli
- * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
- *
- * Revision 1.10  2006/01/26 18:06:33  tparker
- * Correct spelling
- *
- * Revision 1.9  2006/01/26 00:29:05  tparker
- * Correct logic for clipping enabled visibility, with a bit of code cleanup.
- *
- * Revision 1.8  2006/01/25 21:52:50  tparker
- * Cleanup imports
- *
- * Revision 1.7  2006/01/25 21:45:54  tparker
- * Move clipping alert into the heli renderer.
- *
- * Revision 1.6  2006/01/21 11:04:11  tparker
- * Apply alertClip settings
- *
- * Revision 1.5  2006/01/21 01:29:20  tparker
- * First swipe at adding voice alerting of clipping. A work in progress...
- *
- * Revision 1.4  2005/08/30 00:33:43  tparker
- * Update to use Images class
- *
- * Revision 1.3  2005/08/27 00:28:59  tparker
- * Tidy code, no functional changes.
- *
- * Revision 1.2  2005/08/27 00:07:30  tparker
- * Create image constant
- *
- * Revision 1.1  2005/08/26 20:40:28  dcervelli
- * Initial avosouth commit.
- *
- * Revision 1.3  2005/04/13 00:49:04  cervelli
- * Replaced show() with overriden setVisible().
- *
  * @author Dan Cervelli
  */
 public class HelicorderViewerSettingsDialog extends SwarmDialog
@@ -232,7 +177,7 @@ public class HelicorderViewerSettingsDialog extends SwarmDialog
 		zoomList = new JComboBox(zooms);
 		JLabel zoomLabel = new JLabel("Zoom, seconds:");
 		zoomLabel.setLabelFor(zoomList);
-		JButton waveSettingsButton = new JButton("Wave Settings", new ImageIcon(getClass().getClassLoader().getResource(Images.get("wavesettings"))));
+		JButton waveSettingsButton = new JButton("Wave Settings", Icons.wavesettings);
 		waveSettingsButton.addActionListener(new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)

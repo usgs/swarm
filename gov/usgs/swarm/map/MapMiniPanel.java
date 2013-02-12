@@ -6,7 +6,7 @@ import gov.usgs.plot.FrameRenderer;
 import gov.usgs.plot.RectangleRenderer;
 import gov.usgs.plot.SmartTick;
 import gov.usgs.plot.TextRenderer;
-import gov.usgs.swarm.Images;
+import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.SCNL;
 import gov.usgs.swarm.Swarm;
@@ -266,7 +266,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	
 	private void createCloseLabel()
 	{
-		close = new JLabel(Images.getIcon("close_view"));
+		close = new JLabel(Icons.close_view);
 		close.setSize(16, 16);
 		close.addMouseListener(new MouseAdapter()
 				{

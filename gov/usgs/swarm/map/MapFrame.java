@@ -1,7 +1,7 @@
 package gov.usgs.swarm.map;
 
 import gov.usgs.proj.GeoRange;
-import gov.usgs.swarm.Images;
+import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Kioskable;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmFrame;
@@ -120,7 +120,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 	}
 
 	private void createUI() {
-		setFrameIcon(Images.getIcon("earth"));
+		setFrameIcon(Icons.earth);
 		setSize(Swarm.config.mapWidth, Swarm.config.mapHeight);
 		setLocation(Swarm.config.mapX, Swarm.config.mapY);
 		setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);
@@ -181,7 +181,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 	private void createToolbar() {
 		toolbar = SwarmUtil.createToolBar();
 		optionsButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("settings"), "Map options",
+				Icons.settings, "Map options",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						MapSettingsDialog msd = MapSettingsDialog
@@ -192,7 +192,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		toolbar.add(optionsButton);
 
 		labelButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("label_some"), "Change label settings",
+				Icons.label_some, "Change label settings",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						LabelSetting ls = mapPanel.getLabelSetting().next();
@@ -205,7 +205,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		toolbar.addSeparator();
 
 		realtimeButton = SwarmUtil.createToolBarToggleButton(
-				Images.getIcon("clock"), "Realtime mode (N)",
+				Icons.clock, "Realtime mode (N)",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						setRealtime(realtimeButton.isSelected());
@@ -216,7 +216,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		toolbar.add(realtimeButton);
 
 		linkButton = SwarmUtil.createToolBarToggleButton(
-				Images.getIcon("helilink"),
+				Icons.helilink,
 				"Synchronize times with helicorder wave (H)",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
@@ -230,7 +230,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		toolbar.addSeparator();
 
 		JButton earthButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("earth"), "Zoom out to full scale (Home)",
+				Icons.earth, "Zoom out to full scale (Home)",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						Point2D.Double c = new Point2D.Double(mapPanel
@@ -242,7 +242,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		toolbar.add(earthButton);
 
 		dragButton = SwarmUtil.createToolBarToggleButton(
-				Images.getIcon("drag"), "Drag map (D)", new ActionListener() {
+				Icons.drag, "Drag map (D)", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						mapPanel.setDragMode(DragMode.DRAG_MAP);
 					}
@@ -252,7 +252,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		toolbar.add(dragButton);
 
 		dragZoomButton = SwarmUtil.createToolBarToggleButton(
-				Images.getIcon("dragbox"), "Zoom into box (B)",
+				Icons.dragbox, "Zoom into box (B)",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						mapPanel.setDragMode(DragMode.BOX);
@@ -263,7 +263,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		toolbar.add(dragZoomButton);
 
 		rulerButton = SwarmUtil.createToolBarToggleButton(
-				Images.getIcon("ruler"), "Measure distances (M)",
+				Icons.ruler, "Measure distances (M)",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						mapPanel.setDragMode(DragMode.RULER);
@@ -279,7 +279,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		group.add(rulerButton);
 
 		JButton zoomIn = SwarmUtil.createToolBarButton(
-				Images.getIcon("zoomplus"), "Zoom in (+)",
+				Icons.zoomplus, "Zoom in (+)",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						mapPanel.zoom(0.5);
@@ -290,7 +290,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		toolbar.add(zoomIn);
 
 		JButton zoomOut = SwarmUtil.createToolBarButton(
-				Images.getIcon("zoomminus"), "Zoom out (-)",
+				Icons.zoomminus, "Zoom out (-)",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						mapPanel.zoom(2);
@@ -300,7 +300,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		toolbar.add(zoomOut);
 
 		JButton backButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("geoback"), "Last map view (Ctrl-backspace)",
+				Icons.geoback, "Last map view (Ctrl-backspace)",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						mapPanel.mapPop();
@@ -312,7 +312,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 
 		toolbar.addSeparator();
 
-		backTimeButton = SwarmUtil.createToolBarButton(Images.getIcon("left"),
+		backTimeButton = SwarmUtil.createToolBarButton(Icons.left,
 				"Scroll back time 20% (Left arrow)", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						setRealtime(false);
@@ -323,7 +323,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		toolbar.add(backTimeButton);
 
 		forwardTimeButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("right"),
+				Icons.right,
 				"Scroll forward time 20% (Right arrow)", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						setRealtime(false);
@@ -333,7 +333,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		toolbar.add(forwardTimeButton);
 		Util.mapKeyStrokeToButton(this, "RIGHT", "forward1", forwardTimeButton);
 
-		gotoButton = SwarmUtil.createToolBarButton(Images.getIcon("gototime"),
+		gotoButton = SwarmUtil.createToolBarButton(Icons.gototime,
 				"Go to time (Ctrl-G)", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						String t = JOptionPane.showInputDialog(
@@ -354,7 +354,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		toolbar.add(gotoButton);
 		Util.mapKeyStrokeToButton(this, "ctrl G", "goto", gotoButton);
 
-		compXButton = SwarmUtil.createToolBarButton(Images.getIcon("xminus"),
+		compXButton = SwarmUtil.createToolBarButton(Icons.xminus,
 				"Shrink time axis (Alt-left arrow", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						if (realtime) {
@@ -368,7 +368,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		toolbar.add(compXButton);
 		Util.mapKeyStrokeToButton(this, "alt LEFT", "compx", compXButton);
 
-		expXButton = SwarmUtil.createToolBarButton(Images.getIcon("xplus"),
+		expXButton = SwarmUtil.createToolBarButton(Icons.xplus,
 				"Expand time axis (Alt-right arrow)", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						if (realtime) {
@@ -383,7 +383,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		Util.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expXButton);
 
 		timeHistoryButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("timeback"), "Last time settings (Backspace)",
+				Icons.timeback, "Last time settings (Backspace)",
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						if (mapPanel.timePop())
@@ -397,7 +397,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		waveToolbar = new WaveViewSettingsToolbar(null, toolbar, this);
 
 		clipboardButton = SwarmUtil.createToolBarButton(
-				Images.getIcon("clipboard"),
+				Icons.clipboard,
 				"Copy inset to clipboard (C or Ctrl-C)", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						mapPanel.wavesToClipboard();
@@ -410,7 +410,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 
 		toolbar.addSeparator();
 
-		captureButton = SwarmUtil.createToolBarButton(Images.getIcon("camera"),
+		captureButton = SwarmUtil.createToolBarButton(Icons.camera,
 				"Save map image (P)", new CaptureActionListener());
 		Util.mapKeyStrokeToButton(this, "P", "capture", captureButton);
 		toolbar.add(captureButton);

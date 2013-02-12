@@ -62,7 +62,7 @@ public class AboutDialog extends JDialog implements Runnable
 				
 		this.setResizable(false);
 				
-		background = Images.getIcon("honeycomb");
+		background = Icons.honeycomb;
 		JPanel bp = new JPanel(new BorderLayout());
 		bp.add(new JLabel(background), BorderLayout.CENTER);
 		bp.setSize(237, 245);

@@ -7,10 +7,6 @@ import javax.swing.SwingUtilities;
 
 /**
  * 
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2006/04/17 04:16:36  dcervelli
- * More 1.3 changes.
- *
  * @author Dan Cervelli
  */
 public class Throbber extends JLabel implements Runnable
@@ -33,10 +29,16 @@ public class Throbber extends JLabel implements Runnable
 		super();
 		if (offIcon == null)
 		{
-			offIcon = Images.getIcon("throbber_off");
+			offIcon = Icons.throbber_off;
 			onIcons = new ImageIcon[8];
-			for (int i = 0; i < 8; i++)
-				onIcons[i] = Images.getIcon("throbber_" + i);
+			onIcons[0] = Icons.throbber_0;
+			onIcons[1] = Icons.throbber_1;
+			onIcons[2] = Icons.throbber_2;
+			onIcons[3] = Icons.throbber_3;
+			onIcons[4] = Icons.throbber_4;
+			onIcons[5] = Icons.throbber_5;
+			onIcons[6] = Icons.throbber_6;
+			onIcons[7] = Icons.throbber_7;
 		}
 		setIcon(offIcon);
 		setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 4));
