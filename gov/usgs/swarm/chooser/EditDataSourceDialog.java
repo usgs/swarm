@@ -67,6 +67,7 @@ public class EditDataSourceDialog extends SwarmDialog
 		panels.add(new WaveServerPanel());
 		panels.add(new DHIPanel());
 		panels.add(new WebServicesPanel());
+		panels.add(new SeedLinkPanel());
 	}
 	
 	protected void createDataSourceUI()

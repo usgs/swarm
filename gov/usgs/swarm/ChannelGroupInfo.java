@@ -1,9 +1,6 @@
 package gov.usgs.swarm;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Channel group information extends the base channel information and adds
@@ -14,64 +11,6 @@ import java.util.Map;
  */
 public class ChannelGroupInfo extends ChannelInfo
 {
-	/** The groups type. */
-	public enum GroupsType
-	{
-		/** Group by site only. */
-		SITE,
-		/** Group by network only. */
-		NETWORK,
-		/** Group by network and site. */
-		NETWORK_AND_SITE
-	}
-
-	/** Groups map has channel information as key and groups as value */
-	private static final Map<ChannelInfo, List<String>> groupsMap = new HashMap<ChannelInfo, List<String>>();
-
-	/**
-	 * Get the network group for the specified channel information.
-	 * 
-	 * @param ch the channel information.
-	 * @param groupsType groups type.
-	 * @return the group.
-	 */
-	public static final String getGroup(ChannelInfo ch, GroupsType groupsType)
-	{
-		switch (groupsType)
-		{
-		case SITE:
-			return ch.getSiteName();
-		case NETWORK:
-			return "Networks^" + ch.getNetwork();
-		case NETWORK_AND_SITE:
-			return "Networks^" + ch.getNetwork() + "^" + ch.getSiteName();
-		}
-		return null;
-	}
-
-	/**
-	 * Get the groups for the specified channel information.
-	 * 
-	 * @param ch the channel information.
-	 * @param groupsType groups type.
-	 * @return the list of groups.
-	 */
-	public static final List<String> getGroups(ChannelInfo ch, GroupsType groupsType)
-	{
-		List<String> groups = groupsMap.get(ch);
-		if (groups == null)
-		{
-			groups = new ArrayList<String>(1);
-			String group = getGroup(ch, groupsType);
-			if (group != null)
-			{
-				groups.add(group);
-			}
-			groupsMap.put(ch, groups);
-		}
-		return groups;
-	}
-
 	/** Groups type. */
 	private final GroupsType groupsType;
 

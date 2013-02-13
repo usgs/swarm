@@ -9,37 +9,19 @@ import java.util.List;
  * 
  * @author Kevin Frechette (ISTI)
  */
-public class ChannelInfo
+public class ChannelInfo extends AbstractChannelInfo
 {
-	/** Empty string. */
-	public static final String EMPTY = "";
-
-	/**
-	 * Get the formatted SCNL.
-	 * 
-	 * @param station the station name.
-	 * @param channel the channel name.
-	 * @param network the network name.
-	 * @param location the location name.
-	 * @return the the formatted SCNL.
-	 */
-	public static final String getFormattedSCNL(String station, String channel,
-			String network, String location)
-	{
-		return station + " " + channel + " " + network
-				+ (location.length() > 0 ? (" " + location) : EMPTY);
-	}
-
-	/** The station information. */
-	private final StationInfo stationInfo;
-
 	/** The channel name. */
 	private final String channel;
 
-	/** The location name. */
-	private final String location;
 	/** The the formatted SCNL. */
 	private final String formattedSCNL;
+
+	/** The location name. */
+	private final String location;
+
+	/** The station information. */
+	private final StationInfo stationInfo;
 
 	/**
 	 * Create the channel information.
@@ -111,19 +93,6 @@ public class ChannelInfo
 	{
 		this(new StationInfo(station, network, latitude, longitude, siteName),
 				channel, location);
-	}
-
-	/**
-	 * Determines if this channel information is the same as another.
-	 * 
-	 * @return true if this channel information is the same as another, false
-	 *         otherwise.
-	 */
-	public boolean equals(Object obj)
-	{
-		return obj instanceof ChannelInfo
-				&& getFormattedSCNL().equals(
-						((ChannelInfo) obj).getFormattedSCNL());
 	}
 
 	/**
@@ -224,25 +193,5 @@ public class ChannelInfo
 	public StationInfo getStationInfo()
 	{
 		return stationInfo;
-	}
-
-	/**
-	 * Get the hash code.
-	 * 
-	 * @return the hash code.
-	 */
-	public int hashCode()
-	{
-		return getFormattedSCNL().hashCode();
-	}
-
-	/**
-	 * Get the string representation of the channel information.
-	 * 
-	 * @return the string representation of the channel information.
-	 */
-	public String toString()
-	{
-		return formattedSCNL;
 	}
 }

@@ -217,6 +217,10 @@ abstract public class SeismicDataSource
 		{
 			sds = new WebServicesSource(params);
 		}
+		else if (type.equals(SeedLinkSource.SEEDLINK_SOURCE_CODE))
+		{
+			sds = new SeedLinkSource(params);
+		}
 		else if (type.equals("file"))
 		{
 			sds = Swarm.getApplication().fileSource;

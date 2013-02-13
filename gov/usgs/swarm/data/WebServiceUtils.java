@@ -1,17 +1,21 @@
 package gov.usgs.swarm.data;
 
 import gov.usgs.swarm.ChannelInfo;
-import gov.usgs.swarm.Metadata;
+import gov.usgs.swarm.ChannelUtil;
 import gov.usgs.swarm.Swarm;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Level;
 
+/**
+ * Web service utility methods.
+ * 
+ * @author Kevin Frechette (ISTI)
+ */
 public class WebServiceUtils
 {
 	/** Swarm web services property key prefix. */
@@ -63,27 +67,7 @@ public class WebServiceUtils
 	public static String addChannel(List<String> channels, ChannelInfo ch,
 			SeismicDataSource source)
 	{
-		final String formattedScnl = ch.getFormattedSCNL();
-		if (!channels.contains(formattedScnl))
-		{
-			if (Swarm.config != null)
-			{
-				Metadata md = Swarm.config.getMetadata(formattedScnl, true);
-				md.updateLongitude(ch.getLongitude());
-				md.updateLatitude(ch.getLatitude());
-				for (String g : ch.getGroups())
-				{
-					md.addGroup(g);
-				}
-				if (ch.getStation() != ch.getSiteName())
-				{
-					md.updateAlias(ch.getSiteName());
-				}
-				md.source = source;
-			}
-			channels.add(formattedScnl);
-		}
-		return formattedScnl;
+		return ChannelUtil.addChannel(channels, ch, source);
 	}
 
 	/**
@@ -95,8 +79,7 @@ public class WebServiceUtils
 	public static void assignChannels(List<String> channels,
 			SeismicDataSource source)
 	{
-		Collections.sort(channels);
-		Swarm.config.assignMetadataSource(channels, source);
+		ChannelUtil.assignChannels(channels, source);
 	}
 
 	/**

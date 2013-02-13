@@ -1,7 +1,7 @@
 package gov.usgs.swarm.data;
 
 import gov.usgs.swarm.ChannelGroupInfo;
-import gov.usgs.swarm.ChannelGroupInfo.GroupsType;
+import gov.usgs.swarm.GroupsType;
 import gov.usgs.swarm.ChannelInfo;
 import gov.usgs.swarm.StationInfo;
 
