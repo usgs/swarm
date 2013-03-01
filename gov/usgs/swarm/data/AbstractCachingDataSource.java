@@ -22,6 +22,7 @@ import cern.colt.matrix.DoubleMatrix2D;
  */
 public abstract class AbstractCachingDataSource extends SeismicDataSource {
 
+	/** roughly max size of a single wave in bytes. Actually, (numSamples * 4) */
 	private static final int MAX_WAVE_SIZE = 1000000;
 
 	protected long maxSize;
@@ -30,7 +31,6 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 	protected CachePurgeAction[] purgeActions;
 
 	public AbstractCachingDataSource() {
-		// super();
 		helicorderCache = new HashMap<String, List<CachedHelicorder>>();
 		waveCache = new HashMap<String, List<CachedWave>>();
 		maxSize = Runtime.getRuntime().maxMemory() / 6;
@@ -113,6 +113,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 				new CompleteHelicorderPurgeAction(helicorderCache) };
 	}
 
+	/** TODO: maybe this should be an observer? */
 	private synchronized void enforceSize() {
 		if (purgeActions == null)
 			return;
@@ -238,10 +239,12 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 	}
 
 	public synchronized Wave getWave(String station, double t1, double t2) {
+
 		List<CachedWave> waves = waveCache.get(station);
 		if (waves == null)
 			return null;
 		else {
+
 			for (CachedWave cw : waves) {
 				if (t1 >= cw.t1 && t2 <= cw.t2) {
 					// there is an intermittent problem here so I will catch
@@ -314,7 +317,6 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 				if (cw.wave.adjacent(wave))
 					if (cw.wave.getMemorySize() + wave.getMemorySize() < MAX_WAVE_SIZE)
 						join = true;
-
 				if (cw.wave.overlaps(wave))
 					join = true;
 
