@@ -234,8 +234,11 @@ public class DHIDataSource extends SeismicDataSource
 			                    + " points and starts at " + seis[i].begin_time.date_time + " " + 
 			                    (seis[i].sampling_info.numPoints / seis[i].sampling_info.interval.value * 1000));
 			            
+			            Swarm.logger.finer("last sample: " + seis[i].get_as_longs()[seis[i].num_points-1]);
+
 			            wave = new Wave();
 			            wave.buffer = seis[i].get_as_longs();
+			            
 			            String t = seis[i].begin_time.date_time.replace('T', ' ');
 			            t = t.substring(0, t.length() - 1);
 			            double j2k = gov.usgs.util.Time.parse("yyyy-MM-dd HH:mm:ss.SSS", t);
