@@ -534,8 +534,8 @@ public class WaveViewPanel extends JComponent {
 									Util.j2KToDate(wave.getStartTime())),
 							Time.format(DATE_FORMAT,
 									Util.j2KToDate(wave.getEndTime())),
-							wave.samples(),
-							wave.samples() / wave.getSamplingRate(),
+							wave.numSamples(),
+							wave.numSamples() / wave.getSamplingRate(),
 							(int) wave.getSamplingRate(), dataRange[0],
 							dataRange[1]);
 
@@ -870,7 +870,7 @@ public class WaveViewPanel extends JComponent {
 	 *            the wave to plot
 	 */
 	private void plotWave(Plot plot, Wave renderWave) {
-		if (renderWave == null || renderWave.samples() == 0)
+		if (renderWave == null || renderWave.numSamples() == 0)
 			return;
 
 		SliceWave wv = new SliceWave(renderWave);
@@ -940,7 +940,7 @@ public class WaveViewPanel extends JComponent {
 	 *            the wave to plot
 	 */
 	private void plotSpectra(Plot plot, Wave renderWave) {
-		if (renderWave == null || renderWave.samples() == 0)
+		if (renderWave == null || renderWave.numSamples() == 0)
 			return;
 
 		SliceWave wv = new SliceWave(renderWave);
@@ -981,7 +981,7 @@ public class WaveViewPanel extends JComponent {
 	 *            the wave to plot
 	 */
 	private void plotSpectrogram(Plot plot, Wave renderWave) {
-		if (renderWave == null || renderWave.samples() == 0)
+		if (renderWave == null || renderWave.numSamples() == 0)
 			return;
 
 		SliceWave wv = new SliceWave(renderWave);

@@ -233,8 +233,6 @@ public class DHIDataSource extends SeismicDataSource
 			            Swarm.logger.finer("seis[" + i + "] has " + seis[i].num_points
 			                    + " points and starts at " + seis[i].begin_time.date_time + " " + 
 			                    (seis[i].sampling_info.numPoints / seis[i].sampling_info.interval.value * 1000));
-			            
-			            Swarm.logger.finer("last sample: " + seis[i].get_as_longs()[seis[i].num_points-1]);
 
 			            wave = new Wave();
 			            wave.buffer = seis[i].get_as_longs();

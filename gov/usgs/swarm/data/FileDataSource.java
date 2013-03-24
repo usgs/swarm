@@ -340,7 +340,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 						ArrayList<Wave> subParts = new ArrayList<Wave>();
 						int ns = 0;
 						for (int i = 0; i < parts.size(); i++) {
-							ns += parts.get(i).samples();
+							ns += parts.get(i).numSamples();
 							subParts.add(parts.get(i));
 							if (ns > 3600 * 100 || i == parts.size() - 1) {
 								Wave wave = Wave.join(subParts);
