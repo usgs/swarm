@@ -11,7 +11,7 @@
  - internal changes to wave cache
  - internal changes to icon handling
  - fix compiler warnings
- - correct tracebuf2 inconsistancy
+ - correct tracebuf2 inconsistency
  - correct boundary checking when combining two waves
  - code cleanup 
  - corrected bug affecting old GeoLabel config strings
