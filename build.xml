@@ -176,7 +176,7 @@ dist    -- generates new binary distribution
 		<copy todir="${dist-tempdir}/${dist-appdir}/" file="${source}/clip.wav" />
 		<copy todir="${dist-tempdir}/${dist-appdir}/" file="${source}/IRIS_networks.txt" />
 		<copy todir="${dist-tempdir}/${dist-appdir}/" file="${source}/swarm.sh" />
-		<!-- <copy todir="${dist-tempdir}/${dist-appdir}/" file="${source}/swarm.bat" />  -->
+		<copy todir="${dist-tempdir}/${dist-appdir}/" file="${source}/NTP.config" />
 		
 		<!-- <tar destfile="${dist-basedir}/swarm-${version}.tar.gz" basedir="${dist-tempdir}" compression="gzip" /> -->
 		<zip destfile="${dist-basedir}/swarm-${version}.zip"    basedir="${dist-tempdir}" />
