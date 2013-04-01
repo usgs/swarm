@@ -559,14 +559,15 @@ public class WaveViewPanel extends JComponent {
 				if (settings.viewType == ViewType.SPECTROGRAM)
 					unit = "Frequency (Hz)";
 				else {
-					unit = "Counts";
 					Metadata md = Swarm.config.getMetadata(channel);
 					if (md != null) {
 						offset = md.getOffset();
 						multiplier = md.getMultiplier();
 						unit = md.getUnit();
 					}
-
+					
+					if (unit == null)
+						unit = "Counts";
 				}
 
 				// System.out.printf("Multipler: %f, Offset: %f\n", offset,
