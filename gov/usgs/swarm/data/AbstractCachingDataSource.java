@@ -346,32 +346,32 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 			return null;
 		else {
 			HelicorderData hd = new HelicorderData();
+			HelicorderData hd2 = null;
 			for (CachedHelicorder ch : helis) {
 				// found the whole thing, just return the needed subset
 				if (t1 >= ch.t1 && t2 <= ch.t2) {
-					HelicorderData hd2 = ch.helicorder.subset(t1, t2);
+					hd2 = ch.helicorder.subset(t1, t2);
 					ch.lastAccess = System.currentTimeMillis();
 					return hd2;
 				}
 
 				// just a piece, put it in the result
 				if ((t1 < ch.t1 && t2 >= ch.t2) || (t1 <= ch.t1 && t2 > ch.t2)) {
-					hd.concatenate(ch.helicorder);
-					ch.lastAccess = System.currentTimeMillis();
+					hd2 = ch.helicorder;
 				}
-
 				// cached is right side
-				if (t1 < ch.t1 && t2 > ch.t1 && t2 <= ch.t2) {
-					HelicorderData hd2 = ch.helicorder.subset(ch.t1, t2);
-					hd.concatenate(hd2);
-					ch.lastAccess = System.currentTimeMillis();
+				else if (t1 < ch.t1 && t2 > ch.t1 && t2 <= ch.t2) {
+					hd2 = ch.helicorder.subset(ch.t1, t2);
 				}
-
 				// cached is left side
-				if (t1 >= ch.t1 && t1 < ch.t2 && t2 > ch.t2) {
-					HelicorderData hd2 = ch.helicorder.subset(t1, ch.t2);
+				else if (t1 >= ch.t1 && t1 < ch.t2 && t2 > ch.t2) {
+					hd2 = ch.helicorder.subset(t1, ch.t2);
+				}
+				// if cached data found
+				if (hd2 != null) {
 					hd.concatenate(hd2);
 					ch.lastAccess = System.currentTimeMillis();
+					hd2 = null;
 				}
 			}
 			hd.sort();
