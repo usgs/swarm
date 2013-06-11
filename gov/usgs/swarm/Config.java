@@ -76,8 +76,8 @@ import java.util.TreeMap;
 public class Config
 {
 	private static String[] DEFAULT_SERVERS = new String[] {
-				"AVO Winston;wws:pubavo1.wr.usgs.gov:16022:10000:1",
-				"IRIS DMC - New Zealand;dhi:edu/iris/dmc:IRIS_NetworkDC:edu/iris/dmc:IRIS_BudDataCenter:NZ:3600:1000"
+				"AVO Winston;wws:pubavo1.wr.usgs.gov:16022:10000:1"
+//				"IRIS DMC - New Zealand;dhi:edu/iris/dmc:IRIS_NetworkDC:edu/iris/dmc:IRIS_BudDataCenter:NZ:3600:1000"
 			};
 	
 	private static String DEFAULT_CONFIG_FILE = "Swarm.config";
