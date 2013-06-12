@@ -35,7 +35,8 @@ public class DataSelectReader extends StringMSeedQueryReader
 	/** The user agent. */
 	protected String userAgent = "Swarm/" + Swarm.getVersion();
 	/** The default web services URL. */
-	public static final String DEFAULT_WS_URL = "http://www.iris.edu/ws/dataselect/query";
+//	public static final String DEFAULT_WS_URL = "http://www.iris.edu/ws/dataselect/query";
+	public static final String DEFAULT_WS_URL = "http://service.iris.edu/fdsnws/dataselect/1/query";
 
 	/**
 	 * Create the data select reader with the default URL and timeout.

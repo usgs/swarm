@@ -37,7 +37,9 @@ public abstract class AbstractWebServiceStationClient
 	}
 
 	/** Default web services URL for station. */
-	public static final String DEFAULT_WS_URL = "http://www.iris.edu/ws/station/query";
+//	public static final String DEFAULT_WS_URL = "http://www.iris.edu/ws/station/query";
+	public static final String DEFAULT_WS_URL =  "http://service.iris.edu/fdsnws/station/1/query";
+
 	/** Separator text. */
 	private static final String separatorText = "&";
 	/** Equals text */

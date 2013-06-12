@@ -1,6 +1,8 @@
   Changes since version 2.3.2 (r2606)
  .....................................
   - created NTP.config file with NTP defaults
+  - removed DHI data source
+  - updated default IRIS WS urls
  
  
   Changes since version 2.3.1 (r2507)
