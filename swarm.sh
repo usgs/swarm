@@ -1,1 +1,1 @@
-java -Xmx256M -jar lib/swarm.jar gov.usgs.swarm.Swarm $*
+java -jar lib/swarm.jar gov.usgs.swarm.Swarm $*
