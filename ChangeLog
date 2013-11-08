@@ -3,6 +3,8 @@
   - created NTP.config file with NTP defaults
   - removed DHI data source
   - updated default IRIS WS urls
+  - removed default max heap settings from start scripts
+  - corrected rendering bug affecting operation under OpenJDK
  
  
   Changes since version 2.3.1 (r2507)
