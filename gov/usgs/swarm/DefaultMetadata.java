@@ -68,6 +68,6 @@ public class DefaultMetadata
 			Metadata md = DefaultMetadata.getMetadata(a);
 			System.out.println(md);
 		}
-		ct.stop();
+		ct.stopAndReport();
 	}
 }

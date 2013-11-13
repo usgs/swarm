@@ -932,7 +932,7 @@ public class MapPanel extends JPanel
 			ct.mark("plot");
 			dragDX = Integer.MAX_VALUE;
 			dragDY = Integer.MAX_VALUE;
-			ct.stop();
+			ct.stopAndReport();
 		}
 		catch (Exception e)
 		{

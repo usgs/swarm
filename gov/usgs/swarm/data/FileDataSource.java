@@ -354,7 +354,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 						}
 					}
 					ct.mark("insert");
-					ct.stop();
+					ct.stopAndReport();
 					openFiles.add(fn);
 				} catch (Throwable t) {
 					t.printStackTrace();
