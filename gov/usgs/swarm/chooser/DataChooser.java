@@ -480,6 +480,8 @@ public class DataChooser extends JPanel {
 				SwingWorker worker = new SwingWorker() {
 					public Object construct() {
 						List<Pair<ServerNode, String>> channels = getSelections();
+						if (channels == null)
+							channels = new ArrayList<Pair<ServerNode, String>>();
 						GeoRange gr = new GeoRange();
 						int nc = 0;
 						for (Pair<ServerNode, String> pair : channels) {

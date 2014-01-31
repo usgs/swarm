@@ -10,12 +10,18 @@ import edu.iris.Fissures.seed.director.SeedImportDirector;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmDialog;
+import gov.usgs.swarm.SwarmMenu.FileType1;
+import gov.usgs.swarm.wave.WaveViewPanel;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.util.CodeTimer;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;
 import gov.usgs.vdx.data.heli.HelicorderData;
+import gov.usgs.vdx.data.wave.Channel;
 import gov.usgs.vdx.data.wave.SAC;
+import gov.usgs.vdx.data.wave.SEISAN;
+import gov.usgs.vdx.data.wave.SeisanFile;
+import gov.usgs.vdx.data.wave.WIN;
 import gov.usgs.vdx.data.wave.Wave;
 
 import java.awt.BorderLayout;
@@ -65,6 +71,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 		name = "Files";
 	}
 
+	@Override
 	public void flush() {
 		List<String> channels = getChannels();
 		if (channels != null)
@@ -74,6 +81,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 		openFiles.clear();
 		channelTimes.clear();
 		fireChannelsUpdated();
+
 	}
 
 	private void updateChannelTimes(String channel, double t1, double t2) {
@@ -86,8 +94,8 @@ public class FileDataSource extends AbstractCachingDataSource {
 		ct[1] = Math.max(ct[1], t2);
 	}
 
-	private enum FileType {
-		TEXT, SAC, SEED, UNKNOWN;
+	public enum FileType {
+		TEXT, SAC, SEED, WIN, UNKNOWN, SEISAN;
 
 		public static FileType fromFile(File f) {
 			String fn = f.getPath().toLowerCase();
@@ -97,6 +105,8 @@ public class FileDataSource extends AbstractCachingDataSource {
 				return TEXT;
 			else if (fn.endsWith(".seed"))
 				return SEED;
+			else if (fn.endsWith(".win"))
+				return WIN;
 			else
 				return UNKNOWN;
 		}
@@ -119,14 +129,17 @@ public class FileDataSource extends AbstractCachingDataSource {
 			filename.setText(fn);
 		}
 
+		@Override
 		protected void createUI() {
 			super.createUI();
 			filename = new JLabel();
 			filename.setFont(Font.decode("dialog-BOLD-12"));
 			filename.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
-			String[] types = new String[] { "SEED/miniSEED volume", "SAC" };
+			String[] types = new String[] { "SEED/miniSEED volume", "SAC",
+					"WIN" };
 			fileTypes = new JList(types);
 			fileTypes.addMouseListener(new MouseAdapter() {
+				@Override
 				public void mouseClicked(MouseEvent e) {
 					if (e.getClickCount() == 2) {
 						if (fileTypes.getSelectedIndex() != -1)
@@ -161,20 +174,25 @@ public class FileDataSource extends AbstractCachingDataSource {
 				return FileType.SEED;
 			case 1:
 				return FileType.SAC;
+			case 2:
+				return FileType.WIN;
 			default:
 				return null;
 			}
 		}
 
+		@Override
 		public void wasOK() {
 			cancelled = false;
 		}
 
+		@Override
 		public void wasCancelled() {
 			cancelled = true;
 			opened = false;
 		}
 
+		@Override
 		public void setVisible(boolean b) {
 			if (b)
 				opened = true;
@@ -182,39 +200,41 @@ public class FileDataSource extends AbstractCachingDataSource {
 		}
 	}
 
-	public void openFiles(File[] fs) {
+	public void openFiles(File[] fs, FileType1 ft1) {
 		FileTypeDialog dialog = null;
 		for (int i = 0; i < fs.length; i++) {
-			FileType ft = FileType.fromFile(fs[i]);
-			if (ft == FileType.UNKNOWN) {
-				if (dialog == null)
-					dialog = new FileTypeDialog();
-				if (!dialog.opened || (dialog.opened && !dialog.isAssumeSame())) {
-					dialog.setFilename(fs[i].getName());
-					dialog.setVisible(true);
-				}
 
-				if (dialog.cancelled)
-					ft = FileType.UNKNOWN;
-				else
-					ft = dialog.getFileType();
+			/*
+			 * if (ft == FileType.UNKNOWN) { if (dialog == null) dialog = new
+			 * FileTypeDialog(); if (!dialog.opened || (dialog.opened &&
+			 * !dialog.isAssumeSame())) { dialog.setFilename(fs[i].getName());
+			 * dialog.setVisible(true); }
+			 * 
+			 * if (dialog.cancelled) ft = FileType.UNKNOWN; else ft =
+			 * dialog.getFileType();
+			 * 
+			 * Swarm.logger.warning("user input file type: " + fs[i].getPath() +
+			 * " -> " + ft); }
+			 */
 
-				Swarm.logger.warning("user input file type: " + fs[i].getPath()
-						+ " -> " + ft);
-			}
-
-			switch (ft) {
+			switch (ft1) {
 			case SAC:
 				openSACFile(fs[i].getPath());
 				break;
+			case WIN:
+				openWINFile(fs[i].getPath());
+				break;
 			case SEED:
 				openSeedFile(fs[i].getPath());
+				break;
+			case SEISAN:
+				openSEISANFile(fs[i].getPath());
 				break;
 			case UNKNOWN:
 				Swarm.logger.warning("unknown file type: " + fs[i].getPath());
 				break;
 			default:
-				Swarm.logger.warning("Cannot load file type " + ft + ": "
+				Swarm.logger.warning("Cannot load file type " + ft1 + ": "
 						+ fs[i].getPath());
 				break;
 			}
@@ -222,11 +242,70 @@ public class FileDataSource extends AbstractCachingDataSource {
 		}
 	}
 
+	public void openSEISANFile(final String fn) {
+		if (openFiles.contains(fn))
+			return;
+
+		SwingWorker worker = new SwingWorker() {
+			@Override
+			public Object construct() {
+				Object result = null;
+				fireChannelsProgress(fn, 0);
+				try {
+
+					Swarm.logger.fine("opening SEISAN file: " + fn);
+					// SEISAN seisan = new SEISAN();
+					SeisanFile seisan = new SeisanFile();
+					seisan.read(fn);
+					fireChannelsProgress(fn, 0.5);
+					for (int i = 0; i < seisan.getChannels().size(); i++) {
+						Channel c = seisan.getChannels().get(i);
+//						Wave sw = c.toWave();
+//						String networkName = c.getFirstNetworkCode();
+//						String stationCode = c.getStationCode();
+//						String component = c.getFirstTwoComponentCode();
+//						String lastComponentCode = c.getLastComponentCode();
+                        String channel = c.channel.toString;
+
+						Metadata md = Swarm.config.getMetadata(channel, true);
+						md.addGroup("SEISAN^" + fn);
+
+//						Wave wave = seisan.toWave();
+						Wave wave = c.toWave();
+						updateChannelTimes(channel, wave.getStartTime(),
+								wave.getEndTime());
+						cacheWaveAsHelicorder(channel, wave);
+						putWave(channel, wave);
+
+						openFiles.add(fn);
+					}
+				} catch (Throwable t) {
+					t.printStackTrace();
+					result = t;
+				}
+				fireChannelsProgress(fn, 1);
+				fireChannelsUpdated();
+				return result;
+			}
+
+			@Override
+			public void finished() {
+				if (getValue() != null) {
+					JOptionPane.showMessageDialog(Swarm.getApplication(),
+							"Could not open SEISAN file: " + fn, "Error",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		};
+		worker.start();
+	}
+
 	public void openSACFile(final String fn) {
 		if (openFiles.contains(fn))
 			return;
 
 		SwingWorker worker = new SwingWorker() {
+			@Override
 			public Object construct() {
 				Object result = null;
 				fireChannelsProgress(fn, 0);
@@ -238,7 +317,6 @@ public class FileDataSource extends AbstractCachingDataSource {
 					String channel = sac.getStationInfo();
 					Metadata md = Swarm.config.getMetadata(channel, true);
 					md.addGroup("SAC^" + fn);
-
 					Wave wave = sac.toWave();
 					updateChannelTimes(channel, wave.getStartTime(),
 							wave.getEndTime());
@@ -255,10 +333,57 @@ public class FileDataSource extends AbstractCachingDataSource {
 				return result;
 			}
 
+			@Override
 			public void finished() {
 				if (getValue() != null) {
 					JOptionPane.showMessageDialog(Swarm.getApplication(),
 							"Could not open SAC file: " + fn, "Error",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		};
+		worker.start();
+	}
+
+	public void openWINFile(final String fn) {
+		if (openFiles.contains(fn))
+			return;
+
+		SwingWorker worker = new SwingWorker() {
+			@Override
+			public Object construct() {
+				Object result = null;
+				fireChannelsProgress(fn, 0);
+				try {
+					Swarm.logger.fine("opening WIN file: " + fn);
+					WIN win = new WIN();
+					win.read(fn);
+					fireChannelsProgress(fn, 0.5);
+					String channel = win.getStationInfo();
+					Metadata md = Swarm.config.getMetadata(channel, true);
+					md.addGroup("WIN^" + fn);
+
+					Wave wave = win.toWave();
+					updateChannelTimes(channel, wave.getStartTime(),
+							wave.getEndTime());
+					cacheWaveAsHelicorder(channel, wave);
+					putWave(channel, wave);
+
+					openFiles.add(fn);
+				} catch (Throwable t) {
+					t.printStackTrace();
+					result = t;
+				}
+				fireChannelsProgress(fn, 1);
+				fireChannelsUpdated();
+				return result;
+			}
+
+			@Override
+			public void finished() {
+				if (getValue() != null) {
+					JOptionPane.showMessageDialog(Swarm.getApplication(),
+							"Could not open WIN file: " + fn, "Error",
 							JOptionPane.ERROR_MESSAGE);
 				}
 			}
@@ -273,6 +398,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 			return;
 
 		SwingWorker worker = new SwingWorker() {
+			@Override
 			public Object construct() {
 				Object result = null;
 				try {
@@ -354,7 +480,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 						}
 					}
 					ct.mark("insert");
-					ct.stopAndReport();
+					ct.stop();
 					openFiles.add(fn);
 				} catch (Throwable t) {
 					t.printStackTrace();
@@ -365,6 +491,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 				return result;
 			}
 
+			@Override
 			public void finished() {
 				if (getValue() != null) {
 					JOptionPane.showMessageDialog(Swarm.getApplication(),
@@ -399,6 +526,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 		return sampleRate;
 	}
 
+	@Override
 	public HelicorderData getHelicorder(String channel, double t1, double t2,
 			GulperListener gl) {
 		double[] ct = channelTimes.get(channel);
@@ -415,8 +543,8 @@ public class FileDataSource extends AbstractCachingDataSource {
 		return super.getHelicorder(channel, t1, t2, gl);
 	}
 
-	public Wave getWave(String station, double t1, double t2) 
-	{
+	@Override
+	public Wave getWave(String station, double t1, double t2) {
 		Wave wave;
 		List<CachedWave> waves = waveCache.get(station);
 		if (waves == null)
@@ -443,6 +571,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 		return wave;
 	}
 
+	@Override
 	public String toConfigString() {
 		return name + ";file:";
 	}
