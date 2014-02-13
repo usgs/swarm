@@ -5,6 +5,7 @@
   - updated default IRIS WS urls
   - removed default max heap settings from start scripts
   - corrected rendering bug affecting operation under OpenJDK
+  - better handling of high data rate sources
  
  
   Changes since version 2.3.1 (r2507)
