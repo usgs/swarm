@@ -2,7 +2,7 @@ package gov.usgs.swarm.exp;
 
 
 /**
- * @author dcervelli
+ * @author Dan Cervelli
  *
  */
 public class ParticleView
