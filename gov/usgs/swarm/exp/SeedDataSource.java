@@ -1,7 +1,7 @@
 package gov.usgs.swarm.exp;
 
 /**
- * @author cervelli
+ * @author Peter Cervelli (USGS)
  */
 public class SeedDataSource {}
 /*
