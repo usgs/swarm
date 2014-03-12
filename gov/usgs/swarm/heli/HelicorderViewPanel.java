@@ -1,12 +1,12 @@
 package gov.usgs.swarm.heli;
 
-import gov.usgs.plot.AxisRenderer;
-import gov.usgs.plot.FrameDecorator;
-import gov.usgs.plot.FrameRenderer;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
-import gov.usgs.plot.SmartTick;
-import gov.usgs.plot.TextRenderer;
+import gov.usgs.plot.decorate.FrameDecorator;
+import gov.usgs.plot.decorate.SmartTick;
+import gov.usgs.plot.render.AxisRenderer;
+import gov.usgs.plot.render.FrameRenderer;
+import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;

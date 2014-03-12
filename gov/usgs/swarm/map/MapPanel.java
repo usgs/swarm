@@ -1,11 +1,11 @@
 package gov.usgs.swarm.map;
 
 import gov.usgs.plot.Plot;
-import gov.usgs.plot.TextRenderer;
 import gov.usgs.plot.map.GeoImageSet;
 import gov.usgs.plot.map.GeoLabelSet;
 import gov.usgs.plot.map.MapRenderer;
 import gov.usgs.plot.map.WMSGeoImageSet;
+import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.Mercator;
 import gov.usgs.proj.Projection;

@@ -1,7 +1,7 @@
 package gov.usgs.swarm.map;
 
 import gov.usgs.math.Geometry;
-import gov.usgs.plot.DataPointRenderer;
+import gov.usgs.plot.render.DataPointRenderer;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.wave.MultiMonitor;

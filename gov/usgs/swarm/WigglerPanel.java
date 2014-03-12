@@ -1,11 +1,11 @@
 package gov.usgs.swarm;
 
-import gov.usgs.plot.AxisRenderer;
-import gov.usgs.plot.FrameRenderer;
-import gov.usgs.plot.GradientSpectrum;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
-import gov.usgs.plot.Spectrum;
+import gov.usgs.plot.color.GradientSpectrum;
+import gov.usgs.plot.color.Spectrum;
+import gov.usgs.plot.render.AxisRenderer;
+import gov.usgs.plot.render.FrameRenderer;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.vdx.data.wave.Wave;

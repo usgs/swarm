@@ -1,7 +1,7 @@
 package gov.usgs.swarm.map;
 
-import gov.usgs.plot.DataPointRenderer;
 import gov.usgs.plot.map.GeoLabel;
+import gov.usgs.plot.render.DataPointRenderer;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
