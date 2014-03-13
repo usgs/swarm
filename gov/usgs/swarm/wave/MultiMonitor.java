@@ -1,5 +1,6 @@
 package gov.usgs.swarm.wave;
 
+import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.decorate.FrameDecorator;
 import gov.usgs.plot.decorate.SmartTick;
 import gov.usgs.plot.render.AxisRenderer;
@@ -19,7 +20,6 @@ import gov.usgs.util.ConfigFile;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Time;
 import gov.usgs.util.Util;
-import gov.usgs.vdx.data.wave.Wave;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

@@ -1,13 +1,11 @@
 package gov.usgs.swarm.data;
 
-import gov.usgs.swarm.Icons;
+import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.Swarm;
-import gov.usgs.vdx.data.heli.HelicorderData;
-import gov.usgs.vdx.data.wave.Wave;
 
 import java.util.List;
 
-import javax.swing.Icon;
 import javax.swing.event.EventListenerList;
 
 /**

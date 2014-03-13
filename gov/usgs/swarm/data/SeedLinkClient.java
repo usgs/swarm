@@ -4,12 +4,12 @@ import edu.iris.Fissures.seed.container.Blockette;
 import edu.iris.Fissures.seed.container.Btime;
 import edu.iris.Fissures.seed.container.Waveform;
 import edu.iris.Fissures.seed.exception.SeedException;
+import gov.usgs.plot.data.Seed;
+import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.ChannelInfo;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.data.orfeus.BaseSLClient;
 import gov.usgs.util.Util;
-import gov.usgs.vdx.data.wave.Seed;
-import gov.usgs.vdx.data.wave.Wave;
 
 import java.util.ArrayList;
 import java.util.List;

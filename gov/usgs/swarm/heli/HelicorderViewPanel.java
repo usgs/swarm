@@ -2,10 +2,13 @@ package gov.usgs.swarm.heli;
 
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
+import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.decorate.FrameDecorator;
 import gov.usgs.plot.decorate.SmartTick;
 import gov.usgs.plot.render.AxisRenderer;
 import gov.usgs.plot.render.FrameRenderer;
+import gov.usgs.plot.render.HelicorderRenderer;
 import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Metadata;
@@ -16,9 +19,6 @@ import gov.usgs.swarm.wave.WaveViewPanel;
 import gov.usgs.swarm.wave.WaveViewPanelAdapter;
 import gov.usgs.util.Time;
 import gov.usgs.util.Util;
-import gov.usgs.vdx.data.heli.HelicorderData;
-import gov.usgs.vdx.data.heli.plot.HelicorderRenderer;
-import gov.usgs.vdx.data.wave.Wave;
 
 import java.awt.Color;
 import java.awt.Cursor;

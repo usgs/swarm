@@ -1,5 +1,6 @@
 package gov.usgs.swarm.wave;
 
+import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmUtil;
@@ -7,7 +8,6 @@ import gov.usgs.swarm.Throbber;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;
-import gov.usgs.vdx.data.wave.Wave;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;

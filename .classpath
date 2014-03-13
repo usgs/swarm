@@ -16,11 +16,11 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/Net"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Plot"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Util"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/VDX"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Winston"/>
 	<classpathentry kind="lib" path="/USGS/contrib/JavaSeedLite.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/seisFile-1.5.2.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/oscache-2.1-mod2.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/seedlink_lite_1.2.1.jar" sourcepath="/USGS/contrib/seedlink_lite_src_1.2.1.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Math"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

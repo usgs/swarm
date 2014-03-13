@@ -1,23 +1,5 @@
 package gov.usgs.swarm.data;
 
-import edu.iris.Fissures.Time;
-import edu.iris.Fissures.IfNetwork.Channel;
-import edu.iris.Fissures.IfNetwork.ChannelId;
-import edu.iris.Fissures.IfNetwork.NetworkAccess;
-import edu.iris.Fissures.IfNetwork.NetworkDCOperations;
-import edu.iris.Fissures.IfNetwork.NetworkFinder;
-import edu.iris.Fissures.IfNetwork.Station;
-import edu.iris.Fissures.IfSeismogramDC.DataCenter;
-import edu.iris.Fissures.IfSeismogramDC.LocalSeismogram;
-import edu.iris.Fissures.IfSeismogramDC.RequestFilter;
-import edu.iris.Fissures.model.AllVTFactory;
-import edu.sc.seis.fissuresUtil.namingService.FissuresNamingService;
-import gov.usgs.swarm.Metadata;
-import gov.usgs.swarm.Swarm;
-import gov.usgs.util.CurrentTime;
-import gov.usgs.vdx.data.heli.HelicorderData;
-import gov.usgs.vdx.data.wave.Wave;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,6 +12,24 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
 import org.apache.log4j.varia.NullAppender;
+
+import edu.iris.Fissures.Time;
+import edu.iris.Fissures.IfNetwork.Channel;
+import edu.iris.Fissures.IfNetwork.ChannelId;
+import edu.iris.Fissures.IfNetwork.NetworkAccess;
+import edu.iris.Fissures.IfNetwork.NetworkDCOperations;
+import edu.iris.Fissures.IfNetwork.NetworkFinder;
+import edu.iris.Fissures.IfNetwork.Station;
+import edu.iris.Fissures.IfSeismogramDC.DataCenter;
+import edu.iris.Fissures.IfSeismogramDC.LocalSeismogram;
+import edu.iris.Fissures.IfSeismogramDC.RequestFilter;
+import edu.iris.Fissures.model.AllVTFactory;
+import edu.sc.seis.fissuresUtil.namingService.FissuresNamingService;
+import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.Wave;
+import gov.usgs.swarm.Metadata;
+import gov.usgs.swarm.Swarm;
+import gov.usgs.util.CurrentTime;
 
 /**
  *

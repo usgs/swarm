@@ -1,5 +1,6 @@
 package gov.usgs.swarm.map;
 
+import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.decorate.FrameDecorator;
 import gov.usgs.plot.decorate.SmartTick;
 import gov.usgs.plot.render.AxisRenderer;
@@ -16,7 +17,6 @@ import gov.usgs.swarm.map.MapPanel.LabelSetting;
 import gov.usgs.swarm.wave.WaveViewPanel;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Util;
-import gov.usgs.vdx.data.wave.Wave;
 
 import java.awt.Color;
 import java.awt.Cursor;

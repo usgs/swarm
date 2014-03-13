@@ -1,8 +1,8 @@
 package gov.usgs.swarm.data;
 
+import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.util.CurrentTime;
-import gov.usgs.vdx.data.wave.Wave;
 
 import java.util.HashSet;
 import java.util.Set;

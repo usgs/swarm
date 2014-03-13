@@ -1,5 +1,6 @@
 package gov.usgs.swarm;
  
+import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.FileDataSource;
@@ -15,7 +16,6 @@ import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Log;
 import gov.usgs.util.Util;
 import gov.usgs.util.ui.GlobalKeyManager;
-import gov.usgs.vdx.data.wave.Wave;
 
 import java.awt.Dimension;
 import java.awt.Frame;

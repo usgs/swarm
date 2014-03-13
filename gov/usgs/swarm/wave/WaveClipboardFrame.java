@@ -1,5 +1,7 @@
 package gov.usgs.swarm.wave;
 
+import gov.usgs.plot.data.SAC;
+import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
@@ -16,8 +18,6 @@ import gov.usgs.util.Util;
 import gov.usgs.util.png.PngEncoder;
 import gov.usgs.util.png.PngEncoderB;
 import gov.usgs.util.ui.ExtensionFileFilter;
-import gov.usgs.vdx.data.wave.SAC;
-import gov.usgs.vdx.data.wave.Wave;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

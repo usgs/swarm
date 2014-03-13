@@ -1,8 +1,8 @@
 package gov.usgs.swarm.data;
 
+import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.Swarm;
-import gov.usgs.vdx.data.heli.HelicorderData;
-import gov.usgs.vdx.data.wave.Wave;
 
 import java.util.ArrayList;
 import java.util.HashMap;

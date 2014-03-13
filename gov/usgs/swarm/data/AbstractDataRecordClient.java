@@ -5,9 +5,9 @@ import edu.iris.dmc.seedcodec.UnsupportedCompressionType;
 import edu.sc.seis.seisFile.mseed.Blockette;
 import edu.sc.seis.seisFile.mseed.Blockette1000;
 import edu.sc.seis.seisFile.mseed.DataRecord;
+import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.ChannelInfo;
 import gov.usgs.util.Util;
-import gov.usgs.vdx.data.wave.Wave;
 
 import java.util.ArrayList;
 import java.util.Date;

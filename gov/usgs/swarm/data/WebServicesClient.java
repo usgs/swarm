@@ -1,9 +1,9 @@
 package gov.usgs.swarm.data;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
+import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.ChannelInfo;
 import gov.usgs.swarm.StationInfo;
-import gov.usgs.vdx.data.wave.Wave;
 
 import java.util.Date;
 import java.util.List;
