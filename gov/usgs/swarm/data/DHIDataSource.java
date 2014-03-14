@@ -35,6 +35,7 @@ import gov.usgs.util.CurrentTime;
  *
  * @author Dan Cervelli
  */
+@Deprecated
 public class DHIDataSource extends SeismicDataSource
 {
 	protected static final String NAMING_SERVICE_URL = "corbaloc:iiop:dmc.iris.washington.edu:6371/NameService";
