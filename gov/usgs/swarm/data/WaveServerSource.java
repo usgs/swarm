@@ -39,9 +39,11 @@ public class WaveServerSource extends SeismicDataSource
 	
 	private static Map<String, Boolean> scnlSources = new HashMap<String, Boolean>();
 	
-	public WaveServerSource(String s)
-	{
-		params = s;
+	// explicit default constructor required for reflection
+	public WaveServerSource() {}
+ 
+	public void parse(String params) {
+		this.params = params;
 		String[] ss = params.split(":");
 		server = ss[0];
 		port = Integer.parseInt(ss[1]);
@@ -57,20 +59,10 @@ public class WaveServerSource extends SeismicDataSource
 		setTimeout(timeout);
 	}
 	
-	public WaveServerSource(WaveServerSource wss)
-	{
-		this(wss.params);
-		name = wss.name;
-	}
- 
-	public SeismicDataSource getCopy()
-	{
-		return new WaveServerSource(this);	
-	}
-
 	public String toConfigString()
 	{
-		return String.format("%s;ws:%s:%d:%d:%d:%d:%s", name, server, port, timeout, gulpSize, gulpDelay, timeZone.getID());
+		String typeString = DataSourceType.getShortName(this.getClass());
+		return String.format("%s;" + typeString + ":%s:%d:%d:%d:%d:%s", name, server, port, timeout, gulpSize, gulpDelay, timeZone.getID());
 	}
 	
 	public boolean isSCNL(String p)
@@ -197,4 +189,5 @@ public class WaveServerSource extends SeismicDataSource
 	{
 		return true;	
 	}
+
 }

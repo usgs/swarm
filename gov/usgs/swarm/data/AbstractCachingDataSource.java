@@ -37,6 +37,9 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 		createPurgeActions();
 	}
 
+	public void parse(String params) {
+		// no-op
+	}
 	public void flush() {
 		flushWaves();
 		flushHelicorders();
@@ -582,7 +585,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 		abstract public int getMemorySize();
 	}
 
-	protected class CachedWave extends CacheEntry implements Comparable<CacheEntry> {
+	public class CachedWave extends CacheEntry implements Comparable<CacheEntry> {
 		public Wave wave;
 
 		public String getInfoString() {

@@ -1,11 +1,12 @@
 package gov.usgs.swarm.chooser;
 
 import java.awt.Component;
+
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.data.DataSelectReader;
-import gov.usgs.swarm.data.WebServiceStationTextClient;
-import gov.usgs.swarm.data.WebServiceUtils;
-import gov.usgs.swarm.data.WebServicesSource;
+import gov.usgs.swarm.data.fdsnWs.WebServiceStationTextClient;
+import gov.usgs.swarm.data.fdsnWs.WebServiceUtils;
+import gov.usgs.swarm.data.fdsnWs.WebServicesSource;
 import gov.usgs.util.ResourceReader;
 
 import javax.swing.JComboBox;
@@ -26,7 +27,7 @@ public class WebServicesPanel extends DataSourcePanel
 {
 	private static final String WS_NETWORK_FILE = "IRIS_networks.txt";
 	private static final String codeText = ";"
-			+ WebServicesSource.WEB_SERVICES_CLIENT_CODE + ":";
+			+ WebServicesSource.typeString + ":";
 	private boolean showUrlFieldsFlag = false;
 	private JComboBox network;
 	private JTextField station;
@@ -42,7 +43,7 @@ public class WebServicesPanel extends DataSourcePanel
 	 */
 	public WebServicesPanel()
 	{
-		super(WebServicesSource.WEB_SERVICES_CLIENT_CODE,
+		super(WebServicesSource.typeString,
 				WebServicesSource.TAB_TITLE);
 	}
 

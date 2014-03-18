@@ -1,4 +1,4 @@
-package gov.usgs.swarm.data;
+package gov.usgs.swarm.data.seedLink;
 
 /**
  * Stores the start and end time.

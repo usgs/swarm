@@ -1,4 +1,4 @@
-package gov.usgs.swarm.data;
+package gov.usgs.swarm.data.fdsnWs;
 
 import edu.sc.seis.seisFile.stationxml.Channel;
 import edu.sc.seis.seisFile.stationxml.Network;

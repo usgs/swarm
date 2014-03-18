@@ -1,6 +1,7 @@
 package gov.usgs.swarm;
 
 import gov.usgs.plot.map.WMSGeoImageSet;
+import gov.usgs.swarm.data.DataSourceType;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Util;
@@ -19,58 +20,6 @@ import java.util.TreeMap;
 /**
  * Swarm configuration class. 
  * 
- * $Log: not supported by cvs2svn $
- * Revision 1.17  2012/09/11 10:31  dketchum
- * Add heliColors array to config
- * 
- * Revision 1.16  2007/03/12 22:57:08  dcervelli
- * getTimeZone() uses getMetadata() instead of metadata.get().
- *
- * Revision 1.15  2006/11/30 17:07:48  dcervelli
- * Fixed no-close bug.
- *
- * Revision 1.14  2006/10/26 00:47:07  dcervelli
- * Added userTimes variable.
- *
- * Revision 1.13  2006/08/14 22:42:37  dcervelli
- * Changed layouts to be a map.
- *
- * Revision 1.12  2006/08/09 21:53:29  cervelli
- * Removed groupConfigFile and changed NZ Iris source.
- *
- * Revision 1.11  2006/08/04 21:17:22  cervelli
- * Changed default values for a few items.
- *
- * Revision 1.10  2006/08/04 18:34:45  cervelli
- * Changed default servers.
- *
- * Revision 1.9  2006/08/01 23:38:12  cervelli
- * New metadata system.
- *
- * Revision 1.8  2006/07/30 22:43:03  cervelli
- * Changes for layouts.
- *
- * Revision 1.7  2006/07/28 15:02:03  cervelli
- * Outputs config file path.
- *
- * Revision 1.6  2006/07/26 22:39:10  cervelli
- * Added mapPath.
- *
- * Revision 1.5  2006/07/22 20:21:59  cervelli
- * Many Swarm 2.0 changes: time zones, map parameters, data sources, etc.
- *
- * Revision 1.4  2006/06/14 19:19:31  dcervelli
- * Major 1.3.4 changes.
- *
- * Revision 1.3  2006/06/05 18:06:49  dcervelli
- * Major 1.3 changes.
- *
- * Revision 1.2  2006/04/17 04:16:36  dcervelli
- * More 1.3 changes.
- *
- * Revision 1.1  2006/04/15 15:53:09  dcervelli
- * Initial commit.
- *
  * @author Dan Cervelli
  */
 public class Config
@@ -195,7 +144,8 @@ public class Config
 		{
 			for (String server : servers)
 			{
-				SeismicDataSource sds = SeismicDataSource.getDataSource(server);
+//				SeismicDataSource sds = SeismicDataSource.getDataSource(server);
+				SeismicDataSource sds = DataSourceType.parseConfig(server);
 				sds.setStoreInUserConfig(false);
 				sources.put(sds.getName(), sds);
 			}
@@ -350,7 +300,8 @@ public class Config
 		{
 			for (String server : servers)
 			{
-				SeismicDataSource sds = SeismicDataSource.getDataSource(server);
+//				SeismicDataSource sds = SeismicDataSource.getDataSource(server);
+				SeismicDataSource sds = DataSourceType.parseConfig(server);
 				sources.put(sds.getName(), sds);
 			}
 		}
@@ -358,7 +309,8 @@ public class Config
 		{
 			for (String s : DEFAULT_SERVERS)
 			{
-				SeismicDataSource sds = SeismicDataSource.getDataSource(s);
+//				SeismicDataSource sds = SeismicDataSource.getDataSource(s);
+				SeismicDataSource sds = DataSourceType.parseConfig(s);
 				sources.put(sds.getName(), sds);
 			}
 		}

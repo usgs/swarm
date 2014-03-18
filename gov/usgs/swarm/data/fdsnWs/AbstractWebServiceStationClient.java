@@ -1,4 +1,4 @@
-package gov.usgs.swarm.data;
+package gov.usgs.swarm.data.fdsnWs;
 
 import gov.usgs.swarm.ChannelGroupInfo;
 import gov.usgs.swarm.GroupsType;

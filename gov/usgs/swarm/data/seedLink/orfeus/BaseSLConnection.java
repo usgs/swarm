@@ -1,4 +1,4 @@
-package gov.usgs.swarm.data.orfeus;
+package gov.usgs.swarm.data.seedLink.orfeus;
 
 import nl.knmi.orfeus.seedlink.SLLog;
 import nl.knmi.orfeus.seedlink.client.SeedLinkConnection;

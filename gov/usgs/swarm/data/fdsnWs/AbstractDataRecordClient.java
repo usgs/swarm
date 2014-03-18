@@ -1,4 +1,4 @@
-package gov.usgs.swarm.data;
+package gov.usgs.swarm.data.fdsnWs;
 
 import edu.iris.dmc.seedcodec.CodecException;
 import edu.iris.dmc.seedcodec.UnsupportedCompressionType;
@@ -7,6 +7,8 @@ import edu.sc.seis.seisFile.mseed.Blockette1000;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.ChannelInfo;
+import gov.usgs.swarm.data.SeismicDataSource;
+import gov.usgs.swarm.data.seedLink.SeedUtils;
 import gov.usgs.util.Util;
 
 import java.util.ArrayList;

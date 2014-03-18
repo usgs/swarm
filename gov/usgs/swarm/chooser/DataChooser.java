@@ -7,6 +7,7 @@ import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.SwingWorker;
+import gov.usgs.swarm.data.DataSourceType;
 import gov.usgs.swarm.data.FileDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.data.SeismicDataSourceListener;
@@ -239,11 +240,9 @@ public class DataChooser extends JPanel {
 								d.setVisible(true);
 								String nds = d.getResult();
 								if (nds != null) {
-									SeismicDataSource source = SeismicDataSource
-											.getDataSource(nds);
-									if (source != null) {
+									SeismicDataSource source = DataSourceType.parseConfig(nds);
+									if (source != null)
 										insertServer(source);
-									}
 								}
 							}
 						});
@@ -267,8 +266,8 @@ public class DataChooser extends JPanel {
 								d.setVisible(true);
 								String eds = d.getResult();
 								if (eds != null) {
-									SeismicDataSource newSource = SeismicDataSource
-											.getDataSource(eds);
+									SeismicDataSource newSource = DataSourceType.parseConfig(eds);
+
 									if (newSource == null)
 										return;
 									removeServer(servers.get(0));

@@ -446,5 +446,4 @@ public class FileDataSource extends AbstractCachingDataSource {
 	public String toConfigString() {
 		return name + ";file:";
 	}
-
 }

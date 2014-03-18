@@ -8,12 +8,12 @@ package gov.usgs.swarm.data;
  */
 public class CachedDataSource extends AbstractCachingDataSource {
 
-	private CachedDataSource() {
+	private CachedDataSource(String name) {
 		super();
 	}
 
 	private static class CachedDataSourceHolder {
-		private static final CachedDataSource INSTANCE = new CachedDataSource();
+		private static final CachedDataSource INSTANCE = new CachedDataSource("singleton");
 	}
 
 	public static CachedDataSource getInstance() {
@@ -23,4 +23,5 @@ public class CachedDataSource extends AbstractCachingDataSource {
 	public String toConfigString() {
 		return "cache:";
 	}
+
 }

@@ -1,7 +1,8 @@
-package gov.usgs.swarm.data;
+package gov.usgs.swarm.data.seedLink;
 
 import gov.usgs.swarm.AbstractChannelInfo;
 import gov.usgs.swarm.GroupsType;
+import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.xml.SimpleXMLParser;
 import gov.usgs.util.xml.XMLDocHandler;
 

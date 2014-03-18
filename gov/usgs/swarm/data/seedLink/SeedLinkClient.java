@@ -1,4 +1,4 @@
-package gov.usgs.swarm.data;
+package gov.usgs.swarm.data.seedLink;
 
 import edu.iris.Fissures.seed.container.Blockette;
 import edu.iris.Fissures.seed.container.Btime;
@@ -8,7 +8,8 @@ import gov.usgs.plot.data.Seed;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.ChannelInfo;
 import gov.usgs.swarm.Swarm;
-import gov.usgs.swarm.data.orfeus.BaseSLClient;
+import gov.usgs.swarm.data.CachedDataSource;
+import gov.usgs.swarm.data.seedLink.orfeus.BaseSLClient;
 import gov.usgs.util.Util;
 
 import java.util.ArrayList;

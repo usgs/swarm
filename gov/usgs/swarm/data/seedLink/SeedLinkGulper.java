@@ -1,4 +1,7 @@
-package gov.usgs.swarm.data;
+package gov.usgs.swarm.data.seedLink;
+
+import gov.usgs.swarm.data.Gulper;
+import gov.usgs.swarm.data.GulperList;
 
 /**
  * SeedLink Gulper.

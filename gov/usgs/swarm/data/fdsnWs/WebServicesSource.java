@@ -1,9 +1,14 @@
-package gov.usgs.swarm.data;
+package gov.usgs.swarm.data.fdsnWs;
 
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.ChannelGroupInfo;
 import gov.usgs.swarm.ChannelInfo;
+import gov.usgs.swarm.data.CachedDataSource;
+import gov.usgs.swarm.data.DataSourceType;
+import gov.usgs.swarm.data.GulperList;
+import gov.usgs.swarm.data.GulperListener;
+import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.CurrentTime;
 
 import java.util.Collections;
@@ -16,7 +21,7 @@ public class WebServicesSource extends SeismicDataSource
 	/** Web services source description. */
 	public static final String DESCRIPTION = "an IRIS Web Services server";
 	/** Web-Services client code */
-	public static final String WEB_SERVICES_CLIENT_CODE = "wsc";
+	public static final String typeString;
 	/** Parameter split text. */
 	public static final String PARAM_SPLIT_TEXT = "\\|";
 	/** Parameter format text. */
@@ -24,39 +29,36 @@ public class WebServicesSource extends SeismicDataSource
 	/** instance counter */
 	private static int counter = 0;
 	/** The channel. */
-	private final String chan;
+	private String chan;
 	/** Web Services Client. */
-	private final WebServicesClient client;
+	private WebServicesClient client;
 	/** instance count */
 	private final int count = ++counter;
 	/** The gulp delay. */
-	private final int gulpDelay;
+	private int gulpDelay;
 	/** The gulp size. */
-	private final int gulpSize;
+	private int gulpSize;
 	/** The location. */
-	private final String loc;
+	private String loc;
 	/** The network. */
-	private final String net;
+	private String net;
 	/** The colon separated parameters. */
-	private final String params;
+	private String params;
 	/** The station. */
-	private final String sta;
+	private String sta;
 	/** Web Services dataselect URL. */
-	private final String wsDataSelectUrl;
+	private String wsDataSelectUrl;
 	/** Web Services station URL. */
-	private final String wsStationUrl;
+	private String wsStationUrl;
 	
-	/**
-	 * Create a Web Services server source.
-	 * 
-	 * @param s the colon separated parameters.
-	 */
-	public WebServicesSource(String s)
-	{
-		/** IRIS prefers a 60 second interval */
-		minimumRefreshInterval = 60;
-
-		params = s;
+	static {
+		typeString = DataSourceType.getShortName(WebServicesSource.class);
+	}
+	
+	public WebServicesSource() {}
+	
+	public void parse(String params) {
+		this.params = params;
 		String[] ss = params.split(PARAM_SPLIT_TEXT);
 		int ssIndex = 0;
 		net = ss[ssIndex++];
@@ -73,6 +75,7 @@ public class WebServicesSource extends SeismicDataSource
 		{
 			WebServiceUtils.debug("web service started " + count);
 		}
+
 	}
 
 	/**
@@ -83,8 +86,8 @@ public class WebServicesSource extends SeismicDataSource
 	 */
 	public WebServicesSource(WebServicesSource sls)
 	{
-		this(sls.params);
 		name = sls.name;
+		parse(sls.params);
 	}
 
 	/**
@@ -127,7 +130,7 @@ public class WebServicesSource extends SeismicDataSource
 	 */
 	private String getGulperKey(String station)
 	{
-		return WEB_SERVICES_CLIENT_CODE + ":" + station;
+		return typeString + ":" + station;
 	}
 
 	/**
@@ -224,7 +227,7 @@ public class WebServicesSource extends SeismicDataSource
 	public String toConfigString()
 	{
 		return String.format("%s;%s:" + PARAM_FMT_TEXT, name,
-				WEB_SERVICES_CLIENT_CODE, net, sta, loc, chan, gulpSize,
+				typeString, net, sta, loc, chan, gulpSize,
 				gulpDelay, wsDataSelectUrl, wsStationUrl);
 	}
 }

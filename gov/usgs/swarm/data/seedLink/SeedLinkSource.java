@@ -1,8 +1,14 @@
-package gov.usgs.swarm.data;
+package gov.usgs.swarm.data.seedLink;
 
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.ChannelUtil;
+import gov.usgs.swarm.data.CachedDataSource;
+import gov.usgs.swarm.data.DataSourceType;
+import gov.usgs.swarm.data.GulperList;
+import gov.usgs.swarm.data.GulperListener;
+import gov.usgs.swarm.data.IGulper;
+import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.Util;
 
 import java.io.File;
@@ -20,9 +26,6 @@ import java.util.logging.Logger;
  */
 public class SeedLinkSource extends SeismicDataSource
 {
-	/** SeedLinkSource class name */
-	private static final String CLASS_NAME = "gov.usgs.swarm.data.SeedLinkSource";
-
 	/** The gulp delay. */
 	private static final int gulpDelay = 1000;
 
@@ -37,17 +40,20 @@ public class SeedLinkSource extends SeismicDataSource
 
 	/** Log prefix text. */
 	private static final String logPrefixText;
-
-	/** SeedLink Source code */
-	public static final String SEEDLINK_SOURCE_CODE = "sls";
+	
+	private static final String typeString;
 
 	static
 	{
+		typeString = DataSourceType.getShortName(SeedLinkSource.class);
 		logger = SeedLinkLog.logger;
-		logPrefixText = CLASS_NAME + ": ";
-		infoFileText = System.getProperty(SEEDLINK_SOURCE_CODE + "infofile");
+		logPrefixText = gov.usgs.swarm.data.seedLink.SeedLinkSource.class.getName() + ": ";
+		infoFileText = System.getProperty(typeString + "infofile");
 	}
 
+	public SeedLinkSource() {
+		seedLinkClientList = new ArrayList<SeedLinkClient>();
+	}
 	/**
 	 * Gets a <code>String</code> representation of the object.
 	 * 
@@ -77,16 +83,16 @@ public class SeedLinkSource extends SeismicDataSource
 	}
 
 	/** The server host. */
-	private final String host;
+	private String host;
 
 	/** The information string File or null if none. */
 	private File infoStringFile;
 
 	/** The colon separated parameters. */
-	private final String params;
+	private String params;
 
 	/** The server port. */
-	private final int port;
+	private int port;
 
 	/** SeedLink client list. */
 	private final List<SeedLinkClient> seedLinkClientList;
@@ -99,8 +105,7 @@ public class SeedLinkSource extends SeismicDataSource
 	 */
 	public SeedLinkSource(SeedLinkSource sls)
 	{
-		this(sls.params);
-		name = sls.name;
+		this(sls.name, sls.params);
 	}
 
 	/**
@@ -108,20 +113,20 @@ public class SeedLinkSource extends SeismicDataSource
 	 * 
 	 * @param s the colon separated parameters.
 	 */
-	public SeedLinkSource(String s)
+	public SeedLinkSource(String name, String s)
 	{
-		params = s;
+		seedLinkClientList = new ArrayList<SeedLinkClient>();
+	}
+
+	public void parse(String params) {
+		this.params = params;
 		String[] ss = params.split(":");
 		int ssIndex = 0;
 		host = ss[ssIndex++];
 		port = Integer.parseInt(ss[ssIndex++]);
-		seedLinkClientList = new ArrayList<SeedLinkClient>();
 		if (infoFileText != null)
-		{
 			infoStringFile = new File(infoFileText + host + port + ".xml");
-		}
 	}
-
 	/**
 	 * Close the data source.
 	 */
@@ -147,7 +152,7 @@ public class SeedLinkSource extends SeismicDataSource
 	 * 
 	 * @return the client.
 	 */
-	protected SeedLinkClient createClient()
+	public SeedLinkClient createClient()
 	{
 		final SeedLinkClient client = new SeedLinkClient(host, port);
 		synchronized (seedLinkClientList)
@@ -225,7 +230,7 @@ public class SeedLinkSource extends SeismicDataSource
 	 */
 	private String getGulperKey(String station)
 	{
-		return SEEDLINK_SOURCE_CODE + ":" + station;
+		return typeString + ":" + station;
 	}
 
 	/**
@@ -369,7 +374,7 @@ public class SeedLinkSource extends SeismicDataSource
 	 */
 	public String toConfigString()
 	{
-		return String.format("%s;%s:%s:%d", name, SEEDLINK_SOURCE_CODE, host,
+		return String.format("%s;%s:%s:%d", name, typeString, host,
 				port);
 	}
 }

@@ -29,11 +29,15 @@ public class DirectWWSSource extends SeismicDataSource
 	private Data data;
 	private Channels stations;
 	
-	public DirectWWSSource(String d, String u, String db)
-	{
-		dbDriver = d;
-		dbURL = u;
-		dbPrefix = db;
+	// explicit default constructor required for reflection
+	public DirectWWSSource() {}
+
+	public void parse (String params) {
+		String[] ss = params.split("|");
+		dbDriver = ss[0];
+		dbURL = ss[1];
+		dbPrefix = ss[2];
+
 		winston = new WinstonDatabase(dbDriver, dbURL, dbPrefix);
 		stations = new Channels(winston);
 		data = new Data(winston);
@@ -92,7 +96,8 @@ public class DirectWWSSource extends SeismicDataSource
 	
 	public String toConfigString()
 	{
-		return "winston:";
+		String typeString = DataSourceType.getShortName(this.getClass());
+		return String.format("%s;%s:%s|%s|%s", name, typeString, dbDriver, dbURL, dbPrefix);
 	}
-	
+
 }

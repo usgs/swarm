@@ -1,9 +1,11 @@
-package gov.usgs.swarm.data;
+package gov.usgs.swarm.data.fdsnWs;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.ChannelInfo;
 import gov.usgs.swarm.StationInfo;
+import gov.usgs.swarm.data.DataSelectReader;
+import gov.usgs.swarm.data.SeismicDataSource;
 
 import java.util.Date;
 import java.util.List;

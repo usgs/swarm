@@ -1,7 +1,8 @@
 package gov.usgs.swarm.chooser;
 
 import gov.usgs.swarm.Swarm;
-import gov.usgs.swarm.data.SeedLinkSource;
+import gov.usgs.swarm.data.DataSourceType;
+import gov.usgs.swarm.data.seedLink.SeedLinkSource;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -20,8 +21,7 @@ public class SeedLinkPanel extends DataSourcePanel
 {
 	/** The SeedLink source code. */
 	private static final String codeText = ";"
-			+ SeedLinkSource.SEEDLINK_SOURCE_CODE + ":";
-
+			+ DataSourceType.getShortName(SeedLinkSource.class) + ":";
 	/** The default SeedLink host. */
 	private static final String defaultHost = "";
 
@@ -39,7 +39,7 @@ public class SeedLinkPanel extends DataSourcePanel
 	 */
 	public SeedLinkPanel()
 	{
-		super(SeedLinkSource.SEEDLINK_SOURCE_CODE, "SeedLink Server");
+		super(DataSourceType.getShortName(SeedLinkSource.class), "SeedLink Server");
 	}
 
 	/**

@@ -1,4 +1,4 @@
-package gov.usgs.swarm.data;
+package gov.usgs.swarm.data.file;
 
 import edu.iris.Fissures.seed.builder.SeedObjectBuilder;
 import edu.iris.Fissures.seed.container.Blockette;
@@ -9,6 +9,10 @@ import edu.iris.Fissures.seed.director.ImportDirector;
 import edu.iris.Fissures.seed.director.SeedImportDirector;
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.Wave;
+import gov.usgs.swarm.data.CachedDataSource;
+import gov.usgs.swarm.data.DataSourceType;
+import gov.usgs.swarm.data.GulperListener;
+import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;
 
@@ -106,6 +110,10 @@ public class FullSeedDataSource extends SeismicDataSource
 			e.printStackTrace();
 		}
 	}
+	
+	public void parse(String params) {
+		// no-op
+	}
 	 
 	private Date btimeToDate(Btime bt)
 	{
@@ -165,6 +173,9 @@ public class FullSeedDataSource extends SeismicDataSource
 	
 	public String toConfigString()
 	{
-		return name + ";seed:" + filename;
+		String typeString = DataSourceType.getShortName(this.getClass());
+		return name + ";" + typeString + ":" + filename;
+
 	}
+
 }

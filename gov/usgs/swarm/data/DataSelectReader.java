@@ -18,6 +18,7 @@ import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.mseed.SeedRecord;
 import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.data.fdsnWs.WebServiceUtils;
 
 /**
  * The data select reader reads data from the web services. This class a based

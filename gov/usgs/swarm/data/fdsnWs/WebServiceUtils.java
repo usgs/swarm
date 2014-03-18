@@ -1,8 +1,9 @@
-package gov.usgs.swarm.data;
+package gov.usgs.swarm.data.fdsnWs;
 
 import gov.usgs.swarm.ChannelInfo;
 import gov.usgs.swarm.ChannelUtil;
 import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.data.SeismicDataSource;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

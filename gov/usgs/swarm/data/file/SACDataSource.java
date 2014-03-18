@@ -1,8 +1,12 @@
-package gov.usgs.swarm.data;
+package gov.usgs.swarm.data.file;
 
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.SAC;
 import gov.usgs.plot.data.Wave;
+import gov.usgs.swarm.data.CachedDataSource;
+import gov.usgs.swarm.data.DataSourceType;
+import gov.usgs.swarm.data.GulperListener;
+import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.CurrentTime;
 
 import java.util.ArrayList;
@@ -16,18 +20,13 @@ public class SACDataSource extends SeismicDataSource
 {
 	private String station;
 	private Wave wave;
-	
 	private String filename;
-	
-	//private static List loadedList = new ArrayList();
 	
 	public SACDataSource(String fn)
 	{
 		try
 		{
 			filename = fn;
-//			if (loadedList.contains(fn))
-//				return;
 			SAC sac = new SAC();
 			sac.read(fn);
 			station = sac.getStationInfo();
@@ -41,6 +40,9 @@ public class SACDataSource extends SeismicDataSource
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	public void parse(String params) {
 	}
 	 
 	public HelicorderData getHelicorder(String station, double t1, double t2, GulperListener gl)
@@ -72,7 +74,8 @@ public class SACDataSource extends SeismicDataSource
 	
 	public String toConfigString()
 	{
-		return name + ";sac:" + filename;
+		String typeString = DataSourceType.getShortName(this.getClass());
+		return name + ";" + typeString + ":" + filename;
 	}
-	
+
 }

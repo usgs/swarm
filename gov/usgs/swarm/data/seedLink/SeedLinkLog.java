@@ -1,6 +1,6 @@
-package gov.usgs.swarm.data;
+package gov.usgs.swarm.data.seedLink;
 
-import gov.usgs.swarm.data.orfeus.BaseSLLog;
+import gov.usgs.swarm.data.seedLink.orfeus.BaseSLLog;
 import gov.usgs.util.Log;
 
 import java.util.logging.Level;
