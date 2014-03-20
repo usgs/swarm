@@ -5,9 +5,9 @@ import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.ChannelUtil;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.DataSourceType;
+import gov.usgs.swarm.data.Gulper;
 import gov.usgs.swarm.data.GulperList;
 import gov.usgs.swarm.data.GulperListener;
-import gov.usgs.swarm.data.IGulper;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.Util;
 
@@ -164,7 +164,7 @@ public class SeedLinkSource extends SeismicDataSource
 		return client;
 	}
 
-	public IGulper createGulper(GulperList gl, String k, String ch, double t1,
+	public Gulper createGulper(GulperList gl, String k, String ch, double t1,
 			double t2, int size, int delay)
 	{
 		return new SeedLinkGulper(gl, k, this, ch, t1, t2, size, delay);

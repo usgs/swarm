@@ -11,7 +11,7 @@ import java.util.Set;
  *
  * @author Dan Cervelli
  */
-public class Gulper implements IGulper
+public class Gulper implements Runnable
 {
 	private final SeismicDataSource gulpSource;
 	private final GulperList gulperList;

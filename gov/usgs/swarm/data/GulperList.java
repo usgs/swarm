@@ -18,12 +18,12 @@ import java.util.Map;
  */
 public class GulperList
 {
-	private Map<String, IGulper> gulpers;
+	private Map<String, Gulper> gulpers;
 	private static GulperList gulperList;
 	
 	private GulperList()
 	{
-		gulpers = new HashMap<String, IGulper>();
+		gulpers = new HashMap<String, Gulper>();
 	}
 	
 	public static GulperList getInstance()
@@ -34,9 +34,9 @@ public class GulperList
 		return gulperList;
 	}
 	
-	public synchronized IGulper requestGulper(String key, GulperListener gl, SeismicDataSource source, String ch, double t1, double t2, int size, int delay)
+	public synchronized Gulper requestGulper(String key, GulperListener gl, SeismicDataSource source, String ch, double t1, double t2, int size, int delay)
 	{
-		IGulper g = gulpers.get(key);
+		Gulper g = gulpers.get(key);
 		if (g != null)
 		{
 			g.addListener(gl);
@@ -62,7 +62,7 @@ public class GulperList
 
 	public synchronized void killGulper(String key, GulperListener gl)
 	{
-		IGulper g = gulpers.get(key);
+		Gulper g = gulpers.get(key);
 		if (g != null)
 			g.kill(gl);	
 	}
@@ -71,7 +71,7 @@ public class GulperList
 	 * Called from the gulper.
 	 * @param g
 	 */
-	public synchronized void removeGulper(IGulper g)
+	public synchronized void removeGulper(Gulper g)
 	{
 		gulpers.remove(g.getKey());
 	}
