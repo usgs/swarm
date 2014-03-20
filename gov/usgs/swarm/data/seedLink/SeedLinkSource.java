@@ -116,6 +116,8 @@ public class SeedLinkSource extends SeismicDataSource
 	public SeedLinkSource(String name, String s)
 	{
 		seedLinkClientList = new ArrayList<SeedLinkClient>();
+		this.name = name;
+		parse(s);
 	}
 
 	public void parse(String params) {
