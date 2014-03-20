@@ -161,7 +161,7 @@ public class WebServicesSource extends SeismicDataSource
 				(GulperListener) null);
 
 		if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10))
-			GulperList.getInstance().requestGulper(getGulperKey(station), gl,
+			GulperList.INSTANCE.requestGulper(getGulperKey(station), gl,
 					this, station, t1, t2, gulpSize, gulpDelay);
 
 		// this gets the tail end, replacing commented out section above
@@ -216,7 +216,7 @@ public class WebServicesSource extends SeismicDataSource
 	public synchronized void notifyDataNotNeeded(String station, double t1,
 			double t2, GulperListener gl)
 	{
-		GulperList.getInstance().killGulper(getGulperKey(station), gl);
+		GulperList.INSTANCE.killGulper(getGulperKey(station), gl);
 	}
 
 	/**

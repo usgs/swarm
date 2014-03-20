@@ -176,13 +176,13 @@ public class WaveServerSource extends SeismicDataSource
 		HelicorderData hd = cache.getHelicorder(station, t1, t2, (GulperListener)null);	
 
 		if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10))
-			GulperList.getInstance().requestGulper("ws:" + station, gl, this.getCopy(), station, t1, t2, gulpSize, gulpDelay);
+			GulperList.INSTANCE.requestGulper("ws:" + station, gl, this.getCopy(), station, t1, t2, gulpSize, gulpDelay);
 		return hd;
 	}
 	
 	public synchronized void notifyDataNotNeeded(String station, double t1, double t2, GulperListener gl)
 	{
-		GulperList.getInstance().killGulper("ws:" + station, gl);
+		GulperList.INSTANCE.killGulper("ws:" + station, gl);
 	}
 	
 	public synchronized boolean isActiveSource()

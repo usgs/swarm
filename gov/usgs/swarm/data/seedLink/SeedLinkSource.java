@@ -338,7 +338,7 @@ public class SeedLinkSource extends SeismicDataSource
 	public synchronized void notifyDataNotNeeded(String station, double t1,
 			double t2, GulperListener gl)
 	{
-		GulperList.getInstance().killGulper(getGulperKey(station), gl);
+		GulperList.INSTANCE.killGulper(getGulperKey(station), gl);
 	}
 
 	/**
@@ -365,7 +365,7 @@ public class SeedLinkSource extends SeismicDataSource
 	protected void requestGulper(String scnl, double t1, double t2,
 			GulperListener gl)
 	{
-		GulperList.getInstance().requestGulper(getGulperKey(scnl), gl, this,
+		GulperList.INSTANCE.requestGulper(getGulperKey(scnl), gl, this,
 				scnl, t1, t2, gulpSize, gulpDelay);
 	}
 
