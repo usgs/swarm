@@ -59,14 +59,14 @@ public enum DataSourceType {
 		String type = config.substring(0, config.indexOf(":"));
 		String params = config.substring(config.indexOf(":") + 1);
 
-		DataSourceType dataSourceType = DataSourceType.parse(type);
 		SeismicDataSource sds = null;
 		try {
+			DataSourceType dataSourceType = DataSourceType.parse(type);
 			sds = dataSourceType.seismicDataSource.newInstance();
 			sds.setName(name);
 			sds.parse(params);
 		} catch (Exception e) {
-			e.printStackTrace();
+			; // do nothing
 		}
 		return sds;
 	}

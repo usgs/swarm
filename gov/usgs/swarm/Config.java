@@ -149,6 +149,11 @@ public class Config
 			{
 //				SeismicDataSource sds = SeismicDataSource.getDataSource(server);
 				SeismicDataSource sds = DataSourceType.parseConfig(server);
+				if (sds == null) {
+					Swarm.logger.info("Skipping unknown data soruce " + server);
+					continue;
+				}
+				
 				sds.setStoreInUserConfig(false);
 				sources.put(sds.getName(), sds);
 			}
