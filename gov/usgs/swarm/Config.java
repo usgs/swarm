@@ -113,7 +113,7 @@ public class Config
 		if (n >= 0 && !args[n].startsWith("-"))
 			configFile = args[n];
 
-		Swarm.logger.fine("using config: " + configFile);
+		Swarm.logger.fine("Using configuration file: " + configFile);
 		
 		ConfigFile cf = new ConfigFile(configFile);
 		cf.put("configFile", configFile, false);
@@ -129,7 +129,10 @@ public class Config
 			}
 		}
 		Config config = new Config(cf);
-		config.defaultMetadata = Metadata.loadMetadata(Metadata.DEFAULT_METADATA_FILENAME);
+		
+		String metadataConfigFile = System.getProperty("user.home")  + File.separatorChar + Metadata.DEFAULT_METADATA_FILENAME;
+		Swarm.logger.fine("Using metadata configuration file: " + metadataConfigFile);
+		config.defaultMetadata = Metadata.loadMetadata(metadataConfigFile);
 		config.metadata = Collections.synchronizedMap(new HashMap<String, Metadata>());
 		config.loadDataSources();
 		config.loadLayouts();
