@@ -197,11 +197,11 @@ public class WaveViewSettingsDialog extends SwarmDialog
 		waveScaleGroup = new ButtonGroup();
 		removeBias = new JCheckBox("Remove bias");
 		useUnits = new JCheckBox("Use calibrations");
-		waveAutoScale = new JRadioButton("Autoscale");
 		waveManualScale = new JRadioButton("Manual scale");
+		waveAutoScale = new JRadioButton("Autoscale");
 		waveScaleGroup.add(waveAutoScale);
 		waveScaleGroup.add(waveManualScale);
-		waveAutoScaleMemory = new JCheckBox("Memory");
+		waveAutoScaleMemory = new JCheckBox("Persistent rescale");
 		minAmp = new JTextField(7);
 		maxAmp = new JTextField(7);
 		
@@ -270,8 +270,12 @@ public class WaveViewSettingsDialog extends SwarmDialog
 		builder.nextColumn(2);
 		builder.append(maxAmp);
 		builder.append(waveManualScale);
+
 		builder.nextLine();
-		
+		builder.append(new JLabel(""), 5);
+		builder.append(waveAutoScaleMemory);
+		builder.nextLine();
+
 		builder.appendSeparator("Spectra Options");
 		builder.nextLine();
 		builder.append(new JLabel(""), 1);
