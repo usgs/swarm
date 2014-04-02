@@ -1,6 +1,11 @@
 package gov.usgs.swarm.wave;
 
+import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
+
 import gov.usgs.math.Butterworth;
+import gov.usgs.swarm.Metadata;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Util;
  
@@ -11,7 +16,7 @@ import gov.usgs.util.Util;
 
 public class WaveViewSettings
 {
-	public static final String DEFAULTS_FILENAME = "WaveDefaults.config";
+	private static final String DEFAULTS_FILENAME = "WaveDefaults.config";
 	
 	public enum ViewType
 	{
@@ -91,7 +96,14 @@ public class WaveViewSettings
 		DEFAULT_WAVE_VIEW_SETTINGS.filterOn = false;
 		DEFAULT_WAVE_VIEW_SETTINGS.zeroPhaseShift = true;
 		
-		ConfigFile cf = new ConfigFile(DEFAULTS_FILENAME);
+		List<String> candidateNames = new LinkedList<String>();
+		candidateNames.add(DEFAULTS_FILENAME);
+		candidateNames.add(System.getProperty("user.home") + File.separatorChar + DEFAULTS_FILENAME);
+		String defaultsFile = ConfigFile.findConfig(candidateNames);
+		if (defaultsFile == null)
+			defaultsFile = DEFAULTS_FILENAME;
+
+		ConfigFile cf = new ConfigFile(defaultsFile);
 		if (cf.wasSuccessfullyRead())
 		{
 			ConfigFile sub = cf.getSubConfig("default");
