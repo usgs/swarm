@@ -139,10 +139,13 @@ public class Config {
 		List<String> candidateNames = new LinkedList<String>();
 		candidateNames.add(Metadata.DEFAULT_METADATA_FILENAME);
 		candidateNames.add(System.getProperty("user.home") + File.separatorChar + Metadata.DEFAULT_METADATA_FILENAME);
-		String metadataConfigFile = Util.stringToString(ConfigFile.findConfig(candidateNames),
-				Metadata.DEFAULT_METADATA_FILENAME);
-
-		Swarm.logger.fine("Using metadata configuration file: " + metadataConfigFile);
+		
+		String metadataConfigFile = ConfigFile.findConfig(candidateNames);
+		if (metadataConfigFile == null)
+			metadataConfigFile = Metadata.DEFAULT_METADATA_FILENAME;
+		else
+			Swarm.logger.fine("Using metadata configuration file: " + metadataConfigFile);
+			
 		config.defaultMetadata = Metadata.loadMetadata(metadataConfigFile);
 		config.metadata = Collections.synchronizedMap(new HashMap<String, Metadata>());
 
