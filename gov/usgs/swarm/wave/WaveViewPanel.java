@@ -542,7 +542,7 @@ public class WaveViewPanel extends JComponent {
 			if (timeSeries) {
 				String utc = Time.format(DATE_FORMAT, Util.j2KToDate(j2k));
 				TimeZone tz = Swarm.config.getTimeZone(channel);
-				double tzo = Time.getTimeZoneOffset(tz, j2k);
+				double tzo = tz.getOffset((long)Util.j2KToEW(j2k))/1000;
 				if (tzo != 0) {
 					String tza = tz.getDisplayName(
 							tz.inDaylightTime(Util.j2KToDate(j2k)),

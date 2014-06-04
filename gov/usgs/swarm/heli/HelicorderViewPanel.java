@@ -17,7 +17,6 @@ import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.swarm.wave.WaveViewPanel;
 import gov.usgs.swarm.wave.WaveViewPanelAdapter;
-import gov.usgs.util.Time;
 import gov.usgs.util.Util;
 
 import java.awt.Color;
@@ -359,7 +358,7 @@ public class HelicorderViewPanel extends JComponent {
 					double j2k = getMouseJ2K(x, y);
 					status = dateFormat.format(Util.j2KToDate(j2k));
 					TimeZone tz = Swarm.config.getTimeZone(settings.channel);
-					double tzo = Time.getTimeZoneOffset(tz, j2k);
+					double tzo = tz.getOffset((long) Util.j2KToEW(j2k))/1000;
 					if (tzo != 0) {
 						String tza = tz.getDisplayName(tz.inDaylightTime(Util.j2KToDate(j2k)), TimeZone.SHORT);
 						status = dateFormat.format(Util.j2KToDate(j2k + tzo)) + " (" + tza + "), " + status + " (UTC)";

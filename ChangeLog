@@ -1,3 +1,9 @@
+  Changes since version 2.3.3
+ .....................................
+  - reworked config file path searching
+  - fixed concurrency problem affecting monitor mode
+  - minor refactoring of timezone handling
+  
   Changes since version 2.3.2 (r2606)
  .....................................
   - created NTP.config file with NTP defaults
