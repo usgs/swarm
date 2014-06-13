@@ -33,6 +33,7 @@ import java.util.TimeZone;
  *
  * @author Dan Cervelli
  */
+@Deprecated
 public class FullSeedDataSource extends SeismicDataSource
 {
 	private List<String> stations;

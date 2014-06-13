@@ -16,6 +16,7 @@ import java.util.List;
  *
  * @author Dan Cervelli
  */
+@Deprecated
 public class SACDataSource extends SeismicDataSource 
 {
 	private String station;
