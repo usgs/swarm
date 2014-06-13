@@ -4,6 +4,7 @@ import gov.usgs.plot.map.WMSGeoImageSet;
 import gov.usgs.swarm.data.DataSourceType;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.ConfigFile;
+import gov.usgs.util.Log;
 import gov.usgs.util.Util;
 
 import java.awt.Color;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 /**
  * Swarm configuration class.
@@ -25,7 +27,8 @@ import java.util.TreeMap;
  */
 public class SwarmConfig {
 	
-	static final SwarmConfig swarmConfig = new SwarmConfig();
+	private static final SwarmConfig swarmConfig = new SwarmConfig();
+	private static Logger logger = Log.getLogger("gov.usgs.swarm");
 	
 	private static String[] DEFAULT_SERVERS = new String[] { "AVO Winston;wws:pubavo1.wr.usgs.gov:16022:10000:1"
 	// "IRIS DMC - New Zealand;dhi:edu/iris/dmc:IRIS_NetworkDC:edu/iris/dmc:IRIS_BudDataCenter:NZ:3600:1000"
@@ -113,8 +116,8 @@ public class SwarmConfig {
 	}
 	
 	public void createConfig(String[] args) {
-		Swarm.logger.fine("current directory: " + System.getProperty("user.dir"));
-		Swarm.logger.fine("user.home: " + System.getProperty("user.home"));
+		logger.fine("current directory: " + System.getProperty("user.dir"));
+		logger.fine("user.home: " + System.getProperty("user.home"));
 		String configFile;
 
 		int n = args.length - 1;
@@ -131,7 +134,7 @@ public class SwarmConfig {
 		if (configFile == null)
 			configFile = DEFAULT_CONFIG_FILE;
 
-		Swarm.logger.fine("Using configuration file: " + configFile);
+		logger.fine("Using configuration file: " + configFile);
 
 		ConfigFile cf = new ConfigFile(configFile);
 		cf.put("configFile", configFile, false);
@@ -140,7 +143,7 @@ public class SwarmConfig {
 			if (args[i].startsWith("--")) {
 				String key = args[i].substring(2, args[i].indexOf('='));
 				String val = args[i].substring(args[i].indexOf('=') + 1);
-				Swarm.logger.fine("command line: " + key + " = " + val);
+				logger.fine("command line: " + key + " = " + val);
 				cf.put(key, val, false);
 			}
 		}
@@ -154,7 +157,7 @@ public class SwarmConfig {
 		if (metadataConfigFile == null)
 			metadataConfigFile = Metadata.DEFAULT_METADATA_FILENAME;
 		else
-			Swarm.logger.fine("Using metadata configuration file: " + metadataConfigFile);
+			logger.fine("Using metadata configuration file: " + metadataConfigFile);
 			
 		defaultMetadata = Metadata.loadMetadata(metadataConfigFile);
 		metadata = Collections.synchronizedMap(new HashMap<String, Metadata>());
@@ -176,7 +179,7 @@ public class SwarmConfig {
 			for (String server : servers) {
 				SeismicDataSource sds = DataSourceType.parseConfig(server);
 				if (sds == null) {
-					Swarm.logger.info("Skipping unknown data soruce " + server);
+					logger.info("Skipping unknown data soruce " + server);
 					continue;
 				}
 
@@ -324,7 +327,7 @@ public class SwarmConfig {
 				// SeismicDataSource.getDataSource(server);
 				SeismicDataSource sds = DataSourceType.parseConfig(server);
 				if (sds == null) {
-					Swarm.logger.info("Skipping unknown data soruce " + server);
+					logger.info("Skipping unknown data soruce " + server);
 					continue;
 				}
 				sources.put(sds.getName(), sds);

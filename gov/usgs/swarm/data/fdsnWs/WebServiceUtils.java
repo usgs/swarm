@@ -4,6 +4,7 @@ import gov.usgs.swarm.ChannelInfo;
 import gov.usgs.swarm.ChannelUtil;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.data.SeismicDataSource;
+import gov.usgs.util.Log;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -254,14 +255,7 @@ public class WebServiceUtils
 	public static void log(Level level, String msg)
 	{
 		msg = "WebService: " + msg;
-		if (Swarm.logger != null)
-		{
-			Swarm.logger.log(level, msg);
-		}
-		else
-		{
-			System.out.println(level + ": " + msg);
-		}
+		Log.getLogger("gov.usgs.swarm").log(level, msg);
 	}
 
 	/**

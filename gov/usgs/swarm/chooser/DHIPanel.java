@@ -1,6 +1,7 @@
 package gov.usgs.swarm.chooser;
 
 import gov.usgs.swarm.Swarm;
+import gov.usgs.util.Log;
 import gov.usgs.util.ResourceReader;
 
 import javax.swing.JButton;
@@ -116,7 +117,7 @@ public class DHIPanel extends DataSourcePanel
 			}
 		}
 		else
-			Swarm.logger.warning(IRIS_NETWORK_FILE + " is missing.");
+			Log.getLogger("gov.usgs.swarm").warning(IRIS_NETWORK_FILE + " is missing.");
 		gulperSize = new JTextField();
 		gulperDelay = new JTextField();
 		dcButton = new JButton("Query for DCs");

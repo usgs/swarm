@@ -202,7 +202,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 				else
 					ft = dialog.getFileType();
 
-				Swarm.logger.warning("user input file type: " + fs[i].getPath()
+				logger.warning("user input file type: " + fs[i].getPath()
 						+ " -> " + ft);
 			}
 
@@ -214,10 +214,10 @@ public class FileDataSource extends AbstractCachingDataSource {
 				openSeedFile(fs[i].getPath());
 				break;
 			case UNKNOWN:
-				Swarm.logger.warning("unknown file type: " + fs[i].getPath());
+				logger.warning("unknown file type: " + fs[i].getPath());
 				break;
 			default:
-				Swarm.logger.warning("Cannot load file type " + ft + ": "
+				logger.warning("Cannot load file type " + ft + ": "
 						+ fs[i].getPath());
 				break;
 			}
@@ -234,7 +234,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 				Object result = null;
 				fireChannelsProgress(fn, 0);
 				try {
-					Swarm.logger.fine("opening SAC file: " + fn);
+					logger.fine("opening SAC file: " + fn);
 					SAC sac = new SAC();
 					sac.read(fn);
 					fireChannelsProgress(fn, 0.5);
@@ -281,7 +281,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 				try {
 					fireChannelsProgress(fn, 0);
 					CodeTimer ct = new CodeTimer("seed");
-					Swarm.logger.fine("opening SEED file: " + fn);
+					logger.fine("opening SEED file: " + fn);
 					Map<String, List<Wave>> tempStationMap = new HashMap<String, List<Wave>>();
 
 					DataInputStream ls = new DataInputStream(

@@ -122,7 +122,7 @@ public class Swarm extends JFrame
 	
 	private static SwarmConfig config;
 	
-	public static Logger logger;
+	private static Logger logger;
 	
 	private FileDataSource fileSource;
 	

@@ -2,12 +2,13 @@ package gov.usgs.swarm.data;
 
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.Wave;
-import gov.usgs.swarm.Swarm;
+import gov.usgs.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix2D;
@@ -29,11 +30,13 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 	protected Map<String, List<CachedHelicorder>> helicorderCache;
 	protected Map<String, List<CachedWave>> waveCache;
 	protected CachePurgeAction[] purgeActions;
-
+	protected static Logger logger;
+	
 	public AbstractCachingDataSource() {
 		helicorderCache = new HashMap<String, List<CachedHelicorder>>();
 		waveCache = new HashMap<String, List<CachedWave>>();
 		maxSize = Runtime.getRuntime().maxMemory() / 6;
+		logger = Log.getLogger("gov.usgs.swarm");
 		createPurgeActions();
 	}
 
@@ -125,7 +128,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 		int i = 0;
 		while (target > 0 && i < purgeActions.length) {
 			long chunk = purgeActions[i].purge();
-			Swarm.logger.finer("purged " + chunk + " bytes from cache");
+			Log.getLogger("gov.usgs.swarm").finer("purged " + chunk + " bytes from cache");
 			target -= chunk;
 			i++;
 		}

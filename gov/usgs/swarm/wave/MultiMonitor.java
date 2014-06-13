@@ -11,6 +11,7 @@ import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Kioskable;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwarmFrame;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.Throbber;
@@ -578,7 +579,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 	        	String Units = "Counts";
 	        	if (panel.getSettings().useUnits)
 	        	{
-	        		Metadata md = swarmConfig.getMetadata(panel.getChannel(), true);
+	        		Metadata md = SwarmConfig.getInstance().getMetadata(panel.getChannel(), true);
 	        		m = md.getMultiplier();
 	        		b = md.getOffset();
 	        		Units = md.getUnit();

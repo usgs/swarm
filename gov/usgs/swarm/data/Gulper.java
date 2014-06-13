@@ -1,11 +1,12 @@
 package gov.usgs.swarm.data;
 
 import gov.usgs.plot.data.Wave;
-import gov.usgs.swarm.Swarm;
 import gov.usgs.util.CurrentTime;
+import gov.usgs.util.Log;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  *
@@ -24,6 +25,8 @@ public class Gulper implements Runnable
 	
 	private final int gulpSize;
 	private final int gulpDelay;
+	
+	private static Logger logger;
 
 	/**
 	 * Create the gulper. This does not call methods to support subclassing.
@@ -37,6 +40,7 @@ public class Gulper implements Runnable
 	 */
 	public Gulper(GulperList gl, String k, SeismicDataSource source, String ch, double t1, double t2, int size, int delay)
 	{
+		logger = Log.getLogger("gov.usgs.swarm");
 		gulpSize = size;
 		gulpDelay = delay;
 		gulperList = gl;
@@ -129,7 +133,7 @@ public class Gulper implements Runnable
 	{
 		thread = new Thread(this);
 		thread.start();
-		Swarm.logger.finer("gulper started for " + channel);
+		logger.finer("gulper started for " + channel);
 	}
 
 	public void update(double t1, double t2)
@@ -176,9 +180,9 @@ public class Gulper implements Runnable
 		runLoop();	
 		gulpSource.close();
 		if (isKilled())
-			Swarm.logger.finest("gulper killed");
+			logger.finest("gulper killed");
 		else
-			Swarm.logger.finest("gulper finished");
+			logger.finest("gulper finished");
 		gulperList.removeGulper(this);
 		fireStopped();
 	}

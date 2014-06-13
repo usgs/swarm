@@ -23,6 +23,7 @@ import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.swarm.wave.WaveViewPanel;
 import gov.usgs.util.CodeTimer;
 import gov.usgs.util.ConfigFile;
+import gov.usgs.util.Log;
 import gov.usgs.util.Pair;
 import gov.usgs.util.Util;
 
@@ -63,6 +64,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -79,6 +81,7 @@ public class MapPanel extends JPanel
 {
 	
 	private static SwarmConfig swarmConfig;
+	private static Logger logger;
 	
 	public enum DragMode
 	{
@@ -186,6 +189,7 @@ public class MapPanel extends JPanel
 	
 	public MapPanel(MapFrame f)
 	{
+		logger = Log.getLogger("gov.usgs.swarm");
 		swarmConfig = SwarmConfig.getInstance();
 		parent = f;
 		mapHistory = new Stack<double[]>();
@@ -267,7 +271,7 @@ public class MapPanel extends JPanel
 		
 		if (images == null)
 		{
-			Swarm.logger.warning("No map images found in " + swarmConfig.mapPath + ".");
+			logger.warning("No map images found in " + swarmConfig.mapPath + ".");
 			images = new GeoImageSet();
 		}
 		images.setArealCacheSort(false);
@@ -499,7 +503,7 @@ public class MapPanel extends JPanel
 		}
 		catch (Exception e)
 		{
-			Swarm.logger.log(Level.WARNING, e.getMessage());
+			logger.log(Level.WARNING, e.getMessage());
 		}
 	}
 	
@@ -899,8 +903,8 @@ public class MapPanel extends JPanel
 			
 			pickMapParameters(width, height);
 			
-			Swarm.logger.finest("map scale: " + scale);
-			Swarm.logger.finest("center: " + center.x + " " + center.y);
+			logger.finest("map scale: " + scale);
+			logger.finest("center: " + center.x + " " + center.y);
 			
 			MapRenderer mr = new MapRenderer(range, projection);
 			ct.mark("pre bg");
@@ -941,7 +945,7 @@ public class MapPanel extends JPanel
 		}
 		catch (Exception e)
 		{
-			Swarm.logger.log(Level.SEVERE, "Exception during map creation.", e);
+			logger.log(Level.SEVERE, "Exception during map creation.", e);
 		}
 		finally
 		{

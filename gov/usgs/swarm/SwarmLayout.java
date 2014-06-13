@@ -5,6 +5,7 @@ import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.swarm.wave.MultiMonitor;
 import gov.usgs.util.ConfigFile;
+import gov.usgs.util.Log;
 import gov.usgs.util.Util;
 
 import java.awt.event.ActionEvent;
@@ -66,7 +67,7 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 		try
 		{
 			String fn = config.getName() + ".config";
-			Swarm.logger.fine("deleting file: " + fn);
+			Log.getLogger("gov.usgs.swarm").fine("deleting file: " + fn);
 			new File(fn).delete();
 		}
 		catch (Exception e)
