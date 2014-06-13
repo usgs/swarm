@@ -328,7 +328,7 @@ public class HelicorderViewerSettingsDialog extends SwarmDialog {
 		if (Double.isNaN(bt))
 			bottomTime.setText("Now");
 		else {
-			double tzo = Swarm.config.getTimeZone(settings.channel).getOffset(System.currentTimeMillis())/1000;
+			double tzo = swarmConfig.getTimeZone(settings.channel).getOffset(System.currentTimeMillis())/1000;
 
 			bottomTime.setText(utcDateFormat.format(Util.j2KToDate(bt + tzo)));
 		}
@@ -365,7 +365,7 @@ public class HelicorderViewerSettingsDialog extends SwarmDialog {
 				if (t.length() == 8)
 					t = t + "2359";
 				Date bt = utcDateFormat.parse(t);
-				double tzo = Swarm.config.getTimeZone(settings.channel).getOffset(bt.getTime())/1000;
+				double tzo = swarmConfig.getTimeZone(settings.channel).getOffset(bt.getTime())/1000;
 
 				settings.setBottomTime(Util.dateToJ2K(bt) - tzo);
 			}

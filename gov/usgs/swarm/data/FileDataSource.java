@@ -12,6 +12,7 @@ import gov.usgs.plot.data.SAC;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwarmDialog;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.util.CodeTimer;
@@ -54,6 +55,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 
 	private Map<String, double[]> channelTimes;
 	private Set<String> openFiles;
+	private static SwarmConfig swarmConfig;
 
 	public FileDataSource() {
 		super();
@@ -63,13 +65,14 @@ public class FileDataSource extends AbstractCachingDataSource {
 		maxSize = Integer.MAX_VALUE;
 		storeInUserConfig = false;
 		name = "Files";
+		swarmConfig = SwarmConfig.getInstance();
 	}
 
 	public void flush() {
 		List<String> channels = getChannels();
 		if (channels != null)
 			for (String ch : channels)
-				Swarm.config.removeMetadata(ch);
+				swarmConfig.removeMetadata(ch);
 		super.flush();
 		openFiles.clear();
 		channelTimes.clear();
@@ -218,7 +221,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 						+ fs[i].getPath());
 				break;
 			}
-			Swarm.config.lastPath = fs[i].getParent();
+			swarmConfig.lastPath = fs[i].getParent();
 		}
 	}
 
@@ -236,7 +239,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 					sac.read(fn);
 					fireChannelsProgress(fn, 0.5);
 					String channel = sac.getStationInfo();
-					Metadata md = Swarm.config.getMetadata(channel, true);
+					Metadata md = swarmConfig.getMetadata(channel, true);
 					md.addGroup("SAC^" + fn);
 
 					Wave wave = sac.toWave();
@@ -312,7 +315,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 							loc = "";
 						String code = b.getFieldVal(4) + "_" + b.getFieldVal(6)
 								+ "_" + b.getFieldVal(7) + loc;
-						Metadata md = Swarm.config.getMetadata(code, true);
+						Metadata md = swarmConfig.getMetadata(code, true);
 						md.addGroup("SEED^" + fn);
 
 						List<Wave> parts = tempStationMap.get(code);

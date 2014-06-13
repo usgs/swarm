@@ -5,7 +5,7 @@ import gov.usgs.earthworm.MenuItem;
 import gov.usgs.earthworm.WaveServer;
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.Wave;
-import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;
 
@@ -36,6 +36,7 @@ public class WaveServerSource extends SeismicDataSource
 	private int gulpDelay = 1 * 1000;
 	
 	private TimeZone timeZone;
+	
 	
 	private static Map<String, Boolean> scnlSources = new HashMap<String, Boolean>();
 	
@@ -160,7 +161,7 @@ public class WaveServerSource extends SeismicDataSource
 	{
 		Menu menu = getMenu();
 		List<String> channels = getMenuList(menu.getSortedItems());
-		Swarm.config.assignMetadataSource(channels, this);
+		SwarmConfig.getInstance().assignMetadataSource(channels, this);
 		return channels;
 	}
 	

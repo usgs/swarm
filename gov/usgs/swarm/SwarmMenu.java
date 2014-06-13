@@ -97,7 +97,7 @@ public class SwarmMenu extends JMenuBar
 						JFileChooser chooser = Swarm.getApplication().getFileChooser();
 						chooser.resetChoosableFileFilters();
 						chooser.setFileFilter(chooser.getAcceptAllFileFilter());
-						File lastPath = new File(Swarm.config.lastPath);
+						File lastPath = new File(SwarmConfig.getInstance().lastPath);
 						chooser.setCurrentDirectory(lastPath);
 						chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 						chooser.setMultiSelectionEnabled(true);
@@ -470,7 +470,7 @@ public class SwarmMenu extends JMenuBar
 		protected void createUI()
 		{
 			super.createUI();
-			Set<String> keys = Swarm.config.layouts.keySet();
+			Set<String> keys = swarmConfig.layouts.keySet();
 			List<String> sls = new ArrayList<String>();
 			sls.addAll(keys);
 			Collections.sort(sls, Util.getIgnoreCaseStringComparator());
@@ -492,12 +492,12 @@ public class SwarmMenu extends JMenuBar
 			List<String> toRemove = Arrays.asList((String[])layoutList.getSelectedValues());
 			
 			for (String key: toRemove) {
-				SwarmLayout layout = Swarm.config.layouts.get(key);
+				SwarmLayout layout = swarmConfig.layouts.get(key);
 				if (layout != null)
 				{
 					JMenuItem mi = layouts.get(layout);
 					layoutMenu.remove(mi);
-					Swarm.config.removeLayout(layout);
+					swarmConfig.removeLayout(layout);
 				}				
 			}
 		}

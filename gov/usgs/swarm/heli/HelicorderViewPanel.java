@@ -13,6 +13,7 @@ import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.swarm.wave.WaveViewPanel;
@@ -92,8 +93,11 @@ public class HelicorderViewPanel extends JComponent {
 	private double lastMark = Double.NaN;
 
 	private EventListenerList listeners = new EventListenerList();
+	private static SwarmConfig swarmConfig;
 
 	public HelicorderViewPanel(HelicorderViewerFrame hvf) {
+		swarmConfig = SwarmConfig.getInstance();
+
 		// setBackground(new Color(255, 255, 255, 128));
 		parent = hvf;
 		dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -103,8 +107,8 @@ public class HelicorderViewPanel extends JComponent {
 		// plot.setBackgroundColor(null);
 		settings = hvf.getHelicorderViewerSettings();
 		heliRenderer = new HelicorderRenderer();
-		if (Swarm.config.heliColors != null)
-			heliRenderer.setDefaultColors(Swarm.config.heliColors);// DCK: add
+		if (swarmConfig.heliColors != null)
+			heliRenderer.setDefaultColors(swarmConfig.heliColors);// DCK: add
 																	// configured
 																	// colors
 		heliRenderer.setExtents(0, 1, Double.MAX_VALUE, -Double.MAX_VALUE);
@@ -135,7 +139,7 @@ public class HelicorderViewPanel extends JComponent {
 
 	public void cursorChanged() {
 		Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
-		if (Swarm.config.useLargeCursor) {
+		if (swarmConfig.useLargeCursor) {
 			Image cursorImg = Icons.crosshair.getImage();
 			crosshair = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(16, 16), "Large crosshair");
 		}
@@ -357,8 +361,8 @@ public class HelicorderViewPanel extends JComponent {
 						.getGraphY() + heliRenderer.getGraphHeight() - 1)) {
 					double j2k = getMouseJ2K(x, y);
 					status = dateFormat.format(Util.j2KToDate(j2k));
-					TimeZone tz = Swarm.config.getTimeZone(settings.channel);
-					double tzo = tz.getOffset((long) Util.j2KToEW(j2k))/1000;
+					TimeZone tz = swarmConfig.getTimeZone(settings.channel);
+					double tzo = tz.getOffset((long) Util.j2KToEW(j2k)) / 1000;
 					if (tzo != 0) {
 						String tza = tz.getDisplayName(tz.inDaylightTime(Util.j2KToDate(j2k)), TimeZone.SHORT);
 						status = dateFormat.format(Util.j2KToDate(j2k + tzo)) + " (" + tza + "), " + status + " (UTC)";
@@ -371,7 +375,7 @@ public class HelicorderViewPanel extends JComponent {
 
 			if (!Double.isNaN(startMark) && !Double.isNaN(endMark)) {
 				double dur = Math.abs(startMark - endMark);
-				String pre = String.format("Duration: %.2fs (Md: %.2f)", dur, Swarm.config.getDurationMagnitude(dur));
+				String pre = String.format("Duration: %.2fs (Md: %.2f)", dur, swarmConfig.getDurationMagnitude(dur));
 				if (status.length() > 2)
 					status = pre + ", " + status;
 				else
@@ -445,7 +449,7 @@ public class HelicorderViewPanel extends JComponent {
 				}
 
 				public void waveTimePressed(WaveViewPanel src, MouseEvent e, double j2k) {
-					if (Swarm.config.durationEnabled && SwingUtilities.isLeftMouseButton(e))
+					if (swarmConfig.durationEnabled && SwingUtilities.isLeftMouseButton(e))
 						markTime(j2k);
 					insetWavePanel.processMousePosition(e.getX(), e.getY());
 				}
@@ -514,7 +518,7 @@ public class HelicorderViewPanel extends JComponent {
 			endTime = time2;
 			heliRenderer.setData(heliData);
 			heliRenderer.setTimeChunk(settings.timeChunk);
-			heliRenderer.setTimeZone(Swarm.config.getTimeZone(settings.channel));
+			heliRenderer.setTimeZone(swarmConfig.getTimeZone(settings.channel));
 			heliRenderer.setForceCenter(settings.forceCenter);
 			heliRenderer.setClipBars(settings.clipBars);
 			heliRenderer.setShowClip(settings.showClip);
@@ -564,7 +568,7 @@ public class HelicorderViewPanel extends JComponent {
 
 		double offset = 0;
 		double multiplier = 1;
-		Metadata md = Swarm.config.getMetadata(settings.channel);
+		Metadata md = swarmConfig.getMetadata(settings.channel);
 		if (md != null) {
 			offset = md.getOffset();
 			multiplier = md.getMultiplier();
@@ -588,7 +592,7 @@ public class HelicorderViewPanel extends JComponent {
 					Math.abs((settings.barRange - offset) / multiplier));
 		}
 
-		heliRenderer.setTimeZone(Swarm.config.getTimeZone(settings.channel));
+		heliRenderer.setTimeZone(swarmConfig.getTimeZone(settings.channel));
 		heliRenderer.setClipValue(settings.clipValue);
 		if (minimal) {
 			// System.out.println("minimal");
@@ -651,7 +655,7 @@ public class HelicorderViewPanel extends JComponent {
 			double[] labelPosLR = new double[numRows];
 			String[] leftLabelText = new String[numRows];
 			String[] rightLabelText = new String[numRows];
-			TimeZone timeZone = Swarm.config.getTimeZone(settings.channel);
+			TimeZone timeZone = swarmConfig.getTimeZone(settings.channel);
 
 			DateFormat localTimeFormat = new SimpleDateFormat("HH:mm");
 			localTimeFormat.setTimeZone(timeZone);

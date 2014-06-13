@@ -17,27 +17,6 @@ import javax.swing.JOptionPane;
 
 /**
  * 
- * $Log: not supported by cvs2svn $
- * Revision 1.7  2006/08/14 22:43:36  dcervelli
- * Saves kiosks and allows deletes.
- *
- * Revision 1.6  2006/08/12 21:51:04  dcervelli
- * Fixed bugs with file data sources.
- *
- * Revision 1.5  2006/08/12 00:34:44  dcervelli
- * Waits for data sources in background.
- *
- * Revision 1.4  2006/08/09 21:54:58  cervelli
- * Checks data sources and sets map visibility correctly.
- *
- * Revision 1.3  2006/08/07 22:33:26  cervelli
- * Saves monitor layout.
- *
- * Revision 1.2  2006/08/01 23:39:09  cervelli
- * Sets layout info for the chooser.
- *
- * Revision 1.1  2006/07/30 22:42:19  cervelli
- * Initial commit.
  *
  * @author Dan Cervelli
  */
@@ -212,7 +191,7 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 		for (String monitor : monitors)
 		{
 			ConfigFile cf = config.getSubConfig(monitor);
-			SeismicDataSource sds = Swarm.config.getSource(cf.getString("source"));
+			SeismicDataSource sds = SwarmConfig.getInstance().getSource(cf.getString("source"));
 			if (sds != null && Swarm.getApplication().getDataChooser().isSourceOpened(sds.getName()))
 			{
 				MultiMonitor mm = Swarm.getApplication().getMonitor(sds);
@@ -231,7 +210,7 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 		for (String heli : helis)
 		{
 			ConfigFile cf = config.getSubConfig(heli);
-			SeismicDataSource sds = Swarm.config.getSource(cf.getString("source"));
+			SeismicDataSource sds = SwarmConfig.getInstance().getSource(cf.getString("source"));
 			if (sds != null)
 			{
 				HelicorderViewerFrame hvf = new HelicorderViewerFrame(cf);

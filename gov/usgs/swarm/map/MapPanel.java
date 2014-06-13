@@ -13,6 +13,7 @@ import gov.usgs.proj.TransverseMercator;
 import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.Throbber;
 import gov.usgs.swarm.TimeListener;
@@ -76,6 +77,9 @@ import javax.swing.SwingUtilities;
  */
 public class MapPanel extends JPanel
 {
+	
+	private static SwarmConfig swarmConfig;
+	
 	public enum DragMode
 	{
 		DRAG_MAP, BOX, RULER;
@@ -182,6 +186,7 @@ public class MapPanel extends JPanel
 	
 	public MapPanel(MapFrame f)
 	{
+		swarmConfig = SwarmConfig.getInstance();
 		parent = f;
 		mapHistory = new Stack<double[]>();
 		timeHistory = new Stack<double[]>();
@@ -241,18 +246,18 @@ public class MapPanel extends JPanel
 	public void loadMaps(boolean redraw)
 	{
 		Pair<GeoImageSet, GeoLabelSet> pair;
-		if (Swarm.config.useWMS)
+		if (swarmConfig.useWMS)
 		{
 			// TODO: what about GeoLabelSet?
 			WMSGeoImageSet wms = new WMSGeoImageSet();
-			wms.setServer(Swarm.config.wmsServer);
-			wms.setLayer(Swarm.config.wmsLayer);
-			wms.setStyle(Swarm.config.wmsStyles);
+			wms.setServer(swarmConfig.wmsServer);
+			wms.setLayer(swarmConfig.wmsLayer);
+			wms.setStyle(swarmConfig.wmsStyles);
 			pair = new Pair<GeoImageSet, GeoLabelSet>(wms, new GeoLabelSet());
 		}
 		else
 		{
-			pair = GeoImageSet.loadMapPacks(Swarm.config.mapPath);
+			pair = GeoImageSet.loadMapPacks(swarmConfig.mapPath);
 		}
 		if (pair != null)
 		{
@@ -262,7 +267,7 @@ public class MapPanel extends JPanel
 		
 		if (images == null)
 		{
-			Swarm.logger.warning("No map images found in " + Swarm.config.mapPath + ".");
+			Swarm.logger.warning("No map images found in " + swarmConfig.mapPath + ".");
 			images = new GeoImageSet();
 		}
 		images.setArealCacheSort(false);
@@ -277,8 +282,8 @@ public class MapPanel extends JPanel
 	{
 		loadMaps(false);
 
-		center = new Point2D.Double(Swarm.config.mapLongitude, Swarm.config.mapLatitude);
-		scale = Swarm.config.mapScale;
+		center = new Point2D.Double(swarmConfig.mapLongitude, swarmConfig.mapLatitude);
+		scale = swarmConfig.mapScale;
 		
 		setLayout(new BorderLayout());
 		pane = new JLayeredPane();
@@ -487,7 +492,7 @@ public class MapPanel extends JPanel
 	{
 		try
 		{
-			Class<?> cl = Class.forName(Swarm.config.labelSource);
+			Class<?> cl = Class.forName(swarmConfig.labelSource);
 			LabelSource src = (LabelSource)cl.newInstance();
 			clickableLabels = src.getLabels();
 			repaint();
@@ -883,9 +888,9 @@ public class MapPanel extends JPanel
 		CodeTimer ct = new CodeTimer("whole map");
 		try
 		{
-			Swarm.config.mapScale = scale;
-			Swarm.config.mapLongitude = center.x;
-			Swarm.config.mapLatitude = center.y;
+			swarmConfig.mapScale = scale;
+			swarmConfig.mapLongitude = center.x;
+			swarmConfig.mapLatitude = center.y;
 			
 			parent.getThrobber().increment();
 			
@@ -955,7 +960,7 @@ public class MapPanel extends JPanel
 		GeneralPath boxes = new GeneralPath();
 		missing = 0;
 		
-		Map<String, Metadata> allMetadata = Swarm.config.getMetadata();
+		Map<String, Metadata> allMetadata = swarmConfig.getMetadata();
 		synchronized (allMetadata)
 		{
 			for (MapMiniPanel panel : miniPanels.values())

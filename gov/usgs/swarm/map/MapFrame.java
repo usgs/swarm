@@ -121,8 +121,8 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 
 	private void createUI() {
 		setFrameIcon(Icons.earth);
-		setSize(Swarm.config.mapWidth, Swarm.config.mapHeight);
-		setLocation(Swarm.config.mapX, Swarm.config.mapY);
+		setSize(swarmConfig.mapWidth, swarmConfig.mapHeight);
+		setLocation(swarmConfig.mapX, swarmConfig.mapY);
 		setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);
 
 		mainPanel = new JPanel(new BorderLayout());
@@ -172,8 +172,8 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 
 	public void setMaximum(boolean max) throws PropertyVetoException {
 		if (max) {
-			Swarm.config.mapX = getX();
-			Swarm.config.mapY = getY();
+			swarmConfig.mapX = getX();
+			swarmConfig.mapY = getY();
 		}
 		super.setMaximum(max);
 	}
@@ -425,7 +425,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 	class CaptureActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			JFileChooser chooser = Swarm.getApplication().getFileChooser();
-			File lastPath = new File(Swarm.config.lastPath);
+			File lastPath = new File(swarmConfig.lastPath);
 			chooser.setCurrentDirectory(lastPath);
 			chooser.setSelectedFile(new File("map.png"));
 			chooser.setDialogTitle("Save Map Screen Capture");
@@ -441,7 +441,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 					if (choice != JOptionPane.YES_OPTION)
 						return;
 				}
-				Swarm.config.lastPath = f.getParent();
+				swarmConfig.lastPath = f.getParent();
 			}
 			if (f == null)
 				return;

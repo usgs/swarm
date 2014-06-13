@@ -4,6 +4,7 @@ import gov.usgs.math.Geometry;
 import gov.usgs.plot.render.DataPointRenderer;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.wave.MultiMonitor;
 import gov.usgs.util.Pair;
 
@@ -18,9 +19,7 @@ import java.util.Set;
 
 /**
  * 
- * $Log: not supported by cvs2svn $
  * @author Dan Cervelli
- * @version $Id: Hypocenter.java,v 1.1 2007-05-21 02:51:56 dcervelli Exp $
  */
 public class Hypocenter extends ClickableGeoLabel
 {
@@ -28,8 +27,12 @@ public class Hypocenter extends ClickableGeoLabel
 	public double depth;
 	public double magnitude;
 	
+	private static SwarmConfig swarmConfig;
+	
 	public Hypocenter() 
 	{
+		swarmConfig = SwarmConfig.getInstance();
+		
 		DataPointRenderer r = new DataPointRenderer();
 		r.antiAlias = true;
 		r.stroke = new BasicStroke(1.2f);
@@ -49,8 +52,8 @@ public class Hypocenter extends ClickableGeoLabel
 	@Override
 	public void mouseClicked(MouseEvent e)
 	{
-		Map<String, Metadata> metadata = Swarm.config.getMetadata();
-		List<Pair<Double, String>> nrst = Metadata.findNearest(Swarm.config.getMetadata(), location, true);
+		Map<String, Metadata> metadata = swarmConfig.getMetadata();
+		List<Pair<Double, String>> nrst = Metadata.findNearest(swarmConfig.getMetadata(), location, true);
 		Set<MultiMonitor> cleared = new HashSet<MultiMonitor>();
 		if (nrst != null)
 		{

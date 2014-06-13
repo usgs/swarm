@@ -52,7 +52,6 @@ import java.util.TimerTask;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
@@ -579,7 +578,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 	        	String Units = "Counts";
 	        	if (panel.getSettings().useUnits)
 	        	{
-	        		Metadata md = Swarm.config.getMetadata(panel.getChannel(), true);
+	        		Metadata md = swarmConfig.getMetadata(panel.getChannel(), true);
 	        		m = md.getMultiplier();
 	        		b = md.getOffset();
 	        		Units = md.getUnit();

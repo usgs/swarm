@@ -1,6 +1,7 @@
 package gov.usgs.swarm.chooser;
 
 import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwarmDialog;
 
 import java.awt.BorderLayout;
@@ -18,12 +19,6 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 /**
- * $Log: not supported by cvs2svn $
- * Revision 1.2  2006/08/08 22:20:57  cervelli
- * Correct tab now chosen when editing.
- *
- * Revision 1.1  2006/08/01 23:43:13  cervelli
- * Moved package and new data source panel system.
  *
  * @author Dan Cervelli
  */
@@ -110,7 +105,7 @@ public class EditDataSourceDialog extends SwarmDialog
 		String message = null;
 		if (n == null || n.length() <= 0)
 			message = "You must specify a name for this data source.";
-		else if (!edit && Swarm.config.sourceExists(n))
+		else if (!edit && SwarmConfig.getInstance().sourceExists(n))
 			message = "A data source by that name already exists.";
 		
 		if (message != null)

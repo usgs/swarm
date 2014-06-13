@@ -17,9 +17,6 @@ import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
 /**
- * $Log: not supported by cvs2svn $
- * Revision 1.1  2006/08/14 22:46:04  dcervelli
- * Initial commit.
  *
  * @author Dan Cervelli
  */
@@ -158,14 +155,14 @@ public static final long serialVersionUID = -1;
 				noLabels.setSelected(true);
 				break;
 		}
-		labelSource.setText(Swarm.config.labelSource);
+		labelSource.setText(swarmConfig.labelSource);
 	}
 
 	protected void wasOK()
 	{
 		try
 		{
-			Swarm.config.labelSource = labelSource.getText();
+			swarmConfig.labelSource = labelSource.getText();
 			MapPanel panel = map.getMapPanel();
 			LabelSetting ls = LabelSetting.ALL;
 			if (someLabels.isSelected())

@@ -5,6 +5,7 @@ import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Messages;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.data.DataSourceType;
@@ -150,7 +151,7 @@ public class DataChooser extends JPanel {
 
 		setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 0));
 
-		addServers(Swarm.config.sources);
+		addServers(SwarmConfig.getInstance().sources);
 	}
 
 	private class FileSourceListener implements SeismicDataSourceListener {
@@ -273,8 +274,8 @@ public class DataChooser extends JPanel {
 									removeServer(servers.get(0));
 									String svn = eds.substring(0,
 											eds.indexOf(";"));
-									Swarm.config.removeSource(svn);
-									Swarm.config.addSource(newSource);
+									SwarmConfig.getInstance().removeSource(svn);
+									SwarmConfig.getInstance().addSource(newSource);
 									insertServer(newSource);
 								}
 							}
@@ -482,7 +483,7 @@ public class DataChooser extends JPanel {
 						GeoRange gr = new GeoRange();
 						int nc = 0;
 						for (Pair<ServerNode, String> pair : channels) {
-							Metadata md = Swarm.config.getMetadata(pair.item2);
+							Metadata md = SwarmConfig.getInstance().getMetadata(pair.item2);
 							Point2D.Double pt = md.getLonLat();
 							if (pt != null && !Double.isNaN(pt.x)
 									&& !Double.isNaN(pt.y)) {
@@ -513,7 +514,7 @@ public class DataChooser extends JPanel {
 
 		JPanel timePanel = new JPanel(new BorderLayout());
 		timeBox = new JComboBox(TIME_VALUES);
-		for (String ut : Swarm.config.userTimes) {
+		for (String ut : SwarmConfig.getInstance().userTimes) {
 			if (ut.length() > 0)
 				timeBox.addItem(ut);
 		}
@@ -700,7 +701,7 @@ public class DataChooser extends JPanel {
 	public void removeServer(final ServerNode node) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				Swarm.config.removeSource(node.getSource().getName());
+				SwarmConfig.getInstance().removeSource(node.getSource().getName());
 				model.removeNodeFromParent(node);
 			}
 		});
@@ -709,7 +710,7 @@ public class DataChooser extends JPanel {
 	public void insertServer(final SeismicDataSource source) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				Swarm.config.addSource(source);
+				SwarmConfig.getInstance().addSource(source);
 
 				String ns = source.getName();
 				int i = 0;
@@ -808,7 +809,7 @@ public class DataChooser extends JPanel {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				List<Pair<Double, String>> nrst = Metadata.findNearest(
-						Swarm.config.getMetadata(), channel);
+						SwarmConfig.getInstance().getMetadata(), channel);
 				if (nrst == null)
 					return;
 				lastNearest = channel;
@@ -884,7 +885,7 @@ public class DataChooser extends JPanel {
 					ChannelNode newNode = new ChannelNode(channel);
 					allNode.add(newNode);
 
-					Metadata md = Swarm.config.getMetadata(channel);
+					Metadata md = SwarmConfig.getInstance().getMetadata(channel);
 					if (md != null && md.getGroups() != null) {
 						Set<String> groups = md.getGroups();
 						for (String g : groups) {
@@ -1084,7 +1085,7 @@ public class DataChooser extends JPanel {
 		}
 
 		public Icon getIcon() {
-			Metadata md = Swarm.config.getMetadata(channel);
+			Metadata md = SwarmConfig.getInstance().getMetadata(channel);
 			if (md == null || !md.isTouched())
 				return Icons.graybullet;
 			else if (md.hasLonLat())

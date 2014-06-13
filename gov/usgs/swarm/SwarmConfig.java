@@ -23,7 +23,10 @@ import java.util.TreeMap;
  * 
  * @author Dan Cervelli
  */
-public class Config {
+public class SwarmConfig {
+	
+	static final SwarmConfig swarmConfig = new SwarmConfig();
+	
 	private static String[] DEFAULT_SERVERS = new String[] { "AVO Winston;wws:pubavo1.wr.usgs.gov:16022:10000:1"
 	// "IRIS DMC - New Zealand;dhi:edu/iris/dmc:IRIS_NetworkDC:edu/iris/dmc:IRIS_BudDataCenter:NZ:3600:1000"
 	};
@@ -102,7 +105,14 @@ public class Config {
 
 	public String labelSource;
 
-	public static Config createConfig(String[] args) {
+	private SwarmConfig() {
+	}
+
+	public static SwarmConfig getInstance() {
+		return swarmConfig;
+	}
+	
+	public void createConfig(String[] args) {
 		Swarm.logger.fine("current directory: " + System.getProperty("user.dir"));
 		Swarm.logger.fine("user.home: " + System.getProperty("user.home"));
 		String configFile;
@@ -134,7 +144,7 @@ public class Config {
 				cf.put(key, val, false);
 			}
 		}
-		Config config = new Config(cf);
+		parseConfig(cf);
 
 		List<String> candidateNames = new LinkedList<String>();
 		candidateNames.add(Metadata.DEFAULT_METADATA_FILENAME);
@@ -146,12 +156,11 @@ public class Config {
 		else
 			Swarm.logger.fine("Using metadata configuration file: " + metadataConfigFile);
 			
-		config.defaultMetadata = Metadata.loadMetadata(metadataConfigFile);
-		config.metadata = Collections.synchronizedMap(new HashMap<String, Metadata>());
+		defaultMetadata = Metadata.loadMetadata(metadataConfigFile);
+		metadata = Collections.synchronizedMap(new HashMap<String, Metadata>());
 
-		config.loadDataSources();
-		config.loadLayouts();
-		return config;
+		loadDataSources();
+		loadLayouts();
 	}
 
 	private void loadDataSources() {
@@ -244,7 +253,7 @@ public class Config {
 	 * @param config
 	 *            the configuration information
 	 */
-	public Config(ConfigFile config) {
+	public void parseConfig(ConfigFile config) {
 		configFilename = config.getString("configFile");
 
 		windowX = Util.stringToInt(config.getString("windowX"), 10);
@@ -481,4 +490,6 @@ public class Config {
 	public String toString() {
 		return toConfigFile().toString();
 	}
+	
+	
 }

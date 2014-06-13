@@ -13,8 +13,7 @@ import java.util.Map;
  * 
  * @author Kevin Frechette (ISTI)
  */
-public class ChannelUtil
-{
+public class ChannelUtil {
 	/** Empty string. */
 	public static final String EMPTY = "";
 
@@ -24,33 +23,27 @@ public class ChannelUtil
 	/**
 	 * Add the channel.
 	 * 
-	 * @param channels the list of channels.
-	 * @param ch the channel information.
-	 * @param source the seismic data source.
+	 * @param channels
+	 *            the list of channels.
+	 * @param ch
+	 *            the channel information.
+	 * @param source
+	 *            the seismic data source.
 	 * @return the channel information text.
 	 */
-	public static String addChannel(List<String> channels, IChannelInfo ch,
-			SeismicDataSource source)
-	{
+	public static String addChannel(List<String> channels, IChannelInfo ch, SeismicDataSource source) {
 		final String formattedScnl = ch.getFormattedSCNL();
-		if (!channels.contains(formattedScnl))
-		{
-			if (Swarm.config != null)
-			{
-				Metadata md = Swarm.config.getMetadata(formattedScnl, true);
-				md.updateLongitude(ch.getLongitude());
-				md.updateLatitude(ch.getLatitude());
-				for (String g : ch.getGroups())
-				{
-					md.addGroup(g);
-				}
-				if (ch.getStation() != ch.getSiteName()
-						&& ch.getSiteName() != null)
-				{
-					md.updateAlias(ch.getSiteName());
-				}
-				md.source = source;
+		if (!channels.contains(formattedScnl)) {
+			Metadata md = SwarmConfig.getInstance().getMetadata(formattedScnl, true);
+			md.updateLongitude(ch.getLongitude());
+			md.updateLatitude(ch.getLatitude());
+			for (String g : ch.getGroups()) {
+				md.addGroup(g);
 			}
+			if (ch.getStation() != ch.getSiteName() && ch.getSiteName() != null) {
+				md.updateAlias(ch.getSiteName());
+			}
+			md.source = source;
 			channels.add(formattedScnl);
 		}
 		return formattedScnl;
@@ -59,43 +52,44 @@ public class ChannelUtil
 	/**
 	 * Assign the channels.
 	 * 
-	 * @param channels the list of channels.
-	 * @param source the seismic data source.
+	 * @param channels
+	 *            the list of channels.
+	 * @param source
+	 *            the seismic data source.
 	 */
-	public static void assignChannels(List<String> channels,
-			SeismicDataSource source)
-	{
+	public static void assignChannels(List<String> channels, SeismicDataSource source) {
 		Collections.sort(channels);
-		Swarm.config.assignMetadataSource(channels, source);
+		SwarmConfig.getInstance().assignMetadataSource(channels, source);
 	}
 
 	/**
 	 * Get the formatted SCNL.
 	 * 
-	 * @param station the station name.
-	 * @param channel the channel name.
-	 * @param network the network name.
-	 * @param location the location name.
+	 * @param station
+	 *            the station name.
+	 * @param channel
+	 *            the channel name.
+	 * @param network
+	 *            the network name.
+	 * @param location
+	 *            the location name.
 	 * @return the the formatted SCNL.
 	 */
-	public static final String getFormattedSCNL(String station, String channel,
-			String network, String location)
-	{
-		return station + " " + channel + " " + network
-				+ (location.length() > 0 ? (" " + location) : EMPTY);
+	public static final String getFormattedSCNL(String station, String channel, String network, String location) {
+		return station + " " + channel + " " + network + (location.length() > 0 ? (" " + location) : EMPTY);
 	}
 
 	/**
 	 * Get the network group for the specified channel information.
 	 * 
-	 * @param ch the channel information.
-	 * @param groupsType groups type.
+	 * @param ch
+	 *            the channel information.
+	 * @param groupsType
+	 *            groups type.
 	 * @return the group.
 	 */
-	public static final String getGroup(IChannelInfo ch, GroupsType groupsType)
-	{
-		switch (groupsType)
-		{
+	public static final String getGroup(IChannelInfo ch, GroupsType groupsType) {
+		switch (groupsType) {
 		case SITE:
 			return getSiteName(ch);
 		case NETWORK:
@@ -109,20 +103,18 @@ public class ChannelUtil
 	/**
 	 * Get the groups for the specified channel information.
 	 * 
-	 * @param ch the channel information.
-	 * @param groupsType groups type.
+	 * @param ch
+	 *            the channel information.
+	 * @param groupsType
+	 *            groups type.
 	 * @return the list of groups.
 	 */
-	public static final List<String> getGroups(IChannelInfo ch,
-			GroupsType groupsType)
-	{
+	public static final List<String> getGroups(IChannelInfo ch, GroupsType groupsType) {
 		List<String> groups = groupsMap.get(ch);
-		if (groups == null)
-		{
+		if (groups == null) {
 			groups = new ArrayList<String>(1);
 			String group = getGroup(ch, groupsType);
-			if (group != null)
-			{
+			if (group != null) {
 				groups.add(group);
 			}
 			groupsMap.put(ch, groups);
@@ -133,14 +125,13 @@ public class ChannelUtil
 	/**
 	 * Get the site name.
 	 * 
-	 * @param ch the channel information.
+	 * @param ch
+	 *            the channel information.
 	 * @return the site name if available otherwise the station name.
 	 */
-	public static final String getSiteName(IChannelInfo ch)
-	{
+	public static final String getSiteName(IChannelInfo ch) {
 		String s = ch.getSiteName();
-		if (s == null)
-		{
+		if (s == null) {
 			s = ch.getStation();
 		}
 		return s;

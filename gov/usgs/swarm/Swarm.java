@@ -19,7 +19,6 @@ import gov.usgs.util.ui.GlobalKeyManager;
 
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Image;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -41,7 +40,6 @@ import javax.jnlp.BasicService;
 import javax.jnlp.ServiceManager;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -122,11 +120,11 @@ public class Swarm extends JFrame
 	
 	private EventListenerList timeListeners = new EventListenerList();
 	
-	public static Config config;
+	private static SwarmConfig config;
 	
 	public static Logger logger;
 	
-	public FileDataSource fileSource;
+	private FileDataSource fileSource;
 	
 	public Swarm(String[] args)
 	{
@@ -144,6 +142,9 @@ public class Swarm extends JFrame
 		logger.fine("JNLP: " + isJNLP());
 		setIconImage(Icons.swarm.getImage());
 
+		config = SwarmConfig.getInstance();
+		config.createConfig(args);
+
 		monitors = new HashMap<String, MultiMonitor>();
 		cache = CachedDataSource.getInstance();
 		frames = new ArrayList<JInternalFrame>();
@@ -152,7 +153,6 @@ public class Swarm extends JFrame
 		checkJavaVersion();
 		loadFileChooser();
 		setupGlobalKeys();
-		config = Config.createConfig(args);
 		createUI();
 	}
 

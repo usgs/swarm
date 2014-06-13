@@ -1,40 +1,12 @@
 package gov.usgs.swarm.heli;
 
-import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.util.ConfigFile;
 
 /**
  * Settings for a helicorder.
  * 
  * TODO: eliminate this class in favor of vdx.HelicorderSettings
- * 
- * $Log: not supported by cvs2svn $
- * Revision 1.8  2006/07/30 22:43:03  cervelli
- * Changes for layouts.
- *
- * Revision 1.7  2006/07/22 20:25:58  cervelli
- * Added variable for the panel to apply settings to.
- *
- * Revision 1.6  2006/04/15 15:58:52  dcervelli
- * 1.3 changes (renaming, new datachooser, different config).
- *
- * Revision 1.5  2006/03/04 23:03:45  cervelli
- * Added alias feature. More thoroughly incorporated calibrations.  Got rid of 'waves' tab and combined all functionality under a 'channels' tab.
- *
- * Revision 1.4  2006/01/21 01:29:20  tparker
- * First swipe at adding voice alerting of clipping. A work in progress...
- *
- * Revision 1.3  2005/10/26 16:47:38  cervelli
- * Made showClip variable configurable.  Changed manually slightly.
- *
- * Revision 1.2  2005/08/30 18:01:39  tparker
- * Add Autoscale Slider to Helicorder Viewer Frame
- *
- * Revision 1.1  2005/08/26 20:40:28  dcervelli
- * Initial avosouth commit.
- *
- * Revision 1.2  2005/03/24 20:39:25  cervelli
- * Gets default timeChunk and span from config file.
  *
  * @author Dan Cervelli
  */
@@ -61,11 +33,15 @@ public class HelicorderViewerSettings
 	public double barMult;
 	public HelicorderViewPanel view;
 	
+	private static SwarmConfig swarmConfig;
+	
 	public HelicorderViewerSettings(String ch)
 	{
+		swarmConfig = SwarmConfig.getInstance();
+		
 		channel = ch;
-		timeChunk = Swarm.config.timeChunk * 60;
-		span = Swarm.config.span * 60;
+		timeChunk = swarmConfig.timeChunk * 60;
+		span = swarmConfig.span * 60;
 		waveZoomOffset = 30;
 		bottomTime = Double.NaN;
 		refreshInterval = 15;
@@ -75,9 +51,9 @@ public class HelicorderViewerSettings
 		showWiggler = false;
 		
 		clipValue = 2999;
-		showClip = Swarm.config.showClip; 
-		alertClip = Swarm.config.alertClip; 
-		alertClipTimeout = Swarm.config.alertClipTimeout * 60;
+		showClip = swarmConfig.showClip; 
+		alertClip = swarmConfig.alertClip; 
+		alertClipTimeout = swarmConfig.alertClipTimeout * 60;
 		barRange = 1500;
 		barMult = 3;
 		autoScale = true;

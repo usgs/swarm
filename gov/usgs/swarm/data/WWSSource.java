@@ -7,6 +7,7 @@ import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;
 import gov.usgs.winston.Channel;
@@ -38,6 +39,7 @@ public class WWSSource extends SeismicDataSource {
 	private int port;
 
 	private boolean established;
+	
 
 	// explicit default constructor required for reflection
 	public WWSSource() {}
@@ -169,19 +171,20 @@ public class WWSSource extends SeismicDataSource {
 	}
 
 	public synchronized List<String> getChannels() {
+		SwarmConfig swarmConfig = SwarmConfig.getInstance();
 		if (protocolVersion == 1)
 		// if (true)
 		{
 			Menu menu = winstonClient.getMenuSCNL();
 			List<String> channels = getMenuList(menu.getSortedItems());
-			Swarm.config.assignMetadataSource(channels, this);
+			swarmConfig.assignMetadataSource(channels, this);
 			return channels;
 		} else if (protocolVersion == 2) {
 			List<Channel> channels = winstonClient.getChannels();
 			List<String> result = new ArrayList<String>(channels.size());
 			for (Channel ch : channels) {
 				String code = ch.getCode().replace('$', ' ');
-				Metadata md = Swarm.config.getMetadata(code, true);
+				Metadata md = swarmConfig.getMetadata(code, true);
 				Instrument ins = ch.getInstrument();
 				md.updateLongitude(ins.getLongitude());
 				md.updateLatitude(ins.getLatitude());
@@ -194,7 +197,7 @@ public class WWSSource extends SeismicDataSource {
 			List<String> result = new ArrayList<String>(channels.size());
 			for (Channel ch : channels) {
 				String code = ch.getCode().replace('$', ' ');
-				Metadata md = Swarm.config.getMetadata(code, true);
+				Metadata md = swarmConfig.getMetadata(code, true);
 				Instrument ins = ch.getInstrument();
 				md.updateLongitude(ins.getLongitude());
 				md.updateLatitude(ins.getLatitude());

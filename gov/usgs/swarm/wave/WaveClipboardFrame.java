@@ -146,8 +146,8 @@ public class WaveClipboardFrame extends SwarmFrame {
 
 	private void createUI() {
 		this.setFrameIcon(Icons.clipboard);
-		this.setSize(Swarm.config.clipboardWidth, Swarm.config.clipboardHeight);
-		this.setLocation(Swarm.config.clipboardX, Swarm.config.clipboardY);
+		this.setSize(swarmConfig.clipboardWidth, swarmConfig.clipboardHeight);
+		this.setLocation(swarmConfig.clipboardX, swarmConfig.clipboardY);
 		this.setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);
 
 		toolbar = SwarmUtil.createToolBar();
@@ -250,7 +250,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 				return;
 
 			JFileChooser chooser = Swarm.getApplication().getFileChooser();
-			File lastPath = new File(Swarm.config.lastPath);
+			File lastPath = new File(swarmConfig.lastPath);
 			chooser.setCurrentDirectory(lastPath);
 			chooser.setSelectedFile(new File("clipboard.png"));
 			chooser.setDialogTitle("Save Clipboard Screen Capture");
@@ -265,7 +265,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 					if (choice != JOptionPane.YES_OPTION)
 						return;
 				}
-				Swarm.config.lastPath = f.getParent();
+				swarmConfig.lastPath = f.getParent();
 			}
 			if (f == null)
 				return;
@@ -547,7 +547,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 			chooser.addChoosableFileFilter(sacExt);
 			chooser.setDialogTitle("Open Wave");
 			chooser.setFileFilter(chooser.getAcceptAllFileFilter());
-			File lastPath = new File(Swarm.config.lastPath);
+			File lastPath = new File(swarmConfig.lastPath);
 			chooser.setCurrentDirectory(lastPath);
 			chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 			chooser.setMultiSelectionEnabled(true);
@@ -560,10 +560,10 @@ public class WaveClipboardFrame extends SwarmFrame {
 						File[] dfs = fs[i].listFiles();
 						for (int j = 0; j < dfs.length; j++)
 							openFile(dfs[j]);
-						Swarm.config.lastPath = fs[i].getParent();
+						swarmConfig.lastPath = fs[i].getParent();
 					} else {
 						openFile(fs[i]);
-						Swarm.config.lastPath = fs[i].getParent();
+						swarmConfig.lastPath = fs[i].getParent();
 					}
 				}
 			}
@@ -588,7 +588,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 			chooser.addChoosableFileFilter(sacExt);
 			chooser.setFileFilter(chooser.getAcceptAllFileFilter());
 
-			File lastPath = new File(Swarm.config.lastPath);
+			File lastPath = new File(swarmConfig.lastPath);
 			chooser.setCurrentDirectory(lastPath);
 			chooser.setSelectedFile(new File(selected.getChannel() + ".txt"));
 			int result = chooser.showSaveDialog(Swarm.getApplication());
@@ -617,7 +617,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
 				if (confirm) {
 					try {
-						Swarm.config.lastPath = f.getParent();
+						swarmConfig.lastPath = f.getParent();
 						String fn = f.getPath().toLowerCase();
 						if (fn.endsWith(".sac")) {
 							SAC sac = selected.getWave().toSAC();
@@ -651,7 +651,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			chooser.setDialogTitle("Save SAC File Directory");
 
-			File lastPath = new File(Swarm.config.lastPath);
+			File lastPath = new File(swarmConfig.lastPath);
 			chooser.setCurrentDirectory(lastPath);
 			int result = chooser.showSaveDialog(Swarm.getApplication());
 			if (result == JFileChooser.CANCEL_OPTION)
@@ -686,7 +686,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 							sac.write(new File(dir.getPath() + File.separatorChar + wvp.getChannel().replace(' ', '.')));
 						}
 					}
-					Swarm.config.lastPath = f.getPath();
+					swarmConfig.lastPath = f.getPath();
 				} catch (FileNotFoundException ex) {
 					JOptionPane.showMessageDialog(Swarm.getApplication(), "Directory does not exist.", "Error",
 							JOptionPane.ERROR_MESSAGE);
@@ -797,15 +797,15 @@ public class WaveClipboardFrame extends SwarmFrame {
 		for (WaveViewPanel wave : waves)
 			sorted.add(wave);
 
-		final Metadata smd = Swarm.config.getMetadata(p.getChannel());
+		final Metadata smd = swarmConfig.getMetadata(p.getChannel());
 		if (smd == null || Double.isNaN(smd.getLongitude()) || Double.isNaN(smd.getLatitude()))
 			return;
 
 		Collections.sort(sorted, new Comparator<WaveViewPanel>() {
 			public int compare(WaveViewPanel wvp1, WaveViewPanel wvp2) {
-				Metadata md = Swarm.config.getMetadata(wvp1.getChannel());
+				Metadata md = swarmConfig.getMetadata(wvp1.getChannel());
 				double d1 = smd.distanceTo(md);
-				md = Swarm.config.getMetadata(wvp2.getChannel());
+				md = swarmConfig.getMetadata(wvp2.getChannel());
 				double d2 = smd.distanceTo(md);
 				return Double.compare(d1, d2);
 			}
@@ -1049,7 +1049,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 				dt = (et - st);
 			}
 
-			double tzo = Swarm.config.getTimeZone(wvp.getChannel()).getOffset(System.currentTimeMillis())/1000;
+			double tzo = swarmConfig.getTimeZone(wvp.getChannel()).getOffset(System.currentTimeMillis()) / 1000;
 
 			double nst = j2k - tzo - dt / 2;
 			double net = nst + dt;
@@ -1147,8 +1147,8 @@ public class WaveClipboardFrame extends SwarmFrame {
 
 	public void setMaximum(boolean max) throws PropertyVetoException {
 		if (max) {
-			Swarm.config.clipboardX = getX();
-			Swarm.config.clipboardY = getY();
+			swarmConfig.clipboardX = getX();
+			swarmConfig.clipboardY = getY();
 		}
 		super.setMaximum(max);
 	}

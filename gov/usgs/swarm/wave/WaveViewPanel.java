@@ -13,6 +13,7 @@ import gov.usgs.plot.render.wave.SpectrogramRenderer;
 import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
@@ -54,6 +55,7 @@ public class WaveViewPanel extends JComponent {
 	public static final long serialVersionUID = -1;
 
 	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+	private static SwarmConfig swarmConfig;
 
 	/**
 	 * X pixel location of where the main plot axis should be located on the
@@ -156,6 +158,7 @@ public class WaveViewPanel extends JComponent {
 	 *            the settings
 	 */
 	public WaveViewPanel(WaveViewSettings s) {
+		swarmConfig = SwarmConfig.getInstance();
 		settings = s;
 		s.view = this;
 
@@ -171,6 +174,7 @@ public class WaveViewPanel extends JComponent {
 	 *            the source WaveViewPanel
 	 */
 	public WaveViewPanel(WaveViewPanel p) {
+		swarmConfig = SwarmConfig.getInstance();
 		channel = p.channel;
 		source = p.source;
 		startTime = p.startTime;
@@ -190,6 +194,7 @@ public class WaveViewPanel extends JComponent {
 		backgroundColor = p.backgroundColor;
 		setupMouseHandler();
 		processSettings();
+
 	}
 
 	public void setOffsets(int xo, int yo, int rw, int bh) {
@@ -207,29 +212,25 @@ public class WaveViewPanel extends JComponent {
 		listeners.remove(WaveViewPanelListener.class, listener);
 	}
 
-	public void fireZoomed(MouseEvent e, double oldST, double oldET,
-			double newST, double newET) {
+	public void fireZoomed(MouseEvent e, double oldST, double oldET, double newST, double newET) {
 		Object[] ls = listeners.getListenerList();
 		for (int i = ls.length - 2; i >= 0; i -= 2)
 			if (ls[i] == WaveViewPanelListener.class)
-				((WaveViewPanelListener) ls[i + 1]).waveZoomed(this, oldST,
-						oldET, newST, newET);
+				((WaveViewPanelListener) ls[i + 1]).waveZoomed(this, oldST, oldET, newST, newET);
 	}
 
 	public void fireTimePressed(MouseEvent e, double j2k) {
 		Object[] ls = listeners.getListenerList();
 		for (int i = ls.length - 2; i >= 0; i -= 2)
 			if (ls[i] == WaveViewPanelListener.class)
-				((WaveViewPanelListener) ls[i + 1]).waveTimePressed(this, e,
-						j2k);
+				((WaveViewPanelListener) ls[i + 1]).waveTimePressed(this, e, j2k);
 	}
 
 	public void fireMousePressed(MouseEvent e) {
 		Object[] ls = listeners.getListenerList();
 		for (int i = ls.length - 2; i >= 0; i -= 2)
 			if (ls[i] == WaveViewPanelListener.class)
-				((WaveViewPanelListener) ls[i + 1]).mousePressed(this, e,
-						dragging);
+				((WaveViewPanelListener) ls[i + 1]).mousePressed(this, e, dragging);
 	}
 
 	public void fireClose() {
@@ -255,10 +256,8 @@ public class WaveViewPanel extends JComponent {
 					int x = e.getX();
 					double j2k = x * t[0] + t[1];
 					if (timeSeries)
-						System.out.printf("%s UTC: %s j2k: %.3f ew: %.3f\n",
-								channel,
-								Time.format(DATE_FORMAT, Util.j2KToDate(j2k)),
-								j2k, Util.j2KToEW(j2k));
+						System.out.printf("%s UTC: %s j2k: %.3f ew: %.3f\n", channel,
+								Time.format(DATE_FORMAT, Util.j2KToDate(j2k)), j2k, Util.j2KToEW(j2k));
 
 					if (SwingUtilities.isRightMouseButton(e)) {
 						settings.cycleType();
@@ -267,19 +266,14 @@ public class WaveViewPanel extends JComponent {
 					if (timeSeries && j2k >= startTime && j2k <= endTime)
 						fireTimePressed(e, j2k);
 
-					if (timeSeries && allowDragging
-							&& SwingUtilities.isLeftMouseButton(e)) {
+					if (timeSeries && allowDragging && SwingUtilities.isLeftMouseButton(e)) {
 						Dimension size = getSize();
 						int y = e.getY();
-						if (t != null && y > yOffset
-								&& y < (size.height - bottomHeight)
-								&& x > xOffset && x < size.width - rightWidth) {
+						if (t != null && y > yOffset && y < (size.height - bottomHeight) && x > xOffset
+								&& x < size.width - rightWidth) {
 							j2k1 = j2k2 = j2k;
 							if (e.isControlDown()) {
-								System.out.println(channel
-										+ ": "
-										+ Time.format(DATE_FORMAT,
-												Util.j2KToDate(j2k1)));
+								System.out.println(channel + ": " + Time.format(DATE_FORMAT, Util.j2KToDate(j2k1)));
 							} else if (!e.isShiftDown()) {
 								highlightX1 = highlightX2 = x;
 								dragging = true;
@@ -306,10 +300,8 @@ public class WaveViewPanel extends JComponent {
 
 				int mx = e.getX();
 				int my = e.getY();
-				if (allowClose && SwingUtilities.isLeftMouseButton(e)
-						&& mx > WaveViewPanel.this.getWidth() - 17
-						&& mx < WaveViewPanel.this.getWidth() - 3 && my > 2
-						&& my < 17) {
+				if (allowClose && SwingUtilities.isLeftMouseButton(e) && mx > WaveViewPanel.this.getWidth() - 17
+						&& mx < WaveViewPanel.this.getWidth() - 3 && my > 2 && my < 17) {
 					fireClose();
 				}
 			}
@@ -343,14 +335,12 @@ public class WaveViewPanel extends JComponent {
 				 */
 
 				processMousePosition(e.getX(), e.getY());
-				if (SwingUtilities.isLeftMouseButton(e) && !e.isControlDown()
-						&& dragging) {
+				if (SwingUtilities.isLeftMouseButton(e) && !e.isControlDown() && dragging) {
 					double[] t = getTranslation();
 					int x = e.getX();
 					int y = e.getY();
 					Dimension size = getSize();
-					if (t != null && y > yOffset
-							&& y < (size.height - bottomHeight) && x > xOffset
+					if (t != null && y > yOffset && y < (size.height - bottomHeight) && x > xOffset
 							&& x < size.width - rightWidth) {
 						j2k2 = x * t[0] + t[1];
 						highlightX2 = x;
@@ -366,8 +356,7 @@ public class WaveViewPanel extends JComponent {
 			public Object construct() {
 				Wave sw = null;
 				if (source instanceof CachedDataSource)
-					sw = ((CachedDataSource) source).getBestWave(channel, st,
-							et);
+					sw = ((CachedDataSource) source).getBestWave(channel, st, et);
 				else
 					sw = source.getWave(channel, st, et);
 				setWave(sw, st, et);
@@ -521,35 +510,24 @@ public class WaveViewPanel extends JComponent {
 		double[] t = getTranslation();
 		double j2k = Double.NaN;
 
-		if (wave != null && t != null && y > yOffset
-				&& y < (size.height - bottomHeight) && x > xOffset
+		if (wave != null && t != null && y > yOffset && y < (size.height - bottomHeight) && x > xOffset
 				&& x < size.width - rightWidth) {
 			j2k = x * t[0] + t[1];
 			double yi = y * -t[2] + t[3];
 
 			int[] dataRange = wave.getDataRange();
-			waveInfo = String
-					.format("[%s - %s (UTC), %d samples (%.2f s), %d samples/s, %d, %d]",
-							Time.format(DATE_FORMAT,
-									Util.j2KToDate(wave.getStartTime())),
-							Time.format(DATE_FORMAT,
-									Util.j2KToDate(wave.getEndTime())),
-							wave.numSamples(),
-							wave.numSamples() / wave.getSamplingRate(),
-							(int) wave.getSamplingRate(), dataRange[0],
-							dataRange[1]);
+			waveInfo = String.format("[%s - %s (UTC), %d samples (%.2f s), %d samples/s, %d, %d]",
+					Time.format(DATE_FORMAT, Util.j2KToDate(wave.getStartTime())),
+					Time.format(DATE_FORMAT, Util.j2KToDate(wave.getEndTime())), wave.numSamples(), wave.numSamples()
+							/ wave.getSamplingRate(), (int) wave.getSamplingRate(), dataRange[0], dataRange[1]);
 
 			if (timeSeries) {
 				String utc = Time.format(DATE_FORMAT, Util.j2KToDate(j2k));
-				TimeZone tz = Swarm.config.getTimeZone(channel);
-				double tzo = tz.getOffset((long)Util.j2KToEW(j2k))/1000;
+				TimeZone tz = swarmConfig.getTimeZone(channel);
+				double tzo = tz.getOffset((long) Util.j2KToEW(j2k)) / 1000;
 				if (tzo != 0) {
-					String tza = tz.getDisplayName(
-							tz.inDaylightTime(Util.j2KToDate(j2k)),
-							TimeZone.SHORT);
-					status = Time
-							.format(DATE_FORMAT, Util.j2KToDate(j2k + tzo))
-							+ " (" + tza + "), " + utc + " (UTC)";
+					String tza = tz.getDisplayName(tz.inDaylightTime(Util.j2KToDate(j2k)), TimeZone.SHORT);
+					status = Time.format(DATE_FORMAT, Util.j2KToDate(j2k + tzo)) + " (" + tza + "), " + utc + " (UTC)";
 				} else
 					status = utc;
 
@@ -559,21 +537,20 @@ public class WaveViewPanel extends JComponent {
 				if (settings.viewType == ViewType.SPECTROGRAM)
 					unit = "Frequency (Hz)";
 				else {
-					Metadata md = Swarm.config.getMetadata(channel);
+					Metadata md = swarmConfig.getMetadata(channel);
 					if (md != null) {
 						offset = md.getOffset();
 						multiplier = md.getMultiplier();
 						unit = md.getUnit();
 					}
-					
+
 					if (unit == null)
 						unit = "Counts";
 				}
 
 				// System.out.printf("Multipler: %f, Offset: %f\n", offset,
 				// multiplier);
-				status = String.format("%s, %s: %.3f, %s", status, unit,
-						multiplier * yi + offset, waveInfo);
+				status = String.format("%s, %s: %.3f, %s", status, unit, multiplier * yi + offset, waveInfo);
 
 			}
 
@@ -583,8 +560,7 @@ public class WaveViewPanel extends JComponent {
 					xi = Math.pow(10.0, xi);
 				if (settings.viewType == ViewType.SPECTRA && settings.logPower)
 					yi = Math.pow(10.0, yi);
-				status = String.format("%s, Frequency (Hz): %.3f, Power: %.3f",
-						waveInfo, xi, yi);
+				status = String.format("%s, Frequency (Hz): %.3f, Power: %.3f", waveInfo, xi, yi);
 			}
 		} else {
 			status = " ";
@@ -597,8 +573,7 @@ public class WaveViewPanel extends JComponent {
 
 		if (!Double.isNaN(mark1) && !Double.isNaN(mark2)) {
 			double dur = Math.abs(mark1 - mark2);
-			String pre = String.format("Duration: %.2fs (Md: %.2f)", dur,
-					Swarm.config.getDurationMagnitude(dur));
+			String pre = String.format("Duration: %.2fs (Md: %.2f)", dur, swarmConfig.getDurationMagnitude(dur));
 			if (status.length() > 2)
 				status = pre + ", " + status;
 			else
@@ -647,10 +622,8 @@ public class WaveViewPanel extends JComponent {
 		if (settings.viewType == ViewType.SPECTROGRAM) {
 			double maxf = settings.maxFreq * pct;
 			System.out.printf("WaveViewPanel(804): maxf = %f\n", maxf);
-			settings.maxFreq = (maxf > wave.getSamplingRate() / 2) ? wave
-					.getSamplingRate() / 2 : maxf;
-			System.out.printf("WaveViewPanel(806): settings.maxFreq = %f\n",
-					settings.maxFreq);
+			settings.maxFreq = (maxf > wave.getSamplingRate() / 2) ? wave.getSamplingRate() / 2 : maxf;
+			System.out.printf("WaveViewPanel(806): settings.maxFreq = %f\n", settings.maxFreq);
 
 		}
 
@@ -669,8 +642,7 @@ public class WaveViewPanel extends JComponent {
 		final Runnable r = new Runnable() {
 			public void run() {
 				if (getWidth() > 0 && getHeight() > 0) {
-					BufferedImage bi = new BufferedImage(getWidth(),
-							getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+					BufferedImage bi = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
 					Graphics2D ig = (Graphics2D) bi.getGraphics();
 					constructPlot(ig);
 					setImage(bi);
@@ -713,8 +685,7 @@ public class WaveViewPanel extends JComponent {
 	private void filter(Wave w) {
 		double mean = w.mean();
 
-		double[] dBuf = new double[w.buffer.length
-				+ (int) (w.buffer.length * 0.5)];
+		double[] dBuf = new double[w.buffer.length + (int) (w.buffer.length * 0.5)];
 		Arrays.fill(dBuf, mean);
 		int trueStart = (int) (w.buffer.length * 0.25);
 		for (int i = 0; i < w.buffer.length; i++) {
@@ -724,16 +695,14 @@ public class WaveViewPanel extends JComponent {
 
 		settings.filter.setSamplingRate(w.getSamplingRate());
 		settings.filter.create();
-		Filter.filter(dBuf, settings.filter.getSize(),
-				settings.filter.getXCoeffs(), settings.filter.getYCoeffs(),
+		Filter.filter(dBuf, settings.filter.getSize(), settings.filter.getXCoeffs(), settings.filter.getYCoeffs(),
 				settings.filter.getGain(), 0, 0);
 		if (settings.zeroPhaseShift) {
 			double[] dBuf2 = new double[dBuf.length];
 			for (int i = 0, j = dBuf.length - 1; i < dBuf.length; i++, j--)
 				dBuf2[j] = dBuf[i];
 
-			Filter.filter(dBuf2, settings.filter.getSize(),
-					settings.filter.getXCoeffs(), settings.filter.getYCoeffs(),
+			Filter.filter(dBuf2, settings.filter.getSize(), settings.filter.getXCoeffs(), settings.filter.getYCoeffs(),
 					settings.filter.getGain(), 0, 0);
 
 			for (int i = 0, j = dBuf2.length - 1 - trueStart; i < w.buffer.length; i++, j--)
@@ -759,8 +728,7 @@ public class WaveViewPanel extends JComponent {
 			g2.fillRect(0, 0, dim.width, dim.height);
 			g2.setColor(Color.black);
 			if (working)
-				g2.drawString("Retrieving data...", dim.width / 2 - 50,
-						dim.height / 2);
+				g2.drawString("Retrieving data...", dim.width / 2 - 50, dim.height / 2);
 			else {
 				String error = "No wave data.";
 				if (channel != null)
@@ -810,8 +778,7 @@ public class WaveViewPanel extends JComponent {
 		String ft = "";
 		switch (settings.filter.getType()) {
 		case BANDPASS:
-			ft = "Band pass [" + settings.filter.getCorner1() + "-"
-					+ settings.filter.getCorner2() + " Hz]";
+			ft = "Band pass [" + settings.filter.getCorner1() + "-" + settings.filter.getCorner2() + " Hz]";
 			break;
 		case HIGHPASS:
 			ft = "High pass [" + settings.filter.getCorner1() + " Hz]";
@@ -879,7 +846,7 @@ public class WaveViewPanel extends JComponent {
 
 		double offset = 0;
 		double multiplier = 1;
-		Metadata md = Swarm.config.getMetadata(channel);
+		Metadata md = swarmConfig.getMetadata(channel);
 
 		if (settings.useUnits && md != null) {
 			offset = md.getOffset();
@@ -918,8 +885,8 @@ public class WaveViewPanel extends JComponent {
 			waveRenderer.setYLabelText("Counts");
 
 		waveRenderer.setYAxisCoefficients(multiplier, offset);
-		waveRenderer.setLocation(xOffset, yOffset, this.getWidth() - xOffset
-				- rightWidth, this.getHeight() - yOffset - bottomHeight);
+		waveRenderer.setLocation(xOffset, yOffset, this.getWidth() - xOffset - rightWidth, this.getHeight() - yOffset
+				- bottomHeight);
 		waveRenderer.setYLimits(minY, maxY);
 		waveRenderer.setViewTimes(startTime, endTime, "");
 		waveRenderer.setWave(wv);
@@ -953,9 +920,8 @@ public class WaveViewPanel extends JComponent {
 		if (decorator != null)
 			spectraRenderer.setFrameDecorator(decorator);
 
-		spectraRenderer.setLocation(xOffset, yOffset, this.getWidth()
-				- rightWidth - xOffset, this.getHeight() - bottomHeight
-				- yOffset);
+		spectraRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset, this.getHeight()
+				- bottomHeight - yOffset);
 		spectraRenderer.setWave(wv);
 
 		spectraRenderer.setAutoScale(settings.autoScalePower);
@@ -994,9 +960,8 @@ public class WaveViewPanel extends JComponent {
 		if (decorator != null)
 			spectrogramRenderer.setFrameDecorator(decorator);
 
-		spectrogramRenderer.setLocation(xOffset, yOffset, this.getWidth()
-				- rightWidth - xOffset, this.getHeight() - bottomHeight
-				- yOffset);
+		spectrogramRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset, this.getHeight()
+				- bottomHeight - yOffset);
 		spectrogramRenderer.setWave(wv);
 
 		spectrogramRenderer.setViewStartTime(startTime);
@@ -1011,10 +976,8 @@ public class WaveViewPanel extends JComponent {
 		spectrogramRenderer.setMaxPower(settings.maxPower);
 		spectrogramRenderer.setMinPower(settings.minPower);
 
-		spectrogramRenderer.setBinSize((int) Math.pow(
-				2,
-				Math.ceil(Math.log(settings.binSize * wave.getSamplingRate())
-						/ Math.log(2))));
+		spectrogramRenderer.setBinSize((int) Math.pow(2,
+				Math.ceil(Math.log(settings.binSize * wave.getSamplingRate()) / Math.log(2))));
 
 		if (channel != null && displayTitle)
 			spectrogramRenderer.setTitle(channel);
@@ -1046,8 +1009,7 @@ public class WaveViewPanel extends JComponent {
 		int width = x2 - x1 + 1;
 		Paint pnt = g2.getPaint();
 		g2.setPaint(new Color(255, 255, 0, 128));
-		g2.fillRect(x1, yOffset + 1, width, getSize().height - bottomHeight
-				- yOffset);
+		g2.fillRect(x1, yOffset + 1, width, getSize().height - bottomHeight - yOffset);
 		g2.setPaint(pnt);
 	}
 
@@ -1060,8 +1022,7 @@ public class WaveViewPanel extends JComponent {
 	}
 
 	private void paintCursor(Graphics2D g2) {
-		if (Double.isNaN(cursorMark) || cursorMark < startTime
-				|| cursorMark > endTime)
+		if (Double.isNaN(cursorMark) || cursorMark < startTime || cursorMark > endTime)
 			return;
 
 		double[] t = getTranslation();
@@ -1069,8 +1030,7 @@ public class WaveViewPanel extends JComponent {
 			return;
 		double x = (cursorMark - t[1]) / t[0];
 		g2.setColor(DARK_RED);
-		g2.draw(new Line2D.Double(x, yOffset + 1, x, getHeight() - bottomHeight
-				- 1));
+		g2.draw(new Line2D.Double(x, yOffset + 1, x, getHeight() - bottomHeight - 1));
 	}
 
 	private void paintMark(Graphics2D g2, double j2k) {
