@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.TimeZone;
 
 import edu.sc.seis.seisFile.StringMSeedQueryReader;
-import edu.sc.seis.seisFile.dataSelectWS.DataSelectException;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.mseed.SeedRecord;
@@ -84,8 +83,7 @@ public class DataSelectReader extends StringMSeedQueryReader
 	 * @see WebServiceUtils.EMPTY_LOC_CODE
 	 */
 	protected String createQuery(String network, String station,
-			String location, String channel) throws IOException,
-			DataSelectException, SeedFormatException
+			String location, String channel) 
 	{
 		if (location == null || location.trim().length() == 0)
 		{
@@ -108,9 +106,6 @@ public class DataSelectReader extends StringMSeedQueryReader
 	 * @param begin the begin date.
 	 * @param end the end date.
 	 * @return the query.
-	 * @throws IOException if an I/O Exception occurs.
-	 * @throws DataSelectException if data select error.
-	 * @throws SeedFormatException if SEED format error.
 	 * @see WebServiceUtils.EMPTY_LOC_CODE
 	 * @see edu.sc.seis.seisFile.dataSelectWS.MSeedQueryReader#createQuery(java.lang
 	 *      .String, java.lang.String, java.lang.String, java.lang.String,
@@ -118,10 +113,10 @@ public class DataSelectReader extends StringMSeedQueryReader
 	 */
 	@Override
 	public String createQuery(String network, String station, String location,
-			String channel, Date begin, Date end) throws IOException,
-			DataSelectException, SeedFormatException
+			String channel, Date begin, Date end)
 	{
-		String query = createQuery(network, station, location, channel);
+		String query;
+        query = createQuery(network, station, location, channel);
 		SimpleDateFormat longFormat = new SimpleDateFormat(
 				"yyyy-MM-dd'T'HH:mm:ss");
 		longFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -182,7 +177,7 @@ public class DataSelectReader extends StringMSeedQueryReader
 	 * edu.sc.seis.seisFile.dataSelectWS.MSeedQueryReader#read(java.lang.String)
 	 */
 	public List<DataRecord> read(String query) throws IOException,
-			DataSelectException, SeedFormatException
+			 SeedFormatException
 	{
 		return read(query, new ArrayList<DataRecord>());
 	}
@@ -198,7 +193,7 @@ public class DataSelectReader extends StringMSeedQueryReader
 	 * @throws SeedFormatException if the SEED format is invalid.
 	 */
 	public List<DataRecord> read(String query, List<DataRecord> records)
-			throws IOException, DataSelectException, SeedFormatException
+			throws IOException, SeedFormatException
 	{
 		URL requestURL = new URL(urlBase + "?" + query);
 		HttpURLConnection conn = (HttpURLConnection) requestURL
@@ -218,10 +213,11 @@ public class DataSelectReader extends StringMSeedQueryReader
 			}
 			else
 			{
-				throw new DataSelectException(
+			    WebServiceUtils.fine(
 						"Did not get an OK repsonse code (code="
 								+ conn.getResponseCode() + ", url="
 								+ requestURL + "\"");
+			    return records;
 			}
 		}
 		BufferedInputStream bif = new BufferedInputStream(conn.getInputStream());

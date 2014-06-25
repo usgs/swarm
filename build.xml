@@ -2,9 +2,9 @@
 	<description>USGS Swarm Build File</description>
 
 	<property name="package" value="gov.usgs.swarm"/>
-	<property name="version" value="2.3.3.9"/>
+	<property name="version" value="2.3.3.10"/>
 	<property name="jarfile" value="swarm.jar" />
-	<property name="classpath" location="../USGS/contrib/seisFile-1.5.2.jar;../USGS/contrib/slf4j-api-1.7.1.jar;../USGS/contrib/slf4j-log4j12-1.7.1.jar;../USGS/contrib/jtransforms-2.4.jar;../USGS/contrib/log4j-1.2.13.jar;../USGS/contrib/seedCodec-1.0.6.jar;../USGS/contrib/fissuresImpl-1.1.13.jar;../USGS/contrib/fissuresUtil-1.0.18.jar;../USGS/contrib/fissuresIDL-1.0.jar;../USGS/lib/winston.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/JavaSeedLite.jar;../USGS/contrib/looks-2.0.4.jar;../USGS/contrib/forms-1.0.7.jar;../USGS/contrib/jnlp.jar;../USGS/contrib/oscache-2.1-mod2.jar;../USGS/contrib/seedlink_lite_1.2.1.jar" />
+	<property name="classpath" location="../USGS/contrib/seisFile-1.6.3.jar;../USGS/contrib/slf4j-api-1.7.1.jar;../USGS/contrib/slf4j-log4j12-1.7.1.jar;../USGS/contrib/jtransforms-2.4.jar;../USGS/contrib/log4j-1.2.13.jar;../USGS/contrib/seedCodec-1.0.10.jar;../USGS/lib/winston.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/JavaSeedLite.jar;../USGS/contrib/looks-2.0.4.jar;../USGS/contrib/forms-1.0.7.jar;../USGS/contrib/jnlp.jar;../USGS/contrib/oscache-2.1-mod2.jar;../USGS/contrib/seedlink_lite_1.2.1.jar" />
 	<property name="source" location="." />
 	<property name="destination" location="./classes"/>	
 
@@ -139,15 +139,12 @@ dist    -- generates new binary distribution
 			<fileset dir="${source}/../USGS/contrib">
 				<include name="colt.jar" />
 				<include name="JavaSeedLite.jar" />
-				<include name="seedCodec-1.0.6.jar" />
+				<include name="seedCodec-1.0.10.jar" />
 				<include name="looks-2.0.4.jar" />
 				<include name="forms-1.0.7.jar" />
-				<include name="fissuresIDL-1.0.jar" />
-				<include name="fissuresUtil-1.0.18.jar" />
-				<include name="fissuresImpl-1.1.13.jar" />
 				<include name="log4j-1.2.13.jar" />
 				<include name="jtransforms-2.4.jar" />
-				<include name="seisFile-1.5.2.jar" />
+				<include name="seisFile-1.6.3.jar" />
 				<include name="slf4j-api-1.7.1.jar" />
 				<include name="slf4j-log4j12-1.7.1.jar" />
 				<include name="oscache-2.1-mod2.jar" />			

@@ -1,12 +1,19 @@
 package gov.usgs.swarm.data;
 
 import edu.iris.Fissures.seed.builder.SeedObjectBuilder;
-import edu.iris.Fissures.seed.container.Blockette;
-import edu.iris.Fissures.seed.container.Btime;
 import edu.iris.Fissures.seed.container.SeedObjectContainer;
 import edu.iris.Fissures.seed.container.Waveform;
 import edu.iris.Fissures.seed.director.ImportDirector;
 import edu.iris.Fissures.seed.director.SeedImportDirector;
+import edu.iris.dmc.seedcodec.CodecException;
+import edu.iris.dmc.seedcodec.DecompressedData;
+import edu.iris.dmc.seedcodec.UnsupportedCompressionType;
+import edu.sc.seis.seisFile.mseed.Blockette;
+import edu.sc.seis.seisFile.mseed.Btime;
+import edu.sc.seis.seisFile.mseed.DataHeader;
+import edu.sc.seis.seisFile.mseed.DataRecord;
+import edu.sc.seis.seisFile.mseed.SeedFormatException;
+import edu.sc.seis.seisFile.mseed.SeedRecord;
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.SAC;
 import gov.usgs.plot.data.Wave;
@@ -27,8 +34,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -53,400 +63,516 @@ import javax.swing.JScrollPane;
  */
 public class FileDataSource extends AbstractCachingDataSource {
 
-	private Map<String, double[]> channelTimes;
-	private Set<String> openFiles;
-	private static SwarmConfig swarmConfig;
+    private Map<String, double[]> channelTimes;
+    private Set<String> openFiles;
+    private static SwarmConfig swarmConfig;
 
-	public FileDataSource() {
-		super();
+    public FileDataSource() {
+        super();
 
-		channelTimes = new HashMap<String, double[]>();
-		openFiles = new HashSet<String>();
-		maxSize = Integer.MAX_VALUE;
-		storeInUserConfig = false;
-		name = "Files";
-		swarmConfig = SwarmConfig.getInstance();
-	}
+        channelTimes = new HashMap<String, double[]>();
+        openFiles = new HashSet<String>();
+        maxSize = Integer.MAX_VALUE;
+        storeInUserConfig = false;
+        name = "Files";
+        swarmConfig = SwarmConfig.getInstance();
+    }
 
-	public void flush() {
-		List<String> channels = getChannels();
-		if (channels != null)
-			for (String ch : channels)
-				swarmConfig.removeMetadata(ch);
-		super.flush();
-		openFiles.clear();
-		channelTimes.clear();
-		fireChannelsUpdated();
-	}
+    public void flush() {
+        List<String> channels = getChannels();
+        if (channels != null)
+            for (String ch : channels)
+                swarmConfig.removeMetadata(ch);
+        super.flush();
+        openFiles.clear();
+        channelTimes.clear();
+        fireChannelsUpdated();
+    }
 
-	private void updateChannelTimes(String channel, double t1, double t2) {
-		double[] ct = channelTimes.get(channel);
-		if (ct == null) {
-			ct = new double[] { t1, t2 };
-			channelTimes.put(channel, ct);
-		}
-		ct[0] = Math.min(ct[0], t1);
-		ct[1] = Math.max(ct[1], t2);
-	}
+    private void updateChannelTimes(String channel, double t1, double t2) {
+        double[] ct = channelTimes.get(channel);
+        if (ct == null) {
+            ct = new double[] { t1, t2 };
+            channelTimes.put(channel, ct);
+        }
+        ct[0] = Math.min(ct[0], t1);
+        ct[1] = Math.max(ct[1], t2);
+    }
 
-	private enum FileType {
-		TEXT, SAC, SEED, UNKNOWN;
+    private enum FileType {
+        TEXT, SAC, SEED, UNKNOWN;
 
-		public static FileType fromFile(File f) {
-			String fn = f.getPath().toLowerCase();
-			if (fn.endsWith(".sac"))
-				return SAC;
-			else if (fn.endsWith(".txt"))
-				return TEXT;
-			else if (fn.endsWith(".seed"))
-				return SEED;
-			else
-				return UNKNOWN;
-		}
-	}
+        public static FileType fromFile(File f) {
+            String fn = f.getPath().toLowerCase();
+            if (fn.endsWith(".sac"))
+                return SAC;
+            else if (fn.endsWith(".txt"))
+                return TEXT;
+            else if (fn.endsWith(".seed"))
+                return SEED;
+            else
+                return UNKNOWN;
+        }
+    }
 
-	private class FileTypeDialog extends SwarmDialog {
-		private static final long serialVersionUID = 1L;
-		private JLabel filename;
-		private JList fileTypes;
-		private JCheckBox assumeSame;
-		private boolean cancelled = true;
-		private boolean opened = false;
+    private class FileTypeDialog extends SwarmDialog {
+        private static final long serialVersionUID = 1L;
+        private JLabel filename;
+        private JList fileTypes;
+        private JCheckBox assumeSame;
+        private boolean cancelled = true;
+        private boolean opened = false;
 
-		protected FileTypeDialog() {
-			super(Swarm.getApplication(), "Unknown File Type", true);
-			setSizeAndLocation();
-		}
+        protected FileTypeDialog() {
+            super(Swarm.getApplication(), "Unknown File Type", true);
+            setSizeAndLocation();
+        }
 
-		public void setFilename(String fn) {
-			filename.setText(fn);
-		}
+        public void setFilename(String fn) {
+            filename.setText(fn);
+        }
 
-		protected void createUI() {
-			super.createUI();
-			filename = new JLabel();
-			filename.setFont(Font.decode("dialog-BOLD-12"));
-			filename.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
-			String[] types = new String[] { "SEED/miniSEED volume", "SAC" };
-			fileTypes = new JList(types);
-			fileTypes.addMouseListener(new MouseAdapter() {
-				public void mouseClicked(MouseEvent e) {
-					if (e.getClickCount() == 2) {
-						if (fileTypes.getSelectedIndex() != -1)
-							okButton.doClick();
-					}
-				}
-			});
-			fileTypes.setSelectedIndex(0);
-			assumeSame = new JCheckBox(
-					"Assume all unknown files are of this type", false);
-			JPanel panel = new JPanel(new BorderLayout());
-			panel.setBorder(BorderFactory.createEmptyBorder(5, 9, 5, 9));
-			panel.setPreferredSize(new Dimension(300, 200));
-			JPanel labelPanel = new JPanel(new GridLayout(3, 1));
-			labelPanel.add(new JLabel("Unknown file type for file: "));
-			labelPanel.add(filename);
-			labelPanel.add(new JLabel(
-					"Choose 'Cancel' to skip this file or select file type:"));
-			panel.add(labelPanel, BorderLayout.NORTH);
-			panel.add(new JScrollPane(fileTypes), BorderLayout.CENTER);
-			panel.add(assumeSame, BorderLayout.SOUTH);
-			mainPanel.add(panel, BorderLayout.CENTER);
-		}
+        protected void createUI() {
+            super.createUI();
+            filename = new JLabel();
+            filename.setFont(Font.decode("dialog-BOLD-12"));
+            filename.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
+            String[] types = new String[] { "SEED/miniSEED volume", "SAC" };
+            fileTypes = new JList(types);
+            fileTypes.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getClickCount() == 2) {
+                        if (fileTypes.getSelectedIndex() != -1)
+                            okButton.doClick();
+                    }
+                }
+            });
+            fileTypes.setSelectedIndex(0);
+            assumeSame = new JCheckBox("Assume all unknown files are of this type", false);
+            JPanel panel = new JPanel(new BorderLayout());
+            panel.setBorder(BorderFactory.createEmptyBorder(5, 9, 5, 9));
+            panel.setPreferredSize(new Dimension(300, 200));
+            JPanel labelPanel = new JPanel(new GridLayout(3, 1));
+            labelPanel.add(new JLabel("Unknown file type for file: "));
+            labelPanel.add(filename);
+            labelPanel.add(new JLabel("Choose 'Cancel' to skip this file or select file type:"));
+            panel.add(labelPanel, BorderLayout.NORTH);
+            panel.add(new JScrollPane(fileTypes), BorderLayout.CENTER);
+            panel.add(assumeSame, BorderLayout.SOUTH);
+            mainPanel.add(panel, BorderLayout.CENTER);
+        }
 
-		public boolean isAssumeSame() {
-			return assumeSame.isSelected();
-		}
+        public boolean isAssumeSame() {
+            return assumeSame.isSelected();
+        }
 
-		public FileType getFileType() {
-			switch (fileTypes.getSelectedIndex()) {
-			case 0:
-				return FileType.SEED;
-			case 1:
-				return FileType.SAC;
-			default:
-				return null;
-			}
-		}
+        public FileType getFileType() {
+            switch (fileTypes.getSelectedIndex()) {
+            case 0:
+                return FileType.SEED;
+            case 1:
+                return FileType.SAC;
+            default:
+                return null;
+            }
+        }
 
-		public void wasOK() {
-			cancelled = false;
-		}
+        public void wasOK() {
+            cancelled = false;
+        }
 
-		public void wasCancelled() {
-			cancelled = true;
-			opened = false;
-		}
+        public void wasCancelled() {
+            cancelled = true;
+            opened = false;
+        }
 
-		public void setVisible(boolean b) {
-			if (b)
-				opened = true;
-			super.setVisible(b);
-		}
-	}
+        public void setVisible(boolean b) {
+            if (b)
+                opened = true;
+            super.setVisible(b);
+        }
+    }
 
-	public void openFiles(File[] fs) {
-		FileTypeDialog dialog = null;
-		for (int i = 0; i < fs.length; i++) {
-			FileType ft = FileType.fromFile(fs[i]);
-			if (ft == FileType.UNKNOWN) {
-				if (dialog == null)
-					dialog = new FileTypeDialog();
-				if (!dialog.opened || (dialog.opened && !dialog.isAssumeSame())) {
-					dialog.setFilename(fs[i].getName());
-					dialog.setVisible(true);
-				}
+    public void openFiles(File[] fs) {
+        FileTypeDialog dialog = null;
+        for (int i = 0; i < fs.length; i++) {
+            FileType ft = FileType.fromFile(fs[i]);
+            if (ft == FileType.UNKNOWN) {
+                if (dialog == null)
+                    dialog = new FileTypeDialog();
+                if (!dialog.opened || (dialog.opened && !dialog.isAssumeSame())) {
+                    dialog.setFilename(fs[i].getName());
+                    dialog.setVisible(true);
+                }
 
-				if (dialog.cancelled)
-					ft = FileType.UNKNOWN;
-				else
-					ft = dialog.getFileType();
+                if (dialog.cancelled)
+                    ft = FileType.UNKNOWN;
+                else
+                    ft = dialog.getFileType();
 
-				logger.warning("user input file type: " + fs[i].getPath()
-						+ " -> " + ft);
-			}
+                logger.warning("user input file type: " + fs[i].getPath() + " -> " + ft);
+            }
 
-			switch (ft) {
-			case SAC:
-				openSACFile(fs[i].getPath());
-				break;
-			case SEED:
-				openSeedFile(fs[i].getPath());
-				break;
-			case UNKNOWN:
-				logger.warning("unknown file type: " + fs[i].getPath());
-				break;
-			default:
-				logger.warning("Cannot load file type " + ft + ": "
-						+ fs[i].getPath());
-				break;
-			}
-			swarmConfig.lastPath = fs[i].getParent();
-		}
-	}
+            switch (ft) {
+            case SAC:
+                openSACFile(fs[i].getPath());
+                break;
+            case SEED:
+                openSeedFile(fs[i].getPath());
+                break;
+            case UNKNOWN:
+                logger.warning("unknown file type: " + fs[i].getPath());
+                break;
+            default:
+                logger.warning("Cannot load file type " + ft + ": " + fs[i].getPath());
+                break;
+            }
+            swarmConfig.lastPath = fs[i].getParent();
+        }
+    }
 
-	public void openSACFile(final String fn) {
-		if (openFiles.contains(fn))
-			return;
+    public void openSACFile(final String fn) {
+        if (openFiles.contains(fn))
+            return;
 
-		SwingWorker worker = new SwingWorker() {
-			public Object construct() {
-				Object result = null;
-				fireChannelsProgress(fn, 0);
-				try {
-					logger.fine("opening SAC file: " + fn);
-					SAC sac = new SAC();
-					sac.read(fn);
-					fireChannelsProgress(fn, 0.5);
-					String channel = sac.getStationInfo();
-					Metadata md = swarmConfig.getMetadata(channel, true);
-					md.addGroup("SAC^" + fn);
+        SwingWorker worker = new SwingWorker() {
+            public Object construct() {
+                Object result = null;
+                fireChannelsProgress(fn, 0);
+                try {
+                    logger.fine("opening SAC file: " + fn);
+                    SAC sac = new SAC();
+                    sac.read(fn);
+                    fireChannelsProgress(fn, 0.5);
+                    String channel = sac.getStationInfo();
+                    Metadata md = swarmConfig.getMetadata(channel, true);
+                    md.addGroup("SAC^" + fn);
 
-					Wave wave = sac.toWave();
-					updateChannelTimes(channel, wave.getStartTime(),
-							wave.getEndTime());
-					cacheWaveAsHelicorder(channel, wave);
-					putWave(channel, wave);
+                    Wave wave = sac.toWave();
+                    updateChannelTimes(channel, wave.getStartTime(), wave.getEndTime());
+                    cacheWaveAsHelicorder(channel, wave);
+                    putWave(channel, wave);
 
-					openFiles.add(fn);
-				} catch (Throwable t) {
-					t.printStackTrace();
-					result = t;
-				}
-				fireChannelsProgress(fn, 1);
-				fireChannelsUpdated();
-				return result;
-			}
+                    openFiles.add(fn);
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                    result = t;
+                }
+                fireChannelsProgress(fn, 1);
+                fireChannelsUpdated();
+                return result;
+            }
 
-			public void finished() {
-				if (getValue() != null) {
-					JOptionPane.showMessageDialog(Swarm.getApplication(),
-							"Could not open SAC file: " + fn, "Error",
-							JOptionPane.ERROR_MESSAGE);
-				}
-			}
-		};
-		worker.start();
-	}
+            public void finished() {
+                if (getValue() != null) {
+                    JOptionPane.showMessageDialog(Swarm.getApplication(), "Could not open SAC file: " + fn, "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        };
+        worker.start();
+    }
 
-	// TODO: can optimize memory usage further by added combined parts as you
-	// go.
-	public void openSeedFile(final String fn) {
-		if (openFiles.contains(fn))
-			return;
+    // TODO: can optimize memory usage further by added combined parts as you
+    // go.
+//    public void openSeedFileO(final String fn) {
+//        if (openFiles.contains(fn))
+//            return;
+//
+//        SwingWorker worker = new SwingWorker() {
+//            public Object construct() {
+//                Object result = null;
+//                try {
+//                    fireChannelsProgress(fn, 0);
+//                    CodeTimer ct = new CodeTimer("seed");
+//                    logger.fine("opening SEED file: " + fn);
+//                    Map<String, List<Wave>> tempStationMap = new HashMap<String, List<Wave>>();
+//
+//                    DataInputStream ls = new DataInputStream(new BufferedInputStream(new FileInputStream(fn)));
+//                    ct.mark("dis");
+//                    ImportDirector importDirector = new SeedImportDirector();
+//                    SeedObjectBuilder objectBuilder = new SeedObjectBuilder();
+//                    importDirector.assignBuilder(objectBuilder); // register the
+//                    // builder
+//                    // with the
+//                    // director
+//                    // begin reading the stream with the construct command
+//                    importDirector.construct(ls); // construct SEED objects
+//                    // silently
+//                    SeedObjectContainer container = (SeedObjectContainer) importDirector.getBuilder().getContainer();
+//                    ct.mark("prep");
+//                    Object object;
+//                    int total = container.iterate();
+//                    ct.mark("iterate: " + total);
+//                    int cnt = 0;
+//                    while ((object = container.getNext()) != null) {
+//                        fireChannelsProgress(fn, 0.5 + 0.5 * ((double) cnt / (double) total));
+//                        cnt++;
+//                        Blockette b = (Blockette) object;
+//                        if (b.getType() != 999)
+//                            continue;
+//                        String loc = ("_" + b.getFieldVal(5)).trim();
+//                        if (loc.length() == 1)
+//                            loc = "";
+//                        String code = b.getFieldVal(4) + "_" + b.getFieldVal(6) + "_" + b.getFieldVal(7) + loc;
+//                        Metadata md = swarmConfig.getMetadata(code, true);
+//                        md.addGroup("SEED^" + fn);
+//
+//                        List<Wave> parts = tempStationMap.get(code);
+//                        if (parts == null) {
+//                            parts = new ArrayList<Wave>();
+//                            tempStationMap.put(code, parts);
+//                        }
+//
+//                        if (b.getWaveform() != null) {
+//                            Waveform wf = b.getWaveform();
+//                            Wave sw = new Wave();
+//                            sw.setSamplingRate(getSampleRate(((Integer) b.getFieldVal(10)).intValue(),
+//                                    ((Integer) b.getFieldVal(11)).intValue()));
+//                            Btime bTime = (Btime) b.getFieldVal(8);
+//                            sw.setStartTime(Util.dateToJ2K(btimeToDate(bTime)));
+//                            sw.buffer = wf.getDecodedIntegers();
+//                            sw.register();
+//                            parts.add(sw);
+//                        }
+//                    }
+//                    ct.mark("read: " + cnt);
+//                    for (String code : tempStationMap.keySet()) {
+//                        List<Wave> parts = tempStationMap.get(code);
+//                        ArrayList<Wave> subParts = new ArrayList<Wave>();
+//                        int ns = 0;
+//                        for (int i = 0; i < parts.size(); i++) {
+//                            ns += parts.get(i).numSamples();
+//                            subParts.add(parts.get(i));
+//                            if (ns > 3600 * 100 || i == parts.size() - 1) {
+//                                Wave wave = Wave.join(subParts);
+//                                updateChannelTimes(code, wave.getStartTime(), wave.getEndTime());
+//                                cacheWaveAsHelicorder(code, wave);
+//                                putWave(code, wave);
+//                                ns = 0;
+//                                subParts.clear();
+//                            }
+//                        }
+//                    }
+//                    ct.mark("insert");
+//                    ct.stopAndReport();
+//                    openFiles.add(fn);
+//                } catch (Throwable t) {
+//                    t.printStackTrace();
+//                    result = t;
+//                }
+//                fireChannelsProgress(fn, 1);
+//                fireChannelsUpdated();
+//                return result;
+//            }
+//
+//            public void finished() {
+//                if (getValue() != null) {
+//                    JOptionPane.showMessageDialog(Swarm.getApplication(), "Could not open SEED file: " + fn, "Error",
+//                            JOptionPane.ERROR_MESSAGE);
+//                }
+//            }
+//        };
+//        worker.start();
+//    }
 
-		SwingWorker worker = new SwingWorker() {
-			public Object construct() {
-				Object result = null;
-				try {
-					fireChannelsProgress(fn, 0);
-					CodeTimer ct = new CodeTimer("seed");
-					logger.fine("opening SEED file: " + fn);
-					Map<String, List<Wave>> tempStationMap = new HashMap<String, List<Wave>>();
+    // TODO: can optimize memory usage further by added combined parts as you
+    // go.
+    public void openSeedFile(final String fn) {
+        if (openFiles.contains(fn))
+            return;
 
-					DataInputStream ls = new DataInputStream(
-							new BufferedInputStream(new FileInputStream(fn)));
-					ct.mark("dis");
-					ImportDirector importDirector = new SeedImportDirector();
-					SeedObjectBuilder objectBuilder = new SeedObjectBuilder();
-					importDirector.assignBuilder(objectBuilder); // register the
-																	// builder
-																	// with the
-																	// director
-					// begin reading the stream with the construct command
-					importDirector.construct(ls); // construct SEED objects
-													// silently
-					SeedObjectContainer container = (SeedObjectContainer) importDirector
-							.getBuilder().getContainer();
-					ct.mark("prep");
-					Object object;
-					int total = container.iterate();
-					ct.mark("iterate: " + total);
-					int cnt = 0;
-					while ((object = container.getNext()) != null) {
-						fireChannelsProgress(fn,
-								0.5 + 0.5 * ((double) cnt / (double) total));
-						cnt++;
-						Blockette b = (Blockette) object;
-						if (b.getType() != 999)
-							continue;
-						String loc = ("_" + b.getFieldVal(5)).trim();
-						if (loc.length() == 1)
-							loc = "";
-						String code = b.getFieldVal(4) + "_" + b.getFieldVal(6)
-								+ "_" + b.getFieldVal(7) + loc;
-						Metadata md = swarmConfig.getMetadata(code, true);
-						md.addGroup("SEED^" + fn);
+        SwingWorker worker = new SwingWorker() {
+            public Object construct() {
+                Object result = null;
+                fireChannelsProgress(fn, 0);
+                CodeTimer ct = new CodeTimer("seed");
+                logger.fine("opening SEED file: " + fn);
+                Map<String, List<Wave>> tempStationMap = new HashMap<String, List<Wave>>();
 
-						List<Wave> parts = tempStationMap.get(code);
-						if (parts == null) {
-							parts = new ArrayList<Wave>();
-							tempStationMap.put(code, parts);
-						}
+                DataInputStream dis = null;
+                try {
+                    dis = new DataInputStream(new BufferedInputStream(new FileInputStream(fn)));
+                } catch (FileNotFoundException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
 
-						if (b.getWaveform() != null) {
-							Waveform wf = b.getWaveform();
-							Wave sw = new Wave();
-							sw.setSamplingRate(getSampleRate(
-									((Integer) b.getFieldVal(10)).intValue(),
-									((Integer) b.getFieldVal(11)).intValue()));
-							Btime bTime = (Btime) b.getFieldVal(8);
-							sw.setStartTime(Util.dateToJ2K(btimeToDate(bTime)));
-							sw.buffer = wf.getDecodedIntegers();
-							sw.register();
-							parts.add(sw);
-						}
-					}
-					ct.mark("read: " + cnt);
-					for (String code : tempStationMap.keySet()) {
-						List<Wave> parts = tempStationMap.get(code);
-						ArrayList<Wave> subParts = new ArrayList<Wave>();
-						int ns = 0;
-						for (int i = 0; i < parts.size(); i++) {
-							ns += parts.get(i).numSamples();
-							subParts.add(parts.get(i));
-							if (ns > 3600 * 100 || i == parts.size() - 1) {
-								Wave wave = Wave.join(subParts);
-								updateChannelTimes(code, wave.getStartTime(),
-										wave.getEndTime());
-								cacheWaveAsHelicorder(code, wave);
-								putWave(code, wave);
-								ns = 0;
-								subParts.clear();
-							}
-						}
-					}
-					ct.mark("insert");
-					ct.stopAndReport();
-					openFiles.add(fn);
-				} catch (Throwable t) {
-					t.printStackTrace();
-					result = t;
-				}
-				fireChannelsProgress(fn, 1);
-				fireChannelsUpdated();
-				return result;
-			}
+                ct.mark("dis");
+                boolean isDone = false;
+                try {
+                    while (!isDone) {
+                        SeedRecord sr = null;
+                        try {
+                            sr = SeedRecord.read(dis, 4096);
+                        } catch (SeedFormatException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        } catch (EOFException e) {
+                            isDone = true;
+                        } catch (IOException e) {
+                            // TODO Auto-generated catch block
+                            System.err.println(e.getMessage());
+                            e.printStackTrace();
+                        }
+                        if (!(sr instanceof DataRecord))
+                            continue;
 
-			public void finished() {
-				if (getValue() != null) {
-					JOptionPane.showMessageDialog(Swarm.getApplication(),
-							"Could not open SEED file: " + fn, "Error",
-							JOptionPane.ERROR_MESSAGE);
-				}
-			}
-		};
-		worker.start();
-	}
+                        DataRecord dr = (DataRecord) sr;
+                        DataHeader dh = dr.getHeader();
+                        String code = dh.getStationIdentifier() + "_" + dh.getChannelIdentifier() + "_"
+                                + dh.getNetworkCode() + "_" + dh.getLocationIdentifier();
+                        Metadata md = swarmConfig.getMetadata(code, true);
+                        md.addGroup("SEED^" + fn);
 
-	private Date btimeToDate(Btime bt) {
-		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-		cal.set(Calendar.YEAR, bt.getYear());
-		cal.set(Calendar.DAY_OF_YEAR, bt.getDayOfYear());
-		cal.set(Calendar.HOUR_OF_DAY, bt.getHour());
-		cal.set(Calendar.MINUTE, bt.getMinute());
-		cal.set(Calendar.SECOND, bt.getSecond());
-		cal.set(Calendar.MILLISECOND, bt.getTenthMill() / 10);
-		return cal.getTime();
-	}
+                        List<Wave> parts = tempStationMap.get(code);
+                        if (parts == null) {
+                            parts = new ArrayList<Wave>();
+                            tempStationMap.put(code, parts);
+                        }
 
-	private float getSampleRate(double factor, double multiplier) {
-		float sampleRate = (float) 10000.0; // default (impossible) value;
-		if ((factor * multiplier) != 0.0) { // in the case of log records
-			sampleRate = (float) (java.lang.Math.pow(
-					java.lang.Math.abs(factor),
-					(factor / java.lang.Math.abs(factor))) * java.lang.Math
-					.pow(java.lang.Math.abs(multiplier),
-							(multiplier / java.lang.Math.abs(multiplier))));
-		}
-		return sampleRate;
-	}
+                        if (dr.getDataSize() > 0) {
+                            Wave sw = new Wave();
+                            sw.setSamplingRate(dh.getSampleRate());
+                            sw.setStartTime(Util.dateToJ2K(btimeToDate2(dh.getStartBtime())));
+                            sw.buffer = extract(dr);
+                            sw.register();
+                            parts.add(sw);
+                        }
+                    }
+                    for (String code : tempStationMap.keySet()) {
+                        List<Wave> parts = tempStationMap.get(code);
+                        ArrayList<Wave> subParts = new ArrayList<Wave>();
+                        int ns = 0;
+                        for (int i = 0; i < parts.size(); i++) {
+                            ns += parts.get(i).numSamples();
+                            subParts.add(parts.get(i));
+                            if (ns > 3600 * 100 || i == parts.size() - 1) {
+                                Wave wave = Wave.join(subParts);
+                                updateChannelTimes(code, wave.getStartTime(), wave.getEndTime());
+                                cacheWaveAsHelicorder(code, wave);
+                                putWave(code, wave);
+                                ns = 0;
+                                subParts.clear();
+                            }
+                        }
+                    }
+                    ct.mark("insert");
+                    ct.stopAndReport();
+                    openFiles.add(fn);
 
-	public HelicorderData getHelicorder(String channel, double t1, double t2,
-			GulperListener gl) {
-		double[] ct = channelTimes.get(channel);
-		if (ct == null)
-			return null;
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                    result = t;
+                } finally {
+                    try {
+                        dis.close();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
 
-		double dt = t2 - t1;
-		double now = CurrentTime.getInstance().nowJ2K();
-		if (Math.abs(now - t2) < 3600) {
-			t2 = ct[1];
-			t1 = t2 - dt;
-		}
+                fireChannelsProgress(fn, 1);
+                fireChannelsUpdated();
+                return result;
+            }
 
-		return super.getHelicorder(channel, t1, t2, gl);
-	}
+            public void finished() {
+                if (getValue() != null) {
+                    JOptionPane.showMessageDialog(Swarm.getApplication(), "Could not open SEED file: " + fn, "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        };
+        worker.start();
+    }
 
-	public Wave getWave(String station, double t1, double t2) 
-	{
-		Wave wave;
-		List<CachedWave> waves = waveCache.get(station);
-		if (waves == null)
-			return null;
-		else {
-			List<Wave> parts = new ArrayList<Wave>();
-			double minT = 1E300;
-			double maxT = -1E300;
-			for (CachedWave cw : waves) {
-				if (cw.wave.overlaps(t1, t2)) {
-					parts.add(cw.wave);
-					minT = Math.min(minT, cw.t1);
-					maxT = Math.max(maxT, cw.t2);
-				}
-			}
+    private int[] extract(DataRecord dr) throws UnsupportedCompressionType, CodecException, SeedFormatException {
+        int numPts = dr.getHeader().getNumSamples();
+        int[] data = new int[numPts];
+        int numSoFar = 0;
+        DecompressedData decompData = dr.decompress();
+        int[] temp = decompData.getAsInt();
+        System.arraycopy(temp, 0, data, numSoFar, temp.length);
+        numSoFar += temp.length;
+        return data;
+    }
 
-			if (parts.size() == 1)
-				return parts.get(0);
+    private Date btimeToDate(Btime bt) {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        cal.set(Calendar.YEAR, bt.getYear());
+        cal.set(Calendar.DAY_OF_YEAR, bt.getDayOfYear());
+        cal.set(Calendar.HOUR_OF_DAY, bt.getHour());
+        cal.set(Calendar.MINUTE, bt.getMin());
+        cal.set(Calendar.SECOND, bt.getSec());
+        cal.set(Calendar.MILLISECOND, bt.getTenthMilli() / 10);
+        return cal.getTime();
+    }
 
-			wave = Wave.join(parts, minT, maxT);
-			if (wave != null)
-				wave = wave.subset(t1, t2);
-		}
-		return wave;
-	}
+    private Date btimeToDate2(edu.sc.seis.seisFile.mseed.Btime btime) {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        cal.set(Calendar.YEAR, btime.getYear());
+        cal.set(Calendar.DAY_OF_YEAR, btime.getDayOfYear());
+        cal.set(Calendar.HOUR_OF_DAY, btime.getHour());
+        cal.set(Calendar.MINUTE, btime.getMin());
+        cal.set(Calendar.SECOND, btime.getSec());
+        cal.set(Calendar.MILLISECOND, btime.getTenthMilli() / 10);
+        return cal.getTime();
+    }
 
-	public String toConfigString() {
-		return name + ";file:";
-	}
+    private float getSampleRate(double factor, double multiplier) {
+        float sampleRate = (float) 10000.0; // default (impossible) value;
+        if ((factor * multiplier) != 0.0) { // in the case of log records
+            sampleRate = (float) (java.lang.Math.pow(java.lang.Math.abs(factor), (factor / java.lang.Math.abs(factor))) * java.lang.Math
+                    .pow(java.lang.Math.abs(multiplier), (multiplier / java.lang.Math.abs(multiplier))));
+        }
+        return sampleRate;
+    }
+
+    public HelicorderData getHelicorder(String channel, double t1, double t2, GulperListener gl) {
+        double[] ct = channelTimes.get(channel);
+        if (ct == null)
+            return null;
+
+        double dt = t2 - t1;
+        double now = CurrentTime.getInstance().nowJ2K();
+        if (Math.abs(now - t2) < 3600) {
+            t2 = ct[1];
+            t1 = t2 - dt;
+        }
+
+        return super.getHelicorder(channel, t1, t2, gl);
+    }
+
+    public Wave getWave(String station, double t1, double t2) {
+        Wave wave;
+        List<CachedWave> waves = waveCache.get(station);
+        if (waves == null)
+            return null;
+        else {
+            List<Wave> parts = new ArrayList<Wave>();
+            double minT = 1E300;
+            double maxT = -1E300;
+            for (CachedWave cw : waves) {
+                if (cw.wave.overlaps(t1, t2)) {
+                    parts.add(cw.wave);
+                    minT = Math.min(minT, cw.t1);
+                    maxT = Math.max(maxT, cw.t2);
+                }
+            }
+
+            if (parts.size() == 1)
+                return parts.get(0);
+
+            wave = Wave.join(parts, minT, maxT);
+            if (wave != null)
+                wave = wave.subset(t1, t2);
+        }
+        return wave;
+    }
+
+    public String toConfigString() {
+        return name + ";file:";
+    }
 }

@@ -1,14 +1,14 @@
 package gov.usgs.swarm.data.fdsnWs;
 
-import edu.sc.seis.seisFile.stationxml.Channel;
-import edu.sc.seis.seisFile.stationxml.Network;
-import edu.sc.seis.seisFile.stationxml.NetworkIterator;
-import edu.sc.seis.seisFile.stationxml.StaMessage;
-import edu.sc.seis.seisFile.stationxml.Station;
-import edu.sc.seis.seisFile.stationxml.StationEpoch;
-import edu.sc.seis.seisFile.stationxml.StationIterator;
-import edu.sc.seis.seisFile.stationxml.StationXMLException;
-import edu.sc.seis.seisFile.stationxml.StationXMLTagNames;
+import edu.sc.seis.seisFile.fdsnws.stationxml.Channel;
+import edu.sc.seis.seisFile.fdsnws.stationxml.FDSNStationXML;
+import edu.sc.seis.seisFile.fdsnws.stationxml.FloatType;
+import edu.sc.seis.seisFile.fdsnws.stationxml.Network;
+import edu.sc.seis.seisFile.fdsnws.stationxml.NetworkIterator;
+import edu.sc.seis.seisFile.fdsnws.stationxml.Station;
+import edu.sc.seis.seisFile.fdsnws.stationxml.StationIterator;
+import edu.sc.seis.seisFile.fdsnws.stationxml.StationXMLException;
+import edu.sc.seis.seisFile.fdsnws.stationxml.StationXMLTagNames;
 import gov.usgs.swarm.StationInfo;
 
 import java.net.URL;
@@ -90,7 +90,7 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
 	 *            the station message.
 	 * @return true if match, false otherwise.
 	 */
-	protected boolean checkSchemaVersion(StaMessage staMessage) {
+	protected boolean checkSchemaVersion(FDSNStationXML staMessage) {
 		try {
 			if (staMessage.checkSchemaVersion()) {
 				return true;
@@ -100,7 +100,7 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
 		String message = "XM schema of this document ("
 				+ staMessage.getXmlSchemaLocation()
 				+ ") does not match this code ("
-				+ StationXMLTagNames.SCHEMA_VERSION
+				+ StationXMLTagNames.SCHEMAVERSION
 				+ ") , results may be incorrect.";
 		WebServiceUtils.warning(message);
 		return false;
@@ -125,7 +125,7 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
 			e = r.nextEvent(); // eat this one
 			e = r.peek(); // peek at the next
 		}
-		StaMessage staMessage = new StaMessage(r);
+		FDSNStationXML staMessage = new FDSNStationXML(r);
 		checkSchemaVersion(staMessage);
 		final NetworkIterator it = staMessage.getNetworks();
 		if (it != null) {
@@ -135,45 +135,45 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
 				if (sit != null) {
 					while (sit.hasNext()) {
 						final Station s = sit.next();
-						if (!n.getNetCode().equals(s.getNetCode())) {
+						if (!n.toString().equals(s.getNetworkCode())) {
 							throw new StationXMLException(
 									"Station in wrong network: "
-											+ n.getNetCode() + " != "
-											+ s.getNetCode() + "  "
+											+ n.toString() + " != "
+											+ s.getNetworkCode() + "  "
 											+ r.peek().getLocation());
 
 						}
-						List<StationEpoch> staEpochs = s.getStationEpochs();
-						for (StationEpoch stationEpoch : staEpochs) {
-							String network = n.getNetCode();
-							String station = s.getStaCode();
-							double latitude = stationEpoch.getLat();
-							double longitude = stationEpoch.getLon();
+//						List<StationEpoch> staEpochs = s.getStationEpochs();
+//						for (StationEpoch stationEpoch : staEpochs) {
+							String network = n.toString();
+							String station = s.getCode();
+							FloatType latitude = s.getLatitude();
+							FloatType longitude = s.getLongitude();
 							String siteName = null;
-							if (stationEpoch.getSite() != null) {
-								siteName = stationEpoch.getSite().getName();
+							if (s.getSite() != null) {
+								siteName = s.getSite().getName();
 							}
 							switch (getLevel()) {
 							case STATION:
 								processStation(createStationInfo(station,
-										network, latitude, longitude, siteName));
+										network, latitude.getValue(), longitude.getValue(), siteName));
 								break;
 							case CHANNEL:
-								List<Channel> chanList = stationEpoch
+								List<Channel> chanList = s
 										.getChannelList();
 								for (Channel chan : chanList) {
 									String location = chan.getLocCode();
-									String channel = chan.getChanCode();
+									String channel = chan.getCode();
 									processChannel(createChannelInfo(station,
 											channel, network, location,
-											latitude, longitude, siteName,
+											latitude.getValue(), longitude.getValue(), siteName,
 											groupsType));
 								}
 								break;
 							default:
 								break;
 							}
-						}
+//						}
 					}
 				}
 			}
