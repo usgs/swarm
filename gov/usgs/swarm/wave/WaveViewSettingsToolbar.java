@@ -118,6 +118,8 @@ public class WaveViewSettingsToolbar
 						for (WaveViewSettings settings : settingsSet) {
 							if (settings.viewType == ViewType.SPECTRA)
 							settings.cycleLogSettings();
+							if (settings.viewType == ViewType.SPECTROGRAM)
+								settings.toggleLogPower();
 						}
 					}	
 				});
