@@ -1,8 +1,6 @@
 package gov.usgs.swarm.data;
 
 import gov.usgs.swarm.data.fdsnWs.WebServicesSource;
-import gov.usgs.swarm.data.file.FullSeedDataSource;
-import gov.usgs.swarm.data.file.SACDataSource;
 import gov.usgs.swarm.data.seedLink.SeedLinkSource;
 
 /**
@@ -15,8 +13,6 @@ public enum DataSourceType {
 	WINSTON_WAVE_SERVER("wws", WWSSource.class), 
 	WINSTON_DIRECT("wwsd", DirectWWSSource.class), 
 	CACHE("cache", CachedDataSource.class), 
-	SEED("seed", FullSeedDataSource.class), 
-	SAC("sac", SACDataSource.class), 
 	FDSN_WS("wsc", WebServicesSource.class), 
 	SEED_LINK("sls", SeedLinkSource.class);
 

@@ -1,8 +1,5 @@
 package gov.usgs.swarm;
 
-import edu.sc.seis.seisFile.BuildVersion;
-import gov.usgs.swarm.data.CachedDataSource;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -27,6 +24,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 import nl.knmi.orfeus.SLClient;
+import edu.sc.seis.seisFile.BuildVersion;
+import gov.usgs.swarm.data.CachedDataSource;
 
 /**
  * A class that shows an about dialog with some extra controls.

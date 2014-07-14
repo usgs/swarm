@@ -1,7 +1,9 @@
 package gov.usgs.swarm;
 
+import gov.usgs.plot.data.file.SeismicDataFile.FileType;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.util.Util;
+import gov.usgs.util.ui.ExtensionFileFilter;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -96,7 +98,12 @@ public class SwarmMenu extends JMenuBar
 					{
 						JFileChooser chooser = Swarm.getApplication().getFileChooser();
 						chooser.resetChoosableFileFilters();
-						chooser.setFileFilter(chooser.getAcceptAllFileFilter());
+                        for (FileType ft : FileType.getKnownTypes()) {
+                            ExtensionFileFilter f = new ExtensionFileFilter(ft.extension, ft.description);
+                            chooser.addChoosableFileFilter(f);
+                        }
+
+                        chooser.setFileFilter(chooser.getAcceptAllFileFilter());
 						File lastPath = new File(SwarmConfig.getInstance().lastPath);
 						chooser.setCurrentDirectory(lastPath);
 						chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);

@@ -4,19 +4,13 @@ import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.data.file.SeismicDataFile;
 import gov.usgs.plot.data.file.SeismicDataFile.FileType;
+import gov.usgs.swarm.FileTypeDialog;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmConfig;
-import gov.usgs.swarm.SwarmDialog;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.util.CurrentTime;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,13 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.BorderFactory;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 
 /**
  * 
@@ -43,38 +31,7 @@ public class FileDataSource extends AbstractCachingDataSource {
     private Set<String> openFiles;
     private static SwarmConfig swarmConfig;
 
-    // private enum FileType {
-    // SAC(".sac", "SAC file"),
-    // SEED(".seed", "SEED/miniSEED file"),
-    // UNKNOWN(".unknown","Unknown file type");
-    //
-    // private String extension;
-    // private String description;
-    //
-    // private FileType(String extension, String description) {
-    // this.extension = extension;
-    // this.description = description;
-    // }
-    //
-    // public String getExtension() {
-    // return extension;
-    // }
-    //
-    // public String toString() {
-    // return description;
-    // }
-    // public static FileType fromFile(File f) {
-    // String fileName = f.getPath().toLowerCase();
-    //
-    // for (FileType t : FileType.values())
-    // if (fileName.endsWith(t.getExtension()))
-    // return t;
-    //
-    // return UNKNOWN;
-    //
-    // }
-    // }
-
+   
     public FileDataSource() {
         super();
 
@@ -107,75 +64,6 @@ public class FileDataSource extends AbstractCachingDataSource {
         ct[1] = Math.max(ct[1], t2);
     }
 
-    private class FileTypeDialog extends SwarmDialog {
-        private static final long serialVersionUID = 1L;
-        private JLabel filename;
-        private JList fileTypes;
-        private JCheckBox assumeSame;
-        private boolean cancelled = true;
-        private boolean opened = false;
-
-        protected FileTypeDialog() {
-            super(Swarm.getApplication(), "Unknown File Type", true);
-            setSizeAndLocation();
-        }
-
-        public void setFilename(String fn) {
-            filename.setText(fn);
-        }
-
-        protected void createUI() {
-            super.createUI();
-            filename = new JLabel();
-            filename.setFont(Font.decode("dialog-BOLD-12"));
-            filename.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
-            fileTypes = new JList(FileType.values());
-            fileTypes.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent e) {
-                    if (e.getClickCount() == 2) {
-                        if (fileTypes.getSelectedIndex() != -1)
-                            okButton.doClick();
-                    }
-                }
-            });
-            fileTypes.setSelectedValue(FileType.UNKNOWN, true);
-            assumeSame = new JCheckBox("Assume all unknown files are of this type", false);
-            JPanel panel = new JPanel(new BorderLayout());
-            panel.setBorder(BorderFactory.createEmptyBorder(5, 9, 5, 9));
-            panel.setPreferredSize(new Dimension(300, 200));
-            JPanel labelPanel = new JPanel(new GridLayout(3, 1));
-            labelPanel.add(new JLabel("Unknown file type for file: "));
-            labelPanel.add(filename);
-            labelPanel.add(new JLabel("Choose 'Cancel' to skip this file or select file type:"));
-            panel.add(labelPanel, BorderLayout.NORTH);
-            panel.add(new JScrollPane(fileTypes), BorderLayout.CENTER);
-            panel.add(assumeSame, BorderLayout.SOUTH);
-            mainPanel.add(panel, BorderLayout.CENTER);
-        }
-
-        public boolean isAssumeSame() {
-            return assumeSame.isSelected();
-        }
-
-        public FileType getFileType() {
-            return (FileType) fileTypes.getSelectedValue();
-        }
-
-        public void wasOK() {
-            cancelled = false;
-        }
-
-        public void wasCancelled() {
-            cancelled = true;
-            opened = false;
-        }
-
-        public void setVisible(boolean b) {
-            if (b)
-                opened = true;
-            super.setVisible(b);
-        }
-    }
 
     public void openFiles(File[] fs) {
         FileTypeDialog dialog = null;
@@ -189,13 +77,13 @@ public class FileDataSource extends AbstractCachingDataSource {
             if (file == null) {
                 if (dialog == null)
                     dialog = new FileTypeDialog();
-                if (!dialog.opened || (dialog.opened && !dialog.isAssumeSame())) {
+                if (!dialog.isOpen() || (dialog.isOpen() && !dialog.isAssumeSame())) {
                     dialog.setFilename(fs[i].getName());
                     dialog.setVisible(true);
                 }
 
                 FileType fileType;
-                if (dialog.cancelled)
+                if (dialog.isCancelled())
                     fileType = FileType.UNKNOWN;
                 else
                     fileType = dialog.getFileType();
@@ -205,7 +93,9 @@ public class FileDataSource extends AbstractCachingDataSource {
             }
 
             if (file == null)
-                continue;
+                JOptionPane.showMessageDialog(Swarm.getApplication(), "Could not open file: " + fileName, "Error",
+                        JOptionPane.ERROR_MESSAGE);
+
 
             readFile(file);
             swarmConfig.lastPath = fs[i].getParent();
@@ -227,8 +117,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 
                     int channelCount = file.getChannels().size();
                     double progressInc = (1 - .2) / channelCount;
-                    for (int i = 0; i < channelCount; i++) {
-                        String channel = file.getChannels().get(i);
+                    for (String channel : file.getChannels()) {
                         Metadata md = swarmConfig.getMetadata(channel, true);
                         md.addGroup(file.getGroup());
 

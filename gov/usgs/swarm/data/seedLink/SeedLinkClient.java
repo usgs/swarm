@@ -4,7 +4,6 @@ import edu.iris.Fissures.seed.container.Blockette;
 import edu.iris.Fissures.seed.container.Btime;
 import edu.iris.Fissures.seed.container.Waveform;
 import edu.iris.Fissures.seed.exception.SeedException;
-import gov.usgs.plot.data.Seed;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.ChannelInfo;
 import gov.usgs.swarm.Swarm;
@@ -13,7 +12,10 @@ import gov.usgs.swarm.data.seedLink.orfeus.BaseSLClient;
 import gov.usgs.util.Util;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -469,8 +471,8 @@ public class SeedLinkClient extends BaseSLClient
 				final double factor = getDouble(blockette, 10);
 				final double multiplier = getDouble(blockette, 11);
 				final double startTime = Util
-						.dateToJ2K(Seed.btimeToDate(bTime));
-				final double samplingRate = Seed.getSampleRate(factor,
+						.dateToJ2K(btimeToDate(bTime));
+				final double samplingRate = getSampleRate(factor,
 						multiplier);
 				final Wave wave = new Wave();
 				wave.setSamplingRate(samplingRate);
@@ -500,6 +502,32 @@ public class SeedLinkClient extends BaseSLClient
 		}
 		return false; // do not close the connection
 	}
+
+	/*
+	 * taken from Robert Casey's PDCC seed code.
+	 */
+	private float getSampleRate(double factor, double multiplier) {
+        float sampleRate = (float) 10000.0;  // default (impossible) value;
+        if ((factor * multiplier) != 0.0) {  // in the case of log records
+            sampleRate = (float) (java.lang.Math.pow
+                                      (java.lang.Math.abs(factor),
+                                           (factor/java.lang.Math.abs(factor)))
+                                      * java.lang.Math.pow
+                                      (java.lang.Math.abs(multiplier),
+                                           (multiplier/java.lang.Math.abs(multiplier))));
+        }
+        return sampleRate;
+	}
+    private Date btimeToDate(Btime btime) {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        cal.set(Calendar.YEAR, btime.getYear());
+        cal.set(Calendar.DAY_OF_YEAR, btime.getDayOfYear());
+        cal.set(Calendar.HOUR_OF_DAY, btime.getHour());
+        cal.set(Calendar.MINUTE, btime.getMinute());
+        cal.set(Calendar.SECOND, btime.getSecond());
+        cal.set(Calendar.MILLISECOND, btime.getTenthMill() / 10);
+        return cal.getTime();
+    }
 
 	/**
 	 * Start this SeedLinkClient.
