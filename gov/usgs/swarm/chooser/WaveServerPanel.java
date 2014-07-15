@@ -147,7 +147,7 @@ public class WaveServerPanel extends DataSourcePanel
 			message = "The gulper size must be greater than 0 minutes.";
 		
 		double gd = -1;
-		try { gd = Double.parseDouble(gulperDelay.getText()); } catch (Exception e) {}
+		try { gd = Double.parseDouble(gulperDelay.getText()); } catch (Exception e) { e.printStackTrace(); System.out.println(e.getMessage());}
 		if (gd < 0)
 			message = "The gulper delay must be greater than or equal to 0 seconds.";
 		

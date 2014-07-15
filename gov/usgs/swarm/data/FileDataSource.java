@@ -2,8 +2,8 @@ package gov.usgs.swarm.data;
 
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.Wave;
+import gov.usgs.plot.data.file.FileType;
 import gov.usgs.plot.data.file.SeismicDataFile;
-import gov.usgs.plot.data.file.SeismicDataFile.FileType;
 import gov.usgs.swarm.FileTypeDialog;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;

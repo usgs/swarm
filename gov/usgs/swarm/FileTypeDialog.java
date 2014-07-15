@@ -1,6 +1,6 @@
 package gov.usgs.swarm;
 
-import gov.usgs.plot.data.file.SeismicDataFile.FileType;
+import gov.usgs.plot.data.file.FileType;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

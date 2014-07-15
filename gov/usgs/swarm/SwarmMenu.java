@@ -1,6 +1,6 @@
 package gov.usgs.swarm;
 
-import gov.usgs.plot.data.file.SeismicDataFile.FileType;
+import gov.usgs.plot.data.file.FileType;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.util.Util;
 import gov.usgs.util.ui.ExtensionFileFilter;
