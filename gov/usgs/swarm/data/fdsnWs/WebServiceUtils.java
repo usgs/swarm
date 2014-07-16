@@ -2,7 +2,6 @@ package gov.usgs.swarm.data.fdsnWs;
 
 import gov.usgs.swarm.ChannelInfo;
 import gov.usgs.swarm.ChannelUtil;
-import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.Log;
 

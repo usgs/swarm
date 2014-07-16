@@ -4,7 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/USGS/contrib/colt.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/forms-1.0.7.jar"/>
-	<classpathentry kind="lib" path="/USGS/contrib/jnlp.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/log4j-1.2.13.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/looks-2.0.4.jar"/>
 	<classpathentry kind="lib" path="/USGS/contrib/slf4j-api-1.7.1.jar"/>

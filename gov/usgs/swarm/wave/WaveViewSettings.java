@@ -1,13 +1,12 @@
 package gov.usgs.swarm.wave;
 
+import gov.usgs.math.Butterworth;
+import gov.usgs.util.ConfigFile;
+import gov.usgs.util.Util;
+
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
-
-import gov.usgs.math.Butterworth;
-import gov.usgs.swarm.Metadata;
-import gov.usgs.util.ConfigFile;
-import gov.usgs.util.Util;
  
 /**
  *

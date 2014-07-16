@@ -6,7 +6,6 @@ import gov.usgs.net.ReadListener;
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.Metadata;
-import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;

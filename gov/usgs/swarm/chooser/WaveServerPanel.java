@@ -1,9 +1,9 @@
 package gov.usgs.swarm.chooser;
 
+import gov.usgs.swarm.Swarm;
+
 import java.util.Arrays;
 import java.util.TimeZone;
-
-import gov.usgs.swarm.Swarm;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;

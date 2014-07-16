@@ -1,5 +1,9 @@
 package gov.usgs.swarm.data.seedLink;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
 import edu.iris.dmc.seedcodec.Codec;
 import edu.iris.dmc.seedcodec.CodecException;
 import edu.iris.dmc.seedcodec.DecompressedData;
@@ -10,10 +14,6 @@ import edu.sc.seis.seisFile.mseed.DataHeader;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.util.Util;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
 
 public class SeedUtils
 {

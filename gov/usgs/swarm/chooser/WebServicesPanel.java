@@ -1,13 +1,13 @@
 package gov.usgs.swarm.chooser;
 
-import java.awt.Component;
-
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.data.DataSelectReader;
 import gov.usgs.swarm.data.fdsnWs.WebServiceStationTextClient;
 import gov.usgs.swarm.data.fdsnWs.WebServiceUtils;
 import gov.usgs.swarm.data.fdsnWs.WebServicesSource;
 import gov.usgs.util.ResourceReader;
+
+import java.awt.Component;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;

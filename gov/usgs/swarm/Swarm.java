@@ -35,8 +35,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.jnlp.BasicService;
-import javax.jnlp.ServiceManager;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JDesktopPane;
@@ -120,7 +118,6 @@ public class Swarm extends JFrame {
         } else {
             logger.fine("Swarm version/date: " + VERSION + "/" + BUILD_DATE);
         }
-        logger.fine("JNLP: " + isJNLP());
         setIconImage(Icons.swarm.getImage());
 
         config = SwarmConfig.getInstance();
@@ -283,15 +280,6 @@ public class Swarm extends JFrame {
             }
         });
 
-    }
-
-    private boolean isJNLP() {
-        try {
-            BasicService bs = (BasicService) ServiceManager.lookup("javax.jnlp.BasicService");
-            return bs != null;
-        } catch (Throwable e) {
-        }
-        return false;
     }
 
     public void touchUITime() {
