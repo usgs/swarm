@@ -67,7 +67,6 @@ public class Swarm extends JFrame {
     private static Swarm application;
     private JDesktopPane desktop;
     private JSplitPane split;
-    private DataChooser chooser;
     private SwarmMenu swarmMenu;
     private CachedDataSource cache;
     private int frameCount = 0;
@@ -344,10 +343,6 @@ public class Swarm extends JFrame {
         return mapFrame;
     }
 
-    public DataChooser getDataChooser() {
-        return chooser;
-    }
-
     public static Swarm getApplication() {
         return application;
     }
@@ -404,7 +399,7 @@ public class Swarm extends JFrame {
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        chooser = new DataChooser();
+        DataChooser chooser = DataChooser.getInstance();
         split = SwarmUtil.createStrippedSplitPane(JSplitPane.HORIZONTAL_SPLIT, chooser, desktop);
         split.setDividerLocation(config.chooserDividerLocation);
         split.setDividerSize(4);
@@ -594,6 +589,7 @@ public class Swarm extends JFrame {
         config.chooserDividerLocation = split.getDividerLocation();
         config.chooserVisible = isChooserVisible();
 
+        DataChooser chooser = DataChooser.getInstance();
         config.nearestDividerLocation = chooser.getDividerLocation();
         config.kiosk = Boolean.toString(fullScreen);
 
@@ -743,7 +739,7 @@ public class Swarm extends JFrame {
         cf.put("kioskX", Integer.toString(getX()));
         cf.put("kioskY", Integer.toString(getY()));
 
-        chooser.saveLayout(cf, "chooser");
+        DataChooser.getInstance().saveLayout(cf, "chooser");
 
         SwarmLayout sl = new SwarmLayout(cf);
         int i = 0;

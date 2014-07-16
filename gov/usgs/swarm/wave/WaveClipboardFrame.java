@@ -12,6 +12,7 @@ import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.Throbber;
 import gov.usgs.swarm.TimeListener;
+import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.heli.HelicorderViewPanelListener;
@@ -904,7 +905,7 @@ public class WaveClipboardFrame extends SwarmFrame {
         selectedSet.add(p);
         doButtonEnables();
         p.setBackgroundColor(SELECT_COLOR);
-        Swarm.getApplication().getDataChooser().setNearest(p.getChannel());
+        DataChooser.getInstance().setNearest(p.getChannel());
         p.createImage();
         waveToolbar.addSettings(p.getSettings());
     }

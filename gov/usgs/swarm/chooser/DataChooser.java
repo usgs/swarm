@@ -90,10 +90,12 @@ public class DataChooser extends JPanel {
 
     private static final String[] TIME_VALUES = new String[] { "Now" }; // "Today (Local)",
                                                                         // "Today (UTC)",
-    // "Yesterday (Local)", "Yesterday (UTC)" };
+                                                                        // "Yesterday (Local)", "Yesterday (UTC)" };
 
     private static final int MAX_CHANNELS_AT_ONCE = 500;
     public static final Color LINE_COLOR = new Color(0xac, 0xa8, 0x99);
+
+    private static final DataChooser INSTANCE = new DataChooser();
 
     private JTree dataTree;
     private JScrollPane treeScrollPane;
@@ -130,9 +132,10 @@ public class DataChooser extends JPanel {
 
     private DefaultTreeModel model;
 
-    public DataChooser() {
+    private DataChooser() {
         super(new BorderLayout());
 
+        filesNode = new ServerNode(FileDataSource.getInstance());
         filesNode.getSource().addListener(new FileSourceListener());
 
         nearestPaths = new HashMap<String, TreePath>();
@@ -149,6 +152,10 @@ public class DataChooser extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 0));
 
         addServers(SwarmConfig.getInstance().sources);
+    }
+
+    public static DataChooser getInstance() {
+        return INSTANCE;
     }
 
     private class FileSourceListener implements SeismicDataSourceListener {

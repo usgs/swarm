@@ -156,7 +156,7 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 		{
 			for (String src : sources)
 				cl.addSource(src);
-			Swarm.getApplication().getDataChooser().processLayout(cf, cl);
+			DataChooser.getInstance().processLayout(cf, cl);
 			while (!cl.finished())
 			{
 				try { Thread.sleep(100); } catch (Exception e) { e.printStackTrace(); }
@@ -193,7 +193,7 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 		{
 			ConfigFile cf = config.getSubConfig(monitor);
 			SeismicDataSource sds = SwarmConfig.getInstance().getSource(cf.getString("source"));
-			if (sds != null && Swarm.getApplication().getDataChooser().isSourceOpened(sds.getName()))
+			if (sds != null && DataChooser.getInstance().isSourceOpened(sds.getName()))
 			{
 				MultiMonitor mm = Swarm.getApplication().getMonitor(sds);
 				mm.processLayout(cf);

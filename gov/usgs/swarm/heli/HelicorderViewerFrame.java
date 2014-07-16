@@ -14,6 +14,7 @@ import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.Throbber;
 import gov.usgs.swarm.TimeListener;
 import gov.usgs.swarm.WigglerPanel;
+import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.GulperListener;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.data.SeismicDataSourceListener;
@@ -420,7 +421,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 		this.addInternalFrameListener(new InternalFrameAdapter() {
 			public void internalFrameActivated(InternalFrameEvent e) {
 				if (settings.channel != null)
-					Swarm.getApplication().getDataChooser().setNearest(settings.channel);
+					DataChooser.getInstance().setNearest(settings.channel);
 			}
 
 			public void internalFrameClosing(InternalFrameEvent e) {

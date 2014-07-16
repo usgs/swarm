@@ -5,6 +5,7 @@ import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.Throbber;
+import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;
@@ -142,7 +143,7 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 					public void internalFrameActivated(InternalFrameEvent e)
 					{
 						if (channel != null)
-							Swarm.getApplication().getDataChooser().setNearest(channel);
+							DataChooser.getInstance().setNearest(channel);
 					}
 					
 					public void internalFrameClosing(InternalFrameEvent e)

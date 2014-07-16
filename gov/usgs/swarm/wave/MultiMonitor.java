@@ -15,6 +15,7 @@ import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwarmFrame;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.Throbber;
+import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.wave.WaveViewSettings.ViewType;
 import gov.usgs.util.ConfigFile;
@@ -499,7 +500,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 						if (selectedIndex != -1)
 						{
 							String ch = panels.get(selectedIndex).getChannel();
-							Swarm.getApplication().getDataChooser().setNearest(ch);
+							DataChooser.getInstance().setNearest(ch);
 						}
 					}
 					
@@ -646,7 +647,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 			if (panel == p)
 			{
 				selectedIndex = i;
-				Swarm.getApplication().getDataChooser().setNearest(panel.getChannel());
+				DataChooser.getInstance().setNearest(panel.getChannel());
 				panel.setBackgroundColor(SELECT_COLOR);
 				panel.createImage();
 				panel.repaint();
