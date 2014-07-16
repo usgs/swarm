@@ -27,12 +27,13 @@ import javax.swing.JOptionPane;
  */
 public class FileDataSource extends AbstractCachingDataSource {
 
+    private static final FileDataSource INSTANCE = new FileDataSource();
+
     private Map<String, double[]> channelTimes;
     private Set<String> openFiles;
     private static SwarmConfig swarmConfig;
 
-   
-    public FileDataSource() {
+    private FileDataSource() {
         super();
 
         channelTimes = new HashMap<String, double[]>();
@@ -41,6 +42,10 @@ public class FileDataSource extends AbstractCachingDataSource {
         storeInUserConfig = false;
         name = "Files";
         swarmConfig = SwarmConfig.getInstance();
+    }
+
+    public static FileDataSource getInstance() {
+        return INSTANCE;
     }
 
     public void flush() {
@@ -63,7 +68,6 @@ public class FileDataSource extends AbstractCachingDataSource {
         ct[0] = Math.min(ct[0], t1);
         ct[1] = Math.max(ct[1], t2);
     }
-
 
     public void openFiles(File[] fs) {
         FileTypeDialog dialog = null;
@@ -95,7 +99,6 @@ public class FileDataSource extends AbstractCachingDataSource {
             if (file == null)
                 JOptionPane.showMessageDialog(Swarm.getApplication(), "Could not open file: " + fileName, "Error",
                         JOptionPane.ERROR_MESSAGE);
-
 
             readFile(file);
             swarmConfig.lastPath = fs[i].getParent();
@@ -150,7 +153,6 @@ public class FileDataSource extends AbstractCachingDataSource {
         };
         worker.start();
     }
-
 
     public HelicorderData getHelicorder(String channel, double t1, double t2, GulperListener gl) {
         double[] ct = channelTimes.get(channel);
