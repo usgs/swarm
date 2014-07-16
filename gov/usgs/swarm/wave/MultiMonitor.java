@@ -332,7 +332,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 							{
 								WaveViewPanel p =  new WaveViewPanel(panel);
 								p.setDataSource(dataSource.getCopy());
-								WaveClipboardFrame cb = Swarm.getApplication().getWaveClipboard();
+								WaveClipboardFrame cb = WaveClipboardFrame.getInstance();
 								cb.setVisible(true);
 								cb.addWave(p);
 							}

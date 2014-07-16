@@ -3,6 +3,7 @@ package gov.usgs.swarm;
 import gov.usgs.plot.data.file.FileType;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.FileDataSource;
+import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.util.Util;
 import gov.usgs.util.ui.ExtensionFileFilter;
 
@@ -268,7 +269,8 @@ public class SwarmMenu extends JMenuBar {
         clipboard.setMnemonic('W');
         clipboard.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Swarm.getApplication().setClipboardVisible(!Swarm.getApplication().isClipboardVisible());
+                WaveClipboardFrame waveClipboard = WaveClipboardFrame.getInstance();
+                waveClipboard.setVisible(!waveClipboard.isVisible());
             }
         });
         clipboard.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, KeyEvent.CTRL_DOWN_MASK));
@@ -327,7 +329,7 @@ public class SwarmMenu extends JMenuBar {
 
         windowMenu.addMenuListener(new MenuListener() {
             public void menuSelected(MenuEvent e) {
-                clipboard.setSelected(Swarm.getApplication().isClipboardVisible());
+                clipboard.setSelected(WaveClipboardFrame.getInstance().isVisible());
                 chooser.setSelected(Swarm.getApplication().isChooserVisible());
                 map.setSelected(Swarm.getApplication().isMapVisible());
             }

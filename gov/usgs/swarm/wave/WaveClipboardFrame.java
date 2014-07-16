@@ -80,6 +80,8 @@ public class WaveClipboardFrame extends SwarmFrame {
     private static final Color SELECT_COLOR = new Color(200, 220, 241);
     private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
 
+    private static final WaveClipboardFrame INSTANCE = new WaveClipboardFrame();
+    
     private JScrollPane scrollPane;
     private Box waveBox;
     private List<WaveViewPanel> waves;
@@ -126,7 +128,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     private int lastClickedIndex = -1;
 
-    public WaveClipboardFrame() {
+    private WaveClipboardFrame() {
         super("Wave Clipboard", true, true, true, false);
         this.setFocusable(true);
         selectedSet = new HashSet<WaveViewPanel>();
@@ -143,6 +145,10 @@ public class WaveClipboardFrame extends SwarmFrame {
         };
     }
 
+    public static WaveClipboardFrame getInstance() {
+        return INSTANCE;
+    }
+    
     public HelicorderViewPanelListener getLinkListener() {
         return linkListener;
     }
@@ -1152,5 +1158,12 @@ public class WaveClipboardFrame extends SwarmFrame {
             g.setColor(Color.black);
             g.drawString("Clipboard empty.", dim.width / 2 - 40, dim.height / 2);
         }
+    }
+    
+    public void setVisible(boolean isVisible) {
+        super.setVisible(isVisible);
+        if (isVisible)
+            toFront();
+
     }
 }

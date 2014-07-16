@@ -71,7 +71,6 @@ public class Swarm extends JFrame {
     private CachedDataSource cache;
     private int frameCount = 0;
 
-    private WaveClipboardFrame waveClipboard;
     private MapFrame mapFrame;
 
     private static final String TITLE = "Swarm";
@@ -335,10 +334,6 @@ public class Swarm extends JFrame {
         return VERSION;
     }
 
-    public WaveClipboardFrame getWaveClipboard() {
-        return waveClipboard;
-    }
-
     public MapFrame getMapFrame() {
         return mapFrame;
     }
@@ -406,7 +401,7 @@ public class Swarm extends JFrame {
         setChooserVisible(config.chooserVisible);
         chooser.setDividerLocation(config.nearestDividerLocation);
 
-        waveClipboard = new WaveClipboardFrame();
+        WaveClipboardFrame waveClipboard = WaveClipboardFrame.getInstance();
         desktop.add(waveClipboard);
         waveClipboard.setVisible(config.clipboardVisible);
         if (Swarm.config.clipboardMaximized) {
@@ -488,17 +483,6 @@ public class Swarm extends JFrame {
             mapFrame.toFront();
     }
 
-    public boolean isClipboardVisible() {
-        return waveClipboard.isVisible();
-    }
-
-    public void setClipboardVisible(boolean vis) {
-        waveClipboard.setVisible(vis);
-
-        if (vis)
-            waveClipboard.toFront();
-    }
-
     public boolean isFullScreenMode() {
         return fullScreen;
     }
@@ -516,6 +500,8 @@ public class Swarm extends JFrame {
         this.dispose();
         this.setUndecorated(full);
         this.setResizable(!full);
+        
+        WaveClipboardFrame waveClipboard = WaveClipboardFrame.getInstance();
         waveClipboard.setVisible(!full);
         waveClipboard.toBack();
 
@@ -564,6 +550,7 @@ public class Swarm extends JFrame {
             config.windowMaximized = false;
         }
 
+        WaveClipboardFrame waveClipboard = WaveClipboardFrame.getInstance();
         if (waveClipboard.isMaximum())
             config.clipboardMaximized = true;
         else {
@@ -573,7 +560,7 @@ public class Swarm extends JFrame {
             config.clipboardHeight = waveClipboard.getHeight();
             config.clipboardMaximized = false;
         }
-        config.clipboardVisible = isClipboardVisible();
+        config.clipboardVisible = WaveClipboardFrame.getInstance().isVisible();
 
         if (mapFrame.isMaximum())
             config.mapMaximized = true;
@@ -614,7 +601,7 @@ public class Swarm extends JFrame {
         final WaveViewPanel wvp = new WaveViewPanel();
         wvp.setChannel(channel);
         wvp.setDataSource(source);
-        WaveViewPanel cwvp = waveClipboard.getSelected();
+        WaveViewPanel cwvp = WaveClipboardFrame.getInstance().getSelected();
         double st = 0;
         double et = 0;
         if (cwvp == null) {
@@ -629,6 +616,7 @@ public class Swarm extends JFrame {
         final double fet = et;
 
         final SwingWorker worker = new SwingWorker() {
+            WaveClipboardFrame waveClipboard = WaveClipboardFrame.getInstance();
             public Object construct() {
                 // double now = CurrentTime.nowJ2K();
                 waveClipboard.getThrobber().increment();
@@ -825,6 +813,7 @@ public class Swarm extends JFrame {
         Dimension ds = desktop.getSize();
         JInternalFrame bingo = null;
 
+        WaveClipboardFrame waveClipboard = WaveClipboardFrame.getInstance();
         if (waveClipboard.isSelected()) {
             bingo = waveClipboard;
         } else

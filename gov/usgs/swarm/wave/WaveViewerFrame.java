@@ -119,7 +119,7 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 					{
 						if (waveViewPanel != null)
 						{
-							WaveClipboardFrame cb = Swarm.getApplication().getWaveClipboard();
+							WaveClipboardFrame cb = WaveClipboardFrame.getInstance();
 							cb.setVisible(true);
 							cb.addWave(new WaveViewPanel(waveViewPanel));
 						}

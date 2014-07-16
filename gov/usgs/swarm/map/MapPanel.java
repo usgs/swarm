@@ -456,7 +456,7 @@ public class MapPanel extends JPanel {
 
 	public void wavesToClipboard() {
 		synchronized (visiblePanels) {
-			WaveClipboardFrame cb = Swarm.getApplication().getWaveClipboard();
+			WaveClipboardFrame cb = WaveClipboardFrame.getInstance();
 			int cnt = 0;
 			for (MapMiniPanel panel : visiblePanels) {
 				if (panel.isWaveVisible()) {

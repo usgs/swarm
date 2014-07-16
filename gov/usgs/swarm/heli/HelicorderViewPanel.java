@@ -335,7 +335,7 @@ public class HelicorderViewPanel extends JComponent {
 		if (insetWavePanel != null) {
 			WaveViewPanel p = new WaveViewPanel(insetWavePanel);
 			p.setDataSource(insetWavePanel.getDataSource().getCopy());
-			WaveClipboardFrame cb = Swarm.getApplication().getWaveClipboard();
+			WaveClipboardFrame cb = WaveClipboardFrame.getInstance();
 			cb.setVisible(true);
 			cb.addWave(p);
 			requestFocus();

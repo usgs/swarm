@@ -12,6 +12,7 @@ import gov.usgs.swarm.data.DataSourceType;
 import gov.usgs.swarm.data.FileDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.data.SeismicDataSourceListener;
+import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Pair;
 import gov.usgs.util.Time;
@@ -423,7 +424,7 @@ public class DataChooser extends JPanel {
                                 Swarm.getApplication().loadClipboardWave(pair.item1.getSource(), pair.item2);
                             }
                         }
-                        Swarm.getApplication().getWaveClipboard().requestFocusInWindow();
+                        WaveClipboardFrame.getInstance().requestFocusInWindow();
                         return null;
                     }
                 };
