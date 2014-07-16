@@ -69,8 +69,6 @@ public class Swarm extends JFrame {
     private CachedDataSource cache;
     private int frameCount = 0;
 
-    private MapFrame mapFrame;
-
     private static final String TITLE = "Swarm";
     private static final String VERSION;
     private static final String BUILD_DATE;
@@ -317,10 +315,6 @@ public class Swarm extends JFrame {
         return VERSION;
     }
 
-    public MapFrame getMapFrame() {
-        return mapFrame;
-    }
-
     public static Swarm getApplication() {
         return application;
     }
@@ -394,7 +388,7 @@ public class Swarm extends JFrame {
             }
         }
 
-        mapFrame = new MapFrame();
+        MapFrame mapFrame = MapFrame.getInstance();
         desktop.add(mapFrame);
         frames.add(mapFrame);
         mapFrame.setVisible(config.mapVisible);
@@ -453,17 +447,6 @@ public class Swarm extends JFrame {
 
     public boolean isChooserVisible() {
         return getContentPane() == split;
-    }
-
-    public boolean isMapVisible() {
-        return mapFrame.isVisible();
-    }
-
-    public void setMapVisible(boolean vis) {
-        mapFrame.setVisible(vis);
-
-        if (vis)
-            mapFrame.toFront();
     }
 
     public boolean isFullScreenMode() {
@@ -545,6 +528,7 @@ public class Swarm extends JFrame {
         }
         config.clipboardVisible = WaveClipboardFrame.getInstance().isVisible();
 
+        MapFrame mapFrame = MapFrame.getInstance();
         if (mapFrame.isMaximum())
             config.mapMaximized = true;
         else {
@@ -723,6 +707,7 @@ public class Swarm extends JFrame {
             }
         }
 
+        MapFrame mapFrame = MapFrame.getInstance();
         if (mapFrame.isVisible())
             mapFrame.saveLayout(cf, "map");
 

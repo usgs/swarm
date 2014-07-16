@@ -3,6 +3,7 @@ package gov.usgs.swarm;
 import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.heli.HelicorderViewerFrame;
+import gov.usgs.swarm.map.MapFrame;
 import gov.usgs.swarm.wave.MultiMonitor;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Log;
@@ -172,14 +173,15 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 	private void processMap()
 	{
 		ConfigFile cf = config.getSubConfig("map");
+		MapFrame mapFrame = MapFrame.getInstance();
 		if (cf.getString("x") != null)
 		{
-			Swarm.getApplication().getMapFrame().setVisible(true);
-			Swarm.getApplication().getMapFrame().processLayout(cf);
+			mapFrame.setVisible(true);
+			mapFrame.processLayout(cf);
 		}
 		else
 		{
-			Swarm.getApplication().getMapFrame().setVisible(false);
+			mapFrame.setVisible(false);
 		}
 	}
 	

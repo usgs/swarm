@@ -17,6 +17,7 @@ import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.GulperListener;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.data.SeismicDataSourceListener;
+import gov.usgs.swarm.map.MapFrame;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.swarm.wave.WaveViewSettings;
 import gov.usgs.swarm.wave.WaveViewSettingsToolbar;
@@ -189,7 +190,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
 	public void addLinkListeners() {
 		helicorderViewPanel.addListener(WaveClipboardFrame.getInstance().getLinkListener());
-		helicorderViewPanel.addListener(Swarm.getApplication().getMapFrame().getLinkListener());
+		helicorderViewPanel.addListener(MapFrame.getInstance().getLinkListener());
 	}
 
 	private void createStatusLabel() {

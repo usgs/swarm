@@ -3,6 +3,7 @@ package gov.usgs.swarm;
 import gov.usgs.plot.data.file.FileType;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.FileDataSource;
+import gov.usgs.swarm.map.MapFrame;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.util.Util;
 import gov.usgs.util.ui.ExtensionFileFilter;
@@ -276,11 +277,12 @@ public class SwarmMenu extends JMenuBar {
         clipboard.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, KeyEvent.CTRL_DOWN_MASK));
         windowMenu.add(clipboard);
 
+        final MapFrame mapFrame = MapFrame.getInstance();
         map = new JCheckBoxMenuItem("Map");
         map.setMnemonic('M');
         map.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Swarm.getApplication().setMapVisible(!Swarm.getApplication().isMapVisible());
+                mapFrame.setVisible(!mapFrame.isVisible());
             }
         });
         map.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, KeyEvent.CTRL_DOWN_MASK));
@@ -290,7 +292,7 @@ public class SwarmMenu extends JMenuBar {
         mapToFront.setMnemonic('F');
         mapToFront.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Swarm.getApplication().setMapVisible(true);
+                mapFrame.setVisible(true);
             }
         });
         mapToFront.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0));
@@ -331,7 +333,7 @@ public class SwarmMenu extends JMenuBar {
             public void menuSelected(MenuEvent e) {
                 clipboard.setSelected(WaveClipboardFrame.getInstance().isVisible());
                 chooser.setSelected(Swarm.getApplication().isChooserVisible());
-                map.setSelected(Swarm.getApplication().isMapVisible());
+                map.setSelected(MapFrame.getInstance().isVisible());
             }
 
             public void menuDeselected(MenuEvent e) {

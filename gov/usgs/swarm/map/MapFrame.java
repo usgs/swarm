@@ -56,6 +56,8 @@ import javax.swing.event.InternalFrameEvent;
  */
 public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 	private static final long serialVersionUID = 1L;
+	private static final MapFrame INSTANCE = new MapFrame();
+	
 	private JToolBar toolbar;
 	private JPanel mainPanel;
 	private JButton optionsButton;
@@ -96,7 +98,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 
 	private Border border;
 
-	public MapFrame() {
+	private MapFrame() {
 		super("Map", true, true, true, false);
 		this.setFocusable(true);
 		Swarm.getApplication().touchUITime();
@@ -107,6 +109,10 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		updateThread.start();
 	}
 
+	public static MapFrame getInstance() {
+	    return INSTANCE;
+	}
+	
 	public void saveLayout(ConfigFile cf, String prefix) {
 		super.saveLayout(cf, prefix);
 		mapPanel.saveLayout(cf, prefix + ".panel");
@@ -170,6 +176,11 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		setVisible(true);
 	}
 
+	public void setVisible(boolean isVisible) {
+	    super.setVisible(isVisible);
+        if (isVisible)
+            toFront();
+	}
 	public void setMaximum(boolean max) throws PropertyVetoException {
 		if (max) {
 			swarmConfig.mapX = getX();

@@ -12,6 +12,7 @@ import gov.usgs.swarm.data.DataSourceType;
 import gov.usgs.swarm.data.FileDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.data.SeismicDataSourceListener;
+import gov.usgs.swarm.map.MapFrame;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Pair;
@@ -475,8 +476,9 @@ public class DataChooser extends JPanel {
                         else
                             gr.padPercent(1.2, 1.2);
                         if (gr.isValid()) {
-                            Swarm.getApplication().setMapVisible(true);
-                            Swarm.getApplication().getMapFrame().setView(gr);
+                            MapFrame mapFrame = MapFrame.getInstance();
+                            mapFrame.setVisible(true);
+                            mapFrame.setView(gr);
                         }
                         return null;
                     }
@@ -595,7 +597,7 @@ public class DataChooser extends JPanel {
         try {
             sds.establish();
             channels = sds.getChannels();
-            Swarm.getApplication().getMapFrame().reset(false);
+            MapFrame.getInstance().reset(false);
             sds.close();
         } catch (Exception e) {
             // e.printStackTrace();
