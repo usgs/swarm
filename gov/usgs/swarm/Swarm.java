@@ -103,18 +103,13 @@ public class Swarm extends JFrame {
     private Dimension oldSize;
     private Point oldLocation;
     private JFileChooser fileChooser;
-
     private Map<String, MultiMonitor> monitors;
-
     private AbstractAction toggleFullScreenAction;
-
     private long lastUITime;
-
     private EventListenerList timeListeners = new EventListenerList();
-
     private static SwarmConfig config;
-
     private static Logger logger;
+    private String lastLayout = "";
 
     public Swarm(String[] args) {
         super(TITLE + " [" + VERSION + "]");
@@ -290,7 +285,7 @@ public class Swarm extends JFrame {
 
     }
 
-    public boolean isJNLP() {
+    private boolean isJNLP() {
         try {
             BasicService bs = (BasicService) ServiceManager.lookup("javax.jnlp.BasicService");
             return bs != null;
@@ -342,7 +337,7 @@ public class Swarm extends JFrame {
         return application;
     }
 
-    public void createUI() {
+    private void createUI() {
         this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 closeApp();
@@ -675,7 +670,6 @@ public class Swarm extends JFrame {
         return frame;
     }
 
-    private String lastLayout = "";
 
     public void saveLayout(String name) {
         boolean fixedName = (name != null);
@@ -683,14 +677,14 @@ public class Swarm extends JFrame {
         boolean done = false;
         while (!done) {
             if (name == null) {
-                name = (String) JOptionPane.showInputDialog(Swarm.getApplication(), "Enter a name for this layout:",
+                name = (String) JOptionPane.showInputDialog(this, "Enter a name for this layout:",
                         "Save Layout", JOptionPane.INFORMATION_MESSAGE, null, null, lastLayout);
             }
             if (name != null) {
                 if (Swarm.config.layouts.containsKey(name)) {
                     boolean overwrite = false;
                     if (!fixedName) {
-                        int opt = JOptionPane.showConfirmDialog(Swarm.getApplication(),
+                        int opt = JOptionPane.showConfirmDialog(this,
                                 "A layout by that name already exists.  Overwrite?", "Warning",
                                 JOptionPane.YES_NO_OPTION);
                         overwrite = (opt == JOptionPane.YES_OPTION);
@@ -699,7 +693,7 @@ public class Swarm extends JFrame {
 
                     if (overwrite) {
                         if (fixedName) {
-                            JOptionPane.showMessageDialog(Swarm.getApplication(), "Layout overwritten.");
+                            JOptionPane.showMessageDialog(this, "Layout overwritten.");
                         }
                         swarmMenu.removeLayout(Swarm.config.layouts.get(name));
                         Swarm.config.removeLayout(Swarm.config.layouts.get(name));
