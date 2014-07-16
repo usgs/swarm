@@ -1,5 +1,7 @@
   Changes since version 2.3.3 (r2800)
  .....................................
+  - forced us_US in start scripts to avoid decimal comma
+  - reworked file-based import and export
   - reworked config file path searching
   - fixed concurrency problem affecting monitor mode
   - minor refactoring of timezone handling
