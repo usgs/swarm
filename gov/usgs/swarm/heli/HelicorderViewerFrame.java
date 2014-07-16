@@ -13,7 +13,6 @@ import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.Throbber;
 import gov.usgs.swarm.TimeListener;
-import gov.usgs.swarm.WigglerPanel;
 import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.GulperListener;
 import gov.usgs.swarm.data.SeismicDataSource;
@@ -114,7 +113,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 	private JLabel statusLabel;
 
 	private JPanel heliPanel;
-	private WigglerPanel wigglerPanel;
 
 	protected long lastRefreshTime;
 
@@ -434,8 +432,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 				dataSource.notifyDataNotNeeded(settings.channel, helicorderViewPanel.getStartTime(),
 						helicorderViewPanel.getEndTime(), gulperListener);
 				dataSource.close();
-				if (wigglerPanel != null)
-					wigglerPanel.kill();
 			}
 
 			public void internalFrameDeiconified(InternalFrameEvent e) {
@@ -520,31 +516,10 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 		return helicorderViewPanel;
 	}
 
-	public void settingsChanged() {
-		if (!settings.showWiggler && wigglerPanel != null)
-			removeWiggler();
-		if (settings.showWiggler && wigglerPanel == null)
-			createWiggler();
-	}
-
 	public void setPinned(boolean b) {
 		pinButton.setSelected(b);
 		int layer = b ? JLayeredPane.MODAL_LAYER : JLayeredPane.DEFAULT_LAYER;
 		Swarm.getApplication().setFrameLayer(HelicorderViewerFrame.this, layer);
-	}
-
-	public void createWiggler() {
-		wigglerPanel = new WigglerPanel(dataSource, settings.channel);
-		heliPanel.add(wigglerPanel, BorderLayout.SOUTH);
-		wigglerPanel.setPreferredSize(new Dimension(this.getSize().width, 75));
-	}
-
-	public void removeWiggler() {
-		if (wigglerPanel != null) {
-			wigglerPanel.kill();
-			heliPanel.remove(wigglerPanel);
-			wigglerPanel = null;
-		}
 	}
 
 	public void incXAxis() {

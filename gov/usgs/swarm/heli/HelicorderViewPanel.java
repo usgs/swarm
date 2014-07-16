@@ -154,7 +154,6 @@ public class HelicorderViewPanel extends JComponent {
 					/ 2;
 			loadInsetWave(j2k - zoomOffset, j2k + zoomOffset);
 		}
-		parent.settingsChanged();
 
 		repaint();
 	}

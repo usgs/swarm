@@ -22,7 +22,6 @@ public class HelicorderViewerSettings
 	public boolean forceCenter;
 	public int clipBars;
 	private long lastBottomTimeSet;
-	public boolean showWiggler;
 	
 	public boolean autoScale;
 	public boolean showClip;
@@ -48,7 +47,6 @@ public class HelicorderViewerSettings
 		scrollSize = 24;
 		forceCenter = false;
 		clipBars = 21;
-		showWiggler = false;
 		
 		clipValue = 2999;
 		showClip = swarmConfig.showClip; 
