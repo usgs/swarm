@@ -15,6 +15,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 /**
@@ -24,6 +25,7 @@ import javax.swing.JOptionPane;
  */
 public class SwarmLayout implements Comparable<SwarmLayout>
 {
+    private static final JFrame applicationFrame = Swarm.getApplicationFrame();
 	private ConfigFile config;
 	
 	public SwarmLayout(ConfigFile c)
@@ -130,13 +132,13 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 			sources.remove(src);
 			if (e.getID() == DataChooser.NO_DATA_SOURCE)
 			{
-				JOptionPane.showMessageDialog(Swarm.getApplication(), 
+				JOptionPane.showMessageDialog(applicationFrame, 
 						"The data source '" + src + "' does not exist.", 
 						"Error", JOptionPane.ERROR_MESSAGE);
 			}
 			else if (e.getID() == DataChooser.NO_CHANNEL_LIST)
 			{
-				JOptionPane.showMessageDialog(Swarm.getApplication(), 
+				JOptionPane.showMessageDialog(applicationFrame, 
 						"The data source '" + src + "' could not be opened.", 
 						"Error", JOptionPane.ERROR_MESSAGE);
 			}
@@ -234,7 +236,7 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 		boolean kiosk = Boolean.parseBoolean(k);
 		if (kiosk && x != -1 && y != -1)
 		{
-			Swarm.getApplication().setLocation(x, y);
+			applicationFrame.setLocation(x, y);
 		}
 		Swarm.getApplication().setFullScreenMode(kiosk);
 	}

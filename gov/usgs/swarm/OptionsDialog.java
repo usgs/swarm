@@ -9,6 +9,7 @@ import java.util.TimeZone;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -25,6 +26,7 @@ import com.jgoodies.forms.layout.FormLayout;
  */
 public class OptionsDialog extends SwarmDialog {
 	private static final long serialVersionUID = 1L;
+    private static final JFrame applicationFrame = Swarm.getApplicationFrame();
 
 	private JPanel dialogPanel;
 
@@ -48,7 +50,7 @@ public class OptionsDialog extends SwarmDialog {
 	private JLabel wmsStylesLabel;
 
 	public OptionsDialog() {
-		super(Swarm.getApplication(), "Options", true);
+		super(applicationFrame, "Options", true);
 		createUI();
 		setCurrentValues();
 		setSizeAndLocation();

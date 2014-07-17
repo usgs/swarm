@@ -63,6 +63,7 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
 public class Swarm extends JFrame {
     private static final long serialVersionUID = -1;
     private static Swarm application;
+    private static JFrame applicationFrame;
     private JDesktopPane desktop;
     private JSplitPane split;
     private SwarmMenu swarmMenu;
@@ -125,6 +126,7 @@ public class Swarm extends JFrame {
         cache = CachedDataSource.getInstance();
         frames = new ArrayList<JInternalFrame>();
         application = this;
+        applicationFrame = this;
 
         checkJavaVersion();
         loadFileChooser();
@@ -319,6 +321,10 @@ public class Swarm extends JFrame {
         return application;
     }
 
+    public static JFrame getApplicationFrame() {
+        return applicationFrame;
+    }
+    
     private void createUI() {
         this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {

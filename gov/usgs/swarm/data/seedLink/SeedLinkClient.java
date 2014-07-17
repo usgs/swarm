@@ -461,7 +461,7 @@ public class SeedLinkClient extends BaseSLClient
 		final Waveform waveform = blockette.getWaveform();
 		// if waveform and FSDH
 		if (waveform != null && blockette.getType() == 999
-				&& Swarm.getApplication() != null)
+				&& Swarm.getApplicationFrame() != null)
 		{
 			// convert waveform to wave (also done in
 			// gov.usgs.swarm.data.FileDataSource)

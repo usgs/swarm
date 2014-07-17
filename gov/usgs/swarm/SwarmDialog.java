@@ -37,6 +37,7 @@ public class SwarmDialog extends JDialog {
 	private boolean okClicked;
 
 	protected static SwarmConfig swarmConfig;
+    protected static final JFrame applicationFrame = Swarm.getApplicationFrame();
 
 	protected SwarmDialog(JFrame parent, String title, boolean modal) {
 		super(parent, title, modal);

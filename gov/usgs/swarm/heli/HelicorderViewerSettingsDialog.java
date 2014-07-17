@@ -68,7 +68,7 @@ public class HelicorderViewerSettingsDialog extends SwarmDialog {
 	private HelicorderViewerSettingsDialog() {
 		// super(Swarm.getApplication(), "Helicorder View Settings", true,
 		// WIDTH, HEIGHT);
-		super(Swarm.getApplication(), "Helicorder View Settings", true);
+		super(Swarm.getApplicationFrame(), "Helicorder View Settings", true);
 		utcDateFormat = new SimpleDateFormat("yyyyMMddHHmm");
 		utcDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 

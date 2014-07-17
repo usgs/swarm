@@ -153,7 +153,7 @@ public class WaveServerPanel extends DataSourcePanel
 		
 		if (message != null)
 		{
-			JOptionPane.showMessageDialog(Swarm.getApplication(), message, "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(applicationFrame, message, "Error", JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
 		else

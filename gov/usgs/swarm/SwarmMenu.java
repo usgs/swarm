@@ -107,7 +107,7 @@ public class SwarmMenu extends JMenuBar {
                 chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 chooser.setMultiSelectionEnabled(true);
                 chooser.setDialogTitle("Open Wave as Data Source");
-                int result = chooser.showOpenDialog(Swarm.getApplication());
+                int result = chooser.showOpenDialog(Swarm.getApplicationFrame());
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File[] fs = chooser.getSelectedFiles();
                     FileDataSource.getInstance().openFiles(fs);
@@ -414,7 +414,7 @@ public class SwarmMenu extends JMenuBar {
         private DefaultListModel model;
 
         protected RemoveLayoutDialog() {
-            super(Swarm.getApplication(), "Remove Layouts", true);
+            super(Swarm.getApplicationFrame(), "Remove Layouts", true);
             setSizeAndLocation();
         }
 

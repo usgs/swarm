@@ -109,7 +109,7 @@ public class WWSPanel extends DataSourcePanel
 			message = "There is an error with the WWS time out (must be > 0).";
 		if (message != null)
 		{
-			JOptionPane.showMessageDialog(Swarm.getApplication(), message, "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(applicationFrame, message, "Error", JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
 		else

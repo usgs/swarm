@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
@@ -21,6 +22,8 @@ public class SwarmFrame extends JInternalFrame {
 	protected Dimension oldNorthPaneSize;
 	protected boolean fullScreen = false;
 	protected static SwarmConfig swarmConfig;
+    protected static final JFrame applicationFrame = Swarm.getApplicationFrame();
+
 
 	public SwarmFrame(String title, boolean resizable, boolean closable, boolean maximizable, boolean iconifiable) {
 		super(title, resizable, closable, maximizable, iconifiable);

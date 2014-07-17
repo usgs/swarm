@@ -54,6 +54,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -98,6 +99,7 @@ public class DataChooser extends JPanel {
     public static final Color LINE_COLOR = new Color(0xac, 0xa8, 0x99);
 
     private static final DataChooser INSTANCE = new DataChooser();
+    private static final JFrame applicationFrame = Swarm.getApplicationFrame();
 
     private JTree dataTree;
     private JScrollPane treeScrollPane;
@@ -355,7 +357,7 @@ public class DataChooser extends JPanel {
                 addTimeToBox(t0);
             } catch (ParseException e) {
                 String message = "Invalid time; legal format is 'YYYYMMDD' or 'YYYYMMDDhhmm', using 'Now' instead.";
-                JOptionPane.showMessageDialog(Swarm.getApplication(), message, "Time Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(applicationFrame, message, "Time Error", JOptionPane.ERROR_MESSAGE);
             }
         }
         return j2k;
@@ -964,7 +966,7 @@ public class DataChooser extends JPanel {
         }
 
         if (countExceeded) {
-            JOptionPane.showMessageDialog(Swarm.getApplication(),
+            JOptionPane.showMessageDialog(applicationFrame,
                     Messages.getString("DataChooser.maxChannelsAtOnceError") + MAX_CHANNELS_AT_ONCE, //$NON-NLS-1$ 
                     Messages.getString("DataChooser.errorBoxTitle"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$
         }

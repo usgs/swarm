@@ -2,6 +2,7 @@ package gov.usgs.swarm.data;
 
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.Wave;
+import gov.usgs.swarm.Swarm;
 import gov.usgs.util.Log;
 
 import java.util.ArrayList;
@@ -9,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import javax.swing.JFrame;
 
 import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix2D;
@@ -31,6 +34,8 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 	protected Map<String, List<CachedWave>> waveCache;
 	protected CachePurgeAction[] purgeActions;
 	protected static Logger logger;
+    protected static final JFrame applicationFrame = Swarm.getApplicationFrame();
+
 	
 	public AbstractCachingDataSource() {
 		helicorderCache = new HashMap<String, List<CachedHelicorder>>();

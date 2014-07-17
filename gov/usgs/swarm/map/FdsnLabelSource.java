@@ -22,6 +22,11 @@ import edu.sc.seis.seisFile.fdsnws.quakeml.Quakeml;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.util.Time;
 
+/*
+ * A class to retrieve events from IRIS for plotting on the map.
+ * 
+ * @author: Tom Parker
+ */
 public class FdsnLabelSource implements LabelSource {
 
 
@@ -95,44 +100,4 @@ public class FdsnLabelSource implements LabelSource {
         
         return hypos;
     }
-//
-//    public List<? extends ClickableGeoLabel> getLabels()
-//    {
-//        ResourceReader rr = ResourceReader.getResourceReader(RSS_URL);
-//        List<Hypocenter> hypos = new ArrayList<Hypocenter>();
-//        try
-//        {
-//            GetQuakeIDs q = new GetQuakeIDs();
-//            SimpleXMLParser.parse(q, rr.getReader());
-//            for (String id : q.ids)
-//            {
-//                System.out.println(id);
-//                XMLToMap qm = new XMLToMap();
-//                ResourceReader qr = ResourceReader.getResourceReader(QUAKE_URL + "/" + id);
-//                SimpleXMLParser.parse(qm, qr.getReader());
-//                Hypocenter h = new Hypocenter();
-//                double lat = Double.parseDouble(qm.text.get("report/lat"));
-//                double lon = Double.parseDouble(qm.text.get("report/lon"));
-//                h.location = new Point2D.Double(lon, lat);
-//                h.text = "M" + qm.text.get("report/mag");
-//                h.depth = Double.parseDouble(qm.text.get("report/depth"));
-//                String year = qm.text.get("report/uttime/year");
-//                String mo = qm.text.get("report/uttime/month");
-//                String day = qm.text.get("report/uttime/day");
-//                String hour = qm.text.get("report/uttime/hour");
-//                String minute = qm.text.get("report/uttime/minute");
-//                String second = qm.text.get("report/uttime/second");
-//                String ms = qm.text.get("report/uttime/msec");
-//                String ds = String.format("%s-%s-%s %s:%s:%s.%s", year, mo, day, hour, minute, second, ms);
-//                h.time = Time.parse(Time.STANDARD_TIME_FORMAT_MS, ds);
-//                hypos.add(h);
-//            }
-//        }
-//        catch (Exception e)
-//        {
-//            e.printStackTrace();
-//        }
-//        return hypos;
-//    }
-
 }

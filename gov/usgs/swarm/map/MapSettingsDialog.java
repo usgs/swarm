@@ -1,6 +1,5 @@
 package gov.usgs.swarm.map;
 
-import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmDialog;
 import gov.usgs.swarm.map.MapPanel.LabelSetting;
 
@@ -44,7 +43,7 @@ public static final long serialVersionUID = -1;
 	
 	private MapSettingsDialog()
 	{
-		super(Swarm.getApplication(), "Map Settings", true);
+		super(applicationFrame, "Map Settings", true);
 		createUI();
 		setSizeAndLocation();
 	}

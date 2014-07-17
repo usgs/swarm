@@ -16,6 +16,7 @@ import java.text.NumberFormat;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
@@ -37,6 +38,7 @@ import gov.usgs.swarm.data.CachedDataSource;
 public class AboutDialog extends JDialog implements Runnable
 {
 	private static final long serialVersionUID = -1;
+	private static final JFrame applicationFrame = Swarm.getApplicationFrame();
 	private final static int TITLE_LOC_Y = 5;
 	private final static int TITLE_HEIGHT =  190;
 	private final static int MAIN_PAD_HEIGHT = 9;
@@ -69,10 +71,10 @@ public class AboutDialog extends JDialog implements Runnable
 	 */
 	public AboutDialog()
 	{
-		super(Swarm.getApplication(), "About", true);
+		super(applicationFrame, "About", true);
 		this.setSize(WIDTH, HEIGHT);
-		Dimension parentSize = Swarm.getApplication().getSize();
-		Point parentLoc = Swarm.getApplication().getLocation();
+		Dimension parentSize = applicationFrame.getSize();
+		Point parentLoc = applicationFrame.getLocation();
 		this.setLocation(parentLoc.x + (parentSize.width / 2 - WIDTH / 2),
 				parentLoc.y + (parentSize.height / 2 - HEIGHT / 2));
 				

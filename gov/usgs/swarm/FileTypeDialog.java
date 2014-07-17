@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -21,6 +22,7 @@ import javax.swing.JScrollPane;
  */
 public class FileTypeDialog extends SwarmDialog {
     private static final long serialVersionUID = 1L;
+    private static final JFrame applicationFrame = Swarm.getApplicationFrame();
     private JLabel filename;
     private JList fileTypes;
     private JCheckBox assumeSame;
@@ -28,7 +30,7 @@ public class FileTypeDialog extends SwarmDialog {
     private boolean opened = false;
 
     public FileTypeDialog() {
-        super(Swarm.getApplication(), "Select File Type", true);
+        super(applicationFrame, "Select File Type", true);
         setSizeAndLocation();
     }
 

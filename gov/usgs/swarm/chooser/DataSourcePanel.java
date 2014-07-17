@@ -1,7 +1,9 @@
 package gov.usgs.swarm.chooser;
 
+import gov.usgs.swarm.Swarm;
 import gov.usgs.util.ResourceReader;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 /**
@@ -14,6 +16,8 @@ abstract public class DataSourcePanel
 	protected String code;
 	protected String name;
 	protected String source;
+    protected static final JFrame applicationFrame = Swarm.getApplicationFrame();
+
 	
 	public DataSourcePanel(String c, String n)
 	{

@@ -354,7 +354,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 				"Go to time (Ctrl-G)", new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						String t = JOptionPane.showInputDialog(
-								Swarm.getApplication(),
+								applicationFrame,
 								"Input time in 'YYYYMMDDhhmm[ss]' format:",
 								"Go to Time", JOptionPane.PLAIN_MESSAGE);
 						if (t != null) {
@@ -446,14 +446,14 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 			chooser.setCurrentDirectory(lastPath);
 			chooser.setSelectedFile(new File("map.png"));
 			chooser.setDialogTitle("Save Map Screen Capture");
-			int result = chooser.showSaveDialog(Swarm.getApplication());
+			int result = chooser.showSaveDialog(applicationFrame);
 			File f = null;
 			if (result == JFileChooser.APPROVE_OPTION) {
 				f = chooser.getSelectedFile();
 
 				if (f.exists()) {
 					int choice = JOptionPane.showConfirmDialog(
-							Swarm.getApplication(), "File exists, overwrite?",
+							applicationFrame, "File exists, overwrite?",
 							"Confirm", JOptionPane.YES_NO_OPTION);
 					if (choice != JOptionPane.YES_OPTION)
 						return;

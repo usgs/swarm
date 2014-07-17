@@ -11,6 +11,7 @@ import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -25,6 +26,8 @@ import javax.swing.border.EmptyBorder;
 public class EditDataSourceDialog extends SwarmDialog
 {
 	private static final long serialVersionUID = 1L;
+    private static final JFrame applicationFrame = Swarm.getApplicationFrame();
+
 	private String source;
 	private boolean edit;
 	
@@ -38,7 +41,7 @@ public class EditDataSourceDialog extends SwarmDialog
 	
 	public EditDataSourceDialog(String s)
 	{
-		super(Swarm.getApplication(), "", true);
+		super(applicationFrame, "", true);
 		createPanels();
 		source = s;
 		if (source == null)
@@ -110,7 +113,7 @@ public class EditDataSourceDialog extends SwarmDialog
 		
 		if (message != null)
 		{
-			JOptionPane.showMessageDialog(Swarm.getApplication(), message, "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(applicationFrame, message, "Error", JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
 		

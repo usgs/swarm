@@ -97,7 +97,7 @@ public class FileDataSource extends AbstractCachingDataSource {
             }
 
             if (file == null)
-                JOptionPane.showMessageDialog(Swarm.getApplication(), "Could not open file: " + fileName, "Error",
+                JOptionPane.showMessageDialog(applicationFrame, "Could not open file: " + fileName, "Error",
                         JOptionPane.ERROR_MESSAGE);
 
             readFile(file);
@@ -146,7 +146,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 
             public void finished() {
                 if (getValue() != null) {
-                    JOptionPane.showMessageDialog(Swarm.getApplication(), "Could not open file: " + fileName, "Error",
+                    JOptionPane.showMessageDialog(applicationFrame, "Could not open file: " + fileName, "Error",
                             JOptionPane.ERROR_MESSAGE);
                 }
             }
