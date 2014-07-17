@@ -1,9 +1,8 @@
-package gov.usgs.swarm;
+package gov.usgs.swarm.time;
 
 import java.util.EventListener;
 
 /**
- * $Log: not supported by cvs2svn $
  * @author Dan Cervelli
  */
 public interface TimeListener extends EventListener

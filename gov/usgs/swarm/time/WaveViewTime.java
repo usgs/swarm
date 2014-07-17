@@ -1,7 +1,5 @@
 package gov.usgs.swarm.time;
 
-import gov.usgs.swarm.TimeListener;
-
 import javax.swing.event.EventListenerList;
 
 /**
