@@ -317,6 +317,7 @@ public class Swarm extends JFrame {
         return VERSION;
     }
 
+    @Deprecated
     public static Swarm getApplication() {
         return application;
     }
