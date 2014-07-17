@@ -15,6 +15,7 @@ import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwingWorker;
+import gov.usgs.swarm.WaveViewTime;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.wave.WaveViewSettings.ViewType;
@@ -307,7 +308,7 @@ public class WaveViewPanel extends JComponent {
 			}
 
 			public void mouseExited(MouseEvent e) {
-				Swarm.getApplication().fireTimeChanged(Double.NaN);
+				WaveViewTime.fireTimeChanged(Double.NaN);
 				dragging = false;
 				repaint();
 			}
@@ -566,7 +567,7 @@ public class WaveViewPanel extends JComponent {
 			status = " ";
 		}
 
-		Swarm.getApplication().fireTimeChanged(j2k);
+		WaveViewTime.fireTimeChanged(j2k);
 
 		if (status == null)
 			status = " ";

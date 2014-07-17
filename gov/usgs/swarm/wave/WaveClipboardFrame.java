@@ -12,6 +12,7 @@ import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.Throbber;
 import gov.usgs.swarm.TimeListener;
+import gov.usgs.swarm.WaveViewTime;
 import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
@@ -450,7 +451,7 @@ public class WaveClipboardFrame extends SwarmFrame {
             }
         });
 
-        Swarm.getApplication().addTimeListener(new TimeListener() {
+        WaveViewTime.addTimeListener(new TimeListener() {
             public void timeChanged(double j2k) {
                 for (WaveViewPanel panel : waves) {
                     if (panel != null)

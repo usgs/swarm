@@ -103,7 +103,6 @@ public class Swarm extends JFrame {
     private Map<String, MultiMonitor> monitors;
     private AbstractAction toggleFullScreenAction;
     private long lastUITime;
-    private EventListenerList timeListeners = new EventListenerList();
     private static SwarmConfig config;
     private static Logger logger;
     private String lastLayout = "";
@@ -421,21 +420,6 @@ public class Swarm extends JFrame {
             JOptionPane.showMessageDialog(this, "You're system clock is off by more than 10 minutes.\n"
                     + "This is just for your information, Swarm will not be affected by this.", "System Clock",
                     JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    public void addTimeListener(TimeListener tl) {
-        timeListeners.add(TimeListener.class, tl);
-    }
-
-    public void removeTimeListener(TimeListener tl) {
-        timeListeners.remove(TimeListener.class, tl);
-    }
-
-    public void fireTimeChanged(double j2k) {
-        Object[] ls = timeListeners.getListenerList();
-        for (int i = ls.length - 2; i >= 0; i -= 2)
-            if (ls[i] == TimeListener.class)
-                ((TimeListener) ls[i + 1]).timeChanged(j2k);
     }
 
     public void setChooserVisible(boolean vis) {

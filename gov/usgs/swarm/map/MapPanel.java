@@ -16,6 +16,7 @@ import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.TimeListener;
+import gov.usgs.swarm.WaveViewTime;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.map.MapMiniPanel.Position;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
@@ -288,7 +289,7 @@ public class MapPanel extends JPanel {
             }
         });
 
-        Swarm.getApplication().addTimeListener(new TimeListener() {
+        WaveViewTime.addTimeListener(new TimeListener() {
             public void timeChanged(double j2k) {
                 for (MapMiniPanel panel : miniPanels.values()) {
                     if (panel != null && panel.getWaveViewPanel() != null)

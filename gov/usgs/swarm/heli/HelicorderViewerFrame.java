@@ -13,6 +13,7 @@ import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.Throbber;
 import gov.usgs.swarm.TimeListener;
+import gov.usgs.swarm.WaveViewTime;
 import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.GulperListener;
 import gov.usgs.swarm.data.SeismicDataSource;
@@ -416,7 +417,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 				helicorderViewPanel.setCursorMark(j2k);
 			}
 		};
-		Swarm.getApplication().addTimeListener(timeListener);
+		WaveViewTime.addTimeListener(timeListener);
 
 		this.addInternalFrameListener(new InternalFrameAdapter() {
 			public void internalFrameActivated(InternalFrameEvent e) {
@@ -429,7 +430,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 				throbber.close();
 				refreshThread.kill();
 				Swarm.getApplication().removeInternalFrame(HelicorderViewerFrame.this);
-				Swarm.getApplication().removeTimeListener(timeListener);
+				WaveViewTime.removeTimeListener(timeListener);
 				dataSource.notifyDataNotNeeded(settings.channel, helicorderViewPanel.getStartTime(),
 						helicorderViewPanel.getEndTime(), gulperListener);
 				dataSource.close();
