@@ -388,7 +388,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 				{
 					public Object construct()
 					{
-						parent.getThrobber().increment();
+						MapFrame.getInstance().getThrobber().increment();
 						wavePanel.setWorking(true);
 						wavePanel.setDataSource(activeMetadata.source);
 						wavePanel.setChannel(activeMetadata.getChannel());
@@ -433,7 +433,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 						}
 						else
 							setWorking(false);
-						parent.getThrobber().decrement();
+						MapFrame.getInstance().getThrobber().decrement();
 						wavePanel.setWorking(false);
 						if (repaint)
 							wavePanel.repaint();	
@@ -583,7 +583,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	
 	public void mouseEntered(MouseEvent e)
 	{
-		parent.setStatusText(activeMetadata.getSCNL().station + ": " +
+		MapFrame.getInstance().setStatusText(activeMetadata.getSCNL().station + ": " +
 				Util.lonLatToString(activeMetadata.getLonLat()));
 //		setTitleBackground(MOUSEOVER_BACKGROUND);
 //		parent.setSelectedPanel(this);

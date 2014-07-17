@@ -137,7 +137,8 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 
 		mainPanel.add(toolbar, BorderLayout.NORTH);
 
-		mapPanel = new MapPanel(this);
+		mapPanel = new MapPanel();
+		
 		border = BorderFactory.createCompoundBorder(
 				BorderFactory.createEmptyBorder(0, 2, 0, 3),
 				LineBorder.createGrayLineBorder());
@@ -188,6 +189,11 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 		}
 		super.setMaximum(max);
 	}
+
+
+    public GeoRange getRange() {
+        return mapPanel.getRange();
+    }
 
 	private void createToolbar() {
 		toolbar = SwarmUtil.createToolBar();
