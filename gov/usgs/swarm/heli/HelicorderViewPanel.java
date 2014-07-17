@@ -15,7 +15,7 @@ import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwingWorker;
-import gov.usgs.swarm.UiTime;
+import gov.usgs.swarm.time.UiTime;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.swarm.wave.WaveViewPanel;
 import gov.usgs.swarm.wave.WaveViewPanelAdapter;

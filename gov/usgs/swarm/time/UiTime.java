@@ -1,4 +1,4 @@
-package gov.usgs.swarm;
+package gov.usgs.swarm.time;
 
 /**
  * A class to track time of last user action. Used by helicorder in kiosk mode.
