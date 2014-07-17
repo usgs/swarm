@@ -15,6 +15,7 @@ import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwingWorker;
+import gov.usgs.swarm.UiTime;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.swarm.wave.WaveViewPanel;
 import gov.usgs.swarm.wave.WaveViewPanelAdapter;
@@ -198,7 +199,7 @@ public class HelicorderViewPanel extends JComponent {
 
 	class HelicorderMouseMotionListener implements MouseMotionListener {
 		public void mouseDragged(MouseEvent e) {
-			Swarm.getApplication().touchUITime();
+	        UiTime.touchTime();
 			HelicorderViewPanel.this.requestFocus();
 			int mx = e.getX();
 			int my = e.getY();
@@ -220,7 +221,7 @@ public class HelicorderViewPanel extends JComponent {
 		}
 
 		public void mouseMoved(MouseEvent e) {
-			Swarm.getApplication().touchUITime();
+	        UiTime.touchTime();
 			processMousePosition(e.getX(), e.getY());
 		}
 	}
@@ -230,7 +231,7 @@ public class HelicorderViewPanel extends JComponent {
 		Delay delay;
 
 		public void mouseWheelMoved(MouseWheelEvent e) {
-			Swarm.getApplication().touchUITime();
+	        UiTime.touchTime();
 			totalScroll += e.getWheelRotation();
 			if (delay == null)
 				delay = new Delay(250);
@@ -277,7 +278,7 @@ public class HelicorderViewPanel extends JComponent {
 
 	class HelicorderMouseListener implements MouseListener {
 		public void mouseClicked(MouseEvent e) {
-			Swarm.getApplication().touchUITime();
+	        UiTime.touchTime();
 			HelicorderViewPanel.this.requestFocus();
 		}
 
@@ -288,7 +289,7 @@ public class HelicorderViewPanel extends JComponent {
 		}
 
 		public void mousePressed(MouseEvent e) {
-			Swarm.getApplication().touchUITime();
+	        UiTime.touchTime();
 			if (e.getButton() == MouseEvent.BUTTON1) {
 				int mx = e.getX();
 				int my = e.getY();

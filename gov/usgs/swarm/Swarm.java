@@ -102,7 +102,6 @@ public class Swarm extends JFrame {
     private JFileChooser fileChooser;
     private Map<String, MultiMonitor> monitors;
     private AbstractAction toggleFullScreenAction;
-    private long lastUITime;
     private static SwarmConfig config;
     private static Logger logger;
     private String lastLayout = "";
@@ -279,14 +278,6 @@ public class Swarm extends JFrame {
             }
         });
 
-    }
-
-    public void touchUITime() {
-        lastUITime = System.currentTimeMillis();
-    }
-
-    public long getLastUITime() {
-        return lastUITime;
     }
 
     private void loadFileChooser() {
