@@ -12,9 +12,10 @@ import gov.usgs.plot.render.HelicorderRenderer;
 import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Metadata;
-import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwingWorker;
+import gov.usgs.swarm.options.SwarmOptions;
+import gov.usgs.swarm.options.SwarmOptionsListener;
 import gov.usgs.swarm.time.UiTime;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.swarm.wave.WaveViewPanel;
@@ -54,7 +55,7 @@ import javax.swing.event.EventListenerList;
  * 
  * @author Dan Cervelli
  */
-public class HelicorderViewPanel extends JComponent {
+public class HelicorderViewPanel extends JComponent implements SwarmOptionsListener {
 	private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
 	public static final long serialVersionUID = -1;
 
@@ -121,6 +122,8 @@ public class HelicorderViewPanel extends JComponent {
 		this.addMouseWheelListener(new HelicorderMouseWheelListener());
 
 		cursorChanged();
+		
+		SwarmOptions.addOptionsListener(this);
 	}
 
 	public void addListener(HelicorderViewPanelListener listener) {
@@ -843,4 +846,12 @@ public class HelicorderViewPanel extends JComponent {
 
 		resized = false;
 	}
+	
+	    public void optionsChanged() {
+	        cursorChanged();
+	        invalidateImage();
+	        if (!SwarmConfig.getInstance().durationEnabled)
+	            clearMarks();
+	    }
+
 }

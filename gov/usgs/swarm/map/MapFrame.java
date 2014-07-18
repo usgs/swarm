@@ -10,6 +10,8 @@ import gov.usgs.swarm.Throbber;
 import gov.usgs.swarm.heli.HelicorderViewPanelListener;
 import gov.usgs.swarm.map.MapPanel.DragMode;
 import gov.usgs.swarm.map.MapPanel.LabelSetting;
+import gov.usgs.swarm.options.SwarmOptions;
+import gov.usgs.swarm.options.SwarmOptionsListener;
 import gov.usgs.swarm.time.UiTime;
 import gov.usgs.swarm.wave.MultiMonitor;
 import gov.usgs.swarm.wave.WaveViewPanel;
@@ -55,7 +57,7 @@ import javax.swing.event.InternalFrameEvent;
  * 
  * @author Dan Cervelli
  */
-public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
+public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOptionsListener {
     private static final long serialVersionUID = 1L;
     private static final MapFrame INSTANCE = new MapFrame();
 
@@ -108,6 +110,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 
         updateThread = new Thread(this, "Map Update");
         updateThread.start();
+        SwarmOptions.addOptionsListener(this);
     }
 
     public static MapFrame getInstance() {
@@ -540,5 +543,9 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void optionsChanged() {
+        reloadImages();
     }
 }

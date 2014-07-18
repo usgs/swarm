@@ -9,6 +9,7 @@ import gov.usgs.swarm.FileChooser;
 import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Kioskable;
 import gov.usgs.swarm.Swarm;
+import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwarmFrame;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.SwingWorker;
@@ -19,6 +20,8 @@ import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.data.SeismicDataSourceListener;
 import gov.usgs.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.swarm.map.MapFrame;
+import gov.usgs.swarm.options.SwarmOptions;
+import gov.usgs.swarm.options.SwarmOptionsListener;
 import gov.usgs.swarm.time.TimeListener;
 import gov.usgs.swarm.time.UiTime;
 import gov.usgs.swarm.time.WaveViewTime;
@@ -915,4 +918,5 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
             chooser.setAccessory(null);
         }
     }
-}
+
+ }

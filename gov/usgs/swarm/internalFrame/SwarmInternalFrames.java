@@ -1,6 +1,10 @@
 package gov.usgs.swarm.internalFrame;
 
+import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.heli.HelicorderViewerFrame;
+import gov.usgs.swarm.map.MapFrame;
+import gov.usgs.swarm.options.SwarmOptions;
+import gov.usgs.swarm.options.SwarmOptionsListener;
 import gov.usgs.swarm.wave.MultiMonitor;
 import gov.usgs.swarm.wave.WaveViewerFrame;
 

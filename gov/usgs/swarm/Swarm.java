@@ -5,9 +5,11 @@ import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.heli.HelicorderViewerFrame;
-import gov.usgs.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.swarm.internalFrame.InternalFrameListener;
+import gov.usgs.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.swarm.map.MapFrame;
+import gov.usgs.swarm.options.SwarmOptions;
+import gov.usgs.swarm.options.SwarmOptionsListener;
 import gov.usgs.swarm.wave.MultiMonitor;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.swarm.wave.WaveViewPanel;
@@ -932,22 +934,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
             toggleFullScreenMode();
         else
             Swarm.logger.warning("no helicorders, skipping kiosk mode.");
-    }
-
-    // TODO: make listener based
-    public void optionsChanged() {
-        for (JInternalFrame frame : SwarmInternalFrames.getFrames()) {
-            if (frame instanceof HelicorderViewerFrame) {
-                HelicorderViewerFrame hvf = (HelicorderViewerFrame) frame;
-                hvf.getHelicorderViewPanel().cursorChanged();
-                hvf.getHelicorderViewPanel().invalidateImage();
-                if (!config.durationEnabled)
-                    hvf.getHelicorderViewPanel().clearMarks();
-            } else if (frame instanceof MapFrame) {
-                MapFrame mf = (MapFrame) frame;
-                mf.reloadImages();
-            }
-        }
     }
 
     public void internalFrameAdded(final JInternalFrame f) {

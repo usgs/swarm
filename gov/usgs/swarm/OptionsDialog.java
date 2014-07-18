@@ -1,5 +1,7 @@
 package gov.usgs.swarm;
 
+import gov.usgs.swarm.options.SwarmOptions;
+
 import java.awt.BorderLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -207,6 +209,6 @@ public class OptionsDialog extends SwarmDialog {
 		swarmConfig.wmsLayer = wmsLayer.getText();
 		swarmConfig.wmsStyles = wmsStyles.getText();
 
-		Swarm.getApplication().optionsChanged();
+		SwarmOptions.optionsChanged();
 	}
 }
