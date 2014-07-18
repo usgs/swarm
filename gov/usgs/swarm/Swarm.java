@@ -5,6 +5,8 @@ import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.heli.HelicorderViewerFrame;
+import gov.usgs.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.swarm.internalFrame.InternalFrameListener;
 import gov.usgs.swarm.map.MapFrame;
 import gov.usgs.swarm.wave.MultiMonitor;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
@@ -29,8 +31,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,7 +38,6 @@ import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JDesktopPane;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
@@ -46,7 +45,6 @@ import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.event.EventListenerList;
 
 import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
 
@@ -60,7 +58,7 @@ import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
  * 
  * @author Dan Cervelli, Peter Cervelli, and Thomas Parker.
  */
-public class Swarm extends JFrame {
+public class Swarm extends JFrame implements InternalFrameListener {
     private static final long serialVersionUID = -1;
     private static Swarm application;
     private static JFrame applicationFrame;
@@ -68,7 +66,6 @@ public class Swarm extends JFrame {
     private JSplitPane split;
     private SwarmMenu swarmMenu;
     private CachedDataSource cache;
-    private int frameCount = 0;
 
     private static final String TITLE = "Swarm";
     private static final String VERSION;
@@ -94,7 +91,6 @@ public class Swarm extends JFrame {
         }
     }
 
-    private List<JInternalFrame> frames;
     private boolean fullScreen = false;
     private int oldState = 0;
     private Dimension oldSize;
@@ -121,10 +117,10 @@ public class Swarm extends JFrame {
 
         monitors = new HashMap<String, MultiMonitor>();
         cache = CachedDataSource.getInstance();
-        frames = new ArrayList<JInternalFrame>();
         application = this;
         applicationFrame = this;
 
+        SwarmInternalFrames.addInternalFrameListener(this);
         checkJavaVersion();
         setupGlobalKeys();
         createUI();
@@ -304,17 +300,17 @@ public class Swarm extends JFrame {
                 // then it attempts to pass it on to the first helicorder,
                 // failing
                 // that it gives it to the first wave.
-                if (frames != null && frames.size() > 0) {
+                if (SwarmInternalFrames.frameCount() > 0) {
                     JInternalFrame jf = null;
-                    for (int i = 0; i < frames.size(); i++) {
-                        JInternalFrame f = frames.get(i);
+                    for (int i = 0; i < SwarmInternalFrames.frameCount(); i++) {
+                        JInternalFrame f = SwarmInternalFrames.getFrames().get(i);
                         if (f instanceof HelicorderViewerFrame) {
                             jf = f;
                             break;
                         }
                     }
                     if (jf == null)
-                        jf = frames.get(0);
+                        jf = SwarmInternalFrames.getFrames().get(0);
                     jf.requestFocus();
                 }
             }
@@ -361,8 +357,7 @@ public class Swarm extends JFrame {
         }
 
         MapFrame mapFrame = MapFrame.getInstance();
-        desktop.add(mapFrame);
-        frames.add(mapFrame);
+        SwarmInternalFrames.add(mapFrame);
         mapFrame.setVisible(config.mapVisible);
         if (Swarm.config.mapMaximized) {
             try {
@@ -450,7 +445,7 @@ public class Swarm extends JFrame {
         }
         validate();
         this.setVisible(true);
-        for (JInternalFrame frame : frames) {
+        for (JInternalFrame frame : SwarmInternalFrames.getFrames()) {
             if (frame.isVisible() && frame instanceof Kioskable) {
                 Kioskable f = (Kioskable) frame;
                 f.setKioskMode(full);
@@ -514,7 +509,7 @@ public class Swarm extends JFrame {
 
         waveClipboard.removeWaves();
         try {
-            for (JInternalFrame frame : frames)
+            for (JInternalFrame frame : SwarmInternalFrames.getFrames())
                 frame.setClosed(true);
         } catch (Exception e) {
         } // doesn't matter at this point
@@ -565,7 +560,7 @@ public class Swarm extends JFrame {
 
     public void removeMonitor(MultiMonitor mm) {
         monitors.remove(mm.getDataSource().getName());
-        removeInternalFrame(mm);
+        internalFrameRemoved(mm);
         mm = null;
     }
 
@@ -574,7 +569,7 @@ public class Swarm extends JFrame {
         if (monitor == null) {
             monitor = new MultiMonitor(source);
             monitors.put(source.getName(), monitor);
-            addInternalFrame(monitor);
+            SwarmInternalFrames.add(monitor);
         }
         return monitor;
     }
@@ -587,7 +582,7 @@ public class Swarm extends JFrame {
 
     public WaveViewerFrame openRealtimeWave(SeismicDataSource source, String channel) {
         WaveViewerFrame frame = new WaveViewerFrame(source, channel);
-        addInternalFrame(frame);
+        SwarmInternalFrames.add(frame);
         return frame;
     }
 
@@ -595,7 +590,7 @@ public class Swarm extends JFrame {
         source.establish();
         HelicorderViewerFrame frame = new HelicorderViewerFrame(source, channel, time);
         frame.addLinkListeners();
-        addInternalFrame(frame);
+        SwarmInternalFrames.add(frame);
         return frame;
     }
 
@@ -654,7 +649,7 @@ public class Swarm extends JFrame {
 
         SwarmLayout sl = new SwarmLayout(cf);
         int i = 0;
-        for (JInternalFrame frame : frames) {
+        for (JInternalFrame frame : SwarmInternalFrames.getFrames()) {
             if (frame instanceof HelicorderViewerFrame) {
                 HelicorderViewerFrame hvf = (HelicorderViewerFrame) frame;
                 hvf.saveLayout(cf, "helicorder-" + i++);
@@ -671,67 +666,8 @@ public class Swarm extends JFrame {
         return sl;
     }
 
-    public void removeAllFrames() {
-        Runnable r = new Runnable() {
-            public void run() {
-                Iterator<JInternalFrame> it = frames.iterator();
-                while (it.hasNext()) {
-                    JInternalFrame frame = it.next();
-                    if (frame instanceof HelicorderViewerFrame || frame instanceof WaveViewerFrame
-                            || frame instanceof MultiMonitor) {
-                        try {
-                            frame.setClosed(true);
-                        } catch (Exception e) {
-                        }
-                    }
-                }
-            }
-        };
 
-        if (SwingUtilities.isEventDispatchThread())
-            r.run();
-        else {
-            try {
-                SwingUtilities.invokeAndWait(r);
-            } catch (Exception e) {
-            }
-        }
-    }
-
-    public void removeInternalFrame(final JInternalFrame f) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                swarmMenu.removeInternalFrame(f);
-                frames.remove(f);
-                if (frameCount > 0)
-                    frameCount--;
-            }
-        });
-    }
-
-    public void addInternalFrame(final JInternalFrame f) {
-        addInternalFrame(f, true);
-    }
-
-    public void addInternalFrame(final JInternalFrame f, boolean setLoc) {
-        frames.add(f);
-        frameCount++;
-        frameCount = frameCount % 10;
-        if (setLoc)
-            f.setLocation(frameCount * 24, frameCount * 24);
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                swarmMenu.addInternalFrame(f);
-                desktop.add(f);
-                f.toFront();
-                try {
-                    f.setSelected(true);
-                } catch (Exception e) {
-                }
-            }
-        });
-    }
-
+ 
     public void flush(int position) {
 
         Dimension ds = desktop.getSize();
@@ -741,7 +677,7 @@ public class Swarm extends JFrame {
         if (waveClipboard.isSelected()) {
             bingo = waveClipboard;
         } else
-            for (JInternalFrame frame : frames)
+            for (JInternalFrame frame : SwarmInternalFrames.getFrames())
                 if (frame.isSelected())
                     bingo = frame;
 
@@ -825,7 +761,7 @@ public class Swarm extends JFrame {
         Dimension ds = desktop.getSize();
 
         ArrayList<JInternalFrame> ks = new ArrayList<JInternalFrame>();
-        for (JInternalFrame frame : frames) {
+        for (JInternalFrame frame : SwarmInternalFrames.getFrames()) {
             if (frame.isVisible() && frame instanceof Kioskable)
                 ks.add(frame);
         }
@@ -896,7 +832,7 @@ public class Swarm extends JFrame {
         Dimension ds = desktop.getSize();
 
         ArrayList<HelicorderViewerFrame> hcs = new ArrayList<HelicorderViewerFrame>(10);
-        for (JInternalFrame frame : frames) {
+        for (JInternalFrame frame : SwarmInternalFrames.getFrames()) {
             if (frame instanceof HelicorderViewerFrame)
                 hcs.add((HelicorderViewerFrame) frame);
         }
@@ -940,7 +876,7 @@ public class Swarm extends JFrame {
         Dimension ds = desktop.getSize();
 
         int wc = 0;
-        for (JInternalFrame frame : frames) {
+        for (JInternalFrame frame : SwarmInternalFrames.getFrames()) {
             if (frame instanceof WaveViewerFrame)
                 wc++;
         }
@@ -950,7 +886,7 @@ public class Swarm extends JFrame {
 
         int h = ds.height / wc;
         int cy = 0;
-        for (JInternalFrame frame : frames) {
+        for (JInternalFrame frame : SwarmInternalFrames.getFrames()) {
             if (frame instanceof WaveViewerFrame) {
                 WaveViewerFrame wvf = (WaveViewerFrame) frame;
                 try {
@@ -1000,7 +936,7 @@ public class Swarm extends JFrame {
 
     // TODO: make listener based
     public void optionsChanged() {
-        for (JInternalFrame frame : frames) {
+        for (JInternalFrame frame : SwarmInternalFrames.getFrames()) {
             if (frame instanceof HelicorderViewerFrame) {
                 HelicorderViewerFrame hvf = (HelicorderViewerFrame) frame;
                 hvf.getHelicorderViewPanel().cursorChanged();
@@ -1012,6 +948,22 @@ public class Swarm extends JFrame {
                 mf.reloadImages();
             }
         }
+    }
+
+    public void internalFrameAdded(final JInternalFrame f) {
+        desktop.add(f);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                f.toFront();
+                try {
+                    f.setSelected(true);
+                } catch (Exception e) {
+                }
+            }
+        });
+    }
+    
+    public void internalFrameRemoved(JInternalFrame f) {
     }
 
     public static void main(String[] args) {
@@ -1026,4 +978,5 @@ public class Swarm extends JFrame {
         if (Swarm.config.isKiosk())
             swarm.parseKiosk();
     }
+
 }

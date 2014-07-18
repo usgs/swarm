@@ -3,6 +3,7 @@ package gov.usgs.swarm;
 import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.heli.HelicorderViewerFrame;
+import gov.usgs.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.swarm.map.MapFrame;
 import gov.usgs.swarm.wave.MultiMonitor;
 import gov.usgs.util.ConfigFile;
@@ -95,7 +96,7 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 				{
 					public Object construct()
 					{
-						Swarm.getApplication().removeAllFrames();
+						SwarmInternalFrames.removeAllFrames();
 						processChooser();
 						processMap();
 						processWaves();
@@ -220,7 +221,7 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 			{
 				HelicorderViewerFrame hvf = new HelicorderViewerFrame(cf);
 				hvf.addLinkListeners();
-				Swarm.getApplication().addInternalFrame(hvf, false);
+				SwarmInternalFrames.add(hvf, false);
 			}
 		}
 	}

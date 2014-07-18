@@ -3,6 +3,8 @@ package gov.usgs.swarm;
 import gov.usgs.plot.data.file.FileType;
 import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.FileDataSource;
+import gov.usgs.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.swarm.internalFrame.InternalFrameListener;
 import gov.usgs.swarm.map.MapFrame;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.util.Util;
@@ -42,7 +44,7 @@ import javax.swing.event.MenuListener;
  * 
  * @author Dan Cervelli
  */
-public class SwarmMenu extends JMenuBar {
+public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     private static final long serialVersionUID = 1L;
     private JMenu fileMenu;
     private JMenuItem openFile;
@@ -84,6 +86,7 @@ public class SwarmMenu extends JMenuBar {
         createLayoutMenu();
         createWindowMenu();
         createHelpMenu();
+        SwarmInternalFrames.addInternalFrameListener(this);
     }
 
     private void createFileMenu() {
@@ -349,7 +352,7 @@ public class SwarmMenu extends JMenuBar {
         closeAll.setMnemonic('C');
         closeAll.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Swarm.getApplication().removeAllFrames();
+                SwarmInternalFrames.removeAllFrames();
             }
         });
         windowMenu.add(closeAll);
@@ -396,18 +399,6 @@ public class SwarmMenu extends JMenuBar {
         }
     }
 
-    public void addInternalFrame(JInternalFrame f) {
-        InternalFrameMenuItem mi = new InternalFrameMenuItem(f);
-        windows.put(f, mi);
-        windowMenu.add(mi);
-    }
-
-    public void removeInternalFrame(JInternalFrame f) {
-        InternalFrameMenuItem mi = windows.get(f);
-        windows.remove(f);
-        windowMenu.remove(mi);
-    }
-
     private class RemoveLayoutDialog extends SwarmDialog {
         private static final long serialVersionUID = 1L;
         private JList layoutList;
@@ -449,5 +440,17 @@ public class SwarmMenu extends JMenuBar {
                 }
             }
         }
+    }
+
+    public void internalFrameAdded(JInternalFrame f) {
+        InternalFrameMenuItem mi = new InternalFrameMenuItem(f);
+        windows.put(f, mi);
+        windowMenu.add(mi);
+    }
+
+    public void internalFrameRemoved(JInternalFrame f) {
+        InternalFrameMenuItem mi = windows.get(f);
+        windows.remove(f);
+        windowMenu.remove(mi);
     }
 }

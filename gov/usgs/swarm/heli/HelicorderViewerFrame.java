@@ -17,6 +17,7 @@ import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.GulperListener;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.data.SeismicDataSourceListener;
+import gov.usgs.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.swarm.map.MapFrame;
 import gov.usgs.swarm.time.TimeListener;
 import gov.usgs.swarm.time.UiTime;
@@ -431,7 +432,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
                 dispose();
                 throbber.close();
                 refreshThread.kill();
-                Swarm.getApplication().removeInternalFrame(HelicorderViewerFrame.this);
+                SwarmInternalFrames.remove(HelicorderViewerFrame.this);
                 WaveViewTime.removeTimeListener(timeListener);
                 dataSource.notifyDataNotNeeded(settings.channel, helicorderViewPanel.getStartTime(),
                         helicorderViewPanel.getEndTime(), gulperListener);
@@ -840,12 +841,12 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
             String fn = settings.channel.replace(' ', '_') + ".png";
             chooser.setSelectedFile(new File(chooser.getCurrentDirectory().getAbsoluteFile(), fn));
 
-            int result = chooser.showSaveDialog(Swarm.getApplication());
+            int result = chooser.showSaveDialog(Swarm.getApplicationFrame());
             if (result == JFileChooser.APPROVE_OPTION) {
                 File f = chooser.getSelectedFile();
 
                 if (f.exists()) {
-                    int choice = JOptionPane.showConfirmDialog(Swarm.getApplication(), "File exists, overwrite?",
+                    int choice = JOptionPane.showConfirmDialog(Swarm.getApplicationFrame(), "File exists, overwrite?",
                             "Confirm", JOptionPane.YES_NO_OPTION);
                     if (choice != JOptionPane.YES_OPTION)
                         return;

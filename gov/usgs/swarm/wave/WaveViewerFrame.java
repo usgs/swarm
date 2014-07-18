@@ -2,11 +2,11 @@ package gov.usgs.swarm.wave;
 
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.Icons;
-import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.Throbber;
 import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.SeismicDataSource;
+import gov.usgs.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;
 
@@ -150,7 +150,7 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 					{
 						throbber.close();
 						kill();	
-						Swarm.getApplication().removeInternalFrame(WaveViewerFrame.this);
+						SwarmInternalFrames.remove(WaveViewerFrame.this);
 						dataSource.close();
 					}
 				});

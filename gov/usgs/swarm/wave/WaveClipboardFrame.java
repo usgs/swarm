@@ -635,10 +635,10 @@ public class WaveClipboardFrame extends SwarmFrame {
 
                         file.write();
                     } catch (FileNotFoundException ex) {
-                        JOptionPane.showMessageDialog(Swarm.getApplication(), "Directory does not exist.", "Error",
+                        JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "Directory does not exist.", "Error",
                                 JOptionPane.ERROR_MESSAGE);
                     } catch (IOException ex) {
-                        JOptionPane.showMessageDialog(Swarm.getApplication(), "Error writing file.", "Error",
+                        JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "Error writing file.", "Error",
                                 JOptionPane.ERROR_MESSAGE);
                     }
                 }
@@ -707,10 +707,10 @@ public class WaveClipboardFrame extends SwarmFrame {
                     }
                     swarmConfig.lastPath = f.getPath();
                 } catch (FileNotFoundException ex) {
-                    JOptionPane.showMessageDialog(Swarm.getApplication(), "Directory does not exist.", "Error",
+                    JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "Directory does not exist.", "Error",
                             JOptionPane.ERROR_MESSAGE);
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(Swarm.getApplication(), "Error writing file.", "Error",
+                    JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "Error writing file.", "Error",
                             JOptionPane.ERROR_MESSAGE);
                 }
             }
