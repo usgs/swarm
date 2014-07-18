@@ -5,6 +5,7 @@ import gov.usgs.plot.PlotException;
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.render.HelicorderRenderer;
+import gov.usgs.swarm.FileChooser;
 import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Kioskable;
 import gov.usgs.swarm.Swarm;
@@ -781,7 +782,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     // TODO: refactor out some functions
     private class CaptureActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            chooser = Swarm.getApplication().getFileChooser();
+            chooser = FileChooser.getFileChooser();
             chooser.setDialogTitle("Save Helicorder Screen Capture");
             chooser.setSelectedFile(new File("heli.png"));
             File lastPath = new File(swarmConfig.lastPath);

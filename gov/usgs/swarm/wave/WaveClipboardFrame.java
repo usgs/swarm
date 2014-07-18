@@ -3,6 +3,7 @@ package gov.usgs.swarm.wave;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.data.file.FileType;
 import gov.usgs.plot.data.file.SeismicDataFile;
+import gov.usgs.swarm.FileChooser;
 import gov.usgs.swarm.FileTypeDialog;
 import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Metadata;
@@ -82,7 +83,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
 
     private static final WaveClipboardFrame INSTANCE = new WaveClipboardFrame();
-    
+
     private JScrollPane scrollPane;
     private Box waveBox;
     private List<WaveViewPanel> waves;
@@ -149,7 +150,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     public static WaveClipboardFrame getInstance() {
         return INSTANCE;
     }
-    
+
     public HelicorderViewPanelListener getLinkListener() {
         return linkListener;
     }
@@ -259,7 +260,7 @@ public class WaveClipboardFrame extends SwarmFrame {
             if (waves == null || waves.size() == 0)
                 return;
 
-            JFileChooser chooser = Swarm.getApplication().getFileChooser();
+            JFileChooser chooser = FileChooser.getFileChooser();
             File lastPath = new File(swarmConfig.lastPath);
             chooser.setCurrentDirectory(lastPath);
             chooser.setSelectedFile(new File("clipboard.png"));
@@ -270,8 +271,8 @@ public class WaveClipboardFrame extends SwarmFrame {
                 f = chooser.getSelectedFile();
 
                 if (f.exists()) {
-                    int choice = JOptionPane.showConfirmDialog(applicationFrame, "File exists, overwrite?",
-                            "Confirm", JOptionPane.YES_NO_OPTION);
+                    int choice = JOptionPane.showConfirmDialog(applicationFrame, "File exists, overwrite?", "Confirm",
+                            JOptionPane.YES_NO_OPTION);
                     if (choice != JOptionPane.YES_OPTION)
                         return;
                 }
@@ -326,8 +327,8 @@ public class WaveClipboardFrame extends SwarmFrame {
 
         gotoButton = SwarmUtil.createToolBarButton(Icons.gototime, "Go to time (Ctrl-G)", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String t = JOptionPane.showInputDialog(applicationFrame,
-                        "Input time in 'YYYYMMDDhhmm[ss]' format:", "Go to Time", JOptionPane.PLAIN_MESSAGE);
+                String t = JOptionPane.showInputDialog(applicationFrame, "Input time in 'YYYYMMDDhhmm[ss]' format:",
+                        "Go to Time", JOptionPane.PLAIN_MESSAGE);
                 if (t != null)
                     gotoTime(t);
             }
@@ -549,7 +550,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     private class OpenActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            JFileChooser chooser = Swarm.getApplication().getFileChooser();
+            JFileChooser chooser = FileChooser.getFileChooser();
             chooser.resetChoosableFileFilters();
             for (FileType ft : FileType.getKnownTypes()) {
                 ExtensionFileFilter f = new ExtensionFileFilter(ft.extension, ft.description);
@@ -586,7 +587,7 @@ public class WaveClipboardFrame extends SwarmFrame {
             if (selected == null)
                 return;
 
-            JFileChooser chooser = Swarm.getApplication().getFileChooser();
+            JFileChooser chooser = FileChooser.getFileChooser();
             chooser.resetChoosableFileFilters();
             chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             chooser.setMultiSelectionEnabled(false);
@@ -612,13 +613,13 @@ public class WaveClipboardFrame extends SwarmFrame {
                 boolean confirm = true;
                 if (f.exists()) {
                     if (f.isDirectory()) {
-                        JOptionPane.showMessageDialog(applicationFrame,
-                                "You can not select an existing directory.", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(applicationFrame, "You can not select an existing directory.",
+                                "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                     confirm = false;
-                    int choice = JOptionPane.showConfirmDialog(applicationFrame, "File exists, overwrite?",
-                            "Confirm", JOptionPane.YES_NO_OPTION);
+                    int choice = JOptionPane.showConfirmDialog(applicationFrame, "File exists, overwrite?", "Confirm",
+                            JOptionPane.YES_NO_OPTION);
                     if (choice == JOptionPane.YES_OPTION)
                         confirm = true;
                 }
@@ -650,7 +651,7 @@ public class WaveClipboardFrame extends SwarmFrame {
             if (waves.size() <= 0)
                 return;
 
-            JFileChooser chooser = Swarm.getApplication().getFileChooser();
+            JFileChooser chooser = FileChooser.getFileChooser();
             chooser.resetChoosableFileFilters();
             chooser.setMultiSelectionEnabled(false);
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -734,17 +735,16 @@ public class WaveClipboardFrame extends SwarmFrame {
         }
 
         if (file == null) {
-            JOptionPane.showMessageDialog(applicationFrame,
-                    "There was an error opening the file, '" + f.getName() + "'.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(applicationFrame, "There was an error opening the file, '" + f.getName()
+                    + "'.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         try {
             file.read();
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(applicationFrame,
-                    "There was an error opening the file, '" + f.getName() + "'.\n" + e.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(applicationFrame, "There was an error opening the file, '" + f.getName()
+                    + "'.\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
         for (String channel : file.getChannels()) {
@@ -1034,8 +1034,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
             j2k = Time.parse("yyyyMMddHHmmss", t);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(applicationFrame, "Illegal time value.", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(applicationFrame, "Illegal time value.", "Error", JOptionPane.ERROR_MESSAGE);
         }
 
         if (!Double.isNaN(j2k)) {
@@ -1160,7 +1159,7 @@ public class WaveClipboardFrame extends SwarmFrame {
             g.drawString("Clipboard empty.", dim.width / 2 - 40, dim.height / 2);
         }
     }
-    
+
     public void setVisible(boolean isVisible) {
         super.setVisible(isVisible);
         if (isVisible)

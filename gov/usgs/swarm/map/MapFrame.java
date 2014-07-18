@@ -1,9 +1,9 @@
 package gov.usgs.swarm.map;
 
 import gov.usgs.proj.GeoRange;
+import gov.usgs.swarm.FileChooser;
 import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Kioskable;
-import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmFrame;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.Throbber;
@@ -411,7 +411,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable {
 
     class CaptureActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            JFileChooser chooser = Swarm.getApplication().getFileChooser();
+            JFileChooser chooser = FileChooser.getFileChooser();
             File lastPath = new File(swarmConfig.lastPath);
             chooser.setCurrentDirectory(lastPath);
             chooser.setSelectedFile(new File("map.png"));

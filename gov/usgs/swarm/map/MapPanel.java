@@ -191,7 +191,6 @@ public class MapPanel extends JPanel {
         Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
         this.setCursor(crosshair);
         createUI();
-        System.out.println("2");
     }
 
     public void saveLayout(ConfigFile cf, String prefix) {

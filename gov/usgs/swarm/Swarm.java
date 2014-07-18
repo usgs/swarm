@@ -99,7 +99,6 @@ public class Swarm extends JFrame {
     private int oldState = 0;
     private Dimension oldSize;
     private Point oldLocation;
-    private JFileChooser fileChooser;
     private Map<String, MultiMonitor> monitors;
     private AbstractAction toggleFullScreenAction;
     private static SwarmConfig config;
@@ -127,7 +126,6 @@ public class Swarm extends JFrame {
         applicationFrame = this;
 
         checkJavaVersion();
-        loadFileChooser();
         setupGlobalKeys();
         createUI();
     }
@@ -278,29 +276,6 @@ public class Swarm extends JFrame {
             }
         });
 
-    }
-
-    private void loadFileChooser() {
-        Thread t = new Thread(new Runnable() {
-            public void run() {
-                fileChooser = new JFileChooser();
-            }
-        });
-
-        t.setPriority(Thread.MIN_PRIORITY);
-        t.start();
-    }
-
-    public JFileChooser getFileChooser() {
-        int timeout = 10000;
-        while (fileChooser == null && timeout > 0) {
-            try {
-                Thread.sleep(100);
-            } catch (Exception e) {
-            }
-            timeout -= 100;
-        }
-        return fileChooser;
     }
 
     public static String getVersion() {

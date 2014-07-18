@@ -94,7 +94,7 @@ public class SwarmMenu extends JMenuBar {
         openFile.setMnemonic('O');
         openFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JFileChooser chooser = Swarm.getApplication().getFileChooser();
+                JFileChooser chooser = FileChooser.getFileChooser();
                 chooser.resetChoosableFileFilters();
                 for (FileType ft : FileType.getKnownTypes()) {
                     ExtensionFileFilter f = new ExtensionFileFilter(ft.extension, ft.description);
