@@ -13,6 +13,7 @@ import gov.usgs.swarm.data.FileDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.data.SeismicDataSourceListener;
 import gov.usgs.swarm.map.MapFrame;
+import gov.usgs.swarm.wave.SwarmMultiMonitors;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Pair;
@@ -445,7 +446,7 @@ public class DataChooser extends JPanel {
                         List<Pair<ServerNode, String>> channels = getSelections();
                         if (channels != null) {
                             for (Pair<ServerNode, String> pair : channels) {
-                                Swarm.getApplication().monitorChannelSelected(pair.item1.getSource(), pair.item2);
+                                SwarmMultiMonitors.monitorChannelSelected(pair.item1.getSource(), pair.item2);
                             }
                         }
                         return null;

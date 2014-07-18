@@ -6,6 +6,7 @@ import gov.usgs.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.swarm.map.MapFrame;
 import gov.usgs.swarm.wave.MultiMonitor;
+import gov.usgs.swarm.wave.SwarmMultiMonitors;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Log;
 import gov.usgs.util.Util;
@@ -200,7 +201,7 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 			SeismicDataSource sds = SwarmConfig.getInstance().getSource(cf.getString("source"));
 			if (sds != null && DataChooser.getInstance().isSourceOpened(sds.getName()))
 			{
-				MultiMonitor mm = Swarm.getApplication().getMonitor(sds);
+				MultiMonitor mm = SwarmMultiMonitors.getMonitor(sds);
 				mm.processLayout(cf);
 				mm.setVisible(true);
 			}

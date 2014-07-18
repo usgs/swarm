@@ -519,7 +519,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 						wavePanel.removeAll();
 						waveMap.clear();
 						dispose();
-						Swarm.getApplication().removeMonitor(MultiMonitor.this);
+						SwarmMultiMonitors.removeMonitor(MultiMonitor.this);
 					}
 			  });
 

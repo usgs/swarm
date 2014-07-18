@@ -3,9 +3,9 @@ package gov.usgs.swarm.map;
 import gov.usgs.math.Geometry;
 import gov.usgs.plot.render.DataPointRenderer;
 import gov.usgs.swarm.Metadata;
-import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.wave.MultiMonitor;
+import gov.usgs.swarm.wave.SwarmMultiMonitors;
 import gov.usgs.util.Pair;
 
 import java.awt.BasicStroke;
@@ -63,7 +63,7 @@ public class Hypocenter extends ClickableGeoLabel
 				if (ch.matches(".* ..Z .*"))
 				{
 					Metadata md = metadata.get(ch);
-					MultiMonitor mm = Swarm.getApplication().getMonitor(md.source);
+					MultiMonitor mm = SwarmMultiMonitors.getMonitor(md.source);
 					if (!cleared.contains(mm))
 					{
 						mm.removeAllWaves();

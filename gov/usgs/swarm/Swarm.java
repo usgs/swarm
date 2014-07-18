@@ -97,7 +97,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
     private int oldState = 0;
     private Dimension oldSize;
     private Point oldLocation;
-    private Map<String, MultiMonitor> monitors;
     private AbstractAction toggleFullScreenAction;
     private static SwarmConfig config;
     private static Logger logger;
@@ -117,7 +116,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
         config = SwarmConfig.getInstance();
         config.createConfig(args);
 
-        monitors = new HashMap<String, MultiMonitor>();
         cache = CachedDataSource.getInstance();
         application = this;
         applicationFrame = this;
@@ -560,28 +558,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
         worker.start();
     }
 
-    public void removeMonitor(MultiMonitor mm) {
-        monitors.remove(mm.getDataSource().getName());
-        internalFrameRemoved(mm);
-        mm = null;
-    }
-
-    public MultiMonitor getMonitor(SeismicDataSource source) {
-        MultiMonitor monitor = monitors.get(source.getName());
-        if (monitor == null) {
-            monitor = new MultiMonitor(source);
-            monitors.put(source.getName(), monitor);
-            SwarmInternalFrames.add(monitor);
-        }
-        return monitor;
-    }
-
-    public void monitorChannelSelected(SeismicDataSource source, String channel) {
-        MultiMonitor monitor = getMonitor(source);
-        monitor.setVisible(true);
-        monitor.addChannel(channel);
-    }
-
     public WaveViewerFrame openRealtimeWave(SeismicDataSource source, String channel) {
         WaveViewerFrame frame = new WaveViewerFrame(source, channel);
         SwarmInternalFrames.add(frame);
@@ -950,6 +926,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
     }
     
     public void internalFrameRemoved(JInternalFrame f) {
+        // do nothing
     }
 
     public static void main(String[] args) {
