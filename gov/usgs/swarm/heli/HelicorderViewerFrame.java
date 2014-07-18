@@ -527,7 +527,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     public void setPinned(boolean b) {
         pinButton.setSelected(b);
         int layer = b ? JLayeredPane.MODAL_LAYER : JLayeredPane.DEFAULT_LAYER;
-        Swarm.getApplication().setFrameLayer(HelicorderViewerFrame.this, layer);
+        Swarm.setFrameLayer(HelicorderViewerFrame.this, layer);
     }
 
     public void incXAxis() {
@@ -750,7 +750,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
                     helicorderViewPanel.removeWaveInset();
                     helicorderViewPanel.clearMarks();
                     settings.setBottomTime(Double.NaN);
-                    if (swarmConfig.isKiosk() && !Swarm.getApplication().isFullScreenMode())
+                    if (swarmConfig.isKiosk() && !Swarm.isFullScreenMode())
                         Swarm.getApplication().toggleFullScreenMode();
                 }
 

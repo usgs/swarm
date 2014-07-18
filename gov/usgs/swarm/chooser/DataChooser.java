@@ -380,7 +380,7 @@ public class DataChooser extends JPanel {
                         if (channels != null) {
                             double j2k = getTime();
                             for (Pair<ServerNode, String> pair : channels) {
-                                Swarm.getApplication().openHelicorder(pair.item1.getSource(), pair.item2, j2k);
+                                Swarm.openHelicorder(pair.item1.getSource(), pair.item2, j2k);
                             }
                         }
                         return null;
@@ -400,7 +400,7 @@ public class DataChooser extends JPanel {
                         List<Pair<ServerNode, String>> channels = getSelections();
                         if (channels != null) {
                             for (Pair<ServerNode, String> pair : channels) {
-                                Swarm.getApplication().openRealtimeWave(pair.item1.getSource(), pair.item2);
+                                Swarm.openRealtimeWave(pair.item1.getSource(), pair.item2);
                             }
                         }
                         return null;
@@ -425,7 +425,7 @@ public class DataChooser extends JPanel {
                         });
                         if (channels != null) {
                             for (Pair<ServerNode, String> pair : channels) {
-                                Swarm.getApplication().loadClipboardWave(pair.item1.getSource(), pair.item2);
+                                Swarm.loadClipboardWave(pair.item1.getSource(), pair.item2);
                             }
                         }
                         WaveClipboardFrame.getInstance().requestFocusInWindow();

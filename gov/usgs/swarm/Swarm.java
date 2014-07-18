@@ -64,7 +64,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
     private static final long serialVersionUID = -1;
     private static Swarm application;
     private static JFrame applicationFrame;
-    private JDesktopPane desktop;
+    private static JDesktopPane desktop;
     private JSplitPane split;
     private SwarmMenu swarmMenu;
     private CachedDataSource cache;
@@ -93,7 +93,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
         }
     }
 
-    private boolean fullScreen = false;
+    private static boolean fullScreen = false;
     private int oldState = 0;
     private Dimension oldSize;
     private Point oldLocation;
@@ -401,7 +401,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
         return getContentPane() == split;
     }
 
-    public boolean isFullScreenMode() {
+    public static boolean isFullScreenMode() {
         return fullScreen;
     }
 
@@ -516,7 +516,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
         System.exit(0);
     }
 
-    public void loadClipboardWave(final SeismicDataSource source, final String channel) {
+    public static void loadClipboardWave(final SeismicDataSource source, final String channel) {
         final WaveViewPanel wvp = new WaveViewPanel();
         wvp.setChannel(channel);
         wvp.setDataSource(source);
@@ -558,13 +558,13 @@ public class Swarm extends JFrame implements InternalFrameListener {
         worker.start();
     }
 
-    public WaveViewerFrame openRealtimeWave(SeismicDataSource source, String channel) {
+    public static WaveViewerFrame openRealtimeWave(SeismicDataSource source, String channel) {
         WaveViewerFrame frame = new WaveViewerFrame(source, channel);
         SwarmInternalFrames.add(frame);
         return frame;
     }
 
-    public HelicorderViewerFrame openHelicorder(SeismicDataSource source, String channel, double time) {
+    public static HelicorderViewerFrame openHelicorder(SeismicDataSource source, String channel, double time) {
         source.establish();
         HelicorderViewerFrame frame = new HelicorderViewerFrame(source, channel, time);
         frame.addLinkListeners();
@@ -879,7 +879,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
         }
     }
 
-    public void setFrameLayer(JInternalFrame c, int layer) {
+    public static void setFrameLayer(JInternalFrame c, int layer) {
         desktop.setLayer(c, layer, 0);
     }
 

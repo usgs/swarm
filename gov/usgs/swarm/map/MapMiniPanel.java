@@ -563,8 +563,8 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 		{
 			if (activeMetadata.source != null)
 			{
-				HelicorderViewerFrame hvf = Swarm.getApplication().openHelicorder(activeMetadata.source, activeMetadata.getChannel(), Double.NaN);
-				if (Swarm.getApplication().isFullScreenMode())
+				HelicorderViewerFrame hvf = Swarm.openHelicorder(activeMetadata.source, activeMetadata.getChannel(), Double.NaN);
+				if (Swarm.isFullScreenMode())
 					hvf.setPinned(true);
 			}
 		}
