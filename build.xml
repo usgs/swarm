@@ -1,0 +1,290 @@
+<project name="Swarm" default="compile" basedir=".">
+	<description>USGS Swarm Build File</description>
+
+	<property name="package" value="gov.usgs.swarm"/>
+	<property name="version" value="2.4-picker"/>
+	<property name="jarfile" value="swarm.jar" />
+	<property name="classpath" location="../USGS/contrib/seisFile-1.5.2.jar;../USGS/contrib/slf4j-api-1.7.1.jar;../USGS/contrib/slf4j-log4j12-1.7.1.jar;../USGS/contrib/jtransforms-2.4.jar;../USGS/contrib/log4j-1.2.13.jar;../USGS/contrib/seedCodec-1.0.6.jar;../USGS/contrib/fissuresImpl-1.1.13.jar;../USGS/contrib/fissuresUtil-1.0.18.jar;../USGS/contrib/fissuresIDL-1.0.jar;../USGS/lib/winston.jar;../USGS/lib/vdx.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/JavaSeedLite.jar;../USGS/contrib/looks-2.0.4.jar;../USGS/contrib/forms-1.0.7.jar;../USGS/contrib/jnlp.jar;../USGS/contrib/oscache-2.1-mod2.jar;../USGS/contrib/seedlink_lite_1.2.1.jar;../USGS/contrib/javax.persistence_2.1.0.v201304241213.jar;../USGS/contrib/h2.jar;../USGS/contrib/eclipselink.jar" />
+	<property name="source" location="." />
+	<property name="destination" location="./classes"/>	
+
+	<property name="dist-appdir" value="swarm" />
+	<property name="dist-tempdir" location="./temp" />
+	<property name="dist-basedir" location="./dist" />
+	<property name="dist-jarfile" value="swarm.jar"/>
+	<property name="dist-jarfile-bin" value="swarm-bin.jar"/>
+	<property name="classdir" value="classes"/>
+	
+	<!--hypo-->
+	<property name="hypo-classpath" value="${source}/../USGS/contrib"/>
+	<property name="hypo-source" value="${source}/../VDX/"/>
+	<property name="hypo-destination" value="${source}/hypo-classes"/>
+	<property name="hypo-dist" value="${hypo-source}/dist"/>
+	<property name="hypo-dist-lib" value="${hypo-dist}/lib"/>
+	<property name="hypo-jarfile" value="hypo.jar"/>
+	<!--end of hypo-->
+	
+	<property name="jnlp-dir" location="./swarm-jnlp" />
+
+	<target name="help">
+		<echo>
+Available targets:		
+help    -- displays this help information
+init    -- 
+clean   -- remove the classes directory
+compile -- compiles Java code
+jar     -- generates new jarfile
+dist    -- generates new binary distribution
+		</echo>
+	</target>
+	
+	<target name="init">
+	</target>
+
+	<target name="clean" description="remove the classes directory">
+		<delete dir="${destination}"/>
+		<mkdir  dir="${destination}"/>
+		
+		<delete dir="${hypo-destination}"/>
+		<mkdir  dir="${hypo-destination}"/>
+	</target>
+
+	<target name="compile" depends="clean" description="compile the source">
+		<javac srcdir="${source}" destdir="${destination}" classpath="${classpath}" target="1.5" debug="on" includeantruntime="false"/>
+		
+		<javac destdir="${hypo-destination}"  source="1.5" target="1.5" debug="on" includeantruntime="false">
+			<src path="${source}/../Math/"/>
+			<src path="${source}/../Net/"/>
+			<src path="${source}/../Pinnacle/"/>
+			<src path="${source}/../Plot/"/>
+			<src path="${source}/../Util/" />
+			<src path="${source}/../VDX/" />
+			<classpath>
+				<fileset dir="${source}/../USGS/contrib">
+					<include name="colt.jar" />
+					<include name="comm.jar" />
+					<include name="commons-collections-3.2.1.jar" />
+					<include name="JavaSeedLite.jar" />
+					<include name="jtransforms-2.4.jar" />
+					<include name="mysql.jar" />
+				</fileset>
+			</classpath>
+		</javac>
+		
+		<ant antfile="${source}/../USGS/buildversion.xml" target="version" dir="${source}/../USGS" inheritAll="true">
+			<property name="package" value="${package}"/>
+			<property name="version" value="${version}"/>
+			<property name="srcpath" value="${source}"/>
+			<property name="destpath" value="${destination}"/>
+		</ant>
+		<copy todir="classes">
+			<fileset dir="${source}" includes="META-INF/persistence.xml"/>
+			<fileset dir="${source}" includes="**/**.properties"/>
+			<fileset dir="${source}"  includes="images/**"/>
+			<fileset dir="${source}"  includes="layouts/**"/>
+			<fileset dir="${source}"  includes="manual/**"/>
+			<fileset dir="${source}"  includes="mapdata/**"/>
+		</copy>
+	</target>
+
+	<target name="jar" depends="compile" description="generates new jarfile">
+		<mkdir dir="${source}/../USGS/lib"/>
+		<jar destfile="${source}/../USGS/lib/${jarfile}" basedir="${destination}" includes="**/*.class"/>
+		
+		<!--create hypo jars-->
+		<jar destfile="${dist-tempdir}/${dist-appdir}/lib/${hypo-jarfile}" basedir="${hypo-destination}" includes="**/*.class"/>
+	</target>
+	
+	<target name="deploy">
+		<ant target="jar" inheritAll="false" antfile="../USGS/build.xml" />
+	</target>
+
+	<target name="dist" depends="deploy">
+		
+		<!-- rebuild the dist dir -->
+		<delete dir="${dist-basedir}"/>
+		<mkdir  dir="${dist-basedir}"/>
+
+		<!-- Create the distribution directory structure -->
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/layouts" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/mapdata" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/mapdata/augustine" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/mapdata/nasa_2k" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/mapdata/nasa_240m_D2" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/mapdata/world" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/lib" />
+		<mkdir dir="${dist-tempdir}/${dist-appdir}/images" />
+		
+		<jar destfile="${dist-tempdir}/${dist-appdir}/lib/${dist-jarfile-bin}">
+			<fileset dir="${source}/../VDX/${classdir}">
+				<include name="gov/usgs/vdx/data/BinaryDataSet*.class" />
+				<include name="gov/usgs/vdx/data/GenericDataMatrix*.class" />
+				<include name="gov/usgs/vdx/data/heli/HelicorderData*.class" />
+				<include name="gov/usgs/vdx/data/heli/plot/HelicorderRenderer*.class" />
+				<include name="gov/usgs/vdx/data/hypo/HypocenterList*.class" />
+				<include name="gov/usgs/vdx/data/rsam/RSAMData*.class" />
+				<include name="gov/usgs/vdx/data/wave/SeisanChannel*.class" />
+				<include name="gov/usgs/vdx/data/wave/SeisanFile*.class" />
+				<include name="gov/usgs/vdx/data/wave/FileFlag*.class" />
+				<include name="gov/usgs/vdx/data/wave/WIN*.class" />
+				<include name="gov/usgs/vdx/data/wave/SAC*.class" />
+				<include name="gov/usgs/vdx/data/wave/Seed*.class" />
+				<include name="gov/usgs/vdx/data/wave/SliceWave*.class" />
+				<include name="gov/usgs/vdx/data/wave/Wave*.class" />
+				<include name="gov/usgs/vdx/data/wave/Spectrogram*.class" />
+				<include name="gov/usgs/vdx/data/wave/plot/SliceWaveRenderer*.class" />
+				<include name="gov/usgs/vdx/data/wave/plot/SpectraRenderer*.class" />
+				<include name="gov/usgs/vdx/data/wave/plot/SpectrogramRenderer*.class" />
+				<include name="gov/usgs/vdx/calc/Hypo71*.class" />
+				<include name="gov/usgs/vdx/calc/data/*.class" />
+				<include name="gov/usgs/vdx/calc/util/*.class" />
+			</fileset>
+			<fileset dir="${source}/../Earthworm/${classdir}">
+				<include name="gov/usgs/earthworm/Menu*.class" />
+				<include name="gov/usgs/earthworm/MenuItem*.class" />
+				<include name="gov/usgs/earthworm/Message*.class" />
+				<include name="gov/usgs/earthworm/message/Message*.class" />
+				<include name="gov/usgs/earthworm/message/MessageLogo*.class" />
+				<include name="gov/usgs/earthworm/SCN*.class" />
+				<include name="gov/usgs/earthworm/message/TraceBuf*.class" />
+				<include name="gov/usgs/earthworm/WaveServer*.class" />
+			</fileset>
+			<fileset dir="${source}/../Plot/${classdir}">
+				<include name="**/**.class" />	
+			</fileset>
+			<fileset dir="${source}/../Swarm/${classdir}">
+				<include name="**/**.class" />	
+			</fileset>
+			<fileset dir="${source}/../Swarm">
+				<include name="**/**.properties" />	
+			</fileset>
+			<fileset dir="${source}/../Math/${classdir}">
+				<include name="**/**.class" />	
+			</fileset>
+			<fileset dir="${source}/../Net/${classdir}">
+				<include name="gov/usgs/net/*.class" />	
+			</fileset>
+			<fileset dir="${source}/../Util/${classdir}">
+				<include name="**/**.class" />	
+			</fileset>
+			<fileset dir="${source}/../Winston/${classdir}">
+				<include name="gov/usgs/winston/Channel*.class" />
+				<include name="gov/usgs/winston/Instrument*.class" />
+				<include name="gov/usgs/winston/db/Channels*.class" />
+				<include name="gov/usgs/winston/db/Data*.class" />
+				<include name="gov/usgs/winston/db/WinstonDatabase*.class" />
+				<include name="gov/usgs/winston/server/WWSClient*.class" />
+			</fileset>
+			<fileset dir="${source}">
+				<include name="images/*.png" />
+				<include name="images/*.jpg" />
+				<include name="images/*.gif" />
+			</fileset>
+		</jar>
+		
+		<jar manifest="MANIFEST.MF" destfile="${dist-tempdir}/${dist-appdir}/lib/${dist-jarfile}">
+			<metainf file="${source}/META-INF/persistence.xml"/>
+		</jar>
+		
+		<!-- Copy the distribution files -->
+		<copy todir="${dist-tempdir}/${dist-appdir}/lib">
+			<fileset dir="${source}/../USGS/contrib">
+				<include name="colt.jar" />
+				<include name="JavaSeedLite.jar" />
+				<include name="seedCodec-1.0.6.jar" />
+				<include name="looks-2.0.4.jar" />
+				<include name="forms-1.0.7.jar" />
+				<include name="fissuresIDL-1.0.jar" />
+				<include name="fissuresUtil-1.0.18.jar" />
+				<include name="fissuresImpl-1.1.13.jar" />
+				<include name="log4j-1.2.13.jar" />
+				<include name="jtransforms-2.4.jar" />
+				<include name="seisFile-1.5.2.jar" />
+				<include name="slf4j-api-1.7.1.jar" />
+				<include name="slf4j-log4j12-1.7.1.jar" />
+				<include name="oscache-2.1-mod2.jar" />			
+				<include name="seedlink_lite_1.2.1.jar" />
+				<include name="h2.jar" />
+				<include name="eclipselink.jar" />
+				<include name="javax.persistence_2.1.0.v201304241213.jar" />
+			</fileset>
+		</copy>
+		
+		
+		<copy todir="${dist-tempdir}/${dist-appdir}/layouts">
+			<fileset dir="${source}/layouts" />
+		</copy>
+		
+		<copy todir="${dist-tempdir}/${dist-appdir}/mapdata/augustine">
+			<fileset dir="${source}/mapdata/augustine" />
+		</copy>
+		<copy todir="${dist-tempdir}/${dist-appdir}/mapdata/nasa_2k">
+			<fileset dir="${source}/mapdata/nasa_2k" />
+		</copy>
+		<copy todir="${dist-tempdir}/${dist-appdir}/mapdata/nasa_240m_D2">
+			<fileset dir="${source}/mapdata/nasa_240m_D2" />
+		</copy>
+		<copy todir="${dist-tempdir}/${dist-appdir}/mapdata/world">
+			<fileset dir="${source}/mapdata/world" />
+		</copy>
+		<copy todir="${dist-tempdir}/${dist-appdir}/images">
+			<fileset dir="${source}/images" />
+		</copy>
+		
+		<copy todir="${dist-tempdir}/${dist-appdir}/" file="${source}/hypo71Constants.properties" />
+		<copy todir="${dist-tempdir}/${dist-appdir}/" file="${source}/swarm_console.bat" />
+		<copy todir="${dist-tempdir}/${dist-appdir}/" file="${source}/clip.wav" />
+		<copy todir="${dist-tempdir}/${dist-appdir}/" file="${source}/IRIS_networks.txt" />
+		<copy todir="${dist-tempdir}/${dist-appdir}/" file="${source}/swarm.sh" />
+		<copy todir="${dist-tempdir}/${dist-appdir}/" file="${hypo-source}/runHypo.sh" />
+		<copy todir="${dist-tempdir}/${dist-appdir}/" file="${hypo-source}/runHypo.bat" />
+		<copy todir="${dist-tempdir}/${dist-appdir}/" file="${source}/NTP.config" />
+		
+		<!-- <tar destfile="${dist-basedir}/swarm-${version}.tar.gz" basedir="${dist-tempdir}" compression="gzip" /> -->
+		<zip destfile="${dist-basedir}/swarm-${version}.zip"    basedir="${dist-tempdir}" />
+		
+		<!-- Delete the temporary distribution folder -->
+		<delete dir="${dist-tempdir}" />
+		
+	</target>
+	
+	<target name="jnlp-dist" >
+		<delete dir="${jnlp-dir}" />
+		
+		<!-- Create the distribution directory structure -->
+		<mkdir dir="${jnlp-dir}" />
+		<mkdir dir="${jnlp-dir}/${dist-dir}/lib/signed" />
+		<copy todir="${jnlp-dir}">
+			<fileset dir="${dist-basedir}" />
+		</copy>
+
+		<copy todir="${jnlp-dir}/${dist-dir}/lib" file="${source}/swarm_console.bat" />
+		
+		<jar destfile="${jnlp-dir}/${dist-dir}/lib/${dist-jarfile}.jar" update="true">			
+			<fileset dir="${source}">
+				<include name="clip.wav" />
+				<include name="IRIS_networks.txt" />
+			</fileset>
+		</jar>
+		
+		<!-- TODO: streamline this somehow -->
+		<signjar destDir="${jnlp-dir}/swarm/lib/signed" alias="dcervelli" keystore="SwarmKeystore" storepass="swarmkey" preservelastmodified="true">
+			<path>
+				<fileset dir="${jnlp-dir}/${dist-jarfile}/lib/" includes="**/*.jar" />
+			</path>
+			<flattenmapper />
+		</signjar>
+		
+		<copy todir="${jnlp-dir}/${dist-dir}/lib" overwrite="true">
+			<fileset dir="${jnlp-dir}/${dist-dir}/lib/signed" />
+		</copy>
+		
+		<delete dir="${jnlp-dir}/${dist-dir}/lib/signed" />
+		<delete file="${jnlp-dir}/${dist-dir}/swarm_console.bat" />
+		<delete file="${jnlp-dir}/${dist-dir}/swarm.sh" />
+		<delete file="${jnlp-dir}/${dist-dir}/IRIS_networks.txt" />
+		<delete file="${jnlp-dir}/${dist-dir}/clip.wav" />
+	</target>
+
+</project>

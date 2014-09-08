@@ -1,0 +1,32 @@
+  Changes since version 2.3.2 (r2606)
+ .....................................
+  - created NTP.config file with NTP defaults
+  - removed DHI data source
+  - updated default IRIS WS urls
+  - removed default max heap settings from start scripts
+  - corrected rendering bug affecting operation under OpenJDK
+  - better handling of high data rate sources
+ 
+ 
+  Changes since version 2.3.1 (r2507)
+ .....................................
+ 
+ - SEEDLink data source
+ - cleaned up debugging output
+ - internal changes to wave cache
+ - internal changes to icon handling
+ - fix compiler warnings
+ - correct tracebuf2 inconsistency
+ - correct boundary checking when combining two waves
+ - code cleanup 
+ - corrected bug affecting old GeoLabel config strings
+ 
+ 
+  Changes since version 2.3 (r2443)
+ ...................................
+ 
+ - cleaned up compiler warnings
+ - code cleanup
+ - Updated default NTP server list
+ - added support for dataSource-specific minimum refresh intervals
+ - added OsCache .jar, used by JavaSeedLite

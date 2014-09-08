@@ -1,0 +1,12 @@
+03-31 11:49:01 jdbc[2]: exception
+org.h2.jdbc.JdbcSQLException: Table "EVENT" not found; SQL statement:
+SELECT ID FROM EVENT WHERE ID <> ID [42102-173]
+03-31 11:49:01 jdbc[2]: exception
+org.h2.jdbc.JdbcSQLException: Table "ATTEMPT" not found; SQL statement:
+SELECT ID FROM ATTEMPT WHERE ID <> ID [42102-173]
+03-31 11:49:01 jdbc[2]: exception
+org.h2.jdbc.JdbcSQLException: Table "MARKER" not found; SQL statement:
+SELECT ID FROM MARKER WHERE ID <> ID [42102-173]
+03-31 11:49:01 jdbc[2]: exception
+org.h2.jdbc.JdbcSQLException: Table "SEQUENCE" not found; SQL statement:
+SELECT SEQ_NAME FROM SEQUENCE WHERE SEQ_NAME <> SEQ_NAME [42102-173]

@@ -1,0 +1,129 @@
+<!-- $Id: sectionII.html,v 1.2 2005-09-22 21:01:42 dcervelli Exp $ -->
+
+<html>
+	<head>
+		<!-- javascript include version -->
+		<style>
+		p
+		{width: 700px;}
+		</style>
+		<title>Swarm Manual, Section II, Data Sources and Channels</title>
+	</head>
+	<body>
+		<h1>Section II, Data Sources and Channels</h1>
+		
+		<a name="ui"></a><h2>User Interface</h2>
+		<img src="images/secII_1.png" align="left" hspace="15px">
+			<p>
+			After starting <b>Swarm</b> you will see a panel similar to this on the
+			left side of the <b>Swarm</b> screen.  This is the Data Source Chooser
+			and Channel Selector.  You can adjust the size of the two panels
+			by adjusting the split line in the center, either by dragging with
+			your mouse or clicking on one of the small arrows.
+			</p>
+			
+			<h3>Data Source Chooser</h3>
+			<p>
+			The Data Source Chooser, the top half of the panel, is used to select the source of the waveform
+			or helicorder data.  The box contains the list of all available data
+			sources, both ones you have used before and new ones that you create.
+			To choose a data source, select it and press the 'Go' button, or simply
+			double-click on the data source.  To create new data source, press
+			the 'New' button; read below for explanations of the different data
+			sources.  You can also edit an existing data source be clicking
+			on the 'Edit' button.  Finally, if there is a data source you no longer need you
+			can remove it with the 'Remove' button.
+			</p>
+			
+			<h3>Channel Selector</h3>
+			<p>
+			The Channel Selector, the bottom half of the panel, is used to select
+			a channel, either the waveform or the helicorder.  Once you have selected
+			a data source the Channel Selector will be populated with the available
+			channels.  The contents of both the Waves and Helicorders lists depends
+			on the data available from the selected data source.
+			</p>
+			
+			<p>
+			Each of the channels lists is shown in a tree view.  All of the channels
+			are displayed under the 'All' folder.  Double-click on a the 'All'
+			folder for a complete list of stations.  Often it is convenient
+			to groups stations by a common theme or geographical location (in
+			the image above the channels are grouped by volcano).  See the
+			<a href="sectionIII.html">Advanced Topics</a> section for how to
+			set up these channel groupings.
+			</p>
+			
+			<p>
+			If the Waves tab is selected in the Channel Selector then a wave can
+			be opened into one of three places: a <a href="sectionV.html">real-time wave viewer</a>
+			frame, the <a href="">real-time wave monitor</a>, or onto the <a href="sectionVI.html">Wave Clipboard</a>.  Select the appropriate button to open
+			the wave accordingly.  Also, double-clicking on a channel will open
+			it into a real-time wave viewer frame.
+			</p>
+			
+			<p>
+			If the Helicorders tab is selected that you can open a helicorder by
+			double-clicking on a channel or clicking the View Helicorder button.
+			</p>
+			
+			<p>
+			You can also open more than one channel at a time.  Simply select multiple
+			channels (with Control- or Shift-click on Windows) or an entire folder
+			in the Channel Selector then press the appropriate button (Realtime, Clipboard, or
+			View Helicorder).
+			</p>
+			
+			<a name="data"></a><h2>Data Sources</h2>
+			<p>
+			<b>Swarm</b> can currently get data from a few different places, 
+			described below.
+			</p>
+			
+			<h3>Earthworm Wave Servers</h3>
+			<p>
+			To connect to an Earthworm Wave Server (technically, the wave_serverV module of the
+			USGS Earthworm system) you need to create a new data source.  Click
+			on the New button on the Data Source Chooser.  A window similar to
+			the one below will appear.
+			</p>
+			
+			<p><img src="images/secII_2.png"></p>
+			
+			<p>
+			You need to specify a unique name for the data source (which is then 
+			displayed in the Data Source Chooser), the Wave Server host name
+			or IP address, port number, and communication timeout time (under most
+			circumstances the default of 2 seconds is fine). 
+			</p>
+			
+			<p>
+			An Earthworm Wave Server data source will populate both the Waves
+			and Helicorder lists of the Channel Selector.  Some clarification
+			about how this works is in order.  An Earthworm Wave Server actually
+			only provides raw wave data, not derived helicorder data.  When you
+			choose a helicorder view based on Earthworm Wave Server data, 
+			<b>Swarm</b> starts a process called a <i>Gulper</i> that slowly downloads
+			data to fill in the requested helicorder time interval.  This process
+			will take several minutes.  One positive side effect of this process
+			is that the raw wave data will be immediately available for viewing
+			and analysis from the <b>Swarm</b> cache.  
+			</p>
+			
+			<h3>Winston Wave Servers</h3>
+			<p>
+			Winston Wave Servers are another
+			data source for <b>Swarm</b>.  Winston Wave Servers store both derived
+			helicorder data and raw wave data.  <b>More information forthcoming.</b>
+			
+			<h3>SEED</h3>
+			<p>
+			<b>More information forthcoming.</b>
+			
+			<h3>SAC</h3>
+			<p>
+			<b>More information forthcoming.</b>
+			
+			</p>
+		</body>
+</html>
