@@ -96,12 +96,14 @@ public class FileDataSource extends AbstractCachingDataSource {
                 file = SeismicDataFile.getFile(fileName, fileType);
             }
 
-            if (file == null)
+            if (file != null) {
+                readFile(file);
+                swarmConfig.lastPath = fs[i].getParent();
+            } else {
                 JOptionPane.showMessageDialog(applicationFrame, "Could not open file: " + fileName, "Error",
                         JOptionPane.ERROR_MESSAGE);
-
-            readFile(file);
-            swarmConfig.lastPath = fs[i].getParent();
+            }
+            
         }
     }
 

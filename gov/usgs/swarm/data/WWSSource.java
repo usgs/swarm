@@ -172,7 +172,6 @@ public class WWSSource extends SeismicDataSource {
 	public synchronized List<String> getChannels() {
 		SwarmConfig swarmConfig = SwarmConfig.getInstance();
 		if (protocolVersion == 1)
-		// if (true)
 		{
 			Menu menu = winstonClient.getMenuSCNL();
 			List<String> channels = getMenuList(menu.getSortedItems());
