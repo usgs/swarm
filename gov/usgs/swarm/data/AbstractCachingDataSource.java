@@ -6,6 +6,7 @@ import gov.usgs.swarm.Swarm;
 import gov.usgs.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -282,7 +283,9 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 		for (String key : helicorderCache.keySet()) {
 			st.add(key);
 		}
-
+		
+		Collections.sort(st);
+		
 		if (st.size() == 0)
 			return null;
 		else
