@@ -365,7 +365,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 					double j2k = getMouseJ2K(x, y);
 					status = dateFormat.format(Util.j2KToDate(j2k));
 					TimeZone tz = swarmConfig.getTimeZone(settings.channel);
-					double tzo = tz.getOffset((long) Util.j2KToEW(j2k)) / 1000;
+					double tzo = tz.getOffset((long) (Util.j2KToEW(j2k)*1000)) / 1000;
 					if (tzo != 0) {
 						String tza = tz.getDisplayName(tz.inDaylightTime(Util.j2KToDate(j2k)), TimeZone.SHORT);
 						status = dateFormat.format(Util.j2KToDate(j2k + tzo)) + " (" + tza + "), " + status + " (UTC)";
