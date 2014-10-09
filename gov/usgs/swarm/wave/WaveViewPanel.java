@@ -776,6 +776,10 @@ public class WaveViewPanel extends JComponent {
     }
 
     public TextRenderer getFilterLabel() {
+        return getFilterLabel(xOffset + 5, 148, TextRenderer.NONE, TextRenderer.NONE);
+    }
+
+    public TextRenderer getFilterLabel(int x, int y, int horizJustification, int vertJustification) {
         String ft = "";
         switch (settings.filter.getType()) {
         case BANDPASS:
@@ -788,7 +792,9 @@ public class WaveViewPanel extends JComponent {
             ft = "Low pass [" + settings.filter.getCorner1() + " Hz]";
             break;
         }
-        TextRenderer tr = new TextRenderer(xOffset + 5, 148, ft);
+        TextRenderer tr = new TextRenderer(x, y, ft);
+        tr.horizJustification = horizJustification;
+        tr.vertJustification = vertJustification;
         tr.color = Color.red;
         return tr;
     }
@@ -898,7 +904,8 @@ public class WaveViewPanel extends JComponent {
         waveRenderer.update();
         plot.addRenderer(waveRenderer);
         if (useFilterLabel && settings.filterOn)
-            plot.addRenderer(getFilterLabel());
+            plot.addRenderer(getFilterLabel(getWidth() - rightWidth, getHeight() - bottomHeight, TextRenderer.RIGHT,
+                    TextRenderer.BOTTOM));
         translation = waveRenderer.getDefaultTranslation();
     }
 
@@ -936,7 +943,8 @@ public class WaveViewPanel extends JComponent {
 
         spectraRenderer.update();
         if (useFilterLabel && settings.filterOn)
-            plot.addRenderer(getFilterLabel());
+            plot.addRenderer(getFilterLabel(getWidth() - rightWidth, getHeight() - bottomHeight, TextRenderer.RIGHT,
+                    TextRenderer.BOTTOM));
 
         translation = spectraRenderer.getDefaultTranslation();
         plot.addRenderer(spectraRenderer);
@@ -994,7 +1002,8 @@ public class WaveViewPanel extends JComponent {
 
         plot.addRenderer(spectrogramRenderer);
         if (useFilterLabel && settings.filterOn)
-            plot.addRenderer(getFilterLabel());
+            plot.addRenderer(getFilterLabel(getWidth() - rightWidth, getHeight() - bottomHeight, TextRenderer.RIGHT,
+                    TextRenderer.BOTTOM));
         translation = spectrogramRenderer.getDefaultTranslation();
     }
 
