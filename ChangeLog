@@ -1,6 +1,14 @@
  Changes since version 2.3.4 (r2950)
  .....................................
- 
+  - code cleanup
+  - channel lists are always alphabeticaly sorted in data source pane
+  - fixes to earthworm waveform display
+  - seisan data importer and exporter
+  - corrected bug affecting importing large miniSEED files
+  - correct minor display bug when importing SAC files
+  - corrected minor display bug with timezone handling
+  - anchored filter text to lower-right corner of wave displays
+  
  Changes since version 2.3.3 (r2800)
  .....................................
   - forced us_US in start scripts to avoid decimal comma
