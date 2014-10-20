@@ -8,6 +8,7 @@
   - correct minor display bug when importing SAC files
   - corrected minor display bug with timezone handling
   - anchored filter text to lower-right corner of wave displays
+  - tweaks to spectrogram plotting to better handle signals with large offsets
   
  Changes since version 2.3.3 (r2800)
  .....................................
