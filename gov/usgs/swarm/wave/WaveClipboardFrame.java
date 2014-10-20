@@ -629,10 +629,10 @@ public class WaveClipboardFrame extends SwarmFrame {
                         swarmConfig.lastPath = f.getParent();
                         String fn = f.getPath();
                         SeismicDataFile file = SeismicDataFile.getFile(fn);
-                        String channel = selected.getChannel().replace(' ', '_');
+//                        String channel = selected.getChannel().replace(' ', '_');
                         Wave wave = selected.getWave();
-                        file.putWave(channel, wave);
-
+//                        file.putWave(channel, wave);
+                        file.putWave(selected.getChannel(), wave);
                         file.write();
                     } catch (FileNotFoundException ex) {
                         JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "Directory does not exist.", "Error",
@@ -651,35 +651,42 @@ public class WaveClipboardFrame extends SwarmFrame {
             if (waves.size() <= 0)
                 return;
 
-            JFileChooser chooser = FileChooser.getFileChooser();
-            chooser.resetChoosableFileFilters();
-            chooser.setMultiSelectionEnabled(false);
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            chooser.setDialogTitle("Save All Files");
-
             FileTypeDialog dialog = new FileTypeDialog();
             FileType fileType = FileType.UNKNOWN;
             if (!dialog.isOpen() || (dialog.isOpen() && !dialog.isAssumeSame())) {
                 dialog.setVisible(true);
-
+                
                 if (dialog.isCancelled())
                     fileType = FileType.UNKNOWN;
                 else
                     fileType = dialog.getFileType();
-
+                
             }
 
+            JFileChooser chooser = FileChooser.getFileChooser();
+            chooser.resetChoosableFileFilters();
+            chooser.setMultiSelectionEnabled(false);
+            chooser.setDialogTitle("Save All Files");
             File lastPath = new File(swarmConfig.lastPath);
             chooser.setCurrentDirectory(lastPath);
+
+            if (!fileType.isCollective)
+                chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            else
+                chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+
             int result = chooser.showSaveDialog(applicationFrame);
             if (result == JFileChooser.CANCEL_OPTION)
                 return;
+            
             File f = chooser.getSelectedFile();
+
             if (f == null) {
-                JOptionPane.showMessageDialog(applicationFrame, "You must select a directory.", "Error",
+                JOptionPane.showMessageDialog(applicationFrame, "Save location not understood.", "Error",
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            
             if (result == JFileChooser.APPROVE_OPTION) {
                 try {
                     if (f.exists() && !f.isDirectory())
@@ -696,12 +703,10 @@ public class WaveClipboardFrame extends SwarmFrame {
                             if (!dir.exists())
                                 dir.mkdir();
 
-                            String channel = wvp.getChannel().replace(' ', '_');
                             swarmConfig.lastPath = f.getParent();
-                            String fn = dir + File.separator + channel + fileType.extension;
+                            String fn = dir + File.separator + wvp.getChannel().replace(' ', '_') + fileType.extension;
                             SeismicDataFile file = SeismicDataFile.getFile(fn);
-                            file.putWave(channel, sw);
-
+                            file.putWave(wvp.getChannel(), sw);
                             file.write();
                         }
                     }

@@ -722,13 +722,13 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 			setBackgroundColor(wvp, i);
 			rh += awh;
 		}
-		labelFontSize = Math.min(36, wh / 2);
+		labelFontSize = Math.min(36, wh / 3);
 		boolean done = false;
 		while (!done)
 		{
 			font = Font.decode("dialog-BOLD-" + labelFontSize);
 			Rectangle2D r = font.getStringBounds("XXXX XX XXX", frc);
-			if (r.getWidth() / ww < 0.25 || labelFontSize <= 8)
+			if ((r.getWidth() / ww < 0.25) || labelFontSize <= 8)
 				done = true;
 			else
 				labelFontSize--;
