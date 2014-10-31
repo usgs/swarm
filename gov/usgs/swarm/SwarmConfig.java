@@ -27,7 +27,6 @@ import java.util.logging.Logger;
  */
 public class SwarmConfig {
 	
-	private static final SwarmConfig swarmConfig = new SwarmConfig();
 	private static Logger logger = Log.getLogger("gov.usgs.swarm");
 	
 	private static String[] DEFAULT_SERVERS = new String[] { "AVO Winston;wws:pubavo1.wr.usgs.gov:16022:10000:1"
@@ -112,7 +111,7 @@ public class SwarmConfig {
 	}
 
 	public static SwarmConfig getInstance() {
-		return swarmConfig;
+		return SwarmConfigHolder.swarmConfig;
 	}
 	
 	public void createConfig(String[] args) {
@@ -304,8 +303,13 @@ public class SwarmConfig {
 		mapVisible = Util.stringToBoolean(config.getString("mapVisible"), true);
 		mapX = Util.stringToInt(config.getString("mapX"), 5);
 		mapY = Util.stringToInt(config.getString("mapY"), 5);
+		
 		mapWidth = Util.stringToInt(config.getString("mapWidth"), 600);
+		mapWidth = Math.max(mapWidth, 100);
+		
 		mapHeight = Util.stringToInt(config.getString("mapHeight"), 510);
+		mapHeight = Math.max(mapHeight, 100);
+		
 		mapMaximized = Util.stringToBoolean(config.getString("mapMaximized"), false);
 
 		mapScale = Util.stringToDouble(config.getString("mapScale"), 80000);
@@ -494,5 +498,7 @@ public class SwarmConfig {
 		return toConfigFile().toString();
 	}
 	
-	
+	private static class SwarmConfigHolder {
+	    public static SwarmConfig swarmConfig = new SwarmConfig();
+	}
 }

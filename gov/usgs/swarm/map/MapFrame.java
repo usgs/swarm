@@ -59,7 +59,6 @@ import javax.swing.event.InternalFrameEvent;
  */
 public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOptionsListener {
     private static final long serialVersionUID = 1L;
-    private static final MapFrame INSTANCE = new MapFrame();
 
     private JToolBar toolbar;
     private JPanel mainPanel;
@@ -114,7 +113,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
     }
 
     public static MapFrame getInstance() {
-        return INSTANCE;
+        return MapFrameHolder.mapFrame;
     }
 
     public void saveLayout(ConfigFile cf, String prefix) {
@@ -547,5 +546,9 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     public void optionsChanged() {
         reloadImages();
+    }
+    
+    private static class MapFrameHolder {
+        public static MapFrame mapFrame = new MapFrame();
     }
 }

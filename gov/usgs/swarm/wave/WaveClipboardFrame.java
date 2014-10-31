@@ -82,8 +82,6 @@ public class WaveClipboardFrame extends SwarmFrame {
     private static final Color SELECT_COLOR = new Color(200, 220, 241);
     private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
 
-    private static final WaveClipboardFrame INSTANCE = new WaveClipboardFrame();
-
     private JScrollPane scrollPane;
     private Box waveBox;
     private List<WaveViewPanel> waves;
@@ -148,7 +146,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     }
 
     public static WaveClipboardFrame getInstance() {
-        return INSTANCE;
+        return WaveClipboardFrameHolder.waveClipiboardFrame;
     }
 
     public HelicorderViewPanelListener getLinkListener() {
@@ -1169,6 +1167,9 @@ public class WaveClipboardFrame extends SwarmFrame {
         super.setVisible(isVisible);
         if (isVisible)
             toFront();
-
+    }
+    
+    private static class WaveClipboardFrameHolder {
+        public static WaveClipboardFrame waveClipiboardFrame = new WaveClipboardFrame();
     }
 }

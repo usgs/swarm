@@ -6,7 +6,7 @@ import gov.usgs.swarm.internalFrame.SwarmInternalFrames;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SwarmMultiMonitors {
+public final class SwarmMultiMonitors {
     /**
      * A singleton class to keep track of a list of Multimonitors
      * 
