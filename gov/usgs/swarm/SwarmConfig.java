@@ -10,6 +10,7 @@ import gov.usgs.util.Util;
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -241,7 +242,7 @@ public class SwarmConfig {
 		return md;
 	}
 
-	public void assignMetadataSource(List<String> channels, SeismicDataSource source) {
+	public void assignMetadataSource(Collection<String> channels, SeismicDataSource source) {
 		for (String ch : channels) {
 			Metadata md = getMetadata(ch, true);
 			md.source = source;

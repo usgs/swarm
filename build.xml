@@ -2,7 +2,7 @@
 	<description>USGS Swarm Build File</description>
 
 	<property name="package" value="gov.usgs.swarm"/>
-	<property name="version" value="2.3.4.11"/>
+	<property name="version" value="2.3.4.12"/>
 	<property name="jarfile" value="swarm.jar" />
 	<property name="classpath" location="../USGS/contrib/seisFile-1.6.3.jar;../USGS/contrib/slf4j-api-1.7.1.jar;../USGS/contrib/jtransforms-2.4.jar;../USGS/contrib/log4j-1.2.13.jar;../USGS/contrib/seedCodec-1.0.10.jar;../USGS/lib/winston.jar;../USGS/lib/earthworm.jar;../USGS/lib/math.jar;../USGS/lib/net.jar;../USGS/lib/plot.jar;../USGS/lib/util.jar;../USGS/contrib/colt.jar;../USGS/contrib/JavaSeedLite.jar;../USGS/contrib/looks-2.0.4.jar;../USGS/contrib/forms-1.0.7.jar;../USGS/contrib/oscache-2.1-mod2.jar;../USGS/contrib/seedlink_lite_1.2.1.jar" />
 	<property name="source" location="." />

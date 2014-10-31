@@ -6,9 +6,9 @@ import gov.usgs.plot.data.file.FileType;
 import gov.usgs.plot.data.file.SeismicDataFile;
 import gov.usgs.swarm.FileTypeDialog;
 import gov.usgs.swarm.Metadata;
-import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwingWorker;
+import gov.usgs.swarm.map.MapFrame;
 import gov.usgs.util.CurrentTime;
 
 import java.io.File;
@@ -136,6 +136,7 @@ public class FileDataSource extends AbstractCachingDataSource {
                         putWave(channel, wave);
                     }
 
+                    swarmConfig.assignMetadataSource(file.getChannels(), FileDataSource.this);
                     openFiles.add(fileName);
                 } catch (Throwable t) {
                     t.printStackTrace();
@@ -143,6 +144,7 @@ public class FileDataSource extends AbstractCachingDataSource {
                 }
                 fireChannelsProgress(fileName, 1);
                 fireChannelsUpdated();
+                MapFrame.getInstance().reset(false);
                 return result;
             }
 

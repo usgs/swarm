@@ -68,8 +68,8 @@ public class Metadata implements Comparable<Metadata>
 	
 	public Map<String, String> ancillaryMetadata = null;
 	
-	public Metadata()
-	{}
+//	public Metadata()
+//	{}
 	
 	public Metadata(String ch)
 	{
@@ -272,10 +272,8 @@ public class Metadata implements Comparable<Metadata>
 			Metadata md = data.get(key);
 			if (md == null)
 			{
-				md = new Metadata();
+				md = new Metadata(key);
 				data.put(key, md);
-				md.channel = key;
-				md.scnl = new SCNL(md.channel);
 			}
 			else
 				md = data.get(key);

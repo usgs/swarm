@@ -150,8 +150,6 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 	public void addMetadata(Metadata md)
 	{
 		metadataList.put(md.getChannel(), md);
-//		Collections.sort(metadataList);
-//		activeMetadata = metadataList.get(metadataList.size() - 1);
 		// TODO: should be intelligently chosen
 		if (activeMetadata == null)
 			activeMetadata = md;
@@ -159,7 +157,7 @@ public class MapMiniPanel extends JComponent implements MouseListener, MouseMoti
 		{
 			SCNL as = activeMetadata.getSCNL();
 			SCNL ms = md.getSCNL();
-			if (ms.channel.endsWith("Z"))
+			if (ms.channel != null && ms.channel.endsWith("Z"))
 			{
 				if (as.channel.endsWith("Z"))
 				{

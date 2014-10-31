@@ -281,7 +281,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 	public List<String> getChannels() {
 		List<String> st = new ArrayList<String>();
 		for (String key : helicorderCache.keySet()) {
-			st.add(key);
+			st.add(key.replace('$', ' '));
 		}
 		
 		Collections.sort(st);

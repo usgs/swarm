@@ -9,6 +9,7 @@
   - corrected minor display bug with timezone handling
   - anchored filter text to lower-right corner of wave displays
   - Detrend and demean signals before FFT
+  - Plot map labels for file-based sources
   
  Changes since version 2.3.3 (r2800)
  .....................................
