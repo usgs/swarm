@@ -49,6 +49,7 @@ public class MultiMonitorSettingsDialog extends SwarmDialog {
         for (int i = 0; i < spans.length; i++)
             spans[i] = Integer.toString(values[i]);
         spanList = new JComboBox(spans);
+        spanList.setEditable(true);
         refreshInterval = new JTextField();
         slideInterval = new JTextField();
     }
@@ -130,6 +131,9 @@ public class MultiMonitorSettingsDialog extends SwarmDialog {
             ri = Double.parseDouble(refreshInterval.getText());
             if (ri < 0 || ri > 3600)
                 throw new NumberFormatException();
+
+            message = "Invalid time span.";
+            ri = Integer.parseInt(spanList.getSelectedItem().toString());
 
             return true;
         } catch (Exception e) {

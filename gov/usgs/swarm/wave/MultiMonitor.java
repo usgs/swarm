@@ -78,8 +78,9 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 {
 	public static final long serialVersionUID = -1;
 	
-	public final static int[] SPANS = new int[] {15, 30, 60, 120, 180, 240, 300, 600, 15*60, 20*60, 30*60, 60*60};
-	private int spanIndex = 1;
+	public final static int[] SPANS = new int[] {15, 30, 60, 120, 180, 240, 300, 600, 15*60, 20*60, 30*60, 60*60, 2*60*60};
+//	private int spanIndex = 1;
+	private int span = 15;
 	private List<WaveViewPanel> panels;
 	private SeismicDataSource dataSource;
 
@@ -143,7 +144,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 			wvp.getSettings().save(cf, p);
 		}
 		cf.put(prefix + ".waves", Integer.toString(panels.size()));
-		cf.put(prefix + ".spanIndex", Integer.toString(spanIndex));
+		cf.put(prefix + ".span", Integer.toString(span));
 		cf.put(prefix + ".slideInterval", Long.toString(slideInterval));
 		cf.put(prefix + ".refreshInterval", Long.toString(refreshInterval));
 	}
@@ -151,7 +152,8 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 	public void processLayout(ConfigFile cf)
 	{
 		processStandardLayout(cf);
-		spanIndex = Integer.parseInt(cf.getString("spanIndex"));
+		
+		span = getSpan(cf.getString("span"), cf.getString("spanIndex"));
 		slideInterval = Long.parseLong(cf.getString("slideInterval"));
 		refreshInterval = Long.parseLong(cf.getString("refreshInterval"));
 		int waves = Integer.parseInt(cf.getString("waves"));
@@ -163,6 +165,17 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 			WaveViewPanel wvp = addChannel(channel);
 			wvp.getSettings().set(scf);
 		}
+	}
+	
+	private int getSpan(String inSpan, String inSpanIndex) {
+	    int span;
+	   
+	    if (inSpan != null)
+	        span = Integer.parseInt(inSpan);
+	    else
+	        span = SPANS[Integer.parseInt(inSpanIndex)];
+	    
+	    return span;
 	}
 	
 	private void setIntervals()
@@ -200,7 +213,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 	
 	public int getSpan()
 	{
-		return SPANS[spanIndex];
+		return span;
 	}
 	
 	public void setRefreshInterval(long ms)
@@ -217,17 +230,26 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 	
 	public void setSpan(int span)
 	{
-		for (int i = 0; i < SPANS.length; i++)
-		{
-			if (SPANS[i] == span)
-			{
-				spanIndex = i;
-				break;
-			}
-		}
+	    this.span = span;
 	}
 	
-	protected void createUI()
+	private int previousSpan() {
+	    for (int i = SPANS.length; i > 0; i--)
+	        if (SPANS[i-1] < span)
+	            return SPANS[i-1];
+	    
+	    return SPANS[0];
+	}
+	
+    private int nextSpan() {
+        for (int i = 0; i < SPANS.length; i++)
+            if (SPANS[i] > span)
+                return SPANS[i];
+        
+        return SPANS[SPANS.length - 1];
+    }
+
+    protected void createUI()
 	{
 		this.setSize(600, 700);
 		this.setLocation(100, 0);
@@ -259,8 +281,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 					public void actionPerformed(ActionEvent e)
 					{
 						requestFocus();
-						if (spanIndex != 0)
-							spanIndex--;
+						span = previousSpan();
 					}
 				});
 		Util.mapKeyStrokeToButton(this, "alt LEFT", "compx", compXButton);
@@ -274,8 +295,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 					public void actionPerformed(ActionEvent e)
 					{
 						requestFocus();
-						if (spanIndex < SPANS.length - 1)
-							spanIndex++;
+						span = nextSpan();
 					}
 				});
 		Util.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expXButton);
@@ -742,12 +762,12 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		if (Double.isNaN(pauseStartTime))
 		{
 			times[1] = CurrentTime.getInstance().nowJ2K();
-			times[0] = times[1] - SPANS[spanIndex];
+			times[0] = times[1] - span;
 		}
 		else
 		{
 			times[0] = pauseStartTime;
-			times[1] = times[0] + SPANS[spanIndex];
+			times[1] = times[0] + span;
 		}
 		return times;
 	}
