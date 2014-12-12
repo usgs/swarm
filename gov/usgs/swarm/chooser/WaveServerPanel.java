@@ -92,7 +92,7 @@ public class WaveServerPanel extends DataSourcePanel
 		
 		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 		builder.setDefaultDialogBorder();
-		builder.append(new JLabel("Use this data source to connect to an Earthworm Wave Server (EWS)."), 5);
+		builder.append(new JLabel("Use this data source to connect to an Earthworm Wave Server (WSV)."), 5);
 		builder.nextLine();
 		builder.appendSeparator();
 		builder.append("IP address or host name:");
@@ -117,7 +117,7 @@ public class WaveServerPanel extends DataSourcePanel
 		builder.append(gulperDelay);
 		builder.append(" seconds");
 		
-		builder.append("Time zone:");
+		builder.append("Tank file time zone:");
 		builder.append(wsOffset, 3);
 		builder.nextLine();
 		//builder.append(" minutes");
