@@ -12,7 +12,6 @@ import gov.usgs.proj.Projection;
 import gov.usgs.proj.TransverseMercator;
 import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Metadata;
-import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.data.SeismicDataSource;
@@ -27,6 +26,7 @@ import gov.usgs.util.Log;
 import gov.usgs.util.Pair;
 import gov.usgs.util.Util;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -37,6 +37,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
@@ -283,6 +284,7 @@ public class MapPanel extends JPanel {
         addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent e) {
                 mapImagePanel.setSize(pane.getSize());
+
                 resetImage();
                 repaint();
             }
@@ -321,7 +323,6 @@ public class MapPanel extends JPanel {
         });
 
         pane.add(mapImagePanel, new Integer(10));
-
         add(pane, BorderLayout.CENTER);
 
         loadLabels();
@@ -561,24 +562,20 @@ public class MapPanel extends JPanel {
     public void pickMapParameters(int width, int height) {
         double xm = scale * (double) width;
         double ym = scale * (double) height;
-
         if (xm > 3000000) {
             // use Mercator
             projection = new Mercator();
-            projection.setOrigin(center);
             if (xm > Mercator.getMaxWidth()) {
                 xm = Mercator.getMaxWidth() * 0.999999;
                 scale = xm / width;
                 ym = scale * (double) height;
             }
-            range = projection.getGeoRange(center, xm, ym);
         } else {
             // use Transverse Mercator
-            TransverseMercator tm = new TransverseMercator();
-            tm.setOrigin(center);
-            projection = tm;
-            range = projection.getGeoRange(center, xm, ym);
+            projection = new TransverseMercator();
         }
+        projection.setOrigin(center);
+        range = projection.getGeoRange(center, xm, ym);
     }
 
     private Point getLabelPosition(GeneralPath boxes, int x, int y, int w, int h) {
@@ -652,12 +649,10 @@ public class MapPanel extends JPanel {
 
             int width = mapImagePanel.getWidth() - (INSET * 2);
             int height = mapImagePanel.getHeight() - (INSET * 2);
-
             pickMapParameters(width, height);
 
             logger.finest("map scale: " + scale);
             logger.finest("center: " + center.x + " " + center.y);
-
             MapRenderer mr = new MapRenderer(range, projection);
             ct.mark("pre bg");
             image = images.getMapBackground(projection, range, width, scale);
@@ -856,7 +851,6 @@ public class MapPanel extends JPanel {
                         lines.clear();
                     pane.removeAll();
                     pane.add(mapImagePanel, new Integer(10));
-
                     // /
                     visiblePanels.clear();
                     for (MapMiniPanel mp : miniPanels.values())
@@ -864,10 +858,12 @@ public class MapPanel extends JPanel {
 
                     pane.removeAll();
                     pane.add(mapImagePanel, new Integer(10));
+
                     if (compsToAdd != null) {
                         for (JComponent comp : compsToAdd) {
                             if (comp instanceof JLabel)
                                 pane.add(comp, new Integer(15));
+
                             else
                                 pane.add(comp, new Integer(20));
                         }
@@ -972,7 +968,14 @@ public class MapPanel extends JPanel {
                 g.setXORMode(Color.WHITE);
                 if (lines != null) {
                     for (Line2D.Double line : lines) {
+                        Stroke s = g2.getStroke();
+                        Color c = g2.getColor();
+                        g2.setPaintMode();
+                        g2.setStroke(new BasicStroke(swarmConfig.mapLineWidth));
+                        g2.setColor(new Color(swarmConfig.mapLineColor));
                         g2.draw(line);
+                        g2.setStroke(s);
+                        g2.setColor(c);
                     }
                 }
                 g.setPaintMode();
@@ -1085,9 +1088,9 @@ public class MapPanel extends JPanel {
             repaint();
         }
     }
-    
+
     public class MapMouseMotionListener implements MouseMotionListener {
-        
+
         public void mouseMoved(MouseEvent e) {
             Point2D.Double latLon = getLonLat(e.getX(), e.getY());
             if (latLon != null)
@@ -1102,6 +1105,7 @@ public class MapPanel extends JPanel {
                     lines.clear();
                     pane.removeAll();
                     pane.add(mapImagePanel, new Integer(10));
+
                     repaint();
                 }
             } else if (dragMode == DragMode.BOX) {

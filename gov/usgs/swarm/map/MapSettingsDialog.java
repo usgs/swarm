@@ -4,9 +4,11 @@ import gov.usgs.swarm.SwarmDialog;
 import gov.usgs.swarm.map.MapPanel.LabelSetting;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.geom.Point2D;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -31,6 +33,7 @@ public static final long serialVersionUID = -1;
 	private JTextField longitude;
 	private JTextField latitude;
 	
+	private JTextField lineWidth;
 	private JTextField refreshInterval;
 	private ButtonGroup labelGroup;
 	private JRadioButton someLabels;
@@ -53,6 +56,7 @@ public static final long serialVersionUID = -1;
 		latitude = new JTextField();
 		longitude = new JTextField();
 		scale = new JTextField();
+		lineWidth = new JTextField();
 		refreshInterval = new JTextField();
 		labelGroup = new ButtonGroup();
 		someLabels = new JRadioButton("Some");
@@ -91,6 +95,11 @@ public static final long serialVersionUID = -1;
 		builder.nextLine();
 		
 		builder.appendSeparator("Options");
+//		builder.append("Line Width:");
+//		builder.append(lineWidth);
+//		builder.nextLine();
+//		builder.append("Line color:");
+//		builder.nextLine();
 		builder.append("Refresh Interval:");
 		builder.append(refreshInterval);
 		builder.append(" seconds");
@@ -140,6 +149,7 @@ public static final long serialVersionUID = -1;
 		longitude.setText(String.format("%.4f", panel.getCenter().x));
 		latitude.setText(String.format("%.4f", panel.getCenter().y));
 		scale.setText(String.format("%.1f", panel.getScale()));
+		lineWidth.setText(Integer.toString(swarmConfig.mapLineWidth));
 		refreshInterval.setText(String.format("%.2f", map.getRefreshInterval() / 1000.0));
 		LabelSetting ls = panel.getLabelSetting();
 		switch (ls)
@@ -174,6 +184,7 @@ public static final long serialVersionUID = -1;
 			center.y = Double.parseDouble(latitude.getText());
 			double sc = Double.parseDouble(scale.getText());
 			panel.setCenterAndScale(center, sc);
+			swarmConfig.mapLineWidth = Integer.parseInt(lineWidth.getText());
 			map.setRefreshInterval(Math.round(Double.parseDouble(refreshInterval.getText()) * 1000));
 			panel.loadLabels();
 		}
@@ -209,6 +220,12 @@ public static final long serialVersionUID = -1;
 			double sc = Double.parseDouble(scale.getText());
 			if (sc <= 0)
 				throw new NumberFormatException();
+
+			message = "Invalid line width; legal values are integers greater than 0.";
+	            int i = Integer.parseInt(lineWidth.getText());
+	            if (i <= 0)
+	                throw new NumberFormatException();
+	
 			
 			return true;
 		}

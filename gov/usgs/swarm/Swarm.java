@@ -111,14 +111,14 @@ public class Swarm extends JFrame implements InternalFrameListener {
         } else {
             logger.fine("Swarm version/date: " + VERSION + "/" + BUILD_DATE);
         }
+        application = this;
+        applicationFrame = this;
         setIconImage(Icons.swarm.getImage());
 
         config = SwarmConfig.getInstance();
         config.createConfig(args);
 
         cache = CachedDataSource.getInstance();
-        application = this;
-        applicationFrame = this;
 
         SwarmInternalFrames.addInternalFrameListener(this);
         checkJavaVersion();
@@ -439,12 +439,13 @@ public class Swarm extends JFrame implements InternalFrameListener {
             this.setExtendedState(oldState);
             this.setSize(oldSize);
             this.setLocation(oldLocation);
+            this.setVisible(true);
             split.setRightComponent(desktop);
             split.setDividerLocation(config.chooserDividerLocation);
             this.setContentPane(split);
         }
         validate();
-        this.setVisible(true);
+
         for (JInternalFrame frame : SwarmInternalFrames.getFrames()) {
             if (frame.isVisible() && frame instanceof Kioskable) {
                 Kioskable f = (Kioskable) frame;

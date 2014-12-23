@@ -88,6 +88,8 @@ public class SwarmConfig {
 	public double mapLongitude;
 	public double mapLatitude;
 	public String mapPath;
+	public int mapLineWidth;
+	public int mapLineColor;
 
 	public String[] userTimes;
 	public Color[] heliColors;
@@ -316,6 +318,8 @@ public class SwarmConfig {
 		mapScale = Util.stringToDouble(config.getString("mapScale"), 80000);
 		mapLongitude = Util.stringToDouble(config.getString("mapLongitude"), -180);
 		mapLatitude = Util.stringToDouble(config.getString("mapLatitude"), 0);
+		mapLineWidth = Util.stringToInt(config.getString("mapLineWidth"), 2);
+		mapLineColor = Util.stringToInt(config.getString("mapLineColor"), 0x000000);
 
 		useWMS = Util.stringToBoolean(config.getString("useWMS"));
 		wmsServer = Util.stringToString(config.getString("wmsServer"), WMSGeoImageSet.DEFAULT_SERVER);
@@ -464,6 +468,8 @@ public class SwarmConfig {
 		config.put("mapScale", Double.toString(mapScale));
 		config.put("mapLongitude", Double.toString(mapLongitude));
 		config.put("mapLatitude", Double.toString(mapLatitude));
+		config.put("mapLineWidth", Integer.toString(mapLineWidth));
+		config.put("mapLineColor", Integer.toString(mapLineColor));
 
 		config.put("useWMS", Boolean.toString(useWMS));
 		config.put("wmsServer", wmsServer);
