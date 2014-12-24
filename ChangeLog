@@ -11,6 +11,7 @@
   - Detrend and demean signals before FFT
   - Plot map labels for file-based sources
   - The monitor window can extend to two hours using the buttons and can be set to an arbitrary length in the settings dialog
+  - Corrected remove layout bug
   
  Changes since version 2.3.3 (r2800)
  .....................................

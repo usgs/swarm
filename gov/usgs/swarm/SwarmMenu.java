@@ -429,10 +429,10 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
         }
 
         public void wasOK() {
-            List<String> toRemove = Arrays.asList((String[]) layoutList.getSelectedValues());
-
-            for (String key : toRemove) {
-                SwarmLayout layout = swarmConfig.layouts.get(key);
+            Object[] toRemove = layoutList.getSelectedValues();
+            
+            for (Object key : toRemove) {
+                SwarmLayout layout = swarmConfig.layouts.get((String)key);
                 if (layout != null) {
                     JMenuItem mi = layouts.get(layout);
                     layoutMenu.remove(mi);
