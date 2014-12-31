@@ -391,7 +391,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
         scaleButton.setSelected(true);
         toolBar.add(scaleButton);
 
-        autoScaleSlider = new JSlider(1, 39, (int) (10 - settings.barMult) * 4);
+        autoScaleSlider = new JSlider(1, 39, (int) ((10 - settings.barMult) * 4));
         autoScaleSlider.setToolTipText("Adjust helicorder scale");
         autoScaleSlider.setFocusable(false);
         autoScaleSlider.setPreferredSize(new Dimension(80, 20));
