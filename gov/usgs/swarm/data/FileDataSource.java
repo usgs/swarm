@@ -159,6 +159,7 @@ public class FileDataSource extends AbstractCachingDataSource {
     }
 
     public HelicorderData getHelicorder(String channel, double t1, double t2, GulperListener gl) {
+        channel = channel.replace(' ', '$');
         double[] ct = channelTimes.get(channel);
         if (ct == null)
             return null;
@@ -169,7 +170,6 @@ public class FileDataSource extends AbstractCachingDataSource {
             t2 = ct[1];
             t1 = t2 - dt;
         }
-
         return super.getHelicorder(channel, t1, t2, gl);
     }
 
