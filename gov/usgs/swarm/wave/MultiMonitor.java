@@ -847,13 +847,13 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 										if (sw.getEndTime() < now)
 										{
 											Wave w2 = dataSource.getWave(channel, sw.getEndTime() - 10, now);
-											if (w2 != null && sw.overlaps(w2) || sw.adjacent(w2))
+											if (w2 != null && (sw.overlaps(w2) || sw.adjacent(w2)))
 												sw = sw.combine(w2);
 										}
 										if (sw.getStartTime() > start)
 										{
 											Wave w2 = dataSource.getWave(channel, start, sw.getStartTime() + 10);
-											if (w2 != null && sw.overlaps(w2) || sw.adjacent(w2))
+											if (w2 != null && (sw.overlaps(w2) || sw.adjacent(w2)))
 												sw = sw.combine(w2);
 										}
 										sw = sw.subset(start, sw.getEndTime());
