@@ -131,7 +131,10 @@ public class WaveServerSource extends SeismicDataSource
 			sw = cache.getWave(station, t1, t2);
 		if (sw == null)
 		{
-			String[] ss = station.split(" ");
+		    System.out.println("station: " + station);
+		    String seperator = station.indexOf('$') != -1 ? "\\$" : " "; 
+			String[] ss = station.split(seperator);
+			System.out.println(station + " : " + seperator + " : " + ss.length + " : " + ss[0]);
 			String loc = null;
 			if (isSCNL(params))
 			{

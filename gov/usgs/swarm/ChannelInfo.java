@@ -52,7 +52,9 @@ public class ChannelInfo extends AbstractChannelInfo
 		String location = EMPTY;
 		double latitude = Double.NaN;
 		double longitude = Double.NaN;
-		String[] ss = s.split(" ");
+		
+		String delimiter = s.indexOf('$') == -1 ? " " : "\\$";
+		String[] ss = s.split(delimiter);
 		station = ss[0];
 		if (ss.length > 2)
 		{

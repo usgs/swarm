@@ -102,7 +102,8 @@ public class WWSSource extends SeismicDataSource {
 
 	public String[] parseSCNL(String channel) {
 		String[] result = new String[4];
-		StringTokenizer st = new StringTokenizer(channel, " ");
+		String token = channel.indexOf("$") != -1 ? "$" : " ";
+		StringTokenizer st = new StringTokenizer(channel, token);
 		result[0] = st.nextToken();
 		result[1] = st.nextToken();
 		result[2] = st.nextToken();

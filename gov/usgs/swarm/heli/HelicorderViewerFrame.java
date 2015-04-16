@@ -653,7 +653,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     public void getHelicorder() {
         if (noData)
             return;
-
         final SwingWorker worker = new SwingWorker() {
             private double end;
             private double before;
@@ -712,7 +711,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     }
 
     public Wave getWave(double t1, double t2) {
-        return dataSource.getWave(settings.channel, t1, t2);
+        return dataSource.getWave(settings.channel.replace(' ', '$'), t1, t2);
     }
 
     public SeismicDataSource getDataSource() {

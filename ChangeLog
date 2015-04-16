@@ -13,6 +13,8 @@
   - The monitor window can extend to two hours using the buttons and can be set to an arbitrary length in the settings dialog
   - Corrected remove layout bug
   - Corrected autoscaling of spectrograms with gaps
+  - Fixes for seismic data file bugs
+  - Improve support for high data rate sources
   
  Changes since version 2.3.3 (r2800)
  .....................................
