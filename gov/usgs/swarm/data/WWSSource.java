@@ -200,6 +200,8 @@ public class WWSSource extends SeismicDataSource {
 				Instrument ins = ch.getInstrument();
 				md.updateLongitude(ins.getLongitude());
 				md.updateLatitude(ins.getLatitude());
+				md.updateMinTime(ch.getMinTime());
+				md.updateMaxTime(ch.getMaxTime());
 				List<String> groups = ch.getGroups();
 				if (groups != null) {
 					for (String g : groups)

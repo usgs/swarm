@@ -8,8 +8,6 @@ import gov.usgs.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.swarm.internalFrame.InternalFrameListener;
 import gov.usgs.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.swarm.map.MapFrame;
-import gov.usgs.swarm.options.SwarmOptions;
-import gov.usgs.swarm.options.SwarmOptionsListener;
 import gov.usgs.swarm.wave.MultiMonitor;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
 import gov.usgs.swarm.wave.WaveViewPanel;
@@ -17,6 +15,7 @@ import gov.usgs.swarm.wave.WaveViewerFrame;
 import gov.usgs.util.ConfigFile;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Log;
+import gov.usgs.util.ResourceList;
 import gov.usgs.util.Util;
 import gov.usgs.util.ui.GlobalKeyManager;
 
@@ -32,10 +31,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;

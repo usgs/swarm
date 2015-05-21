@@ -2,6 +2,7 @@
  .....................................
   - improve handling of very high sampling rate data
   - fix minor bug in auto-scaling spectrograms
+  - Add tooltip in data chooser describing channel data range
 
  Changes since version 2.3.4 (r2950)
  .....................................

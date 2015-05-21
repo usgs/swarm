@@ -8,6 +8,13 @@ import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.SwingWorker;
+import gov.usgs.swarm.chooser.node.ChannelNode;
+import gov.usgs.swarm.chooser.node.ChooserNode;
+import gov.usgs.swarm.chooser.node.GroupNode;
+import gov.usgs.swarm.chooser.node.MessageNode;
+import gov.usgs.swarm.chooser.node.ProgressNode;
+import gov.usgs.swarm.chooser.node.RootNode;
+import gov.usgs.swarm.chooser.node.ServerNode;
 import gov.usgs.swarm.data.DataSourceType;
 import gov.usgs.swarm.data.FileDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
@@ -23,7 +30,6 @@ import gov.usgs.util.Util;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -60,13 +66,13 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeExpansionEvent;
@@ -88,7 +94,6 @@ public class DataChooser extends JPanel {
     public static final int NO_CHANNEL_LIST = -2;
     public static final int NO_DATA_SOURCE = -1;
     public static final int OK = 0;
-
     private static final long serialVersionUID = 1L;
     private static final String OPENING_MESSAGE = Messages.getString("DataChooser.treeOpening"); //$NON-NLS-1$
 
@@ -127,7 +132,7 @@ public class DataChooser extends JPanel {
     private JButton monitorButton;
     private JButton realtimeButton;
     private JButton mapButton;
-
+    
     private Map<String, TreePath> nearestPaths;
 
     private Set<String> openedSources;
@@ -577,6 +582,7 @@ public class DataChooser extends JPanel {
         return true;
     }
 
+
     private class ExpansionListener implements TreeExpansionListener {
         public void treeExpanded(TreeExpansionEvent event) {
             TreePath path = event.getPath();
@@ -738,7 +744,8 @@ public class DataChooser extends JPanel {
         dataTree.addTreeSelectionListener(new MakeVisibileTSL());
         dataTree.addTreeExpansionListener(new ExpansionListener());
         dataTree.setCellRenderer(new CellRenderer());
-
+        ToolTipManager.sharedInstance().registerComponent(dataTree);
+        
         dataTree.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 1) {
@@ -890,7 +897,7 @@ public class DataChooser extends JPanel {
                                     for (j = 0; j < cn.getChildCount(); j++) {
                                         if (cn.getChildAt(j) instanceof GroupNode) {
                                             GroupNode ogn = (GroupNode) cn.getChildAt(j);
-                                            if (nn.name.compareToIgnoreCase(ogn.name) <= 0)
+                                            if (nn.getName().compareToIgnoreCase(ogn.getName()) <= 0)
                                                 break;
                                         }
                                     }
@@ -934,7 +941,7 @@ public class DataChooser extends JPanel {
         for (Enumeration<?> e = gn.children(); e.hasMoreElements();) {
             ChooserNode n = (ChooserNode) e.nextElement();
             if (n instanceof ChannelNode)
-                channels.add(((ChannelNode) n).channel);
+                channels.add(((ChannelNode) n).getChannel());
             else if (n instanceof GroupNode)
                 channels.addAll(getGroupChannels((GroupNode) n));
         }
@@ -957,7 +964,7 @@ public class DataChooser extends JPanel {
 
             ChooserNode node = (ChooserNode) path.getLastPathComponent();
             if (node.isLeaf() && node instanceof ChannelNode) {
-                selections.add(new Pair<ServerNode, String>(serverNode, ((ChannelNode) node).channel));
+                selections.add(new Pair<ServerNode, String>(serverNode, ((ChannelNode) node).getChannel()));
             } else if (!node.isLeaf()) {
                 Set<String> channels = getGroupChannels((GroupNode) node);
                 for (String ch : channels)
@@ -975,161 +982,16 @@ public class DataChooser extends JPanel {
         return selections;
     }
 
-    abstract private class ChooserNode extends DefaultMutableTreeNode {
-        private static final long serialVersionUID = 1L;
 
-        abstract public Icon getIcon();
+ 
 
-        abstract public String getLabel();
 
-        public String toString() {
-            return "chooserNode";
-        }
-    }
 
-    private class RootNode extends ChooserNode {
-        private static final long serialVersionUID = 1L;
+ 
 
-        public Icon getIcon() {
-            return null;
-        }
+ 
 
-        public String getLabel() {
-            return null;
-        }
-    }
 
-    private class ServerNode extends ChooserNode {
-        private static final long serialVersionUID = 1L;
-        private boolean broken;
-        private SeismicDataSource source;
-
-        public ServerNode(SeismicDataSource sds) {
-            source = sds;
-        }
-
-        public void setBroken(boolean b) {
-            broken = b;
-        }
-
-        public Icon getIcon() {
-            if (source instanceof FileDataSource) {
-                return Icons.wave_folder;
-            } else {
-                if (!broken) {
-                    if (source.isStoreInUserConfig())
-                        return Icons.server;
-                    else
-                        return Icons.locked_server;
-                } else {
-                    if (source.isStoreInUserConfig())
-                        return Icons.broken_server;
-                    else
-                        return Icons.broken_locked_server;
-                }
-            }
-        }
-
-        public String getLabel() {
-            return source.getName();
-        }
-
-        public SeismicDataSource getSource() {
-            return source;
-        }
-    }
-
-    private class ChannelNode extends ChooserNode {
-        private static final long serialVersionUID = 1L;
-        private String channel;
-
-        public ChannelNode(String c) {
-            channel = c;
-            setToolTipText(channel + "<br>2nd line: value");
-        }
-
-        public Icon getIcon() {
-            Metadata md = SwarmConfig.getInstance().getMetadata(channel);
-            if (md == null || !md.isTouched())
-                return Icons.graybullet;
-            else if (md.hasLonLat())
-                return Icons.bluebullet;
-            else
-                return Icons.bullet;
-        }
-
-        public String getLabel() {
-            return channel;
-        }
-
-        public String getChannel() {
-            return channel;
-        }
-    }
-
-    private class MessageNode extends ChooserNode {
-        private static final long serialVersionUID = 1L;
-        private String message;
-
-        public MessageNode(String m) {
-            message = m;
-        }
-
-        public Icon getIcon() {
-            return Icons.warning;
-        }
-
-        public String getLabel() {
-            return message;
-        }
-
-        public String toString() {
-            return message;
-        }
-    }
-
-    private class GroupNode extends ChooserNode {
-        private static final long serialVersionUID = 1L;
-        private String name;
-
-        public GroupNode(String n) {
-            name = n;
-        }
-
-        public Icon getIcon() {
-            return Icons.wave_folder;
-        }
-
-        public String getLabel() {
-            return name;
-        }
-    }
-
-    private class ProgressNode extends ChooserNode {
-        private static final long serialVersionUID = 1L;
-        private JProgressBar progressBar;
-
-        public ProgressNode() {
-            progressBar = new JProgressBar(0, 100);
-            progressBar.setPreferredSize(new Dimension(80, 10));
-        }
-
-        public Icon getIcon() {
-            return Icons.warning;
-        }
-
-        public void setProgress(double p) {
-            progressBar.setValue((int) Math.round(p * 100));
-        }
-
-        public JProgressBar getProgressBar() {
-            return progressBar;
-        }
-
-        public String getLabel() {
-            return "progress";
-        }
-    }
 
     private class ListCellRenderer extends DefaultListCellRenderer {
         private static final long serialVersionUID = 1L;
@@ -1162,13 +1024,13 @@ public class DataChooser extends JPanel {
                 return panel;
             } else if (value instanceof ChooserNode) {
                 ChooserNode node = (ChooserNode) value;
+                setToolTipText(node.getToolTip());
                 Icon icon = node.getIcon();
                 super.getTreeCellRendererComponent(tree, node.getLabel(), sel, exp, leaf, row, focus);
                 setIcon(icon);
                 return this;
             } else {
-                super.getTreeCellRendererComponent(tree, value, sel, exp, leaf, row, focus);
-                return this;
+                return super.getTreeCellRendererComponent(tree, value, sel, exp, leaf, row, focus);
             }
         }
     }
