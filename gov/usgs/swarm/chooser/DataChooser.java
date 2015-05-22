@@ -99,7 +99,9 @@ public class DataChooser extends JPanel {
 
     private static final String[] TIME_VALUES = new String[] { "Now" }; // "Today (Local)",
                                                                         // "Today (UTC)",
-                                                                        // "Yesterday (Local)", "Yesterday (UTC)" };
+                                                                        // "Yesterday (Local)",
+                                                                        // "Yesterday (UTC)"
+                                                                        // };
 
     private static final int MAX_CHANNELS_AT_ONCE = 500;
     public static final Color LINE_COLOR = new Color(0xac, 0xa8, 0x99);
@@ -132,7 +134,7 @@ public class DataChooser extends JPanel {
     private JButton monitorButton;
     private JButton realtimeButton;
     private JButton mapButton;
-    
+
     private Map<String, TreePath> nearestPaths;
 
     private Set<String> openedSources;
@@ -582,7 +584,6 @@ public class DataChooser extends JPanel {
         return true;
     }
 
-
     private class ExpansionListener implements TreeExpansionListener {
         public void treeExpanded(TreeExpansionEvent event) {
             TreePath path = event.getPath();
@@ -745,7 +746,7 @@ public class DataChooser extends JPanel {
         dataTree.addTreeExpansionListener(new ExpansionListener());
         dataTree.setCellRenderer(new CellRenderer());
         ToolTipManager.sharedInstance().registerComponent(dataTree);
-        
+
         dataTree.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 1) {
@@ -806,6 +807,8 @@ public class DataChooser extends JPanel {
 
     private void createNearest() {
         nearestList = new JList(new DefaultListModel());
+        ToolTipManager.sharedInstance().registerComponent(nearestList);
+
         nearestScrollPane = new JScrollPane(nearestList);
         nearestPanel = new JPanel(new BorderLayout());
         nearestPanel.add(nearestScrollPane, BorderLayout.CENTER);
@@ -982,17 +985,6 @@ public class DataChooser extends JPanel {
         return selections;
     }
 
-
- 
-
-
-
- 
-
- 
-
-
-
     private class ListCellRenderer extends DefaultListCellRenderer {
         private static final long serialVersionUID = 1L;
 
@@ -1003,6 +995,19 @@ public class DataChooser extends JPanel {
             Icon icon = nearestPaths.containsKey(ch) ? Icons.bullet : Icons.redbullet;
             super.getListCellRendererComponent(list, value, index, isSelected, hasFocus);
             setIcon(icon);
+
+            Metadata md = SwarmConfig.getInstance().getMetadata(ch);
+            double minTime = md.getMinTime();
+            double maxTime = md.getMaxTime();
+            String ttText = null;
+            if (!Double.isNaN(minTime) && !Double.isNaN(maxTime))
+                ttText = String.format("%s - %s", Util.j2KToDateString(minTime, ChannelNode.TOOL_TIP_DATE_FORMAT),
+                        Util.j2KToDateString(maxTime, ChannelNode.TOOL_TIP_DATE_FORMAT));
+            setToolTipText(ttText);
+
+            if (Double.isNaN(maxTime) || Util.nowJ2K() - maxTime > ChannelNode.ONE_DAY_S)
+                setForeground(Color.GRAY);
+
             return this;
         }
     }
@@ -1028,10 +1033,10 @@ public class DataChooser extends JPanel {
                 Icon icon = node.getIcon();
                 super.getTreeCellRendererComponent(tree, node.getLabel(), sel, exp, leaf, row, focus);
                 setIcon(icon);
-                
+
                 if (value instanceof ChannelNode && ((ChannelNode) value).isStale())
                     setForeground(Color.GRAY);
-                
+
                 return this;
             } else {
                 return super.getTreeCellRendererComponent(tree, value, sel, exp, leaf, row, focus);
