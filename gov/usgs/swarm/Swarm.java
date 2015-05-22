@@ -494,11 +494,10 @@ public class Swarm extends JFrame implements InternalFrameListener {
         config.chooserDividerLocation = split.getDividerLocation();
         config.chooserVisible = isChooserVisible();
 
-        DataChooser chooser = DataChooser.getInstance();
-        config.nearestDividerLocation = chooser.getDividerLocation();
+        DataChooser.getInstance().updateConfig(config);
+
         config.kiosk = Boolean.toString(fullScreen);
 
-        config.userTimes = chooser.getUserTimes();
 
         if (config.saveConfig) {
             ConfigFile configFile = config.toConfigFile();

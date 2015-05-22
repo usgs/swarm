@@ -6,13 +6,14 @@ import gov.usgs.swarm.data.SeismicDataSource;
 
 import javax.swing.Icon;
 
-public class ServerNode extends ChooserNode {
+public class ServerNode extends AbstractChooserNode {
     private static final long serialVersionUID = 1L;
     private boolean broken;
     private SeismicDataSource source;
 
     public ServerNode(SeismicDataSource sds) {
         source = sds;
+        label = source.getName();
     }
 
     public void setBroken(boolean b) {
@@ -36,14 +37,7 @@ public class ServerNode extends ChooserNode {
             }
         }
     }
-    public String getLabel() {
-        return source.getName();
-    }
 
-    public String getToolTip() {
-        return source.toString();
-    }
-    
     public SeismicDataSource getSource() {
         return source;
     }

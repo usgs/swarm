@@ -4,24 +4,14 @@ import gov.usgs.swarm.Icons;
 
 import javax.swing.Icon;
 
-public class MessageNode extends ChooserNode {
+public class MessageNode extends AbstractChooserNode {
     private static final long serialVersionUID = 1L;
     private String message;
 
     public MessageNode(String m) {
         message = m;
-    }
-
-    public Icon getIcon() {
-        return Icons.warning;
-    }
-
-    public String getLabel() {
-        return message;
-    }
-
-    public String getToolTip() {
-        return null;
+        label = message;
+        icon = Icons.warning;
     }
 
     public String toString() {

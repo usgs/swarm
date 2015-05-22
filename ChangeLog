@@ -3,6 +3,8 @@
   - improve handling of very high sampling rate data
   - fix minor bug in auto-scaling spectrograms
   - Add tooltip in data chooser describing channel data range
+  - Data Chooser displays WWS channels with no data in past 24 hours in gray
+  - Tool tip added to WWS channels in Data Chooser to display data range
 
  Changes since version 2.3.4 (r2950)
  .....................................

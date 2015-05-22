@@ -1,5 +1,7 @@
 package gov.usgs.swarm.chooser.node;
 
+import java.awt.Color;
+
 import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.SwarmConfig;
@@ -7,7 +9,8 @@ import gov.usgs.util.Util;
 
 import javax.swing.Icon;
 
-public class ChannelNode extends ChooserNode {
+public class ChannelNode extends AbstractChooserNode {
+    public static final int ONE_DAY_S = 60 * 60 * 24;
     public static final String TOOL_TIP_DATE_FORMAT = "MMM dd, yyyy";
 
     private static final long serialVersionUID = 1L;
@@ -15,6 +18,7 @@ public class ChannelNode extends ChooserNode {
 
     public ChannelNode(String c) {
         channel = c;
+        label = channel;
     }
 
     public Icon getIcon() {
@@ -27,14 +31,10 @@ public class ChannelNode extends ChooserNode {
             return Icons.bullet;
     }
 
-    public String getLabel() {
-        return channel;
-    }
-
     public String getChannel() {
         return channel;
     }
-    
+
     public String getToolTip() {
         Metadata md = SwarmConfig.getInstance().getMetadata(channel);
         double minTime = md.getMinTime();
@@ -42,6 +42,16 @@ public class ChannelNode extends ChooserNode {
         if (Double.isNaN(minTime) || Double.isNaN(maxTime))
             return null;
         else
-            return Util.j2KToDateString(minTime, TOOL_TIP_DATE_FORMAT) + " - " + Util.j2KToDateString(maxTime, TOOL_TIP_DATE_FORMAT);
+            return Util.j2KToDateString(minTime, TOOL_TIP_DATE_FORMAT) + " - "
+                    + Util.j2KToDateString(maxTime, TOOL_TIP_DATE_FORMAT);
+    }
+
+    public boolean isStale() {
+        Metadata md = SwarmConfig.getInstance().getMetadata(channel);
+        double maxTime = md.getMaxTime();
+        if (Double.isNaN(maxTime) || Util.nowJ2K() - maxTime > ONE_DAY_S)
+            return true;
+        else
+            return false;
     }
 }

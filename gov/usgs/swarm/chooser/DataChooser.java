@@ -8,8 +8,8 @@ import gov.usgs.swarm.Swarm;
 import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.SwingWorker;
+import gov.usgs.swarm.chooser.node.AbstractChooserNode;
 import gov.usgs.swarm.chooser.node.ChannelNode;
-import gov.usgs.swarm.chooser.node.ChooserNode;
 import gov.usgs.swarm.chooser.node.GroupNode;
 import gov.usgs.swarm.chooser.node.MessageNode;
 import gov.usgs.swarm.chooser.node.ProgressNode;
@@ -573,8 +573,8 @@ public class DataChooser extends JPanel {
         model.reload();
     }
 
-    private boolean isOpened(ChooserNode node) {
-        ChooserNode child = (ChooserNode) node.getChildAt(0);
+    private boolean isOpened(AbstractChooserNode node) {
+        AbstractChooserNode child = (AbstractChooserNode) node.getChildAt(0);
         if (!(child instanceof MessageNode))
             return true;
         if (((MessageNode) child).getLabel().equals(OPENING_MESSAGE))
@@ -847,7 +847,7 @@ public class DataChooser extends JPanel {
                 HashSet<GroupNode> openGroups = new HashSet<GroupNode>();
 
                 GroupNode allNode = new GroupNode(Messages.getString("DataChooser.allGroup")); //$NON-NLS-1$
-                ChooserNode rootNode = node;
+                AbstractChooserNode rootNode = node;
                 if (!saveProgress)
                     rootNode.removeAllChildren();
                 else {
@@ -939,7 +939,7 @@ public class DataChooser extends JPanel {
     private Set<String> getGroupChannels(GroupNode gn) {
         HashSet<String> channels = new HashSet<String>();
         for (Enumeration<?> e = gn.children(); e.hasMoreElements();) {
-            ChooserNode n = (ChooserNode) e.nextElement();
+            AbstractChooserNode n = (AbstractChooserNode) e.nextElement();
             if (n instanceof ChannelNode)
                 channels.add(((ChannelNode) n).getChannel());
             else if (n instanceof GroupNode)
@@ -962,7 +962,7 @@ public class DataChooser extends JPanel {
 
             ServerNode serverNode = (ServerNode) path.getPathComponent(1);
 
-            ChooserNode node = (ChooserNode) path.getLastPathComponent();
+            AbstractChooserNode node = (AbstractChooserNode) path.getLastPathComponent();
             if (node.isLeaf() && node instanceof ChannelNode) {
                 selections.add(new Pair<ServerNode, String>(serverNode, ((ChannelNode) node).getChannel()));
             } else if (!node.isLeaf()) {
@@ -1022,16 +1022,25 @@ public class DataChooser extends JPanel {
                 panel.add(new JLabel(node.getIcon()));
                 panel.add(node.getProgressBar());
                 return panel;
-            } else if (value instanceof ChooserNode) {
-                ChooserNode node = (ChooserNode) value;
+            } else if (value instanceof AbstractChooserNode) {
+                AbstractChooserNode node = (AbstractChooserNode) value;
                 setToolTipText(node.getToolTip());
                 Icon icon = node.getIcon();
                 super.getTreeCellRendererComponent(tree, node.getLabel(), sel, exp, leaf, row, focus);
                 setIcon(icon);
+                
+                if (value instanceof ChannelNode && ((ChannelNode) value).isStale())
+                    setForeground(Color.GRAY);
+                
                 return this;
             } else {
                 return super.getTreeCellRendererComponent(tree, value, sel, exp, leaf, row, focus);
             }
         }
+    }
+
+    public void updateConfig(SwarmConfig config) {
+        config.nearestDividerLocation = getDividerLocation();
+        config.userTimes = getUserTimes();
     }
 }

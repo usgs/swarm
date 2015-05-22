@@ -1,19 +1,7 @@
 package gov.usgs.swarm.chooser.node;
 
-import javax.swing.Icon;
 
-public class RootNode extends ChooserNode {
+public class RootNode extends AbstractChooserNode {
     private static final long serialVersionUID = 1L;
 
-    public Icon getIcon() {
-        return null;
-    }
-
-    public String getLabel() {
-        return null;
-    }
-    
-    public String getToolTip() {
-        return null;
-    }
 }
