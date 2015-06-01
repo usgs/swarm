@@ -1003,6 +1003,9 @@ public class DataChooser extends JPanel {
             if (!Double.isNaN(minTime) && !Double.isNaN(maxTime))
                 ttText = String.format("%s - %s", Util.j2KToDateString(minTime, ChannelNode.TOOL_TIP_DATE_FORMAT),
                         Util.j2KToDateString(maxTime, ChannelNode.TOOL_TIP_DATE_FORMAT));
+            else 
+                ttText = "No data";
+            
             setToolTipText(ttText);
 
             if (Double.isNaN(maxTime) || Util.nowJ2K() - maxTime > ChannelNode.ONE_DAY_S)

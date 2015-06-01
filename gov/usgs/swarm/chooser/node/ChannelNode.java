@@ -40,7 +40,7 @@ public class ChannelNode extends AbstractChooserNode {
         double minTime = md.getMinTime();
         double maxTime = md.getMaxTime();
         if (Double.isNaN(minTime) || Double.isNaN(maxTime))
-            return null;
+            return "No data";
         else
             return Util.j2KToDateString(minTime, TOOL_TIP_DATE_FORMAT) + " - "
                     + Util.j2KToDateString(maxTime, TOOL_TIP_DATE_FORMAT);
