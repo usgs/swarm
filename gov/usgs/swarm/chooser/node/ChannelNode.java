@@ -37,6 +37,9 @@ public class ChannelNode extends AbstractChooserNode {
 
     public String getToolTip() {
         Metadata md = SwarmConfig.getInstance().getMetadata(channel);
+        if (md == null)
+            return null;
+        
         double minTime = md.getMinTime();
         double maxTime = md.getMaxTime();
         if (Double.isNaN(minTime) || Double.isNaN(maxTime))
@@ -48,6 +51,9 @@ public class ChannelNode extends AbstractChooserNode {
 
     public boolean isStale() {
         Metadata md = SwarmConfig.getInstance().getMetadata(channel);
+        if (md == null)
+            return false;
+        
         double maxTime = md.getMaxTime();
         if (Double.isNaN(maxTime) || Util.nowJ2K() - maxTime > ONE_DAY_S)
             return true;
