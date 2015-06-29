@@ -589,6 +589,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 			settings.clipValue = (int) (mean * settings.clipBars);
 			heliRenderer.setHelicorderExtents(startTime, endTime, -1 * Math.abs(settings.barRange),
 					Math.abs(settings.barRange));
+			
 		} else {
 			heliRenderer.setHelicorderExtents(startTime, endTime,
 					-1 * Math.abs((settings.barRange - offset) / multiplier),
