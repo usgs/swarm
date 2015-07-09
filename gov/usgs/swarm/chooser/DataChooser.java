@@ -19,6 +19,7 @@ import gov.usgs.swarm.data.DataSourceType;
 import gov.usgs.swarm.data.FileDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.data.SeismicDataSourceListener;
+import gov.usgs.swarm.data.WWSSource;
 import gov.usgs.swarm.map.MapFrame;
 import gov.usgs.swarm.wave.SwarmMultiMonitors;
 import gov.usgs.swarm.wave.WaveClipboardFrame;
@@ -1003,9 +1004,9 @@ public class DataChooser extends JPanel {
             if (!Double.isNaN(minTime) && !Double.isNaN(maxTime))
                 ttText = String.format("%s - %s", Util.j2KToDateString(minTime, ChannelNode.TOOL_TIP_DATE_FORMAT),
                         Util.j2KToDateString(maxTime, ChannelNode.TOOL_TIP_DATE_FORMAT));
-            else 
+            else
                 ttText = "No data";
-            
+
             setToolTipText(ttText);
 
             if (Double.isNaN(maxTime) || Util.nowJ2K() - maxTime > ChannelNode.ONE_DAY_S)
@@ -1032,13 +1033,18 @@ public class DataChooser extends JPanel {
                 return panel;
             } else if (value instanceof AbstractChooserNode) {
                 AbstractChooserNode node = (AbstractChooserNode) value;
-                setToolTipText(node.getToolTip());
+
                 Icon icon = node.getIcon();
                 super.getTreeCellRendererComponent(tree, node.getLabel(), sel, exp, leaf, row, focus);
                 setIcon(icon);
-
-                if (value instanceof ChannelNode && ((ChannelNode) value).isStale())
-                    setForeground(Color.GRAY);
+                
+                // greyout stale channels
+                Metadata md = SwarmConfig.getInstance().getMetadata(node.getLabel());
+                if (md != null && md.source instanceof WWSSource) {
+                    setToolTipText(node.getToolTip());
+                    if (value instanceof ChannelNode && ((ChannelNode) value).isStale())
+                        setForeground(Color.GRAY);
+                }
 
                 return this;
             } else {
