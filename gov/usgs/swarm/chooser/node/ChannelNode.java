@@ -39,7 +39,6 @@ public class ChannelNode extends AbstractChooserNode {
         Metadata md = SwarmConfig.getInstance().getMetadata(channel);
         if (md == null)
             return null;
-        
         double minTime = md.getMinTime();
         double maxTime = md.getMaxTime();
         if (Double.isNaN(minTime) || Double.isNaN(maxTime))
