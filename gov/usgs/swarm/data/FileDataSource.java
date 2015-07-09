@@ -175,7 +175,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 
     public Wave getWave(String station, double t1, double t2) {
         Wave wave;
-        List<CachedWave> waves = waveCache.get(station);
+        List<CachedWave> waves = waveCache.get(station.replace(' ', '$'));
         if (waves == null)
             return null;
         else {
