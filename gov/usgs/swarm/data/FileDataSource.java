@@ -22,6 +22,7 @@ import java.util.Set;
 import javax.swing.JOptionPane;
 
 /**
+ * TODO: remove reference to application frame. Non-GUI apps want to use the class too.
  * 
  * @author Dan Cervelli
  */
