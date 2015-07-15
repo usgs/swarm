@@ -674,7 +674,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
                         tc = settings.timeChunk;
 
                     if (!HelicorderViewerFrame.this.isClosed) {
-                        hd = dataSource.getHelicorder(settings.channel, before - tc, end + tc, gulperListener);
+                        hd = dataSource.getHelicorder(settings.channel.replace(' ', '$'), before - tc, end + tc, gulperListener);
                         success = true;
                     } else {
                         success = false;

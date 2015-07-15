@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TAG="Swarm_2.3.5"
+TAG="Swarm_2.3.6"
 BASE="http://avosouth.wr.usgs.gov/vhpsvn"
 tag() {
         svn copy ${BASE}/${1}/trunk ${BASE}/${1}/tags/$TAG -m "Tagging $TAG"

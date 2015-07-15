@@ -205,7 +205,6 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
     }
 
     public synchronized void cacheWaveAsHelicorder(String station, Wave wave) {
-
         if (inHelicorderCache(station, wave.getStartTime(), wave.getEndTime()))
             return;
 
@@ -214,44 +213,23 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 
         int sPeriod = (int) (wave.getSamplingPeriod() * TO_USEC);
         long sampleTime = (long) (wave.getStartTime() * TO_USEC);
-        int secondIndex = 0;
-        int min = Integer.MAX_VALUE;
-        int max = -Integer.MAX_VALUE;
 
         for (int sampleIndex = 0; sampleIndex < wave.numSamples(); sampleIndex++) {
-
-            long secOffset = (sampleTime / TO_USEC) - ((sampleTime - sPeriod) / TO_USEC);
-            if (secOffset != 0 && min < max) {
-                double t = (sampleTime * FROM_USEC) - 1;
-                data.setQuick(secondIndex, 0, t);
-                data.setQuick(secondIndex, 1, min);
-                data.setQuick(secondIndex, 2, max);
-                secondIndex++;
-
-                min = Integer.MAX_VALUE;
-                max = -Integer.MAX_VALUE;
-            }
-
+            int secondIndex = (int) (sampleTime / TO_USEC) - (int) wave.getStartTime();
             int sample = wave.buffer[sampleIndex];
-            if (sample != Wave.NO_DATA) {
-                min = Math.min(min, sample);
-                max = Math.max(max, sample);
-            }
+
+            if (sample == Wave.NO_DATA)
+                continue;
+            data.setQuick(secondIndex, 0, (int) (sampleTime / TO_USEC));
+            data.setQuick(secondIndex, 1, Math.min(data.getQuick(secondIndex, 1), sample));
+            data.setQuick(secondIndex, 2, Math.max(data.getQuick(secondIndex, 2), sample));
 
             sampleTime += sPeriod;
         }
 
-        if (secondIndex < seconds) {
-            double t = (sampleTime * FROM_USEC) - 1;
-            data.setQuick(secondIndex, 0, t);
-            data.setQuick(secondIndex, 1, min);
-            data.setQuick(secondIndex, 2, max);
-        }
-        if (data.rows() > 0) {
-            HelicorderData hd = new HelicorderData();
-            hd.setData(data);
-            putHelicorder(station, hd);
-        }
+        HelicorderData hd = new HelicorderData();
+        hd.setData(data);
+        putHelicorder(station, hd);
     }
 
     public boolean isEmpty() {
@@ -375,6 +353,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
     // side use
     // the version below
     public synchronized HelicorderData getHelicorder(String station, double t1, double t2, GulperListener gl) {
+        station = station.replace(' ', '$');
         List<CachedHelicorder> helis = helicorderCache.get(station);
         if (helis == null)
             return null;
@@ -390,15 +369,15 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
                 }
 
                 // just a piece, put it in the result
-                if ((t1 < ch.t1 && t2 >= ch.t2) || (t1 <= ch.t1 && t2 > ch.t2)) {
+                if (t1 <= ch.t1 && t2 >= ch.t2) {
                     hd2 = ch.helicorder;
                 }
                 // cached is right side
-                else if (t1 < ch.t1 && t2 > ch.t1 && t2 <= ch.t2) {
+                else if (t2 >= ch.t1 && t2 <= ch.t2) {
                     hd2 = ch.helicorder.subset(ch.t1, t2);
                 }
                 // cached is left side
-                else if (t1 >= ch.t1 && t1 < ch.t2 && t2 > ch.t2) {
+                else if (t1 >= ch.t1 && t1 <= ch.t2) {
                     hd2 = ch.helicorder.subset(t1, ch.t2);
                 }
                 // if cached data found
@@ -411,6 +390,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
             hd.sort();
             if (hd.getData() == null)
                 hd = null;
+
             return hd;
         }
     }
