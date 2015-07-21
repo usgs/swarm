@@ -19,9 +19,8 @@ public class RsamViewSettings
 	
 	public enum ViewType
 	{
-		WAVE("W"),
-		SPECTRA("S"),
-		SPECTROGRAM("G");
+		VALUES("V"),
+		COUNTS("C");
 		
 		public String code;
 		
@@ -32,12 +31,10 @@ public class RsamViewSettings
 		
 		public static ViewType fromString(String c)
 		{
-			if (c.equals("S"))
-				return SPECTRA;
-			else if (c.equals("G"))
-				return SPECTROGRAM;
+			if (c.equals("C"))
+				return COUNTS;
 			else
-				return WAVE;
+				return VALUES;
 		}
 	}
 		
@@ -73,7 +70,7 @@ public class RsamViewSettings
 	static
 	{
 		DEFAULT_WAVE_VIEW_SETTINGS = new RsamViewSettings();
-		DEFAULT_WAVE_VIEW_SETTINGS.viewType = ViewType.WAVE;
+		DEFAULT_WAVE_VIEW_SETTINGS.viewType = ViewType.VALUES;
 		DEFAULT_WAVE_VIEW_SETTINGS.removeBias = true;
 		DEFAULT_WAVE_VIEW_SETTINGS.autoScaleAmp = true;
 		DEFAULT_WAVE_VIEW_SETTINGS.autoScaleAmpMemory = true;
@@ -212,14 +209,11 @@ public class RsamViewSettings
 	{
 		switch (viewType)
 		{
-			case WAVE:
-				viewType = ViewType.SPECTRA;
+			case VALUES:
+				viewType = ViewType.COUNTS;
 				break;
-			case SPECTRA:
-				viewType = ViewType.SPECTROGRAM;
-				break;
-			case SPECTROGRAM:
-				viewType = ViewType.WAVE;
+			case COUNTS:
+				viewType = ViewType.VALUES;
 				break;
 		}
 		notifyView();	

@@ -28,7 +28,7 @@ import java.util.StringTokenizer;
  * 
  * @author Dan Cervelli
  */
-public class WWSSource extends SeismicDataSource {
+public class WWSSource extends SeismicDataSource implements RsamSource {
 	private String params;
 	private WWSClient winstonClient;
 	private int timeout = 2000;

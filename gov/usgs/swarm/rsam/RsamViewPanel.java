@@ -408,14 +408,6 @@ public class RsamViewPanel extends JComponent {
         settings.minAmp = center - newRange / 2;
         settings.maxAmp = center + newRange / 2;
 
-//        if (settings.viewType == ViewType.SPECTROGRAM) {
-//            double maxf = settings.maxFreq * pct;
-//            System.out.printf("WaveViewPanel(804): maxf = %f\n", maxf);
-//            settings.maxFreq = (maxf > wave.getSamplingRate() / 2) ? wave.getSamplingRate() / 2 : maxf;
-//            System.out.printf("WaveViewPanel(806): settings.maxFreq = %f\n", settings.maxFreq);
-//
-//        }
-
         processSettings();
     }
 
@@ -427,7 +419,7 @@ public class RsamViewPanel extends JComponent {
         return image;
     }
 
-    public void createImage() {
+    private void createImage() {
         final Runnable r = new Runnable() {
             public void run() {
                 if (getWidth() > 0 && getHeight() > 0) {
@@ -592,14 +584,7 @@ public class RsamViewPanel extends JComponent {
         mr.createDefaultAxis();
         mr.setXAxisToTime(8, true, true);
         
-//        TimeZone timeZone = swarmConfig.getTimeZone(channel);
-//        double timeZoneOffset = timeZone.getOffset((long) Util.j2KToEW(endTime)) / 1000;
-//        String tzText = timeZone.getDisplayName(timeZone.inDaylightTime(Util.j2KToDate(endTime)), TimeZone.SHORT);
-//        String bottomText = "(" + Util.j2KToDateString(startTime + timeZoneOffset, DISPLAY_DATE_FORMAT) + " to "
-//                + Util.j2KToDateString(endTime + timeZoneOffset, DISPLAY_DATE_FORMAT) + " " + tzText + ")";
-
-//        mr.getAxis().setBottomLabelAsText(bottomText);
-        mr.getAxis().setLeftLabelAsText("RSAM");
+        mr.getAxis().setLeftLabelAsText("RSAM Values");
         
         mr.createDefaultLineRenderers(Color.blue);
         plot.addRenderer(mr);

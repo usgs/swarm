@@ -32,9 +32,10 @@ import javax.swing.event.InternalFrameEvent;
 public class RsamViewerFrame extends JInternalFrame implements Runnable
 {
 	public static final long serialVersionUID = -1;
+	private static final int H_TO_S = 60*60;
 	
 	private long intervalMs = 60 * 1000;
-	private final static int[] SPANS_S = new int[] {15 * 60, 30 * 60, 60 * 60, 120 * 60, 180 * 60, 240 * 60, 300 * 60};
+	private final static int[] SPANS_S = new int[] {1 * H_TO_S, 12 * H_TO_S, 24 * H_TO_S, 48 * H_TO_S, 168 * H_TO_S, 366 * H_TO_S, 672 * H_TO_S};
 	private int spanIndex;
 	private SeismicDataSource dataSource;
 	private String channel;
@@ -56,7 +57,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable
 		dataSource = sds;
 		channel = ch;
 		settings = new RsamViewSettings();
-		spanIndex = 3;
+		spanIndex = 1;
 		kill = false;
 		updateThread = new Thread(this, "RsamViewerFrame-" + sds + "-" + ch);
 		createUI();
@@ -64,7 +65,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable
 	
 	private void createUI()
 	{
-		this.setFrameIcon(Icons.rsam);
+		this.setFrameIcon(Icons.rsam_values);
 		mainPanel = new JPanel(new BorderLayout());
 		viewPanel = new RsamViewPanel(settings);
 		viewPanel.setChannel(channel);
@@ -89,6 +90,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable
 					{
 						if (spanIndex != 0)
 							spanIndex--;
+						getRsam();
 					}
 				});
 		Util.mapKeyStrokeToButton(this, "alt LEFT", "compx", compXButton);
@@ -103,6 +105,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable
 					{
 						if (spanIndex < SPANS_S.length - 1)
 							spanIndex++;
+						getRsam();
 					}
 				});
 		Util.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expXButton);				

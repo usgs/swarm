@@ -35,10 +35,10 @@ public class RsamViewSettingsDialog extends SwarmDialog {
     private JLabel warningLabel;
 
     private ButtonGroup viewGroup;
-    private JRadioButton waveButton;
+    private JRadioButton valuesButton;
     private JCheckBox removeBias;
     private JCheckBox useUnits;
-    private JRadioButton spectraButton;
+    private JRadioButton countsButton;
     private JRadioButton spectrogramButton;
 
     private ButtonGroup waveScaleGroup;
@@ -106,14 +106,11 @@ public class RsamViewSettingsDialog extends SwarmDialog {
 
     public void setToCurrent() {
         switch (settings.viewType) {
-        case WAVE:
-            waveButton.setSelected(true);
+        case VALUES:
+            valuesButton.setSelected(true);
             break;
-        case SPECTRA:
-            spectraButton.setSelected(true);
-            break;
-        case SPECTROGRAM:
-            spectrogramButton.setSelected(true);
+        case COUNTS:
+            countsButton.setSelected(true);
             break;
         }
         removeBias.setSelected(settings.removeBias);
@@ -168,11 +165,11 @@ public class RsamViewSettingsDialog extends SwarmDialog {
         warningLabel = new JLabel(" ");
 
         viewGroup = new ButtonGroup();
-        waveButton = new JRadioButton("Wave");
-        spectraButton = new JRadioButton("Spectra");
+        valuesButton = new JRadioButton("Wave");
+        countsButton = new JRadioButton("Spectra");
         spectrogramButton = new JRadioButton("Spectrogram");
-        viewGroup.add(waveButton);
-        viewGroup.add(spectraButton);
+        viewGroup.add(valuesButton);
+        viewGroup.add(countsButton);
         viewGroup.add(spectrogramButton);
 
         waveScaleGroup = new ButtonGroup();
@@ -230,8 +227,8 @@ public class RsamViewSettingsDialog extends SwarmDialog {
 
         builder.appendSeparator("View");
         builder.nextLine();
-        builder.append(waveButton);
-        builder.append(spectraButton);
+        builder.append(valuesButton);
+        builder.append(countsButton);
         builder.append(spectrogramButton);
         builder.nextLine();
 
