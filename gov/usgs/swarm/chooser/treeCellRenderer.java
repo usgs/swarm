@@ -1,14 +1,8 @@
 package gov.usgs.swarm.chooser;
 
-import java.awt.Color;
-import java.awt.Component;
-
-import javax.swing.ImageIcon;
-import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-
+@Deprecated
 public class treeCellRenderer extends DefaultTreeCellRenderer {
     
 //Anykey_ImageIcon imageLoader = new Anykey_ImageIcon();
