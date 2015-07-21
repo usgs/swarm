@@ -134,6 +134,7 @@ public class DataChooser extends JPanel {
     private JButton clipboardButton;
     private JButton monitorButton;
     private JButton realtimeButton;
+    private JButton rsamButton;
     private JButton mapButton;
 
     private Map<String, TreePath> nearestPaths;
@@ -418,6 +419,26 @@ public class DataChooser extends JPanel {
             }
         });
 
+        rsamButton = new JButton(Icons.alarm); //$NON-NLS-1$
+        rsamButton.setFocusable(false);
+        rsamButton.setToolTipText(Messages.getString("DataChooser.rsamButtonToolTip")); //$NON-NLS-1$
+        rsamButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                SwingWorker worker = new SwingWorker() {
+                    public Object construct() {
+                        List<Pair<ServerNode, String>> channels = getSelections();
+                        if (channels != null) {
+                            for (Pair<ServerNode, String> pair : channels) {
+                                Swarm.openRsam(pair.item1.getSource(), pair.item2);
+                            }
+                        }
+                        return null;
+                    }
+                };
+                worker.start();
+            }
+        });
+
         clipboardButton = new JButton(Icons.clipboard); //$NON-NLS-1$
         clipboardButton.setFocusable(false);
         clipboardButton.setToolTipText(Messages.getString("DataChooser.clipboardButtonToolTip")); //$NON-NLS-1$
@@ -502,6 +523,7 @@ public class DataChooser extends JPanel {
         actionPanel.add(clipboardButton);
         actionPanel.add(monitorButton);
         actionPanel.add(realtimeButton);
+        actionPanel.add(rsamButton);
         actionPanel.add(mapButton);
 
         JPanel timePanel = new JPanel(new BorderLayout());

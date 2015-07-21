@@ -4,6 +4,7 @@ import gov.usgs.earthworm.Menu;
 import gov.usgs.earthworm.MenuItem;
 import gov.usgs.net.ReadListener;
 import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.SwarmConfig;
@@ -143,6 +144,30 @@ public class WWSSource extends SeismicDataSource {
 		}
 		return wave;
 	}
+
+	   public synchronized RSAMData getRsam(String station, double t1, double t2) {
+	        RSAMData rsamData = null;
+	        if (useCache) {
+	            CachedDataSource cache = CachedDataSource.getInstance();
+	            rsamData = cache.getRsam(station, t1, t2);
+	        }
+
+	        if (rsamData == null) {
+	            String[] scnl = parseSCNL(station);
+	            rsamData = winstonClient.getRSAMData(scnl[0], scnl[1], scnl[2], scnl[3], t1, t2, 60, compress);
+
+	            if (rsamData == null)
+	                return null;
+
+	            if (useCache) {
+	                CachedDataSource cache = CachedDataSource.getInstance();
+	                cache.putRsam(station, rsamData);
+	            }
+	        } else {
+	            // System.out.println("cached");
+	        }
+	        return rsamData;
+	    }
 
 	public synchronized HelicorderData getHelicorder(final String station, double t1, double t2, GulperListener gl) {
 		CachedDataSource cache = CachedDataSource.getInstance();

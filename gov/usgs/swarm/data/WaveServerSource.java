@@ -4,6 +4,7 @@ import gov.usgs.earthworm.Menu;
 import gov.usgs.earthworm.MenuItem;
 import gov.usgs.earthworm.WaveServer;
 import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.util.CurrentTime;
@@ -191,5 +192,11 @@ public class WaveServerSource extends SeismicDataSource
 	{
 		return true;	
 	}
+
+    @Override
+    public RSAMData getRsam(String channel, double st, double et) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

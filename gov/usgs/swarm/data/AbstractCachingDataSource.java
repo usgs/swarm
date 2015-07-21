@@ -1,6 +1,7 @@
 package gov.usgs.swarm.data;
 
 import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.util.Log;
@@ -40,6 +41,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
     protected long maxSize;
     protected Map<String, List<CachedHelicorder>> helicorderCache;
     protected Map<String, List<CachedWave>> waveCache;
+    protected Map<String, List<CachedRsam>> rsamCache;
     protected CachePurgeAction[] purgeActions;
     protected static Logger logger;
     protected static final JFrame applicationFrame = Swarm.getApplicationFrame();
@@ -47,6 +49,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
     public AbstractCachingDataSource() {
         helicorderCache = new HashMap<String, List<CachedHelicorder>>();
         waveCache = new HashMap<String, List<CachedWave>>();
+        rsamCache = new HashMap<String, List<CachedRsam>>();
         maxSize = Runtime.getRuntime().maxMemory() / 6;
         logger = Log.getLogger("gov.usgs.swarm");
         createPurgeActions();
@@ -69,6 +72,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
     public synchronized long getSize() {
         long size = getSize(waveCache);
         size += getSize(helicorderCache);
+        size += getSize(rsamCache);
         return size;
     }
 
@@ -115,6 +119,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
                 // purge anything that hasn't been hit in 5 minutes
                 new TimeLimitWavePurgeAction(waveCache, 5 * 60 * 1000),
                 new TimeLimitHelicorderPurgeAction(helicorderCache, 5 * 60 * 1000),
+                new TimeLimitRsamPurgeAction(rsamCache, 5 * 60 * 1000),
 
                 // cut waves larger than 3 hours in half keeping latest half
                 new HalveLargeWavesPurgeAction(waveCache, 3 * 60 * 60),
@@ -161,6 +166,10 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
         cw.lastAccess = System.currentTimeMillis();
         waves.add(cw);
         enforceSize();
+    }
+
+    public void putRsam(String station, RSAMData rsamData) {
+        List<CachedRsam> rsams = rsamCache.get(station);
     }
 
     public synchronized void putHelicorder(String station, HelicorderData helicorder) {
@@ -276,6 +285,13 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
         }
         return null;
     }
+    
+    @Override
+    public RSAMData getRsam(String channel, double st, double et) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 
     public List<String> getChannels() {
         List<String> st = new ArrayList<String>();
@@ -346,6 +362,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
             putWaveInCache(station, wave, waves);
         }
     }
+
 
     // this version, the one that implements SeismicDataSource, will only
     // composite
@@ -571,6 +588,31 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
         }
     }
 
+    private class TimeLimitRsamPurgeAction extends CachePurgeAction {
+        private long interval;
+        private Map<String, List<CachedRsam>> cache;
+
+        public TimeLimitRsamPurgeAction(Map<String, List<CachedRsam>> c, long i) {
+            cache = c;
+            interval = i;
+        }
+
+        public long purge() {
+            List<CacheEntry> items = getEntriesByLastAccess(cache);
+
+            long chunk = 0;
+            long now = System.currentTimeMillis();
+
+            for (CacheEntry ce : items) {
+                if (now - ce.lastAccess > interval) {
+                    removeEntryFromCache(ce, cache);
+                    chunk += ce.getMemorySize();
+                }
+            }
+            return chunk;
+        }
+    }
+
     abstract protected class CachePurgeAction {
         public CachePurgeAction() {
         }
@@ -620,6 +662,26 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 
         public int getMemorySize() {
             return helicorder.getMemorySize();
+        }
+    }
+
+    public class CachedRsam extends CacheEntry {
+        public RSAMData rsamData;
+
+        public String toString() {
+            return station + " " + t1 + " " + t2;
+        }
+
+        @Override
+        public String getInfoString() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public int getMemorySize() {
+            // TODO Auto-generated method stub
+            return 0;
         }
     }
 

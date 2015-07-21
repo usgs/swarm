@@ -1,6 +1,7 @@
 package gov.usgs.swarm.data.fdsnWs;
 
 import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.ChannelGroupInfo;
 import gov.usgs.swarm.ChannelInfo;
@@ -230,4 +231,10 @@ public class WebServicesSource extends SeismicDataSource
 				typeString, net, sta, loc, chan, gulpSize,
 				gulpDelay, wsDataSelectUrl, wsStationUrl);
 	}
+
+    @Override
+    public RSAMData getRsam(String channel, double st, double et) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

@@ -1,6 +1,7 @@
 package gov.usgs.swarm.data;
 
 import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.data.file.FileType;
 import gov.usgs.plot.data.file.SeismicDataFile;
@@ -203,5 +204,11 @@ public class FileDataSource extends AbstractCachingDataSource {
 
     public String toConfigString() {
         return name + ";file:";
+    }
+
+    @Override
+    public RSAMData getRsam(String channel, double st, double et) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

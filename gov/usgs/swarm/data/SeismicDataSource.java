@@ -1,6 +1,7 @@
 package gov.usgs.swarm.data;
 
 import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
 
 import java.util.List;
@@ -40,6 +41,8 @@ abstract public class SeismicDataSource {
 	abstract public Wave getWave(String station, double t1, double t2);
 
 	abstract public HelicorderData getHelicorder(String station, double t1, double t2, GulperListener gl);
+
+    public abstract RSAMData getRsam(String channel, double st, double et);
 
 	abstract public String toConfigString();
 
@@ -162,4 +165,5 @@ abstract public class SeismicDataSource {
 	public int getMinimumRefreshInterval() {
 		return minimumRefreshInterval;
 	}
+
 }
