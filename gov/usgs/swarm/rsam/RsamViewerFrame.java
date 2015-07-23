@@ -57,7 +57,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable
 		dataSource = sds;
 		channel = ch;
 		settings = new RsamViewSettings();
-		spanIndex = 1;
+		spanIndex = 2;
 		kill = false;
 		updateThread = new Thread(this, "RsamViewerFrame-" + sds + "-" + ch);
 		createUI();
@@ -154,8 +154,6 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable
 		throbber.increment();
 		double now = CurrentTime.getInstance().nowJ2K();
 		RSAMData data = dataSource.getRsam(channel, now - SPANS_S[spanIndex], now);
-		System.out.println("ds: " + dataSource.getClass());
-		System.out.println("2plotting rsam values; rows: " + data.rows() + " ; times: " + Util.j2KToDateString(data.getStartTime()) + " - " + Util.j2KToDateString(data.getEndTime()));
 
 		viewPanel.setWorking(true);
 		viewPanel.setData(data, now - SPANS_S[spanIndex], now);

@@ -1,18 +1,20 @@
 package gov.usgs.swarm.rsam;
 
-import gov.usgs.math.Butterworth.FilterType;
+import gov.usgs.math.BinSize;
 import gov.usgs.swarm.SwarmDialog;
-import gov.usgs.swarm.wave.WaveViewSettings.ViewType;
+import gov.usgs.swarm.rsam.RsamViewSettings.ViewType;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JSlider;
 import javax.swing.JTextField;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
@@ -22,7 +24,7 @@ import com.jgoodies.forms.layout.FormLayout;
 /**
  * 
  * 
- * @author Dan Cervelli
+ * @author Tom Parker
  */
 public class RsamViewSettingsDialog extends SwarmDialog {
     private static final long serialVersionUID = 1L;
@@ -32,44 +34,26 @@ public class RsamViewSettingsDialog extends SwarmDialog {
     private static RsamViewSettingsDialog dialog;
     private RsamViewSettings settings;
 
-    private JLabel warningLabel;
-
     private ButtonGroup viewGroup;
     private JRadioButton valuesButton;
-    private JCheckBox removeBias;
-    private JCheckBox useUnits;
     private JRadioButton countsButton;
-    private JRadioButton spectrogramButton;
 
-    private ButtonGroup waveScaleGroup;
-    private JRadioButton waveAutoScale;
-    private JRadioButton waveManualScale;
-    private JCheckBox waveAutoScaleMemory;
-    private JTextField minAmp;
-    private JTextField maxAmp;
+    private JCheckBox detrend;
+    private JCheckBox despike;
+    private JTextField despikePeriod;
 
-    private JCheckBox logPower;
-    private JCheckBox logFreq;
-    private JTextField powerRange;
-    private JTextField minFreq;
-    private JTextField maxFreq;
-    private ButtonGroup spectraScaleGroup;
-    private JRadioButton spectraAutoScale;
-    private JRadioButton spectraManualScale;
-    private JTextField binSize;
-    private JTextField nfft;
-    private JTextField spectrogramOverlap;
+    private JCheckBox bandpassButton;
+    private JTextField bandpassMin;
+    private JTextField bandpassMax;
+    private JCheckBox runningMedianButton;
+    private JTextField runningMedianPeriod;
+    private JCheckBox runningMeanButton;
+    private JTextField runningMeanPeriod;
 
-    private ButtonGroup filterGroup;
-    private JCheckBox filterEnabled;
-    private JRadioButton lowPass;
-    private JRadioButton highPass;
-    private JRadioButton bandPass;
-    private JCheckBox zeroPhaseShift;
-    private JTextField corner1;
-    private JTextField corner2;
-    private JSlider order;
-    private int settingsCount;
+    private JTextField eventThreshold;
+    private JTextField eventRatio;
+    private JTextField eventMaxLength;
+    private JComboBox binSize;
 
     private RsamViewSettingsDialog() {
         super(applicationFrame, "RSAM Settings", true);
@@ -85,23 +69,9 @@ public class RsamViewSettingsDialog extends SwarmDialog {
         if (dialog == null)
             dialog = new RsamViewSettingsDialog();
 
-        dialog.setSettings(s);
+        dialog.settings = s;
         dialog.setToCurrent();
-        dialog.setSettingsCount(count);
         return dialog;
-    }
-
-    public void setSettingsCount(int i) {
-        settingsCount = i;
-        if (settingsCount > 1)
-            warningLabel.setText("You are currently configuring the settings for " + settingsCount
-                    + " different waves.");
-        else
-            warningLabel.setText(" ");
-    }
-
-    public void setSettings(RsamViewSettings s) {
-        settings = s;
     }
 
     public void setToCurrent() {
@@ -113,112 +83,80 @@ public class RsamViewSettingsDialog extends SwarmDialog {
             countsButton.setSelected(true);
             break;
         }
-        removeBias.setSelected(settings.removeBias);
-        useUnits.setSelected(settings.useUnits);
 
-        if (settings.autoScaleAmp)
-            waveAutoScale.setSelected(true);
-        else
-            waveManualScale.setSelected(true);
-        waveAutoScaleMemory.setSelected(settings.autoScaleAmpMemory);
+        despike.setSelected(settings.despike);
+        despikePeriod.setText(String.format("%.1f", settings.despikePeriod));
+        despikePeriod.setEnabled(despike.isSelected());
+        detrend.setSelected(settings.detrend);
 
-        if (settings.autoScalePower)
-            spectraAutoScale.setSelected(true);
-        else
-            spectraManualScale.setSelected(true);
-
-        minAmp.setText(String.format("%.1f", settings.minAmp));
-        maxAmp.setText(String.format("%.1f", settings.maxAmp));
-        powerRange.setText(String.format("%.1f, %.1f", settings.minPower, settings.maxPower));
-
-        binSize.setText(String.format("%.1f", settings.binSize));
-        nfft.setText(String.format("%d", settings.nfft));
-        minFreq.setText(String.format("%.1f", settings.minFreq));
-        maxFreq.setText(String.format("%.1f", settings.maxFreq));
-        logFreq.setSelected(settings.logFreq);
-        logPower.setSelected(settings.logPower);
-        spectrogramOverlap.setText(String.format("%3.0f", settings.spectrogramOverlap * 100));
-
-        filterEnabled.setSelected(settings.filterOn);
-
-        switch (settings.filter.getType()) {
-        case LOWPASS:
-            lowPass.setSelected(true);
-            corner1.setText("0.0");
-            corner2.setText(String.format("%.1f", settings.filter.getCorner1()));
-            break;
-        case HIGHPASS:
-            highPass.setSelected(true);
-            corner1.setText(String.format("%.1f", settings.filter.getCorner1()));
-            corner2.setText("0.0");
-            break;
-        case BANDPASS:
-            bandPass.setSelected(true);
-            corner1.setText(String.format("%.1f", settings.filter.getCorner1()));
-            corner2.setText(String.format("%.1f", settings.filter.getCorner2()));
-            break;
-        }
-        order.setValue(settings.filter.getOrder());
+        bandpassButton.setSelected(settings.bandpass);
+        bandpassMin.setText(String.format("%.1f", settings.bandpassMin));
+        bandpassMin.setEnabled(bandpassButton.isSelected());
+        bandpassMax.setText(String.format("%.1f", settings.bandpassMax));
+        bandpassMax.setEnabled(bandpassButton.isSelected());
+        runningMedianButton.setSelected(settings.runningMedian);
+        runningMedianPeriod.setText(String.format("%.1f", settings.runningMedianPeriod));
+        runningMedianPeriod.setEnabled(settings.runningMedian);
+        runningMeanButton.setSelected(settings.runningMean);
+        runningMeanPeriod.setText(String.format("%.1f", settings.runningMeanPeriod));
+        runningMeanPeriod.setEnabled(settings.runningMean);
+        eventThreshold.setText(String.format("%d", settings.eventThreshold));
+        eventRatio.setText(String.format("%.1f", settings.eventRatio));
+        eventMaxLength.setText(String.format("%.1f", settings.eventMaxLength));
+        binSize.setSelectedItem(settings.binSize.toString());
     }
 
     private void createComponents() {
-        warningLabel = new JLabel(" ");
-
         viewGroup = new ButtonGroup();
-        valuesButton = new JRadioButton("Wave");
-        countsButton = new JRadioButton("Spectra");
-        spectrogramButton = new JRadioButton("Spectrogram");
+        valuesButton = new JRadioButton("RSAM values");
+        countsButton = new JRadioButton("Event counts");
         viewGroup.add(valuesButton);
         viewGroup.add(countsButton);
-        viewGroup.add(spectrogramButton);
 
-        waveScaleGroup = new ButtonGroup();
-        removeBias = new JCheckBox("Remove bias");
-        useUnits = new JCheckBox("Use calibrations");
-        waveManualScale = new JRadioButton("Manual scale");
-        waveAutoScale = new JRadioButton("Autoscale");
-        waveScaleGroup.add(waveAutoScale);
-        waveScaleGroup.add(waveManualScale);
-        waveAutoScaleMemory = new JCheckBox("Persistent rescale");
-        minAmp = new JTextField(7);
-        maxAmp = new JTextField(7);
-
-        logPower = new JCheckBox("Log power");
-        logFreq = new JCheckBox("Log frequency");
-        powerRange = new JTextField(6);
-        minFreq = new JTextField(4);
-        maxFreq = new JTextField(4);
-        spectraScaleGroup = new ButtonGroup();
-        spectraAutoScale = new JRadioButton("Auto scale");
-        spectraManualScale = new JRadioButton("Manual scale");
-        spectraScaleGroup.add(spectraAutoScale);
-        spectraScaleGroup.add(spectraManualScale);
-        binSize = new JTextField(4);
-        nfft = new JTextField(4);
-        spectrogramOverlap = new JTextField(4);
-
-        filterGroup = new ButtonGroup();
-        filterEnabled = new JCheckBox("Enabled");
-        lowPass = new JRadioButton("Low pass");
-        highPass = new JRadioButton("High pass");
-        bandPass = new JRadioButton("Band pass");
-        filterGroup.add(lowPass);
-        filterGroup.add(highPass);
-        filterGroup.add(bandPass);
-        zeroPhaseShift = new JCheckBox("Zero phase shift (doubles order)");
-        corner1 = new JTextField(7);
-        corner2 = new JTextField(7);
-        order = new JSlider(2, 8, 4);
-        order.setMajorTickSpacing(2);
-        order.setSnapToTicks(true);
-        order.createStandardLabels(2);
-        order.setPaintLabels(true);
+        detrend = new JCheckBox("Detrend (linear)");
+        despike = new JCheckBox("Despike (mean)");
+        despikePeriod = new JTextField(4);
+        despike.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                despikePeriod.setEnabled(despike.isSelected());
+            }
+        });
+ 
+        bandpassButton = new JCheckBox("Bandpass");
+        bandpassMin = new JTextField(4);
+        bandpassMax = new JTextField(4);
+        bandpassButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                bandpassMin.setEnabled(bandpassButton.isSelected());
+                bandpassMax.setEnabled(bandpassButton.isSelected());
+            }
+        });
+        runningMedianButton = new JCheckBox("Running median");
+        runningMedianPeriod = new JTextField(4);
+        runningMedianButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                runningMedianPeriod.setEnabled(runningMedianButton.isSelected());
+            }
+        });
+        runningMeanButton = new JCheckBox("Running mean");
+        runningMeanPeriod = new JTextField(4);
+        runningMeanButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                runningMeanPeriod.setEnabled(runningMeanButton.isSelected());
+            }
+        });
+        
+        eventThreshold = new JTextField(4);
+        eventRatio = new JTextField(4);
+        eventMaxLength = new JTextField(4);
+        binSize = new JComboBox(BinSize.values());
     }
 
     protected void createUI() {
         super.createUI();
         createComponents();
-        FormLayout layout = new FormLayout("left:60dlu, 3dlu, left:60dlu, 3dlu, left:60dlu, 3dlu, left:60dlu", "");
+        FormLayout layout = new FormLayout(
+                "left:65dlu, 1dlu, left:60dlu, 3dlu, left:30dlu, 3dlu, left:30dlu, 3dlu, left:30dlu", "");
 
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
@@ -229,89 +167,60 @@ public class RsamViewSettingsDialog extends SwarmDialog {
         builder.nextLine();
         builder.append(valuesButton);
         builder.append(countsButton);
-        builder.append(spectrogramButton);
         builder.nextLine();
 
-        builder.appendSeparator("Wave Options");
+        builder.appendSeparator("RSAM Options");
         builder.nextLine();
-        builder.append(removeBias);
-        builder.add(new JLabel("Min. Amplitude:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+        builder.append(despike);
+        builder.add(new JLabel("Period:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
         builder.nextColumn(2);
-        builder.append(minAmp);
-        builder.append(waveAutoScale);
+        builder.append(despikePeriod);
         builder.nextLine();
-        builder.append(useUnits);
-        builder.add(new JLabel("Max. Amplitude:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+        builder.append(detrend);
+        builder.nextLine();
+
+        builder.appendSeparator("Filter Options");
+        builder.nextLine();
+        builder.append(bandpassButton);
+        builder.add(new JLabel("Min:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
         builder.nextColumn(2);
-        builder.append(maxAmp);
-        builder.append(waveManualScale);
+        builder.append(bandpassMin);
+        builder.add(new JLabel("Max:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+        builder.nextColumn(2);
+        builder.append(bandpassMax);
+        builder.nextLine();
+        builder.append(runningMedianButton);
+        builder.add(new JLabel("Period:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+        builder.nextColumn(2);
+        builder.append(runningMedianPeriod);
+        builder.nextLine();
+        builder.append(runningMeanButton);
+        builder.add(new JLabel("Period:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+        builder.nextColumn(2);
+        builder.append(runningMeanPeriod);
+        builder.nextLine();
 
-        builder.nextLine();
-        builder.append(new JLabel(""), 5);
-        builder.append(waveAutoScaleMemory);
-        builder.nextLine();
-
-        builder.appendSeparator("Spectra Options");
-        builder.nextLine();
-        builder.append(new JLabel(""), 1);
-        builder.append(logPower);
-        builder.append(logFreq);
-        builder.nextLine();
-
-        builder.appendSeparator("Spectrogram Options");
-        builder.nextLine();
-        builder.append(new JLabel(""), 1);
-        builder.append(spectraAutoScale);
-        builder.append(spectraManualScale);
+        builder.appendSeparator("Event Options");
         builder.nextLine();
         builder.appendRow("center:18dlu");
-        builder.add(new JLabel("Min. frequency:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+        builder.add(new JLabel("Event threshold:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
         builder.nextColumn(2);
-        builder.append(minFreq);
-        builder.add(new JLabel("Window size (s):"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+        builder.append(eventThreshold);
+        builder.add(new JLabel("Bin size:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
         builder.nextColumn(2);
-        builder.append(binSize);
+        builder.add(binSize, cc.xyw(builder.getColumn(), builder.getRow(), 3));
+        builder.nextColumn();
+        
         builder.nextLine();
         builder.appendRow("center:18dlu");
-        builder.add(new JLabel("Max. frequency:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+        builder.add(new JLabel("Event ratio:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
         builder.nextColumn(2);
-        builder.append(maxFreq);
-        builder.add(new JLabel("# of FFT points:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
-        builder.nextColumn(2);
-        builder.append(nfft);
+        builder.append(eventRatio);
         builder.nextLine();
         builder.appendRow("center:18dlu");
-        builder.add(new JLabel("Overlap (%)"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+        builder.add(new JLabel("Event max length:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
         builder.nextColumn(2);
-        builder.append(spectrogramOverlap);
-        builder.add(new JLabel("Power range (dB):"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
-        builder.nextColumn(2);
-        builder.append(powerRange);
-        builder.nextLine();
-
-        builder.appendSeparator("Butterworth Filter");
-        builder.append(filterEnabled, 3);
-        builder.append(zeroPhaseShift, 3);
-        builder.nextLine();
-        builder.append(lowPass, 3);
-        builder.add(new JLabel("Min. frequency:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
-        builder.nextColumn(2);
-        builder.append(corner1);
-        builder.nextLine();
-        builder.append(highPass, 3);
-        builder.add(new JLabel("Max. frequency:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
-        builder.nextColumn(2);
-        builder.append(corner2);
-        builder.nextLine();
-        builder.append(bandPass, 3);
-        builder.add(new JLabel("Order"), cc.xyw(builder.getColumn(), builder.getRow(), 3, "center, center"));
-        builder.nextLine();
-        builder.appendRow("center:20dlu");
-        builder.nextColumn(3);
-        builder.append(order, 4);
-        builder.nextLine();
-        builder.append(warningLabel, 7);
-        builder.nextLine();
+        builder.append(eventMaxLength);
 
         dialogPanel = builder.getPanel();
         mainPanel.add(dialogPanel, BorderLayout.CENTER);
@@ -321,114 +230,60 @@ public class RsamViewSettingsDialog extends SwarmDialog {
     public boolean allowOK() {
         String message = null;
         try {
-            message = "Error in minimum ampitude format.";
-            double min = Double.parseDouble(minAmp.getText());
-            message = "Error in maximum ampitude format.";
-            double max = Double.parseDouble(maxAmp.getText());
-            message = "Minimum amplitude must be less than maximum amplitude.";
-            if (min >= max)
+            message = "Error in despike period.";
+            double dsp = Double.parseDouble(despikePeriod.getText());
+            
+            message = "Error in bandpass minimum frequency.";
+            double bmin = Double.parseDouble(bandpassMin.getText());
+            message = "Error in bandpass maximum frequency.";
+            double bmax = Double.parseDouble(bandpassMax.getText());
+            message = "Bandpass minimum frequency must be less than bandpass maximum frequency.";
+            if (bmin >= bmax)
                 throw new NumberFormatException();
+            message = "Error in running median period.";
+            double rm = Double.parseDouble(runningMedianPeriod.getText());
+            message = "Error in running mean period.";
+            double rmp = Double.parseDouble(runningMeanPeriod.getText());
 
-            message = "Error in minimum frequency format.";
-            double minf = Double.parseDouble(minFreq.getText());
-            message = "Error in maximum frequency format.";
-            double maxf = Double.parseDouble(maxFreq.getText());
-            message = "Minimum frequency must be 0 or above and less than maximum frequency.";
-            if (minf < 0 || minf >= maxf)
-                throw new NumberFormatException();
-
-            message = "Error in spectrogram overlap format.";
-            double so = Double.parseDouble(spectrogramOverlap.getText());
-            message = "Spectrogram overlap must be between 0 and 95%.";
-            if (so < 0 || so > 95)
-                throw new NumberFormatException();
-
-            message = "Error in minimum Hz format.";
-            double c1 = Double.parseDouble(corner1.getText());
-            message = "Minimum Hz must be 0 or above.";
-            if (c1 < 0)
-                throw new NumberFormatException();
-
-            message = "Error in maximum Hz format.";
-            double c2 = Double.parseDouble(corner2.getText());
-            message = "Maximum Hz must be 0 or above.";
-            if (c2 < 0)
-                throw new NumberFormatException();
-
-            message = "Minimum Hz must be less than maximum Hz.";
-            if (bandPass.isSelected())
-                if (c1 >= c2)
-                    throw new NumberFormatException();
+            message = "Error in event threshold.";
+            double et = Double.parseDouble(eventThreshold.getText());
+            message = "Error in event ratio.";
+            double er = Double.parseDouble(eventRatio.getText());
+            message = "Error in event maximum length.";
+            double eml = Double.parseDouble(eventMaxLength.getText());
 
             return true;
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, message, "Options Error", JOptionPane.ERROR_MESSAGE);
         }
+
         return false;
     }
 
     public void wasOK() {
+        
         try {
-//            if (waveButton.isSelected())
-//                settings.viewType = ViewType.WAVE;
-//            else if (spectraButton.isSelected())
-//                settings.viewType = ViewType.SPECTRA;
-//            else if (spectrogramButton.isSelected())
-//                settings.viewType = ViewType.SPECTROGRAM;
+            if (valuesButton.isSelected())
+                settings.viewType = ViewType.VALUES;
+            else
+                settings.viewType = ViewType.COUNTS;
+            
+            settings.despike = despike.isSelected();
+            settings.despikePeriod = Double.parseDouble(despikePeriod.getText());
+            settings.detrend = detrend.isSelected();
 
-            settings.removeBias = removeBias.isSelected();
-            settings.useUnits = useUnits.isSelected();
-            settings.autoScaleAmp = waveAutoScale.isSelected();
-            settings.autoScaleAmpMemory = waveAutoScaleMemory.isSelected();
-
-            settings.autoScalePower = spectraAutoScale.isSelected();
-
-            double newMinPower = Double.parseDouble(powerRange.getText().split(",")[0]);
-            double newMaxPower = Double.parseDouble(powerRange.getText().split(",")[1]);
-
-            if (newMinPower != settings.minPower | newMaxPower != settings.maxPower) {
-                settings.minPower = Double.parseDouble(powerRange.getText().split(",")[0]);
-                settings.maxPower = Double.parseDouble(powerRange.getText().split(",")[1]);
-                settings.autoScalePower = false;
-            }
-
-            settings.minAmp = Double.parseDouble(minAmp.getText());
-            settings.maxAmp = Double.parseDouble(maxAmp.getText());
-
-            settings.maxFreq = Double.parseDouble(maxFreq.getText());
-            settings.minFreq = Double.parseDouble(minFreq.getText());
-            if (settings.minFreq < 0)
-                settings.minFreq = 0;
-
-            settings.binSize = Double.parseDouble(binSize.getText());
-            settings.nfft = Integer.parseInt(nfft.getText());
-            settings.logFreq = logFreq.isSelected();
-            settings.logPower = logPower.isSelected();
-            settings.spectrogramOverlap = Double.parseDouble(spectrogramOverlap.getText()) / 100;
-            if (settings.spectrogramOverlap > 0.95 || settings.spectrogramOverlap < 0)
-                settings.spectrogramOverlap = 0;
-            settings.notifyView();
-
-            settings.filterOn = filterEnabled.isSelected();
-            settings.zeroPhaseShift = zeroPhaseShift.isSelected();
-
-            FilterType ft = null;
-            double c1 = 0;
-            double c2 = 0;
-            if (lowPass.isSelected()) {
-                ft = FilterType.LOWPASS;
-                c1 = Double.parseDouble(corner2.getText());
-                c2 = 0;
-            } else if (highPass.isSelected()) {
-                ft = FilterType.HIGHPASS;
-                c1 = Double.parseDouble(corner1.getText());
-                c2 = 0;
-            } else if (bandPass.isSelected()) {
-                ft = FilterType.BANDPASS;
-                c1 = Double.parseDouble(corner1.getText());
-                c2 = Double.parseDouble(corner2.getText());
-            }
-            settings.filter.set(ft, order.getValue(), 100, c1, c2);
+            settings.bandpass = bandpassButton.isSelected();
+            settings.bandpassMin = Double.parseDouble(bandpassMin.getText());
+            settings.bandpassMax = Double.parseDouble(bandpassMax.getText());
+            settings.runningMean = runningMeanButton.isSelected();
+            settings.runningMeanPeriod = Double.parseDouble(runningMeanPeriod.getText());
+            settings.runningMedian = runningMedianButton.isSelected();
+            settings.runningMedianPeriod = Double.parseDouble(runningMedianPeriod.getText());
+            
+            settings.eventThreshold = Integer.parseInt(eventThreshold.getText());
+            settings.eventRatio = Double.parseDouble(eventRatio.getText());
+            settings.eventMaxLength = Double.parseDouble(eventMaxLength.getText());
+            settings.binSize = (BinSize) binSize.getSelectedItem();
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Illegal values.", "Options Error", JOptionPane.ERROR_MESSAGE);

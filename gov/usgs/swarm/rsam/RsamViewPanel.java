@@ -1,31 +1,26 @@
 package gov.usgs.swarm.rsam;
 
-import gov.usgs.math.Filter;
-import gov.usgs.net.HttpResponse;
+import gov.usgs.math.BinSize;
+import gov.usgs.math.Butterworth;
+import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
+import gov.usgs.plot.data.GenericDataMatrix;
 import gov.usgs.plot.data.RSAMData;
-import gov.usgs.plot.data.SliceWave;
-import gov.usgs.plot.data.Wave;
-import gov.usgs.plot.decorate.DefaultFrameDecorator;
 import gov.usgs.plot.decorate.FrameDecorator;
-import gov.usgs.plot.decorate.DefaultFrameDecorator.Location;
+import gov.usgs.plot.decorate.SmartTick;
+import gov.usgs.plot.render.AxisRenderer;
+import gov.usgs.plot.render.HistogramRenderer;
 import gov.usgs.plot.render.MatrixRenderer;
+import gov.usgs.plot.render.ShapeRenderer;
 import gov.usgs.plot.render.TextRenderer;
-import gov.usgs.plot.render.wave.SliceWaveRenderer;
-import gov.usgs.plot.render.wave.SpectraRenderer;
-import gov.usgs.plot.render.wave.SpectrogramRenderer;
 import gov.usgs.swarm.Icons;
-import gov.usgs.swarm.Metadata;
 import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwingWorker;
-import gov.usgs.swarm.data.CachedDataSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.time.UiTime;
-import gov.usgs.swarm.time.WaveViewTime;
-import gov.usgs.util.Time;
-import gov.usgs.util.Util;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -35,18 +30,16 @@ import java.awt.Image;
 import java.awt.Paint;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.TimeZone;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
+
+import cern.colt.matrix.DoubleMatrix2D;
 
 /**
  * A component that renders a RSAM plot.
@@ -73,13 +66,10 @@ public class RsamViewPanel extends JComponent {
     private int yOffset = 20;
 
     /** The amount of padding space on the right side. */
-    private int rightWidth = 20;
+    private int rightWidth = 40;
 
     /** The amount of padding space on the bottom. */
     private int bottomHeight = 20;
-
-    private FrameDecorator decorator;
-    private MatrixRenderer renderer;
 
     private RSAMData data;
 
@@ -87,12 +77,6 @@ public class RsamViewPanel extends JComponent {
     private double endTime;
     private RsamViewSettings settings;
     private int bias;
-
-    private double minAmp = 1E300;
-    private double maxAmp = -1E300;
-    private double maxSpectraPower = -1E300;
-    private double maxSpectrogramPower = -1E300;
-    private double[] translation;
 
     private boolean timeSeries;
     private String channel;
@@ -145,6 +129,8 @@ public class RsamViewPanel extends JComponent {
 
     private Color borderColor;
 
+    private double[] translation;
+
     /**
      * Constructs a WaveViewPanel with default settings.
      */
@@ -164,6 +150,7 @@ public class RsamViewPanel extends JComponent {
         s.view = this;
 
         backgroundColor = new Color(0xf7, 0xf7, 0xf7);
+        setupMouseHandler();
     }
 
     /**
@@ -180,11 +167,6 @@ public class RsamViewPanel extends JComponent {
         startTime = p.startTime;
         endTime = p.endTime;
         bias = p.bias;
-        maxSpectraPower = p.maxSpectraPower;
-        maxSpectrogramPower = p.maxSpectrogramPower;
-        translation = new double[8];
-        if (p.translation != null)
-            System.arraycopy(p.translation, 0, translation, 0, 8);
         timeSeries = p.timeSeries;
         allowDragging = p.allowDragging;
         settings = new RsamViewSettings(p.settings);
@@ -192,8 +174,12 @@ public class RsamViewPanel extends JComponent {
         data = p.data;
         displayTitle = p.displayTitle;
         backgroundColor = p.backgroundColor;
-        processSettings();
+        translation = new double[8];
+        if (p.translation != null)
+            System.arraycopy(p.translation, 0, translation, 0, 8);
 
+        processSettings();
+        setupMouseHandler();
     }
 
     public void setOffsets(int xo, int yo, int rw, int bh) {
@@ -201,6 +187,20 @@ public class RsamViewPanel extends JComponent {
         yOffset = yo;
         rightWidth = rw;
         bottomHeight = bh;
+    }
+
+    private void setupMouseHandler() {
+        Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
+        this.setCursor(crosshair);
+
+        this.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                UiTime.touchTime();
+                if (SwingUtilities.isRightMouseButton(e))
+                    settings.cycleType();
+                fireMousePressed(e);
+            }
+        });
     }
 
     public void addListener(RsamViewPanelListener listener) {
@@ -336,10 +336,6 @@ public class RsamViewPanel extends JComponent {
         source = s;
     }
 
-    public void setFrameDecorator(FrameDecorator fd) {
-        decorator = fd;
-    }
-
     public void setDisplayTitle(boolean b) {
         displayTitle = b;
     }
@@ -352,6 +348,7 @@ public class RsamViewPanel extends JComponent {
         return timeSeries;
     }
 
+    
     /**
      * Gets the translation info for this panel. The translation info is used to
      * convert from pixel coordinates on the panel into time or data
@@ -385,29 +382,6 @@ public class RsamViewPanel extends JComponent {
         this.data = data;
         startTime = st;
         endTime = et;
-        processSettings();
-    }
-
-    public void resetAutoScaleMemory() {
-        minAmp = 1E300;
-        maxAmp = -1E300;
-        maxSpectraPower = -1E300;
-        maxSpectrogramPower = -1E300;
-        settings.autoScaleAmp = true;
-        settings.autoScalePower = true;
-        processSettings();
-    }
-
-    public void adjustScale(double pct) {
-        double maxa = settings.autoScaleAmp ? maxAmp : settings.maxAmp;
-        double mina = settings.autoScaleAmp ? minAmp : settings.minAmp;
-        settings.autoScaleAmp = false;
-        double range = maxa - mina;
-        double center = range / 2 + mina;
-        double newRange = range * pct;
-        settings.minAmp = center - newRange / 2;
-        settings.maxAmp = center + newRange / 2;
-
         processSettings();
     }
 
@@ -554,8 +528,15 @@ public class RsamViewPanel extends JComponent {
         Plot plot = new Plot();
         plot.setBackgroundColor(backgroundColor);
         plot.setSize(dim);
-        
-        plotValues(plot, data);
+
+        switch (settings.viewType) {
+        case VALUES:
+            plotValues(plot, data);
+            break;
+        case COUNTS:
+            plotCounts(plot, data);
+            break;
+        }
 
         try {
             plot.render(g2);
@@ -574,20 +555,99 @@ public class RsamViewPanel extends JComponent {
         if (data == null || data.getData() == null || data.getData().rows() == 0)
             return;
         
-        MatrixRenderer mr = new MatrixRenderer(data.getData(), false);
-        double max = data.max(1) + data.max(1) * .1;
-        double min = data.min(1) - data.max(1) * .1;
+        GenericDataMatrix gdm = new GenericDataMatrix(data.getData().copy());
+
+        if (settings.despike)
+            gdm.despike(1, settings.despikePeriod);
+
+        if (settings.detrend)
+            gdm.detrend(1);
+
+        if (settings.runningMedian)
+            gdm.set2median(1, settings.runningMedianPeriod);
+
+        if (settings.runningMedian)
+            gdm.set2mean(1, settings.runningMeanPeriod);
+
+//        if (settings.bandpass) {
+//            GenericDataMatrix gdm   = new GenericDataMatrix(data.getData());
+//            Butterworth bw = new Butterworth();
+//            Double singleBand = 0.0;
+//                bw.set(FilterType.BANDPASS, 4, Math.pow(filterPeriod, -1), Math.pow(settings.bandpassMax, -1), Math.pow(settings.bandpassMin, -1));
+//            gdm.filter(bw, 1, true);
+//
+//        }
+
+        MatrixRenderer mr = new MatrixRenderer(gdm.getData(), false);
+        double max = gdm.max(1) + gdm.max(1) * .1;
+        double min = gdm.min(1) - gdm.max(1) * .1;
 
         mr.setExtents(startTime, endTime, min, max);
         mr.setLocation(xOffset, yOffset, this.getWidth() - xOffset - rightWidth, this.getHeight() - yOffset
                 - bottomHeight);
         mr.createDefaultAxis();
         mr.setXAxisToTime(8, true, true);
-        
-        mr.getAxis().setLeftLabelAsText("RSAM Values");
-        
+
+        mr.getAxis().setLeftLabelAsText("RSAM Values", -55, Color.BLACK);
+
         mr.createDefaultLineRenderers(Color.blue);
         plot.addRenderer(mr);
+    }
+
+    /**
+     * Plots RSAM values.
+     * 
+     * @param data
+     *            the RSAM values to plot
+     */
+    private void plotCounts(Plot plot, RSAMData data) {
+        if (data == null || data.getData() == null || data.getData().rows() == 0)
+            return;
+
+        // get the relevant information for this channel
+        data.countEvents(settings.eventThreshold, settings.eventRatio, settings.eventMaxLength);
+
+        // setup the histogram renderer with this data
+        HistogramRenderer hr = new HistogramRenderer(data.getCountsHistogram(settings.binSize));
+        hr.setLocation(xOffset, yOffset, this.getWidth() - xOffset - rightWidth, this.getHeight() - yOffset
+                - bottomHeight);
+        hr.setDefaultExtents();
+        hr.setMinX(startTime);
+        hr.setMaxX(endTime);
+
+        // x axis decorations
+        hr.createDefaultAxis(8, 8, true, true, false, true, true, true);
+        hr.setXAxisToTime(8, true, true);
+
+        hr.getAxis().setLeftLabelAsText("Events per " + settings.binSize, -55, Color.BLACK);
+
+        DoubleMatrix2D countsData = data.getCumulativeCounts();
+        if (countsData != null && countsData.rows() > 0) {
+
+            double cmin = countsData.get(0, 1);
+            double cmax = countsData.get(countsData.rows() - 1, 1);
+
+            MatrixRenderer mr = new MatrixRenderer(countsData, false);
+            mr.setAllVisible(true);
+            mr.setLocation(xOffset, yOffset, this.getWidth() - xOffset - rightWidth, this.getHeight() - yOffset
+                    - bottomHeight);
+            mr.setExtents(startTime, endTime, cmin, cmax + 1);
+            mr.createDefaultLineRenderers(Color.RED);
+            ShapeRenderer[] r = mr.getLineRenderers();
+            ((ShapeRenderer) r[0]).color = Color.RED;
+            ((ShapeRenderer) r[0]).stroke = new BasicStroke(2.0f);
+
+            // create the axis for the right hand side
+            AxisRenderer ar = new AxisRenderer(mr);
+            ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, 8, false), null);
+            mr.setAxis(ar);
+
+            hr.addRenderer(mr);
+            hr.getAxis().setRightLabelAsText("Cumulative Counts");
+
+        }
+        plot.addRenderer(hr);
+
     }
 
     /**
