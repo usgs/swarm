@@ -5,6 +5,7 @@ import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.SwarmUtil;
 import gov.usgs.swarm.Throbber;
 import gov.usgs.swarm.chooser.DataChooser;
+import gov.usgs.swarm.data.RsamSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.util.CurrentTime;
@@ -34,7 +35,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable
 	public static final long serialVersionUID = -1;
 	private static final int H_TO_S = 60*60;
 	
-	private long intervalMs = 60 * 1000;
+	private long intervalMs = 5 * 1000;
 	private final static int[] SPANS_S = new int[] {1 * H_TO_S, 12 * H_TO_S, 24 * H_TO_S, 48 * H_TO_S, 168 * H_TO_S, 366 * H_TO_S, 672 * H_TO_S};
 	private int spanIndex;
 	private SeismicDataSource dataSource;
@@ -55,6 +56,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable
 	{
 		super(ch + ", [" + sds + "]", true, true, false, true);
 		dataSource = sds;
+		dataSource.setUseCache(false);
 		channel = ch;
 		settings = new RsamViewSettings();
 		spanIndex = 2;
@@ -153,7 +155,12 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable
 	{
 		throbber.increment();
 		double now = CurrentTime.getInstance().nowJ2K();
-		RSAMData data = dataSource.getRsam(channel, now - SPANS_S[spanIndex], now);
+		double st = now - SPANS_S[spanIndex];
+		st -= st % settings.period;
+		
+		double et = now;
+		et += settings.period - (et % settings.period);
+		RSAMData data = ((RsamSource) dataSource).getRsam(channel, st, et, settings.period);
 
 		viewPanel.setWorking(true);
 		viewPanel.setData(data, now - SPANS_S[spanIndex], now);
