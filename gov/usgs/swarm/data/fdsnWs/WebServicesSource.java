@@ -231,10 +231,4 @@ public class WebServicesSource extends SeismicDataSource
 				typeString, net, sta, loc, chan, gulpSize,
 				gulpDelay, wsDataSelectUrl, wsStationUrl);
 	}
-
-    @Override
-    public RSAMData getRsam(String channel, double st, double et) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }

@@ -1,6 +1,7 @@
 package gov.usgs.swarm.rsam;
 
 import gov.usgs.math.BinSize;
+import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.SwarmDialog;
 import gov.usgs.swarm.rsam.RsamViewSettings.ViewType;
 
@@ -39,8 +40,8 @@ public class RsamViewSettingsDialog extends SwarmDialog {
     private JRadioButton countsButton;
 
     private JCheckBox detrend;
-    private JCheckBox despike;
-    private JTextField despikePeriod;
+    private JComboBox valuesPeriod;
+    private JComboBox countsPeriod;
 
     private JCheckBox bandpassButton;
     private JTextField bandpassMin;
@@ -57,6 +58,7 @@ public class RsamViewSettingsDialog extends SwarmDialog {
 
     private RsamViewSettingsDialog() {
         super(applicationFrame, "RSAM Settings", true);
+        this.setIconImage(Icons.rsam_values.getImage());
         createUI();
         setSizeAndLocation();
     }
@@ -84,9 +86,6 @@ public class RsamViewSettingsDialog extends SwarmDialog {
             break;
         }
 
-        despike.setSelected(settings.despike);
-        despikePeriod.setText(String.format("%.1f", settings.despikePeriod));
-        despikePeriod.setEnabled(despike.isSelected());
         detrend.setSelected(settings.detrend);
 
         bandpassButton.setSelected(settings.bandpass);
@@ -103,7 +102,7 @@ public class RsamViewSettingsDialog extends SwarmDialog {
         eventThreshold.setText(String.format("%d", settings.eventThreshold));
         eventRatio.setText(String.format("%.1f", settings.eventRatio));
         eventMaxLength.setText(String.format("%.1f", settings.eventMaxLength));
-        binSize.setSelectedItem(settings.binSize.toString());
+        binSize.setSelectedItem(settings.binSize);
     }
 
     private void createComponents() {
@@ -113,14 +112,10 @@ public class RsamViewSettingsDialog extends SwarmDialog {
         viewGroup.add(valuesButton);
         viewGroup.add(countsButton);
 
+        valuesPeriod = new JComboBox(ValuesPeriods.values());
+        countsPeriod = new JComboBox(countsPeriods.values());
+        
         detrend = new JCheckBox("Detrend (linear)");
-        despike = new JCheckBox("Despike (mean)");
-        despikePeriod = new JTextField(4);
-        despike.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                despikePeriod.setEnabled(despike.isSelected());
-            }
-        });
  
         bandpassButton = new JCheckBox("Bandpass");
         bandpassMin = new JTextField(4);
@@ -171,12 +166,10 @@ public class RsamViewSettingsDialog extends SwarmDialog {
 
         builder.appendSeparator("RSAM Options");
         builder.nextLine();
-        builder.append(despike);
+        builder.append(detrend);
         builder.add(new JLabel("Period:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
         builder.nextColumn(2);
-        builder.append(despikePeriod);
-        builder.nextLine();
-        builder.append(detrend);
+        builder.add(valuesPeriod, cc.xyw(builder.getColumn(), builder.getRow(), 3));
         builder.nextLine();
 
         builder.appendSeparator("Filter Options");
@@ -216,6 +209,9 @@ public class RsamViewSettingsDialog extends SwarmDialog {
         builder.add(new JLabel("Event ratio:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
         builder.nextColumn(2);
         builder.append(eventRatio);
+        builder.add(new JLabel("Period:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+        builder.nextColumn(2);
+        builder.add(countsPeriod, cc.xyw(builder.getColumn(), builder.getRow(), 3));
         builder.nextLine();
         builder.appendRow("center:18dlu");
         builder.add(new JLabel("Event max length:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
@@ -230,9 +226,6 @@ public class RsamViewSettingsDialog extends SwarmDialog {
     public boolean allowOK() {
         String message = null;
         try {
-            message = "Error in despike period.";
-            double dsp = Double.parseDouble(despikePeriod.getText());
-            
             message = "Error in bandpass minimum frequency.";
             double bmin = Double.parseDouble(bandpassMin.getText());
             message = "Error in bandpass maximum frequency.";
@@ -267,9 +260,7 @@ public class RsamViewSettingsDialog extends SwarmDialog {
                 settings.viewType = ViewType.VALUES;
             else
                 settings.viewType = ViewType.COUNTS;
-            
-            settings.despike = despike.isSelected();
-            settings.despikePeriod = Double.parseDouble(despikePeriod.getText());
+
             settings.detrend = detrend.isSelected();
 
             settings.bandpass = bandpassButton.isSelected();

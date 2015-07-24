@@ -380,9 +380,4 @@ public class SeedLinkSource extends SeismicDataSource
 		return String.format("%s;%s:%s:%d", name, typeString, host,
 				port);
 	}
-    @Override
-    public RSAMData getRsam(String channel, double st, double et) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }

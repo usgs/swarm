@@ -205,10 +205,4 @@ public class FileDataSource extends AbstractCachingDataSource {
     public String toConfigString() {
         return name + ";file:";
     }
-
-    @Override
-    public RSAMData getRsam(String channel, double st, double et) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }

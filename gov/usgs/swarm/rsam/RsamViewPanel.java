@@ -1,13 +1,9 @@
 package gov.usgs.swarm.rsam;
 
-import gov.usgs.math.BinSize;
-import gov.usgs.math.Butterworth;
-import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.plot.data.GenericDataMatrix;
 import gov.usgs.plot.data.RSAMData;
-import gov.usgs.plot.decorate.FrameDecorator;
 import gov.usgs.plot.decorate.SmartTick;
 import gov.usgs.plot.render.AxisRenderer;
 import gov.usgs.plot.render.HistogramRenderer;
@@ -17,6 +13,7 @@ import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwingWorker;
+import gov.usgs.swarm.data.RsamSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.time.UiTime;
 
@@ -243,23 +240,7 @@ public class RsamViewPanel extends JComponent {
         allowClose = b;
     }
 
-    public void zoom(final double st, final double et) {
-        final SwingWorker worker = new SwingWorker() {
-            public Object construct() {
-                RSAMData data = null;
-                data = source.getRsam(channel, st, et);
-                setData(data, st, et);
-                return null;
-            }
-
-            public void finished() {
-
-                repaint();
-            }
-        };
-        worker.start();
-    }
-
+ 
     /**
      * Set the working flag. This flag indicates whether data are being loaded
      * for this panel.
@@ -557,8 +538,7 @@ public class RsamViewPanel extends JComponent {
         
         GenericDataMatrix gdm = new GenericDataMatrix(data.getData().copy());
 
-        if (settings.despike)
-            gdm.despike(1, settings.despikePeriod);
+        gdm.despike(1, settings.valuesPeriod);
 
         if (settings.detrend)
             gdm.detrend(1);
@@ -566,17 +546,8 @@ public class RsamViewPanel extends JComponent {
         if (settings.runningMedian)
             gdm.set2median(1, settings.runningMedianPeriod);
 
-        if (settings.runningMedian)
+        if (settings.runningMean)
             gdm.set2mean(1, settings.runningMeanPeriod);
-
-//        if (settings.bandpass) {
-//            GenericDataMatrix gdm   = new GenericDataMatrix(data.getData());
-//            Butterworth bw = new Butterworth();
-//            Double singleBand = 0.0;
-//                bw.set(FilterType.BANDPASS, 4, Math.pow(filterPeriod, -1), Math.pow(settings.bandpassMax, -1), Math.pow(settings.bandpassMin, -1));
-//            gdm.filter(bw, 1, true);
-//
-//        }
 
         MatrixRenderer mr = new MatrixRenderer(gdm.getData(), false);
         double max = gdm.max(1) + gdm.max(1) * .1;

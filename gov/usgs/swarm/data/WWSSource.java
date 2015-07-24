@@ -145,17 +145,16 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
 		return wave;
 	}
 
-	   public synchronized RSAMData getRsam(String station, double t1, double t2) {
+	   public synchronized RSAMData getRsam(String station, double t1, double t2, int period) {
 	        RSAMData rsamData = null;
 	        if (useCache) {
 	            CachedDataSource cache = CachedDataSource.getInstance();
-	            rsamData = cache.getRsam(station, t1, t2);
+	            rsamData = cache.getRsam(station, t1, t2, period);
 	        }
 
 	        if (rsamData == null) {
 	            String[] scnl = parseSCNL(station);
-	            rsamData = winstonClient.getRSAMData(scnl[0], scnl[1], scnl[2], scnl[3], t1, t2, 60, compress);
-
+	            rsamData = winstonClient.getRSAMData(scnl[0], scnl[1], scnl[2], scnl[3], t1, t2, period, compress);
 	            if (rsamData == null)
 	                return null;
 

@@ -192,11 +192,4 @@ public class WaveServerSource extends SeismicDataSource
 	{
 		return true;	
 	}
-
-    @Override
-    public RSAMData getRsam(String channel, double st, double et) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 }

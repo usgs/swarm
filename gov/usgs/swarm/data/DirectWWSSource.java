@@ -100,11 +100,4 @@ public class DirectWWSSource extends SeismicDataSource
 		String typeString = DataSourceType.getShortName(this.getClass());
 		return String.format("%s;%s:%s|%s|%s", name, typeString, dbDriver, dbURL, dbPrefix);
 	}
-
-    @Override
-    public RSAMData getRsam(String channel, double st, double et) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 }

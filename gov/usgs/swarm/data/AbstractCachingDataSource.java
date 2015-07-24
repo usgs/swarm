@@ -27,7 +27,7 @@ import cern.colt.matrix.DoubleMatrix2D;
  * 
  * @author Tom Parker
  */
-public abstract class AbstractCachingDataSource extends SeismicDataSource {
+public abstract class AbstractCachingDataSource extends SeismicDataSource implements RsamSource {
 
     /** roughly max size of a single wave in bytes. Actually, (numSamples * 4) */
     private static final int MAX_WAVE_SIZE = 1000000;
@@ -258,6 +258,24 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
         return false;
     }
 
+    public RSAMData getRsam(String channel, double t1, double t2, int period) {
+        List<CachedRsam> rsam = rsamCache.get(channel);
+        if (rsam == null)
+            return null;
+        else {
+
+            for (CachedRsam cw : rsam) {
+                if (cw.period != period)
+                    continue;
+
+                if (t1 >= cw.t1 && t2 <= cw.t2) {
+                    return cw.slice(t1, t2);
+                }
+            }
+        }
+        return null;
+    }
+
     public synchronized Wave getWave(String station, double t1, double t2) {
 
         List<CachedWave> waves = waveCache.get(station);
@@ -267,9 +285,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 
             for (CachedWave cw : waves) {
                 if (t1 >= cw.t1 && t2 <= cw.t2) {
-                    // there is an intermittent problem here so I will catch
-                    // this exception
-                    // so the program doesn't lose functionality
+                    // TODO: fix this. It's a sloppy.
                     try {
                         int[] newbuf = new int[(int) ((t2 - t1) * cw.wave.getSamplingRate())];
                         int i = (int) ((t1 - cw.wave.getStartTime()) * cw.wave.getSamplingRate());
@@ -285,13 +301,6 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
         }
         return null;
     }
-    
-    @Override
-    public RSAMData getRsam(String channel, double st, double et) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 
     public List<String> getChannels() {
         List<String> st = new ArrayList<String>();
@@ -362,7 +371,6 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
             putWaveInCache(station, wave, waves);
         }
     }
-
 
     // this version, the one that implements SeismicDataSource, will only
     // composite
@@ -667,9 +675,41 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 
     public class CachedRsam extends CacheEntry {
         public RSAMData rsamData;
+        public int period;
 
         public String toString() {
             return station + " " + t1 + " " + t2;
+        }
+
+        public RSAMData slice(double t1, double t2) {
+            if (t1 >= this.t2 || t2 <= this.t1)
+                return null;
+            
+            DoubleMatrix2D d = rsamData.getData();
+            int i = 0;
+
+            int firstRow = Integer.MAX_VALUE;
+            while (firstRow == Integer.MAX_VALUE && i < d.rows()) {
+                double t = d.getQuick(i, 0);
+                if (t >= t1)
+                    firstRow = i;
+                else
+                    i++;
+            }
+            
+            int lastRow = -Integer.MAX_VALUE;
+            while (lastRow == -Integer.MAX_VALUE && i < d.rows()) {
+                double t = d.getQuick(i, 0);
+                if (t >= t2)
+                    lastRow = i;
+                else
+                    i++;
+            }
+            
+            RSAMData rd = new RSAMData();
+            rd.setData(d.viewPart(firstRow, 0, lastRow - firstRow, 2).copy());
+            
+            return rd;
         }
 
         @Override

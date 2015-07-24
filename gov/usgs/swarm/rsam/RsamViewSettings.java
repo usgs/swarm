@@ -21,9 +21,9 @@ public class RsamViewSettings {
         VALUES, COUNTS;
     }
 
+    public int valuesPeriod;
+    public int countsPeriod;
     public boolean detrend;
-    public boolean despike;
-    public double despikePeriod;
     public boolean bandpass;
     public double bandpassMin;
     public double bandpassMax;
@@ -48,9 +48,9 @@ public class RsamViewSettings {
     static {
         DEFAULT_RSAM_VIEW_SETTINGS = new RsamViewSettings();
         DEFAULT_RSAM_VIEW_SETTINGS.viewType = ViewType.VALUES;
+        DEFAULT_RSAM_VIEW_SETTINGS.valuesPeriod = 600;
+        DEFAULT_RSAM_VIEW_SETTINGS.countsPeriod = 10;
         DEFAULT_RSAM_VIEW_SETTINGS.detrend = false;
-        DEFAULT_RSAM_VIEW_SETTINGS.despike = false;
-        DEFAULT_RSAM_VIEW_SETTINGS.despikePeriod = 300;
         DEFAULT_RSAM_VIEW_SETTINGS.bandpass = false;
         DEFAULT_RSAM_VIEW_SETTINGS.bandpassMin = 2;
         DEFAULT_RSAM_VIEW_SETTINGS.bandpassMax = 20;
@@ -93,9 +93,9 @@ public class RsamViewSettings {
 
     public void copy(RsamViewSettings s) {
         viewType = s.viewType;
+        valuesPeriod = s.valuesPeriod;
+        countsPeriod = s.countsPeriod;
         detrend = s.detrend;
-        despike = s.despike;
-        despikePeriod = s.despikePeriod;
         bandpass = s.bandpass;
         bandpassMin = s.bandpassMin;
         bandpassMax = s.bandpassMax;
@@ -111,9 +111,9 @@ public class RsamViewSettings {
 
     public void set(ConfigFile cf) {
         viewType = ViewType.valueOf(cf.getString("viewType"));
+        valuesPeriod = Util.stringToInt(cf.getString("valuesPeriod"), DEFAULT_RSAM_VIEW_SETTINGS.valuesPeriod);
+        countsPeriod = Util.stringToInt(cf.getString("countsPeriod"), DEFAULT_RSAM_VIEW_SETTINGS.countsPeriod);
         detrend = Util.stringToBoolean(cf.getString("detrend"), DEFAULT_RSAM_VIEW_SETTINGS.detrend);
-        despike = Util.stringToBoolean(cf.getString("despike"), DEFAULT_RSAM_VIEW_SETTINGS.despike);
-        despikePeriod = Util.stringToDouble(cf.getString("despikePeriod"), DEFAULT_RSAM_VIEW_SETTINGS.despikePeriod);
         bandpass = Util.stringToBoolean(cf.getString("bandpass"), DEFAULT_RSAM_VIEW_SETTINGS.bandpass);
         bandpassMin = Util.stringToDouble(cf.getString("bandpassMin"), DEFAULT_RSAM_VIEW_SETTINGS.bandpassMin);
         bandpassMax = Util.stringToDouble(cf.getString("bandpassMax"), DEFAULT_RSAM_VIEW_SETTINGS.bandpassMax);
@@ -130,10 +130,10 @@ public class RsamViewSettings {
     }
 
     public void save(ConfigFile cf, String prefix) {
+        cf.put(prefix + ".valuesPeriod", Integer.toString(valuesPeriod));
+        cf.put(prefix + ".countsPeriod", Integer.toString(countsPeriod));
         cf.put(prefix + ".viewType", viewType.toString());
         cf.put(prefix + ".detrend", Boolean.toString(detrend));
-        cf.put(prefix + ".despike", Boolean.toString(despike));
-        cf.put(prefix + ".despikePeriod", Double.toString(despikePeriod));
         cf.put(prefix + ".bandpass", Boolean.toString(bandpass));
         cf.put(prefix + ".bandpassMin", Double.toString(bandpassMin));
         cf.put(prefix + ".bandpassMax", Double.toString(bandpassMax));

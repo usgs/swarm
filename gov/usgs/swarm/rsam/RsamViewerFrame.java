@@ -8,6 +8,7 @@ import gov.usgs.swarm.chooser.DataChooser;
 import gov.usgs.swarm.data.RsamSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.swarm.rsam.RsamViewSettings.ViewType;
 import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;
 
@@ -156,11 +157,19 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable
 		throbber.increment();
 		double now = CurrentTime.getInstance().nowJ2K();
 		double st = now - SPANS_S[spanIndex];
-		st -= st % settings.period;
+
+		int period;
+		if (settings.viewType == ViewType.VALUES)
+		    period = settings.valuesPeriod;
+		else 
+		    period = settings.countsPeriod;
+		    
+		    
+		    st -= st % period;
 		
 		double et = now;
-		et += settings.period - (et % settings.period);
-		RSAMData data = ((RsamSource) dataSource).getRsam(channel, st, et, settings.period);
+		et += period - (et % period);
+		RSAMData data = ((RsamSource) dataSource).getRsam(channel, st, et, period);
 
 		viewPanel.setWorking(true);
 		viewPanel.setData(data, now - SPANS_S[spanIndex], now);

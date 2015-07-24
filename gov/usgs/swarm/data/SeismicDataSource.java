@@ -42,8 +42,6 @@ abstract public class SeismicDataSource {
 
 	abstract public HelicorderData getHelicorder(String station, double t1, double t2, GulperListener gl);
 
-    public abstract RSAMData getRsam(String channel, double st, double et);
-
 	abstract public String toConfigString();
 
 	protected SeismicDataSource() {
