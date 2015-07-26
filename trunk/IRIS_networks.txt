@@ -1,0 +1,215 @@
+# This is a default list of channels for the IRIS data source
+# The networks were taken from this page:
+#    http://www.iris.edu/stations/networks.txt
+
+AA, Anchorage Strong Motion Network
+AB, National Seismic Network of Azerbaijan
+AF, Africa Array
+AI, Antarctic Seismographic Argentinean Italian Network (ASAIN)
+AK, Alaska  Regional Network
+AL, Alaska Long Period Array
+AN, Altay-Sayan Regional Seismic Network
+AR, Northern Arizona Network
+AS, Modified High Gain Long Period Observatory (ASRO)
+AT, Alaska Tsunami Warning Seismic System
+AU, Australian Seismological Centre
+AV, Alaska Volcano Observatory
+AZ, ANZA Regional Network
+BE, Belgian Seismic Network
+BF, Black Forest Observatory
+BG, Berkeley Geysers Network
+BK, Berkeley Digital Seismic Network (BDSN)
+BL, Brazilian Lithospheric Seismic Project, BLSP
+BN, UK-Net, Blacknest Array
+BO, Bosai-Ken Network
+BP, Berkeley Parkfield High Resolution Seismic Network
+BR, University of Brasilia Seismic Network
+BS, National Network of Bulgaria
+BU, Boise State University Seismic Network
+CA, Catalan Seismic Network
+CB, China National Seismic Network
+CC, Cascade Chain Volcano Monitoring
+CD, China Digital Seismic Network (CDSN)
+CE, California Strong Motion Instrumentation Program
+CF, Red Acelerografica Nacional de la Comision Federal de Electricidad (CFE)
+CG, Coso Microearthquake Network
+CH, Switzerland  Seismological Network
+CI, Caltech Regional Seismic Network
+CL, Corinth Riff Laboratory
+CN, Canadian National Seismic Network
+CO, South Carolina Seismic Network
+CR, Croatian Seismograph Network
+CS, Caucasus Network
+CT, California Transect Network
+CU, CariUSGS Caribbean Network
+CV, VIGIL Network, Cape Verde Islands
+CX, Plate Boundary Observatory Network Northern Chile
+CY, Grand Cayman
+CZ, Czech Seismic Network
+DK, Danish Seismological Network
+DN, Dubai Seismological Network
+DR, Dominican Republic Seismic Network
+DW, Digital World-Wide Standardized Seismograph Network (DWWSSN)
+DZ, REALSAS
+EC, Ecuador Seismic Network
+EE, Estonian Seismic Network
+EM, Electromagnetic Studies of the Continents (EMSOC)
+EQ, Nevada Educational Seismic Network
+ER, Mount Erebus Volcano Observatory Network
+ES, SPANISH DIGITAL SEISMIC NETWORK
+ET, CERI Southern Appalachian Seismic Network
+EX, EXTREMA Network
+FA, UCLA Seismic Network
+FN, Northen Finland Seismological Network
+FR, French Broadband Seismological Network
+FV, Friuli Veneto short period network
+G, GEOSCOPE
+GA, GARNET Seismic Network
+GB, Great Britain Seismograph Network
+GD, Global Postioning System Displacement Data 
+GE, GEOFON
+GO, USGS Golden Network
+GN, Garni Dense Array
+GP, GPS Data Products for Solid Earth Science
+GR, German Regional Seismic Network
+GT, Global Telemetered Southern Hemisphere Network
+GY, Geyokcha Array, Turkmenistan
+H2, Hawaii 2 Observatory
+HC, Seismological Network of Crete - Laboratory Geophysics & Seismology
+HE, Finnish National Seismic Network (HEL)
+HF, Swedish Seismic Array Network
+HG, High-Gain Long Period Network (HGLP)
+HL, National Observatory of Athens Digital Broadband Network
+HP, University of Patras, Seismological Laboratory
+HT, Aristotle University of Thessaloniki Seismological Network
+HU, Hungarian Seismological Network
+HV, Hawaiian Volcano Observatory Network
+HW, Hanford Washington Seismic Network
+IA, Indonesian Seismic Network
+IC, IRIS  China Digital Seismic Network
+ID, Project IDA University of California, LaCoste Romberg Gravimeter
+IE, Idaho National Engineering Laboratory
+IG, Southern Spain Broad Band Seismic Network
+II, IRIS/IDA Network
+IL, ILPA
+IM, International-Miscellaneous Stations 
+IN, National Seismic Network of India
+IP, Instituto Superior Tecnico Broadband Seismic Network
+IS, Israel National Seismic Network
+IT, Italian Strong Motion Network
+IU, IRIS/USGS Network
+IV, Italian National Seismic Network
+IW, Intermountain West Seismic Network
+JM, Jamaica Seismograph Network
+JP, Japan Meteorological Agency Seismic Network
+KA, Karthala Volcano Monitoring Network
+KG, Korean Seismic Network
+KN, Kirghiz Telemetered Network
+KO, Kandilli Observatory
+KS, Korea National Seismography Network(KNSN)
+KU, King Saud University Network
+KY, Kentucky Seismic and Strong Motion Network
+KZ, Kazakhstan Network
+LA, Los Angeles Basin Seismic Network
+LB, Leo Brady Network
+LD, Lamont-Doherty Cooperative Seismographic Network
+LI, Laser Interferometer Gravitational-Wave experiment (LIGO)
+LL, LLNL NTS Network
+LN, Los Alamos Seismograph Network
+LS, LASA
+LX, University of LISbon SEISmic network
+MA, Macedonia Seismological Network
+MB, Montana Regional Seismic Network
+MI, Northern Mariana Islands Seismograph Network
+MN, MEDNET
+MO, Morooco Seismic Network
+MQ, Reseau sismique de la Martinique
+MS, Singapore Seismological Network
+MU, Miami University Seismic Network
+MX, Mexican National Seismic Network 
+MY, Malaysian National Seismic Network
+NA, Netherlands Antilles Seismic Network
+NB, Northeastern Brazil UFRN
+NC, USGS Northern California Regional Network
+NE, Northeastern United States Networks
+NI, North-East Italy Broadband Network
+NL, Netherlands Seismic Network
+NM, Cooperative New Madrid Seismic Network
+NN, Western Great Basin/Eastern Sierra Nevada
+NO, Norwegian Seismic Array Network 
+NP, United States National Strong-Motion Network
+NR, NARS Array
+NS, Norwegian National Seismic Network
+NT, USGS Geomagnetism Program, NanoTesla Network
+NU, Nicaraguan Seismic Network
+NZ, New Zealand National Seismograph Network
+OE, Austrian Seismic Network
+OH, Ohio Seismic Network
+OM, Earthquake Monitoring Program of Oman (EMPO)
+OS, Seismological Observatory, Brasilia
+OV, Observatorio Vulcanolgico y Sismolgico de Costa Rica
+PA, CHIRINET
+PB, Plate Boundary Observatory Borehole Seismic Network
+PC, Panama Canal Network
+PE, Penn State Network
+PG, PG & E, Diablo Canyon
+PH, Puna Geothermal Network
+PI, PASSCAL Instrument Center(s)
+PL, Polish Seismological Network
+PM, Portuguese National Seismograph Network
+PN, PEPP-INdiana
+PO, POLARIS - 
+PP, PEPP - Princeton Earth Physics Program
+PQ, PASSEQ Network
+PR, Puerto Rico Seismic Network (PRSN) & Puerto Rico Strong Motion Program (PRSMP)
+PS, POSEIDON
+PT, Pacific Tsunami Warning Seismic System
+PX, Parkfield Experiment Array
+RA, Reseau Accelerometrique Permanent (French Accelerometrique Network)
+RB, Red Sismologica de Banda Ancha
+RC, Rick's College Network
+RE, US Bureau of Reclamation Seismic Networks
+RF, Friuli Venezia Giulia Accelerommetric Network
+RO, Romanian Seismic Network
+RP, Universidad de Panama Seismic Network
+RS, Regional Seismic Test Network (RSTN)
+SA, Saudi Arabia Broadband Seismic Network
+SB, UC Santa Barbara Engineering Seismology Network
+SC, New Mexico Tech Seismic Network
+SE, Southeastern Appalachian Cooperative Seismic Network
+SF, San Andreas Fault Observatory at Depth (SAFOD)
+SG, Superconducting Gravimeter
+SI, Province SudTirol, Italy
+SJ, Serbian Seismological Network
+SK, Slovak National Seismic Network
+SL, Slovenia Seismic Network
+SN, Southern Great Basin Network
+SR, Seismic Research Observatory
+SS, SINGLE STATION
+SP, South Carolina Earth Physics Project
+SV, El Salvador Broadband Network (SNET-BB)
+TA, USArray Transportable Array 
+TI, Centro Sismologico de America Central  (CASC)
+TN, Eastern Tennessee Seismic Network
+TO, Tectonic Observatory
+TR, Eastern Caribbean Seismograph Network
+TS, TERRAscope
+TW, Broadband Array in Taiwan for Seismology (BATS) 
+UA, Caribbean Andesite Lava Island Precision Seismo-geodetic Observatory
+UC, Colima  Seismic Network (RESCO)
+UG, Unocal Geothermal Northern California Network
+UI, North Idaho Seismic network
+UK, UK Schools Seismic Network
+UL, USGS Low Frequency Geophysical Data Network
+UO, University of Oregon Regional Network
+UP, University of Uppsala Network
+US, US National Seismic Network
+UU, University of Utah Regional Network
+UZ, Uzbekistan digital seismic network
+UW, Pacific Northwest Regional Seismic Network
+VE, Red Sismologica Nacional con Apertura Continental
+VI, SIL-Icelandic National Digital Seismograph Network
+WK, Wake Island Hydrophone Array
+WM, Western Mediterranean Seismic Network
+WR, California Division of Water Resources
+WY, Yellowstone Wyoming Seismic Network

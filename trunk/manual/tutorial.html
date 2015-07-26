@@ -1,0 +1,72 @@
+<!-- $Id: tutorial.html,v 1.2 2005-09-22 21:01:42 dcervelli Exp $ -->
+
+<html>
+	<head>
+		<!-- javascript include version -->
+		<style>
+		p
+		{width: 700px;}
+		</style>
+		<title>Swarm Manual, Quick Start Tutorial</title>
+	</head>
+	<body>
+		<h1>Quick Start Tutorial</h1>
+		<p>
+		This tutorial will get you using <b>Swarm</b> productively in minutes!  First get <b>Swarm</b> running as described on the 
+		download page or in <a href="sectionI.html">Section I</a> of the manual.
+		</p>
+		
+		<p>
+		<b>By default Swarm is set to open a window that will fit on a 1024x768 screen but IT IS NOT INTENDED TO BE USED AT THIS
+		RESOLUTION!  Maximize the window; make it as big as possible!  Helicorders are big, they display lots of data, use the whole 
+		monitor!</b>
+		</p>
+		
+		<h3>Step 1</h3>
+		<p>
+		Create a data source.  Unless you want to look at AVO data you'll have to tell <b>Swarm</b> where to look for data.  Click
+		'New' on the Data Sources panel in the upper left of the <b>Swarm</b> interface.  For non-AVO users you're option is an
+		Earthworm Wave Server.  Pick a name for your data source (like 'My Wave Server'), enter the IP address or host name, and set the 
+		port (16022 by default).  After you hit 'OK' the data source will appear in the selection box.  Highlight it and click 'Go'.
+		</p>
+		
+		<h3>Step 2</h3>
+		<p>
+		Start downloading some helicorder data.  Since you'll be running off a Wave Server you need to download data before you can
+		display a full helicorder (Winston users won't have to wait, of course), so click on the 'Helicorders' tab and pick a channel.  Either
+		double-click it or click 'View Helicorder'.  A blank helicorder window should open with a bit of data at the bottom.  <b>Swarm</b>
+		has now started downloading some data.  Give it 30 seconds to a minute and more will show up until it fills up the whole helicorder
+		(time varies by network connection, wave sample rate, etc.). In the mean time, try some other features (see Step 3).
+		</p>
+		
+		<h3>Step 3</h3>
+		<p>
+		Try out a real-time wave viewer.  Highlight a random channel on the 'Waves' tab and double-click it or click 'Real-time'.  This
+		will open a window that shows the last two minutes of data, updated every two seconds.  Try a spectrogram or spectra view
+		by clicking on the appropriate button on the toolbar.  In reality, this is probably the least exciting feature of <b>Swarm</b>, but
+		hopefully you'll play with it long enough to have downloaded some data for the helicorder.
+		</p>
+		
+		<h3>Step 4</h3>
+		<p>
+		Play with the helicorder.  Now that you've got some data on your helicorder you can use the mouse to look at it closely.  Just left-click
+		or drag your mouse (with left button down) to display the raw waveform behind an interesting feature on the helicorder.  You can
+		then use the buttons at the top of the helicorder to change the wave view.  Or modify the size and shape of your helicorder.  If you increase the size
+		of the Y axis <b>Swarm</b> will start downloading more data.  Also, don't be afraid to close the helicorder, <b>Swarm</b> automatically keeps
+		a cache of all recent data -- if you reopen the channel the helicorder will appear instantly.
+		</p>
+		
+		<h3>Step 5</h3>
+		<p>
+		Try the Wave Clipboard.  If you found something interesting on the helicorder then copy it to the clipboard (look for a clipboard button on the right
+		side of the toolbar, or just type 'C').  There you can zoom around the wave
+		all you like, make copies of it to try different filters on, or load other stations in the same time window (clicking 'Clipboard' on the Channel
+		Selection panel automatically chooses the time range of the selected [blue] wave on the clipboard).
+		</p>
+		
+		<h3>Read the Manual!</h3>
+		<p>
+		The manual explains all of the features of <b>Swarm</b> in detail.
+		</p>
+	</body>
+</html>

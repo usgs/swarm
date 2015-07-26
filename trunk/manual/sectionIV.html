@@ -1,0 +1,99 @@
+<!-- $Id: sectionIV.html,v 1.2 2005-09-22 21:01:42 dcervelli Exp $ -->
+
+<html>
+	<head>
+		<!-- javascript include version -->
+		<style>
+		p
+		{width: 700px;}
+		</style>
+		<title>Swarm Manual, Section IV, Helicorder Views</title>
+	</head>
+	<body>
+		<h1>Section IV, Helicorder Views</h1>
+		
+		<a name="ui"></a><h2>User Interface</h2>
+		<p>
+		<b>Swarm</b> is also a tool for interacting with and displaying helicorders.  Here is a typical helicorder view (actually,
+		this is smaller size than typical in order to fit into the manual better):<br><br>
+		<img src="images/secIV_1.png">
+		</p>
+		
+		<p>
+		The view consists of a window displaying the data source '[Winston]' and the channel 'CRP_SHZ_AK'.  In the window is the helicorder, 
+		bordered on the top by a toolbar and on the bottom by a status bar that shows the time under the mouse cursor.
+		The spectrogram inside the helicorder was generated when the user clicked on the helicorder.  A small transparent yellow 
+		box under the inset wave view shows the area that is being magnified.
+		<p>
+		
+		<p>
+		Helicorders derived from an active source, like a Wave Server or Winston connection, will automatically update themselves when new
+		data are available.
+		</p>
+		
+		<a name="settings"></a><h2>Helicorder View Settings Dialog</h2>
+		<p>
+		There are two main ways in which you can interact with the a helicorder view: manipulating the helicorder view itself or zooming
+		in and looking at the underlying waveform.  All of the settings for the helicorder view can be manipulated in the helicorder
+		view settings dialog which can be opened by clicking on this button: <img src="../images/settings.png">.  The settings dialog
+		box looks like this:<br><br>
+		<img src="images/secIV_2.png">
+		</p>
+		
+		<a name="axes"></a><h3>Axes Options</h3>
+		<p>These settings effect the size of the X and Y axes.  The X axis determines the number of minutes to display along the bottom.
+		Legal values are 10, 15, 20, 30, 60, 120, 180, and 360.  Values above 60 are seldom used.  The Y axis determines how much total 
+		time to display on the helicorder and is measured in hours.  Legal values are 2, 4, 6, 12, 24, 48, 72, and 168.  The default settings
+		generate a 12 hour helicorder with 15 minutes rows.
+		</p>
+		
+		<p>
+		The last settings under Axes is 'View time'.  This setting allows you to set the time at the bottom of the helicorder.  By default
+		a helicorder view opens with the bottom being set to 'Now'.  The format for specifying the bottom view time is "YYYYMMDD" or, if more
+		resolution is needed, "YYMMDDHHMMSS".
+		</p>
+		
+		<a name="zoom"></a><h3>Zoom Options</h3>
+		<p>
+		The zoom settings allow you to customize the display of the zoomed waveform view.  The first setting, 'Zoom' determines the amount of time
+		<i>on either side of the mouse cursor</i> to zoom.  Also available is a button to display the <a href="sectionIII.html#settings">Wave
+		View Settings Dialog</a>.
+		</p>
+		
+		<a name="other"></a><h3>Other Options</h3>
+		<p>
+		These settings configure various other options for the helicorder view.  'Refresh' is the number of seconds between attempts to refresh
+		the helicorder with the latest data, the default value is 15.  'Scroll size' is the number of helicorder rows to scroll up or down on user's 
+		scroll requests with the mouse-wheel or the scroll toolbar buttons.  The next option 'Force Center' forces each helicorder sample to be centered
+		on its current line.  This effectively eliminates all drift and is useful for broadband stations with lots of 
+		low frequency energy.  Use this feature with caution though: it can make an obviously false signal look like an earthquake.  'Auto-scale'
+		toggles helicorder auto-scaling on and off.  When auto-scaling is on an attempt is made to produce a "pleasant" looking helicorder.  If this 
+		fails, or if you want more control over the appearance of the helicorder, set the 'One bar range'.  The 'One bar range' is the number of counts
+		on either side of zero that make up one bar.  For example, if you have a seismometer that reports counts between -3600 and 3600 and you select 
+		a bar range of 1200, a full-range waveform will take 3 bars, overlapping one above and one below.  This is best understood through experimentation.
+		The last options are 'Show clip' and 'Clip threshold'.  This allows you to set a counts threshold after which the trace will be shown in red.
+		</p>
+		
+		<a name="toolbar"></a><h2>Toolbar and Keyboard Interaction</h2>
+		<p>There is toolbar full of buttons at the top of each helicorder.  Here is a description of each button:<br>
+		<br>
+		<img src="../images/minimize.png"> - Minimizes the toolbar, maximizing screen real-estate for the helicorder.<br>
+		<img src="../images/settings.png"> - Opens the settings dialog.<br>
+		<img src="../images/left.png"> - Scrolls the display (helicorder or wave inset) back in time.  Keyboard shortcut: A<br>
+		<img src="../images/right.png"> - Scrolls the display (the helicorder or wave inset) back in time.  Keyboard shortcut: Z<br>
+		<img src="../images/xminus.png"> - Decreases number of minutes on the X axis.  Keyboard shortcut: Alt-Left arrow<br>
+		<img src="../images/xplus.png"> - Increases number of minutes on the X axis.  Keyboard shortcut: Alt-Right arrow<br>
+		<img src="../images/yminus.png"> - Decreases amount of time on the Y axis.  Keyboard shortcut: Alt-Down arrow<br>
+		<img src="../images/yplus.png"> - Increases amount of time on the Y axis.  Keyboard shortcut: Alt-Up arrow<br>
+		<img src="../images/zoomplus.png"> - Decreases zoom window size (zooms in).  Keyboard shortcut: +<br>
+		<img src="../images/zoomminus.png"> - Increases zoom window size (zooms out).  Keyboard shortcut: -<br>
+		<img src="../images/wavesettings.png"> - Opens the <a href="sectionIII.html#settings">Wave View Settings Dialog</a> for the inset wave view.  Keyboard shortcut: ?<br>
+		<img src="../images/wave.png"> - Chooses wave view for the inset wave view.  Keyboard shortcut: W or ,<br>
+		<img src="../images/spectra.png"> - Chooses spectra view for the inset wave view.  Keyboard shortcut: S or .<br>
+		<img src="../images/spectrogram.png"> - Chooses spectrogram view for the inset wave view.  Keyboard shortcut: G or /<br>
+		<img src="../images/clipboard.png"> - Copies inset wave view to the <a href="sectionVI.html">Wave Clipboard</a>. Keyboard shortcut: C or Control-C<br>
+		<img src="../images/delete.png"> - Removes the inset wave view. Keyboard shortcut: Escape or Delete<br>
+		<br>
+		Also, when an inset wave view is open the <a href="sectionIII.html#keys">standard keys for interacting with wave views</a> are active.<br>
+	</body>
+</html>

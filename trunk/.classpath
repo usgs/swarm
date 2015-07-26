@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="../USGS/contrib/colt.jar"/>
+	<classpathentry kind="lib" path="../USGS/contrib/forms-1.0.7.jar"/>
+	<classpathentry kind="lib" path="../USGS/contrib/log4j-1.2.13.jar"/>
+	<classpathentry kind="lib" path="../USGS/contrib/looks-2.0.4.jar"/>
+	<classpathentry kind="lib" path="../USGS/contrib/slf4j-api-1.7.1.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Earthworm"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Net"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Plot"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Util"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Winston"/>
+	<classpathentry kind="lib" path="../USGS/contrib/oscache-2.1-mod2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Math"/>
+	<classpathentry kind="lib" path="../USGS/contrib/seisFile-1.6.3.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/home/tparker/workspace/USGS/contrib/javadoc/seisFile-1.6.3/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="../USGS/contrib/seedlink_lite_1.2.1.jar"/>
+	<classpathentry kind="lib" path="../USGS/contrib/JavaSeedLite.jar"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>
