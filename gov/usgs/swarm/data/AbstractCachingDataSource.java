@@ -170,6 +170,43 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
 
     public void putRsam(String station, RSAMData rsamData) {
         List<CachedRsam> rsams = rsamCache.get(station);
+        if (rsams == null) {
+            rsams = new ArrayList<CachedRsam>();
+            CachedRsam cr = new CachedRsam();
+            cr.station = station;
+            cr.t1 = rsamData.getStartTime();
+            cr.t2 = rsamData.getEndTime();
+            cr.rsamData = rsamData;
+            cr.lastAccess = System.currentTimeMillis();
+            rsams.add(cr);
+            rsamCache.put(station, rsams);
+            enforceSize();
+        } else {
+            boolean add = true;
+            for (int i = 0; i < rsams.size(); i++) {
+                CachedRsam ch = rsams.get(i);
+                if (ch.rsamData.overlaps(rsamData) && rsamData != ch.rsamData) {
+                    System.out.println("p1: " + ch.rsamData.getPeriod() + "; p2: " + rsamData.getPeriod());
+                    rsams.remove(ch);
+                    RSAMData newRsam = ch.rsamData.combine(rsamData);
+                    putRsam(station, newRsam);
+                    rsamData = newRsam;
+                    i = 0;
+                    add = false;
+                }
+            }
+
+            if (add) {
+                CachedRsam ch = new CachedRsam();
+                ch.station = station;
+                ch.t1 = rsamData.getStartTime();
+                ch.t2 = rsamData.getEndTime();
+                ch.rsamData = rsamData;
+                ch.lastAccess = System.currentTimeMillis();
+                rsams.add(ch);
+                enforceSize();
+            }
+        }
     }
 
     public synchronized void putHelicorder(String station, HelicorderData helicorder) {
@@ -264,12 +301,12 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
             return null;
         else {
 
-            for (CachedRsam cw : rsam) {
-                if (cw.period != period)
+            for (CachedRsam cr : rsam) {
+                if (cr.rsamData.getPeriod() != period)
                     continue;
 
-                if (t1 >= cw.t1 && t2 <= cw.t2) {
-                    return cw.slice(t1, t2);
+                if (t1 >= cr.t1 && t2 <= cr.t2) {
+                    return cr.slice(t1, t2);
                 }
             }
         }
@@ -675,7 +712,6 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
 
     public class CachedRsam extends CacheEntry {
         public RSAMData rsamData;
-        public int period;
 
         public String toString() {
             return station + " " + t1 + " " + t2;
@@ -684,7 +720,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
         public RSAMData slice(double t1, double t2) {
             if (t1 >= this.t2 || t2 <= this.t1)
                 return null;
-            
+
             DoubleMatrix2D d = rsamData.getData();
             int i = 0;
 
@@ -696,7 +732,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
                 else
                     i++;
             }
-            
+
             int lastRow = -Integer.MAX_VALUE;
             while (lastRow == -Integer.MAX_VALUE && i < d.rows()) {
                 double t = d.getQuick(i, 0);
@@ -705,23 +741,22 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
                 else
                     i++;
             }
-            
+
             RSAMData rd = new RSAMData();
             rd.setData(d.viewPart(firstRow, 0, lastRow - firstRow, 2).copy());
-            
+
             return rd;
         }
 
         @Override
         public String getInfoString() {
-            // TODO Auto-generated method stub
-            return null;
+            long ms = System.currentTimeMillis() - lastAccess;
+            return "[" + ms + "ms] " + (t2 - t1) + "s, " + rsamData.getMemorySize() + " bytes, " + t1 + " => " + t2;
         }
 
         @Override
         public int getMemorySize() {
-            // TODO Auto-generated method stub
-            return 0;
+            return rsamData.getMemorySize();
         }
     }
 

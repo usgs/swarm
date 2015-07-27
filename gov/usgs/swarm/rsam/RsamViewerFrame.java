@@ -35,9 +35,11 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable
 {
 	public static final long serialVersionUID = -1;
 	private static final int H_TO_S = 60*60;
+	private static final int D_TO_S = 24 * H_TO_S;
+	private static final int W_TO_S = 7 * D_TO_S;
 	
 	private long intervalMs = 5 * 1000;
-	private final static int[] SPANS_S = new int[] {1 * H_TO_S, 12 * H_TO_S, 24 * H_TO_S, 48 * H_TO_S, 168 * H_TO_S, 366 * H_TO_S, 672 * H_TO_S};
+	private final static int[] SPANS_S = new int[] {1 * H_TO_S, 12 * H_TO_S, 1 * D_TO_S, 2 * D_TO_S, 1 * W_TO_S, 2 * W_TO_S, 4 * W_TO_S};
 	private int spanIndex;
 	private SeismicDataSource dataSource;
 	private String channel;
@@ -57,10 +59,9 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable
 	{
 		super(ch + ", [" + sds + "]", true, true, false, true);
 		dataSource = sds;
-		dataSource.setUseCache(false);
 		channel = ch;
 		settings = new RsamViewSettings();
-		spanIndex = 2;
+		spanIndex = 4;
 		kill = false;
 		updateThread = new Thread(this, "RsamViewerFrame-" + sds + "-" + ch);
 		createUI();

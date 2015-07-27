@@ -1,13 +1,13 @@
 package gov.usgs.swarm.rsam;
 
 
-public enum ValuesPeriods {
-    ONE_M(60, "One Minute"), TEN_M(10 * 60, "Ten Minutes"), ONE_H(60 * 60, "One Hour"), ONE_D(24 * 60 * 60, "One Day");
+public enum CountsPeriods {
+    TEN_S(10, "Ten Seconds"), ONE_M(60, "One Minute"), TEN_M(10 * 60, "Ten Minutes");
     
     private int periodS;
     private String string;
     
-    private ValuesPeriods(int period, String string) {
+    private CountsPeriods(int period, String string) {
         this.periodS = period;
         this.string = string;
     }
@@ -19,9 +19,9 @@ public enum ValuesPeriods {
     public int getPeriodS() {
         return periodS;
     }
-
-    public static ValuesPeriods fromS(int s) {
-        for (ValuesPeriods p : ValuesPeriods.values()) {
+    
+    public static CountsPeriods fromS(int s) {
+        for (CountsPeriods p : CountsPeriods.values()) {
             if (p.periodS == s)
                 return p;
         }

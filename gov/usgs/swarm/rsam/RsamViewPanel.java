@@ -13,7 +13,6 @@ import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwingWorker;
-import gov.usgs.swarm.data.RsamSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.time.UiTime;
 

@@ -150,6 +150,8 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
 	        if (useCache) {
 	            CachedDataSource cache = CachedDataSource.getInstance();
 	            rsamData = cache.getRsam(station, t1, t2, period);
+	            if (rsamData != null)
+	                System.out.println("found in cache");
 	        }
 
 	        if (rsamData == null) {
