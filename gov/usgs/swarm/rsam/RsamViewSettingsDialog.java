@@ -202,9 +202,11 @@ public class RsamViewSettingsDialog extends SwarmDialog {
         builder.add(new JLabel("Event threshold:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
         builder.nextColumn(2);
         builder.append(eventThreshold);
-        builder.add(new JLabel("Bin size:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+        builder.add(new JLabel("Period:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
         builder.nextColumn(2);
-        builder.add(binSize, cc.xyw(builder.getColumn(), builder.getRow(), 3));
+        builder.add(countsPeriod, cc.xyw(builder.getColumn(), builder.getRow(), 3));
+        
+        
         builder.nextColumn();
         
         builder.nextLine();
@@ -212,9 +214,11 @@ public class RsamViewSettingsDialog extends SwarmDialog {
         builder.add(new JLabel("Event ratio:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
         builder.nextColumn(2);
         builder.append(eventRatio);
-        builder.add(new JLabel("Period:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+        builder.add(new JLabel("Bin size:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
         builder.nextColumn(2);
-        builder.add(countsPeriod, cc.xyw(builder.getColumn(), builder.getRow(), 3));
+        builder.add(binSize, cc.xyw(builder.getColumn(), builder.getRow(), 3));
+        
+        
         builder.nextLine();
         builder.appendRow("center:18dlu");
         builder.add(new JLabel("Event max length:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));

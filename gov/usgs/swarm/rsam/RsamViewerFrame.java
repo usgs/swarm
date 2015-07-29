@@ -170,9 +170,8 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable
 		
 		double et = now;
 		et += period - (et % period);
+        viewPanel.setWorking(true);
 		RSAMData data = ((RsamSource) dataSource).getRsam(channel, st, et, period);
-
-		viewPanel.setWorking(true);
 		viewPanel.setData(data, now - SPANS_S[spanIndex], now);
 		viewPanel.setChannel(channel);
 		viewPanel.setDataSource(dataSource);

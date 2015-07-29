@@ -14,6 +14,7 @@ import gov.usgs.swarm.Icons;
 import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwingWorker;
 import gov.usgs.swarm.data.SeismicDataSource;
+import gov.usgs.swarm.rsam.RsamViewSettings.ViewType;
 import gov.usgs.swarm.time.UiTime;
 
 import java.awt.BasicStroke;
@@ -192,8 +193,10 @@ public class RsamViewPanel extends JComponent {
         this.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 UiTime.touchTime();
-                if (SwingUtilities.isRightMouseButton(e))
+                if (SwingUtilities.isRightMouseButton(e)) {
                     settings.cycleType();
+                    data = null;
+                }
                 fireMousePressed(e);
             }
         });
@@ -421,7 +424,8 @@ public class RsamViewPanel extends JComponent {
     public void paint(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         Dimension dim = this.getSize();
-        if (data == null) {
+        // TODO: fix this
+        if (data == null || (settings.viewType == ViewType.VALUES && data.getPeriod() != settings.valuesPeriod) || (settings.viewType == ViewType.COUNTS && data.getPeriod() != settings.countsPeriod)) {
             g2.setColor(backgroundColor);
             g2.fillRect(0, 0, dim.width, dim.height);
             g2.setColor(Color.black);
@@ -472,29 +476,6 @@ public class RsamViewPanel extends JComponent {
         useFilterLabel = b;
     }
 
-    public TextRenderer getFilterLabel() {
-        return getFilterLabel(xOffset + 5, 148, TextRenderer.NONE, TextRenderer.NONE);
-    }
-
-    public TextRenderer getFilterLabel(int x, int y, int horizJustification, int vertJustification) {
-        String ft = "";
-        switch (settings.filter.getType()) {
-        case BANDPASS:
-            ft = "Band pass [" + settings.filter.getCorner1() + "-" + settings.filter.getCorner2() + " Hz]";
-            break;
-        case HIGHPASS:
-            ft = "High pass [" + settings.filter.getCorner1() + " Hz]";
-            break;
-        case LOWPASS:
-            ft = "Low pass [" + settings.filter.getCorner1() + " Hz]";
-            break;
-        }
-        TextRenderer tr = new TextRenderer(x, y, ft);
-        tr.horizJustification = horizJustification;
-        tr.vertJustification = vertJustification;
-        tr.color = Color.red;
-        return tr;
-    }
 
     /**
      * Constructs the plot on the specified graphics context.
@@ -565,15 +546,16 @@ public class RsamViewPanel extends JComponent {
     }
 
     /**
-     * Plots RSAM values.
+     * Plots RSAM counts.
      * 
      * @param data
      *            the RSAM values to plot
      */
     private void plotCounts(Plot plot, RSAMData data) {
-        if (data == null || data.getData() == null || data.getData().rows() == 0)
+        
+        if (data == null || data.getData() == null || data.getData().rows() == 0 || data.getPeriod() != settings.countsPeriod)
             return;
-
+        
         // get the relevant information for this channel
         data.countEvents(settings.eventThreshold, settings.eventRatio, settings.eventMaxLength);
 
@@ -617,7 +599,6 @@ public class RsamViewPanel extends JComponent {
 
         }
         plot.addRenderer(hr);
-
     }
 
     /**

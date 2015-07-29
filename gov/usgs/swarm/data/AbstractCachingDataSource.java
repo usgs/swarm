@@ -186,7 +186,6 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
             for (int i = 0; i < rsams.size(); i++) {
                 CachedRsam ch = rsams.get(i);
                 if (ch.rsamData.overlaps(rsamData) && rsamData != ch.rsamData) {
-                    System.out.println("p1: " + ch.rsamData.getPeriod() + "; p2: " + rsamData.getPeriod());
                     rsams.remove(ch);
                     RSAMData newRsam = ch.rsamData.combine(rsamData);
                     putRsam(station, newRsam);
