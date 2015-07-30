@@ -23,24 +23,22 @@ public class RsamViewSettings {
         VALUES, COUNTS;
     }
 
-    public int valuesPeriod;
-    public int countsPeriod;
+    public int valuesPeriodS;
+    public int countsPeriodS;
     public boolean detrend;
     public boolean runningMedian;
-    public double runningMedianPeriod;
+    public double runningMedianPeriodS;
     public boolean runningMean;
-    public double runningMeanPeriod;
+    public double runningMeanPeriodS;
 
     public int eventThreshold;
     public double eventRatio;
-    public double eventMaxLength;
+    public double eventMaxLengthS;
     public BinSize binSize;
-
-    public RsamViewPanel view;
-    public RsamViewSettingsToolbar toolbar;
+    
+    
+    private int spanLengthS;
     private ViewType viewType;
-
-    public Butterworth filter;
 
     private static RsamViewSettings DEFAULT_RSAM_VIEW_SETTINGS;
     private Set<SettingsListener> listeners;
@@ -48,18 +46,19 @@ public class RsamViewSettings {
     static {
         DEFAULT_RSAM_VIEW_SETTINGS = new RsamViewSettings();
         DEFAULT_RSAM_VIEW_SETTINGS.viewType = ViewType.VALUES;
-        DEFAULT_RSAM_VIEW_SETTINGS.valuesPeriod = 600;
-        DEFAULT_RSAM_VIEW_SETTINGS.countsPeriod = 10;
+        DEFAULT_RSAM_VIEW_SETTINGS.valuesPeriodS = 600;
+        DEFAULT_RSAM_VIEW_SETTINGS.countsPeriodS = 10;
         DEFAULT_RSAM_VIEW_SETTINGS.detrend = false;
         DEFAULT_RSAM_VIEW_SETTINGS.runningMedian = false;
-        DEFAULT_RSAM_VIEW_SETTINGS.runningMedianPeriod = 300;
+        DEFAULT_RSAM_VIEW_SETTINGS.runningMedianPeriodS = 300;
         DEFAULT_RSAM_VIEW_SETTINGS.runningMean = false;
-        DEFAULT_RSAM_VIEW_SETTINGS.runningMeanPeriod = 300;
+        DEFAULT_RSAM_VIEW_SETTINGS.runningMeanPeriodS = 300;
         DEFAULT_RSAM_VIEW_SETTINGS.eventThreshold = 50;
         DEFAULT_RSAM_VIEW_SETTINGS.eventRatio = 1.3;
-        DEFAULT_RSAM_VIEW_SETTINGS.eventMaxLength = 300;
+        DEFAULT_RSAM_VIEW_SETTINGS.eventMaxLengthS = 300;
         DEFAULT_RSAM_VIEW_SETTINGS.binSize = BinSize.HOUR;
-
+        DEFAULT_RSAM_VIEW_SETTINGS.spanLengthS = 60 * 60* 24 * 7;
+        
         List<String> candidateNames = new LinkedList<String>();
         candidateNames.add(DEFAULTS_FILENAME);
         candidateNames.add(System.getProperty("user.home") + File.separatorChar + DEFAULTS_FILENAME);
@@ -78,8 +77,6 @@ public class RsamViewSettings {
     }
 
     public RsamViewSettings() {
-        filter = new Butterworth();
-        view = null;
         if (DEFAULT_RSAM_VIEW_SETTINGS != null)
             copy(DEFAULT_RSAM_VIEW_SETTINGS);
 
@@ -88,51 +85,60 @@ public class RsamViewSettings {
 
     public void copy(RsamViewSettings s) {
         viewType = s.viewType;
-        valuesPeriod = s.valuesPeriod;
-        countsPeriod = s.countsPeriod;
+        valuesPeriodS = s.valuesPeriodS;
+        countsPeriodS = s.countsPeriodS;
         detrend = s.detrend;
         runningMedian = s.runningMedian;
-        runningMedianPeriod = s.runningMedianPeriod;
+        runningMedianPeriodS = s.runningMedianPeriodS;
         runningMean = s.runningMean;
-        runningMeanPeriod = s.runningMeanPeriod;
+        runningMeanPeriodS = s.runningMeanPeriodS;
         eventRatio = s.eventRatio;
         eventThreshold = s.eventThreshold;
-        eventMaxLength = s.eventMaxLength;
+        eventMaxLengthS = s.eventMaxLengthS;
         binSize = s.binSize;
     }
 
     public void set(ConfigFile cf) {
         viewType = ViewType.valueOf(cf.getString("viewType"));
-        valuesPeriod = Util.stringToInt(cf.getString("valuesPeriod"), DEFAULT_RSAM_VIEW_SETTINGS.valuesPeriod);
-        countsPeriod = Util.stringToInt(cf.getString("countsPeriod"), DEFAULT_RSAM_VIEW_SETTINGS.countsPeriod);
+        valuesPeriodS = Util.stringToInt(cf.getString("valuesPeriod"), DEFAULT_RSAM_VIEW_SETTINGS.valuesPeriodS);
+        countsPeriodS = Util.stringToInt(cf.getString("countsPeriod"), DEFAULT_RSAM_VIEW_SETTINGS.countsPeriodS);
         detrend = Util.stringToBoolean(cf.getString("detrend"), DEFAULT_RSAM_VIEW_SETTINGS.detrend);
         runningMedian = Util.stringToBoolean(cf.getString("runningMedian"), DEFAULT_RSAM_VIEW_SETTINGS.runningMedian);
-        runningMedianPeriod = Util.stringToDouble(cf.getString("runningMedianPeriod"),
-                DEFAULT_RSAM_VIEW_SETTINGS.runningMedianPeriod);
+        runningMedianPeriodS = Util.stringToDouble(cf.getString("runningMedianPeriod"),
+                DEFAULT_RSAM_VIEW_SETTINGS.runningMedianPeriodS);
         runningMean = Util.stringToBoolean(cf.getString("runningMean"), DEFAULT_RSAM_VIEW_SETTINGS.runningMean);
-        runningMeanPeriod = Util.stringToDouble(cf.getString("runningMeanPeriod"),
-                DEFAULT_RSAM_VIEW_SETTINGS.runningMeanPeriod);
+        runningMeanPeriodS = Util.stringToDouble(cf.getString("runningMeanPeriod"),
+                DEFAULT_RSAM_VIEW_SETTINGS.runningMeanPeriodS);
         eventRatio = Util.stringToDouble(cf.getString("eventRatio"), DEFAULT_RSAM_VIEW_SETTINGS.eventRatio);
         eventThreshold = Util.stringToInt(cf.getString("eventThreshold"), DEFAULT_RSAM_VIEW_SETTINGS.eventThreshold);
-        eventMaxLength = Util.stringToDouble(cf.getString("eventMaxLength"), DEFAULT_RSAM_VIEW_SETTINGS.eventMaxLength);
+        eventMaxLengthS = Util.stringToDouble(cf.getString("eventMaxLength"), DEFAULT_RSAM_VIEW_SETTINGS.eventMaxLengthS);
         binSize = BinSize.fromString(cf.getString("binSize"));
     }
 
     public void save(ConfigFile cf, String prefix) {
-        cf.put(prefix + ".valuesPeriod", Integer.toString(valuesPeriod));
-        cf.put(prefix + ".countsPeriod", Integer.toString(countsPeriod));
+        cf.put(prefix + ".valuesPeriod", Integer.toString(valuesPeriodS));
+        cf.put(prefix + ".countsPeriod", Integer.toString(countsPeriodS));
         cf.put(prefix + ".viewType", viewType.toString());
         cf.put(prefix + ".detrend", Boolean.toString(detrend));
         cf.put(prefix + ".runningMedian", Boolean.toString(runningMedian));
-        cf.put(prefix + ".runningMedianPeriod", Double.toString(runningMedianPeriod));
+        cf.put(prefix + ".runningMedianPeriod", Double.toString(runningMedianPeriodS));
         cf.put(prefix + ".runningMean", Boolean.toString(runningMean));
-        cf.put(prefix + ".runningMeanPeriod", Double.toString(runningMeanPeriod));
+        cf.put(prefix + ".runningMeanPeriod", Double.toString(runningMeanPeriodS));
         cf.put(prefix + ".eventRatio", Double.toString(eventRatio));
         cf.put(prefix + ".eventThreshold", Double.toString(eventThreshold));
-        cf.put(prefix + ".eventMaxLength", Double.toString(eventMaxLength));
+        cf.put(prefix + ".eventMaxLength", Double.toString(eventMaxLengthS));
         cf.put(prefix + ".binSize", binSize.toString());
     }
 
+    public void setSpanLength(int spanLengthS) {
+        this.spanLengthS = spanLengthS;
+        notifyListeners();
+    }
+    
+    public int getSpanLength() {
+        return spanLengthS;
+    }
+    
     public void setType(ViewType t) {
         viewType = t;
         notifyListeners();

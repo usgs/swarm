@@ -85,17 +85,17 @@ public class RsamViewSettingsDialog extends SwarmDialog {
 
         detrend.setSelected(settings.detrend);
 
-        valuesPeriod.setSelectedItem(ValuesPeriods.fromS(settings.valuesPeriod));
-        countsPeriod.setSelectedItem(CountsPeriods.fromS(settings.countsPeriod));
+        valuesPeriod.setSelectedItem(ValuesPeriods.fromS(settings.valuesPeriodS));
+        countsPeriod.setSelectedItem(CountsPeriods.fromS(settings.countsPeriodS));
         runningMedianButton.setSelected(settings.runningMedian);
-        runningMedianPeriod.setText(String.format("%.1f", settings.runningMedianPeriod));
+        runningMedianPeriod.setText(String.format("%.1f", settings.runningMedianPeriodS));
         runningMedianPeriod.setEnabled(settings.runningMedian);
         runningMeanButton.setSelected(settings.runningMean);
-        runningMeanPeriod.setText(String.format("%.1f", settings.runningMeanPeriod));
+        runningMeanPeriod.setText(String.format("%.1f", settings.runningMeanPeriodS));
         runningMeanPeriod.setEnabled(settings.runningMean);
         eventThreshold.setText(String.format("%d", settings.eventThreshold));
         eventRatio.setText(String.format("%.1f", settings.eventRatio));
-        eventMaxLength.setText(String.format("%.1f", settings.eventMaxLength));
+        eventMaxLength.setText(String.format("%.1f", settings.eventMaxLengthS));
         binSize.setSelectedItem(settings.binSize);
     }
 
@@ -218,18 +218,18 @@ public class RsamViewSettingsDialog extends SwarmDialog {
     public void wasOK() {
         
         try {
-            settings.valuesPeriod = ((ValuesPeriods)valuesPeriod.getSelectedItem()).getPeriodS();
-            settings.countsPeriod = ((CountsPeriods)countsPeriod.getSelectedItem()).getPeriodS();
+            settings.valuesPeriodS = ((ValuesPeriods)valuesPeriod.getSelectedItem()).getPeriodS();
+            settings.countsPeriodS = ((CountsPeriods)countsPeriod.getSelectedItem()).getPeriodS();
             settings.detrend = detrend.isSelected();
 
             settings.runningMean = runningMeanButton.isSelected();
-            settings.runningMeanPeriod = Double.parseDouble(runningMeanPeriod.getText());
+            settings.runningMeanPeriodS = Double.parseDouble(runningMeanPeriod.getText());
             settings.runningMedian = runningMedianButton.isSelected();
-            settings.runningMedianPeriod = Double.parseDouble(runningMedianPeriod.getText());
+            settings.runningMedianPeriodS = Double.parseDouble(runningMedianPeriod.getText());
             
             settings.eventThreshold = Integer.parseInt(eventThreshold.getText());
             settings.eventRatio = Double.parseDouble(eventRatio.getText());
-            settings.eventMaxLength = Double.parseDouble(eventMaxLength.getText());
+            settings.eventMaxLengthS = Double.parseDouble(eventMaxLength.getText());
             settings.binSize = (BinSize) binSize.getSelectedItem();
 
             if (valuesButton.isSelected())

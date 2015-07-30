@@ -47,64 +47,38 @@ import cern.colt.matrix.DoubleMatrix2D;
 public class RsamViewPanel extends JComponent implements SettingsListener {
     public static final long serialVersionUID = -1;
 
-    private static final String DISPLAY_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-    private static SwarmConfig swarmConfig;
-
+    private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
+    
     /**
      * X pixel location of where the main plot axis should be located on the
      * component.
      */
-    private int xOffset = 60;
+    private static final int X_OFFSET = 60;
 
     /**
      * Y pixel location of where the main plot axis should be located on the
      * component.
      */
-    private int yOffset = 20;
+    private static final int Y_OFFSET = 20;
 
     /** The amount of padding space on the right side. */
-    private int rightWidth = 40;
+    private static final int RIGHT_WIDTH = 40;
 
     /** The amount of padding space on the bottom. */
-    private int bottomHeight = 20;
+    private static final int BOTTOM_HEIGHT = 20;
 
     private RSAMData data;
 
     private double startTime;
     private double endTime;
     private RsamViewSettings settings;
-    private int bias;
 
-    private boolean timeSeries;
     private String channel;
 
-    /**
-     * The data source to use for zoom drags. This should probably be moved from
-     * this class to follow a stricter interpretation of MVC.
-     */
-    private SeismicDataSource source;
-
-    /**
-     * A flag to indicate wheter the plot should display a title. Currently used
-     * when the plot is on the clipboard or monitor.
-     */
-    private boolean displayTitle;
-
-    private Color backgroundColor;
     private Color bottomBorderColor;
-    private JLabel statusLabel;
-
-    private boolean allowDragging;
-    private boolean dragging;
-    private double j2k1;
-    private double j2k2;
-    private int highlightX1;
-    private int highlightX2;
 
     private static Image closeImg;
     private boolean allowClose;
-
-    private EventListenerList listeners = new EventListenerList();
 
     /**
      * A flag that indicates whether data are being loaded for this panel.
@@ -117,16 +91,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
      */
     private BufferedImage image;
 
-    private double mark1 = Double.NaN;
-    private double mark2 = Double.NaN;
-
-    private double cursorMark = Double.NaN;
-
-    private boolean useFilterLabel = true;
-
     private Color borderColor;
-
-    private double[] translation;
 
     /**
      * Constructs a WaveViewPanel with default settings.
@@ -143,11 +108,8 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
      *            the settings
      */
     public RsamViewPanel(RsamViewSettings s) {
-        swarmConfig = SwarmConfig.getInstance();
         settings = s;
-        s.view = this;
 
-        backgroundColor = new Color(0xf7, 0xf7, 0xf7);
         setupMouseHandler();
         settings.addListener(this);
     }
@@ -189,27 +151,11 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
         channel = c;
     }
 
-    public void setDataSource(SeismicDataSource s) {
-        source = s;
-    }
-
     public void settingsChanged() {
         processSettings();
     }
 
     
-    /**
-     * Gets the translation info for this panel. The translation info is used to
-     * convert from pixel coordinates on the panel into time or data
-     * coordinates.
-     * 
-     * @return the transformation information
-     */
-    public double[] getTranslation() {
-        return translation;
-    }
-
-
     public void setData(RSAMData data, double st, double et) {
         this.data = data;
         startTime = st;
@@ -274,8 +220,8 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
         Graphics2D g2 = (Graphics2D) g;
         Dimension dim = this.getSize();
         // TODO: fix this
-        if (data == null || (settings.getType() == ViewType.VALUES && data.getPeriod() != settings.valuesPeriod) || (settings.getType() == ViewType.COUNTS && data.getPeriod() != settings.countsPeriod)) {
-            g2.setColor(backgroundColor);
+        if (data == null || (settings.getType() == ViewType.VALUES && data.getPeriod() != settings.valuesPeriodS) || (settings.getType() == ViewType.COUNTS && data.getPeriod() != settings.countsPeriodS)) {
+            g2.setColor(BACKGROUND_COLOR);
             g2.fillRect(0, 0, dim.width, dim.height);
             g2.setColor(Color.black);
             if (working)
@@ -292,17 +238,6 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
             if (bi != null)
                 g2.drawImage(bi, 0, 0, null);
 
-            if (dragging)
-                paintDragBox(g2);
-
-            if (!Double.isNaN(mark1))
-                paintMark(g2, mark1);
-
-            if (!Double.isNaN(mark2))
-                paintMark(g2, mark2);
-
-            if (!Double.isNaN(cursorMark))
-                paintCursor(g2);
         }
 
         if (allowClose) {
@@ -321,9 +256,6 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
         }
     }
 
-    public void setUseFilterLabel(boolean b) {
-        useFilterLabel = b;
-    }
 
 
     /**
@@ -336,7 +268,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
         Dimension dim = this.getSize();
 
         Plot plot = new Plot();
-        plot.setBackgroundColor(backgroundColor);
+        plot.setBackgroundColor(BACKGROUND_COLOR);
         plot.setSize(dim);
 
         switch (settings.getType()) {
@@ -367,24 +299,24 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
         
         GenericDataMatrix gdm = new GenericDataMatrix(data.getData().copy());
 
-        gdm.despike(1, settings.valuesPeriod);
+        gdm.despike(1, settings.valuesPeriodS);
 
         if (settings.detrend)
             gdm.detrend(1);
 
         if (settings.runningMedian)
-            gdm.set2median(1, settings.runningMedianPeriod);
+            gdm.set2median(1, settings.runningMedianPeriodS);
 
         if (settings.runningMean)
-            gdm.set2mean(1, settings.runningMeanPeriod);
+            gdm.set2mean(1, settings.runningMeanPeriodS);
 
         MatrixRenderer mr = new MatrixRenderer(gdm.getData(), false);
         double max = gdm.max(1) + gdm.max(1) * .1;
         double min = gdm.min(1) - gdm.max(1) * .1;
 
         mr.setExtents(startTime, endTime, min, max);
-        mr.setLocation(xOffset, yOffset, this.getWidth() - xOffset - rightWidth, this.getHeight() - yOffset
-                - bottomHeight);
+        mr.setLocation(X_OFFSET, Y_OFFSET, this.getWidth() - X_OFFSET - RIGHT_WIDTH, this.getHeight() - Y_OFFSET
+                - BOTTOM_HEIGHT);
         mr.createDefaultAxis();
         mr.setXAxisToTime(8, true, true);
 
@@ -402,16 +334,16 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
      */
     private void plotCounts(Plot plot, RSAMData data) {
         
-        if (data == null || data.getData() == null || data.getData().rows() == 0 || data.getPeriod() != settings.countsPeriod)
+        if (data == null || data.getData() == null || data.getData().rows() == 0 || data.getPeriod() != settings.countsPeriodS)
             return;
         
         // get the relevant information for this channel
-        data.countEvents(settings.eventThreshold, settings.eventRatio, settings.eventMaxLength);
+        data.countEvents(settings.eventThreshold, settings.eventRatio, settings.eventMaxLengthS);
 
         // setup the histogram renderer with this data
         HistogramRenderer hr = new HistogramRenderer(data.getCountsHistogram(settings.binSize));
-        hr.setLocation(xOffset, yOffset, this.getWidth() - xOffset - rightWidth, this.getHeight() - yOffset
-                - bottomHeight);
+        hr.setLocation(X_OFFSET, Y_OFFSET, this.getWidth() - X_OFFSET - RIGHT_WIDTH, this.getHeight() - Y_OFFSET
+                - BOTTOM_HEIGHT);
         hr.setDefaultExtents();
         hr.setMinX(startTime);
         hr.setMaxX(endTime);
@@ -430,8 +362,8 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
 
             MatrixRenderer mr = new MatrixRenderer(countsData, false);
             mr.setAllVisible(true);
-            mr.setLocation(xOffset, yOffset, this.getWidth() - xOffset - rightWidth, this.getHeight() - yOffset
-                    - bottomHeight);
+            mr.setLocation(X_OFFSET, Y_OFFSET, this.getWidth() - X_OFFSET - RIGHT_WIDTH, this.getHeight() - Y_OFFSET
+                    - BOTTOM_HEIGHT);
             mr.setExtents(startTime, endTime, cmin, cmax + 1);
             mr.createDefaultLineRenderers(Color.RED);
             ShapeRenderer[] r = mr.getLineRenderers();
@@ -450,60 +382,6 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
         plot.addRenderer(hr);
     }
 
-    /**
-     * Paints the zoom drag box.
-     * 
-     * @param g2
-     *            the graphics context
-     */
-    private void paintDragBox(Graphics2D g2) {
-        int x1 = Math.min(highlightX1, highlightX2);
-        int x2 = Math.max(highlightX1, highlightX2);
-        int width = x2 - x1 + 1;
-        Paint pnt = g2.getPaint();
-        g2.setPaint(new Color(255, 255, 0, 128));
-        g2.fillRect(x1, yOffset + 1, width, getSize().height - bottomHeight - yOffset);
-        g2.setPaint(pnt);
-    }
-
-    private static final Color DARK_RED = new Color(168, 0, 0);
-    private static final Color DARK_GREEN = new Color(0, 168, 0);
-
-
-    private void paintCursor(Graphics2D g2) {
-        if (Double.isNaN(cursorMark) || cursorMark < startTime || cursorMark > endTime)
-            return;
-
-        double[] t = getTranslation();
-        if (t == null)
-            return;
-        double x = (cursorMark - t[1]) / t[0];
-        g2.setColor(DARK_RED);
-        g2.draw(new Line2D.Double(x, yOffset + 1, x, getHeight() - bottomHeight - 1));
-    }
-
-    private void paintMark(Graphics2D g2, double j2k) {
-        if (Double.isNaN(j2k) || j2k < startTime || j2k > endTime)
-            return;
-
-        double[] t = getTranslation();
-        if (t == null)
-            return;
-
-        double x = (j2k - t[1]) / t[0];
-        g2.setColor(DARK_GREEN);
-        g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
-
-        GeneralPath gp = new GeneralPath();
-        gp.moveTo((float) x, yOffset);
-        gp.lineTo((float) x - 5, yOffset - 7);
-        gp.lineTo((float) x + 5, yOffset - 7);
-        gp.closePath();
-        g2.setPaint(Color.GREEN);
-        g2.fill(gp);
-        g2.setColor(DARK_GREEN);
-        g2.draw(gp);
-    }
 
     /**
      * Overload of Component. Always returns the developer-specified size.
