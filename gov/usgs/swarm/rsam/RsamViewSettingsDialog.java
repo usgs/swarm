@@ -8,8 +8,8 @@ import gov.usgs.swarm.rsam.RsamViewSettings.ViewType;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashSet;
-import java.util.Set;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
@@ -55,6 +55,9 @@ public class RsamViewSettingsDialog extends SwarmDialog {
     private JTextField eventMaxLength;
     private JComboBox binSize;
     
+    private JCheckBox autoScale;
+    private JTextField scaleMax;
+    private JTextField scaleMin;
 
     private RsamViewSettingsDialog() {
         super(applicationFrame, "RSAM Settings", true);
@@ -97,6 +100,12 @@ public class RsamViewSettingsDialog extends SwarmDialog {
         eventRatio.setText(String.format("%.1f", settings.eventRatio));
         eventMaxLength.setText(String.format("%.1f", settings.eventMaxLengthS));
         binSize.setSelectedItem(settings.binSize);
+        autoScale.setSelected(settings.getAutoScale());
+        System.out.println("S: " + settings.getAutoScale());
+        scaleMax.setText("" + settings.scaleMax);
+        scaleMax.setEnabled(!autoScale.isSelected());
+        scaleMin.setText("" + settings.scaleMin);
+        scaleMin.setEnabled(!autoScale.isSelected());
     }
 
     private void createComponents() {
@@ -125,6 +134,17 @@ public class RsamViewSettingsDialog extends SwarmDialog {
                 runningMeanPeriod.setEnabled(runningMeanButton.isSelected());
             }
         });
+        
+        autoScale = new JCheckBox("Auto scale");
+        autoScale.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent e) {
+                scaleMax.setEnabled(!autoScale.isSelected());
+                scaleMin.setEnabled(!autoScale.isSelected());
+            }
+        });
+
+        scaleMax = new JTextField(4);
+        scaleMin = new JTextField(4);
         
         eventThreshold = new JTextField(4);
         eventRatio = new JTextField(4);
@@ -156,8 +176,22 @@ public class RsamViewSettingsDialog extends SwarmDialog {
         builder.add(new JLabel("Period:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
         builder.nextColumn(2);
         builder.add(valuesPeriod, cc.xyw(builder.getColumn(), builder.getRow(), 3));
-        builder.nextLine();
 
+        builder.nextLine();
+        builder.append(autoScale);
+        builder.nextColumn(2);
+        builder.add(new JLabel("Min:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+        builder.nextColumn(2);
+        builder.add(scaleMin, cc.xyw(builder.getColumn(), builder.getRow(), 1));
+        
+        builder.nextLine();
+        builder.appendRow("center:18dlu");
+        builder.nextColumn(4);
+        builder.add(new JLabel("Max:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+        builder.nextColumn(2);
+        builder.add(scaleMax, cc.xyw(builder.getColumn(), builder.getRow(), 1));
+
+        builder.nextLine();
         builder.appendSeparator("Event Options");
         builder.nextLine();
         builder.appendRow("center:18dlu");
@@ -167,11 +201,8 @@ public class RsamViewSettingsDialog extends SwarmDialog {
         builder.add(new JLabel("Period:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
         builder.nextColumn(2);
         builder.add(countsPeriod, cc.xyw(builder.getColumn(), builder.getRow(), 3));
-        
-        
-        builder.nextColumn();
-        
         builder.nextLine();
+
         builder.appendRow("center:18dlu");
         builder.add(new JLabel("Event ratio:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
         builder.nextColumn(2);
@@ -207,6 +238,13 @@ public class RsamViewSettingsDialog extends SwarmDialog {
             message = "Error in event maximum length.";
             double eml = Double.parseDouble(eventMaxLength.getText());
 
+            if (!autoScale.isSelected()) {
+                message = "Error in Scale min";
+                int sm = Integer.parseInt(scaleMin.getText());
+                message = "Error in Scale max";
+                int sn = Integer.parseInt(scaleMax.getText());
+            }
+            
             return true;
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, message, "Options Error", JOptionPane.ERROR_MESSAGE);
@@ -232,6 +270,12 @@ public class RsamViewSettingsDialog extends SwarmDialog {
             settings.eventMaxLengthS = Double.parseDouble(eventMaxLength.getText());
             settings.binSize = (BinSize) binSize.getSelectedItem();
 
+            settings.setAutoScale(autoScale.isSelected());
+            if (!autoScale.isSelected()) {
+                settings.scaleMax = Integer.parseInt(scaleMax.getText());
+                settings.scaleMin = Integer.parseInt(scaleMin.getText());
+            }
+            
             if (valuesButton.isSelected())
                 settings.setType(ViewType.VALUES);
             else

@@ -35,7 +35,9 @@ public class RsamViewSettings {
     public double eventRatio;
     public double eventMaxLengthS;
     public BinSize binSize;
-    
+    private boolean autoScale;
+    public int scaleMax;
+    public int scaleMin;
     
     private int spanLengthS;
     private ViewType viewType;
@@ -58,6 +60,9 @@ public class RsamViewSettings {
         DEFAULT_RSAM_VIEW_SETTINGS.eventMaxLengthS = 300;
         DEFAULT_RSAM_VIEW_SETTINGS.binSize = BinSize.HOUR;
         DEFAULT_RSAM_VIEW_SETTINGS.spanLengthS = 60 * 60* 24 * 7;
+        DEFAULT_RSAM_VIEW_SETTINGS.autoScale = true;
+        DEFAULT_RSAM_VIEW_SETTINGS.scaleMax = 100;
+        DEFAULT_RSAM_VIEW_SETTINGS.scaleMin = 0;
         
         List<String> candidateNames = new LinkedList<String>();
         candidateNames.add(DEFAULTS_FILENAME);
@@ -96,6 +101,9 @@ public class RsamViewSettings {
         eventThreshold = s.eventThreshold;
         eventMaxLengthS = s.eventMaxLengthS;
         binSize = s.binSize;
+        autoScale = s.autoScale;
+        scaleMax = s.scaleMax;
+        scaleMin = s.scaleMin;
     }
 
     public void set(ConfigFile cf) {
@@ -113,6 +121,9 @@ public class RsamViewSettings {
         eventThreshold = Util.stringToInt(cf.getString("eventThreshold"), DEFAULT_RSAM_VIEW_SETTINGS.eventThreshold);
         eventMaxLengthS = Util.stringToDouble(cf.getString("eventMaxLength"), DEFAULT_RSAM_VIEW_SETTINGS.eventMaxLengthS);
         binSize = BinSize.fromString(cf.getString("binSize"));
+        autoScale = Util.stringToBoolean(cf.getString("autoScale"), DEFAULT_RSAM_VIEW_SETTINGS.autoScale);
+        scaleMax = Util.stringToInt(cf.getString("scaleMax"), DEFAULT_RSAM_VIEW_SETTINGS.scaleMax);
+        scaleMin = Util.stringToInt(cf.getString("scaleMin"), DEFAULT_RSAM_VIEW_SETTINGS.scaleMin);
     }
 
     public void save(ConfigFile cf, String prefix) {
@@ -128,6 +139,9 @@ public class RsamViewSettings {
         cf.put(prefix + ".eventThreshold", Double.toString(eventThreshold));
         cf.put(prefix + ".eventMaxLength", Double.toString(eventMaxLengthS));
         cf.put(prefix + ".binSize", binSize.toString());
+        cf.put(prefix + ".autoScale", Boolean.toString(autoScale));
+        cf.put(prefix + ".scaleMax", Double.toString(scaleMax));
+        cf.put(prefix + ".scaleMin", Double.toString(scaleMin));
     }
 
     public void setSpanLength(int spanLengthS) {
@@ -146,6 +160,14 @@ public class RsamViewSettings {
 
     public ViewType getType() {
         return viewType;
+    }
+    
+    public void setAutoScale(boolean isAutoScale) {
+        this.autoScale = isAutoScale;
+    }
+    
+    public boolean getAutoScale() {
+        return autoScale;
     }
     
     public void cycleType() {

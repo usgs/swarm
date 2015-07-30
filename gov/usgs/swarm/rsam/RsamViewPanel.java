@@ -303,8 +303,15 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
             gdm.set2mean(1, settings.runningMeanPeriodS);
 
         MatrixRenderer mr = new MatrixRenderer(gdm.getData(), false);
-        double max = gdm.max(1) + gdm.max(1) * .1;
-        double min = gdm.min(1) - gdm.max(1) * .1;
+        double max;
+        double min;
+        if (settings.getAutoScale()) {
+            max = gdm.max(1) + gdm.max(1) * .1;
+            min = gdm.min(1) - gdm.max(1) * .1;
+        } else {
+            max = settings.scaleMax;
+            min = settings.scaleMin;
+        }
 
         mr.setExtents(startTime, endTime, min, max);
         mr.setLocation(X_OFFSET, Y_OFFSET, this.getWidth() - X_OFFSET - RIGHT_WIDTH, this.getHeight() - Y_OFFSET
