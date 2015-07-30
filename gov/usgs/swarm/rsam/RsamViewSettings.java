@@ -6,8 +6,10 @@ import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Util;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 
@@ -24,9 +26,6 @@ public class RsamViewSettings {
     public int valuesPeriod;
     public int countsPeriod;
     public boolean detrend;
-    public boolean bandpass;
-    public double bandpassMin;
-    public double bandpassMax;
     public boolean runningMedian;
     public double runningMedianPeriod;
     public boolean runningMean;
@@ -39,11 +38,12 @@ public class RsamViewSettings {
 
     public RsamViewPanel view;
     public RsamViewSettingsToolbar toolbar;
-    public ViewType viewType;
+    private ViewType viewType;
 
     public Butterworth filter;
 
     private static RsamViewSettings DEFAULT_RSAM_VIEW_SETTINGS;
+    private Set<SettingsListener> listeners;
 
     static {
         DEFAULT_RSAM_VIEW_SETTINGS = new RsamViewSettings();
@@ -51,9 +51,6 @@ public class RsamViewSettings {
         DEFAULT_RSAM_VIEW_SETTINGS.valuesPeriod = 600;
         DEFAULT_RSAM_VIEW_SETTINGS.countsPeriod = 10;
         DEFAULT_RSAM_VIEW_SETTINGS.detrend = false;
-        DEFAULT_RSAM_VIEW_SETTINGS.bandpass = false;
-        DEFAULT_RSAM_VIEW_SETTINGS.bandpassMin = 2;
-        DEFAULT_RSAM_VIEW_SETTINGS.bandpassMax = 20;
         DEFAULT_RSAM_VIEW_SETTINGS.runningMedian = false;
         DEFAULT_RSAM_VIEW_SETTINGS.runningMedianPeriod = 300;
         DEFAULT_RSAM_VIEW_SETTINGS.runningMean = false;
@@ -85,10 +82,8 @@ public class RsamViewSettings {
         view = null;
         if (DEFAULT_RSAM_VIEW_SETTINGS != null)
             copy(DEFAULT_RSAM_VIEW_SETTINGS);
-    }
 
-    public RsamViewSettings(RsamViewSettings s) {
-        copy(s);
+        listeners = new HashSet<SettingsListener>();
     }
 
     public void copy(RsamViewSettings s) {
@@ -96,9 +91,6 @@ public class RsamViewSettings {
         valuesPeriod = s.valuesPeriod;
         countsPeriod = s.countsPeriod;
         detrend = s.detrend;
-        bandpass = s.bandpass;
-        bandpassMin = s.bandpassMin;
-        bandpassMax = s.bandpassMax;
         runningMedian = s.runningMedian;
         runningMedianPeriod = s.runningMedianPeriod;
         runningMean = s.runningMean;
@@ -114,9 +106,6 @@ public class RsamViewSettings {
         valuesPeriod = Util.stringToInt(cf.getString("valuesPeriod"), DEFAULT_RSAM_VIEW_SETTINGS.valuesPeriod);
         countsPeriod = Util.stringToInt(cf.getString("countsPeriod"), DEFAULT_RSAM_VIEW_SETTINGS.countsPeriod);
         detrend = Util.stringToBoolean(cf.getString("detrend"), DEFAULT_RSAM_VIEW_SETTINGS.detrend);
-        bandpass = Util.stringToBoolean(cf.getString("bandpass"), DEFAULT_RSAM_VIEW_SETTINGS.bandpass);
-        bandpassMin = Util.stringToDouble(cf.getString("bandpassMin"), DEFAULT_RSAM_VIEW_SETTINGS.bandpassMin);
-        bandpassMax = Util.stringToDouble(cf.getString("bandpassMax"), DEFAULT_RSAM_VIEW_SETTINGS.bandpassMax);
         runningMedian = Util.stringToBoolean(cf.getString("runningMedian"), DEFAULT_RSAM_VIEW_SETTINGS.runningMedian);
         runningMedianPeriod = Util.stringToDouble(cf.getString("runningMedianPeriod"),
                 DEFAULT_RSAM_VIEW_SETTINGS.runningMedianPeriod);
@@ -134,9 +123,6 @@ public class RsamViewSettings {
         cf.put(prefix + ".countsPeriod", Integer.toString(countsPeriod));
         cf.put(prefix + ".viewType", viewType.toString());
         cf.put(prefix + ".detrend", Boolean.toString(detrend));
-        cf.put(prefix + ".bandpass", Boolean.toString(bandpass));
-        cf.put(prefix + ".bandpassMin", Double.toString(bandpassMin));
-        cf.put(prefix + ".bandpassMax", Double.toString(bandpassMax));
         cf.put(prefix + ".runningMedian", Boolean.toString(runningMedian));
         cf.put(prefix + ".runningMedianPeriod", Double.toString(runningMedianPeriod));
         cf.put(prefix + ".runningMean", Boolean.toString(runningMean));
@@ -149,9 +135,13 @@ public class RsamViewSettings {
 
     public void setType(ViewType t) {
         viewType = t;
-        notifyView();
+        notifyListeners();
     }
 
+    public ViewType getType() {
+        return viewType;
+    }
+    
     public void cycleType() {
         switch (viewType) {
         case VALUES:
@@ -161,15 +151,15 @@ public class RsamViewSettings {
             viewType = ViewType.VALUES;
             break;
         }
-        notifyView();
+        notifyListeners();
+    }
+    
+    public void addListener(SettingsListener l) {
+        listeners.add(l);
     }
 
-    public void notifyView() {
-        if (view != null)
-            view.settingsChanged();
-
-        if (toolbar != null)
-            toolbar.settingsChanged();
+    private void notifyListeners() {
+        for (SettingsListener l : listeners) 
+            l.settingsChanged();
     }
-
 }

@@ -160,7 +160,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable
 		double st = now - SPANS_S[spanIndex];
 
 		int period;
-		if (settings.viewType == ViewType.VALUES)
+		if (settings.getType() == ViewType.VALUES)
 		    period = settings.valuesPeriod;
 		else 
 		    period = settings.countsPeriod;

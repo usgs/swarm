@@ -44,7 +44,7 @@ import cern.colt.matrix.DoubleMatrix2D;
  * 
  * @author Tom Parker
  */
-public class RsamViewPanel extends JComponent {
+public class RsamViewPanel extends JComponent implements SettingsListener {
     public static final long serialVersionUID = -1;
 
     private static final String DISPLAY_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
@@ -133,6 +133,7 @@ public class RsamViewPanel extends JComponent {
      */
     public RsamViewPanel() {
         this(new RsamViewSettings());
+        settings.addListener(this);
     }
 
     /**
@@ -148,43 +149,9 @@ public class RsamViewPanel extends JComponent {
 
         backgroundColor = new Color(0xf7, 0xf7, 0xf7);
         setupMouseHandler();
+        settings.addListener(this);
     }
 
-    /**
-     * Constructs a WaveViewPanel set up the same as a source WaveViewPanel.
-     * Used when copying a waveform to the clipboard.
-     * 
-     * @param p
-     *            the source WaveViewPanel
-     */
-    public RsamViewPanel(RsamViewPanel p) {
-        swarmConfig = SwarmConfig.getInstance();
-        channel = p.channel;
-        source = p.source;
-        startTime = p.startTime;
-        endTime = p.endTime;
-        bias = p.bias;
-        timeSeries = p.timeSeries;
-        allowDragging = p.allowDragging;
-        settings = new RsamViewSettings(p.settings);
-        settings.view = this;
-        data = p.data;
-        displayTitle = p.displayTitle;
-        backgroundColor = p.backgroundColor;
-        translation = new double[8];
-        if (p.translation != null)
-            System.arraycopy(p.translation, 0, translation, 0, 8);
-
-        processSettings();
-        setupMouseHandler();
-    }
-
-    public void setOffsets(int xo, int yo, int rw, int bh) {
-        xOffset = xo;
-        yOffset = yo;
-        rightWidth = rw;
-        bottomHeight = bh;
-    }
 
     private void setupMouseHandler() {
         Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
@@ -197,52 +164,11 @@ public class RsamViewPanel extends JComponent {
                     settings.cycleType();
                     data = null;
                 }
-                fireMousePressed(e);
             }
         });
     }
 
-    public void addListener(RsamViewPanelListener listener) {
-        listeners.add(RsamViewPanelListener.class, listener);
-    }
 
-    public void removeListener(RsamViewPanelListener listener) {
-        listeners.remove(RsamViewPanelListener.class, listener);
-    }
-
-    public void fireZoomed(MouseEvent e, double oldST, double oldET, double newST, double newET) {
-        Object[] ls = listeners.getListenerList();
-        for (int i = ls.length - 2; i >= 0; i -= 2)
-            if (ls[i] == RsamViewPanelListener.class)
-                ((RsamViewPanelListener) ls[i + 1]).waveZoomed(this, oldST, oldET, newST, newET);
-    }
-
-    public void fireTimePressed(MouseEvent e, double j2k) {
-        Object[] ls = listeners.getListenerList();
-        for (int i = ls.length - 2; i >= 0; i -= 2)
-            if (ls[i] == RsamViewPanelListener.class)
-                ((RsamViewPanelListener) ls[i + 1]).waveTimePressed(this, e, j2k);
-    }
-
-    public void fireMousePressed(MouseEvent e) {
-        Object[] ls = listeners.getListenerList();
-        for (int i = ls.length - 2; i >= 0; i -= 2)
-            if (ls[i] == RsamViewPanelListener.class)
-                ((RsamViewPanelListener) ls[i + 1]).mousePressed(this, e, dragging);
-    }
-
-    public void fireClose() {
-        Object[] ls = listeners.getListenerList();
-        for (int i = ls.length - 2; i >= 0; i -= 2)
-            if (ls[i] == RsamViewPanelListener.class)
-                ((RsamViewPanelListener) ls[i + 1]).waveClosed(this);
-    }
-
-    public void setAllowClose(boolean b) {
-        allowClose = b;
-    }
-
- 
     /**
      * Set the working flag. This flag indicates whether data are being loaded
      * for this panel.
@@ -254,49 +180,6 @@ public class RsamViewPanel extends JComponent {
         working = b;
     }
 
-    /**
-     * Set the allow dragging flag. This flag enables zoom dragging. Currently
-     * only allowed on the clipboard, but could be implemented within the
-     * helicorder view.
-     * 
-     * @param b
-     *            the allow dragging flag state
-     */
-    public void setAllowDragging(boolean b) {
-        allowDragging = b;
-    }
-
-    public void setStatusLabel(JLabel l) {
-        statusLabel = l;
-    }
-
-    public int getXOffset() {
-        return xOffset;
-    }
-
-    public int getYOffset() {
-        return yOffset;
-    }
-
-    public RsamViewSettings getSettings() {
-        return settings;
-    }
-
-    public double getStartTime() {
-        return startTime;
-    }
-
-    public double getEndTime() {
-        return endTime;
-    }
-
-    public RSAMData getData() {
-        return data;
-    }
-
-    public RsamViewSettings getRsamViewSettings() {
-        return settings;
-    }
 
     public String getChannel() {
         return channel;
@@ -306,29 +189,12 @@ public class RsamViewPanel extends JComponent {
         channel = c;
     }
 
-    public void setSettings(RsamViewSettings s) {
-        settings = s;
-        processSettings();
-    }
-
-    public SeismicDataSource getDataSource() {
-        return source;
-    }
-
     public void setDataSource(SeismicDataSource s) {
         source = s;
     }
 
-    public void setDisplayTitle(boolean b) {
-        displayTitle = b;
-    }
-
     public void settingsChanged() {
         processSettings();
-    }
-
-    public boolean isTimeSeries() {
-        return timeSeries;
     }
 
     
@@ -343,23 +209,6 @@ public class RsamViewPanel extends JComponent {
         return translation;
     }
 
-    /**
-     * Set the background color of the panel.
-     * 
-     * @param c
-     *            the background color
-     */
-    public void setBackgroundColor(Color c) {
-        backgroundColor = c;
-    }
-
-    public void setBottomBorderColor(Color c) {
-        bottomBorderColor = c;
-    }
-
-    public void setBorderColor(Color c) {
-        borderColor = c;
-    }
 
     public void setData(RSAMData data, double st, double et) {
         this.data = data;
@@ -425,7 +274,7 @@ public class RsamViewPanel extends JComponent {
         Graphics2D g2 = (Graphics2D) g;
         Dimension dim = this.getSize();
         // TODO: fix this
-        if (data == null || (settings.viewType == ViewType.VALUES && data.getPeriod() != settings.valuesPeriod) || (settings.viewType == ViewType.COUNTS && data.getPeriod() != settings.countsPeriod)) {
+        if (data == null || (settings.getType() == ViewType.VALUES && data.getPeriod() != settings.valuesPeriod) || (settings.getType() == ViewType.COUNTS && data.getPeriod() != settings.countsPeriod)) {
             g2.setColor(backgroundColor);
             g2.fillRect(0, 0, dim.width, dim.height);
             g2.setColor(Color.black);
@@ -490,7 +339,7 @@ public class RsamViewPanel extends JComponent {
         plot.setBackgroundColor(backgroundColor);
         plot.setSize(dim);
 
-        switch (settings.viewType) {
+        switch (settings.getType()) {
         case VALUES:
             plotValues(plot, data);
             break;
@@ -620,10 +469,6 @@ public class RsamViewPanel extends JComponent {
     private static final Color DARK_RED = new Color(168, 0, 0);
     private static final Color DARK_GREEN = new Color(0, 168, 0);
 
-    public void setCursorMark(double j2k) {
-        cursorMark = j2k;
-        repaint();
-    }
 
     private void paintCursor(Graphics2D g2) {
         if (Double.isNaN(cursorMark) || cursorMark < startTime || cursorMark > endTime)
@@ -676,19 +521,5 @@ public class RsamViewPanel extends JComponent {
      */
     public Dimension getMinimumSize() {
         return getSize();
-    }
-
-    /**
-     * Overload of Component. Always returns the developer-specified size.
-     * 
-     * @return the size of the component
-     */
-    public Dimension getMaximumSize() {
-        return getSize();
-    }
-
-    public void setMarks(double m1, double m2) {
-        mark1 = m1;
-        mark2 = m2;
     }
 }

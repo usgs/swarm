@@ -8,6 +8,8 @@ import gov.usgs.swarm.rsam.RsamViewSettings.ViewType;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
@@ -43,9 +45,6 @@ public class RsamViewSettingsDialog extends SwarmDialog {
     private JComboBox valuesPeriod;
     private JComboBox countsPeriod;
 
-    private JCheckBox bandpassButton;
-    private JTextField bandpassMin;
-    private JTextField bandpassMax;
     private JCheckBox runningMedianButton;
     private JTextField runningMedianPeriod;
     private JCheckBox runningMeanButton;
@@ -55,6 +54,7 @@ public class RsamViewSettingsDialog extends SwarmDialog {
     private JTextField eventRatio;
     private JTextField eventMaxLength;
     private JComboBox binSize;
+    
 
     private RsamViewSettingsDialog() {
         super(applicationFrame, "RSAM Settings", true);
@@ -63,11 +63,8 @@ public class RsamViewSettingsDialog extends SwarmDialog {
         setSizeAndLocation();
     }
 
-    public static RsamViewSettingsDialog getInstance(RsamViewSettings s) {
-        return getInstance(s, 1);
-    }
 
-    public static RsamViewSettingsDialog getInstance(RsamViewSettings s, int count) {
+    public static RsamViewSettingsDialog getInstance(RsamViewSettings s) {
         if (dialog == null)
             dialog = new RsamViewSettingsDialog();
 
@@ -77,7 +74,7 @@ public class RsamViewSettingsDialog extends SwarmDialog {
     }
 
     public void setToCurrent() {
-        switch (settings.viewType) {
+        switch (settings.getType()) {
         case VALUES:
             valuesButton.setSelected(true);
             break;
@@ -90,11 +87,6 @@ public class RsamViewSettingsDialog extends SwarmDialog {
 
         valuesPeriod.setSelectedItem(ValuesPeriods.fromS(settings.valuesPeriod));
         countsPeriod.setSelectedItem(CountsPeriods.fromS(settings.countsPeriod));
-        bandpassButton.setSelected(settings.bandpass);
-        bandpassMin.setText(String.format("%.1f", settings.bandpassMin));
-        bandpassMin.setEnabled(bandpassButton.isSelected());
-        bandpassMax.setText(String.format("%.1f", settings.bandpassMax));
-        bandpassMax.setEnabled(bandpassButton.isSelected());
         runningMedianButton.setSelected(settings.runningMedian);
         runningMedianPeriod.setText(String.format("%.1f", settings.runningMedianPeriod));
         runningMedianPeriod.setEnabled(settings.runningMedian);
@@ -119,15 +111,6 @@ public class RsamViewSettingsDialog extends SwarmDialog {
         
         detrend = new JCheckBox("Detrend (linear)");
  
-        bandpassButton = new JCheckBox("Bandpass");
-        bandpassMin = new JTextField(4);
-        bandpassMax = new JTextField(4);
-        bandpassButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                bandpassMin.setEnabled(bandpassButton.isSelected());
-                bandpassMax.setEnabled(bandpassButton.isSelected());
-            }
-        });
         runningMedianButton = new JCheckBox("Running median");
         runningMedianPeriod = new JTextField(4);
         runningMedianButton.addActionListener(new ActionListener() {
@@ -175,27 +158,6 @@ public class RsamViewSettingsDialog extends SwarmDialog {
         builder.add(valuesPeriod, cc.xyw(builder.getColumn(), builder.getRow(), 3));
         builder.nextLine();
 
-//        builder.appendSeparator("Filter Options");
-//        builder.nextLine();
-//        builder.append(bandpassButton);
-//        builder.add(new JLabel("Min:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
-//        builder.nextColumn(2);
-//        builder.append(bandpassMin);
-//        builder.add(new JLabel("Max:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
-//        builder.nextColumn(2);
-//        builder.append(bandpassMax);
-//        builder.nextLine();
-//        builder.append(runningMedianButton);
-//        builder.add(new JLabel("Period:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
-//        builder.nextColumn(2);
-//        builder.append(runningMedianPeriod);
-//        builder.nextLine();
-//        builder.append(runningMeanButton);
-//        builder.add(new JLabel("Period:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
-//        builder.nextColumn(2);
-//        builder.append(runningMeanPeriod);
-//        builder.nextLine();
-
         builder.appendSeparator("Event Options");
         builder.nextLine();
         builder.appendRow("center:18dlu");
@@ -233,13 +195,6 @@ public class RsamViewSettingsDialog extends SwarmDialog {
     public boolean allowOK() {
         String message = null;
         try {
-            message = "Error in bandpass minimum frequency.";
-            double bmin = Double.parseDouble(bandpassMin.getText());
-            message = "Error in bandpass maximum frequency.";
-            double bmax = Double.parseDouble(bandpassMax.getText());
-            message = "Bandpass minimum frequency must be less than bandpass maximum frequency.";
-            if (bmin >= bmax)
-                throw new NumberFormatException();
             message = "Error in running median period.";
             double rm = Double.parseDouble(runningMedianPeriod.getText());
             message = "Error in running mean period.";
@@ -263,18 +218,10 @@ public class RsamViewSettingsDialog extends SwarmDialog {
     public void wasOK() {
         
         try {
-            if (valuesButton.isSelected())
-                settings.viewType = ViewType.VALUES;
-            else
-                settings.viewType = ViewType.COUNTS;
-
             settings.valuesPeriod = ((ValuesPeriods)valuesPeriod.getSelectedItem()).getPeriodS();
             settings.countsPeriod = ((CountsPeriods)countsPeriod.getSelectedItem()).getPeriodS();
             settings.detrend = detrend.isSelected();
 
-            settings.bandpass = bandpassButton.isSelected();
-            settings.bandpassMin = Double.parseDouble(bandpassMin.getText());
-            settings.bandpassMax = Double.parseDouble(bandpassMax.getText());
             settings.runningMean = runningMeanButton.isSelected();
             settings.runningMeanPeriod = Double.parseDouble(runningMeanPeriod.getText());
             settings.runningMedian = runningMedianButton.isSelected();
@@ -284,9 +231,15 @@ public class RsamViewSettingsDialog extends SwarmDialog {
             settings.eventRatio = Double.parseDouble(eventRatio.getText());
             settings.eventMaxLength = Double.parseDouble(eventMaxLength.getText());
             settings.binSize = (BinSize) binSize.getSelectedItem();
+
+            if (valuesButton.isSelected())
+                settings.setType(ViewType.VALUES);
+            else
+                settings.setType(ViewType.COUNTS);
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Illegal values.", "Options Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+    
 }
