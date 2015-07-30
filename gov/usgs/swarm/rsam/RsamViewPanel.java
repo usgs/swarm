@@ -9,13 +9,11 @@ import gov.usgs.plot.render.AxisRenderer;
 import gov.usgs.plot.render.HistogramRenderer;
 import gov.usgs.plot.render.MatrixRenderer;
 import gov.usgs.plot.render.ShapeRenderer;
-import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.swarm.Icons;
-import gov.usgs.swarm.SwarmConfig;
 import gov.usgs.swarm.SwingWorker;
-import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.rsam.RsamViewSettings.ViewType;
 import gov.usgs.swarm.time.UiTime;
+import gov.usgs.util.Util;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -24,17 +22,12 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Paint;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.EventListenerList;
 
 import cern.colt.matrix.DoubleMatrix2D;
 
@@ -124,7 +117,6 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
                 UiTime.touchTime();
                 if (SwingUtilities.isRightMouseButton(e)) {
                     settings.cycleType();
-                    data = null;
                 }
             }
         });

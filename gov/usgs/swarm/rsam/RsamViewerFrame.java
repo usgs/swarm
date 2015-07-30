@@ -44,7 +44,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
     private SeismicDataSource dataSource;
     private String channel;
     private Thread updateThread;
-    private boolean kill;
+    private boolean run;
     private JToolBar toolBar;
 
     private RsamViewSettings settings;
@@ -61,7 +61,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
         channel = ch;
         settings = new RsamViewSettings();
         settings.addListener(this);
-        kill = false;
+        run = true;
         updateThread = new Thread(this, "RsamViewerFrame-" + sds + "-" + ch);
         createUI();
         settings.setSpanLength(2 * D_TO_S);
@@ -124,7 +124,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
 
             public void internalFrameClosing(InternalFrameEvent e) {
                 throbber.close();
-                kill();
+                pause();
                 SwarmInternalFrames.remove(RsamViewerFrame.this);
                 dataSource.close();
             }
@@ -138,8 +138,10 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
         updateThread.start();
     }
 
-    public void getRsam() {
+    public synchronized void getRsam() {
         throbber.increment();
+        
+        viewPanel.setWorking(true);
         double now = CurrentTime.getInstance().nowJ2K();
         double st = now - settings.getSpanLength();
 
@@ -153,7 +155,6 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
 
         double et = now;
         et += period - (et % period);
-        viewPanel.setWorking(true);
         RSAMData data = ((RsamSource) dataSource).getRsam(channel, st, et, period);
         viewPanel.setData(data, now - settings.getSpanLength(), now);
         viewPanel.setChannel(channel);
@@ -162,13 +163,13 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
         throbber.decrement();
     }
 
-    public void kill() {
-        kill = true;
+    public void pause() {
+        run = false;
         updateThread.interrupt();
     }
 
     public void run() {
-        while (!kill) {
+        while (run) {
             try {
                 getRsam();
                 Thread.sleep(intervalMs);
@@ -186,7 +187,6 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
             i++;
 
         spanIndex = i;
-        
         getRsam();
     }
 }
