@@ -55,7 +55,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
     private static final int Y_OFFSET = 20;
 
     /** The amount of padding space on the right side. */
-    private static final int RIGHT_WIDTH = 40;
+    private static final int RIGHT_WIDTH = 60;
 
     /** The amount of padding space on the bottom. */
     private static final int BOTTOM_HEIGHT = 20;
