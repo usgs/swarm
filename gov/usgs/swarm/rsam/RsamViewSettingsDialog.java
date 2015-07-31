@@ -101,7 +101,6 @@ public class RsamViewSettingsDialog extends SwarmDialog {
         eventMaxLength.setText(String.format("%.1f", settings.eventMaxLengthS));
         binSize.setSelectedItem(settings.binSize);
         autoScale.setSelected(settings.getAutoScale());
-        System.out.println("S: " + settings.getAutoScale());
         scaleMax.setText("" + settings.scaleMax);
         scaleMax.setEnabled(!autoScale.isSelected());
         scaleMin.setText("" + settings.scaleMin);
