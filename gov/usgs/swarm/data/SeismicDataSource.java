@@ -1,6 +1,7 @@
 package gov.usgs.swarm.data;
 
 import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
 
 import java.util.List;
@@ -162,4 +163,5 @@ abstract public class SeismicDataSource {
 	public int getMinimumRefreshInterval() {
 		return minimumRefreshInterval;
 	}
+
 }

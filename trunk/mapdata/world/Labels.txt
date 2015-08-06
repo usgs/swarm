@@ -1,0 +1,15 @@
+# This file allows the user to list labels that will then appear on the map.
+# Each line must be strictly formatted: 
+#   name; lon; lat, symbol, symbolSize, symbolColor, symbolStroke, font, fontSize, fontStyle, fontColor
+#
+# Possible symbols are:
+#  o : circlr
+#  t : triangle
+#  s : square
+#  * : star
+#
+# Possible colors are: BLACK, BLUE, CYAN, DARK_GRAY, GRAY, GREEN, LIGHT_GRAY, MAGENTA, ORANGE, PINK, RED, WHITE, or YELLOW
+#
+# Possible font styles are: PLAIN, BOLD, ITALIC
+
+#WLWY;-110.287,44.640,o,6,GREEN,1,Consolas,20,PLAIN,RED

@@ -17,6 +17,7 @@ import gov.usgs.swarm.chooser.node.RootNode;
 import gov.usgs.swarm.chooser.node.ServerNode;
 import gov.usgs.swarm.data.DataSourceType;
 import gov.usgs.swarm.data.FileDataSource;
+import gov.usgs.swarm.data.RsamSource;
 import gov.usgs.swarm.data.SeismicDataSource;
 import gov.usgs.swarm.data.SeismicDataSourceListener;
 import gov.usgs.swarm.data.WWSSource;
@@ -134,6 +135,7 @@ public class DataChooser extends JPanel {
     private JButton clipboardButton;
     private JButton monitorButton;
     private JButton realtimeButton;
+    private JButton rsamButton;
     private JButton mapButton;
 
     private Map<String, TreePath> nearestPaths;
@@ -418,6 +420,27 @@ public class DataChooser extends JPanel {
             }
         });
 
+        rsamButton = new JButton(Icons.rsam_values); //$NON-NLS-1$
+        rsamButton.setFocusable(false);
+        rsamButton.setEnabled(false);
+        rsamButton.setToolTipText(Messages.getString("DataChooser.rsamButtonToolTip")); //$NON-NLS-1$
+        rsamButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                SwingWorker worker = new SwingWorker() {
+                    public Object construct() {
+                        List<Pair<ServerNode, String>> channels = getSelections();
+                        if (channels != null) {
+                            for (Pair<ServerNode, String> pair : channels) {
+                                Swarm.openRsam(pair.item1.getSource(), pair.item2);
+                            }
+                        }
+                        return null;
+                    }
+                };
+                worker.start();
+            }
+        });
+
         clipboardButton = new JButton(Icons.clipboard); //$NON-NLS-1$
         clipboardButton.setFocusable(false);
         clipboardButton.setToolTipText(Messages.getString("DataChooser.clipboardButtonToolTip")); //$NON-NLS-1$
@@ -502,6 +525,7 @@ public class DataChooser extends JPanel {
         actionPanel.add(clipboardButton);
         actionPanel.add(monitorButton);
         actionPanel.add(realtimeButton);
+        actionPanel.add(rsamButton);
         actionPanel.add(mapButton);
 
         JPanel timePanel = new JPanel(new BorderLayout());
@@ -757,6 +781,9 @@ public class DataChooser extends JPanel {
                         if (node instanceof ChannelNode) {
                             ChannelNode cn = (ChannelNode) node;
                             setNearest(cn.getChannel());
+                            
+                            ServerNode sn = (ServerNode) path.getPathComponent(1);
+                            rsamButton.setEnabled(sn.getSource() instanceof RsamSource);
                         }
                     }
                 }

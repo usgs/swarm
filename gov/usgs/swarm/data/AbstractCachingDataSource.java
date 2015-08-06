@@ -1,6 +1,7 @@
 package gov.usgs.swarm.data;
 
 import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.Swarm;
 import gov.usgs.util.Log;
@@ -26,7 +27,7 @@ import cern.colt.matrix.DoubleMatrix2D;
  * 
  * @author Tom Parker
  */
-public abstract class AbstractCachingDataSource extends SeismicDataSource {
+public abstract class AbstractCachingDataSource extends SeismicDataSource implements RsamSource {
 
     /** roughly max size of a single wave in bytes. Actually, (numSamples * 4) */
     private static final int MAX_WAVE_SIZE = 1000000;
@@ -40,6 +41,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
     protected long maxSize;
     protected Map<String, List<CachedHelicorder>> helicorderCache;
     protected Map<String, List<CachedWave>> waveCache;
+    protected Map<String, List<CachedRsam>> rsamCache;
     protected CachePurgeAction[] purgeActions;
     protected static Logger logger;
     protected static final JFrame applicationFrame = Swarm.getApplicationFrame();
@@ -47,6 +49,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
     public AbstractCachingDataSource() {
         helicorderCache = new HashMap<String, List<CachedHelicorder>>();
         waveCache = new HashMap<String, List<CachedWave>>();
+        rsamCache = new HashMap<String, List<CachedRsam>>();
         maxSize = Runtime.getRuntime().maxMemory() / 6;
         logger = Log.getLogger("gov.usgs.swarm");
         createPurgeActions();
@@ -69,6 +72,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
     public synchronized long getSize() {
         long size = getSize(waveCache);
         size += getSize(helicorderCache);
+        size += getSize(rsamCache);
         return size;
     }
 
@@ -115,6 +119,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
                 // purge anything that hasn't been hit in 5 minutes
                 new TimeLimitWavePurgeAction(waveCache, 5 * 60 * 1000),
                 new TimeLimitHelicorderPurgeAction(helicorderCache, 5 * 60 * 1000),
+                new TimeLimitRsamPurgeAction(rsamCache, 5 * 60 * 1000),
 
                 // cut waves larger than 3 hours in half keeping latest half
                 new HalveLargeWavesPurgeAction(waveCache, 3 * 60 * 60),
@@ -161,6 +166,46 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
         cw.lastAccess = System.currentTimeMillis();
         waves.add(cw);
         enforceSize();
+    }
+
+    public void putRsam(String station, RSAMData rsamData) {
+        List<CachedRsam> rsams = rsamCache.get(station);
+        if (rsams == null) {
+            rsams = new ArrayList<CachedRsam>();
+            CachedRsam cr = new CachedRsam();
+            cr.station = station;
+            cr.t1 = rsamData.getStartTime();
+            cr.t2 = rsamData.getEndTime();
+            cr.rsamData = rsamData;
+            cr.lastAccess = System.currentTimeMillis();
+            rsams.add(cr);
+            rsamCache.put(station, rsams);
+            enforceSize();
+        } else {
+            boolean add = true;
+            for (int i = 0; i < rsams.size(); i++) {
+                CachedRsam ch = rsams.get(i);
+                if (ch.rsamData.overlaps(rsamData) && rsamData != ch.rsamData) {
+                    rsams.remove(ch);
+                    RSAMData newRsam = ch.rsamData.combine(rsamData);
+                    putRsam(station, newRsam);
+                    rsamData = newRsam;
+                    i = 0;
+                    add = false;
+                }
+            }
+
+            if (add) {
+                CachedRsam ch = new CachedRsam();
+                ch.station = station;
+                ch.t1 = rsamData.getStartTime();
+                ch.t2 = rsamData.getEndTime();
+                ch.rsamData = rsamData;
+                ch.lastAccess = System.currentTimeMillis();
+                rsams.add(ch);
+                enforceSize();
+            }
+        }
     }
 
     public synchronized void putHelicorder(String station, HelicorderData helicorder) {
@@ -249,6 +294,24 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
         return false;
     }
 
+    public RSAMData getRsam(String channel, double t1, double t2, int period) {
+        List<CachedRsam> rsam = rsamCache.get(channel);
+        if (rsam == null)
+            return null;
+        else {
+
+            for (CachedRsam cr : rsam) {
+                if (cr.rsamData.getPeriod() != period)
+                    continue;
+
+                if (t1 >= cr.t1 && t2 <= cr.t2) {
+                    return cr.slice(t1, t2);
+                }
+            }
+        }
+        return null;
+    }
+
     public synchronized Wave getWave(String station, double t1, double t2) {
 
         List<CachedWave> waves = waveCache.get(station);
@@ -258,9 +321,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 
             for (CachedWave cw : waves) {
                 if (t1 >= cw.t1 && t2 <= cw.t2) {
-                    // there is an intermittent problem here so I will catch
-                    // this exception
-                    // so the program doesn't lose functionality
+                    // TODO: fix this. It's a sloppy.
                     try {
                         int[] newbuf = new int[(int) ((t2 - t1) * cw.wave.getSamplingRate())];
                         int i = (int) ((t1 - cw.wave.getStartTime()) * cw.wave.getSamplingRate());
@@ -571,6 +632,31 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
         }
     }
 
+    private class TimeLimitRsamPurgeAction extends CachePurgeAction {
+        private long interval;
+        private Map<String, List<CachedRsam>> cache;
+
+        public TimeLimitRsamPurgeAction(Map<String, List<CachedRsam>> c, long i) {
+            cache = c;
+            interval = i;
+        }
+
+        public long purge() {
+            List<CacheEntry> items = getEntriesByLastAccess(cache);
+
+            long chunk = 0;
+            long now = System.currentTimeMillis();
+
+            for (CacheEntry ce : items) {
+                if (now - ce.lastAccess > interval) {
+                    removeEntryFromCache(ce, cache);
+                    chunk += ce.getMemorySize();
+                }
+            }
+            return chunk;
+        }
+    }
+
     abstract protected class CachePurgeAction {
         public CachePurgeAction() {
         }
@@ -620,6 +706,56 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource {
 
         public int getMemorySize() {
             return helicorder.getMemorySize();
+        }
+    }
+
+    public class CachedRsam extends CacheEntry {
+        public RSAMData rsamData;
+
+        public String toString() {
+            return station + " " + t1 + " " + t2;
+        }
+
+        public RSAMData slice(double t1, double t2) {
+            if (t1 >= this.t2 || t2 <= this.t1)
+                return null;
+
+            DoubleMatrix2D d = rsamData.getData();
+            int i = 0;
+
+            int firstRow = Integer.MAX_VALUE;
+            while (firstRow == Integer.MAX_VALUE && i < d.rows()) {
+                double t = d.getQuick(i, 0);
+                if (t >= t1)
+                    firstRow = i;
+                else
+                    i++;
+            }
+
+            int lastRow = -Integer.MAX_VALUE;
+            while (lastRow == -Integer.MAX_VALUE && i < d.rows()) {
+                double t = d.getQuick(i, 0);
+                if (t >= t2)
+                    lastRow = i;
+                else
+                    i++;
+            }
+
+            RSAMData rd = new RSAMData();
+            rd.setData(d.viewPart(firstRow, 0, lastRow - firstRow, 2).copy());
+
+            return rd;
+        }
+
+        @Override
+        public String getInfoString() {
+            long ms = System.currentTimeMillis() - lastAccess;
+            return "[" + ms + "ms] " + (t2 - t1) + "s, " + rsamData.getMemorySize() + " bytes, " + t1 + " => " + t2;
+        }
+
+        @Override
+        public int getMemorySize() {
+            return rsamData.getMemorySize();
         }
     }
 

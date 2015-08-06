@@ -1,6 +1,7 @@
 package gov.usgs.swarm.data;
 
 import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.util.UtilException;
 import gov.usgs.winston.Channel;
@@ -99,5 +100,4 @@ public class DirectWWSSource extends SeismicDataSource
 		String typeString = DataSourceType.getShortName(this.getClass());
 		return String.format("%s;%s:%s|%s|%s", name, typeString, dbDriver, dbURL, dbPrefix);
 	}
-
 }

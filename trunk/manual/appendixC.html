@@ -1,0 +1,295 @@
+<!-- $Id: appendixC.html,v 1.7 2005-10-27 16:01:28 cervelli Exp $ -->
+
+<html>
+	<head>
+		<!-- javascript include version -->
+		<style>
+		p
+		{width: 700px;}
+		</style>
+		<title>Swarm Manual, Appendix C, Version History and Changelog</title>
+	</head>
+	<body>
+	<h1>Appendix C, Version History and Changelog</h1>
+		
+		<a name="intro"></a><h2>Introduction</h2>
+		<p>
+		This is a comprehensive list of changes that have occurred between release version
+		of <b>Swarm</b>.  The motivation for this list is partly curiousity and partly for 
+		debugging.  If a bug crops up between versions it is almost certainly a result
+		of one of the changes listed here.
+		</p>
+		
+<h2>Changelog</h2>
+
+<p>
+<i>1.2.3.20051027</i><br>
+[UI] Nyquist frequency warning box only displays once per session. [Thanks: David Scott].<br>
+[UI] Fixed bug where showClip was defaulting to off.<br>
+</p>
+
+<p>
+<i>1.2.2.20051026</i><br>
+[Feature] The showClip variable can be set in the config file or at the command line. [Thanks: Seth Moran]<br>
+[UI] A channel can now be in multiple groups. [Thanks: John Power]<br>
+[SEED] Fixed bug where SEED files weren't loading. [Thanks: Craig Miller]<br>
+</p>
+
+<p>
+<i>1.2.1.20050923</i><br>
+[UI] Duration magnitude markers only show up on left clicks.<br>
+[UI] Fixed bug where saving multiple SAC files was creating mulitple directories. [Thanks for all the multifile SAC stuff: John Power]<br>
+[UI] Fixed bug where couldn't zoom in on loaded clipboard waves.<br>
+[UI] SAC save from clipboard defaults to '.' in filenames between SCN.<br>
+</p>
+
+<p>
+<i>1.2.0.20050922</i><br>
+[UI] If Swarm started in kiosk mode, it reverts to kiosk mode after 10 minutes of inactivity.<br>
+[UI/Internal] Many bug fixes.<br>
+[Feature] Helicorder scaling slider.<br>
+[Feature] Export Helicorder images.<br>
+[Feature] Duration magnitude calculation. [Thanks: Jennifer Nakata]<br>
+[Internal] Major rewrite of many internal workings to use Java 1.5.<br>
+</p>
+
+<p>
+<i>1.1.12.20050425</i><br>
+[Internal] Fixed bug where kiosk mode wasn't working with wave servers. [Thanks: Gabriel Reyes]<br>
+</p>
+
+<p>
+<i>1.1.11.20050424</i><br>
+[Internal] Wave server SCNLs are now space separated instead of '_' separated.<br>
+[UI/Internal] Optimized helicorder drawing.<br>
+[Internal] SCNL wave server aware.<br>
+[Internal] New WWS SCNL protocol.<br>
+</p>
+
+<p>
+<i>1.1.10.20050328</i><br>
+[UI] Fixed minor UI bug on helicorder yellow zoom highlight bar.<br>
+[Feature] Opening a folder through the "Open wave" button on the clipboard loads all waves in a directory.<br>
+[Feature] Added "Save all waves" button to wave clipboard.<br>
+[Internal] Changed "windowMaximized" to have values of "true"/"false" instead of "1"/"0".<br>
+[Feature] Can specify number of seconds to sleep before starting application with "--sleep" or "-s".<br>
+[Feature] Added support for Winston Wave Servers (WWS).<br>
+[UI] Fixed bug where waves with gaps weren't drawing properly.<br>
+[Feature] Can now save SAC files from the wave clipboard.<br>
+[Feature] Can now read SAC files into wave clipboard.<br>
+[Feature] Can open multiple files into clipboard with one open operation.<br>
+[UI] Tile Helicorders with 4 helicorders tiles as squares.<br>
+[UI] Helicorders/Waves tabs switched on channel panel.<br>
+[Feature] Can specify the group config file on command line with "--group" or "-g".<br>
+[Feature] Ctrl-click on clipboard wave outputs time to console.<br>
+[Feature] Default helicorder sizes can be changed in config file, default is now (24 hr x 30 min).<br>
+[Feature] Remembers last path for saving/loading files from clipboard.<br>
+</p>
+
+<p>
+<i>1.1.9.20041028</i><br>
+[UI] Added options dialog for monitor mode including the ability to change the refresh interval.<br>
+[UI] Fixed quirky UI bugs in monitor mode.<br>
+[Feature] Added option for large, bright mouse cursor on helicorders.<br>
+</p>
+
+<p>
+<i>1.1.8.20041023</i><br>
+[Internal] Null pointer check in data cache.<br>
+[Feature] Can load SAC files.<br>
+</p>
+
+<p>
+<i>1.1.7.20041012</i><br>
+[UI] Fixed bug where helicorders were rendering areas with no data poorly.<br>
+[UI] Fixed bug where manual scaling of waves in helicorder insets wasn't working.<br>
+[UI] Prettied up auto-scaling on helicorders and Helicorder View Settings dialog.<br>
+[UI] Added more time span options on Monitor mode.<br>
+[Internal] Data source chooser didn't work when there were no servers in the 'Swarm.config' file.
+</p>
+
+<p>
+<i>1.1.6.20041006</i><br>
+[Feature] Monitor mode.<br>
+[UI] Fixed bug where spectrograms that went past the most recent time stretched to fill the whole view.<br>
+[UI] Allow 8-14 day helicorders.<br>
+</p>
+
+<p>
+<i>1.1.5.20041003</i><br>
+[Feature] Very rudimentary SEED file support.<br>
+</p>
+
+<p>
+<i>1.1.4.20041001</i><br>
+[UI] User-specified clipping value.<br>
+[UI] Removed clip bars function (replaced by below).<br>
+[UI] Option to not auto-scale helicorder.<br>
+[UI] Options for 4, 5, and 6 day helicorders.<br>
+</p>
+
+<p>
+<i>1.1.3.20040913</i><br>
+[UI] Made slight change to how Swarm enters Kiosk Mode.<br>
+[Internal/Feature] Specify which config file to use with '-c' or '--config' option.<br>
+[UI] Ctrl-F11 and Ctrl-\ toggle Kiosk Mode.<br>
+[UI] Increased default size of settings dialogs.<br>
+[UI] Set default font size for plots to 11-point.<br>
+[UI] New spectrogram renderer wasn't setting minimum and maximum frequency properly.<br>
+</p>
+
+<p>
+<i>1.1.2.20040908</i><br>
+[Internal/UI] New animated wave displays were not intended to be included in previous version because they aren't ready; they've been removed.<br>
+</p>
+
+<p>
+<i>1.1.1.20040907</i><br>
+[Internal] Refactored wave views and spectrograms into more generic plotting classes to be shared with Valve.<br>
+[Internal] Refactored a few classes into generic utilities.<br>
+[UI] Fixed bug where multiple Wave View Settings Dialogs could open.<br>
+[UI] Fixed bug where Maximum Power settings was not being error checked.<br>
+[Internal] Fixed bug where FFTs weren't padding properly.<br>
+[UI] Fixed extremely minor bug in spectrogram auto-scaling.<br>
+[UI] Removed "feature" that closed inset wave when dragging out of bounds.<br>
+[UI] Fixed focus issues with Kiosk Mode; all keyboard control should work as expected.<br>
+[UI] Fixed bug where resizing wave clipboard under certain situation failed to resize waves properly.<br>
+[UI] Fixed bug where Kiosk Mode helicorder label would flicker when a new inset wave opened.<br>
+[UI] Fixed bug where scrollbar didn't go away when all clipboard waves were removed.<br>
+[Internal/UI] Added support for Wave Servers with different timeout values. [Thanks: Steve Malone]<br>
+[UI] Now sorts data sources.<br>
+[UI Feature] Added close icon to upper-right corner of helicorder inset wave.  [Thanks: Austin Holland]<br>
+[UI] Helicorder didn't redraw properly on deiconification from maximized state. [Thanks: Peter Cervelli]<br>
+[UI] Data source name is now used in helicorder title bar.<br>
+[UI] Filter parameters are displayed on wave views.  [Thanks: Richard Ortt]<br>
+[Internal] Multiple select to clipboard shares single data source.<br>
+[UI] 'No wave data' message now has channel name.  [Thanks: Peter Cervelli]<br>
+[Internal] Can now open up to 500 channels at once (instead of 10).  [Thanks: Peter Cervelli]<br>
+[Internal] Added Java version check.  [Thanks: Thomas Parker]<br>
+</p>
+
+<p>
+<i>1.1.0.20040831</i> -- <b>Initial beta release.</b><br>
+[Internal] Fixed bug where some spikiness was occuring after waves improperly joined.<br>
+[Internal] Generalized helicorder renderer so it could be shared with Valve.<br>
+[Internal/UI] Helicorder biases are now calculated per row.<br>
+[Internal] Fixed long-standing bug in wave server client that caused a 5-10% of data requests to fail.<br>
+[Internal] Fixed bug where wave server gulpers were delaying before starting.<br>
+[UI] Fixed bug where real-time wave view frame was not displaying "Retrieving data..."<br>
+[UI] Fixed bug where clipboard would attempt to go to time even after cancel.<br>
+[Internal] Fixed bug where data with gaps where being squeezed together.<br>
+[UI] Fixed bug on helicorder settings dialog where View Time was not being time zone adjusted.<br>
+[Feature] 'R' resets auto-scaling memory when interacting with wave.<br>
+[UI] Changed default maximum frequency to 25.<br>
+[UI] Removed the wiggler until the necessary time to do it right is available.<br>
+</p>
+
+<p>
+<i>1.0.5.20040820</i><br>
+[UI] Helicorder Settings dialog box OK button was behaving badly.<br>
+[UI] Swarm tells you if it adjusts the maximum frequency (if it was set above the Nyquist frequency).<br>
+[Feature] Added command-line/configuration-file driven kiosk mode.<br>
+[Internal] Refresh interval is now amount of time since last successful refresh.<br>
+[Internal] Prevent threads from piling up when a helicorder is not updating properly.<br>
+[Internal] Keeps Winston connects alive constantly.<br>
+[UI] Added edit data source button.<br>
+[Internal] Refactored some methods out of the HelicorderViewerSettingsDialog class.<br>
+[UI] Clipboard and remove inset buttons disabled when no inset is open.<br>
+[Internal] Implemented maximum single wave size in cache to avoid large memory allocations.<br>
+[Internal] Fixed bug on stupidly sized helicorders.<br>
+[UI] Channels lists are now sorted.<br>
+[UI] Renamed 'Remove Drift' to 'Force Center'.<br>
+[UI] Added alert if your system clock is off by more than 10 minutes.<br>
+[Feature] Added wiggler to helicorder view, disabled by default.  Turn on in helicorder settings.<br>
+[Internal] Better management of data sources.<br>
+[Feature] Added open button to clipboard.  Allows the loading of files saved with the save button.<br>
+[Internal/Feature] Current time is synchronized to network time servers.<br>
+[Internal] Wave Server interactions have been made more robust and fault-tolerant.<br>
+</p>
+
+<p>
+<i>1.0.4.20040816</i><br>
+[Internal] Added delay after which helicorder views are forced to current and inset wave is closed.<br>
+[Feature] Added save button to clipboard.  Load output via Matlab 'load filename.txt'.<br>
+[UI] Added option to specify the number of rows before helicorder clips.<br>
+[UI] Status text now doesn't update if helicorder hasn't loaded yet.<br>
+[UI] Increased size of full-screen label, fixed centering, removed underscores.<br>
+[UI] Fixed bug where yellow time highlight was showing up before wave inset loaded.<br>
+[UI] Added support for intelligent keyboard navigation in channel panel.<br>
+[UI] Fixed two bugs on full-screen mode: got rid of top bar and made windows unmovable.<br>
+[UI] Made left side a split pane.<br>
+[Internal/UI] Added drift removal for Helicorders (including option in settings dialog).<br>
+[UI] Helicorder generated from incoming waves no longer display dropouts.<br>
+[UI] Plotting waves with missing data points is slightly prettier.<br>
+[Internal] Fixed some bugs that were screwing up auto-scaling on biased waves.<br>
+[Internal] Set minimum height for a helicorder pixel to 1.<br>
+[Internal] Fixed bug where filter was choking when there were missing samples.<br>
+[Internal] Refactored OptionsDialog to new generic dialog class.<br>
+[UI] Buttons on Wave Clipboard disable/enable appropriately.<br>
+[UI] Added input checks on wave view settings dialog.<br>
+[UI] Refactored WaveViewSettingsDialog to new generic dialog class.<br>
+[UI] Polished new dialog class: OK is default button (accepts 'Enter'), and 'Escape' selects Cancel.<br>
+[UI] Fixed bug where channel panel showed 'All' station on empty Swarm Cache data source.<br>
+[UI] Fixed bug that allowed zoom panning ('A' and 'Z') to pan off the Helicorder.<br>
+[Internal] Added filter padding to avoid artifacts and allow filtering of higher sample rate data.<br>
+[Internal] Added cache management code; not quite ideal but good enough to avoid having an infinitely large cache.<br>
+[UI] Fixed bug where key strokes weren't getting processed in full screen mode.<br>
+[UI] Fixed bug where helicorder zoom +/- were not updating the wave view immediately.<br>
+[Feature] Added experimental 'micro zoom': ctrl-left click on a wave view to play with it.<br>
+[UI] Fixed bug that was causing waves in the clipboard to jump occasionally.<br>
+[Internal] Refactored HelicorderViewDialog to new generic dialog class.<br>
+[Internal] Created generic dialog class.<br>
+[UI] Nodes are now sorted on Channel Panel.<br>
+[Internal] Fixed bug where failure to open a server left Go button disabled forever.<br>
+</p>
+
+<p>
+<i>1.0.3.20040813</i><br>
+[UI] Made all toolbar buttons take less real estate.<br>
+[UI] Added some UI polish.<br>
+[UI] Finalized auto-scaling options including options in Wave Settings Dialog.<br>
+[UI] Fixed most kiosk mode problems by using a 'fake' full screen mode.<br>
+[UI] Added remove wave inset button (Shortcut: 'Delete' or 'Escape') to Helicorder view and eliminated right-clicking as the means to remove an inset wave.<br>
+[UI] Fixed bug where the correct bias wasn't being removed on a filtered wave.<br>
+[UI/Internal] Added "cache:" data source for direct access to data in the cache.<br>
+[UI] Added some more memory usage information to the About Dialog.<br>
+[Internal] Fix for the renaming of WDC to Winston.<br>
+[UI] When an inset wave is open on a Helicorder View, 'A' and 'Z' make the time window shift one time unit in either direction.<br>
+[Internal] Helicorder panels attempt to create another copy of a data source.  This eliminates some annoying pauses during the use of Wave Servers.<br>
+[UI] Now disables navigation buuttons on Helicorder panels during helicorder retrieval.<br>
+[UI] Now disables navigation buttons on Wave Clipboard during wave retrieval.<br>
+[UI] Made it so you can't open the Wave Settings Dialog when in full-screen mode, see Notes and Issues above.<br>
+[UI] Added a button on the clipboard for going to a user-specified time.<br>
+[UI] Added input checks on Helicorder Settings Dialog.  Can now handle time time inputs in 'YYYYMMDD' form.<br>
+[UI] Fixed bug where wave panel loses focus and ignores key events after clicking hide/show toolbar.<br>
+[UI] Added labels to wave plots.<br>
+[Internal] Refactored WaveViewPanel class.<br>
+</p>
+
+<p>
+<i>1.0.2.20040808</i><br>
+[Feature] Kiosk mode (F11 to toggle), see notes and issues above.<br>
+[UI] Fixed bug when tiling windows that were iconified or maxmimized.<br>
+[UI] Improved y-axis labels for log plots, still not perfect.<br>
+[UI] Fixed status labels for log plots.<br>
+[UI] Fixed issue where log frequency axes were ignoring minimum frequency setting.<br>
+</p>
+
+<p>
+<i>1.0.1.20040805</i><br>
+[UI] Switched some keybindings: 'F' and 'P' no longer toggle log axes but 'L' cycles through the different setups, and 'F' toggles filter on and off.<br>
+[Feature] Implemented filtering.<br>
+[UI] Redid layout of Helicorder Settings Dialog.<br>
+[UI] Redid layout of Wave Settings Dialog.<br>
+[UI] Fixed when a date and time where shown on right axis of a helicorder the date was shown first.<br>
+[UI] Fixed backwards tool tips on zoom plus/zoom minus buttons.<br>
+[UI] Fixed issues with yellow highlight bar and inset location after window resize.<br>
+[UI] Fixed over-crowded axis labels.<br>
+</p>
+
+<p>
+<i>1.0.0.20040802</i> -- <b>Initial pre-release version.</b><br>
+</p>
+
+	</body>
+</html>

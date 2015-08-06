@@ -2,10 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path=""/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="../USGS/contrib/colt.jar"/>
-	<classpathentry kind="lib" path="../USGS/contrib/forms-1.0.7.jar"/>
+	<classpathentry kind="lib" path="../USGS/contrib/colt.jar" sourcepath="/home/tparker/workspace/contrib/colt/src"/>
 	<classpathentry kind="lib" path="../USGS/contrib/log4j-1.2.13.jar"/>
-	<classpathentry kind="lib" path="../USGS/contrib/looks-2.0.4.jar"/>
 	<classpathentry kind="lib" path="../USGS/contrib/slf4j-api-1.7.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Earthworm"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Net"/>
@@ -21,5 +19,8 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="../USGS/contrib/seedlink_lite_1.2.1.jar"/>
 	<classpathentry kind="lib" path="../USGS/contrib/JavaSeedLite.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/jgoodies-looks-2.6.0.jar" sourcepath="/home/tparker/workspace/contrib/jgoodies-looks-2.6.0-sources.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/jgoodies-forms-1.8.0.jar" sourcepath="/home/tparker/workspace/contrib/jgoodies-forms-1.8.0-sources.jar"/>
+	<classpathentry kind="lib" path="/USGS/contrib/jgoodies-common-1.8.1.jar" sourcepath="/home/tparker/workspace/contrib/jgoodies-common-1.8.1-sources.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

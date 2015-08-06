@@ -1,6 +1,7 @@
 package gov.usgs.swarm.data.seedLink;
 
 import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.ChannelUtil;
 import gov.usgs.swarm.data.CachedDataSource;

@@ -1,0 +1,104 @@
+package gov.usgs.swarm.map;
+
+import gov.usgs.swarm.SwarmConfig;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.geom.Line2D;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+@SuppressWarnings("serial")
+public class MapLinePreview extends JPanel {
+
+    SwarmConfig config = SwarmConfig.getInstance();
+    LinePreviewPane linePreviewPane = new LinePreviewPane();
+    LineWidthPane lineWidthPane = new LineWidthPane();
+    int lineWidth;
+
+    public MapLinePreview() {
+        add(linePreviewPane);
+        add(lineWidthPane);
+        lineWidth = config.mapLineWidth;
+    }
+
+    public void setForeground(Color c) {
+        if (linePreviewPane != null)
+            linePreviewPane.setColor(c);
+    }
+
+    @SuppressWarnings("serial")
+    public class LinePreviewPane extends JPanel {
+        Color lineColor;
+
+        public LinePreviewPane() {
+            setPreferredSize(new Dimension(200,50));
+            lineColor = new Color(config.mapLineColor);
+        }
+        
+        public void paintComponent(Graphics g) {
+            Line2D.Double line = new Line2D.Double(0, getHeight() / 2, getWidth(), getHeight() / 2);
+            Graphics2D g2 = (Graphics2D) g;
+            System.out.println(lineColor + " : " + lineWidth);
+            g2.setPaintMode();
+            g2.setStroke(new BasicStroke(config.mapLineWidth));
+            g2.setStroke(new BasicStroke(lineWidth));
+            g2.setColor(lineColor);
+            g2.draw(line);
+        }
+
+        public void setColor(Color c) {
+            lineColor = c;
+        }
+    }
+    
+    public class LineWidthPane extends JPanel implements DocumentListener {
+        JTextField widthBox;
+        JLabel widthBoxLabel;
+        
+        
+        public LineWidthPane() {
+            widthBoxLabel = new JLabel("Width");
+            add(widthBoxLabel);
+            
+            widthBox = new JTextField(4);
+            widthBox.getDocument().addDocumentListener(this);
+            widthBox.setText("" + lineWidth);
+            setPreferredSize(new Dimension(100,50));
+            add(widthBox);
+        }
+        
+        @Override
+        public void insertUpdate(DocumentEvent ignoredEvent) {
+           updateLineWidth(widthBox.getText());
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent ignoredEvent) {
+            updateLineWidth(widthBox.getText());
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            updateLineWidth(widthBox.getText());
+        }
+        
+        private void updateLineWidth(String w) {
+            System.out.println("-- " + w);
+            try {
+                lineWidth = Integer.parseInt(w);
+                widthBox.setBackground(Color.white);
+                linePreviewPane.repaint();
+            } catch (NumberFormatException e) {
+                widthBox.setBackground(new Color(253,130,130));
+            }
+        }
+    }
+}

@@ -1,0 +1,38 @@
+<!-- $Id: sectionVIII.html,v 1.2 2005-09-22 21:01:42 dcervelli Exp $ -->
+
+<html>
+	<head>
+		<!-- javascript include version -->
+		<style>
+		p
+		{width: 700px;}
+		</style>
+		<title>Swarm Manual, Section VIII, Kiosk Mode</title>
+	</head>
+	<body>
+		<h1>Section VIII, Kiosk Mode</h1>
+		
+		<a name="intro"></a><h2>Introduction</h2>
+		<p>
+		<b>Swarm</b> can be used as a <i>much</i> lower cost, more functional replacement to the traditional helicorder by using its Kiosk Mode.
+		In Kiosk Mode <b>Swarm</b> displays all of the open helicorders in full-screen mode.  This make seismic monitoring as easy as a glance 
+		at the screen while still allowing the standard helicorder zooming.  Of course, if you want to look at other stations
+		or use the <a href="sectionVI.html">Wave Clipboard</a> you can just leave Kiosk Mode. F11 toggles between Kiosk Mode and normal operation.
+		</p>
+		
+		<p>
+		Because there are no menus or toolbars when in Kiosk Mode you'll have to use keyboard shortcuts to interact with the inset wave view.  Or,
+		just switch to normal mode.
+		</p>
+		
+		<a name="setup"></a><h2>Configuring Automatic Kiosk Mode</h2>
+		<p><b>Swarm</b> can be automatically start in Kiosk Mode by running it with the '--kiosk=[parameters]' option or through
+		the configuration file.  The value of the 'kiosk' parameter is <code>[server name];[channel]</code>. Example:<br>
+		<br>
+		<code>swarm --kiosk="localhost;BGL SHZ AK" --saveConfig=false --timeChunk=15</code><br>
+		<br>
+		The data source specified has to be one of the configured data sources.
+		See <a href="sectionIX.html">Advanced Topics</a>, for more information about this topic.
+	</body>
+</html>
+		

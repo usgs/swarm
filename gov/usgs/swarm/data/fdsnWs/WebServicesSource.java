@@ -1,6 +1,7 @@
 package gov.usgs.swarm.data.fdsnWs;
 
 import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.swarm.ChannelGroupInfo;
 import gov.usgs.swarm.ChannelInfo;
