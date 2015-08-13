@@ -102,6 +102,22 @@ public class EditDataSourceDialog extends SwarmDialog
 		mainPanel.add(dsPanel, BorderLayout.CENTER);
 	}
 
+       public void resetSource(String src)
+       {
+           if(src != null) {
+               source = src;
+               String s = source.substring(source.indexOf(';') + 1, source.indexOf(':'));
+               for (DataSourcePanel dsp : panels)
+               {
+                   dsp.resetSource(source);
+                   JPanel p = dsp.getPanel();
+                   if (s.equals(dsp.getCode())) tabPane.setSelectedComponent(p);
+               }
+               name.setText(source.substring(0, source.indexOf(';')));
+           }
+       }
+
+
 	protected boolean allowOK()
 	{
 		String n = name.getText();
@@ -131,4 +147,12 @@ public class EditDataSourceDialog extends SwarmDialog
 	{
 		return result;
 	}
+       public void setVisible(boolean b) {
+           if(b) {
+               if(source == null) name.setText("");
+               result = null;
+           }
+           super.setVisible(b);
+       }
+
 }

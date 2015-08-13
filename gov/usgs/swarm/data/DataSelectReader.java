@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import edu.sc.seis.seisFile.SeisFileException;
 import edu.sc.seis.seisFile.StringMSeedQueryReader;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
@@ -35,7 +36,6 @@ public class DataSelectReader extends StringMSeedQueryReader
 	/** The user agent. */
 	protected String userAgent = "Swarm/" + Swarm.getVersion();
 	/** The default web services URL. */
-//	public static final String DEFAULT_WS_URL = "http://www.iris.edu/ws/dataselect/query";
 	public static final String DEFAULT_WS_URL = "http://service.iris.edu/fdsnws/dataselect/1/query";
 
 	/**
@@ -177,7 +177,7 @@ public class DataSelectReader extends StringMSeedQueryReader
 	 * edu.sc.seis.seisFile.dataSelectWS.MSeedQueryReader#read(java.lang.String)
 	 */
 	public List<DataRecord> read(String query) throws IOException,
-			 SeedFormatException
+			 SeisFileException, SeedFormatException
 	{
 		return read(query, new ArrayList<DataRecord>());
 	}
@@ -193,7 +193,7 @@ public class DataSelectReader extends StringMSeedQueryReader
 	 * @throws SeedFormatException if the SEED format is invalid.
 	 */
 	public List<DataRecord> read(String query, List<DataRecord> records)
-			throws IOException, SeedFormatException
+			throws IOException, SeisFileException, SeedFormatException
 	{
 		URL requestURL = new URL(urlBase + "?" + query);
 		HttpURLConnection conn = (HttpURLConnection) requestURL
@@ -213,11 +213,11 @@ public class DataSelectReader extends StringMSeedQueryReader
 			}
 			else
 			{
-			    WebServiceUtils.fine(
+			    throw new SeisFileException(
 						"Did not get an OK repsonse code (code="
 								+ conn.getResponseCode() + ", url="
 								+ requestURL + "\"");
-			    return records;
+//			    return records;
 			}
 		}
 		BufferedInputStream bif = new BufferedInputStream(conn.getInputStream());

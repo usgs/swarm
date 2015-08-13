@@ -7,6 +7,7 @@ import gov.usgs.swarm.StationInfo;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -21,7 +22,7 @@ public abstract class AbstractWebServiceStationClient
 	/** The station service output level. */
 	public enum OutputLevel
 	{
-		NETWORK("net"), STATION("sta"), CHANNEL("chan"), RESPONSE("resp");
+		NETWORK("network"), STATION("station"), CHANNEL("channel"), RESPONSE("response");
 
 		private final String s;
 
@@ -138,6 +139,9 @@ public abstract class AbstractWebServiceStationClient
 	/** The channel list. */
 	private List<String> channelList;
 
+	/** The network list. */
+	private List<String> networkList;
+
 	/**
 	 * Create the web service station client.
 	 * 
@@ -158,6 +162,7 @@ public abstract class AbstractWebServiceStationClient
 		this.chan = chan;
 		this.date = date;
 		// if network contains wild card
+/*
 		if (net == null || net.length() == 0 || net.matches(".*[\\*?].*"))
 		{
 			if (useOnlyChannels())
@@ -169,6 +174,18 @@ public abstract class AbstractWebServiceStationClient
 		{
 			groupsType = GroupsType.SITE;
 		}
+*/
+		groupsType = GroupsType.NETWORK_AND_SITE;
+	}
+	public AbstractWebServiceStationClient(String baseUrlText)
+	{
+		this.baseUrlText = baseUrlText;
+		this.net = null;
+		this.sta = null;
+		this.loc = null;
+		this.chan = null;
+		this.date = null;
+		groupsType = GroupsType.NETWORK;
 	}
 
 	/**
@@ -309,14 +326,17 @@ public abstract class AbstractWebServiceStationClient
 			conn = (HttpURLConnection) urlConn;
 			if (conn.getResponseCode() != 200) // if response not OK
 			{
-				final BufferedReader errorReader = new BufferedReader(
-						new InputStreamReader(conn.getErrorStream()));
-				error.append("Error in connection with url: " + url + "\n");
-				for (String line; (line = readLine(errorReader)) != null;)
-				{
-					error.append(line + "\n");
+				error.append("Error in connection with url: " + url);
+				InputStream in = conn.getErrorStream();
+				if(in != null) {
+				    final BufferedReader errorReader = new BufferedReader(
+						new InputStreamReader(in));
+				    for (String line; (line = readLine(errorReader)) != null;)
+				    {
+					error.append("\n" + line);
+				    }
+				    errorReader.close();
 				}
-				errorReader.close();
 				return;
 			}
 			else
@@ -407,6 +427,15 @@ public abstract class AbstractWebServiceStationClient
 	{
 		return channelList;
 	}
+	/**
+	 * Get the network list.
+	 * 
+	 * @return the network list or null if none.
+	 */
+	public List<String> getNetworkList()
+	{
+		return networkList;
+	}
 
 	/**
 	 * Get the current station.
@@ -489,16 +518,16 @@ public abstract class AbstractWebServiceStationClient
 		urlText = append(urlText, "level", level);
 		if (currentStation == null)
 		{
-			urlText = append(urlText, "net", net);
-			urlText = append(urlText, "sta", sta);
+			urlText = append(urlText, "network", net);
+			urlText = append(urlText, "station", sta);
 		}
 		else
 		{
-			urlText = append(urlText, "net", currentStation.getNetwork());
-			urlText = append(urlText, "sta", currentStation.getStation());
+			urlText = append(urlText, "network", currentStation.getNetwork());
+			urlText = append(urlText, "station", currentStation.getStation());
 		}
-		urlText = append(urlText, "loc", loc);
-		urlText = append(urlText, "chan", chan);
+		urlText = append(urlText, "location", loc);
+		urlText = append(urlText, "channel", chan);
 		urlText = append(urlText, startTimeText, date);
 		return urlText;
 	}
@@ -580,6 +609,15 @@ public abstract class AbstractWebServiceStationClient
 	public void setChannelList(List<String> channelList)
 	{
 		this.channelList = channelList;
+	}
+	/**
+	 * Set the network list.
+	 * 
+	 * @param networkList the channel list.
+	 */
+	public void setNetworkList(List<String> networkList)
+	{
+		this.networkList = networkList;
 	}
 
 	/**

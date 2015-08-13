@@ -93,7 +93,7 @@ public class WebServiceStationTextClient extends
 	 */
 	protected String getBaseUrlText() {
 		String urlText = super.getBaseUrlText();
-		urlText = append(urlText, "output", "text");
+		urlText = append(urlText, "format", "text");
 		return urlText;
 	}
 

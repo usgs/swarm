@@ -107,6 +107,8 @@ public class DataChooser extends JPanel {
 
     private static final int MAX_CHANNELS_AT_ONCE = 500;
     public static final Color LINE_COLOR = new Color(0xac, 0xa8, 0x99);
+       private static EditDataSourceDialog src_dialog_selected = null;
+       private static EditDataSourceDialog src_dialog = null;
 
     private static final DataChooser INSTANCE = new DataChooser();
     private static final JFrame applicationFrame = Swarm.getApplicationFrame();
@@ -254,9 +256,12 @@ public class DataChooser extends JPanel {
                     public void actionPerformed(ActionEvent e) {
                         SwingUtilities.invokeLater(new Runnable() {
                             public void run() {
-                                EditDataSourceDialog d = new EditDataSourceDialog(null);
-                                d.setVisible(true);
-                                String nds = d.getResult();
+                                                               if(src_dialog == null) {
+                                                                   src_dialog = new EditDataSourceDialog(null);
+                                                               }
+                                                               src_dialog.setVisible(true);
+                                                               String nds = src_dialog.getResult();
+
                                 if (nds != null) {
                                     SeismicDataSource source = DataSourceType.parseConfig(nds);
                                     if (source != null)
@@ -277,9 +282,15 @@ public class DataChooser extends JPanel {
                             SeismicDataSource sds = servers.get(0).getSource();
                             if (sds.isStoreInUserConfig()) {
                                 String selected = servers.get(0).getSource().toConfigString();
-                                EditDataSourceDialog d = new EditDataSourceDialog(selected);
-                                d.setVisible(true);
-                                String eds = d.getResult();
+                                                               if(src_dialog_selected == null) {
+                                                                   src_dialog_selected = new EditDataSourceDialog(selected);
+                                                               }
+                                                               else {
+                                                                   src_dialog_selected.resetSource(selected);
+                                                               }
+                                                               src_dialog_selected.setVisible(true);
+                                                               String eds = src_dialog_selected.getResult();
+
                                 if (eds != null) {
                                     SeismicDataSource newSource = DataSourceType.parseConfig(eds);
 

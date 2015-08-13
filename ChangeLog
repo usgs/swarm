@@ -1,7 +1,14 @@
- Changes since version 2.3.6 (r3148)
+  Version 2.3.4 (r3178)
  .....................................
-
- Changes since version 2.3.5 (r3109)
+  - Added RSAM plotting for Winston data sources
+ 
+ 
+  Version 2.3.7 (r3148)
+ .....................................
+  - Stations with no recent data are greyed out in data chooser
+  - Tooltip added to describe channel data range
+  
+  Version 2.3.6 (r3109)
  .....................................
   - improve handling of very high sampling rate data
   - fix minor bug in auto-scaling spectrograms
@@ -9,7 +16,7 @@
   - Data Chooser displays WWS channels with no data in past 24 hours in gray
   - Tool tip added to WWS channels in Data Chooser to display data range
 
- Changes since version 2.3.4 (r2950)
+  Version 2.3.5 (r2950)
  .....................................
   - code cleanup
   - channel lists are always alphabeticaly sorted in data source pane
@@ -27,7 +34,7 @@
   - Fixes for seismic data file bugs
   - Improve support for high data rate sources
   
- Changes since version 2.3.3 (r2800)
+  Version 2.3.5 (r2800)
  .....................................
   - forced us_US in start scripts to avoid decimal comma
   - reworked file-based import and export
@@ -37,7 +44,7 @@
   - minor logging changes to help troubleshooting
   - replace "memory" button on waveviewsettings dialog
   
-  Changes since version 2.3.2 (r2606)
+  Version 2.3.3 (r2606)
  .....................................
   - created NTP.config file with NTP defaults
   - removed DHI data source
@@ -47,7 +54,7 @@
   - better handling of high data rate sources
  
  
-  Changes since version 2.3.1 (r2507)
+  Version 2.3.2 (r2507)
  .....................................
  
  - SEEDLink data source
@@ -61,7 +68,7 @@
  - corrected bug affecting old GeoLabel config strings
  
  
-  Changes since version 2.3 (r2443)
+  Version 2.3.1 (r2443)
  ...................................
  
  - cleaned up compiler warnings

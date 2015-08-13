@@ -29,6 +29,11 @@ abstract public class DataSourcePanel
 	{
 		source = s;
 	}
+
+       public void resetSource(String s)
+       {
+       }
+
 	
 	public String getCode()
 	{

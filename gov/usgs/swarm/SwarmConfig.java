@@ -110,6 +110,9 @@ public class SwarmConfig {
 
 	public String labelSource;
 
+       public String fdsnDataselectURL;
+       public String fdsnStationURL;
+
 	private SwarmConfig() {
 	}
 
@@ -328,6 +331,12 @@ public class SwarmConfig {
 
 		labelSource = Util.stringToString(config.getString("labelSource"), "");
 
+               fdsnDataselectURL = Util.stringToString(config.getString("fdsnDataselectURL"),
+                                               "http://service.iris.edu/fdsnws/dataselect/1/query");
+               fdsnStationURL = Util.stringToString(config.getString("fdsnStationURL"),
+                                               "http://service.iris.edu/fdsnws/station/1/query");
+
+
 		sources = new HashMap<String, SeismicDataSource>();
 		List<String> servers = config.getList("server");
 		if (servers != null && servers.size() > 0) {
@@ -477,6 +486,9 @@ public class SwarmConfig {
 		config.put("wmsStyles", wmsStyles);
 
 		config.put("labelSource", labelSource);
+
+               config.put("fdsnDataselectURL", fdsnDataselectURL);
+               config.put("fdsnStationURL", fdsnStationURL);
 
 		List<String> servers = new ArrayList<String>();
 		for (SeismicDataSource sds : sources.values()) {
