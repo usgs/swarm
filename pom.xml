@@ -3,7 +3,7 @@
 
   <groupId>gov.usgs.volcanoes</groupId>
   <artifactId>swarm</artifactId>
-  <version>2.5</version>
+  <version>2.5-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Swarm</name>
@@ -109,7 +109,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>gov.usgs.volcanoes.pensive.Pensive</mainClass>
+              <mainClass>gov.usgs.volcanoes.swarm.Swarm</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -267,6 +267,11 @@
   	 <groupId>gov.usgs.volcanoes</groupId>
   	 <artifactId>usgs</artifactId>
   	 <version>1.1</version>
+    </dependency>
+    <dependency>
+    	<groupId>gov.usgs.volcanoes</groupId>
+    	<artifactId>util</artifactId>
+    	<version>[0.0.1-SNAPSHOT,)</version>
     </dependency>
   </dependencies>
 </project>
