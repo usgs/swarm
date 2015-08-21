@@ -1,0 +1,272 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>gov.usgs.volcanoes</groupId>
+  <artifactId>swarm</artifactId>
+  <version>2.5</version>
+  <packaging>jar</packaging>
+
+  <name>Swarm</name>
+  <url>http://volcanoes.usgs.gov/software/swarm</url>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <version.template.file>src/main/resources/Version.java.template</version.template.file>
+    <version.file>src/main/java/gov/usgs/volcanoes/swarm/Version.java</version.file>
+  </properties>
+  
+  <licenses>
+    <license>
+      <name>CC0 1.0 Universal</name>
+      <url>http://creativecommons.org/publicdomain/zero/1.0/></url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>  
+
+  <developers>
+    <developer>
+      <id>dcervelli</id>
+      <name>Dan Cervelli</name>
+      <properties>
+        <active>false</active>
+      </properties>
+    </developer>
+    <developer>
+      <id>cervelli</id>
+      <name>Peter Cervelli</name>
+      <email>pcervelli@usgs.gov</email>
+      <organization>U.S. Geological Survey, Volcano Science Center</organization>
+      <properties>
+        <active>true</active>
+      </properties>
+    </developer>
+    <developer>
+      <id>tparker</id>
+      <name>Tom Parker</name>
+      <email>tparker@usgs.gov</email>
+      <organization>U.S. Geological Survey, Alaska Volcano Observatory</organization>
+      <properties>
+        <active>true</active>
+      </properties>
+    </developer>
+  </developers>
+  
+  <distributionManagement>
+    <repository>
+      <id>volcanoes.web</id>
+      <name>Volcanoes website</name>
+      <url>scpexe://vulcan4.wr.usgs.gov/webdata/volcanoes.usgs.gov/htdocs/software/maven2</url>
+    </repository>
+  </distributionManagement>
+ 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+	      <artifactId>maven-shade-plugin</artifactId>
+      	<version>2.4.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+	    <minimizeJar>true</minimizeJar> 
+            <filters>
+              <filter>
+                <artifact>org.apache:log4j</artifact>
+                <includes>
+                  <include>org/apache/log4j/**</include>
+                </includes>
+              </filter>
+              <filter>
+                <artifact>org.freemarker:freemarker</artifact>
+                <includes>
+                  <include>freemarker/**</include>
+                </includes>
+              </filter>
+            </filters>
+              <artifactSet>
+                <includes>
+                  <include>gov.usgs.volcanoes:usgs</include>
+                  <include>org.freemarker:freemarker</include>
+                  <include>com.martiansoftware:jsap</include>
+                  <include>net.sourceforge.jtransforms:jtransforms</include>
+                  <include>org.slf4j:*</include>
+                  <include>org.apache:log4j</include>
+                  <include>gov.usgs.volcanoes:swarm</include>
+                </includes>
+              </artifactSet>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.6</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>gov.usgs.volcanoes.pensive.Pensive</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.google.code.maven-replacer-plugin</groupId>
+            <artifactId>maven-replacer-plugin</artifactId>
+            <version>1.4.0</version>
+            <executions>                
+                <execution>
+                    <phase>process-sources</phase>
+                    <goals>
+                        <goal>replace</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <configuration>
+                <file>${version.template.file}</file>
+                <outputFile>${version.file}</outputFile>
+                <replacements>
+                    <replacement>
+                        <token>@buildnumber@</token>
+                        <value>${svn.revision}</value>
+                    </replacement>
+                    <replacement>
+                        <token>@buildtime@</token>
+                        <value>${maven.build.timestamp}</value>
+                    </replacement>
+                    <replacement>
+                        <token>@pomversion@</token>
+                        <value>${project.version}</value>
+                    </replacement>
+                </replacements>                        
+            </configuration>
+      </plugin>
+    </plugins>
+    
+    <!--  Make m2e happy -->
+    <pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.m2e</groupId>
+        <artifactId>lifecycle-mapping</artifactId>
+        <version>1.0.0</version>
+        <configuration>
+          <lifecycleMappingMetadata>
+            <pluginExecutions>
+              <pluginExecution>
+                <pluginExecutionFilter>
+                  <groupId>com.google.code.maven-replacer-plugin</groupId>
+				  <artifactId>maven-replacer-plugin</artifactId>
+				  <versionRange>1.4.0</versionRange>
+				  <goals>
+					<goal>replace</goal>
+				  </goals>
+				</pluginExecutionFilter>
+				<action>
+				  <execute />
+				</action>
+				<comment>source: </comment>
+			  </pluginExecution>
+	        </pluginExecutions>
+          </lifecycleMappingMetadata>
+        </configuration>
+      </plugin>
+    </plugins>
+    </pluginManagement>
+    
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ssh-external</artifactId>
+        <version>1.0-beta-6</version>
+      </extension>
+    </extensions>
+  </build>
+
+  <repositories>
+    <repository>
+      <id>volcanoes</id>
+      <releases>
+        <checksumPolicy>true</checksumPolicy>
+      </releases>
+      <url>http://volcanoes.usgs.gov/software/maven2/</url>
+    </repository>
+  </repositories>
+  <dependencies>
+    <dependency>
+  	 <groupId>com.martiansoftware</groupId>
+  	 <artifactId>jsap</artifactId>
+  	 <version>2.1</version>
+    </dependency>
+    <dependency>
+        <groupId>colt</groupId>
+        <artifactId>colt</artifactId>
+        <version>1.2.0</version>
+</dependency>
+
+<dependency>
+        <groupId>com.jgoodies</groupId>
+        <artifactId>jgoodies-common</artifactId>
+        <version>1.8.1</version>
+</dependency>
+<dependency>
+        <groupId>com.jgoodies</groupId>
+        <artifactId>jgoodies-forms</artifactId>
+        <version>1.8.0</version>
+</dependency>
+<dependency>
+        <groupId>com.jgoodies</groupId>
+        <artifactId>jgoodies-looks</artifactId>
+        <version>2.6.0</version>
+</dependency>
+    <dependency>
+        <groupId>edu.iris</groupId>
+        <artifactId>JavaSeedLite</artifactId>
+        <version>1.0</version>
+</dependency>
+<dependency>
+        <groupId>edu.iris</groupId>
+        <artifactId>seedCodec</artifactId>
+        <version>1.0.10</version>
+</dependency>
+<dependency>
+        <groupId>edu.sc.seis</groupId>
+        <artifactId>seisFile</artifactId>
+        <version>1.6.3</version>
+</dependency>
+<dependency>
+        <groupId>net.alomax</groupId>
+        <artifactId>seedlink_lite</artifactId>
+        <version>1.2.1</version>
+</dependency>
+    <dependency>
+  	 <groupId>net.sourceforge.jtransforms</groupId>
+  	 <artifactId>jtransforms</artifactId>
+  	 <version>2.4.0</version>
+    </dependency>
+    <dependency>
+  	 <groupId>org.slf4j</groupId>
+  	 <artifactId>slf4j-api</artifactId>
+  	 <version>1.7.1</version>
+    </dependency>
+    <dependency>
+  	 <groupId>org.slf4j</groupId>
+  	 <artifactId>slf4j-log4j12</artifactId>
+  	 <version>1.7.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.13</version>
+    </dependency>
+    <dependency>
+  	 <groupId>gov.usgs.volcanoes</groupId>
+  	 <artifactId>usgs</artifactId>
+  	 <version>1.1</version>
+    </dependency>
+  </dependencies>
+</project>
