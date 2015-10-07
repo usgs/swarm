@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>HelicorderViewerSettings xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
+</head>
+<body>
+<div id="overview"><a href="../../../../../../apidocs/gov/usgs/volcanoes/swarm/heli/HelicorderViewerSettings.html">View Javadoc</a></div><pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> gov.usgs.volcanoes.swarm.heli;
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> gov.usgs.util.ConfigFile;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.SwarmConfig;
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_javadoccomment"> * Settings for a helicorder.</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_javadoccomment"> * </em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_javadoccomment"> * TODO: eliminate this class in favor of vdx.HelicorderSettings</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_javadoccomment"> * @author Dan Cervelli</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../gov/usgs/volcanoes/swarm/heli/HelicorderViewerSettings.html">HelicorderViewerSettings</a>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  {
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  	<strong class="jxr_keyword">public</strong> String channel;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> timeChunk; <em class="jxr_comment">// seconds</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> span; <em class="jxr_comment">// minutes</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> waveZoomOffset; <em class="jxr_comment">// seconds</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">double</strong> bottomTime; <em class="jxr_comment">// Double.NaN for now</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> refreshInterval;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> scrollSize;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> forceCenter;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> clipBars;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">long</strong> lastBottomTimeSet;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  	
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> autoScale;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> showClip;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> alertClip;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> alertClipTimeout;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> clipValue;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> barRange;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">double</strong> barMult;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../gov/usgs/volcanoes/swarm/heli/HelicorderViewPanel.html">HelicorderViewPanel</a> view;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  	
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../gov/usgs/volcanoes/swarm/SwarmConfig.html">SwarmConfig</a> swarmConfig;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  	
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../gov/usgs/volcanoes/swarm/heli/HelicorderViewerSettings.html">HelicorderViewerSettings</a>(String ch)
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  	{
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  		swarmConfig = SwarmConfig.getInstance();
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  		
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  		channel = ch;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  		timeChunk = swarmConfig.timeChunk * 60;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  		span = swarmConfig.span * 60;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  		waveZoomOffset = 30;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  		bottomTime = Double.NaN;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  		refreshInterval = 15;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  		scrollSize = 24;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  		forceCenter = false;
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  		clipBars = 21;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  		
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  		clipValue = 2999;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  		showClip = swarmConfig.showClip; 
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  		alertClip = swarmConfig.alertClip; 
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  		alertClipTimeout = swarmConfig.alertClipTimeout * 60;
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  		barRange = 1500;
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  		barMult = 3;
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  		autoScale = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  	}
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  	
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> getLastBottomTimeSet()
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  	{
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  		<strong class="jxr_keyword">return</strong> System.currentTimeMillis() - lastBottomTimeSet;
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  	}
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  	
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setBottomTime(<strong class="jxr_keyword">double</strong> bt)
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  	{
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  		lastBottomTimeSet = System.currentTimeMillis();
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  		bottomTime = bt;
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  	}
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  	
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">double</strong> getBottomTime()
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  	{
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		<strong class="jxr_keyword">return</strong> bottomTime;
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  	}
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  	
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> set(ConfigFile cf)
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  	{
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		timeChunk = Integer.parseInt(cf.getString(<span class="jxr_string">"timeChunk"</span>));
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		span = Integer.parseInt(cf.getString(<span class="jxr_string">"span"</span>));
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  		waveZoomOffset = Integer.parseInt(cf.getString(<span class="jxr_string">"waveZoomOffset"</span>));
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  		refreshInterval = Integer.parseInt(cf.getString(<span class="jxr_string">"refreshInterval"</span>));
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  		scrollSize = Integer.parseInt(cf.getString(<span class="jxr_string">"scrollSize"</span>));
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  		clipValue = Integer.parseInt(cf.getString(<span class="jxr_string">"clipValue"</span>));
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		clipBars = Integer.parseInt(cf.getString(<span class="jxr_string">"clipBars"</span>));
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  		barRange = Integer.parseInt(cf.getString(<span class="jxr_string">"barRange"</span>));
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  		alertClipTimeout = Integer.parseInt(cf.getString(<span class="jxr_string">"alertClipTimeout"</span>));
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  		setBottomTime(Double.parseDouble(cf.getString(<span class="jxr_string">"bottomTime"</span>)));
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  		barMult = Double.parseDouble(cf.getString(<span class="jxr_string">"barMult"</span>));
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  		forceCenter = Boolean.parseBoolean(cf.getString(<span class="jxr_string">"forceCenter"</span>));
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  		autoScale = Boolean.parseBoolean(cf.getString(<span class="jxr_string">"autoScale"</span>));
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  		showClip = Boolean.parseBoolean(cf.getString(<span class="jxr_string">"showClip"</span>));
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  		alertClip = Boolean.parseBoolean(cf.getString(<span class="jxr_string">"alertClip"</span>));
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  	}
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  	
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> save(ConfigFile cf, String prefix)
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  	{
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  		cf.put(prefix + <span class="jxr_string">".channel"</span>, channel);
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  		cf.put(prefix + <span class="jxr_string">".timeChunk"</span>, Integer.toString(timeChunk));
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  		cf.put(prefix + <span class="jxr_string">".span"</span>, Integer.toString(span));
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 		cf.put(prefix + <span class="jxr_string">".waveZoomOffset"</span>, Integer.toString(waveZoomOffset));
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 		cf.put(prefix + <span class="jxr_string">".refreshInterval"</span>, Integer.toString(refreshInterval));
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 		cf.put(prefix + <span class="jxr_string">".scrollSize"</span>, Integer.toString(scrollSize));
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 		cf.put(prefix + <span class="jxr_string">".clipValue"</span>, Integer.toString(clipValue));
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 		cf.put(prefix + <span class="jxr_string">".clipBars"</span>, Integer.toString(clipBars));
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 		cf.put(prefix + <span class="jxr_string">".barRange"</span>, Integer.toString(barRange));
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 		cf.put(prefix + <span class="jxr_string">".alertClipTimeout"</span>, Integer.toString(alertClipTimeout));
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 		cf.put(prefix + <span class="jxr_string">".bottomTime"</span>, Double.toString(bottomTime));
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		cf.put(prefix + <span class="jxr_string">".barMult"</span>, Double.toString(barMult));
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 		cf.put(prefix + <span class="jxr_string">".forceCenter"</span>, Boolean.toString(forceCenter));
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 		cf.put(prefix + <span class="jxr_string">".autoScale"</span>, Boolean.toString(autoScale));
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 		cf.put(prefix + <span class="jxr_string">".showClip"</span>, Boolean.toString(showClip));
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 		cf.put(prefix + <span class="jxr_string">".alertClip"</span>, Boolean.toString(alertClip));
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 	}
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 	
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> parseSettingsString(String o)
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 	{
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> <em class="jxr_comment">//		String[] opts = Util.splitString(o, ",");</em>
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 		String[] opts = o.split(<span class="jxr_string">","</span>);
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; opts.length; i++)
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 		{
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 			<strong class="jxr_keyword">try</strong>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 			{
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 				String key = opts[i].substring(0, opts[i].indexOf('='));
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 				String value = opts[i].substring(opts[i].indexOf('=') + 1);
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 				
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 				<strong class="jxr_keyword">if</strong> (key.equals(<span class="jxr_string">"x"</span>)) <em class="jxr_comment">// minutes</em>
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 					timeChunk = Integer.parseInt(value) * 60;
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 				<strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (key.equals(<span class="jxr_string">"y"</span>)) <em class="jxr_comment">// hours</em>
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 					span =  Integer.parseInt(value) * 60;
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 			}
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 			<strong class="jxr_keyword">catch</strong> (Exception e)
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 			{
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 				System.err.println(<span class="jxr_string">"Could not parse setting: "</span> + opts[i]);
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 			}
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 		}
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 	}
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 	
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyView()
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 	{
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 		<strong class="jxr_keyword">if</strong> (view != <strong class="jxr_keyword">null</strong>)
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 			view.settingsChanged();	
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 	}
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> }
+</pre>
+<hr/>
+<div id="footer">Copyright &#169; 2015. All rights reserved.</div>
+</body>
+</html>

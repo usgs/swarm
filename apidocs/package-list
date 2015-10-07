@@ -1,0 +1,16 @@
+gov.usgs.volcanoes.swarm
+gov.usgs.volcanoes.swarm.chooser
+gov.usgs.volcanoes.swarm.chooser.node
+gov.usgs.volcanoes.swarm.data
+gov.usgs.volcanoes.swarm.data.fdsnWs
+gov.usgs.volcanoes.swarm.data.seedLink
+gov.usgs.volcanoes.swarm.data.seedLink.orfeus
+gov.usgs.volcanoes.swarm.exp
+gov.usgs.volcanoes.swarm.heli
+gov.usgs.volcanoes.swarm.internalFrame
+gov.usgs.volcanoes.swarm.map
+gov.usgs.volcanoes.swarm.options
+gov.usgs.volcanoes.swarm.rsam
+gov.usgs.volcanoes.swarm.time
+gov.usgs.volcanoes.swarm.wave
+nz.org.geonet.data
