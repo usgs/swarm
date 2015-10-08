@@ -6,6 +6,10 @@
   <name>Swarm</name>
   <version>2.5-SNAPSHOT</version>
   <url>http://volcanoes.usgs.gov/software/swarm</url>
+  <ciManagement>
+    <system>Travis</system>
+    <url>https://travis-ci.org/usgs/swarm/</url>
+  </ciManagement>
   <developers>
     <developer>
       <id>dcervelli</id>
@@ -40,6 +44,11 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+  <scm>
+    <connection>scm:git:git@github.com:usgs/swarm.git</connection>
+    <developerConnection>scm:git:git@github.com:usgs/swarm.git</developerConnection>
+    <url>git@github.com:usgs/swarm.git</url>
+  </scm>
   <build>
     <extensions>
       <extension>
@@ -272,12 +281,72 @@
       <scope>compile</scope>
     </dependency>
   </dependencies>
+  <reporting>
+    <plugins>
+      <plugin>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>3.5</version>
+        <configuration>
+          <rulesets>
+            <ruleset>/rulesets/java/braces.xml</ruleset>
+            <ruleset>/rulesets/java/naming.xml</ruleset>
+            <ruleset>.ruleset</ruleset>
+          </rulesets>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <effort>Max</effort>
+          <threshold>Low</threshold>
+          <xmlOutput>true</xmlOutput>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-jxr-plugin</artifactId>
+        <version>2.5</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.10.3</version>
+        <configuration>
+          <failOnError>false</failOnError>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.7</version>
+        <configuration>
+          <formats>
+            <format>html</format>
+            <format>xml</format>
+          </formats>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>javancss-maven-plugin</artifactId>
+        <version>2.1</version>
+        <configuration>
+          <forceEncoding>utf-8</forceEncoding>
+          <failOnViolation>false</failOnViolation>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
   <distributionManagement>
     <repository>
       <id>volcanoes.web</id>
       <name>Volcanoes website</name>
       <url>scpexe://vulcan4.wr.usgs.gov/webdata/volcanoes.usgs.gov/htdocs/software/maven2</url>
     </repository>
+    <site>
+      <id>github.pages</id>
+      <url>scm:git:https://git@github.com/usgs/swarm.git</url>
+    </site>
   </distributionManagement>
   <properties>
     <version.template.file>src/main/resources/Version.java.template</version.template.file>
