@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/usgs/swarm.svg?branch=master)](https://travis-ci.org/usgs/swarm)
+[![Coverage Status](https://coveralls.io/repos/usgs/swarm/badge.svg?branch=master&service=github)](https://coveralls.io/github/usgs/swarm?branch=master)
 
 
  swarm
