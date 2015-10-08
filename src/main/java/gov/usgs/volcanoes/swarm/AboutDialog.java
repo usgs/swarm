@@ -135,7 +135,7 @@ public class AboutDialog extends JDialog implements Runnable
 				+ "<SPAN style=\"color: red;\">SWARM:</SPAN><BR>"
 				+ "<SPAN style=\"color: blue;\">Seismic Wave Analysis/</SPAN><BR>"
 				+ "<SPAN style=\"color: blue;\">Real-time Monitoring/</SPAN><BR>"
-				+ "Version: " + Swarm.getVersion() + "<BR>"
+				+ "Version: " + Version.POM_VERSION + "<BR>"
 				+ "<HR>"
 				+ "<B>Funded by:</B><BR>"
 				+ "USGS  http://www.usgs.gov<BR>"
