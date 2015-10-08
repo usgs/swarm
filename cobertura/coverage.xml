@@ -1,9 +1,8 @@
 <?xml version="1.0"?>
 <!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-04.dtd">
 
-<coverage line-rate="0.0" branch-rate="0.0" lines-covered="0" lines-valid="11686" branches-covered="0" branches-valid="3707" complexity="2.358502538071066" version="2.1.1" timestamp="1444177154844">
+<coverage line-rate="0.0" branch-rate="0.0" lines-covered="0" lines-valid="11686" branches-covered="0" branches-valid="3707" complexity="2.358502538071066" version="2.1.1" timestamp="1444325244254">
 	<sources>
-		<source>/home/tparker/git/swarm/target/generated-sources/annotations</source>
 		<source>--source</source>
 		<source>/home/tparker/git/swarm/src/main/java</source>
 	</sources>

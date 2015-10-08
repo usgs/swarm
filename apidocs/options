@@ -1,0 +1,24 @@
+-classpath
+'/home/tparker/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar:/home/tparker/.m2/repository/edu/iris/seedCodec/1.0.10/seedCodec-1.0.10.jar:/home/tparker/.m2/repository/gov/usgs/volcanoes/volcano-core/1.2.0-SNAPSHOT/volcano-core-1.2.0-SNAPSHOT.jar:/home/tparker/.m2/repository/net/alomax/seedlink_lite/1.2.1/seedlink_lite-1.2.1.jar:/home/tparker/.m2/repository/concurrent/concurrent/1.3.4/concurrent-1.3.4.jar:/home/tparker/.m2/repository/net/sourceforge/jtransforms/jtransforms/2.4.0/jtransforms-2.4.0.jar:/home/tparker/.m2/repository/com/martiansoftware/jsap/2.1/jsap-2.1.jar:/home/tparker/.m2/repository/org/slf4j/slf4j-api/1.7.1/slf4j-api-1.7.1.jar:/home/tparker/.m2/repository/edu/iris/JavaSeedLite/1.0/JavaSeedLite-1.0.jar:/home/tparker/.m2/repository/junit/junit/4.8.2/junit-4.8.2.jar:/home/tparker/.m2/repository/colt/colt/1.2.0/colt-1.2.0.jar:/home/tparker/.m2/repository/gov/usgs/volcanoes/usgs/1.1/usgs-1.1.jar:/home/tparker/.m2/repository/com/jgoodies/jgoodies-forms/1.8.0/jgoodies-forms-1.8.0.jar:/home/tparker/.m2/repository/org/apache/commons/commons-csv/1.2/commons-csv-1.2.jar:/home/tparker/.m2/repository/com/jgoodies/jgoodies-common/1.8.1/jgoodies-common-1.8.1.jar:/home/tparker/.m2/repository/com/jgoodies/jgoodies-looks/2.6.0/jgoodies-looks-2.6.0.jar:/home/tparker/.m2/repository/org/apache/log4j/1.2.13/log4j-1.2.13.jar:/home/tparker/.m2/repository/org/slf4j/slf4j-log4j12/1.7.1/slf4j-log4j12-1.7.1.jar:/home/tparker/.m2/repository/edu/sc/seis/seisFile/1.6.3/seisFile-1.6.3.jar'
+-encoding
+'UTF-8'
+-protected
+-sourcepath
+'/home/tparker/git/swarm/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2015. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'/home/tparker/git/swarm/target/site/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'Swarm 2.5-SNAPSHOT API'
+-linkoffline
+'http://docs.oracle.com/javase/7/docs/api' '/home/tparker/git/swarm/target/javadoc-bundle-options'
+-use
+-version
+-windowtitle
+'Swarm 2.5-SNAPSHOT API'
