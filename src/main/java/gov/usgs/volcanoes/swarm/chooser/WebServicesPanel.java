@@ -19,7 +19,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
-import gov.usgs.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServiceStationXmlClient;
 import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServiceUtils;

@@ -227,7 +227,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
       for (int i = 0; i < helis.size(); i++) {
         CachedHelicorder ch = helis.get(i);
 
-        if (ch.helicorder.overlaps(helicorder) && helicorder != ch.helicorder) {
+        if (helicorder != ch.helicorder && ch.helicorder.overlaps(helicorder)) {
           helis.remove(ch);
           HelicorderData newHeli = ch.helicorder.combine(helicorder);
           putHelicorder(station, newHeli);
@@ -258,7 +258,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
     DoubleMatrix2D data = DoubleFactory2D.dense.make(seconds, 3);
     for (int i = 0; i < seconds; i++) {
       data.setQuick(i, 1, Integer.MAX_VALUE);
-      data.setQuick(i,  2, Integer.MIN_VALUE);
+      data.setQuick(i, 2, Integer.MIN_VALUE);
     }
 
     int sPeriod = (int) (wave.getSamplingPeriod() * TO_USEC);
@@ -266,13 +266,14 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
     long sampleTime = startTime;
     for (int sampleIndex = 0; sampleIndex < wave.numSamples(); sampleIndex++) {
       int sample = wave.buffer[sampleIndex];
-      if (sample == Wave.NO_DATA)
-        continue;
       
-      int secondIndex = (int) ((sampleTime - startTime) / TO_USEC);
-      data.setQuick(secondIndex, 0, (int) (sampleTime / TO_USEC));
-      data.setQuick(secondIndex, 1, Math.min(data.getQuick(secondIndex, 1), sample));
-      data.setQuick(secondIndex, 2, Math.max(data.getQuick(secondIndex, 2), sample));
+      if (sample != Wave.NO_DATA) {
+        int secondIndex = (int) ((sampleTime - startTime) / TO_USEC);
+        data.setQuick(secondIndex, 0, (int) (sampleTime / TO_USEC));
+        data.setQuick(secondIndex, 1, Math.min(data.getQuick(secondIndex, 1), sample));
+        data.setQuick(secondIndex, 2, Math.max(data.getQuick(secondIndex, 2), sample));
+      }
+      
       sampleTime += sPeriod;
     }
 
