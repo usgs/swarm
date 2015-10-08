@@ -641,7 +641,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 			axis.createTopTicks(null, mjt);
 			axis.createVerticalGridLines(mjt);
 
-			int bc = Math.round(settings.timeChunk / 5) + 2;
+			int bc = (settings.timeChunk / 5) + 2;
 			String[] btl = new String[bc];
 			double[] btlv = new double[bc];
 			btl[0] = "+";
