@@ -49,13 +49,112 @@
       </properties>
     </developer>
   </developers>
-  
+ 
+        <scm>
+                <connection>scm:git:git@github.com:usgs/swarm.git</connection>
+                <developerConnection>scm:git:git@github.com:usgs/swarm.git</developerConnection>
+                <url>git@github.com:usgs/swarm.git</url>
+        </scm>
+
+        <ciManagement>
+                <system>Travis</system>
+                <url>https://travis-ci.org/usgs/swarm/</url>
+                <notifiers />
+        </ciManagement>
+
+
+       <reporting>
+                <plugins>
+                        <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-pmd-plugin</artifactId>
+                                <version>3.5</version>
+                                <configuration>
+                                        <rulesets>
+                                                <ruleset>/rulesets/java/braces.xml</ruleset>
+                                                <ruleset>/rulesets/java/naming.xml</ruleset>
+                                                <ruleset>.ruleset</ruleset>
+                                        </rulesets>
+                                </configuration>
+                        </plugin>
+                        <plugin>
+                                <groupId>org.codehaus.mojo</groupId>
+                                <artifactId>findbugs-maven-plugin</artifactId>
+                                <version>3.0.0</version>
+                                <configuration>
+                                        <!-- Enables analysis which takes more memory but finds more bugs. If
+                                                you run out of memory, changes the value of the effort element to 'low'. -->
+                                        <effort>Max</effort>
+                                        <!-- Reports all bugs (other values are medium and max) -->
+                                        <threshold>Low</threshold>
+                                        <!-- Produces XML report -->
+                                        <xmlOutput>true</xmlOutput>
+                                </configuration>
+                        </plugin>
+<!--
+                        <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-checkstyle-plugin</artifactId>
+                                <version>2.16</version>
+                                <configuration>
+                                        <configLocation>checkstyle.xml</configLocation>
+                                </configuration>
+                                <reportSets>
+                                        <reportSet>
+                                                <reports>
+                                                        <report>checkstyle</report>
+                                                </reports>
+                                        </reportSet>
+                                </reportSets>
+                        </plugin>
+-->
+                        <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-jxr-plugin</artifactId>
+                                <version>2.5</version>
+                        </plugin>
+                        <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-javadoc-plugin</artifactId>
+                                <version>2.10.3</version>
+                                <configuration>
+                                        <failOnError>false</failOnError>
+                                </configuration>
+                        </plugin>
+                       <plugin>
+                                <groupId>org.codehaus.mojo</groupId>
+                                <artifactId>cobertura-maven-plugin</artifactId>
+                                <version>2.7</version>
+                                <configuration>
+                                        <formats>
+                                                <format>html</format>
+                                                <format>xml</format>
+                                        </formats>
+                                </configuration>
+                        </plugin>
+                        <plugin>
+                                <groupId>org.codehaus.mojo</groupId>
+                                <artifactId>javancss-maven-plugin</artifactId>
+                                <version>2.1</version>
+                                <configuration>
+                                        <forceEncoding>utf-8</forceEncoding>
+                                        <failOnViolation>false</failOnViolation>
+                                </configuration>
+                        </plugin>
+                </plugins>
+        </reporting>
+ 
   <distributionManagement>
     <repository>
       <id>volcanoes.web</id>
       <name>Volcanoes website</name>
       <url>scpexe://vulcan4.wr.usgs.gov/webdata/volcanoes.usgs.gov/htdocs/software/maven2</url>
     </repository>
+                <site>
+                        <id>github.pages</id>
+                        <url>scm:git:https://git@github.com/usgs/swarm.git</url>
+                </site>
+
   </distributionManagement>
  
   <build>
@@ -145,6 +244,85 @@
                 </replacements>                        
             </configuration>
       </plugin>
+                        <!-- cobertura -->
+                        <plugin>
+                                <groupId>org.codehaus.mojo</groupId>
+                                <artifactId>cobertura-maven-plugin</artifactId>
+                                <version>2.7</version>
+                                <configuration>
+                                        <format>xml</format>
+                                        <maxmem>256m</maxmem>
+                                        <!-- aggregated reports for multi-module projects -->
+                                        <aggregate>true</aggregate>
+                                </configuration>
+                        </plugin>
+
+                        <!-- coveralls -->
+                        <plugin>
+                                <groupId>org.eluder.coveralls</groupId>
+                                <artifactId>coveralls-maven-plugin</artifactId>
+                                <version>3.2.0</version>
+                                <configuration>
+                                        <repoToken>${env.coveralls_repo_token}</repoToken>
+                                </configuration>
+                        </plugin>
+                        <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-site-plugin</artifactId>
+                                <version>3.4</version>
+                                <dependencies>
+                                        <dependency>
+                                                <groupId>org.apache.maven.wagon</groupId>
+                                                <artifactId>wagon-scm</artifactId>
+                                                <version>2.9</version>
+                                        </dependency>
+                                        <dependency>
+                                                <groupId>org.apache.maven.scm</groupId>
+                                                <artifactId>maven-scm-manager-plexus</artifactId>
+                                                <version>1.9.4</version>
+                                        </dependency>
+                                        <dependency>
+                                                <groupId>org.apache.maven.scm</groupId>
+                                                <artifactId>maven-scm-provider-gitexe</artifactId>
+                                                <version>1.9.4</version>
+                                        </dependency>
+                                        <dependency>
+                                                <groupId>org.apache.maven.scm</groupId>
+                                                <artifactId>maven-scm-api</artifactId>
+                                                <version>1.9.4</version>
+                                        </dependency>
+                                </dependencies>
+                        </plugin>
+<!--
+                        <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-checkstyle-plugin</artifactId>
+                                <version>2.16</version>
+                                <executions>
+                                        <execution>
+                                                <id>validate</id>
+                                                <phase>validate</phase>
+                                                <configuration>
+                                                        <configLocation>checkstyle.xml</configLocation>
+                                                        <encoding>UTF-8</encoding>
+                                                        <consoleOutput>true</consoleOutput>
+                                                        <failOnViolation>true</failOnViolation>
+                                                        <linkXRef>false</linkXRef>
+                                                </configuration>
+                                                <goals>
+                                                        <goal>check</goal>
+                                                </goals>
+                                        </execution>
+                                </executions>
+                                <dependencies>
+                                        <dependency>
+                                                <groupId>com.puppycrawl.tools</groupId>
+                                                <artifactId>checkstyle</artifactId>
+                                                <version>6.10.1</version>
+                                        </dependency>
+                                </dependencies>
+                        </plugin>
+-->
     </plugins>
     
     <!--  Make m2e happy -->
@@ -266,7 +444,7 @@
     <dependency>
   	 <groupId>gov.usgs.volcanoes</groupId>
   	 <artifactId>usgs</artifactId>
-  	 <version>1.1</version>
+  	 <version>1.2</version>
     </dependency>
     <dependency>
     	<groupId>gov.usgs.volcanoes</groupId>

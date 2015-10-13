@@ -18,9 +18,9 @@ import java.util.List;
 public class WebServicesSource extends SeismicDataSource
 {
 	/** Web services source tab title. */
-	public static final String TAB_TITLE = "IRIS WS";
+	public static final String TAB_TITLE = "FDSN WS";
 	/** Web services source description. */
-	public static final String DESCRIPTION = "an IRIS Web Services server";
+	public static final String DESCRIPTION = "an FDSN Web Services server";
 	/** Web-Services client code */
 	public static final String typeString;
 	/** Parameter split text. */
