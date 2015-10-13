@@ -1,5 +1,11 @@
 package gov.usgs.volcanoes.swarm.data;
 
+import edu.sc.seis.seisFile.SeisFileException;
+import edu.sc.seis.seisFile.StringMSeedQueryReader;
+import edu.sc.seis.seisFile.mseed.DataRecord;
+import edu.sc.seis.seisFile.mseed.SeedFormatException;
+import edu.sc.seis.seisFile.mseed.SeedRecord;
+
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
@@ -12,11 +18,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import edu.sc.seis.seisFile.StringMSeedQueryReader;
-import edu.sc.seis.seisFile.mseed.DataRecord;
-import edu.sc.seis.seisFile.mseed.SeedFormatException;
-import edu.sc.seis.seisFile.mseed.SeedRecord;
 import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.Version;
 import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServiceUtils;
 
 /**
@@ -33,9 +36,8 @@ public class DataSelectReader extends StringMSeedQueryReader
 	/** The URL base. */
 	protected String urlBase;
 	/** The user agent. */
-	protected String userAgent = "Swarm/" + Swarm.getVersion();
+	protected String userAgent = "Swarm/" + Version.POM_VERSION;
 	/** The default web services URL. */
-//	public static final String DEFAULT_WS_URL = "http://www.iris.edu/ws/dataselect/query";
 	public static final String DEFAULT_WS_URL = "http://service.iris.edu/fdsnws/dataselect/1/query";
 
 	/**
@@ -177,7 +179,7 @@ public class DataSelectReader extends StringMSeedQueryReader
 	 * edu.sc.seis.seisFile.dataSelectWS.MSeedQueryReader#read(java.lang.String)
 	 */
 	public List<DataRecord> read(String query) throws IOException,
-			 SeedFormatException
+			 SeisFileException
 	{
 		return read(query, new ArrayList<DataRecord>());
 	}
@@ -189,11 +191,11 @@ public class DataSelectReader extends StringMSeedQueryReader
 	 * @param records the data record list or null if none.
 	 * @return the data record list.
 	 * @throws IOException if an I/O exception occurs.
+	 * @throws SeisFileException 
 	 * @throws DataSelectException if not OK repsonse code.
-	 * @throws SeedFormatException if the SEED format is invalid.
 	 */
 	public List<DataRecord> read(String query, List<DataRecord> records)
-			throws IOException, SeedFormatException
+			throws IOException, SeisFileException
 	{
 		URL requestURL = new URL(urlBase + "?" + query);
 		HttpURLConnection conn = (HttpURLConnection) requestURL
@@ -213,11 +215,10 @@ public class DataSelectReader extends StringMSeedQueryReader
 			}
 			else
 			{
-			    WebServiceUtils.fine(
+			    throw new SeisFileException(
 						"Did not get an OK repsonse code (code="
 								+ conn.getResponseCode() + ", url="
 								+ requestURL + "\"");
-			    return records;
 			}
 		}
 		BufferedInputStream bif = new BufferedInputStream(conn.getInputStream());
