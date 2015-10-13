@@ -227,13 +227,17 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
       for (int i = 0; i < helis.size(); i++) {
         CachedHelicorder ch = helis.get(i);
 
-        if (helicorder != ch.helicorder && ch.helicorder.overlaps(helicorder)) {
-          helis.remove(ch);
+        if (ch.helicorder.overlaps(helicorder)) {
           HelicorderData newHeli = ch.helicorder.combine(helicorder);
-          putHelicorder(station, newHeli);
+          ch.t1 = newHeli.getStartTime();
+          ch.t2 = newHeli.getEndTime();
+          ch.helicorder = newHeli;
+          ch.lastAccess = System.currentTimeMillis();
+          
           helicorder = newHeli;
           i = 0;
           add = false;
+          break;
         }
       }
 
@@ -263,18 +267,27 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
 
     int sPeriod = (int) (wave.getSamplingPeriod() * TO_USEC);
     long startTime = (long) (wave.getStartTime() * TO_USEC);
-    long sampleTime = startTime;
     for (int sampleIndex = 0; sampleIndex < wave.numSamples(); sampleIndex++) {
+      long sampleTime = startTime + sampleIndex * sPeriod;
       int sample = wave.buffer[sampleIndex];
       
       if (sample != Wave.NO_DATA) {
         int secondIndex = (int) ((sampleTime - startTime) / TO_USEC);
-        data.setQuick(secondIndex, 0, (int) (sampleTime / TO_USEC));
+        data.setQuick(secondIndex, 0, sampleTime / TO_USEC);
         data.setQuick(secondIndex, 1, Math.min(data.getQuick(secondIndex, 1), sample));
         data.setQuick(secondIndex, 2, Math.max(data.getQuick(secondIndex, 2), sample));
       }
       
-      sampleTime += sPeriod;
+    }
+
+    for (int i = 0; i < seconds; i++) {
+      double min = data.getQuick(i, 1);
+      if (min == Integer.MAX_VALUE)
+        data.setQuick(i,  1,  wave.mean());
+      
+      double max = data.getQuick(i, 2);
+      if (max == Integer.MIN_VALUE)
+        data.setQuick(i,  2,  wave.mean());
     }
 
     HelicorderData hd = new HelicorderData();
@@ -418,7 +431,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
   // a Helicorder from the cache. If you want to try and fill data on either
   // side use
   // the version below
-  public synchronized HelicorderData getHelicorder(String station, double t1, double t2,
+  public synchronized HelicorderData getHelicorder(String station, double startTime, double endTime,
       GulperListener gl) {
     station = station.replace(' ', '$');
     List<CachedHelicorder> helis = helicorderCache.get(station);
@@ -429,24 +442,25 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
       HelicorderData hd2 = null;
       for (CachedHelicorder ch : helis) {
         // found the whole thing, just return the needed subset
-        if (t1 >= ch.t1 && t2 <= ch.t2) {
-          hd2 = ch.helicorder.subset(t1, t2);
+        if (startTime >= ch.t1 && endTime <= ch.t2) {
+          hd2 = ch.helicorder.subset(startTime, endTime);
           ch.lastAccess = System.currentTimeMillis();
           return hd2;
         }
 
         // just a piece, put it in the result
-        if (t1 <= ch.t1 && t2 >= ch.t2) {
+        if (startTime <= ch.t1 && endTime >= ch.t2) {
           hd2 = ch.helicorder;
         }
         // cached is right side
-        else if (t2 >= ch.t1 && t2 <= ch.t2) {
-          hd2 = ch.helicorder.subset(ch.t1, t2);
+        else if (endTime >= ch.t1 && endTime <= ch.t2) {
+          hd2 = ch.helicorder.subset(ch.t1, endTime);
         }
         // cached is left side
-        else if (t1 >= ch.t1 && t1 <= ch.t2) {
-          hd2 = ch.helicorder.subset(t1, ch.t2);
+        else if (startTime >= ch.t1 && startTime <= ch.t2) {
+          hd2 = ch.helicorder.subset(startTime, ch.t2);
         }
+        
         // if cached data found
         if (hd2 != null) {
           hd.concatenate(hd2);
