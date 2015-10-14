@@ -3,7 +3,7 @@
 
   <groupId>gov.usgs.volcanoes</groupId>
   <artifactId>swarm</artifactId>
-  <version>2.5-SNAPSHOT</version>
+  <version>2.5</version>
   <packaging>jar</packaging>
 
   <name>Swarm</name>
@@ -17,7 +17,7 @@
   <licenses>
     <license>
       <name>CC0 1.0 Universal</name>
-      <url>http://creativecommons.org/publicdomain/zero/1.0/></url>
+      <url>http://creativecommons.org/publicdomain/zero/1.0 /&gt;</url>
       <distribution>repo</distribution>
     </license>
   </licenses>  
@@ -54,7 +54,8 @@
                 <connection>scm:git:git@github.com:usgs/swarm.git</connection>
                 <developerConnection>scm:git:git@github.com:usgs/swarm.git</developerConnection>
                 <url>git@github.com:usgs/swarm.git</url>
-        </scm>
+          <tag>swarm-2.5</tag>
+  </scm>
 
         <ciManagement>
                 <system>Travis</system>
