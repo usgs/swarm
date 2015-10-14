@@ -1,5 +1,6 @@
 ## Version 2.5.1
   * Add missing libraries
+  * Correct overflow when working with long waves
   
 ## Version 2.5
   * SCM migrated from in-house subversion to git hosted at GitHub
