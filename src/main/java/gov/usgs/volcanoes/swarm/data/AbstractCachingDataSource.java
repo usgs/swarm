@@ -265,7 +265,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
       data.setQuick(i, 2, Integer.MIN_VALUE);
     }
 
-    int sPeriod = (int) (wave.getSamplingPeriod() * TO_USEC);
+    long sPeriod = (long) (wave.getSamplingPeriod() * TO_USEC);
     long startTime = (long) (wave.getStartTime() * TO_USEC);
     for (int sampleIndex = 0; sampleIndex < wave.numSamples(); sampleIndex++) {
       long sampleTime = startTime + sampleIndex * sPeriod;
@@ -284,7 +284,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
       double min = data.getQuick(i, 1);
       if (min == Integer.MAX_VALUE)
         data.setQuick(i,  1,  wave.mean());
-      
+
       double max = data.getQuick(i, 2);
       if (max == Integer.MIN_VALUE)
         data.setQuick(i,  2,  wave.mean());
