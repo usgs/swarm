@@ -1,2 +1,3 @@
 /target/
 /classes/
+src/main/java/gov/usgs/volcanoes/swarm/Version.java
