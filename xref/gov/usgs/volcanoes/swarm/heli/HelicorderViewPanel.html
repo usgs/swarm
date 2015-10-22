@@ -649,7 +649,7 @@
 <a class="jxr_linenumber" name="L641" href="#L641">641</a> 			axis.createTopTicks(<strong class="jxr_keyword">null</strong>, mjt);
 <a class="jxr_linenumber" name="L642" href="#L642">642</a> 			axis.createVerticalGridLines(mjt);
 <a class="jxr_linenumber" name="L643" href="#L643">643</a> 
-<a class="jxr_linenumber" name="L644" href="#L644">644</a> 			<strong class="jxr_keyword">int</strong> bc = Math.round(settings.timeChunk / 5) + 2;
+<a class="jxr_linenumber" name="L644" href="#L644">644</a> 			<strong class="jxr_keyword">int</strong> bc = (settings.timeChunk / 5) + 2;
 <a class="jxr_linenumber" name="L645" href="#L645">645</a> 			String[] btl = <strong class="jxr_keyword">new</strong> String[bc];
 <a class="jxr_linenumber" name="L646" href="#L646">646</a> 			<strong class="jxr_keyword">double</strong>[] btlv = <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">double</strong>[bc];
 <a class="jxr_linenumber" name="L647" href="#L647">647</a> 			btl[0] = <span class="jxr_string">"+"</span>;
