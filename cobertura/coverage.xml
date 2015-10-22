@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-04.dtd">
 
-<coverage line-rate="0.0" branch-rate="0.0" lines-covered="0" lines-valid="11844" branches-covered="0" branches-valid="3757" complexity="2.362437185929648" version="2.1.1" timestamp="1445533688596">
+<coverage line-rate="0.0" branch-rate="0.0" lines-covered="0" lines-valid="11844" branches-covered="0" branches-valid="3757" complexity="2.362437185929648" version="2.1.1" timestamp="1445534788199">
 	<sources>
 		<source>--source</source>
 		<source>/home/tparker/git/swarm/src/main/java</source>
