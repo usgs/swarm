@@ -40,7 +40,7 @@ public class ChannelUtil {
 			for (String g : ch.getGroups()) {
 				md.addGroup(g);
 			}
-			if (ch.getStation() != ch.getSiteName() && ch.getSiteName() != null) {
+			if (ch.getSiteName() != null && !ch.getSiteName().equals(ch.getStation())) {
 				md.updateAlias(ch.getSiteName());
 			}
 			md.source = source;
