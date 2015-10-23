@@ -34,7 +34,7 @@ public class DirectWWSSource extends SeismicDataSource
 	public DirectWWSSource() {}
 
 	public void parse (String params) {
-		String[] ss = params.split("|");
+		String[] ss = params.split("\\|");
 		dbDriver = ss[0];
 		dbURL = ss[1];
 		dbPrefix = ss[2];

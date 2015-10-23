@@ -696,7 +696,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 	
 	private void setBackgroundColor(WaveViewPanel wvp, int i)
 	{
-		if (i % 2 == 1)
+		if (i % 2 != 0)
 			wvp.setBackgroundColor(Color.WHITE);
 		else
 			wvp.setBackgroundColor(new Color(230, 230, 230));

@@ -198,7 +198,7 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo
 
 	private final String networkTag = "network";
 
-	private String siteName;
+//	private String siteName;
 
 	private String station;
 
@@ -289,12 +289,13 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo
 
 	/**
 	 * Get the site name.
+	 * A noop since siteName is not set.
 	 * 
 	 * @return the site name.
 	 */
 	public String getSiteName()
 	{
-		return siteName;
+		return null;
 	}
 
 	/**

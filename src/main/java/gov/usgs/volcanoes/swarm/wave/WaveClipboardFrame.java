@@ -567,6 +567,8 @@ public class WaveClipboardFrame extends SwarmFrame {
                 for (int i = 0; i < fs.length; i++) {
                     if (fs[i].isDirectory()) {
                         File[] dfs = fs[i].listFiles();
+                        if (dfs == null)
+                          continue;
                         for (int j = 0; j < dfs.length; j++)
                             openFile(dfs[j]);
                         swarmConfig.lastPath = fs[i].getParent();
