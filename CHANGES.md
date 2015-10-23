@@ -1,5 +1,5 @@
 ## Version 2.5.2
-  * Minor tweaks. No functional changes.
+  * Remove obsoleted DefaultMetadata Class.
   
 ## Version 2.5.1
   * Add missing libraries
