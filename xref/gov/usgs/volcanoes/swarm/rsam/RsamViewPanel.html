@@ -76,7 +76,7 @@
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>      <strong class="jxr_keyword">private</strong> String channel;
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>      <strong class="jxr_keyword">private</strong> Color bottomBorderColor;
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_comment">//    private Color bottomBorderColor;</em>
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Image closeImg;
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> allowClose;
@@ -92,7 +92,7 @@
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment">     */</em>
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>      <strong class="jxr_keyword">private</strong> BufferedImage image;
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>      <strong class="jxr_keyword">private</strong> Color borderColor;
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  <em class="jxr_comment">//    private Color borderColor;</em>
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>  
 <a class="jxr_linenumber" name="L89" href="#L89">89</a>      <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>  <em class="jxr_javadoccomment">     * Constructs a WaveViewPanel with default settings.</em>
@@ -246,14 +246,14 @@
 <a class="jxr_linenumber" name="L238" href="#L238">238</a> 
 <a class="jxr_linenumber" name="L239" href="#L239">239</a>             g2.drawImage(closeImg, dim.width - 17, 3, <strong class="jxr_keyword">null</strong>);
 <a class="jxr_linenumber" name="L240" href="#L240">240</a>         }
-<a class="jxr_linenumber" name="L241" href="#L241">241</a>         <strong class="jxr_keyword">if</strong> (bottomBorderColor != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L242" href="#L242">242</a>             g2.setColor(bottomBorderColor);
-<a class="jxr_linenumber" name="L243" href="#L243">243</a>             g2.drawLine(0, dim.height - 1, dim.width, dim.height - 1);
-<a class="jxr_linenumber" name="L244" href="#L244">244</a>         }
-<a class="jxr_linenumber" name="L245" href="#L245">245</a>         <strong class="jxr_keyword">if</strong> (borderColor != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L246" href="#L246">246</a>             g2.setColor(borderColor);
-<a class="jxr_linenumber" name="L247" href="#L247">247</a>             g2.drawRect(0, 0, dim.width - 1, dim.height - 2);
-<a class="jxr_linenumber" name="L248" href="#L248">248</a>         }
+<a class="jxr_linenumber" name="L241" href="#L241">241</a> <em class="jxr_comment">//        if (bottomBorderColor != null) {</em>
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> <em class="jxr_comment">//            g2.setColor(bottomBorderColor);</em>
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> <em class="jxr_comment">//            g2.drawLine(0, dim.height - 1, dim.width, dim.height - 1);</em>
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> <em class="jxr_comment">//        }</em>
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> <em class="jxr_comment">//        if (borderColor != null) {</em>
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> <em class="jxr_comment">//            g2.setColor(borderColor);</em>
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> <em class="jxr_comment">//            g2.drawRect(0, 0, dim.width - 1, dim.height - 2);</em>
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> <em class="jxr_comment">//        }</em>
 <a class="jxr_linenumber" name="L249" href="#L249">249</a>     }
 <a class="jxr_linenumber" name="L250" href="#L250">250</a> 
 <a class="jxr_linenumber" name="L251" href="#L251">251</a> 

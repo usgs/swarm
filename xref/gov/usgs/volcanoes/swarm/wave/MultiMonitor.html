@@ -704,7 +704,7 @@
 <a class="jxr_linenumber" name="L696" href="#L696">696</a> 	
 <a class="jxr_linenumber" name="L697" href="#L697">697</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> setBackgroundColor(<a href="../../../../../gov/usgs/volcanoes/swarm/wave/WaveViewPanel.html">WaveViewPanel</a> wvp, <strong class="jxr_keyword">int</strong> i)
 <a class="jxr_linenumber" name="L698" href="#L698">698</a> 	{
-<a class="jxr_linenumber" name="L699" href="#L699">699</a> 		<strong class="jxr_keyword">if</strong> (i % 2 == 1)
+<a class="jxr_linenumber" name="L699" href="#L699">699</a> 		<strong class="jxr_keyword">if</strong> (i % 2 != 0)
 <a class="jxr_linenumber" name="L700" href="#L700">700</a> 			wvp.setBackgroundColor(Color.WHITE);
 <a class="jxr_linenumber" name="L701" href="#L701">701</a> 		<strong class="jxr_keyword">else</strong>
 <a class="jxr_linenumber" name="L702" href="#L702">702</a> 			wvp.setBackgroundColor(<strong class="jxr_keyword">new</strong> Color(230, 230, 230));
