@@ -68,7 +68,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
 
     private String channel;
 
-    private Color bottomBorderColor;
+//    private Color bottomBorderColor;
 
     private static Image closeImg;
     private boolean allowClose;
@@ -84,7 +84,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
      */
     private BufferedImage image;
 
-    private Color borderColor;
+//    private Color borderColor;
 
     /**
      * Constructs a WaveViewPanel with default settings.
@@ -238,14 +238,14 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
 
             g2.drawImage(closeImg, dim.width - 17, 3, null);
         }
-        if (bottomBorderColor != null) {
-            g2.setColor(bottomBorderColor);
-            g2.drawLine(0, dim.height - 1, dim.width, dim.height - 1);
-        }
-        if (borderColor != null) {
-            g2.setColor(borderColor);
-            g2.drawRect(0, 0, dim.width - 1, dim.height - 2);
-        }
+//        if (bottomBorderColor != null) {
+//            g2.setColor(bottomBorderColor);
+//            g2.drawLine(0, dim.height - 1, dim.width, dim.height - 1);
+//        }
+//        if (borderColor != null) {
+//            g2.setColor(borderColor);
+//            g2.drawRect(0, 0, dim.width - 1, dim.height - 2);
+//        }
     }
 
 
