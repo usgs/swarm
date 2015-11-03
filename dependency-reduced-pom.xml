@@ -4,18 +4,25 @@
   <groupId>gov.usgs.volcanoes</groupId>
   <artifactId>swarm</artifactId>
   <name>Swarm</name>
-  <version>2.5-SNAPSHOT</version>
+  <version>2.5.2</version>
+  <description>Swarm is a Java application designed to display and analyze seismic waveforms in real-time. Swarm can connect to and read from a variety of different static and dynamics data sources, including Earthworm waveservers, IRIS DMCs, SEED and SAC files, and simple ASCII. Swarm has both time- and frequency-domain analysis tools, along with a simple but powerful mapping platfrom. A full-screen kiosk mode can act as a low-cost, low-maintenance replacement for paper drum recorders. Swarm was written by and for scientists and provides fine control over many different program settings and variables.</description>
   <url>http://volcanoes.usgs.gov/software/swarm</url>
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/usgs/swarm/issues</url>
+  </issueManagement>
   <ciManagement>
     <system>Travis</system>
     <url>https://travis-ci.org/usgs/swarm/</url>
   </ciManagement>
   <developers>
     <developer>
-      <id>dcervelli</id>
-      <name>Dan Cervelli</name>
+      <id>tparker</id>
+      <name>Tom Parker</name>
+      <email>tparker@usgs.gov</email>
+      <organization>U.S. Geological Survey, Alaska Volcano Observatory</organization>
       <properties>
-        <active>false</active>
+        <active>true</active>
       </properties>
     </developer>
     <developer>
@@ -28,19 +35,43 @@
       </properties>
     </developer>
     <developer>
-      <id>tparker</id>
-      <name>Tom Parker</name>
-      <email>tparker@usgs.gov</email>
-      <organization>U.S. Geological Survey, Alaska Volcano Observatory</organization>
+      <id>lantolik</id>
+      <name>Loren Antolik</name>
+      <email>lantolik@usgs.gov</email>
+      <organization>U.S. Geological Survey, Hawaiian Volcano Observatory</organization>
       <properties>
         <active>true</active>
       </properties>
     </developer>
+    <developer>
+      <id>dcervelli</id>
+      <name>Dan Cervelli</name>
+      <properties>
+        <active>false</active>
+      </properties>
+    </developer>
   </developers>
+  <contributors>
+    <contributor>
+      <name>Kevin Frechette (ISTI)</name>
+    </contributor>
+    <contributor>
+      <name>Anthony Lomax</name>
+    </contributor>
+    <contributor>
+      <name>Dave Ketchum</name>
+    </contributor>
+    <contributor>
+      <name>Chirag Patel</name>
+    </contributor>
+    <contributor>
+      <name>Ivan Henson</name>
+    </contributor>
+  </contributors>
   <licenses>
     <license>
       <name>CC0 1.0 Universal</name>
-      <url>http://creativecommons.org/publicdomain/zero/1.0/&gt;</url>
+      <url>http://creativecommons.org/publicdomain/zero/1.0 /&gt;</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -111,16 +142,40 @@
                     <include>freemarker/**</include>
                   </includes>
                 </filter>
+                <filter>
+                  <artifact>com.jgoodies:jgoodies-common</artifact>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                </filter>
+                <filter>
+                  <artifact>com.jgoodies:jgoodies-forms</artifact>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                </filter>
+                <filter>
+                  <artifact>com.jgoodies:jgoodies-looks</artifact>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                </filter>
               </filters>
               <artifactSet>
                 <includes>
                   <include>gov.usgs.volcanoes:usgs</include>
                   <include>org.freemarker:freemarker</include>
+                  <include>com.jgoodies:*</include>
                   <include>com.martiansoftware:jsap</include>
                   <include>net.sourceforge.jtransforms:jtransforms</include>
                   <include>org.slf4j:*</include>
                   <include>org.apache:log4j</include>
                   <include>gov.usgs.volcanoes:swarm</include>
+                  <include>gov.usgs.volcanoes:swarm</include>
+                  <include>net.alomax:*</include>
+                  <include>edu.sc.seis:*</include>
+                  <include>colt:colt</include>
+                  <include>edu.iris:JavaSeedLite</include>
                 </includes>
               </artifactSet>
             </configuration>
@@ -214,6 +269,24 @@
           </dependency>
         </dependencies>
       </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.6</version>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <descriptors>
+            <descriptor>src/assembly/swarmBin.xml</descriptor>
+          </descriptors>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <repositories>
@@ -227,51 +300,9 @@
   </repositories>
   <dependencies>
     <dependency>
-      <groupId>colt</groupId>
-      <artifactId>colt</artifactId>
-      <version>1.2.0</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.jgoodies</groupId>
-      <artifactId>jgoodies-common</artifactId>
-      <version>1.8.1</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.jgoodies</groupId>
-      <artifactId>jgoodies-forms</artifactId>
-      <version>1.8.0</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.jgoodies</groupId>
-      <artifactId>jgoodies-looks</artifactId>
-      <version>2.6.0</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>edu.iris</groupId>
-      <artifactId>JavaSeedLite</artifactId>
-      <version>1.0</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
       <groupId>edu.iris</groupId>
       <artifactId>seedCodec</artifactId>
       <version>1.0.10</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>edu.sc.seis</groupId>
-      <artifactId>seisFile</artifactId>
-      <version>1.6.3</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>net.alomax</groupId>
-      <artifactId>seedlink_lite</artifactId>
-      <version>1.2.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
