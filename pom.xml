@@ -4,7 +4,7 @@
 
 	<groupId>gov.usgs.volcanoes</groupId>
 	<artifactId>swarm</artifactId>
-	<version>2.5.1</version>
+	<version>2.5.2</version>
 	<packaging>jar</packaging>
 
 	<name>Swarm</name>
@@ -203,6 +203,18 @@
 									</includes>
 								</filter>
 								<filter>
+									<artifact>com.jgoodies:jgoodies-common</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>com.jgoodies:jgoodies-forms</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
 									<artifact>com.jgoodies:jgoodies-looks</artifact>
 									<includes>
 										<include>**</include>
@@ -213,13 +225,13 @@
 								<includes>
 									<include>gov.usgs.volcanoes:usgs</include>
 									<include>org.freemarker:freemarker</include>
+									<include>com.jgoodies:*</include>
 									<include>com.martiansoftware:jsap</include>
 									<include>net.sourceforge.jtransforms:jtransforms</include>
 									<include>org.slf4j:*</include>
 									<include>org.apache:log4j</include>
 									<include>gov.usgs.volcanoes:swarm</include>
 									<include>gov.usgs.volcanoes:swarm</include>
-									<include>com.jgoodies:*</include>
 									<include>net.alomax:*</include>
 									<include>edu.sc.seis:*</include>
 									<include>colt:colt</include>
