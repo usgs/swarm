@@ -1,8 +1,8 @@
 package gov.usgs.volcanoes.swarm;
 
 import gov.usgs.plot.data.file.FileType;
-import gov.usgs.util.Util;
 import gov.usgs.util.ui.ExtensionFileFilter;
+import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.FileDataSource;
 import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
@@ -414,7 +414,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
             Set<String> keys = swarmConfig.layouts.keySet();
             List<String> sls = new ArrayList<String>();
             sls.addAll(keys);
-            Collections.sort(sls, Util.getIgnoreCaseStringComparator());
+            Collections.sort(sls, StringUtils.getCaseInsensitiveStringComparator());
             model = new DefaultListModel();
             for (String sl : sls)
                 model.addElement(sl);
