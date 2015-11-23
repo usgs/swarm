@@ -1,20 +1,5 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
-import gov.usgs.plot.Plot;
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.data.GenericDataMatrix;
-import gov.usgs.plot.data.RSAMData;
-import gov.usgs.plot.decorate.SmartTick;
-import gov.usgs.plot.render.AxisRenderer;
-import gov.usgs.plot.render.HistogramRenderer;
-import gov.usgs.plot.render.MatrixRenderer;
-import gov.usgs.plot.render.ShapeRenderer;
-import gov.usgs.util.Util;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
-import gov.usgs.volcanoes.swarm.time.UiTime;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -30,6 +15,19 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
 import cern.colt.matrix.DoubleMatrix2D;
+import gov.usgs.plot.Plot;
+import gov.usgs.plot.PlotException;
+import gov.usgs.plot.data.GenericDataMatrix;
+import gov.usgs.plot.data.RSAMData;
+import gov.usgs.plot.decorate.SmartTick;
+import gov.usgs.plot.render.AxisRenderer;
+import gov.usgs.plot.render.HistogramRenderer;
+import gov.usgs.plot.render.MatrixRenderer;
+import gov.usgs.plot.render.ShapeRenderer;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
+import gov.usgs.volcanoes.swarm.time.UiTime;
 
 /**
  * A component that renders a RSAM plot.
@@ -38,365 +36,369 @@ import cern.colt.matrix.DoubleMatrix2D;
  * @author Tom Parker
  */
 public class RsamViewPanel extends JComponent implements SettingsListener {
-    public static final long serialVersionUID = -1;
+  public static final long serialVersionUID = -1;
 
-    private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
-    
-    /**
-     * X pixel location of where the main plot axis should be located on the
-     * component.
-     */
-    private static final int X_OFFSET = 60;
+  private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
 
-    /**
-     * Y pixel location of where the main plot axis should be located on the
-     * component.
-     */
-    private static final int Y_OFFSET = 20;
+  /**
+   * X pixel location of where the main plot axis should be located on the
+   * component.
+   */
+  private static final int X_OFFSET = 60;
 
-    /** The amount of padding space on the right side. */
-    private static final int RIGHT_WIDTH = 60;
+  /**
+   * Y pixel location of where the main plot axis should be located on the
+   * component.
+   */
+  private static final int Y_OFFSET = 20;
 
-    /** The amount of padding space on the bottom. */
-    private static final int BOTTOM_HEIGHT = 20;
+  /** The amount of padding space on the right side. */
+  private static final int RIGHT_WIDTH = 60;
 
-    private RSAMData data;
+  /** The amount of padding space on the bottom. */
+  private static final int BOTTOM_HEIGHT = 20;
 
-    private double startTime;
-    private double endTime;
-    private RsamViewSettings settings;
+  private RSAMData data;
 
-    private String channel;
+  private double startTime;
+  private double endTime;
+  private RsamViewSettings settings;
 
-//    private Color bottomBorderColor;
+  private String channel;
 
-    private static Image closeImg;
-    private boolean allowClose;
+  // private Color bottomBorderColor;
 
-    /**
-     * A flag that indicates whether data are being loaded for this panel.
-     */
-    private boolean working;
+  private static Image closeImg;
+  private boolean allowClose;
 
-    /**
-     * The wave is rendered to an image that is only updated when the settings
-     * change for repaint efficiency.
-     */
-    private BufferedImage image;
+  /**
+   * A flag that indicates whether data are being loaded for this panel.
+   */
+  private boolean working;
 
-//    private Color borderColor;
+  /**
+   * The wave is rendered to an image that is only updated when the settings
+   * change for repaint efficiency.
+   */
+  private BufferedImage image;
 
-    /**
-     * Constructs a WaveViewPanel with default settings.
-     */
-    public RsamViewPanel() {
-        this(new RsamViewSettings());
-        settings.addListener(this);
-    }
+  // private Color borderColor;
 
-    /**
-     * Constructs a WaveViewPanel with specified settings.
-     * 
-     * @param s
-     *            the settings
-     */
-    public RsamViewPanel(RsamViewSettings s) {
-        settings = s;
+  /**
+   * Constructs a WaveViewPanel with default settings.
+   */
+  public RsamViewPanel() {
+    this(new RsamViewSettings());
+    settings.addListener(this);
+  }
 
-        setupMouseHandler();
-        settings.addListener(this);
-    }
+  /**
+   * Constructs a WaveViewPanel with specified settings.
+   * 
+   * @param s
+   *          the settings
+   */
+  public RsamViewPanel(RsamViewSettings s) {
+    settings = s;
 
-
-    private void setupMouseHandler() {
-        Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
-        this.setCursor(crosshair);
-
-        this.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-                UiTime.touchTime();
-                if (SwingUtilities.isRightMouseButton(e)) {
-                    settings.cycleType();
-                }
-            }
-        });
-    }
+    setupMouseHandler();
+    settings.addListener(this);
+  }
 
 
-    /**
-     * Set the working flag. This flag indicates whether data are being loaded
-     * for this panel.
-     * 
-     * @param b
-     *            the working flag state
-     */
-    public void setWorking(boolean b) {
-        working = b;
-    }
+  private void setupMouseHandler() {
+    Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
+    this.setCursor(crosshair);
+
+    this.addMouseListener(new MouseAdapter() {
+      public void mousePressed(MouseEvent e) {
+        UiTime.touchTime();
+        if (SwingUtilities.isRightMouseButton(e)) {
+          settings.cycleType();
+        }
+      }
+    });
+  }
 
 
-    public String getChannel() {
-        return channel;
-    }
+  /**
+   * Set the working flag. This flag indicates whether data are being loaded
+   * for this panel.
+   * 
+   * @param b
+   *          the working flag state
+   */
+  public void setWorking(boolean b) {
+    working = b;
+  }
 
-    public void setChannel(String c) {
-        channel = c;
-    }
 
-    public void settingsChanged() {
-        processSettings();
-    }
+  public String getChannel() {
+    return channel;
+  }
 
-    
-    public void setData(RSAMData data, double st, double et) {
-        this.data = data;
-        startTime = st;
-        endTime = et;
-        processSettings();
-    }
+  public void setChannel(String c) {
+    channel = c;
+  }
 
-    private synchronized void setImage(BufferedImage bi) {
-        image = bi;
-    }
+  public void settingsChanged() {
+    processSettings();
+  }
 
-    private synchronized BufferedImage getImage() {
-        return image;
-    }
 
-    private void createImage() {
-        final Runnable r = new Runnable() {
-            public void run() {
-                if (getWidth() > 0 && getHeight() > 0) {
-                    BufferedImage bi = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
-                    Graphics2D ig = (Graphics2D) bi.getGraphics();
-                    constructPlot(ig);
-                    setImage(bi);
-                }
-            }
-        };
+  public void setData(RSAMData data, double st, double et) {
+    this.data = data;
+    startTime = st;
+    endTime = et;
+    processSettings();
+  }
 
-        if (SwingUtilities.isEventDispatchThread()) {
-            SwingWorker worker = new SwingWorker() {
-                public Object construct() {
-                    r.run();
-                    return null;
-                }
+  private synchronized void setImage(BufferedImage bi) {
+    image = bi;
+  }
 
-                public void finished() {
-                    repaint();
-                }
-            };
-            worker.start();
-        } else
-            r.run();
-    }
+  private synchronized BufferedImage getImage() {
+    return image;
+  }
 
-    /**
-     * Does NOT call repaint for efficiency purposes, that is left to the
-     * container.
-     */
-    private void processSettings() {
-        if (data == null || data.getData() == null || data.getData().rows() == 0)
-            return;
+  private void createImage() {
+    final Runnable r = new Runnable() {
+      public void run() {
+        if (getWidth() > 0 && getHeight() > 0) {
+          BufferedImage bi =
+              new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+          Graphics2D ig = (Graphics2D) bi.getGraphics();
+          constructPlot(ig);
+          setImage(bi);
+        }
+      }
+    };
 
-        createImage();
-    }
-
-    /**
-     * Paints the component on the specified graphics context.
-     * 
-     * @param g
-     *            the graphics context
-     */
-    public void paint(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g;
-        Dimension dim = this.getSize();
-        // TODO: fix this
-        if (data == null || (settings.getType() == ViewType.VALUES && data.getPeriod() != settings.valuesPeriodS) || (settings.getType() == ViewType.COUNTS && data.getPeriod() != settings.countsPeriodS)) {
-            g2.setColor(BACKGROUND_COLOR);
-            g2.fillRect(0, 0, dim.width, dim.height);
-            g2.setColor(Color.black);
-            if (working)
-                g2.drawString("Retrieving data...", dim.width / 2 - 50, dim.height / 2);
-            else {
-                String error = "No RSAM data.";
-                if (channel != null)
-                    error = "No RSAM data for " + channel + ".";
-                int w = g2.getFontMetrics().stringWidth(error);
-                g2.drawString(error, dim.width / 2 - w / 2, dim.height / 2);
-            }
-        } else {
-            BufferedImage bi = getImage();
-            if (bi != null)
-                g2.drawImage(bi, 0, 0, null);
-
+    if (SwingUtilities.isEventDispatchThread()) {
+      SwingWorker worker = new SwingWorker() {
+        public Object construct() {
+          r.run();
+          return null;
         }
 
-        if (allowClose) {
-            if (closeImg == null)
-                closeImg = Icons.close_view.getImage();
-
-            g2.drawImage(closeImg, dim.width - 17, 3, null);
+        public void finished() {
+          repaint();
         }
-//        if (bottomBorderColor != null) {
-//            g2.setColor(bottomBorderColor);
-//            g2.drawLine(0, dim.height - 1, dim.width, dim.height - 1);
-//        }
-//        if (borderColor != null) {
-//            g2.setColor(borderColor);
-//            g2.drawRect(0, 0, dim.width - 1, dim.height - 2);
-//        }
+      };
+      worker.start();
+    } else
+      r.run();
+  }
+
+  /**
+   * Does NOT call repaint for efficiency purposes, that is left to the
+   * container.
+   */
+  private void processSettings() {
+    if (data == null || data.getData() == null || data.getData().rows() == 0)
+      return;
+
+    createImage();
+  }
+
+  /**
+   * Paints the component on the specified graphics context.
+   * 
+   * @param g
+   *          the graphics context
+   */
+  public void paint(Graphics g) {
+    Graphics2D g2 = (Graphics2D) g;
+    Dimension dim = this.getSize();
+    // TODO: fix this
+    if (data == null
+        || (settings.getType() == ViewType.VALUES && data.getPeriod() != settings.valuesPeriodS)
+        || (settings.getType() == ViewType.COUNTS && data.getPeriod() != settings.countsPeriodS)) {
+      g2.setColor(BACKGROUND_COLOR);
+      g2.fillRect(0, 0, dim.width, dim.height);
+      g2.setColor(Color.black);
+      if (working)
+        g2.drawString("Retrieving data...", dim.width / 2 - 50, dim.height / 2);
+      else {
+        String error = "No RSAM data.";
+        if (channel != null)
+          error = "No RSAM data for " + channel + ".";
+        int w = g2.getFontMetrics().stringWidth(error);
+        g2.drawString(error, dim.width / 2 - w / 2, dim.height / 2);
+      }
+    } else {
+      BufferedImage bi = getImage();
+      if (bi != null)
+        g2.drawImage(bi, 0, 0, null);
+
     }
 
+    if (allowClose) {
+      if (closeImg == null)
+        closeImg = Icons.close_view.getImage();
+
+      g2.drawImage(closeImg, dim.width - 17, 3, null);
+    }
+    // if (bottomBorderColor != null) {
+    // g2.setColor(bottomBorderColor);
+    // g2.drawLine(0, dim.height - 1, dim.width, dim.height - 1);
+    // }
+    // if (borderColor != null) {
+    // g2.setColor(borderColor);
+    // g2.drawRect(0, 0, dim.width - 1, dim.height - 2);
+    // }
+  }
 
 
-    /**
-     * Constructs the plot on the specified graphics context.
-     * 
-     * @param g2
-     *            the graphics context
-     */
-    private synchronized void constructPlot(Graphics2D g2) {
-        Dimension dim = this.getSize();
 
-        Plot plot = new Plot();
-        plot.setBackgroundColor(BACKGROUND_COLOR);
-        plot.setSize(dim);
+  /**
+   * Constructs the plot on the specified graphics context.
+   * 
+   * @param g2
+   *          the graphics context
+   */
+  private synchronized void constructPlot(Graphics2D g2) {
+    Dimension dim = this.getSize();
 
-        switch (settings.getType()) {
-        case VALUES:
-            plotValues(plot, data);
-            break;
-        case COUNTS:
-            plotCounts(plot, data);
-            break;
-        }
+    Plot plot = new Plot();
+    plot.setBackgroundColor(BACKGROUND_COLOR);
+    plot.setSize(dim);
 
-        try {
-            plot.render(g2);
-        } catch (PlotException e) {
-            e.printStackTrace();
-        }
+    switch (settings.getType()) {
+      case VALUES:
+        plotValues(plot, data);
+        break;
+      case COUNTS:
+        plotCounts(plot, data);
+        break;
     }
 
-    /**
-     * Plots RSAM values.
-     * 
-     * @param data
-     *            the RSAM values to plot
-     */
-    private void plotValues(Plot plot, RSAMData data) {
-        if (data == null || data.getData() == null || data.getData().rows() == 0)
-            return;
-        
-        GenericDataMatrix gdm = new GenericDataMatrix(data.getData().copy());
+    try {
+      plot.render(g2);
+    } catch (PlotException e) {
+      e.printStackTrace();
+    }
+  }
 
-        gdm.despike(1, settings.valuesPeriodS);
+  /**
+   * Plots RSAM values.
+   * 
+   * @param data
+   *          the RSAM values to plot
+   */
+  private void plotValues(Plot plot, RSAMData data) {
+    if (data == null || data.getData() == null || data.getData().rows() == 0)
+      return;
 
-        if (settings.detrend)
-            gdm.detrend(1);
+    GenericDataMatrix gdm = new GenericDataMatrix(data.getData().copy());
 
-        if (settings.runningMedian)
-            gdm.set2median(1, settings.runningMedianPeriodS);
+    gdm.despike(1, settings.valuesPeriodS);
 
-        if (settings.runningMean)
-            gdm.set2mean(1, settings.runningMeanPeriodS);
+    if (settings.detrend)
+      gdm.detrend(1);
 
-        MatrixRenderer mr = new MatrixRenderer(gdm.getData(), false);
-        double max;
-        double min;
-        if (settings.getAutoScale()) {
-            max = gdm.max(1) + gdm.max(1) * .1;
-            min = gdm.min(1) - gdm.max(1) * .1;
-        } else {
-            max = settings.scaleMax;
-            min = settings.scaleMin;
-        }
+    if (settings.runningMedian)
+      gdm.set2median(1, settings.runningMedianPeriodS);
 
-        mr.setExtents(startTime, endTime, min, max);
-        mr.setLocation(X_OFFSET, Y_OFFSET, this.getWidth() - X_OFFSET - RIGHT_WIDTH, this.getHeight() - Y_OFFSET
-                - BOTTOM_HEIGHT);
-        mr.createDefaultAxis();
-        mr.setXAxisToTime(8, true, true);
+    if (settings.runningMean)
+      gdm.set2mean(1, settings.runningMeanPeriodS);
 
-        mr.getAxis().setLeftLabelAsText("RSAM Values", -55, Color.BLACK);
-
-        mr.createDefaultLineRenderers(Color.blue);
-        plot.addRenderer(mr);
+    MatrixRenderer mr = new MatrixRenderer(gdm.getData(), false);
+    double max;
+    double min;
+    if (settings.getAutoScale()) {
+      max = gdm.max(1) + gdm.max(1) * .1;
+      min = gdm.min(1) - gdm.max(1) * .1;
+    } else {
+      max = settings.scaleMax;
+      min = settings.scaleMin;
     }
 
-    /**
-     * Plots RSAM counts.
-     * 
-     * @param data
-     *            the RSAM values to plot
-     */
-    private void plotCounts(Plot plot, RSAMData data) {
-        
-        if (data == null || data.getData() == null || data.getData().rows() == 0 || data.getPeriod() != settings.countsPeriodS)
-            return;
-        
-        // get the relevant information for this channel
-        data.countEvents(settings.eventThreshold, settings.eventRatio, settings.eventMaxLengthS);
+    mr.setExtents(startTime, endTime, min, max);
+    mr.setLocation(X_OFFSET, Y_OFFSET, this.getWidth() - X_OFFSET - RIGHT_WIDTH,
+        this.getHeight() - Y_OFFSET - BOTTOM_HEIGHT);
+    mr.createDefaultAxis();
+    mr.setXAxisToTime(8, true, true);
 
-        // setup the histogram renderer with this data
-        HistogramRenderer hr = new HistogramRenderer(data.getCountsHistogram(settings.binSize));
-        hr.setLocation(X_OFFSET, Y_OFFSET, this.getWidth() - X_OFFSET - RIGHT_WIDTH, this.getHeight() - Y_OFFSET
-                - BOTTOM_HEIGHT);
-        hr.setDefaultExtents();
-        hr.setMinX(startTime);
-        hr.setMaxX(endTime);
+    mr.getAxis().setLeftLabelAsText("RSAM Values", -55, Color.BLACK);
 
-        // x axis decorations
-        hr.createDefaultAxis(8, 8, true, true, false, true, true, true);
-        hr.setXAxisToTime(8, true, true);
+    mr.createDefaultLineRenderers(Color.blue);
+    plot.addRenderer(mr);
+  }
 
-        hr.getAxis().setLeftLabelAsText("Events per " + settings.binSize, -55, Color.BLACK);
+  /**
+   * Plots RSAM counts.
+   * 
+   * @param data
+   *          the RSAM values to plot
+   */
+  private void plotCounts(Plot plot, RSAMData data) {
 
-        DoubleMatrix2D countsData = data.getCumulativeCounts();
-        if (countsData != null && countsData.rows() > 0) {
+    if (data == null || data.getData() == null || data.getData().rows() == 0
+        || data.getPeriod() != settings.countsPeriodS)
+      return;
 
-            double cmin = countsData.get(0, 1);
-            double cmax = countsData.get(countsData.rows() - 1, 1);
+    // get the relevant information for this channel
+    data.countEvents(settings.eventThreshold, settings.eventRatio, settings.eventMaxLengthS);
 
-            MatrixRenderer mr = new MatrixRenderer(countsData, false);
-            mr.setAllVisible(true);
-            mr.setLocation(X_OFFSET, Y_OFFSET, this.getWidth() - X_OFFSET - RIGHT_WIDTH, this.getHeight() - Y_OFFSET
-                    - BOTTOM_HEIGHT);
-            mr.setExtents(startTime, endTime, cmin, cmax + 1);
-            mr.createDefaultLineRenderers(Color.RED);
-            ShapeRenderer[] r = mr.getLineRenderers();
-            ((ShapeRenderer) r[0]).color = Color.RED;
-            ((ShapeRenderer) r[0]).stroke = new BasicStroke(2.0f);
+    // setup the histogram renderer with this data
+    HistogramRenderer hr = new HistogramRenderer(data.getCountsHistogram(settings.binSize));
+    hr.setLocation(X_OFFSET, Y_OFFSET, this.getWidth() - X_OFFSET - RIGHT_WIDTH,
+        this.getHeight() - Y_OFFSET - BOTTOM_HEIGHT);
+    hr.setDefaultExtents();
+    hr.setMinX(startTime);
+    hr.setMaxX(endTime);
 
-            // create the axis for the right hand side
-            AxisRenderer ar = new AxisRenderer(mr);
-            ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, 8, false), null);
-            mr.setAxis(ar);
+    // x axis decorations
+    hr.createDefaultAxis(8, 8, true, true, false, true, true, true);
+    hr.setXAxisToTime(8, true, true);
 
-            hr.addRenderer(mr);
-            hr.getAxis().setRightLabelAsText("Cumulative Counts");
+    hr.getAxis().setLeftLabelAsText("Events per " + settings.binSize, -55, Color.BLACK);
 
-        }
-        plot.addRenderer(hr);
+    DoubleMatrix2D countsData = data.getCumulativeCounts();
+    if (countsData != null && countsData.rows() > 0) {
+
+      double cmin = countsData.get(0, 1);
+      double cmax = countsData.get(countsData.rows() - 1, 1);
+
+      MatrixRenderer mr = new MatrixRenderer(countsData, false);
+      mr.setAllVisible(true);
+      mr.setLocation(X_OFFSET, Y_OFFSET, this.getWidth() - X_OFFSET - RIGHT_WIDTH,
+          this.getHeight() - Y_OFFSET - BOTTOM_HEIGHT);
+      mr.setExtents(startTime, endTime, cmin, cmax + 1);
+      mr.createDefaultLineRenderers(Color.RED);
+      ShapeRenderer[] r = mr.getLineRenderers();
+      ((ShapeRenderer) r[0]).color = Color.RED;
+      ((ShapeRenderer) r[0]).stroke = new BasicStroke(2.0f);
+
+      // create the axis for the right hand side
+      AxisRenderer ar = new AxisRenderer(mr);
+      ar.createRightTickLabels(SmartTick.autoTick(cmin, cmax, 8, false), null);
+      mr.setAxis(ar);
+
+      hr.addRenderer(mr);
+      hr.getAxis().setRightLabelAsText("Cumulative Counts");
+
     }
+    plot.addRenderer(hr);
+  }
 
 
-    /**
-     * Overload of Component. Always returns the developer-specified size.
-     * 
-     * @return the size of the component
-     */
-    public Dimension getPreferredSize() {
-        return getSize();
-    }
+  /**
+   * Overload of Component. Always returns the developer-specified size.
+   * 
+   * @return the size of the component
+   */
+  public Dimension getPreferredSize() {
+    return getSize();
+  }
 
-    /**
-     * Overload of Component. Always returns the developer-specified size.
-     * 
-     * @return the size of the component
-     */
-    public Dimension getMinimumSize() {
-        return getSize();
-    }
+  /**
+   * Overload of Component. Always returns the developer-specified size.
+   * 
+   * @return the size of the component
+   */
+  public Dimension getMinimumSize() {
+    return getSize();
+  }
 }

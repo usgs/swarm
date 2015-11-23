@@ -3,7 +3,7 @@ package gov.usgs.volcanoes.swarm.data.seedLink;
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
-import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.ChannelUtil;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.DataSourceType;
@@ -65,8 +65,8 @@ public class SeedLinkSource extends SeismicDataSource
 		if (obj instanceof Wave)
 		{
 			Wave wave = (Wave) obj;
-			return "Wave(s=" + Util.j2KToDateString(wave.getStartTime())
-					+ ", e=" + Util.j2KToDateString(wave.getEndTime())
+			return "Wave(s=" + J2kSec.toDateString(wave.getStartTime())
+					+ ", e=" + J2kSec.toDateString(wave.getEndTime())
 					+ ", sr=" + wave.getSamplingRate() + ", n="
 					+ wave.buffer.length + ")";
 		}
@@ -74,8 +74,8 @@ public class SeedLinkSource extends SeismicDataSource
 		{
 			HelicorderData hd = (HelicorderData) obj;
 			return "HelicorderData(s="
-					+ Util.j2KToDateString(hd.getStartTime()) + ", e="
-					+ Util.j2KToDateString(hd.getEndTime()) + ")";
+					+ J2kSec.toDateString(hd.getStartTime()) + ", e="
+					+ J2kSec.toDateString(hd.getEndTime()) + ")";
 		}
 		else
 		{
@@ -268,8 +268,8 @@ public class SeedLinkSource extends SeismicDataSource
 			logger.log(
 					level,
 					logPrefixText + "getHelicorder(scnl=" + scnl + ", start="
-							+ Util.j2KToDateString(t1) + ", end="
-							+ Util.j2KToDateString(t2) + ")\nDATA="
+							+ J2kSec.toDateString(t1) + ", end="
+							+ J2kSec.toDateString(t2) + ")\nDATA="
 							+ (hd == null ? "NONE" : toString(hd)));
 		}
 		return hd;
@@ -304,7 +304,7 @@ public class SeedLinkSource extends SeismicDataSource
 		if (wave == null)
 		{
 			// remove all data in the future to avoid blocking
-			final double now = Util.nowJ2K();
+			final double now = J2kSec.now();
 			if (t1 <= now)
 			{
 				final SeedLinkClient client = createClient();
@@ -318,8 +318,8 @@ public class SeedLinkSource extends SeismicDataSource
 			logger.log(
 					level,
 					logPrefixText + "getWave(scnl=" + scnl + ", start="
-							+ Util.j2KToDateString(t1) + ", end="
-							+ Util.j2KToDateString(t2) + ")\nDATA="
+							+ J2kSec.toDateString(t1) + ", end="
+							+ J2kSec.toDateString(t2) + ")\nDATA="
 							+ (wave == null ? "NONE" : toString(wave)));
 		}
 		return wave;

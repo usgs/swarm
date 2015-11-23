@@ -1,3 +1,9 @@
+/**
+ * I waive copyright and related rights in the this work worldwide through the CC0 1.0
+ * Universal public domain dedication.
+ * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ */
+
 package gov.usgs.volcanoes.swarm.data.seedLink;
 
 import edu.iris.Fissures.seed.container.Blockette;
@@ -5,7 +11,7 @@ import edu.iris.Fissures.seed.container.Btime;
 import edu.iris.Fissures.seed.container.Waveform;
 import edu.iris.Fissures.seed.exception.SeedException;
 import gov.usgs.plot.data.Wave;
-import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.ChannelInfo;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
@@ -107,7 +113,7 @@ public class SeedLinkClient extends BaseSLClient
 		{
 			return null;
 		}
-		return Util.j2KToDateString(j, "yyyy,MM,dd,HH,mm,ss");
+		return J2kSec.format("yyyy,MM,dd,HH,mm,ss", j);
 	}
 
 	/**
@@ -470,8 +476,7 @@ public class SeedLinkClient extends BaseSLClient
 				final Btime bTime = getBtime(blockette, 8);
 				final double factor = getDouble(blockette, 10);
 				final double multiplier = getDouble(blockette, 11);
-				final double startTime = Util
-						.dateToJ2K(btimeToDate(bTime));
+				final double startTime = J2kSec.fromDate(btimeToDate(bTime));
 				final double samplingRate = getSampleRate(factor,
 						multiplier);
 				final Wave wave = new Wave();

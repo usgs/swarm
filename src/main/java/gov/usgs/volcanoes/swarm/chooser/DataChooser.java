@@ -1,33 +1,10 @@
-package gov.usgs.volcanoes.swarm.chooser;
+/**
+ * I waive copyright and related rights in the this work worldwide through the CC0 1.0
+ * Universal public domain dedication.
+ * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ */
 
-import gov.usgs.proj.GeoRange;
-import gov.usgs.util.ConfigFile;
-import gov.usgs.util.Pair;
-import gov.usgs.util.Time;
-import gov.usgs.util.Util;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Messages;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.SwarmUtil;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.chooser.node.AbstractChooserNode;
-import gov.usgs.volcanoes.swarm.chooser.node.ChannelNode;
-import gov.usgs.volcanoes.swarm.chooser.node.GroupNode;
-import gov.usgs.volcanoes.swarm.chooser.node.MessageNode;
-import gov.usgs.volcanoes.swarm.chooser.node.ProgressNode;
-import gov.usgs.volcanoes.swarm.chooser.node.RootNode;
-import gov.usgs.volcanoes.swarm.chooser.node.ServerNode;
-import gov.usgs.volcanoes.swarm.data.DataSourceType;
-import gov.usgs.volcanoes.swarm.data.FileDataSource;
-import gov.usgs.volcanoes.swarm.data.RsamSource;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSourceListener;
-import gov.usgs.volcanoes.swarm.data.WWSSource;
-import gov.usgs.volcanoes.swarm.map.MapFrame;
-import gov.usgs.volcanoes.swarm.wave.SwarmMultiMonitors;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+package gov.usgs.volcanoes.swarm.chooser;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -85,6 +62,35 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+
+import gov.usgs.proj.GeoRange;
+import gov.usgs.util.ConfigFile;
+import gov.usgs.util.Pair;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Messages;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwarmUtil;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.chooser.node.AbstractChooserNode;
+import gov.usgs.volcanoes.swarm.chooser.node.ChannelNode;
+import gov.usgs.volcanoes.swarm.chooser.node.GroupNode;
+import gov.usgs.volcanoes.swarm.chooser.node.MessageNode;
+import gov.usgs.volcanoes.swarm.chooser.node.ProgressNode;
+import gov.usgs.volcanoes.swarm.chooser.node.RootNode;
+import gov.usgs.volcanoes.swarm.chooser.node.ServerNode;
+import gov.usgs.volcanoes.swarm.data.DataSourceType;
+import gov.usgs.volcanoes.swarm.data.FileDataSource;
+import gov.usgs.volcanoes.swarm.data.RsamSource;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSourceListener;
+import gov.usgs.volcanoes.swarm.data.WWSSource;
+import gov.usgs.volcanoes.swarm.map.MapFrame;
+import gov.usgs.volcanoes.swarm.wave.SwarmMultiMonitors;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 
 /**
  * TODO: tooltip over data source describes data source TODO: refresh data
@@ -383,7 +389,7 @@ public class DataChooser extends JPanel {
         t += "2359";
 
       try {
-        j2k = Time.parseEx("yyyyMMddHHmm", t);
+        j2k = J2kSec.parse("yyyyMMddHHmm", t);
         addTimeToBox(t0);
       } catch (ParseException e) {
         String message =
@@ -762,7 +768,7 @@ public class DataChooser extends JPanel {
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         List<String> list = Collections.list(Collections.enumeration(servers.keySet()));
-        Collections.sort(list, Util.getIgnoreCaseStringComparator());
+        Collections.sort(list, StringUtils.getCaseInsensitiveStringComparator());
         for (String key : list) {
           SeismicDataSource sds = servers.get(key);
           ServerNode node = new ServerNode(sds);
@@ -1047,15 +1053,14 @@ public class DataChooser extends JPanel {
       double maxTime = md.getMaxTime();
       String ttText = null;
       if (!Double.isNaN(minTime) && !Double.isNaN(maxTime))
-        ttText = String.format("%s - %s",
-            Util.j2KToDateString(minTime, ChannelNode.TOOL_TIP_DATE_FORMAT),
-            Util.j2KToDateString(maxTime, ChannelNode.TOOL_TIP_DATE_FORMAT));
+        ttText = String.format("%s - %s", J2kSec.format(ChannelNode.TOOL_TIP_DATE_FORMAT, minTime),
+            J2kSec.format(ChannelNode.TOOL_TIP_DATE_FORMAT, maxTime));
       else
         ttText = "No data";
 
       setToolTipText(ttText);
 
-      if (Double.isNaN(maxTime) || Util.nowJ2K() - maxTime > ChannelNode.ONE_DAY_S)
+      if (Double.isNaN(maxTime) || J2kSec.now() - maxTime > ChannelNode.ONE_DAY_S)
         setForeground(Color.GRAY);
 
       return this;
