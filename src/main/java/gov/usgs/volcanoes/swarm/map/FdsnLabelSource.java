@@ -1,6 +1,7 @@
 package gov.usgs.volcanoes.swarm.map;
 
 import java.awt.geom.Point2D;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,8 +20,13 @@ import edu.sc.seis.seisFile.fdsnws.quakeml.Magnitude;
 import edu.sc.seis.seisFile.fdsnws.quakeml.Origin;
 import edu.sc.seis.seisFile.fdsnws.quakeml.QuakeMLTagNames;
 import edu.sc.seis.seisFile.fdsnws.quakeml.Quakeml;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gov.usgs.proj.GeoRange;
-import gov.usgs.util.Time;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.time.Time;
 
 /*
  * A class to retrieve events from IRIS for plotting on the map.
@@ -28,6 +34,8 @@ import gov.usgs.util.Time;
  * @author: Tom Parker
  */
 public class FdsnLabelSource implements LabelSource {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(FdsnLabelSource.class);
 
 
   public List<? extends ClickableGeoLabel> getLabels() {
@@ -85,7 +93,12 @@ public class FdsnLabelSource implements LabelSource {
         h.location = new Point2D.Double(lon, lat);
         h.text = "M" + m.getMag().getValue();
         h.depth = o.getDepth().getValue();
-        h.time = Time.parse(Time.FDSN_TIME_FORMAT, o.getTime().getValue());
+        try {
+          h.time = J2kSec.parse(Time.FDSN_TIME_FORMAT, o.getTime().getValue());
+        } catch (ParseException e1) {
+          LOGGER.info("Can't parse label date: {}", o.getTime().getValue());
+          continue;
+        }
         hypos.add(h);
 
       }

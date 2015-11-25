@@ -1,6 +1,5 @@
 package gov.usgs.volcanoes.swarm;
 
-import gov.usgs.util.ConfigFile;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -10,6 +9,8 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
+
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
 
 /**
  * 

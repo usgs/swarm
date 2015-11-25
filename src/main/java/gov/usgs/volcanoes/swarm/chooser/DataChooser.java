@@ -64,8 +64,8 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 import gov.usgs.proj.GeoRange;
-import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Pair;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.swarm.Icons;
