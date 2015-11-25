@@ -1,8 +1,8 @@
 package gov.usgs.volcanoes.swarm.data;
 
 import gov.usgs.plot.data.Wave;
-import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Log;
+import gov.usgs.volcanoes.core.time.CurrentTime;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -50,7 +50,7 @@ public class Gulper implements Runnable {
     channel = ch;
     lastTime = t2;
 
-    double now = CurrentTime.getInstance().nowJ2K();
+    double now = CurrentTime.getInstance().nowJ2k();
     if (lastTime > now)
       lastTime = now;
   }

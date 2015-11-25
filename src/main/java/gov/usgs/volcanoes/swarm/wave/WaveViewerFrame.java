@@ -1,8 +1,8 @@
 package gov.usgs.volcanoes.swarm.wave;
 
 import gov.usgs.plot.data.Wave;
-import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.time.CurrentTime;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.Throbber;
@@ -166,7 +166,7 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable
 	public void getWave()
 	{
 		throbber.increment();
-		double now = CurrentTime.getInstance().nowJ2K();
+		double now = CurrentTime.getInstance().nowJ2k();
 		Wave sw = dataSource.getWave(channel, now - SPANS[spanIndex], now);
 //		System.out.println(sw);
 		waveViewPanel.setWorking(true);

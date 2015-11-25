@@ -1,17 +1,5 @@
 package gov.usgs.volcanoes.swarm.data;
 
-import gov.usgs.plot.data.HelicorderData;
-import gov.usgs.plot.data.RSAMData;
-import gov.usgs.plot.data.Wave;
-import gov.usgs.plot.data.file.FileType;
-import gov.usgs.plot.data.file.SeismicDataFile;
-import gov.usgs.util.CurrentTime;
-import gov.usgs.volcanoes.swarm.FileTypeDialog;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.map.MapFrame;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +9,18 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JOptionPane;
+
+import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.Wave;
+import gov.usgs.plot.data.file.FileType;
+import gov.usgs.plot.data.file.SeismicDataFile;
+import gov.usgs.volcanoes.core.time.CurrentTime;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.swarm.FileTypeDialog;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.map.MapFrame;
 
 /**
  * TODO: remove reference to application frame. Non-GUI apps want to use the class too.
@@ -167,7 +167,7 @@ public class FileDataSource extends AbstractCachingDataSource {
             return null;
 
         double dt = t2 - t1;
-        double now = CurrentTime.getInstance().nowJ2K();
+        double now = CurrentTime.getInstance().nowJ2k();
         if (Math.abs(now - t2) < 3600) {
             t2 = ct[1];
             t1 = t2 - dt;

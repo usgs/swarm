@@ -2,8 +2,8 @@ package gov.usgs.volcanoes.swarm.rsam;
 
 import gov.usgs.math.BinSize;
 import gov.usgs.math.Butterworth;
-import gov.usgs.util.ConfigFile;
-import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.util.StringUtils;
 
 import java.io.File;
 import java.util.HashSet;
@@ -108,22 +108,22 @@ public class RsamViewSettings {
 
     public void set(ConfigFile cf) {
         viewType = ViewType.valueOf(cf.getString("viewType"));
-        valuesPeriodS = Util.stringToInt(cf.getString("valuesPeriod"), DEFAULT_RSAM_VIEW_SETTINGS.valuesPeriodS);
-        countsPeriodS = Util.stringToInt(cf.getString("countsPeriod"), DEFAULT_RSAM_VIEW_SETTINGS.countsPeriodS);
-        detrend = Util.stringToBoolean(cf.getString("detrend"), DEFAULT_RSAM_VIEW_SETTINGS.detrend);
-        runningMedian = Util.stringToBoolean(cf.getString("runningMedian"), DEFAULT_RSAM_VIEW_SETTINGS.runningMedian);
-        runningMedianPeriodS = Util.stringToDouble(cf.getString("runningMedianPeriod"),
+        valuesPeriodS = StringUtils.stringToInt(cf.getString("valuesPeriod"), DEFAULT_RSAM_VIEW_SETTINGS.valuesPeriodS);
+        countsPeriodS = StringUtils.stringToInt(cf.getString("countsPeriod"), DEFAULT_RSAM_VIEW_SETTINGS.countsPeriodS);
+        detrend = StringUtils.stringToBoolean(cf.getString("detrend"), DEFAULT_RSAM_VIEW_SETTINGS.detrend);
+        runningMedian = StringUtils.stringToBoolean(cf.getString("runningMedian"), DEFAULT_RSAM_VIEW_SETTINGS.runningMedian);
+        runningMedianPeriodS = StringUtils.stringToDouble(cf.getString("runningMedianPeriod"),
                 DEFAULT_RSAM_VIEW_SETTINGS.runningMedianPeriodS);
-        runningMean = Util.stringToBoolean(cf.getString("runningMean"), DEFAULT_RSAM_VIEW_SETTINGS.runningMean);
-        runningMeanPeriodS = Util.stringToDouble(cf.getString("runningMeanPeriod"),
+        runningMean = StringUtils.stringToBoolean(cf.getString("runningMean"), DEFAULT_RSAM_VIEW_SETTINGS.runningMean);
+        runningMeanPeriodS = StringUtils.stringToDouble(cf.getString("runningMeanPeriod"),
                 DEFAULT_RSAM_VIEW_SETTINGS.runningMeanPeriodS);
-        eventRatio = Util.stringToDouble(cf.getString("eventRatio"), DEFAULT_RSAM_VIEW_SETTINGS.eventRatio);
-        eventThreshold = Util.stringToInt(cf.getString("eventThreshold"), DEFAULT_RSAM_VIEW_SETTINGS.eventThreshold);
-        eventMaxLengthS = Util.stringToDouble(cf.getString("eventMaxLength"), DEFAULT_RSAM_VIEW_SETTINGS.eventMaxLengthS);
+        eventRatio = StringUtils.stringToDouble(cf.getString("eventRatio"), DEFAULT_RSAM_VIEW_SETTINGS.eventRatio);
+        eventThreshold = StringUtils.stringToInt(cf.getString("eventThreshold"), DEFAULT_RSAM_VIEW_SETTINGS.eventThreshold);
+        eventMaxLengthS = StringUtils.stringToDouble(cf.getString("eventMaxLength"), DEFAULT_RSAM_VIEW_SETTINGS.eventMaxLengthS);
         binSize = BinSize.fromString(cf.getString("binSize"));
-        autoScale = Util.stringToBoolean(cf.getString("autoScale"), DEFAULT_RSAM_VIEW_SETTINGS.autoScale);
-        scaleMax = Util.stringToInt(cf.getString("scaleMax"), DEFAULT_RSAM_VIEW_SETTINGS.scaleMax);
-        scaleMin = Util.stringToInt(cf.getString("scaleMin"), DEFAULT_RSAM_VIEW_SETTINGS.scaleMin);
+        autoScale = StringUtils.stringToBoolean(cf.getString("autoScale"), DEFAULT_RSAM_VIEW_SETTINGS.autoScale);
+        scaleMax = StringUtils.stringToInt(cf.getString("scaleMax"), DEFAULT_RSAM_VIEW_SETTINGS.scaleMax);
+        scaleMin = StringUtils.stringToInt(cf.getString("scaleMin"), DEFAULT_RSAM_VIEW_SETTINGS.scaleMin);
     }
 
     public void save(ConfigFile cf, String prefix) {

@@ -1,11 +1,11 @@
 package gov.usgs.volcanoes.swarm;
 
 import gov.usgs.plot.data.Wave;
-import gov.usgs.util.ConfigFile;
-import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Log;
 import gov.usgs.util.Util;
 import gov.usgs.util.ui.GlobalKeyManager;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.time.CurrentTime;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
@@ -521,7 +521,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
     double st = 0;
     double et = 0;
     if (cwvp == null) {
-      double now = CurrentTime.getInstance().nowJ2K();
+      double now = CurrentTime.getInstance().nowJ2k();
       st = now - 180;
       et = now;
     } else {

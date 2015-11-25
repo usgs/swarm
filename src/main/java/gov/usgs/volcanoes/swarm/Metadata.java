@@ -1,8 +1,8 @@
 package gov.usgs.volcanoes.swarm;
 
 import gov.usgs.proj.Projection;
-import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Pair;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 
 import java.awt.geom.Point2D;

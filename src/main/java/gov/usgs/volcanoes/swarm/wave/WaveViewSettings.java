@@ -1,8 +1,8 @@
 package gov.usgs.volcanoes.swarm.wave;
 
-import gov.usgs.math.Butterworth;
-import gov.usgs.util.ConfigFile;
-import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.math.Butterworth;
+import gov.usgs.volcanoes.core.util.StringUtils;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -155,26 +155,26 @@ public class WaveViewSettings
 	{
 		viewType = ViewType.fromString(cf.getString("viewType"));
 		filter.set(cf.getSubConfig("filter"));
-		maxAmp = Util.stringToDouble(cf.getString("maxAmp"), DEFAULT_WAVE_VIEW_SETTINGS.maxAmp);
-		minAmp = Util.stringToDouble(cf.getString("minAmp"), DEFAULT_WAVE_VIEW_SETTINGS.minAmp);
-		maxPower = Util.stringToDouble(cf.getString("maxPower"), DEFAULT_WAVE_VIEW_SETTINGS.maxPower);
-		minPower = Util.stringToDouble(cf.getString("minPower"), DEFAULT_WAVE_VIEW_SETTINGS.minPower);
-		minFreq = Util.stringToDouble(cf.getString("minFreq"), DEFAULT_WAVE_VIEW_SETTINGS.minFreq);
-		maxFreq = Util.stringToDouble(cf.getString("maxFreq"), DEFAULT_WAVE_VIEW_SETTINGS.maxFreq);
-		spectrogramOverlap = Util.stringToDouble(cf.getString("spectrogramOverlap"), DEFAULT_WAVE_VIEW_SETTINGS.spectrogramOverlap);
+		maxAmp = StringUtils.stringToDouble(cf.getString("maxAmp"), DEFAULT_WAVE_VIEW_SETTINGS.maxAmp);
+		minAmp = StringUtils.stringToDouble(cf.getString("minAmp"), DEFAULT_WAVE_VIEW_SETTINGS.minAmp);
+		maxPower = StringUtils.stringToDouble(cf.getString("maxPower"), DEFAULT_WAVE_VIEW_SETTINGS.maxPower);
+		minPower = StringUtils.stringToDouble(cf.getString("minPower"), DEFAULT_WAVE_VIEW_SETTINGS.minPower);
+		minFreq = StringUtils.stringToDouble(cf.getString("minFreq"), DEFAULT_WAVE_VIEW_SETTINGS.minFreq);
+		maxFreq = StringUtils.stringToDouble(cf.getString("maxFreq"), DEFAULT_WAVE_VIEW_SETTINGS.maxFreq);
+		spectrogramOverlap = StringUtils.stringToDouble(cf.getString("spectrogramOverlap"), DEFAULT_WAVE_VIEW_SETTINGS.spectrogramOverlap);
 		
-		removeBias = Util.stringToBoolean(cf.getString("removeBias"), DEFAULT_WAVE_VIEW_SETTINGS.removeBias);
-		filterOn = Util.stringToBoolean(cf.getString("filterOn"), DEFAULT_WAVE_VIEW_SETTINGS.filterOn);
-		zeroPhaseShift = Util.stringToBoolean(cf.getString("zeroPhaseShift"), DEFAULT_WAVE_VIEW_SETTINGS.zeroPhaseShift);
-		autoScaleAmp = Util.stringToBoolean(cf.getString("autoScaleAmp"), DEFAULT_WAVE_VIEW_SETTINGS.autoScaleAmp);
-		autoScaleAmpMemory = Util.stringToBoolean(cf.getString("autoScaleAmpMemory"), DEFAULT_WAVE_VIEW_SETTINGS.autoScaleAmpMemory);
-		autoScalePower = Util.stringToBoolean(cf.getString("autoScalePower"), DEFAULT_WAVE_VIEW_SETTINGS.autoScalePower);
-		autoScalePowerMemory = Util.stringToBoolean(cf.getString("autoScalePowerMemory"), DEFAULT_WAVE_VIEW_SETTINGS.autoScalePowerMemory);
-		useUnits = Util.stringToBoolean(cf.getString("useUnits"), DEFAULT_WAVE_VIEW_SETTINGS.useUnits);
-		logFreq = Util.stringToBoolean(cf.getString("logFreq"), DEFAULT_WAVE_VIEW_SETTINGS.logFreq);
-		logPower = Util.stringToBoolean(cf.getString("logPower"), DEFAULT_WAVE_VIEW_SETTINGS.logPower);
-		binSize = Util.stringToDouble(cf.getString("binSize"), DEFAULT_WAVE_VIEW_SETTINGS.binSize);
-		nfft = Util.stringToInt(cf.getString("nfft"), DEFAULT_WAVE_VIEW_SETTINGS.nfft);
+		removeBias = StringUtils.stringToBoolean(cf.getString("removeBias"), DEFAULT_WAVE_VIEW_SETTINGS.removeBias);
+		filterOn = StringUtils.stringToBoolean(cf.getString("filterOn"), DEFAULT_WAVE_VIEW_SETTINGS.filterOn);
+		zeroPhaseShift = StringUtils.stringToBoolean(cf.getString("zeroPhaseShift"), DEFAULT_WAVE_VIEW_SETTINGS.zeroPhaseShift);
+		autoScaleAmp = StringUtils.stringToBoolean(cf.getString("autoScaleAmp"), DEFAULT_WAVE_VIEW_SETTINGS.autoScaleAmp);
+		autoScaleAmpMemory = StringUtils.stringToBoolean(cf.getString("autoScaleAmpMemory"), DEFAULT_WAVE_VIEW_SETTINGS.autoScaleAmpMemory);
+		autoScalePower = StringUtils.stringToBoolean(cf.getString("autoScalePower"), DEFAULT_WAVE_VIEW_SETTINGS.autoScalePower);
+		autoScalePowerMemory = StringUtils.stringToBoolean(cf.getString("autoScalePowerMemory"), DEFAULT_WAVE_VIEW_SETTINGS.autoScalePowerMemory);
+		useUnits = StringUtils.stringToBoolean(cf.getString("useUnits"), DEFAULT_WAVE_VIEW_SETTINGS.useUnits);
+		logFreq = StringUtils.stringToBoolean(cf.getString("logFreq"), DEFAULT_WAVE_VIEW_SETTINGS.logFreq);
+		logPower = StringUtils.stringToBoolean(cf.getString("logPower"), DEFAULT_WAVE_VIEW_SETTINGS.logPower);
+		binSize = StringUtils.stringToDouble(cf.getString("binSize"), DEFAULT_WAVE_VIEW_SETTINGS.binSize);
+		nfft = StringUtils.stringToInt(cf.getString("nfft"), DEFAULT_WAVE_VIEW_SETTINGS.nfft);
 	}
 	
 	public void save(ConfigFile cf, String prefix)

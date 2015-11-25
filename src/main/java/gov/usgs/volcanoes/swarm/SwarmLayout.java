@@ -1,8 +1,8 @@
 package gov.usgs.volcanoes.swarm;
 
-import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Log;
-import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
@@ -232,8 +232,8 @@ public class SwarmLayout implements Comparable<SwarmLayout>
 		String k = config.getString("kiosk");
 		if (k == null)
 			k = "false";
-		int x = Util.stringToInt(config.getString("kioskX"), -1);
-		int y = Util.stringToInt(config.getString("kioskY"), -1);
+		int x = StringUtils.stringToInt(config.getString("kioskX"), -1);
+		int y = StringUtils.stringToInt(config.getString("kioskY"), -1);
 		
 		boolean kiosk = Boolean.parseBoolean(k);
 		if (kiosk && x != -1 && y != -1)

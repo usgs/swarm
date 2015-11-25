@@ -1,6 +1,6 @@
 package gov.usgs.volcanoes.swarm.wave;
 
-import gov.usgs.math.Butterworth.FilterType;
+import gov.usgs.volcanoes.core.math.Butterworth.FilterType;
 import gov.usgs.volcanoes.swarm.SwarmDialog;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
 

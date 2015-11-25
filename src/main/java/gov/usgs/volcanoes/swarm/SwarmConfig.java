@@ -1,9 +1,9 @@
 package gov.usgs.volcanoes.swarm;
 
 import gov.usgs.plot.map.WMSGeoImageSet;
-import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Log;
-import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.swarm.data.DataSourceType;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 
@@ -180,7 +180,7 @@ public class SwarmConfig {
     candidateNames
         .add(System.getProperty("user.home") + File.separatorChar + DEFAULT_DATA_SOURCES_FILE);
     String configName =
-        Util.stringToString(ConfigFile.findConfig(candidateNames), DEFAULT_DATA_SOURCES_FILE);
+        StringUtils.stringToString(ConfigFile.findConfig(candidateNames), DEFAULT_DATA_SOURCES_FILE);
 
     ConfigFile cf = new ConfigFile(configName);
     List<String> servers = cf.getList("server");
@@ -268,77 +268,77 @@ public class SwarmConfig {
   public void parseConfig(ConfigFile config) {
     configFilename = config.getString("configFile");
 
-    windowX = Util.stringToInt(config.getString("windowX"), 10);
-    windowY = Util.stringToInt(config.getString("windowY"), 10);
-    windowWidth = Util.stringToInt(config.getString("windowSizeX"), 1000);
-    windowHeight = Util.stringToInt(config.getString("windowSizeY"), 700);
-    windowMaximized = Util.stringToBoolean(config.getString("windowMaximized"), false);
+    windowX = StringUtils.stringToInt(config.getString("windowX"), 10);
+    windowY = StringUtils.stringToInt(config.getString("windowY"), 10);
+    windowWidth = StringUtils.stringToInt(config.getString("windowSizeX"), 1000);
+    windowHeight = StringUtils.stringToInt(config.getString("windowSizeY"), 700);
+    windowMaximized = StringUtils.stringToBoolean(config.getString("windowMaximized"), false);
 
-    chooserDividerLocation = Util.stringToInt(config.getString("chooserDividerLocation"), 200);
-    chooserVisible = Util.stringToBoolean(config.getString("chooserVisible"), true);
+    chooserDividerLocation = StringUtils.stringToInt(config.getString("chooserDividerLocation"), 200);
+    chooserVisible = StringUtils.stringToBoolean(config.getString("chooserVisible"), true);
 
-    nearestDividerLocation = Util.stringToInt(config.getString("nearestDividerLocation"), 600);
+    nearestDividerLocation = StringUtils.stringToInt(config.getString("nearestDividerLocation"), 600);
 
     specificTimeZone =
-        TimeZone.getTimeZone(Util.stringToString(config.getString("specificTimeZone"), "UTC"));
-    useInstrumentTimeZone = Util.stringToBoolean(config.getString("useInstrumentTimeZone"), true);
-    useLocalTimeZone = Util.stringToBoolean(config.getString("useLocalTimeZone"), true);
+        TimeZone.getTimeZone(StringUtils.stringToString(config.getString("specificTimeZone"), "UTC"));
+    useInstrumentTimeZone = StringUtils.stringToBoolean(config.getString("useInstrumentTimeZone"), true);
+    useLocalTimeZone = StringUtils.stringToBoolean(config.getString("useLocalTimeZone"), true);
 
-    useLargeCursor = Util.stringToBoolean(config.getString("useLargeCursor"), false);
+    useLargeCursor = StringUtils.stringToBoolean(config.getString("useLargeCursor"), false);
 
-    span = Util.stringToInt(config.getString("span"), 24);
-    timeChunk = Util.stringToInt(config.getString("timeChunk"), 30);
+    span = StringUtils.stringToInt(config.getString("span"), 24);
+    timeChunk = StringUtils.stringToInt(config.getString("timeChunk"), 30);
 
-    lastPath = Util.stringToString(config.getString("lastPath"), "default");
+    lastPath = StringUtils.stringToString(config.getString("lastPath"), "default");
 
-    kiosk = Util.stringToString(config.getString("kiosk"), "false");
+    kiosk = StringUtils.stringToString(config.getString("kiosk"), "false");
 
-    saveConfig = Util.stringToBoolean(config.getString("saveConfig"), true);
+    saveConfig = StringUtils.stringToBoolean(config.getString("saveConfig"), true);
 
-    durationEnabled = Util.stringToBoolean(config.getString("durationEnabled"), false);
-    durationA = Util.stringToDouble(config.getString("durationA"), 1.86);
-    durationB = Util.stringToDouble(config.getString("durationB"), -0.85);
+    durationEnabled = StringUtils.stringToBoolean(config.getString("durationEnabled"), false);
+    durationA = StringUtils.stringToDouble(config.getString("durationA"), 1.86);
+    durationB = StringUtils.stringToDouble(config.getString("durationB"), -0.85);
 
-    showClip = Util.stringToBoolean(config.getString("showClip"), true);
-    alertClip = Util.stringToBoolean(config.getString("alertClip"), false);
-    alertClipTimeout = Util.stringToInt(config.getString("alertClipTimeout"), 5);
+    showClip = StringUtils.stringToBoolean(config.getString("showClip"), true);
+    alertClip = StringUtils.stringToBoolean(config.getString("alertClip"), false);
+    alertClipTimeout = StringUtils.stringToInt(config.getString("alertClipTimeout"), 5);
 
-    clipboardVisible = Util.stringToBoolean(config.getString("clipboardVisible"), true);
-    clipboardX = Util.stringToInt(config.getString("clipboardX"), 25);
-    clipboardY = Util.stringToInt(config.getString("clipboardY"), 25);
-    clipboardWidth = Util.stringToInt(config.getString("clipboardSizeX"), 600);
-    clipboardHeight = Util.stringToInt(config.getString("clipboardSizeY"), 600);
-    clipboardMaximized = Util.stringToBoolean(config.getString("clipboardMaximized"), false);
+    clipboardVisible = StringUtils.stringToBoolean(config.getString("clipboardVisible"), true);
+    clipboardX = StringUtils.stringToInt(config.getString("clipboardX"), 25);
+    clipboardY = StringUtils.stringToInt(config.getString("clipboardY"), 25);
+    clipboardWidth = StringUtils.stringToInt(config.getString("clipboardSizeX"), 600);
+    clipboardHeight = StringUtils.stringToInt(config.getString("clipboardSizeY"), 600);
+    clipboardMaximized = StringUtils.stringToBoolean(config.getString("clipboardMaximized"), false);
 
-    mapPath = Util.stringToString(config.getString("mapPath"), "mapdata");
-    mapVisible = Util.stringToBoolean(config.getString("mapVisible"), true);
-    mapX = Util.stringToInt(config.getString("mapX"), 5);
-    mapY = Util.stringToInt(config.getString("mapY"), 5);
+    mapPath = StringUtils.stringToString(config.getString("mapPath"), "mapdata");
+    mapVisible = StringUtils.stringToBoolean(config.getString("mapVisible"), true);
+    mapX = StringUtils.stringToInt(config.getString("mapX"), 5);
+    mapY = StringUtils.stringToInt(config.getString("mapY"), 5);
 
-    mapWidth = Util.stringToInt(config.getString("mapWidth"), 600);
+    mapWidth = StringUtils.stringToInt(config.getString("mapWidth"), 600);
     mapWidth = Math.max(mapWidth, 100);
 
-    mapHeight = Util.stringToInt(config.getString("mapHeight"), 510);
+    mapHeight = StringUtils.stringToInt(config.getString("mapHeight"), 510);
     mapHeight = Math.max(mapHeight, 100);
 
-    mapMaximized = Util.stringToBoolean(config.getString("mapMaximized"), false);
+    mapMaximized = StringUtils.stringToBoolean(config.getString("mapMaximized"), false);
 
-    mapScale = Util.stringToDouble(config.getString("mapScale"), 80000);
-    mapLongitude = Util.stringToDouble(config.getString("mapLongitude"), -180);
-    mapLatitude = Util.stringToDouble(config.getString("mapLatitude"), 0);
-    mapLineWidth = Util.stringToInt(config.getString("mapLineWidth"), 2);
-    mapLineColor = Util.stringToInt(config.getString("mapLineColor"), 0x000000);
+    mapScale = StringUtils.stringToDouble(config.getString("mapScale"), 80000);
+    mapLongitude = StringUtils.stringToDouble(config.getString("mapLongitude"), -180);
+    mapLatitude = StringUtils.stringToDouble(config.getString("mapLatitude"), 0);
+    mapLineWidth = StringUtils.stringToInt(config.getString("mapLineWidth"), 2);
+    mapLineColor = StringUtils.stringToInt(config.getString("mapLineColor"), 0x000000);
 
-    useWMS = Util.stringToBoolean(config.getString("useWMS"));
-    wmsServer = Util.stringToString(config.getString("wmsServer"), WMSGeoImageSet.DEFAULT_SERVER);
-    wmsLayer = Util.stringToString(config.getString("wmsLayer"), WMSGeoImageSet.DEFAULT_LAYER);
-    wmsStyles = Util.stringToString(config.getString("wmsStyles"), WMSGeoImageSet.DEFAULT_STYLE);
+    useWMS = StringUtils.stringToBoolean(config.getString("useWMS"));
+    wmsServer = StringUtils.stringToString(config.getString("wmsServer"), WMSGeoImageSet.DEFAULT_SERVER);
+    wmsLayer = StringUtils.stringToString(config.getString("wmsLayer"), WMSGeoImageSet.DEFAULT_LAYER);
+    wmsStyles = StringUtils.stringToString(config.getString("wmsStyles"), WMSGeoImageSet.DEFAULT_STYLE);
 
-    labelSource = Util.stringToString(config.getString("labelSource"), "");
+    labelSource = StringUtils.stringToString(config.getString("labelSource"), "");
 
-    fdsnDataselectURL = Util.stringToString(config.getString("fdsnDataselectURL"),
+    fdsnDataselectURL = StringUtils.stringToString(config.getString("fdsnDataselectURL"),
         "http://service.iris.edu/fdsnws/dataselect/1/query");
-    fdsnStationURL = Util.stringToString(config.getString("fdsnStationURL"),
+    fdsnStationURL = StringUtils.stringToString(config.getString("fdsnStationURL"),
         "http://service.iris.edu/fdsnws/station/1/query");
 
     sources = new HashMap<String, SeismicDataSource>();
@@ -362,9 +362,9 @@ public class SwarmConfig {
       }
     }
 
-    userTimes = Util.stringToString(config.getString("userTimes"), "").split(",");
+    userTimes = StringUtils.stringToString(config.getString("userTimes"), "").split(",");
 
-    heliColorsString = Util.stringToString(config.getString("heliColors"), "");
+    heliColorsString = StringUtils.stringToString(config.getString("heliColors"), "");
     if (heliColorsString != null) {
       if (heliColorsString.length() > 3) {
         String[] color = heliColorsString.split(":");

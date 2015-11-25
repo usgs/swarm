@@ -3,7 +3,8 @@ package gov.usgs.volcanoes.swarm.data.fdsnWs;
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
-import gov.usgs.util.CurrentTime;
+import gov.usgs.volcanoes.core.time.CurrentTime;
+import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.ChannelGroupInfo;
 import gov.usgs.volcanoes.swarm.ChannelInfo;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
@@ -147,7 +148,7 @@ public class WebServicesSource extends SeismicDataSource
 			double t2, GulperListener gl)
 	{
 		// lifted from gov.usgs.swarm.data.DHIDataSource
-		double now = CurrentTime.getInstance().nowJ2K();
+		double now = CurrentTime.getInstance().nowJ2k();
 		// if a time later than now has been asked for make sure to get the
 		// latest so that, if possible, a small bit of helicorder data will be
 		// displayed

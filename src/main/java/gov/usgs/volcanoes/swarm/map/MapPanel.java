@@ -11,10 +11,11 @@ import gov.usgs.proj.Mercator;
 import gov.usgs.proj.Projection;
 import gov.usgs.proj.TransverseMercator;
 import gov.usgs.util.CodeTimer;
-import gov.usgs.util.ConfigFile;
 import gov.usgs.util.Log;
 import gov.usgs.util.Pair;
 import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
@@ -1122,7 +1123,7 @@ public class MapPanel extends JPanel {
                 }
                 MapFrame.getInstance().setStatusText(
                         String.format("%s to %s, distance: %.1f %s, azimuth: %.2f%c", Util.lonLatToString(origin),
-                                Util.lonLatToString(lonLat), d, label, az, Util.DEGREE_SYMBOL));
+                                Util.lonLatToString(lonLat), d, label, az, StringUtils.DEGREE_SYMBOL));
             }
             repaint();
         }

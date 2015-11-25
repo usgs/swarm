@@ -5,10 +5,10 @@ import gov.usgs.plot.PlotException;
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.render.HelicorderRenderer;
-import gov.usgs.util.ConfigFile;
-import gov.usgs.util.CurrentTime;
 import gov.usgs.util.GridBagHelper;
 import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.time.CurrentTime;
 import gov.usgs.volcanoes.swarm.FileChooser;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Kioskable;
@@ -645,7 +645,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
   public void scroll(int units) {
     double bt = settings.getBottomTime();
     if (Double.isNaN(bt))
-      bt = CurrentTime.getInstance().nowJ2K();
+      bt = CurrentTime.getInstance().nowJ2k();
 
     settings.setBottomTime(bt + units * settings.scrollSize * settings.timeChunk);
     getHelicorder();
@@ -671,7 +671,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
           working = true;
           end = settings.getBottomTime();
           if (Double.isNaN(end))
-            end = CurrentTime.getInstance().nowJ2K();
+            end = CurrentTime.getInstance().nowJ2k();
 
           before = end - settings.span * 60;
           int tc = 30;
@@ -882,7 +882,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
         Double end = settings.getBottomTime();
         if (Double.isNaN(end))
-          end = CurrentTime.getInstance().nowJ2K();
+          end = CurrentTime.getInstance().nowJ2k();
 
         Double before = end - settings.span * 60;
         int tc = 30;

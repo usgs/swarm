@@ -1,12 +1,13 @@
 package gov.usgs.volcanoes.swarm.map;
 
 import gov.usgs.proj.GeoRange;
-import gov.usgs.util.ConfigFile;
-import gov.usgs.util.CurrentTime;
-import gov.usgs.util.Time;
 import gov.usgs.util.Util;
 import gov.usgs.util.png.PngEncoder;
 import gov.usgs.util.png.PngEncoderB;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.time.CurrentTime;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.swarm.FileChooser;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Kioskable;
@@ -35,6 +36,7 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.ParseException;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -337,10 +339,16 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
                     if (t.length() == 12)
                         t = t + "30";
 
-                    double j2k = Time.parse("yyyyMMddHHmmss", t);
-                    setRealtime(false);
-                    mapPanel.gotoTime(j2k);
-
+                    double j2k;
+                    
+                    try {
+                      j2k = J2kSec.parse("yyyyMMddHHmmss", t);
+                      setRealtime(false);
+                      mapPanel.gotoTime(j2k);
+                    } catch (ParseException e1) {
+                      // TODO Auto-generated catch block
+                      e1.printStackTrace();
+                    }
                 }
             }
         });
@@ -532,7 +540,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
         while (true) {
             try {
                 if (this.isVisible() && realtime) {
-                    double end = CurrentTime.getInstance().nowJ2K();
+                    double end = CurrentTime.getInstance().nowJ2k();
                     double start = end - MultiMonitor.SPANS[spanIndex];
                     mapPanel.setTimes(start, end, false);
                 }

@@ -6,8 +6,8 @@ import gov.usgs.net.ReadListener;
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
-import gov.usgs.util.CurrentTime;
-import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.time.CurrentTime;
+import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.winston.Channel;
@@ -125,7 +125,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
 		if (wave == null) {
 			String[] scnl = parseSCNL(station);
 			if (protocolVersion == 1) {
-				wave = winstonClient.getRawData(scnl[0], scnl[1], scnl[2], scnl[3], Util.j2KToEW(t1), Util.j2KToEW(t2));
+				wave = winstonClient.getRawData(scnl[0], scnl[1], scnl[2], scnl[3], J2kSec.asEpoch(t1), J2kSec.asEpoch(t2));
 				if (wave != null)
 					wave.convertToJ2K();
 			} else
@@ -187,7 +187,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
 			fireHelicorderProgress(station, 1.0);
 
 			if (hd != null && hd.rows() != 0) {
-				HelicorderData noLatest = hd.subset(hd.getStartTime(), CurrentTime.getInstance().nowJ2K() - 30);
+				HelicorderData noLatest = hd.subset(hd.getStartTime(), CurrentTime.getInstance().nowJ2k() - 30);
 				if (noLatest != null && noLatest.rows() > 0)
 					cache.putHelicorder(station, noLatest);
 			} else

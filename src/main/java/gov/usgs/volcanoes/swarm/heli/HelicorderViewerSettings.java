@@ -1,6 +1,6 @@
 package gov.usgs.volcanoes.swarm.heli;
 
-import gov.usgs.util.ConfigFile;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 
 /**

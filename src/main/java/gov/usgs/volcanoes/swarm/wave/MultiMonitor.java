@@ -7,10 +7,11 @@ import gov.usgs.plot.render.AxisRenderer;
 import gov.usgs.plot.render.FrameRenderer;
 import gov.usgs.plot.render.RectangleRenderer;
 import gov.usgs.plot.render.TextRenderer;
-import gov.usgs.util.ConfigFile;
-import gov.usgs.util.CurrentTime;
-import gov.usgs.util.Time;
 import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.time.CurrentTime;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Kioskable;
 import gov.usgs.volcanoes.swarm.Metadata;
@@ -498,13 +499,13 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 				double now = times[1];
 				double start = times[0];
 				
-				String tf = Time.format("HH:mm:ss", now);
+				String tf = J2kSec.format("HH:mm:ss", now);
 				Font font = Font.decode("dialog-BOLD-" + (bottomLabelHeight - 2));
 				g.setFont(font);
 				FontMetrics fm = g.getFontMetrics();
 //				System.out.println(insets.bottom);
 				g.drawString(tf, getWidth() - fm.stringWidth(tf) - 4, getHeight() - (insets.bottom + 3));
-				tf = Time.format("HH:mm:ss", start);
+				tf = J2kSec.format("HH:mm:ss", start);
 				g.drawString(tf, 4, getHeight() - (insets.bottom + 3));
 				g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, aa);
 			}
@@ -761,7 +762,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable
 		double[] times = new double[2];
 		if (Double.isNaN(pauseStartTime))
 		{
-			times[1] = CurrentTime.getInstance().nowJ2K();
+			times[1] = CurrentTime.getInstance().nowJ2k();
 			times[0] = times[1] - span;
 		}
 		else

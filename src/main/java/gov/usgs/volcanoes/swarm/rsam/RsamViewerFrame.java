@@ -1,8 +1,8 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
 import gov.usgs.plot.data.RSAMData;
-import gov.usgs.util.CurrentTime;
 import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.time.CurrentTime;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.Throbber;
@@ -142,7 +142,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
         throbber.increment();
         
         viewPanel.setWorking(true);
-        double now = CurrentTime.getInstance().nowJ2K();
+        double now = CurrentTime.getInstance().nowJ2k();
         double st = now - settings.getSpanLength();
 
         int period;
