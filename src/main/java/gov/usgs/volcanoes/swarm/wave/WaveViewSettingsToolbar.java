@@ -1,6 +1,6 @@
 package gov.usgs.volcanoes.swarm.wave;
 
-import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.util.UiUtils;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
@@ -61,7 +61,7 @@ public class WaveViewSettingsToolbar
 						}
 					}
 				});
-		Util.mapKeyStrokeToButton(keyComp, "shift SLASH", "settings", waveSet);
+		UiUtils.mapKeyStrokeToButton(keyComp, "shift SLASH", "settings", waveSet);
 		dest.add(waveSet);
 		
 		waveToggle = SwarmUtil.createToolBarToggleButton(
@@ -75,8 +75,8 @@ public class WaveViewSettingsToolbar
 							settings.setType(ViewType.WAVE);
 					}
 				});
-		Util.mapKeyStrokeToButton(keyComp, "COMMA", "wave1", waveToggle);
-		Util.mapKeyStrokeToButton(keyComp, "W", "wave2", waveToggle);
+		UiUtils.mapKeyStrokeToButton(keyComp, "COMMA", "wave1", waveToggle);
+		UiUtils.mapKeyStrokeToButton(keyComp, "W", "wave2", waveToggle);
 		dest.add(waveToggle);
 		
 		spectraToggle = SwarmUtil.createToolBarToggleButton(
@@ -90,8 +90,8 @@ public class WaveViewSettingsToolbar
 							settings.setType(ViewType.SPECTRA);
 					}
 				});
-		Util.mapKeyStrokeToButton(keyComp, "PERIOD", "spectra1", spectraToggle);
-		Util.mapKeyStrokeToButton(keyComp, "S", "spectra2", spectraToggle);
+		UiUtils.mapKeyStrokeToButton(keyComp, "PERIOD", "spectra1", spectraToggle);
+		UiUtils.mapKeyStrokeToButton(keyComp, "S", "spectra2", spectraToggle);
 		dest.add(spectraToggle);
 		
 		spectrogramToggle = SwarmUtil.createToolBarToggleButton(
@@ -105,8 +105,8 @@ public class WaveViewSettingsToolbar
 							settings.setType(ViewType.SPECTROGRAM);
 					}
 				});
-		Util.mapKeyStrokeToButton(keyComp, "SLASH", "spectrogram1", spectrogramToggle);
-		Util.mapKeyStrokeToButton(keyComp, "G", "spectrogram2", spectrogramToggle);
+		UiUtils.mapKeyStrokeToButton(keyComp, "SLASH", "spectrogram1", spectrogramToggle);
+		UiUtils.mapKeyStrokeToButton(keyComp, "G", "spectrogram2", spectrogramToggle);
 		dest.add(spectrogramToggle);
 		
 		keyComp.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke("L"), "cycleLogSettings");
