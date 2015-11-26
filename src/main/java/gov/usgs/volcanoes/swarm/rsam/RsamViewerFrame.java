@@ -1,8 +1,8 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
 import gov.usgs.plot.data.RSAMData;
-import gov.usgs.util.Util;
 import gov.usgs.volcanoes.core.time.CurrentTime;
+import gov.usgs.volcanoes.core.util.UiUtils;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.Throbber;
@@ -90,7 +90,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
                             settings.setSpanLength(SPANS_S[spanIndex - 1]);
                     }
                 });
-        Util.mapKeyStrokeToButton(this, "alt LEFT", "compx", compXButton);
+        UiUtils.mapKeyStrokeToButton(this, "alt LEFT", "compx", compXButton);
         toolBar.add(compXButton);
 
         JButton expXButton = SwarmUtil.createToolBarButton(Icons.xplus, "Expand time axis (Alt-right arrow)",
@@ -100,7 +100,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
                             settings.setSpanLength(SPANS_S[spanIndex + 1]);
                     }
                 });
-        Util.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expXButton);
+        UiUtils.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expXButton);
         toolBar.add(expXButton);
 
         toolBar.addSeparator();
