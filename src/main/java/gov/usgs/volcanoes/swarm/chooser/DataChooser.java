@@ -476,12 +476,13 @@ public class DataChooser extends JPanel {
         SwingWorker worker = new SwingWorker() {
           public Object construct() {
             List<Pair<ServerNode, String>> channels = getSelections();
-            Collections.sort(channels, new Comparator<Pair<ServerNode, String>>() {
-              public int compare(Pair<ServerNode, String> o1, Pair<ServerNode, String> o2) {
-                return o1.item2.compareTo(o2.item2);
-              }
-            });
             if (channels != null) {
+              Collections.sort(channels, new Comparator<Pair<ServerNode, String>>() {
+                public int compare(Pair<ServerNode, String> o1, Pair<ServerNode, String> o2) {
+                  return o1.item2.compareTo(o2.item2);
+                }
+              });
+
               for (Pair<ServerNode, String> pair : channels) {
                 Swarm.loadClipboardWave(pair.item1.getSource(), pair.item2);
               }
