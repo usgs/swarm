@@ -32,9 +32,9 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
 import gov.usgs.proj.GeoRange;
-import gov.usgs.util.png.PngEncoder;
-import gov.usgs.util.png.PngEncoderB;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.contrib.PngEncoder;
+import gov.usgs.volcanoes.core.contrib.PngEncoderB;
 import gov.usgs.volcanoes.core.time.CurrentTime;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.UiUtils;
