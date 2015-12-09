@@ -321,7 +321,6 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
     return false;
   }
 
-  @Override
   public RSAMData getRsam(final String channel, final double t1, final double t2,
       final int period) {
     final List<CachedRsam> rsam = rsamCache.get(channel);
@@ -712,7 +711,6 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
     public double t2;
     public long lastAccess;
 
-    @Override
     public int compareTo(final CacheEntry oce) {
       return (int) (lastAccess - oce.lastAccess);
     }

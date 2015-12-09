@@ -60,9 +60,9 @@ import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.Mercator;
 import gov.usgs.proj.Projection;
 import gov.usgs.proj.TransverseMercator;
-import gov.usgs.util.CodeTimer;
 import gov.usgs.util.Pair;
 import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.CodeTimer;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.swarm.Icons;
@@ -269,7 +269,6 @@ public class MapPanel extends JPanel {
     pane = new JLayeredPane();
     mapImagePanel = new MapImagePanel();
     addMouseWheelListener(new MouseWheelListener() {
-      @Override
       public void mouseWheelMoved(final MouseWheelEvent e) {
         if (e.isControlDown()) {
           final int cnt = -e.getWheelRotation();
@@ -294,7 +293,6 @@ public class MapPanel extends JPanel {
     });
 
     WaveViewTime.addTimeListener(new TimeListener() {
-      @Override
       public void timeChanged(final double j2k) {
         for (final MapMiniPanel panel : miniPanels.values()) {
           if (panel != null && panel.getWaveViewPanel() != null)
@@ -304,7 +302,6 @@ public class MapPanel extends JPanel {
     });
 
     addKeyListener(new KeyListener() {
-      @Override
       public void keyPressed(final KeyEvent e) {
         if (allowMultiSelection && e.isControlDown() && e.getKeyCode() == KeyEvent.VK_A) {
           deselectAllPanels();
@@ -320,10 +317,8 @@ public class MapPanel extends JPanel {
         }
       }
 
-      @Override
       public void keyReleased(final KeyEvent e) {}
 
-      @Override
       public void keyTyped(final KeyEvent e) {}
     });
 
@@ -1108,14 +1103,12 @@ public class MapPanel extends JPanel {
 
   public class MapMouseMotionListener implements MouseMotionListener {
 
-    @Override
     public void mouseMoved(final MouseEvent e) {
       final Point2D.Double latLon = getLonLat(e.getX(), e.getY());
       if (latLon != null)
         MapFrame.getInstance().setStatusText(Util.lonLatToString(latLon));
     }
 
-    @Override
     public void mouseDragged(final MouseEvent e) {
       mouseNow = e.getPoint();
       final Point2D.Double lonLat = getLonLat(e.getX(), e.getY());

@@ -243,7 +243,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
 
     optionsButton =
         SwarmUtil.createToolBarButton(Icons.settings, "Monitor options", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             requestFocus();
             final MultiMonitorSettingsDialog mmsd =
@@ -257,7 +256,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
 
     compXButton = SwarmUtil.createToolBarButton(Icons.xminus, "Shrink time axis (Alt-left arrow)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             requestFocus();
             span = previousSpan();
@@ -268,7 +266,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
 
     expXButton = SwarmUtil.createToolBarButton(Icons.xplus, "Expand time axis (Alt-right arrow)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             requestFocus();
             span = nextSpan();
@@ -279,7 +276,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
 
     pauseButton = SwarmUtil.createToolBarToggleButton(Icons.pause, "Pause the monitor (P)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             requestFocus();
             if (!pauseButton.isSelected())
@@ -295,7 +291,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
 
     settingsButton = SwarmUtil.createToolBarButton(Icons.wavesettings, "Settings for selected wave",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             requestFocus();
             if (selectedIndex >= 0) {
@@ -310,7 +305,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
 
     copyButton = SwarmUtil.createToolBarButton(Icons.clipboard,
         "Copy waves to clipboard (C or Ctrl-C)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             requestFocus();
             for (final WaveViewPanel panel : panels) {
@@ -332,7 +326,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
 
     removeButton = SwarmUtil.createToolBarButton(Icons.delete, "Remove selected wave from monitor",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             requestFocus();
             if (selectedIndex >= 0) {
@@ -352,7 +345,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     UiUtils.mapKeyStrokeToAction(this, "UP", "up", new AbstractAction() {
       private static final long serialVersionUID = 1L;
 
-      @Override
       public void actionPerformed(final ActionEvent e) {
         if (selectedIndex > 0) {
           deselect();
@@ -365,7 +357,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     UiUtils.mapKeyStrokeToAction(this, "DOWN", "down", new AbstractAction() {
       private static final long serialVersionUID = 1L;
 
-      @Override
       public void actionPerformed(final ActionEvent e) {
         if (selectedIndex < panels.size() - 1) {
           deselect();
@@ -704,7 +695,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
       return;
 
     final Runnable r = new Runnable() {
-      @Override
       public void run() {
         sliding = true;
         final double[] times = getTimeWindow();
@@ -744,7 +734,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
       return;
 
     final Runnable r = new Runnable() {
-      @Override
       public void run() {
         throbber.increment();
         String channel = null;
@@ -796,7 +785,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     worker.start();
   }
 
-  @Override
   public void setKioskMode(final boolean b) {
     setDefaultKioskMode(b);
     if (fullScreen) {

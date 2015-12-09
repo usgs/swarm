@@ -1,5 +1,8 @@
 package gov.usgs.volcanoes.swarm.data.fdsnWs;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -7,7 +10,6 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Level;
 
-import gov.usgs.util.Log;
 import gov.usgs.volcanoes.swarm.ChannelInfo;
 import gov.usgs.volcanoes.swarm.ChannelUtil;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
@@ -18,6 +20,8 @@ import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
  * @author Kevin Frechette (ISTI)
  */
 public class WebServiceUtils {
+  private static final Logger LOGGER = LoggerFactory.getLogger(WebServiceUtils.class);
+  
   /** Swarm web services property key prefix. */
   public final static String SWARM_WS_PROP_KEY_PREFIX = "SWARM_WS_";
 
@@ -84,54 +88,6 @@ public class WebServiceUtils {
   }
 
   /**
-   * Log a debug message.
-   * 
-   * @param level the message level.
-   * @param msg the message.
-   */
-  public static void debug(final Level level, final String msg) {
-    if (isDebug(level)) {
-      log(level, msg);
-    }
-  }
-
-  /**
-   * Log a debug message.
-   * 
-   * @param msg the message.
-   */
-  public static void debug(final String msg) {
-    debug(defaultDebugLevel, msg);
-  }
-
-  /**
-   * Log a fine message.
-   * 
-   * @param msg the message.
-   */
-  public static void fine(final String msg) {
-    log(Level.FINE, msg);
-  }
-
-  /**
-   * Log a finer message.
-   * 
-   * @param msg the message.
-   */
-  public static void finer(final String msg) {
-    log(Level.FINER, msg);
-  }
-
-  /**
-   * Log a finest message.
-   * 
-   * @param msg the message.
-   */
-  public static void finest(final String msg) {
-    log(Level.FINEST, msg);
-  }
-
-  /**
    * Get the text for the current date.
    * 
    * @return the text.
@@ -183,16 +139,6 @@ public class WebServiceUtils {
     }
     return s;
   }
-
-  /**
-   * Log an info message.
-   * 
-   * @param msg the message.
-   */
-  public static void info(final String msg) {
-    log(Level.INFO, msg);
-  }
-
   /**
    * Determines if debug logging is enabled.
    * 
@@ -211,18 +157,6 @@ public class WebServiceUtils {
   public static boolean isDebug(final Level level) {
     return debugLevel != null && level.intValue() >= debugLevel.intValue();
   }
-
-  /**
-   * Log a message.
-   * 
-   * @param level the message level.
-   * @param msg the message.
-   */
-  public static void log(final Level level, String msg) {
-    msg = "WebService: " + msg;
-    Log.getLogger("gov.usgs.swarm").log(level, msg);
-  }
-
   /**
    * Get the date for the text.
    * 
@@ -250,23 +184,5 @@ public class WebServiceUtils {
       }
     }
     return def;
-  }
-
-  /**
-   * Sets if debug logging is enabled.
-   * 
-   * @param b true if debug logging is enabled, false otherwise.
-   */
-  public static void setDebug(final Level level) {
-    debugLevel = level;
-  }
-
-  /**
-   * Log a warning message.
-   * 
-   * @param msg the message.
-   */
-  public static void warning(final String msg) {
-    log(Level.WARNING, msg);
   }
 }

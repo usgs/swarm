@@ -9,6 +9,9 @@ import edu.sc.seis.seisFile.fdsnws.stationxml.StationIterator;
 import edu.sc.seis.seisFile.fdsnws.stationxml.StationXMLException;
 import edu.sc.seis.seisFile.fdsnws.stationxml.StationXMLTagNames;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,6 +24,9 @@ import javax.xml.stream.events.XMLEvent;
 import gov.usgs.volcanoes.swarm.StationInfo;
 
 public class WebServiceStationXmlClient extends AbstractWebServiceStationClient {
+
+  private final static Logger LOGGER = LoggerFactory.getLogger(WebServiceStationXmlClient.class);
+
   /**
    * Create the web service station client.
    * 
@@ -101,10 +107,9 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
       }
     } catch (Exception ex) {
     }
-    String message = "XM schema of this document (" + staMessage.getXmlSchemaLocation()
-        + ") does not match this code (" + StationXMLTagNames.CURRENT_SCHEMA_VERSION
-        + ") , results may be incorrect.";
-    WebServiceUtils.warning(message);
+    LOGGER.warn(
+        "XM schema of this document ({}) does not match this code ({}) , results may be incorrect.",
+        staMessage.getXmlSchemaLocation(), StationXMLTagNames.CURRENT_SCHEMA_VERSION);
     return false;
   }
 
@@ -167,7 +172,7 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
               case STATION:
                 processStation(createStationInfo(station,
 
-                network, latitude, longitude, siteName));
+                    network, latitude, longitude, siteName));
                 // break;
                 // case CHANNEL:
                 // List<Channel> chanList = s.getChannelList();
@@ -183,7 +188,7 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
                   String channel = chan.getCode();
                   processChannel(createChannelInfo(station,
 
-                  channel, network, location, latitude, longitude, siteName, groupsType));
+                      channel, network, location, latitude, longitude, siteName, groupsType));
                 }
                 // break;
                 // default:

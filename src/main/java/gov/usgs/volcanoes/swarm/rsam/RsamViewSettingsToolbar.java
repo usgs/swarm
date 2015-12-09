@@ -37,7 +37,6 @@ public class RsamViewSettingsToolbar implements SettingsListener {
   public void createUI(final JToolBar dest, final JComponent keyComp) {
     waveSet = SwarmUtil.createToolBarButton(Icons.wavesettings, "RSAM view settings (?)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             final RsamViewSettingsDialog wvsd = RsamViewSettingsDialog.getInstance(settings);
             wvsd.setVisible(true);
@@ -49,7 +48,6 @@ public class RsamViewSettingsToolbar implements SettingsListener {
     rsamTypes = new ButtonGroup();
     valuesToggle = SwarmUtil.createToolBarToggleButton(Icons.rsam_values, "Values view (V or ,)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             settings.setType(ViewType.VALUES);
           }
@@ -62,7 +60,6 @@ public class RsamViewSettingsToolbar implements SettingsListener {
 
     countsToggle = SwarmUtil.createToolBarToggleButton(Icons.rsam_counts, "Counts view (C or .)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             settings.setType(ViewType.COUNTS);
           }
@@ -73,7 +70,6 @@ public class RsamViewSettingsToolbar implements SettingsListener {
     rsamTypes.add(countsToggle);
   }
 
-  @Override
   public void settingsChanged() {
     if (settings.getType() == ViewType.VALUES)
       rsamTypes.setSelected(valuesToggle.getModel(), true);

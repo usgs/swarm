@@ -77,7 +77,6 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
 
     final JButton compXButton = SwarmUtil.createToolBarButton(Icons.xminus,
         "Shrink time axis (Alt-left arrow)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             if (spanIndex != 0)
               spanIndex--;
@@ -88,7 +87,6 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
 
     final JButton expXButton = SwarmUtil.createToolBarButton(Icons.xplus,
         "Expand time axis (Alt-right arrow)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             if (spanIndex < SPANS.length - 1)
               spanIndex++;
@@ -103,7 +101,6 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
 
     final JButton clipboard = SwarmUtil.createToolBarButton(Icons.clipboard,
         "Copy wave to clipboard (C or Ctrl-C)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             if (waveViewPanel != null) {
               final WaveClipboardFrame cb = WaveClipboardFrame.getInstance();
@@ -168,7 +165,6 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
     updateThread.interrupt();
   }
 
-  @Override
   public void run() {
     while (!kill) {
       try {

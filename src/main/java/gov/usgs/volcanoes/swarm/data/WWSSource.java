@@ -1,23 +1,22 @@
 package gov.usgs.volcanoes.swarm.data;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
+
 import gov.usgs.earthworm.Menu;
 import gov.usgs.earthworm.MenuItem;
 import gov.usgs.net.ReadListener;
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
-import gov.usgs.volcanoes.core.time.CurrentTime;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.winston.Channel;
-import gov.usgs.winston.Instrument;
-import gov.usgs.winston.server.WWSClient;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.StringTokenizer;
+import gov.usgs.volcanoes.winston.Channel;
+import gov.usgs.volcanoes.winston.Instrument;
+import gov.usgs.volcanoes.winston.server.WWSClient;
 
 /**
  * An implementation of <code>SeismicDataSource</code> that communicates
