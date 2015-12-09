@@ -1,16 +1,21 @@
 package gov.usgs.volcanoes.swarm.data.fdsnWs;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
-import gov.usgs.plot.data.Wave;
-import gov.usgs.volcanoes.swarm.ChannelInfo;
-import gov.usgs.volcanoes.swarm.StationInfo;
-import gov.usgs.volcanoes.swarm.data.DataSelectReader;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.List;
 
+import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.swarm.ChannelInfo;
+import gov.usgs.volcanoes.swarm.data.DataSelectReader;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+
 public class WebServicesClient extends AbstractDataRecordClient {
+  private static final Logger LOGGER = LoggerFactory.getLogger(WebServicesClient.class);
+
   /**
    * Test flag to use XML instead of text for station details. XML is more
    * robust at the cost of a lot of speed. This will crawl if there are many
@@ -120,7 +125,7 @@ public class WebServicesClient extends AbstractDataRecordClient {
   public List<String> getChannels() {
     final List<String> channelList = stationClient.getChannelList();
     if (channelList.size() != 0) {
-      WebServiceUtils.info("channel list is not empty");
+      LOGGER.info("channel list is not empty");
     } else {
       String error = null;
       long start = System.currentTimeMillis();
@@ -164,11 +169,11 @@ public class WebServicesClient extends AbstractDataRecordClient {
       }
       long end = System.currentTimeMillis();
       if (WebServiceUtils.isDebug()) {
-        WebServiceUtils.debug("getChannels(" + (useXmlClientFlag ? "XML" : "Text") + "): "
-            + ((end - start) / 1000.) + " seconds");
+        LOGGER.debug("getChannels({}): {} seconds", (useXmlClientFlag ? "XML" : "Text"),
+            ((end - start) / 1000.));
       }
       if (error != null) {
-        WebServiceUtils.warning("could not get channels: " + error);
+        LOGGER.warn("could not get channels: {}", error);
       }
       assignChannels(channelList);
     }
@@ -199,8 +204,7 @@ public class WebServicesClient extends AbstractDataRecordClient {
         try {
           addWaves(waves, dr);
         } catch (Exception ex) {
-          WebServiceUtils.warning(
-              "could not get web service raw data (" + channelInfo + "): " + ex.getMessage());
+          LOGGER.warn("could not get web service raw data ({}): {}", channelInfo, ex.getMessage());
         }
         return true;
       }
@@ -210,13 +214,12 @@ public class WebServicesClient extends AbstractDataRecordClient {
           channelInfo.getLocation(), channelInfo.getChannel(), begin, end);
       reader.read(query, (List<DataRecord>) null);
     } catch (Exception ex) {
-      WebServiceUtils
-          .warning("could not get web service raw data (" + channelInfo + "): " + ex.getMessage());
+      LOGGER.warn("could not get web service raw data ({}): {}", channelInfo, ex.getMessage());
     }
     Wave wave = join(waves);
     if (wave != null && WebServiceUtils.isDebug()) {
-      WebServiceUtils.debug("web service raw data (" + getDateText(wave.getStartTime()) + ", "
-          + getDateText(wave.getEndTime()) + ")");
+      LOGGER.debug("web service raw data ({}, {})", getDateText(wave.getStartTime()),
+          getDateText(wave.getEndTime()) + ")");
     }
     return wave;
   }
