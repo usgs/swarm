@@ -1,6 +1,5 @@
 package gov.usgs.volcanoes.swarm;
 
-import gov.usgs.util.Util;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -17,6 +16,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
+
+import gov.usgs.volcanoes.core.util.UiUtils;
 
 import com.jgoodies.forms.builder.ButtonBarBuilder;
 
@@ -79,7 +80,7 @@ public class SwarmDialog extends JDialog {
                 }
             }
         });
-        Util.mapKeyStrokeToButton(mainPanel, "ESCAPE", "cancel1", cancelButton);
+        UiUtils.mapKeyStrokeToButton(mainPanel, "ESCAPE", "cancel1", cancelButton);
         this.addWindowListener(new WindowAdapter() {
             public void windowOpened(WindowEvent e) {
                 okButton.requestFocus();

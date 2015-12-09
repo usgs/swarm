@@ -11,7 +11,7 @@ import javax.swing.JTextField;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
-import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.core.util.StringUtils;
 
 /**
  * $Log: not supported by cvs2svn $
@@ -83,7 +83,8 @@ public class WaveServerPanel extends DataSourcePanel
 //		wsOffset.setText(wso);
 	}
 	
-	protected void createPanel()
+	@Override
+  protected void createPanel()
 	{
 		createFields();
 		FormLayout layout = new FormLayout(
@@ -125,31 +126,33 @@ public class WaveServerPanel extends DataSourcePanel
 		panel = builder.getPanel();
 	}
 	
-	public boolean allowOK(boolean edit)
+	@Override
+  public boolean allowOK(boolean edit)
 	{
 		String message = null;
 		String host = wsHost.getText();
 		if (host == null || host.length() == 0 || host.indexOf(';') != -1 || host.indexOf(':') !=-1)
-			message = "There is an error with the Wave Server IP address or host name.";
-		int ip = -1;
-		try { ip = Integer.parseInt(wsPort.getText()); } catch (Exception e) {}
-		if (ip < 0 || ip > 65535)
-			message = "There is an error with the Wave Server port.";
+			message = "There is an error with the Wave Server IP address or host name. ";
 		
-		double to = -1;
-		try { to = Double.parseDouble(wsTimeout.getText()); } catch (Exception e) {}
-		if (to <= 0)
-			message = "There is an error with the Wave Server time out (must be > 0).";
+		int ip = StringUtils.stringToInt(wsPort.getText(), -1);
+		if (ip < 0 || ip > 65535) {
+			message = "There is an error with the Wave Server port. ";
+		}
 		
-		double gs = -1;
-		try { gs = Double.parseDouble(gulperSize.getText()); } catch (Exception e) {}
-		if (gs <= 0)
-			message = "The gulper size must be greater than 0 minutes.";
+		double to = StringUtils.stringToDouble(wsTimeout.getText(), -1);
+		if (to <= 0) {
+			message = "There is an error with the Wave Server time out (must be > 0). ";
+		}
 		
-		double gd = -1;
-		try { gd = Double.parseDouble(gulperDelay.getText()); } catch (Exception e) { e.printStackTrace(); System.out.println(e.getMessage());}
-		if (gd < 0)
-			message = "The gulper delay must be greater than or equal to 0 seconds.";
+		double gs = StringUtils.stringToDouble(gulperSize.getText(), -1);
+		if (gs <= 0) {
+			message = "The gulper size must be greater than 0 minutes. ";
+		}
+		
+		double gd = StringUtils.stringToDouble(gulperDelay.getText(), -1);
+		if (gd < 0) {
+			message = "The gulper delay must be greater than or equal to 0 seconds. ";
+		}
 		
 		if (message != null)
 		{
@@ -160,7 +163,8 @@ public class WaveServerPanel extends DataSourcePanel
 			return true;
 	}
 	
-	public String wasOK()
+	@Override
+  public String wasOK()
 	{
 		int timeout = (int)(Double.parseDouble(wsTimeout.getText()) * 1000);
 		int gs = (int)(Double.parseDouble(gulperSize.getText()) * 60);

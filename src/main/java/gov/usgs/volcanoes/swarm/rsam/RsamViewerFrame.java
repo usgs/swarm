@@ -1,17 +1,5 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
-import gov.usgs.plot.data.RSAMData;
-import gov.usgs.util.Util;
-import gov.usgs.volcanoes.core.time.CurrentTime;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.SwarmUtil;
-import gov.usgs.volcanoes.swarm.Throbber;
-import gov.usgs.volcanoes.swarm.chooser.DataChooser;
-import gov.usgs.volcanoes.swarm.data.RsamSource;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
-import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
-
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,6 +14,18 @@ import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
+
+import gov.usgs.plot.data.RSAMData;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.UiUtils;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.SwarmUtil;
+import gov.usgs.volcanoes.swarm.Throbber;
+import gov.usgs.volcanoes.swarm.chooser.DataChooser;
+import gov.usgs.volcanoes.swarm.data.RsamSource;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
 
 /**
  * 
@@ -90,7 +90,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
                             settings.setSpanLength(SPANS_S[spanIndex - 1]);
                     }
                 });
-        Util.mapKeyStrokeToButton(this, "alt LEFT", "compx", compXButton);
+        UiUtils.mapKeyStrokeToButton(this, "alt LEFT", "compx", compXButton);
         toolBar.add(compXButton);
 
         JButton expXButton = SwarmUtil.createToolBarButton(Icons.xplus, "Expand time axis (Alt-right arrow)",
@@ -100,7 +100,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
                             settings.setSpanLength(SPANS_S[spanIndex + 1]);
                     }
                 });
-        Util.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expXButton);
+        UiUtils.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expXButton);
         toolBar.add(expXButton);
 
         toolBar.addSeparator();
@@ -142,7 +142,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
         throbber.increment();
         
         viewPanel.setWorking(true);
-        double now = CurrentTime.getInstance().nowJ2k();
+        double now = J2kSec.now();
         double st = now - settings.getSpanLength();
 
         int period;

@@ -187,7 +187,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
 			fireHelicorderProgress(station, 1.0);
 
 			if (hd != null && hd.rows() != 0) {
-				HelicorderData noLatest = hd.subset(hd.getStartTime(), CurrentTime.getInstance().nowJ2k() - 30);
+				HelicorderData noLatest = hd.subset(hd.getStartTime(), J2kSec.now() - 30);
 				if (noLatest != null && noLatest.rows() > 0)
 					cache.putHelicorder(station, noLatest);
 			} else

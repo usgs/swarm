@@ -1,10 +1,11 @@
 package nz.org.geonet.data;
 
 import gov.usgs.util.ResourceReader;
-import gov.usgs.util.Time;
 import gov.usgs.util.xml.SimpleXMLParser;
 import gov.usgs.util.xml.XMLDocHandler;
 import gov.usgs.util.xml.XMLToMap;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.swarm.map.ClickableGeoLabel;
 import gov.usgs.volcanoes.swarm.map.Hypocenter;
 import gov.usgs.volcanoes.swarm.map.LabelSource;
@@ -87,7 +88,7 @@ public class RSSHypocenters implements LabelSource
 				String second = qm.text.get("report/uttime/second");
 				String ms = qm.text.get("report/uttime/msec");
 				String ds = String.format("%s-%s-%s %s:%s:%s.%s", year, mo, day, hour, minute, second, ms);
-				h.time = Time.parse(Time.STANDARD_TIME_FORMAT_MS, ds);
+				h.time = J2kSec.parse(Time.STANDARD_TIME_FORMAT_MS, ds);
 				hypos.add(h);
 			}
 		}

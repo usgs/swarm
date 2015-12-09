@@ -30,10 +30,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import gov.usgs.plot.data.Wave;
-import gov.usgs.util.Util;
 import gov.usgs.util.ui.GlobalKeyManager;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.time.CurrentTime;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
@@ -124,14 +125,14 @@ public class Swarm extends JFrame implements InternalFrameListener {
     LOGGER.info("java.version: " + version);
     if (version.startsWith("1.1") || version.startsWith("1.2") || version.startsWith("1.3")
         || version.startsWith("1.4")) {
-      JOptionPane.showMessageDialog(this,
-          TITLE + " " + Version.POM_VERSION + " requires at least Java version 1.5 or above.",
+      JOptionPane.showMessageDialog(this, String
+          .format("%s %s requires at least Java version 1.5 or above.", TITLE, Version.POM_VERSION),
           "Error", JOptionPane.ERROR_MESSAGE);
       System.exit(-1);
     }
 
     final Runtime rt = Runtime.getRuntime();
-    LOGGER.info("maximum heap size: " + Util.numBytesToString(rt.maxMemory()));
+    LOGGER.info("maximum heap size: " + StringUtils.numBytesToString(rt.maxMemory()));
   }
 
   private void setupGlobalKeys() {
@@ -537,7 +538,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
     double st = 0;
     double et = 0;
     if (cwvp == null) {
-      final double now = CurrentTime.getInstance().nowJ2k();
+      final double now = J2kSec.now();
       st = now - 180;
       et = now;
     } else {

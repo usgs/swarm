@@ -17,7 +17,7 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
 import gov.usgs.plot.data.Wave;
-import gov.usgs.volcanoes.core.time.CurrentTime;
+import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.UiUtils;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
@@ -151,7 +151,7 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
 
   public void getWave() {
     throbber.increment();
-    final double now = CurrentTime.getInstance().nowJ2k();
+    final double now = J2kSec.now();
     final Wave sw = dataSource.getWave(channel, now - SPANS[spanIndex], now);
     // System.out.println(sw);
     waveViewPanel.setWorking(true);

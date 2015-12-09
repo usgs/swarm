@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import gov.usgs.plot.data.Wave;
-import gov.usgs.volcanoes.core.time.CurrentTime;
+import gov.usgs.volcanoes.core.time.J2kSec;
 
 /**
  *
@@ -53,7 +53,7 @@ public class Gulper implements Runnable {
     channel = ch;
     lastTime = t2;
 
-    final double now = CurrentTime.getInstance().nowJ2k();
+    final double now = J2kSec.now();
     if (lastTime > now)
       lastTime = now;
   }
