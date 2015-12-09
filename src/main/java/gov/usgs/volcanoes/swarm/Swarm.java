@@ -33,6 +33,7 @@ import gov.usgs.plot.data.Wave;
 import gov.usgs.util.ui.GlobalKeyManager;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.time.CurrentTime;
+import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
@@ -537,7 +538,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
     double st = 0;
     double et = 0;
     if (cwvp == null) {
-      final double now = CurrentTime.getInstance().nowJ2k();
+      final double now = J2kSec.now();
       st = now - 180;
       et = now;
     } else {

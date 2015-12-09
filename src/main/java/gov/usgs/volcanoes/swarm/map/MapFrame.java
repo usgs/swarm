@@ -578,7 +578,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
     while (true) {
       try {
         if (this.isVisible() && realtime) {
-          final double end = CurrentTime.getInstance().nowJ2k();
+          final double end = J2kSec.now();
           final double start = end - MultiMonitor.SPANS[spanIndex];
           mapPanel.setTimes(start, end, false);
         }

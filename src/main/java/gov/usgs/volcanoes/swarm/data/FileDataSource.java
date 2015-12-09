@@ -17,7 +17,7 @@ import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.data.file.FileType;
 import gov.usgs.plot.data.file.SeismicDataFile;
-import gov.usgs.volcanoes.core.time.CurrentTime;
+import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.FileTypeDialog;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
@@ -176,7 +176,7 @@ public class FileDataSource extends AbstractCachingDataSource {
       return null;
 
     final double dt = t2 - t1;
-    final double now = CurrentTime.getInstance().nowJ2k();
+    final double now = J2kSec.now();
     if (Math.abs(now - t2) < 3600) {
       t2 = ct[1];
       t1 = t2 - dt;

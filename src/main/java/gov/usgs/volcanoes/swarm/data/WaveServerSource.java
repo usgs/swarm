@@ -1,21 +1,19 @@
 package gov.usgs.volcanoes.swarm.data;
 
-import gov.usgs.earthworm.Menu;
-import gov.usgs.earthworm.MenuItem;
-import gov.usgs.earthworm.WaveServer;
-import gov.usgs.plot.data.HelicorderData;
-import gov.usgs.plot.data.RSAMData;
-import gov.usgs.plot.data.Wave;
-import gov.usgs.volcanoes.core.time.CurrentTime;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+
+import gov.usgs.earthworm.Menu;
+import gov.usgs.earthworm.MenuItem;
+import gov.usgs.earthworm.WaveServer;
+import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
 
 /**
  * An implementation of <code>SeismicDataSource</code> that connects to an
@@ -127,7 +125,7 @@ public class WaveServerSource extends SeismicDataSource {
         if (ss.length == 4)
           loc = ss[3];
       }
-      double offset = timeZone.getOffset(J2kSec.asEpochMs(t1));
+      double offset = timeZone.getOffset(J2kSec.asEpoch(t1));
       double at1 = J2kSec.asEpoch(t1) + offset / 1000.0;
       double at2 = J2kSec.asEpoch(t2) + offset / 1000.0;
       sw = waveServer.getRawData(ss[0], ss[1], ss[2], loc, at1, at2);
@@ -153,7 +151,7 @@ public class WaveServerSource extends SeismicDataSource {
 
   public synchronized HelicorderData getHelicorder(String station, double t1, double t2,
       GulperListener gl) {
-    double now = CurrentTime.getInstance().nowJ2k();
+    double now = J2kSec.now();
     // if a time later than now has been asked for make sure to get the latest
     if ((t2 - now) >= -20)
       getWave(station, now - 2 * 60, now);

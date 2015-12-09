@@ -48,7 +48,6 @@ import gov.usgs.plot.render.FrameRenderer;
 import gov.usgs.plot.render.RectangleRenderer;
 import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.time.CurrentTime;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.UiUtils;
 import gov.usgs.volcanoes.swarm.Icons;
@@ -689,7 +688,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
   private double[] getTimeWindow() {
     final double[] times = new double[2];
     if (Double.isNaN(pauseStartTime)) {
-      times[1] = CurrentTime.getInstance().nowJ2k();
+      times[1] = J2kSec.now();
       times[0] = times[1] - span;
     } else {
       times[0] = pauseStartTime;
