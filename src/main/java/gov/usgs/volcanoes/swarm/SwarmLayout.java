@@ -117,7 +117,6 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
       sources.add(s);
     }
 
-    @Override
     public synchronized void actionPerformed(final ActionEvent e) {
       final String src = e.getActionCommand();
       sources.remove(src);
@@ -215,7 +214,6 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
     Swarm.getApplication().setFullScreenMode(kiosk);
   }
 
-  @Override
   public int compareTo(final SwarmLayout o) {
     return getName().compareToIgnoreCase(o.getName());
   }

@@ -235,7 +235,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
     pinButton = SwarmUtil.createToolBarToggleButton(Icons.pin, "Helicorder always on top",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             setPinned(pinButton.isSelected());
           }
@@ -244,7 +243,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
     settingsButton = SwarmUtil.createToolBarButton(Icons.settings, "Helicorder view settings",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             final HelicorderViewerSettingsDialog hvsd =
                 HelicorderViewerSettingsDialog.getInstance(settings, waveViewSettings);
@@ -259,7 +257,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
     backButton = SwarmUtil.createToolBarButton(Icons.left, "Scroll back time (A or Left arrow)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             if (helicorderViewPanel.hasInset())
               helicorderViewPanel.moveInset(-1);
@@ -273,7 +270,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
     forwardButton = SwarmUtil.createToolBarButton(Icons.right,
         "Scroll forward time (Z or Right arrow)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             if (helicorderViewPanel.hasInset())
               helicorderViewPanel.moveInset(1);
@@ -287,7 +283,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
     compX = SwarmUtil.createToolBarButton(Icons.xminus, "Compress X-axis (Alt-left arrow)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             decXAxis();
             getHelicorder();
@@ -298,7 +293,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
     expX = SwarmUtil.createToolBarButton(Icons.xplus, "Expand X-axis (Alt-right arrow)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             incXAxis();
             getHelicorder();
@@ -309,7 +303,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
     compY = SwarmUtil.createToolBarButton(Icons.yminus, "Compress Y-axis (Alt-down arrow)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             decYAxis();
             getHelicorder();
@@ -320,7 +313,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
     expY = SwarmUtil.createToolBarButton(Icons.yplus, "Expand Y-axis (Alt-up arrow)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             incYAxis();
             getHelicorder();
@@ -333,7 +325,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
     final JButton addZoom = SwarmUtil.createToolBarButton(Icons.zoomplus,
         "Decrease zoom time window (+)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             decZoom();
             settings.notifyView();
@@ -345,7 +336,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
     final JButton subZoom = SwarmUtil.createToolBarButton(Icons.zoomminus,
         "Increase zoom time window (-)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             incZoom();
             settings.notifyView();
@@ -358,7 +348,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
     clipboard = SwarmUtil.createToolBarButton(Icons.clipboard,
         "Copy inset to clipboard (C or Ctrl-C)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             helicorderViewPanel.insetToClipboard();
           }
@@ -370,7 +359,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
     removeWave = SwarmUtil.createToolBarButton(Icons.delete, "Remove inset wave (Delete or Escape)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             helicorderViewPanel.removeWaveInset();
           }
@@ -391,7 +379,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
     scaleButton = SwarmUtil.createToolBarButton(Icons.wavezoom,
         "Toggle between adjusting helicoder scale and clip", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             scaleClipState = !scaleClipState;
             if (scaleClipState) {
@@ -417,7 +404,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     autoScaleSlider.setMaximumSize(new Dimension(80, 20));
     autoScaleSlider.setMinimumSize(new Dimension(80, 20));
     autoScaleSlider.addChangeListener(new ChangeListener() {
-      @Override
       public void stateChanged(final ChangeEvent e) {
         settings.autoScale = true;
         if (!autoScaleSlider.getValueIsAdjusting()) {
@@ -439,7 +425,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
   private void createListeners() {
     timeListener = new TimeListener() {
-      @Override
       public void timeChanged(final double j2k) {
         helicorderViewPanel.setCursorMark(j2k);
       }
@@ -488,13 +473,11 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     });
 
     gulperListener = new GulperListener() {
-      @Override
       public void gulperStarted() {
         gulperWorking = true;
         throbber.increment();
       }
 
-      @Override
       public void gulperStopped(final boolean killed) {
         if (killed)
           noData = true;
@@ -508,7 +491,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
         }
       }
 
-      @Override
       public void gulperGulped(final double t1, final double t2, final boolean success) {
         if (success)
           getHelicorder();
@@ -517,16 +499,12 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
     dataListener = new SeismicDataSourceListener() {
 
-      @Override
       public void channelsProgress(final String id, final double progress) {}
 
-      @Override
       public void channelsUpdated() {}
 
-      @Override
       public void helicorderProgress(final String channel, final double progress) {
         SwingUtilities.invokeLater(new Runnable() {
-          @Override
           public void run() {
             if (!progressBar.isVisible())
               progressBar.setVisible(true);
@@ -604,7 +582,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
   public void setInsetButtonsEnabled(final boolean b) {
     SwingUtilities.invokeLater(new Runnable() {
-      @Override
       public void run() {
         clipboard.setEnabled(b);
         removeWave.setEnabled(b);
@@ -614,7 +591,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
   public void setNavigationButtonsEnabled(final boolean b) {
     SwingUtilities.invokeLater(new Runnable() {
-      @Override
       public void run() {
         compX.setEnabled(b);
         expX.setEnabled(b);
@@ -627,7 +603,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     });
   }
 
-  @Override
   public void setKioskMode(final boolean b) {
     super.setDefaultKioskMode(b);
     helicorderViewPanel.setFullScreen(fullScreen);
@@ -643,7 +618,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
   public void setStatus(final String status) {
     SwingUtilities.invokeLater(new Runnable() {
-      @Override
       public void run() {
         statusLabel.setText(status);
       }
@@ -822,7 +796,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
   // TODO: refactor out some functions
   private class CaptureActionListener implements ActionListener {
-    @Override
     public void actionPerformed(final ActionEvent e) {
       chooser = FileChooser.getFileChooser();
       chooser.setDialogTitle("Save Helicorder Screen Capture");
@@ -853,7 +826,6 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
       fileFormatCB.addItem("PS");
 
       fileFormatCB.addActionListener(new ActionListener() {
-        @Override
         public void actionPerformed(final ActionEvent e) {
           final JComboBox source = (JComboBox) e.getSource();
           if (source.getSelectedItem().equals("PS")) {

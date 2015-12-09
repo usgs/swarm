@@ -29,8 +29,6 @@ public class Gulper implements Runnable {
   private final int gulpSize;
   private final int gulpDelay;
 
-  private static Logger logger;
-
   /**
    * Create the gulper. This does not call methods to support subclassing.
    *
@@ -168,7 +166,6 @@ public class Gulper implements Runnable {
       listener.gulperStopped(killed);
   }
 
-  @Override
   public void run() {
     fireStarted();
     runLoop();

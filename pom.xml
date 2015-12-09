@@ -478,5 +478,10 @@
 			<artifactId>volcano-core</artifactId>
 			<version>[1.3.2,)</version>
 		</dependency>
+		<dependency>
+			<groupId>gov.usgs.volcanoes</groupId>
+			<artifactId>winston</artifactId>
+			<version>1.3.0-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 </project>

@@ -139,7 +139,6 @@ public class WaveClipboardFrame extends SwarmFrame {
     histories = new HashMap<WaveViewPanel, Stack<double[]>>();
     createUI();
     linkListener = new HelicorderViewPanelListener() {
-      @Override
       public void insetCreated(final double st, final double et) {
         if (heliLinked)
           repositionWaves(st, et);
@@ -206,7 +205,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     linkButton = SwarmUtil.createToolBarToggleButton(Icons.helilink,
         "Synchronize times with helicorder wave", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             heliLinked = linkButton.isSelected();
           }
@@ -216,7 +214,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     syncButton = SwarmUtil.createToolBarButton(Icons.clock, "Synchronize times with selected wave",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             syncChannels();
           }
@@ -226,7 +223,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     sortButton = SwarmUtil.createToolBarButton(Icons.geosort,
         "Sort waves by nearest to selected wave", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             sortChannelsByNearest();
           }
@@ -238,7 +234,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     sizeButton = SwarmUtil.createToolBarButton(Icons.resize, "Set clipboard wave size",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             doSizePopup(sizeButton.getX(), sizeButton.getY() + 2 * sizeButton.getHeight());
           }
@@ -247,7 +242,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     removeAllButton = SwarmUtil.createToolBarButton(Icons.deleteall,
         "Remove all waves from clipboard", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             removeWaves();
           }
@@ -265,7 +259,6 @@ public class WaveClipboardFrame extends SwarmFrame {
   // TODO: don't write image on event thread
   // TODO: unify with MapFrame.CaptureActionListener
   class CaptureActionListener implements ActionListener {
-    @Override
     public void actionPerformed(final ActionEvent e) {
       if (waves == null || waves.size() == 0)
         return;
@@ -319,7 +312,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     backButton = SwarmUtil.createToolBarButton(Icons.left, "Scroll back time 20% (Left arrow)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             shiftTime(-0.20);
           }
@@ -329,7 +321,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     forwardButton = SwarmUtil.createToolBarButton(Icons.right,
         "Scroll forward time 20% (Right arrow)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             shiftTime(0.20);
           }
@@ -339,7 +330,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     gotoButton =
         SwarmUtil.createToolBarButton(Icons.gototime, "Go to time (Ctrl-G)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             final String t = JOptionPane.showInputDialog(applicationFrame,
                 "Input time in 'YYYYMMDDhhmm[ss]' format:", "Go to Time",
@@ -353,7 +343,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     compXButton = SwarmUtil.createToolBarButton(Icons.xminus,
         "Shrink sample time 20% (Alt-left arrow, +)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             scaleTime(0.20);
           }
@@ -365,7 +354,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     expXButton = SwarmUtil.createToolBarButton(Icons.xplus,
         "Expand sample time 20% (Alt-right arrow, -)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             scaleTime(-0.20);
           }
@@ -376,7 +364,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     histButton = SwarmUtil.createToolBarButton(Icons.timeback, "Last time settings (Backspace)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             back();
           }
@@ -389,7 +376,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     copyButton = SwarmUtil.createToolBarButton(Icons.clipboard,
         "Place another copy of wave on clipboard (C or Ctrl-C)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             // TODO: implement
             // if (selected != null)
@@ -408,7 +394,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     upButton = SwarmUtil.createToolBarButton(Icons.up, "Move wave up in clipboard (Up arrow)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             moveUp();
           }
@@ -418,7 +403,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     downButton = SwarmUtil.createToolBarButton(Icons.down,
         "Move wave down in clipboard (Down arrow)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             moveDown();
           }
@@ -428,7 +412,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     removeButton = SwarmUtil.createToolBarButton(Icons.delete,
         "Remove wave from clipboard (Delete)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             remove();
           }
@@ -444,7 +427,6 @@ public class WaveClipboardFrame extends SwarmFrame {
     UiUtils.mapKeyStrokeToAction(this, "control A", "selectAll", new AbstractAction() {
       private static final long serialVersionUID = 1L;
 
-      @Override
       public void actionPerformed(final ActionEvent e) {
         for (final WaveViewPanel wave : waves)
           select(wave);
@@ -479,7 +461,6 @@ public class WaveClipboardFrame extends SwarmFrame {
     });
 
     WaveViewTime.addTimeListener(new TimeListener() {
-      @Override
       public void timeChanged(final double j2k) {
         for (final WaveViewPanel panel : waves) {
           if (panel != null)
@@ -565,7 +546,6 @@ public class WaveClipboardFrame extends SwarmFrame {
           final int size = sizes[i];
           final JRadioButtonMenuItem mi = new JRadioButtonMenuItem(labels[i]);
           mi.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(final ActionEvent e) {
               setWaveHeight(size);
             }
@@ -582,7 +562,6 @@ public class WaveClipboardFrame extends SwarmFrame {
   }
 
   private class OpenActionListener implements ActionListener {
-    @Override
     public void actionPerformed(final ActionEvent e) {
       final JFileChooser chooser = FileChooser.getFileChooser();
       chooser.resetChoosableFileFilters();
@@ -618,7 +597,6 @@ public class WaveClipboardFrame extends SwarmFrame {
   }
 
   private class SaveActionListener implements ActionListener {
-    @Override
     public void actionPerformed(final ActionEvent e) {
       final WaveViewPanel selected = getSingleSelected();
       if (selected == null)
@@ -684,7 +662,6 @@ public class WaveClipboardFrame extends SwarmFrame {
   }
 
   private class SaveAllActionListener implements ActionListener {
-    @Override
     public void actionPerformed(final ActionEvent e) {
       if (waves.size() <= 0)
         return;
@@ -847,7 +824,6 @@ public class WaveClipboardFrame extends SwarmFrame {
       return;
 
     Collections.sort(sorted, new Comparator<WaveViewPanel>() {
-      @Override
       public int compare(final WaveViewPanel wvp1, final WaveViewPanel wvp2) {
         Metadata md = swarmConfig.getMetadata(wvp1.getChannel());
         final double d1 = smd.distanceTo(md);
@@ -912,7 +888,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
   public void setStatusText(final String s) {
     SwingUtilities.invokeLater(new Runnable() {
-      @Override
       public void run() {
         statusLabel.setText(s);
       }

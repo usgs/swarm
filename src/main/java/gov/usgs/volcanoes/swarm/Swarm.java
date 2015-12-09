@@ -143,7 +143,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
     m.getActionMap().put("focus", new AbstractAction() {
       private static final long serialVersionUID = -1;
 
-      @Override
       public void actionPerformed(final ActionEvent e) {
         final KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         System.out.println("Focus check: \n" + "Current window: " + kfm.getFocusedWindow() + "\n\n"
@@ -155,7 +154,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
     m.getActionMap().put("outputcache", new AbstractAction() {
       private static final long serialVersionUID = -1;
 
-      @Override
       public void actionPerformed(final ActionEvent e) {
         if (cache != null)
           cache.output();
@@ -166,7 +164,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
     m.getActionMap().put("savelayout", new AbstractAction() {
       private static final long serialVersionUID = -1;
 
-      @Override
       public void actionPerformed(final ActionEvent e) {
         saveLayout(null);
       }
@@ -176,7 +173,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
     m.getActionMap().put("savelastlayout", new AbstractAction() {
       private static final long serialVersionUID = -1;
 
-      @Override
       public void actionPerformed(final ActionEvent e) {
         final String ll = swarmMenu.getLastLayoutName();
         if (ll != null)
@@ -192,7 +188,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
     toggleFullScreenAction = new AbstractAction() {
       private static final long serialVersionUID = -1;
 
-      @Override
       public void actionPerformed(final ActionEvent e) {
         toggleFullScreenMode();
       }
@@ -204,7 +199,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
     m.getActionMap().put("flushRight", new AbstractAction() {
       private static final long serialVersionUID = -1;
 
-      @Override
       public void actionPerformed(final ActionEvent e) {
         flushRight();
       }
@@ -215,7 +209,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
     m.getActionMap().put("flushLeft", new AbstractAction() {
       private static final long serialVersionUID = -1;
 
-      @Override
       public void actionPerformed(final ActionEvent e) {
         flushLeft();
       }
@@ -226,7 +219,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
     m.getActionMap().put("flushTop", new AbstractAction() {
       private static final long serialVersionUID = -1;
 
-      @Override
       public void actionPerformed(final ActionEvent e) {
         flushTop();
       }
@@ -237,7 +229,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
     m.getActionMap().put("flushBottom", new AbstractAction() {
       private static final long serialVersionUID = -1;
 
-      @Override
       public void actionPerformed(final ActionEvent e) {
         flushBottom();
       }
@@ -248,7 +239,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
     m.getActionMap().put("flushBottomRight", new AbstractAction() {
       private static final long serialVersionUID = -1;
 
-      @Override
       public void actionPerformed(final ActionEvent e) {
         flushBottomRight();
       }
@@ -259,7 +249,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
     m.getActionMap().put("flushBottomLeft", new AbstractAction() {
       private static final long serialVersionUID = -1;
 
-      @Override
       public void actionPerformed(final ActionEvent e) {
         flushBottomLeft();
       }
@@ -270,7 +259,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
     m.getActionMap().put("flushTopRight", new AbstractAction() {
       private static final long serialVersionUID = -1;
 
-      @Override
       public void actionPerformed(final ActionEvent e) {
         flushTopRight();
       }
@@ -281,7 +269,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
     m.getActionMap().put("flushTopLeft", new AbstractAction() {
       private static final long serialVersionUID = -1;
 
-      @Override
       public void actionPerformed(final ActionEvent e) {
         flushTopLeft();
       }
@@ -306,7 +293,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
       }
     });
     this.addFocusListener(new FocusListener() {
-      @Override
       public void focusGained(final FocusEvent e) {
         // The main Swarm window has no need for the focus. If it gets
         // it
@@ -328,7 +314,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
         }
       }
 
-      @Override
       public void focusLost(final FocusEvent e) {}
     });
 
@@ -937,11 +922,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
       LOGGER.warn("no helicorders, skipping kiosk mode.");
   }
 
-  @Override
   public void internalFrameAdded(final JInternalFrame f) {
     desktop.add(f);
     SwingUtilities.invokeLater(new Runnable() {
-      @Override
       public void run() {
         f.toFront();
         try {
@@ -952,7 +935,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
     });
   }
 
-  @Override
   public void internalFrameRemoved(final JInternalFrame f) {
     // do nothing
   }

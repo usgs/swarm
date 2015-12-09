@@ -169,7 +169,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
     });
 
     linkListener = new HelicorderViewPanelListener() {
-      @Override
       public void insetCreated(final double st, final double et) {
         if (heliLinked) {
           if (!realtime)
@@ -208,7 +207,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
     toolbar = SwarmUtil.createToolBar();
     optionsButton =
         SwarmUtil.createToolBarButton(Icons.settings, "Map options", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             final MapSettingsDialog msd = MapSettingsDialog.getInstance(MapFrame.this);
             msd.setVisible(true);
@@ -218,7 +216,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     labelButton = SwarmUtil.createToolBarButton(Icons.label_some, "Change label settings",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             final LabelSetting ls = mapPanel.getLabelSetting().next();
             labelButton.setIcon(ls.getIcon());
@@ -231,7 +228,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     realtimeButton =
         SwarmUtil.createToolBarToggleButton(Icons.clock, "Realtime mode (N)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             setRealtime(realtimeButton.isSelected());
           }
@@ -242,7 +238,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     linkButton = SwarmUtil.createToolBarToggleButton(Icons.helilink,
         "Synchronize times with helicorder wave (H)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             heliLinked = linkButton.isSelected();
           }
@@ -255,7 +250,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     final JButton earthButton = SwarmUtil.createToolBarButton(Icons.earth,
         "Zoom out to full scale (Home)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             final Point2D.Double c = new Point2D.Double(mapPanel.getCenter().x, 0);
             mapPanel.setCenterAndScale(c, 100000);
@@ -266,7 +260,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     dragButton =
         SwarmUtil.createToolBarToggleButton(Icons.drag, "Drag map (D)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             mapPanel.setDragMode(DragMode.DRAG_MAP);
           }
@@ -277,7 +270,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     dragZoomButton = SwarmUtil.createToolBarToggleButton(Icons.dragbox, "Zoom into box (B)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             mapPanel.setDragMode(DragMode.BOX);
           }
@@ -288,7 +280,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     rulerButton = SwarmUtil.createToolBarToggleButton(Icons.ruler, "Measure distances (M)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             mapPanel.setDragMode(DragMode.RULER);
           }
@@ -304,7 +295,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     final JButton zoomIn =
         SwarmUtil.createToolBarButton(Icons.zoomplus, "Zoom in (+)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             mapPanel.zoom(0.5);
           }
@@ -315,7 +305,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     final JButton zoomOut =
         SwarmUtil.createToolBarButton(Icons.zoomminus, "Zoom out (-)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             mapPanel.zoom(2);
           }
@@ -325,7 +314,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     final JButton backButton = SwarmUtil.createToolBarButton(Icons.geoback,
         "Last map view (Ctrl-backspace)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             mapPanel.mapPop();
           }
@@ -337,7 +325,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     backTimeButton = SwarmUtil.createToolBarButton(Icons.left, "Scroll back time 20% (Left arrow)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             setRealtime(false);
             mapPanel.shiftTime(-0.20);
@@ -348,7 +335,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     forwardTimeButton = SwarmUtil.createToolBarButton(Icons.right,
         "Scroll forward time 20% (Right arrow)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             setRealtime(false);
             mapPanel.shiftTime(0.20);
@@ -359,7 +345,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     gotoButton =
         SwarmUtil.createToolBarButton(Icons.gototime, "Go to time (Ctrl-G)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             String t = JOptionPane.showInputDialog(applicationFrame,
                 "Input time in 'YYYYMMDDhhmm[ss]' format:", "Go to Time",
@@ -386,7 +371,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     compXButton = SwarmUtil.createToolBarButton(Icons.xminus, "Shrink time axis (Alt-left arrow",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             if (realtime) {
               if (spanIndex != 0)
@@ -401,7 +385,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     expXButton = SwarmUtil.createToolBarButton(Icons.xplus, "Expand time axis (Alt-right arrow)",
         new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             if (realtime) {
               if (spanIndex < MultiMonitor.SPANS.length - 1)
@@ -416,7 +399,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     timeHistoryButton = SwarmUtil.createToolBarButton(Icons.timeback,
         "Last time settings (Backspace)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             if (mapPanel.timePop())
               setRealtime(false);
@@ -430,7 +412,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
     clipboardButton = SwarmUtil.createToolBarButton(Icons.clipboard,
         "Copy inset to clipboard (C or Ctrl-C)", new ActionListener() {
-          @Override
           public void actionPerformed(final ActionEvent e) {
             mapPanel.wavesToClipboard();
           }
@@ -454,7 +435,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
   }
 
   class CaptureActionListener implements ActionListener {
-    @Override
     public void actionPerformed(final ActionEvent e) {
       final JFileChooser chooser = FileChooser.getFileChooser();
       final File lastPath = new File(swarmConfig.lastPath);
@@ -532,7 +512,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
   public void setStatusText(final String t) {
     SwingUtilities.invokeLater(new Runnable() {
-      @Override
       public void run() {
         String missing = "";
         if (mapPanel.getMissing() == 1)
@@ -561,7 +540,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
     return linkListener;
   }
 
-  @Override
   public void setKioskMode(final boolean b) {
     setDefaultKioskMode(b);
     if (fullScreen) {
@@ -573,7 +551,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
     }
   }
 
-  @Override
   public void run() {
     while (true) {
       try {
@@ -590,7 +567,6 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
     }
   }
 
-  @Override
   public void optionsChanged() {
     reloadImages();
   }
