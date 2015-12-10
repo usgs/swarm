@@ -1,15 +1,5 @@
 package gov.usgs.volcanoes.swarm;
 
-import gov.usgs.plot.data.file.FileType;
-import gov.usgs.util.ui.ExtensionFileFilter;
-import gov.usgs.volcanoes.core.util.StringUtils;
-import gov.usgs.volcanoes.swarm.data.CachedDataSource;
-import gov.usgs.volcanoes.swarm.data.FileDataSource;
-import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
-import gov.usgs.volcanoes.swarm.map.MapFrame;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -17,7 +7,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +28,16 @@ import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+
+import gov.usgs.plot.data.file.FileType;
+import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.swarm.data.CachedDataSource;
+import gov.usgs.volcanoes.swarm.data.FileDataSource;
+import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.map.MapFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 
 /**
  * 
