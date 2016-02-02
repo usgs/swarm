@@ -16,7 +16,7 @@ import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.winston.Channel;
 import gov.usgs.volcanoes.winston.Instrument;
-import gov.usgs.volcanoes.winston.server.WWSClient;
+import gov.usgs.volcanoes.winston.legacyServer.WWSClient;
 
 /**
  * An implementation of <code>SeismicDataSource</code> that communicates

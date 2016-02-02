@@ -55,34 +55,38 @@ public class WaveServerPanel extends DataSourcePanel
 		String[] tzs = TimeZone.getAvailableIDs();
 		Arrays.sort(tzs);
 		wsOffset = new JComboBox(tzs);
-		
-		String h = "";
-		String p = "16022";
-		String t = "2.0";
-		String gs = "30";
-		String gd = "1.0";
-		wsOffset.setSelectedItem("UTC");
-		
-		if (source != null && source.indexOf(";ws:") != -1)
-		{
-			String[] ss = source.substring(source.indexOf(";ws:") + 4).split(":");
-			h = ss[0];
-			p = ss[1];
-			t = String.format("%.1f", Integer.parseInt(ss[2]) / 1000.0);
-			gs = String.format("%.0f", Integer.parseInt(ss[3]) / 60.0);
-			gd = String.format("%.1f", Integer.parseInt(ss[4]) / 1000.0);
-			if (ss.length >= 6)
-				wsOffset.setSelectedItem(ss[5]);
-//			wso = String.format("%.1f", Integer.parseInt(ss[5]) / 60.0);
-		}
-		wsHost.setText(h);
-		wsPort.setText(p);
-		wsTimeout.setText(t);
-		gulperSize.setText(gs);
-		gulperDelay.setText(gd);
-//		wsOffset.setText(wso);
+		resetSource(source);
 	}
 	
+	 public void resetSource(String source) {
+	   this.source = source;
+       String h = "";
+       String p = "16022";
+       String t = "2.0";
+       String gs = "30";
+       String gd = "1.0";
+       wsOffset.setSelectedItem("UTC");
+       
+       if (source != null && source.indexOf(";ws:") != -1)
+       {
+           String[] ss = source.substring(source.indexOf(";ws:") + 4).split(":");
+           h = ss[0];
+           p = ss[1];
+           t = String.format("%.1f", Integer.parseInt(ss[2]) / 1000.0);
+           gs = String.format("%.0f", Integer.parseInt(ss[3]) / 60.0);
+           gd = String.format("%.1f", Integer.parseInt(ss[4]) / 1000.0);
+           if (ss.length >= 6)
+               wsOffset.setSelectedItem(ss[5]);
+//         wso = String.format("%.1f", Integer.parseInt(ss[5]) / 60.0);
+       }
+       wsHost.setText(h);
+       wsPort.setText(p);
+       wsTimeout.setText(t);
+       gulperSize.setText(gs);
+       gulperDelay.setText(gd);
+//     wsOffset.setText(wso);
+
+	 }
 	@Override
   protected void createPanel()
 	{
