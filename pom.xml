@@ -224,14 +224,15 @@
 							<artifactSet>
 								<includes>
 									<include>gov.usgs.volcanoes:usgs</include>
+									<include>gov.usgs.volcanoes:volcano-core</include>
+									<include>gov.usgs.volcanoes:winston</include>
+									<include>gov.usgs.volcanoes:swarm</include>
 									<include>org.freemarker:freemarker</include>
 									<include>com.jgoodies:*</include>
 									<include>com.martiansoftware:jsap</include>
 									<include>net.sourceforge.jtransforms:jtransforms</include>
 									<include>org.slf4j:*</include>
 									<include>org.apache:log4j</include>
-									<include>gov.usgs.volcanoes:swarm</include>
-									<include>gov.usgs.volcanoes:swarm</include>
 									<include>net.alomax:*</include>
 									<include>edu.sc.seis:*</include>
 									<include>colt:colt</include>
