@@ -1,11 +1,10 @@
 package gov.usgs.volcanoes.swarm;
 
-import gov.usgs.proj.Projection;
-import gov.usgs.util.Pair;
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.geom.Point2D;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,6 +15,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import gov.usgs.proj.Projection;
+import gov.usgs.util.Pair;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+
 /**
  * 
  * 
@@ -24,6 +28,8 @@ import java.util.TimeZone;
 public class Metadata implements Comparable<Metadata> {
     public static final String DEFAULT_METADATA_FILENAME = "SwarmMetadata.config";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Metadata.class);
+    
     private SCNL scnl;
 
     private String channel = null;
@@ -218,24 +224,23 @@ public class Metadata implements Comparable<Metadata> {
 
     public static Map<String, Metadata> loadMetadata(String fn) {
         Map<String, Metadata> data = new HashMap<String, Metadata>();
-        ConfigFile cf = new ConfigFile(fn);
+          ConfigFile cf = new ConfigFile(fn); 
+          Map<String, List<String>> config = cf.getConfig();
 
-        Map<String, List<String>> config = cf.getConfig();
+          for (String key : config.keySet()) {
+              Metadata md = data.get(key);
+              if (md == null) {
+                  md = new Metadata(key);
+                  data.put(key, md);
+              } else
+                  md = data.get(key);
 
-        for (String key : config.keySet()) {
-            Metadata md = data.get(key);
-            if (md == null) {
-                md = new Metadata(key);
-                data.put(key, md);
-            } else
-                md = data.get(key);
-
-            for (String value : config.get(key)) {
-                for (String item : value.split(";")) {
-                    md.interpret(item);
-                }
-            }
-        }
+              for (String value : config.get(key)) {
+                  for (String item : value.split(";")) {
+                      md.interpret(item);
+                  }
+              }
+          }
 
         return data;
     }
