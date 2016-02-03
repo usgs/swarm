@@ -29,6 +29,11 @@ public class WWSPanel extends DataSourcePanel {
     wwsPort = new JTextField();
     wwsTimeout = new JTextField();
     wwsCompress = new JCheckBox();
+    resetSource(source);
+  }
+
+  public void resetSource(String source) {
+    this.source = source;
     String h = "";
     String p = "16022";
     String t = "15.0";
@@ -45,7 +50,6 @@ public class WWSPanel extends DataSourcePanel {
     wwsTimeout.setText(t);
     wwsCompress.setSelected(wscomp);
   }
-
   @Override
   protected void createPanel() {
     createFields();
