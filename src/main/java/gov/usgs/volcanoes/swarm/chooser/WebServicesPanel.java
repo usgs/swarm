@@ -245,7 +245,7 @@ public class WebServicesPanel extends DataSourcePanel {
     FormLayout layout = new FormLayout(
         // "right:max(20dlu;pref), 3dlu, 40dlu, 0dlu, 45dlu, 3dlu, right:max(20dlu;pref), 3dlu,
         // 40dlu, 0dlu, 45dlu",
-        "right:max(10dlu;pref), 3dlu, right:max(20dlu;pref), 3dlu, 40dlu, 0dlu, 45dlu, 3dlu, right:max(20dlu;pref), 3dlu, 40dlu, 0dlu, 40dlu",
+        "right:max(10dlu;pref), 3dlu, right:max(20dlu;pref), 3dlu, 80dlu, 0dlu, 5dlu, 3dlu, right:max(20dlu;pref), 3dlu, 40dlu, 0dlu, 40dlu",
 
     "");
 
@@ -330,6 +330,8 @@ public class WebServicesPanel extends DataSourcePanel {
     builder.nextLine();
     builder.append(" ");
     panel = builder.getPanel();
+    
+    
   }
 
   /**
