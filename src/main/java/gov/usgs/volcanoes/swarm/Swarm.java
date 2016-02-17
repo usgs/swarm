@@ -42,10 +42,12 @@ import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
 import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
+import gov.usgs.volcanoes.swarm.picker.PickerFrame;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
 import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
 import gov.usgs.volcanoes.swarm.wave.WaveViewerFrame;
 
 /**
@@ -71,8 +73,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
   private final CachedDataSource cache;
 
   private static final String TITLE = "Swarm";
-  // private static final String VERSION;
-  // private static final String BUILD_DATE;
 
   private static final int LEFT = 1;
   private static final int RIGHT = 2;
@@ -82,17 +82,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
   private static final int BOTTOM_RIGHT = 6;
   private static final int TOP_LEFT = 7;
   private static final int TOP_RIGHT = 8;
-
-  // static {
-  // String[] ss = Util.getVersion("gov.usgs.swarm");
-  // if (ss != null && ss.length >= 2) {
-  // VERSION = ss[0];
-  // BUILD_DATE = ss[1];
-  // } else {
-  // VERSION = "Development";
-  // BUILD_DATE = null;
-  // }
-  // }
 
   private static boolean fullScreen = false;
   private int oldState = 0;
@@ -582,6 +571,16 @@ public class Swarm extends JFrame implements InternalFrameListener {
     return frame;
   }
 
+  public static PickerFrame openPicker(final WaveViewPanel insetWavePanel) {
+    WaveViewPanel p = new WaveViewPanel(insetWavePanel);
+    p.setDataSource(insetWavePanel.getDataSource().getCopy());
+    PickerFrame pickerFrame = new PickerFrame();
+    pickerFrame.setVisible(true);
+    pickerFrame.requestFocus();
+    SwarmInternalFrames.add(pickerFrame);
+    pickerFrame.addWave(p);
+    return pickerFrame;
+  }
 
   public void saveLayout(String name) {
     final boolean fixedName = (name != null);

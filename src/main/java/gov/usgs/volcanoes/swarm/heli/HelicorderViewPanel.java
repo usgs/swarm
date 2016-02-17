@@ -28,6 +28,9 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.plot.data.HelicorderData;
@@ -41,10 +44,12 @@ import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.options.SwarmOptions;
 import gov.usgs.volcanoes.swarm.options.SwarmOptionsListener;
+import gov.usgs.volcanoes.swarm.picker.PickerFrame;
 import gov.usgs.volcanoes.swarm.time.UiTime;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
@@ -56,6 +61,8 @@ import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
  * @author Dan Cervelli
  */
 public class HelicorderViewPanel extends JComponent implements SwarmOptionsListener {
+  private static final Logger LOGGER = LoggerFactory.getLogger(HelicorderViewPanel.class);
+  
   private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
   public static final long serialVersionUID = -1;
 
@@ -855,6 +862,13 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
     invalidateImage();
     if (!SwarmConfig.getInstance().durationEnabled)
       clearMarks();
+  }
+
+  public void insetToPicker() {
+    if (insetWavePanel != null) {
+      LOGGER.debug("Sending wave to picker");
+      Swarm.openPicker(insetWavePanel);
+    }
   }
 
 }
