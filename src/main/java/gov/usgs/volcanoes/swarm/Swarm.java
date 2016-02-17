@@ -43,11 +43,11 @@ import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
 import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.picker.PickerFrame;
+import gov.usgs.volcanoes.swarm.picker.PickerWavePanel;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
 import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
 import gov.usgs.volcanoes.swarm.wave.WaveViewerFrame;
 
 /**
@@ -572,7 +572,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
   }
 
   public static PickerFrame openPicker(final WaveViewPanel insetWavePanel) {
-    WaveViewPanel p = new WaveViewPanel(insetWavePanel);
+    WaveViewPanel p = new PickerWavePanel(insetWavePanel);
     p.setDataSource(insetWavePanel.getDataSource().getCopy());
     PickerFrame pickerFrame = new PickerFrame();
     pickerFrame.setVisible(true);

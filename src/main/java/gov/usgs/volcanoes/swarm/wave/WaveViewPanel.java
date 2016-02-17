@@ -61,19 +61,19 @@ public class WaveViewPanel extends JComponent {
    * X pixel location of where the main plot axis should be located on the
    * component.
    */
-  private int xOffset = 60;
+  protected int xOffset = 60;
 
   /**
    * Y pixel location of where the main plot axis should be located on the
    * component.
    */
-  private int yOffset = 20;
+  protected int yOffset = 20;
 
   /** The amount of padding space on the right side. */
-  private int rightWidth = 20;
+  protected int rightWidth = 20;
 
   /** The amount of padding space on the bottom. */
-  private int bottomHeight = 20;
+  protected int bottomHeight = 20;
 
   private FrameDecorator decorator;
   private SliceWaveRenderer waveRenderer;
@@ -82,9 +82,9 @@ public class WaveViewPanel extends JComponent {
 
   private Wave wave;
 
-  private double startTime;
-  private double endTime;
-  private WaveViewSettings settings;
+  protected double startTime;
+  protected double endTime;
+  protected WaveViewSettings settings;
   private int bias;
 
   private double minAmp = 1E300;
@@ -93,14 +93,14 @@ public class WaveViewPanel extends JComponent {
   private double maxSpectrogramPower = -1E300;
   private double[] translation;
 
-  private boolean timeSeries;
-  private String channel;
+  protected boolean timeSeries;
+  protected String channel;
 
   /**
    * The data source to use for zoom drags. This should probably be moved from
    * this class to follow a stricter interpretation of MVC.
    */
-  private SeismicDataSource source;
+  protected SeismicDataSource source;
 
   /**
    * A flag to indicate wheter the plot should display a title. Currently used
@@ -112,15 +112,15 @@ public class WaveViewPanel extends JComponent {
   private Color bottomBorderColor;
   private JLabel statusLabel;
 
-  private boolean allowDragging;
-  private boolean dragging;
-  private double j2k1;
-  private double j2k2;
-  private int highlightX1;
-  private int highlightX2;
+  protected boolean allowDragging;
+  protected boolean dragging;
+  protected double j2k1;
+  protected double j2k2;
+  protected int highlightX1;
+  protected int highlightX2;
 
   private static Image closeImg;
-  private boolean allowClose;
+  protected boolean allowClose;
 
   private EventListenerList listeners = new EventListenerList();
 
