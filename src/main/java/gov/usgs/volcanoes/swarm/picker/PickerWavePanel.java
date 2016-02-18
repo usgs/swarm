@@ -17,11 +17,11 @@ import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
-public class PickerWavePanel extends AbstractWavePanel {
+public class PickerWavePanel extends AbstractWavePanel implements EventObserver {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PickerWavePanel.class);
 
-  private static final Font ANNOTATION_FONT =  new Font("Monospaced", Font.BOLD, 12);
+  private static final Font ANNOTATION_FONT = new Font("Monospaced", Font.BOLD, 12);
 
   private Event event;
 
@@ -49,11 +49,13 @@ public class PickerWavePanel extends AbstractWavePanel {
 
   @Override
   protected void annotateImage(Graphics2D g2) {
-    ListIterator<Phase> it = event.phasesIt();
-    while (it.hasNext()) {
-      markPhase(g2, it.next());
+    for (Phase.PhaseType type : Phase.PhaseType.values()) {
+      Phase phase = event.getPhase(channel, type);
+      if (phase != null) {
+        markPhase(g2, phase);
+      }
     }
-//    repaint();
+    // repaint();
   }
 
   private void markPhase(Graphics2D g2, Phase phase) {
@@ -68,37 +70,14 @@ public class PickerWavePanel extends AbstractWavePanel {
     g2.setColor(DARK_GREEN);
     g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
 
-//    GeneralPath gp = new GeneralPath();
-//    gp.moveTo((float) x, yOffset);
-//    gp.lineTo((float) x - 5, yOffset - 7);
-//    gp.lineTo((float) x + 5, yOffset - 7);
-//    gp.closePath();
-//    g2.setPaint(Color.GREEN);
-//    g2.fill(gp);
-//    g2.setColor(DARK_GREEN);
-//    g2.draw(gp);
-
-    // g2.drawString("iP0", (int)x, yOffset);
-
     String tag = phase.tag();
     Font oldFont = g2.getFont();
-     g2.setFont(ANNOTATION_FONT);
-    // String c = channel.replace('_', ' ');
-    //
+    g2.setFont(ANNOTATION_FONT);
 
-    // Font f = g2.getFont();
-    // float s = f.getSize();
     FontMetrics fm = g2.getFontMetrics();
     int width = fm.stringWidth(tag);
-    // while ((width / (double)graphWidth > .5) && (--s > 1)) {
-    // g2.setFont(f.deriveFont(s));
-    // fm = g2.getFontMetrics();
-    // width = fm.stringWidth(tag);
-    // }
-    
-    // int height = fm.getAscent() + fm.getDescent();
     int height = fm.getAscent();
-    
+
     int offset = 2;
     int lw = width + 2 * offset;
     g2.setColor(new Color(255, 255, 255, 192));
@@ -109,20 +88,14 @@ public class PickerWavePanel extends AbstractWavePanel {
 
     g2.drawString(tag, (int) x + offset, 3 + (fm.getAscent() + offset));
     g2.setFont(oldFont);
-
-
-
-    //
-    // Graphics2D g2d = (Graphics2D)g;
-    // g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-    // RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-    // }
-    // g2.drawString("This is gona be awesome", 200, 200);
-
   }
 
   @Override
   protected void processRightMouseRelease(MouseEvent e) {
     pauseCursorMark = false;
+  }
+
+  public void updateEvent() {
+    repaint();
   }
 }

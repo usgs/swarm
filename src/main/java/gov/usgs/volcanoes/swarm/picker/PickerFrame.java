@@ -911,6 +911,8 @@ public class PickerFrame extends SwarmFrame {
   }
 
   public synchronized void addWave(final PickerWavePanel p) {
+    String channel = p.getChannel();
+    Metadata.findNearest(metadata, channel)
     p.addListener(selectListener);
     p.setOffsets(54, 8, 21, 19);
     p.setAllowClose(true);
@@ -929,6 +931,7 @@ public class PickerFrame extends SwarmFrame {
     waveBox.validate();
   }
 
+  
   private synchronized void deselect(final AbstractWavePanel p) {
     selectedSet.remove(p);
     waveToolbar.removeSettings(p.getSettings());

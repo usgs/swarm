@@ -358,7 +358,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     UiUtils.mapKeyStrokeToButton(this, "C", "clipboard2", clipboard);
     toolBar.add(clipboard);
 
-    picker = SwarmUtil.createToolBarButton(Icons.picker,
+    picker = SwarmUtil.createToolBarButton(Icons.ruler,
         "Copy inset to picker (P)", new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
             helicorderViewPanel.insetToPicker();
