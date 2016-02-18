@@ -2,7 +2,7 @@ package gov.usgs.volcanoes.swarm.picker;
 
 public class Phase {
   public static enum Onset {
-    I, E
+    i, p
   }
 
   public static enum PhaseType {
@@ -84,5 +84,12 @@ public class Phase {
     time = builder.time;
     maxAmplitude = builder.maxAmplitude;
     duration = builder.duration;
+  }
+
+  public String tag() {
+    StringBuffer sb = new StringBuffer();
+    sb.append(onset).append(phaseType).append(weight);
+    
+    return sb.toString();
   }
 }

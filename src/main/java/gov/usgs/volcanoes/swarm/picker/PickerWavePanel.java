@@ -21,6 +21,8 @@ public class PickerWavePanel extends AbstractWavePanel {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PickerWavePanel.class);
 
+  private static final Font ANNOTATION_FONT =  new Font("Monospaced", Font.BOLD, 12);
+
   private Event event;
 
   public PickerWavePanel(WaveViewPanel insetWavePanel) {
@@ -62,25 +64,25 @@ public class PickerWavePanel extends AbstractWavePanel {
     if (t == null)
       return;
 
-    double x = (j2k - t[1]) / t[0];
+    double x = 2 + (j2k - t[1]) / t[0];
     g2.setColor(DARK_GREEN);
     g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
 
-    GeneralPath gp = new GeneralPath();
-    gp.moveTo((float) x, yOffset);
-    gp.lineTo((float) x - 5, yOffset - 7);
-    gp.lineTo((float) x + 5, yOffset - 7);
-    gp.closePath();
-    g2.setPaint(Color.GREEN);
-    g2.fill(gp);
-    g2.setColor(DARK_GREEN);
-    g2.draw(gp);
+//    GeneralPath gp = new GeneralPath();
+//    gp.moveTo((float) x, yOffset);
+//    gp.lineTo((float) x - 5, yOffset - 7);
+//    gp.lineTo((float) x + 5, yOffset - 7);
+//    gp.closePath();
+//    g2.setPaint(Color.GREEN);
+//    g2.fill(gp);
+//    g2.setColor(DARK_GREEN);
+//    g2.draw(gp);
 
     // g2.drawString("iP0", (int)x, yOffset);
 
-    String tag = "iP0";
+    String tag = phase.tag();
     Font oldFont = g2.getFont();
-    // g.setFont(LARGE_FONT);
+     g2.setFont(ANNOTATION_FONT);
     // String c = channel.replace('_', ' ');
     //
 
@@ -105,7 +107,7 @@ public class PickerWavePanel extends AbstractWavePanel {
     g2.setColor(Color.black);
     g2.drawRect((int) x, 3, lw, height + 2 * offset);
 
-    g2.drawString(tag, (int) x + offset, (fm.getAscent() + offset));
+    g2.drawString(tag, (int) x + offset, 3 + (fm.getAscent() + offset));
     g2.setFont(oldFont);
 
 

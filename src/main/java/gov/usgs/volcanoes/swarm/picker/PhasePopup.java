@@ -25,7 +25,7 @@ public class PhasePopup extends JPopupMenu {
     ip0 = new JMenuItem("iP0");
     ip0.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        Phase phase = new Phase.Builder().channel(PhasePopup.this.channel).onset(Phase.Onset.I)
+        Phase phase = new Phase.Builder().channel(PhasePopup.this.channel).onset(Phase.Onset.i)
             .duration(1000).maxAmplitude(100).phaseType(Phase.PhaseType.P)
             .time(PhasePopup.this.time).weight(0).build();
         PhasePopup.this.event.addPhase(phase);
