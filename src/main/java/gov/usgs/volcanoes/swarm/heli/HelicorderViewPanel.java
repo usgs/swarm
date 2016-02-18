@@ -51,6 +51,7 @@ import gov.usgs.volcanoes.swarm.options.SwarmOptions;
 import gov.usgs.volcanoes.swarm.options.SwarmOptionsListener;
 import gov.usgs.volcanoes.swarm.picker.PickerFrame;
 import gov.usgs.volcanoes.swarm.time.UiTime;
+import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
@@ -458,7 +459,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
           removeWaveInset();
         }
 
-        public void waveTimePressed(WaveViewPanel src, MouseEvent e, double j2k) {
+        public void waveTimePressed(AbstractWavePanel src, MouseEvent e, double j2k) {
           if (swarmConfig.durationEnabled && SwingUtilities.isLeftMouseButton(e))
             markTime(j2k);
           insetWavePanel.processMousePosition(e.getX(), e.getY());

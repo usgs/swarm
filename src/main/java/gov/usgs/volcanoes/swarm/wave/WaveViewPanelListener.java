@@ -16,8 +16,8 @@ import java.util.EventListener;
  */
 public interface WaveViewPanelListener extends EventListener
 {
-	public void waveZoomed(WaveViewPanel src, double oldST, double oldET, double newST, double newET);
-	public void mousePressed(WaveViewPanel src, MouseEvent e, boolean dragging);
-	public void waveClosed(WaveViewPanel src);
-	public void waveTimePressed(WaveViewPanel src, MouseEvent e, double j2k);
+	public void waveZoomed(AbstractWavePanel src, double oldST, double oldET, double newST, double newET);
+	public void mousePressed(AbstractWavePanel src, MouseEvent e, boolean dragging);
+	public void waveClosed(AbstractWavePanel src);
+	public void waveTimePressed(AbstractWavePanel src, MouseEvent e, double j2k);
 }

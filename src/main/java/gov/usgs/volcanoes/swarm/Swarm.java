@@ -572,7 +572,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
   }
 
   public static PickerFrame openPicker(final WaveViewPanel insetWavePanel) {
-    WaveViewPanel p = new PickerWavePanel(insetWavePanel);
+    PickerWavePanel p = new PickerWavePanel(insetWavePanel);
     p.setDataSource(insetWavePanel.getDataSource().getCopy());
     PickerFrame pickerFrame = new PickerFrame();
     pickerFrame.setVisible(true);

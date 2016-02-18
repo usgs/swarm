@@ -15,15 +15,15 @@ import java.awt.event.MouseEvent;
  */
 public class WaveViewPanelAdapter implements WaveViewPanelListener
 {
-	public void waveZoomed(WaveViewPanel src, double st, double et, double nst, double net)
+	public void waveZoomed(AbstractWavePanel src, double st, double et, double nst, double net)
 	{}
 	
-	public void mousePressed(WaveViewPanel src, MouseEvent e, boolean dragging)
+	public void mousePressed(AbstractWavePanel src, MouseEvent e, boolean dragging)
 	{}
 	
-	public void waveClosed(WaveViewPanel src)
+	public void waveClosed(AbstractWavePanel src)
 	{}
 
-	public void waveTimePressed(WaveViewPanel src, MouseEvent e, double j2k)
+	public void waveTimePressed(AbstractWavePanel src, MouseEvent e, double j2k)
 	{}
 }
