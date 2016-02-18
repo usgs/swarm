@@ -15,10 +15,12 @@ public class PhasePopup extends JPopupMenu {
   private JMenu s;
   private final String channel;
   private final long time;
+  private final Event event;
 
-  public PhasePopup(String channel, long time) {
+  public PhasePopup(Event event, String channel, long time) {
     this.channel = channel;
     this.time = time;
+    this.event = event;
 
     ip0 = new JMenuItem("iP0");
     ip0.addActionListener(new ActionListener() {
@@ -26,6 +28,7 @@ public class PhasePopup extends JPopupMenu {
         Phase phase = new Phase.Builder().channel(PhasePopup.this.channel).onset(Phase.Onset.I)
             .duration(1000).maxAmplitude(100).phaseType(Phase.PhaseType.P)
             .time(PhasePopup.this.time).weight(0).build();
+        PhasePopup.this.event.addPhase(phase);
       }
     });
     add(ip0);

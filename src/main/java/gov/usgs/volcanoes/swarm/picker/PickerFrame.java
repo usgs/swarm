@@ -917,6 +917,7 @@ public class PickerFrame extends SwarmFrame {
     p.setStatusLabel(statusLabel);
     p.setAllowDragging(true);
     p.setDisplayTitle(true);
+    p.setEvent(event);
     final int w = scrollPane.getViewport().getSize().width;
     p.setSize(w, calculateWaveHeight());
     p.setBottomBorderColor(Color.GRAY);

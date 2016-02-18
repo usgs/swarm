@@ -50,90 +50,88 @@ public abstract class AbstractWavePanel extends JComponent {
   public static final long serialVersionUID = -1;
   protected static SwarmConfig swarmConfig;
   /**
-   * X pixel location of where the main plot axis should be located on the
-   * component.
+   * X pixel location of where the main plot axis should be located on the component.
    */
   protected int xOffset = 60;
   /**
-   * Y pixel location of where the main plot axis should be located on the
-   * component.
+   * Y pixel location of where the main plot axis should be located on the component.
    */
   protected int yOffset = 20;
   /** The amount of padding space on the right side. */
   protected int rightWidth = 20;
   /** The amount of padding space on the bottom. */
   protected int bottomHeight = 20;
-  private FrameDecorator decorator;
-  private SliceWaveRenderer waveRenderer;
-  private SpectrogramRenderer spectrogramRenderer;
-  private SpectraRenderer spectraRenderer;
+  protected FrameDecorator decorator;
+  protected SliceWaveRenderer waveRenderer;
+  protected SpectrogramRenderer spectrogramRenderer;
+  protected SpectraRenderer spectraRenderer;
   protected Wave wave;
   protected double startTime;
   protected double endTime;
   protected WaveViewSettings settings;
   protected int bias;
-  private double minAmp = 1E300;
-  private double maxAmp = -1E300;
+  protected double minAmp = 1E300;
+  protected double maxAmp = -1E300;
   protected double maxSpectraPower = -1E300;
   protected double maxSpectrogramPower = -1E300;
   protected double[] translation;
   protected boolean timeSeries;
   protected String channel;
   /**
-   * The data source to use for zoom drags. This should probably be moved from
-   * this class to follow a stricter interpretation of MVC.
+   * The data source to use for zoom drags. This should probably be moved from this class to follow
+   * a stricter interpretation of MVC.
    */
   protected SeismicDataSource source;
   /**
-   * A flag to indicate wheter the plot should display a title. Currently used
-   * when the plot is on the clipboard or monitor.
+   * A flag to indicate wheter the plot should display a title. Currently used when the plot is on
+   * the clipboard or monitor.
    */
   protected boolean displayTitle;
   protected Color backgroundColor;
-  private Color bottomBorderColor;
-  private JLabel statusLabel;
+  protected Color bottomBorderColor;
+  protected JLabel statusLabel;
   protected boolean allowDragging;
   protected boolean dragging;
   protected double j2k1;
   protected double j2k2;
   protected int highlightX1;
   protected int highlightX2;
-  private static Image closeImg;
+  protected static Image closeImg;
   protected boolean allowClose;
-  private EventListenerList listeners = new EventListenerList();
+  protected EventListenerList listeners = new EventListenerList();
   /**
    * A flag that indicates whether data are being loaded for this panel.
    */
-  private boolean working;
+  protected boolean working;
   /**
-   * The wave is rendered to an image that is only updated when the settings
-   * change for repaint efficiency.
+   * The wave is rendered to an image that is only updated when the settings change for repaint
+   * efficiency.
    */
-  private BufferedImage image;
-  private double mark1 = Double.NaN;
-  private double mark2 = Double.NaN;
-  private double cursorMark = Double.NaN;
-  private boolean useFilterLabel = true;
-  private Color borderColor;
-  private static final Color DARK_RED = new Color(168, 0, 0);
+  protected BufferedImage image;
+  protected double mark1 = Double.NaN;
+  protected double mark2 = Double.NaN;
+  protected double cursorMark = Double.NaN;
+  protected boolean useFilterLabel = true;
+  protected Color borderColor;
+  protected static final Color DARK_RED = new Color(168, 0, 0);
+  protected static final Color DARK_GREEN = new Color(0, 168, 0);
 
-
+  protected boolean pauseCursorMark;
 
   public AbstractWavePanel(WaveViewSettings s) {
     swarmConfig = SwarmConfig.getInstance();
     settings = s;
     s.view = this;
-
+    pauseCursorMark = false;
     backgroundColor = new Color(0xf7, 0xf7, 0xf7);
     setupMouseHandler();
   }
 
   /**
-   * Constructs a WaveViewPanel set up the same as a source WaveViewPanel.
-   * Used when copying a waveform to the clipboard.
+   * Constructs a WaveViewPanel set up the same as a source WaveViewPanel. Used when copying a
+   * waveform to the clipboard.
    * 
-   * @param p
-   *          the source WaveViewPanel
+   * @param p the source WaveViewPanel
    */
   public AbstractWavePanel(WaveViewPanel p) {
     swarmConfig = SwarmConfig.getInstance();
@@ -207,7 +205,9 @@ public abstract class AbstractWavePanel extends JComponent {
   }
 
   abstract protected void processRightMousePress(MouseEvent e);
-  
+
+  abstract protected void processRightMouseRelease(MouseEvent e);
+
   protected void setupMouseHandler() {
     Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
     this.setCursor(crosshair);
@@ -262,17 +262,20 @@ public abstract class AbstractWavePanel extends JComponent {
           repaint();
         }
 
+        if (SwingUtilities.isRightMouseButton(e)) {
+          processRightMouseRelease(e);
+        }
         int mx = e.getX();
         int my = e.getY();
-        if (allowClose && SwingUtilities.isLeftMouseButton(e)
-            && mx > getWidth() - 17 && mx < getWidth() - 3
-            && my > 2 && my < 17) {
+        if (allowClose && SwingUtilities.isLeftMouseButton(e) && mx > getWidth() - 17
+            && mx < getWidth() - 3 && my > 2 && my < 17) {
           fireClose();
         }
       }
 
       public void mouseExited(MouseEvent e) {
         WaveViewTime.fireTimeChanged(Double.NaN);
+        pauseCursorMark = false;
         dragging = false;
         repaint();
       }
@@ -287,16 +290,13 @@ public abstract class AbstractWavePanel extends JComponent {
       public void mouseDragged(MouseEvent e) {
         UiTime.touchTime();
         /*
-         * // This used to be the launcher for the microview. // It was
-         * removed because it wasn't very useful, but this // stub is
-         * left here in case something like it ever gets // put in if
-         * (SwingUtilities.isLeftMouseButton(e) && e.isControlDown() &&
-         * settings.type != WaveViewSettings.SPECTRA) { Dimension size =
-         * getSize(); double[] t = getTranslation(); int x = e.getX();
-         * int y = e.getY(); if (t != null && y > Y_OFFSET && y <
-         * (size.height - BOTTOM_HEIGHT) && x > X_OFFSET && x <
-         * size.width - RIGHT_WIDTH) { double j2k = x * t[0] + t[1];
-         * createMicroView(j2k); } }
+         * // This used to be the launcher for the microview. // It was removed because it wasn't
+         * very useful, but this // stub is left here in case something like it ever gets // put in
+         * if (SwingUtilities.isLeftMouseButton(e) && e.isControlDown() && settings.type !=
+         * WaveViewSettings.SPECTRA) { Dimension size = getSize(); double[] t = getTranslation();
+         * int x = e.getX(); int y = e.getY(); if (t != null && y > Y_OFFSET && y < (size.height -
+         * BOTTOM_HEIGHT) && x > X_OFFSET && x < size.width - RIGHT_WIDTH) { double j2k = x * t[0] +
+         * t[1]; createMicroView(j2k); } }
          */
 
         processMousePosition(e.getX(), e.getY());
@@ -337,23 +337,19 @@ public abstract class AbstractWavePanel extends JComponent {
   }
 
   /**
-   * Set the working flag. This flag indicates whether data are being loaded
-   * for this panel.
+   * Set the working flag. This flag indicates whether data are being loaded for this panel.
    * 
-   * @param b
-   *          the working flag state
+   * @param b the working flag state
    */
   public void setWorking(boolean b) {
     working = b;
   }
 
   /**
-   * Set the allow dragging flag. This flag enables zoom dragging. Currently
-   * only allowed on the clipboard, but could be implemented within the
-   * helicorder view.
+   * Set the allow dragging flag. This flag enables zoom dragging. Currently only allowed on the
+   * clipboard, but could be implemented within the helicorder view.
    * 
-   * @param b
-   *          the allow dragging flag state
+   * @param b the allow dragging flag state
    */
   public void setAllowDragging(boolean b) {
     allowDragging = b;
@@ -429,9 +425,8 @@ public abstract class AbstractWavePanel extends JComponent {
   }
 
   /**
-   * Gets the translation info for this panel. The translation info is used to
-   * convert from pixel coordinates on the panel into time or data
-   * coordinates.
+   * Gets the translation info for this panel. The translation info is used to convert from pixel
+   * coordinates on the panel into time or data coordinates.
    * 
    * @return the transformation information
    */
@@ -442,8 +437,7 @@ public abstract class AbstractWavePanel extends JComponent {
   /**
    * Set the background color of the panel.
    * 
-   * @param c
-   *          the background color
+   * @param c the background color
    */
   public void setBackgroundColor(Color c) {
     backgroundColor = c;
@@ -458,13 +452,11 @@ public abstract class AbstractWavePanel extends JComponent {
   }
 
   /**
-   * Processes the mouse position variables when the cursor is over the panel.
-   * Currently, the only thing this does is set the status bar text.
+   * Processes the mouse position variables when the cursor is over the panel. Currently, the only
+   * thing this does is set the status bar text.
    * 
-   * @param x
-   *          the mouse x position
-   * @param y
-   *          the mouse y position
+   * @param x the mouse x position
+   * @param y the mouse y position
    */
   public boolean processMousePosition(int x, int y) {
     String status = null;
@@ -534,7 +526,8 @@ public abstract class AbstractWavePanel extends JComponent {
       status = " ";
     }
 
-    WaveViewTime.fireTimeChanged(j2k);
+    if (!pauseCursorMark)
+      WaveViewTime.fireTimeChanged(j2k);
 
     if (status == null)
       status = " ";
@@ -637,8 +630,7 @@ public abstract class AbstractWavePanel extends JComponent {
   }
 
   /**
-   * Does NOT call repaint for efficiency purposes, that is left to the
-   * container.
+   * Does NOT call repaint for efficiency purposes, that is left to the container.
    */
   protected void processSettings() {
     if (wave == null || wave.buffer == null || wave.buffer.length == 0)
@@ -684,11 +676,12 @@ public abstract class AbstractWavePanel extends JComponent {
     w.invalidateStatistics();
   }
 
+  abstract protected void annotateImage(Graphics2D g2);
+
   /**
    * Paints the component on the specified graphics context.
    * 
-   * @param g
-   *          the graphics context
+   * @param g the graphics context
    */
   public void paint(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
@@ -714,11 +707,8 @@ public abstract class AbstractWavePanel extends JComponent {
       if (dragging)
         paintDragBox(g2);
 
-      if (!Double.isNaN(mark1))
-        paintMark(g2, mark1);
+      annotateImage(g2);
 
-      if (!Double.isNaN(mark2))
-        paintMark(g2, mark2);
 
       if (!Double.isNaN(cursorMark))
         paintCursor(g2);
@@ -772,8 +762,7 @@ public abstract class AbstractWavePanel extends JComponent {
   /**
    * Constructs the plot on the specified graphics context.
    * 
-   * @param g2
-   *          the graphics context
+   * @param g2 the graphics context
    */
   private synchronized void constructPlot(Graphics2D g2) {
     Dimension dim = this.getSize();
@@ -811,10 +800,9 @@ public abstract class AbstractWavePanel extends JComponent {
   /**
    * Plots a wave.
    * 
-   * @param renderWave
-   *          the wave to plot
+   * @param renderWave the wave to plot
    */
-  private void plotWave(Plot plot, Wave renderWave) {
+  protected void plotWave(Plot plot, Wave renderWave) {
     if (renderWave == null || renderWave.numSamples() == 0)
       return;
 
@@ -882,8 +870,7 @@ public abstract class AbstractWavePanel extends JComponent {
   /**
    * Plots frequency spectra.
    * 
-   * @param renderWave
-   *          the wave to plot
+   * @param renderWave the wave to plot
    */
   private void plotSpectra(Plot plot, Wave renderWave) {
     if (renderWave == null || renderWave.numSamples() == 0)
@@ -923,8 +910,7 @@ public abstract class AbstractWavePanel extends JComponent {
   /**
    * Plots a spectrogram. TODO: Fix logPower.
    * 
-   * @param renderWave
-   *          the wave to plot
+   * @param renderWave the wave to plot
    */
   private void plotSpectrogram(Plot plot, Wave renderWave) {
     if (renderWave == null || renderWave.numSamples() == 0)
@@ -980,8 +966,7 @@ public abstract class AbstractWavePanel extends JComponent {
   /**
    * Paints the zoom drag box.
    * 
-   * @param g2
-   *          the graphics context
+   * @param g2 the graphics context
    */
   private void paintDragBox(Graphics2D g2) {
     int x1 = Math.min(highlightX1, highlightX2);
@@ -993,7 +978,6 @@ public abstract class AbstractWavePanel extends JComponent {
     g2.setPaint(pnt);
   }
 
-  private static final Color DARK_GREEN = new Color(0, 168, 0);
 
   public AbstractWavePanel() {
     super();
@@ -1016,28 +1000,6 @@ public abstract class AbstractWavePanel extends JComponent {
     g2.draw(new Line2D.Double(x, yOffset + 1, x, getHeight() - bottomHeight - 1));
   }
 
-  private void paintMark(Graphics2D g2, double j2k) {
-    if (Double.isNaN(j2k) || j2k < startTime || j2k > endTime)
-      return;
-
-    double[] t = getTranslation();
-    if (t == null)
-      return;
-
-    double x = (j2k - t[1]) / t[0];
-    g2.setColor(DARK_GREEN);
-    g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
-
-    GeneralPath gp = new GeneralPath();
-    gp.moveTo((float) x, yOffset);
-    gp.lineTo((float) x - 5, yOffset - 7);
-    gp.lineTo((float) x + 5, yOffset - 7);
-    gp.closePath();
-    g2.setPaint(Color.GREEN);
-    g2.fill(gp);
-    g2.setColor(DARK_GREEN);
-    g2.draw(gp);
-  }
 
   /**
    * Overload of Component. Always returns the developer-specified size.
