@@ -1,6 +1,10 @@
 package gov.usgs.volcanoes.swarm.picker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class EventChannel {
+  private final static Logger LOGGER = LoggerFactory.getLogger(EventChannel.class);
   private Phase pPhase;
   private Phase sPhase;
   

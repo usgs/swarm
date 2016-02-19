@@ -1,5 +1,8 @@
 package gov.usgs.volcanoes.swarm.picker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -41,6 +44,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.ScrollPaneConstants;
@@ -48,9 +52,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.data.file.FileType;
@@ -97,11 +98,10 @@ public class PickerFrame extends SwarmFrame {
 
   private JScrollPane scrollPane;
   private Box waveBox;
-  private JPanel pickPanel;
+  private PickListPanel pickList;
   private final List<PickerWavePanel> waves;
   private final Set<PickerWavePanel> selectedSet;
   private JToolBar toolbar;
-  private JPanel mainPanel;
   private JLabel statusLabel;
   private JToggleButton linkButton;
   private JButton sizeButton;
@@ -113,6 +113,7 @@ public class PickerFrame extends SwarmFrame {
   private JButton openButton;
   private JButton captureButton;
   private JButton histButton;
+
   private final DateFormat saveAllDateFormat;
 
   private WaveViewPanelListener selectListener;
@@ -131,8 +132,6 @@ public class PickerFrame extends SwarmFrame {
   private JPopupMenu popup;
 
   private final Map<AbstractWavePanel, Stack<double[]>> histories;
-
-  private final HelicorderViewPanelListener linkListener;
 
   private boolean heliLinked = true;
 
@@ -156,19 +155,9 @@ public class PickerFrame extends SwarmFrame {
     waves = new ArrayList<PickerWavePanel>();
     histories = new HashMap<AbstractWavePanel, Stack<double[]>>();
     createUI();
-    linkListener = new HelicorderViewPanelListener() {
-      public void insetCreated(final double st, final double et) {
-        if (heliLinked)
-          repositionWaves(st, et);
-      }
-    };
     LOGGER.debug("Finished creating picker frame.");
-
    }
 
-  public HelicorderViewPanelListener getLinkListener() {
-    return linkListener;
-  }
 
   private void createUI() {
     this.setFrameIcon(Icons.clipboard);
@@ -178,33 +167,44 @@ public class PickerFrame extends SwarmFrame {
     LOGGER.debug("picker frame: {} @ {}", this.getSize(), this.getLocation());
 
     toolbar = SwarmUtil.createToolBar();
-    mainPanel = new JPanel();
-    mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
+    
+    JPanel wavePanel = new JPanel();
+    wavePanel.setLayout(new BoxLayout(wavePanel, BoxLayout.PAGE_AXIS));
+    
+   JPanel tablePanel = new JPanel();
+   tablePanel.setLayout(new BoxLayout(tablePanel, BoxLayout.PAGE_AXIS));
+//   tablePanel.setMinimumSize(new Dimension(tablePanel.getMinimumSize().width, 50));
+
+    JSplitPane mainPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, wavePanel, tablePanel);
+    mainPanel.setOneTouchExpandable(true);
+    mainPanel.setDividerLocation(550);
 
     createMainButtons();
     createWaveButtons();
-
 
     waveBox = new Box(BoxLayout.Y_AXIS);
     scrollPane = new JScrollPane(waveBox);
     scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     scrollPane.getVerticalScrollBar().setUnitIncrement(40);
-    mainPanel.add(scrollPane);
+    wavePanel.add(scrollPane);
 
     JPanel statusPanel = new JPanel();
     statusPanel.setLayout(new BorderLayout());
     statusLabel = new JLabel(" ");
-    statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 1));
-//    statusLabel.setBorder(BorderFactory.createLineBorder(Color.black));
+//    statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 1));
+    statusLabel.setBorder(BorderFactory.createEtchedBorder());
     statusPanel.add(statusLabel);
-    mainPanel.add(statusPanel);
-    mainPanel.add(toolbar, BorderLayout.NORTH);
+    wavePanel.add(statusPanel);
+    tablePanel.add(toolbar, BorderLayout.NORTH);
 
-    pickPanel = new PickListPanel(event);
-    mainPanel.add(pickPanel);
+    pickList = new PickListPanel(event);
+    scrollPane = new JScrollPane(pickList);
+    scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+    scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+    scrollPane.getVerticalScrollBar().setUnitIncrement(40);
+    tablePanel.add(scrollPane);
 
-    mainPanel.setBorder(BorderFactory.createEmptyBorder(0, 2, 1, 2));
     this.setContentPane(mainPanel);
 
     createListeners();
@@ -495,21 +495,23 @@ public class PickerFrame extends SwarmFrame {
     });
 
     selectListener = new WaveViewPanelAdapter() {
-      public void mousePressed(final PickerWavePanel src, final MouseEvent e,
+      public void mousePressed(final AbstractWavePanel src, final MouseEvent e,
           final boolean dragging) {
+        PickerWavePanel panel = (PickerWavePanel) src;
+        LOGGER.debug("wave selected.");
         requestFocusInWindow();
         final int thisIndex = getWaveIndex(src);
         if (!e.isControlDown() && !e.isShiftDown() && !e.isAltDown()) {
           deselectAll();
-          select(src);
+          select(panel);
         } else if (e.isControlDown()) {
           if (selectedSet.contains(src))
             deselect(src);
           else
-            select(src);
+            select(panel);
         } else if (e.isShiftDown()) {
           if (lastClickedIndex == -1)
-            select(src);
+            select(panel);
           else {
             deselectAll();
             final int min = Math.min(lastClickedIndex, thisIndex);
@@ -969,6 +971,7 @@ public class PickerFrame extends SwarmFrame {
   }
 
   public synchronized void addWave(final PickerWavePanel p) {
+    LOGGER.debug("Adding listener: {}", selectListener);
     p.addListener(selectListener);
     p.setOffsets(54, 8, 21, 19);
     p.setAllowClose(true);
@@ -987,6 +990,7 @@ public class PickerFrame extends SwarmFrame {
 
   private synchronized void deselect(final AbstractWavePanel p) {
     selectedSet.remove(p);
+    pickList.deselect(p.getChannel());
     waveToolbar.removeSettings(p.getSettings());
     p.setBackgroundColor(BACKGROUND_COLOR);
     p.createImage();
@@ -994,15 +998,18 @@ public class PickerFrame extends SwarmFrame {
   }
 
   private synchronized void deselectAll() {
-    final WaveViewPanel[] panels = selectedSet.toArray(new WaveViewPanel[0]);
-    for (final WaveViewPanel p : panels)
+    final AbstractWavePanel[] panels = selectedSet.toArray(new AbstractWavePanel[0]);
+    pickList.deselectAll();
+    for (final AbstractWavePanel p : panels) {
       deselect(p);
+    }
   }
 
   private synchronized void select(final PickerWavePanel p) {
     if (p == null || selectedSet.contains(p))
       return;
 
+    pickList.select(p.getChannel());
     selectedSet.add(p);
     doButtonEnables();
     p.setBackgroundColor(SELECT_COLOR);
@@ -1012,6 +1019,7 @@ public class PickerFrame extends SwarmFrame {
   }
 
   private synchronized void remove(final WaveViewPanel p) {
+    event.remove(p.getChannel());
     int i = 0;
     for (i = 0; i < waveBox.getComponentCount(); i++) {
       if (p == waveBox.getComponent(i))
@@ -1027,6 +1035,7 @@ public class PickerFrame extends SwarmFrame {
     doButtonEnables();
     waveBox.validate();
     selectedSet.remove(p);
+    pickList.remove(p.getChannel());
     lastClickedIndex = Math.min(lastClickedIndex, waveBox.getComponentCount() - 1);
     waveToolbar.removeSettings(p.getSettings());
     repaint();

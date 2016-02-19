@@ -31,7 +31,14 @@ public class Phase {
     private long time;
 
     public Builder() {}
-
+    public Builder(Phase phase) {
+      onset = phase.onset;
+      phaseType = phase.phaseType;
+      firstMotion = phase.firstMotion;
+      weight = phase.weight;
+      time = phase.time;
+    }
+    
     public Builder onset(Onset onset) {
       this.onset = onset;
       return this;

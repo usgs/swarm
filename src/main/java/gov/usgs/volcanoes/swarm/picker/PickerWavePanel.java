@@ -61,8 +61,6 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
   }
 
   private void markPhase(Graphics2D g2, Phase phase) {
-    LOGGER.debug("Marking phase: {}", phase);
-
     double j2k = J2kSec.fromEpoch(phase.time);
     double[] t = getTranslation();
     if (t == null)

@@ -1,30 +1,43 @@
 package gov.usgs.volcanoes.swarm.picker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gov.usgs.volcanoes.core.time.Time;
+import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanelListener;
 
 public class PickListPanel extends JPanel implements EventObserver {
   private static final Logger LOGGER = LoggerFactory.getLogger(PickListPanel.class);
   private static final Color BACKGROUND_COLOR = new Color(255, 255, 255);
-  private Event event;
+  private static final Color SELECTED_BACKGROUND_COLOR = new Color(255, 248, 220);
+  // private static final Color SELECTED_BACKGROUND_COLOR = new Color(0, 0, 220);
+  private final Event event;
   private JPanel pickList;
+  private Set<String> selected;
 
   public PickListPanel(Event event) {
     super();
     this.event = event;
+    selected = new HashSet<String>();
+
     setLayout(new BorderLayout());
     this.setPreferredSize(new Dimension(this.getPreferredSize().width, 200));
     LOGGER.debug("Event: " + event);
@@ -43,7 +56,7 @@ public class PickListPanel extends JPanel implements EventObserver {
     GridBagConstraints c = new GridBagConstraints();
     c.fill = GridBagConstraints.HORIZONTAL;
     c.weightx = .5;
-    c.anchor = GridBagConstraints.PAGE_START;
+    c.anchor = GridBagConstraints.CENTER;
     c.gridy = 0;
     c.gridx = GridBagConstraints.RELATIVE;
     c.ipadx = 3;
@@ -71,20 +84,21 @@ public class PickListPanel extends JPanel implements EventObserver {
     for (String channel : channels.keySet()) {
       c.gridy++;
 
+      EventChannel eventChannel = channels.get(channel);
+
       Phase phase;
 
-      phase = channels.get(channel).getPhase(Phase.PhaseType.P);
+      phase = eventChannel.getPhase(Phase.PhaseType.P);
       if (phase != null) {
         writePhase(pickList, channel, phase, c);
       }
 
-      phase = channels.get(channel).getPhase(Phase.PhaseType.S);
+      phase = eventChannel.getPhase(Phase.PhaseType.S);
       if (phase != null) {
         writePhase(pickList, channel, phase, c);
       }
 
     }
-    
 
     c.weighty = 1;
     c.gridy++;
@@ -93,27 +107,77 @@ public class PickListPanel extends JPanel implements EventObserver {
     pickList.add(filler, c);
   }
 
-  public void writePhase(JPanel pickList, String channel, Phase phase, GridBagConstraints c) {
+  public void writePhase(final JPanel pickList, final String channel, final Phase phase,
+      final GridBagConstraints c) {
+
+    boolean isSelected = selected.contains(channel);
+
     c.gridy++;
 
-    JLabel label;
-    label = new JLabel(Time.toDateString(phase.time));
-    pickList.add(label, c);
+    String time = Time.toDateString(phase.time);
+    pickList.add(getLabel(time, isSelected), c);
 
-    label = new JLabel(phase.phaseType.toString());
-    pickList.add(label, c);
+    String phaseT = phase.phaseType.toString();
+    pickList.add(getLabel(phaseT, isSelected), c);
 
-    label = new JLabel(channel);
-    pickList.add(label, c);
+    pickList.add(getLabel(channel, isSelected), c);
 
-    label = new JLabel("" + phase.weight);
-    pickList.add(label, c);
+    c.fill = GridBagConstraints.NONE;
+    final JComboBox<Integer> weight = new JComboBox<Integer>(new Integer[] {0, 1, 2, 3, 4});
+    weight.setSelectedIndex(phase.weight);
+    weight.addActionListener(new ActionListener() {
 
-    label = new JLabel(phase.onset.toString());
-    pickList.add(label, c);
+      public void actionPerformed(ActionEvent e) {
+        Phase newPhase = new Phase.Builder(phase).weight(weight.getSelectedIndex()).build();
+        event.setPhase(channel, newPhase);
+      }
+    });
+    pickList.add(weight, c);
+    c.fill = GridBagConstraints.HORIZONTAL;
 
-    label = new JLabel(phase.firstMotion.toString());
-    pickList. add(label, c);
+    c.fill = GridBagConstraints.NONE;
+    Phase.Onset[] onsets = Phase.Onset.values();
+    final JComboBox<Phase.Onset> onset = new JComboBox<Phase.Onset>(onsets);
+    int i = 0;
+    while (i < onsets.length && onsets[i] != phase.onset) {
+      i++;
+    }
+    onset.setSelectedIndex(i);
+    onset.addActionListener(new ActionListener() {
+
+      public void actionPerformed(ActionEvent e) {
+        Phase newPhase =
+            new Phase.Builder(phase).onset((Phase.Onset) onset.getSelectedItem()).build();
+        event.setPhase(channel, newPhase);
+      }
+    });
+    pickList.add(onset, c);
+    c.fill = GridBagConstraints.HORIZONTAL;
+
+    if (phase.phaseType == Phase.PhaseType.P) {
+      c.fill = GridBagConstraints.NONE;
+      Phase.FirstMotion[] firstMotions = Phase.FirstMotion.values();
+      final JComboBox<Phase.FirstMotion> firstMotion =
+          new JComboBox<Phase.FirstMotion>(firstMotions);
+      int idx = 0;
+      while (idx < firstMotions.length && firstMotions[idx] != phase.firstMotion) {
+        idx++;
+      }
+      firstMotion.setSelectedIndex(i);
+      firstMotion.addActionListener(new ActionListener() {
+
+        public void actionPerformed(ActionEvent e) {
+          Phase newPhase = new Phase.Builder(phase)
+              .firstMotion((Phase.FirstMotion) firstMotion.getSelectedItem()).build();
+          event.setPhase(channel, newPhase);
+          repaint();
+        }
+      });
+      pickList.add(firstMotion, c);
+      c.fill = GridBagConstraints.HORIZONTAL;
+    } else {
+      pickList.add(new JLabel(""), c);
+    }
   }
 
   public void updateEvent() {
@@ -121,10 +185,44 @@ public class PickListPanel extends JPanel implements EventObserver {
     JPanel newList = new JPanel();
     newList.setLayout(new GridBagLayout());
     writeList(newList);
-    
+
     remove(pickList);
     pickList = newList;
     add(pickList, BorderLayout.CENTER);
   }
 
+  public void deselect(String channel) {
+    LOGGER.debug("deselecting {}", channel);
+    selected.remove(channel);
+  }
+
+  public void deselectAll() {
+    LOGGER.debug("deselecting all");
+    selected = new HashSet<String>();
+
+  }
+
+  public void select(String channel) {
+    LOGGER.debug("selecting {}", channel);
+    selected.add(channel);
+  }
+
+  public void remove(String channel) {
+    LOGGER.debug("removing {}", channel);
+
+    selected.remove(channel);
+    event.remove(channel);
+  }
+
+  private JLabel getLabel(String string, boolean selected) {
+    JLabel label = new JLabel(string);
+    label.setOpaque(true);
+    if (selected) {
+      label.setBackground(SELECTED_BACKGROUND_COLOR);
+    } else {
+      label.setBackground(BACKGROUND_COLOR);
+    }
+
+    return label;
+  }
 }

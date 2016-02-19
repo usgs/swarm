@@ -2,6 +2,9 @@ package gov.usgs.volcanoes.swarm.wave;
 
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -12,7 +15,6 @@ import java.awt.Paint;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -47,6 +49,7 @@ import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
 
 public abstract class AbstractWavePanel extends JComponent {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(AbstractWavePanel.class);
   public static final long serialVersionUID = -1;
   protected static SwarmConfig swarmConfig;
   /**
@@ -134,7 +137,7 @@ public abstract class AbstractWavePanel extends JComponent {
    * @param p the source WaveViewPanel
    */
   public AbstractWavePanel(AbstractWavePanel p) {
-    
+
     swarmConfig = SwarmConfig.getInstance();
     channel = p.channel;
     source = p.source;
@@ -189,9 +192,12 @@ public abstract class AbstractWavePanel extends JComponent {
 
   public void fireMousePressed(MouseEvent e) {
     Object[] ls = listeners.getListenerList();
-    for (int i = ls.length - 2; i >= 0; i -= 2)
-      if (ls[i] == WaveViewPanelListener.class)
+    for (int i = ls.length - 2; i >= 0; i -= 2) {
+      if (ls[i] == WaveViewPanelListener.class) {
+        LOGGER.debug("Notifying mouse listeners.");
         ((WaveViewPanelListener) ls[i + 1]).mousePressed(this, e, dragging);
+      }
+    }
   }
 
   public void fireClose() {
@@ -387,6 +393,7 @@ public abstract class AbstractWavePanel extends JComponent {
   public void setEndTime(double endTime) {
     this.endTime = endTime;
   }
+
   public Wave getWave() {
     return wave;
   }

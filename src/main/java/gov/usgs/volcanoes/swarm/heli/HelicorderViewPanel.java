@@ -455,7 +455,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
     if (insetWavePanel == null) {
       insetWavePanel = new WaveViewPanel(parent.getWaveViewSettings());
       insetWavePanel.addListener(new WaveViewPanelAdapter() {
-        public void waveClosed(WaveViewPanel src) {
+        public void waveClosed(AbstractWavePanel src) {
           removeWaveInset();
         }
 
