@@ -39,6 +39,10 @@ public class Event {
     }
   }
   
+  public Map<String, EventChannel> getChannels() {
+    return channels;
+  }
+  
   public void addObserver(EventObserver observer) {
     observers.add(observer);
   }

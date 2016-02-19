@@ -1,5 +1,8 @@
 package gov.usgs.volcanoes.swarm.picker;
 
+import gov.usgs.volcanoes.swarm.picker.Phase.Builder;
+import gov.usgs.volcanoes.swarm.picker.Phase.FirstMotion;
+
 public class Phase {
   public static enum Onset {
     i, e
@@ -36,6 +39,11 @@ public class Phase {
 
     public Builder phaseType(PhaseType phaseType) {
       this.phaseType = phaseType;
+      return this;
+    }
+
+    public Builder firstMotion(FirstMotion firstMotion) {
+      this.firstMotion = firstMotion;
       return this;
     }
 

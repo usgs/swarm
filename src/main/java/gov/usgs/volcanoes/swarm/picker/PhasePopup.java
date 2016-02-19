@@ -28,7 +28,7 @@ public class PhasePopup extends JPopupMenu {
     ip0.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         Phase phase = new Phase.Builder().onset(Phase.Onset.i).phaseType(Phase.PhaseType.P)
-            .time(time).weight(0).build();
+            .firstMotion(Phase.FirstMotion.UP).time(time).weight(0).build();
         event.setPhase(channel, phase);
       }
     });
@@ -38,7 +38,7 @@ public class PhasePopup extends JPopupMenu {
     ip1.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         Phase phase = new Phase.Builder().onset(Phase.Onset.i).phaseType(Phase.PhaseType.P)
-            .time(time).weight(1).build();
+            .firstMotion(Phase.FirstMotion.UP).time(time).weight(1).build();
         event.setPhase(channel, phase);
       }
     });
@@ -48,7 +48,7 @@ public class PhasePopup extends JPopupMenu {
     ep2.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         Phase phase = new Phase.Builder().onset(Phase.Onset.e).phaseType(Phase.PhaseType.P)
-            .time(time).weight(2).build();
+            .firstMotion(Phase.FirstMotion.UP).time(time).weight(2).build();
         event.setPhase(channel, phase);
       }
     });
@@ -58,7 +58,7 @@ public class PhasePopup extends JPopupMenu {
     ep3.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         Phase phase = new Phase.Builder().onset(Phase.Onset.e).phaseType(Phase.PhaseType.P)
-            .time(time).weight(3).build();
+            .firstMotion(Phase.FirstMotion.UP).time(time).weight(3).build();
         event.setPhase(channel, phase);
       }
     });
@@ -79,7 +79,7 @@ public class PhasePopup extends JPopupMenu {
     is0.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         Phase phase = new Phase.Builder().onset(Phase.Onset.i).phaseType(Phase.PhaseType.S)
-            .time(time).weight(0).build();
+            .firstMotion(Phase.FirstMotion.UP).time(time).weight(0).build();
         event.setPhase(channel, phase);
       }
     });
@@ -89,7 +89,7 @@ public class PhasePopup extends JPopupMenu {
     is1.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         Phase phase = new Phase.Builder().onset(Phase.Onset.i).phaseType(Phase.PhaseType.S)
-            .time(time).weight(1).build();
+            .firstMotion(Phase.FirstMotion.UP).time(time).weight(1).build();
         event.setPhase(channel, phase);
       }
     });
@@ -99,7 +99,7 @@ public class PhasePopup extends JPopupMenu {
     es2.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         Phase phase = new Phase.Builder().onset(Phase.Onset.e).phaseType(Phase.PhaseType.S)
-            .time(time).weight(2).build();
+            .firstMotion(Phase.FirstMotion.UP).time(time).weight(2).build();
         event.setPhase(channel, phase);
       }
     });
@@ -108,14 +108,13 @@ public class PhasePopup extends JPopupMenu {
     JMenuItem es3 = new JMenuItem("eS3");
     es3.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        Phase phase = new Phase.Builder().onset(Phase.Onset.e)
-            .phaseType(Phase.PhaseType.S)
-            .time(time).weight(3).build();
+        Phase phase = new Phase.Builder().onset(Phase.Onset.e).phaseType(Phase.PhaseType.S)
+            .firstMotion(Phase.FirstMotion.UP).time(time).weight(3).build();
         event.setPhase(channel, phase);
       }
     });
     s.add(es3);
-    
+
     JMenuItem clearS = new JMenuItem("clear S");
     clearS.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {

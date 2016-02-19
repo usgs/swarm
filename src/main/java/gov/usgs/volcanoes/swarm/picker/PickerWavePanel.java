@@ -22,8 +22,8 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
   private static final Logger LOGGER = LoggerFactory.getLogger(PickerWavePanel.class);
 
   private static final Font ANNOTATION_FONT = new Font("Monospaced", Font.BOLD, 12);
-  private static final Color P_BACKGROUND = new Color(0, 255, 0, 32);
-  private static final Color S_BACKGROUND = new Color(0, 0, 255, 32);
+  private static final Color P_BACKGROUND = new Color(128, 255, 128, 192);
+  private static final Color S_BACKGROUND = new Color(128, 128, 255, 192);
 
   private Event event;
 

@@ -23,7 +23,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -147,6 +146,8 @@ public class PickerFrame extends SwarmFrame {
 
   public PickerFrame() {
     super("Picker", true, true, true, false);
+    event = new Event();
+
     this.setFocusable(true);
     this.setVisible(true);
     selectedSet = new HashSet<PickerWavePanel>();
@@ -163,8 +164,7 @@ public class PickerFrame extends SwarmFrame {
     };
     LOGGER.debug("Finished creating picker frame.");
 
-    event = new Event();
-  }
+   }
 
   public HelicorderViewPanelListener getLinkListener() {
     return linkListener;
@@ -178,28 +178,32 @@ public class PickerFrame extends SwarmFrame {
     LOGGER.debug("picker frame: {} @ {}", this.getSize(), this.getLocation());
 
     toolbar = SwarmUtil.createToolBar();
-    mainPanel = new JPanel(new BorderLayout());
+    mainPanel = new JPanel();
+    mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
 
     createMainButtons();
     createWaveButtons();
 
-//    mainPanel.add(toolbar, BorderLayout.NORTH);
 
     waveBox = new Box(BoxLayout.Y_AXIS);
     scrollPane = new JScrollPane(waveBox);
     scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     scrollPane.getVerticalScrollBar().setUnitIncrement(40);
-    mainPanel.add(scrollPane, BorderLayout.CENTER);
+    mainPanel.add(scrollPane);
 
+    JPanel statusPanel = new JPanel();
+    statusPanel.setLayout(new BorderLayout());
     statusLabel = new JLabel(" ");
     statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 1));
-    mainPanel.add(statusLabel, BorderLayout.SOUTH);
+//    statusLabel.setBorder(BorderFactory.createLineBorder(Color.black));
+    statusPanel.add(statusLabel);
+    mainPanel.add(statusPanel);
+    mainPanel.add(toolbar, BorderLayout.NORTH);
 
-    pickPanel = new JPanel();
-    pickPanel.add(new JLabel("PICK PANEL'"));
-    mainPanel.add(pickPanel, BorderLayout.SOUTH);
-    
+    pickPanel = new PickListPanel(event);
+    mainPanel.add(pickPanel);
+
     mainPanel.setBorder(BorderFactory.createEmptyBorder(0, 2, 1, 2));
     this.setContentPane(mainPanel);
 
@@ -941,7 +945,7 @@ public class PickerFrame extends SwarmFrame {
             double st = p2.getStartTime();
             double et = p2.getEndTime();
             Wave wave = sds.getWave(item.item2, st, et);
-            if ( wave != null && wave.isData()) {
+            if (wave != null && wave.isData()) {
               p2.setWave(wave, st, et);
               p2.getWaveViewSettings().autoScaleAmpMemory = false;
               addWave(p2);
