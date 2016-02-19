@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -55,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.data.file.FileType;
 import gov.usgs.plot.data.file.SeismicDataFile;
+import gov.usgs.util.Pair;
 import gov.usgs.volcanoes.core.contrib.PngEncoder;
 import gov.usgs.volcanoes.core.contrib.PngEncoderB;
 import gov.usgs.volcanoes.core.time.J2kSec;
@@ -65,6 +67,7 @@ import gov.usgs.volcanoes.swarm.FileTypeDialog;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwarmFrame;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.SwingWorker;
@@ -88,13 +91,14 @@ import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
  */
 public class PickerFrame extends SwarmFrame {
   private static final Logger LOGGER = LoggerFactory.getLogger(PickerFrame.class);
-  
+
   public static final long serialVersionUID = -1;
   private static final Color SELECT_COLOR = new Color(200, 220, 241);
   private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
 
   private JScrollPane scrollPane;
   private Box waveBox;
+  private JPanel pickPanel;
   private final List<PickerWavePanel> waves;
   private final Set<PickerWavePanel> selectedSet;
   private JToolBar toolbar;
@@ -138,7 +142,7 @@ public class PickerFrame extends SwarmFrame {
   private int waveHeight = -1;
 
   private int lastClickedIndex = -1;
-  
+
   private Event event;
 
   public PickerFrame() {
@@ -158,7 +162,7 @@ public class PickerFrame extends SwarmFrame {
       }
     };
     LOGGER.debug("Finished creating picker frame.");
-    
+
     event = new Event();
   }
 
@@ -168,7 +172,7 @@ public class PickerFrame extends SwarmFrame {
 
   private void createUI() {
     this.setFrameIcon(Icons.clipboard);
-    this.setSize(swarmConfig.clipboardWidth, swarmConfig.clipboardHeight);    
+    this.setSize(swarmConfig.clipboardWidth, swarmConfig.clipboardHeight);
     this.setLocation(swarmConfig.clipboardX, swarmConfig.clipboardY);
     this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     LOGGER.debug("picker frame: {} @ {}", this.getSize(), this.getLocation());
@@ -179,7 +183,7 @@ public class PickerFrame extends SwarmFrame {
     createMainButtons();
     createWaveButtons();
 
-    mainPanel.add(toolbar, BorderLayout.NORTH);
+//    mainPanel.add(toolbar, BorderLayout.NORTH);
 
     waveBox = new Box(BoxLayout.Y_AXIS);
     scrollPane = new JScrollPane(waveBox);
@@ -192,6 +196,10 @@ public class PickerFrame extends SwarmFrame {
     statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 1));
     mainPanel.add(statusLabel, BorderLayout.SOUTH);
 
+    pickPanel = new JPanel();
+    pickPanel.add(new JLabel("PICK PANEL'"));
+    mainPanel.add(pickPanel, BorderLayout.SOUTH);
+    
     mainPanel.setBorder(BorderFactory.createEmptyBorder(0, 2, 1, 2));
     this.setContentPane(mainPanel);
 
@@ -910,9 +918,53 @@ public class PickerFrame extends SwarmFrame {
     return null;
   }
 
-  public synchronized void addWave(final PickerWavePanel p) {
+  public synchronized void setBaseWave(final PickerWavePanel p) {
+    addWave(p);
+    doButtonEnables();
+    waveBox.validate();
+
     String channel = p.getChannel();
-    Metadata.findNearest(metadata, channel)
+
+    final List<Pair<Double, String>> nrst =
+        Metadata.findNearest(SwarmConfig.getInstance().getMetadata(), channel);
+
+    final SwingWorker worker = new SwingWorker() {
+      @Override
+      public Object construct() {
+        for (Pair<Double, String> item : nrst) {
+          if (item.item1 > 20000) {
+            break;
+          } else if (item.item2.matches(".*(B|E|H)H(Z|E|N).*")) {
+            PickerWavePanel p2 = new PickerWavePanel(p);
+            p2.setChannel(item.item2);
+            SeismicDataSource sds = p2.getDataSource();
+            double st = p2.getStartTime();
+            double et = p2.getEndTime();
+            Wave wave = sds.getWave(item.item2, st, et);
+            if ( wave != null && wave.isData()) {
+              p2.setWave(wave, st, et);
+              p2.getWaveViewSettings().autoScaleAmpMemory = false;
+              addWave(p2);
+              System.out.println(String.format("%s (%.1f km)", item.item2, item.item1 / 1000));
+            } else {
+              LOGGER.debug("Skipping {}, no data.", item.item2);
+            }
+          }
+        }
+        return null;
+      }
+
+      @Override
+      public void finished() {
+        waveBox.validate();
+        validate();
+        repaint();
+      }
+    };
+    worker.start();
+  }
+
+  public synchronized void addWave(final PickerWavePanel p) {
     p.addListener(selectListener);
     p.setOffsets(54, 8, 21, 19);
     p.setAllowClose(true);
@@ -926,12 +978,9 @@ public class PickerFrame extends SwarmFrame {
     p.createImage();
     waveBox.add(p);
     waves.add(p);
-    LOGGER.debug("{} panels; {} waves", waveBox.getComponentCount(), waves.size()); 
-    doButtonEnables();
-    waveBox.validate();
+    LOGGER.debug("{} panels; {} waves", waveBox.getComponentCount(), waves.size());
   }
 
-  
   private synchronized void deselect(final AbstractWavePanel p) {
     selectedSet.remove(p);
     waveToolbar.removeSettings(p.getSettings());

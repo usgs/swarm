@@ -578,7 +578,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
     pickerFrame.setVisible(true);
     pickerFrame.requestFocus();
     SwarmInternalFrames.add(pickerFrame);
-    pickerFrame.addWave(p);
+    pickerFrame.setBaseWave(p);
     return pickerFrame;
   }
 

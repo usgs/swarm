@@ -133,7 +133,8 @@ public abstract class AbstractWavePanel extends JComponent {
    * 
    * @param p the source WaveViewPanel
    */
-  public AbstractWavePanel(WaveViewPanel p) {
+  public AbstractWavePanel(AbstractWavePanel p) {
+    
     swarmConfig = SwarmConfig.getInstance();
     channel = p.channel;
     source = p.source;
@@ -375,10 +376,17 @@ public abstract class AbstractWavePanel extends JComponent {
     return startTime;
   }
 
+  public void setStartTime(double startTime) {
+    this.startTime = startTime;
+  }
+
   public double getEndTime() {
     return endTime;
   }
 
+  public void setEndTime(double endTime) {
+    this.endTime = endTime;
+  }
   public Wave getWave() {
     return wave;
   }

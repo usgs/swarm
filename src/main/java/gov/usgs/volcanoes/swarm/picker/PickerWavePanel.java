@@ -22,10 +22,12 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
   private static final Logger LOGGER = LoggerFactory.getLogger(PickerWavePanel.class);
 
   private static final Font ANNOTATION_FONT = new Font("Monospaced", Font.BOLD, 12);
+  private static final Color P_BACKGROUND = new Color(0, 255, 0, 32);
+  private static final Color S_BACKGROUND = new Color(0, 0, 255, 32);
 
   private Event event;
 
-  public PickerWavePanel(WaveViewPanel insetWavePanel) {
+  public PickerWavePanel(AbstractWavePanel insetWavePanel) {
     super(insetWavePanel);
   }
 
@@ -80,7 +82,14 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
 
     int offset = 2;
     int lw = width + 2 * offset;
-    g2.setColor(new Color(255, 255, 255, 192));
+    
+    Color background;
+    if (phase.phaseType == Phase.PhaseType.P) {
+      background = P_BACKGROUND;
+    } else {
+      background = S_BACKGROUND;
+    }
+    g2.setColor(background);
 
     g2.fillRect((int) x, 3, lw, height + 2 * offset);
     g2.setColor(Color.black);
