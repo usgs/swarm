@@ -1,14 +1,12 @@
 package gov.usgs.volcanoes.swarm.picker;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Event {
   private static final Logger LOGGER = LoggerFactory.getLogger(Event.class);
@@ -16,7 +14,7 @@ public class Event {
   private final List<EventObserver> observers;
 
   public Event() {
-    channels = new HashMap<String, EventChannel>();
+    channels = new LinkedHashMap<String, EventChannel>();
     observers = new ArrayList<EventObserver>();
   }
 

@@ -76,7 +76,7 @@ public class PhasePopup extends JPopupMenu {
     });
     p.add(ep3);
 
-    JMenuItem clearP = new JMenuItem("clear P");
+    JMenuItem clearP = new JMenuItem("Clear P");
     clearP.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         event.clearPhase(channel, Phase.PhaseType.P);
@@ -137,7 +137,7 @@ public class PhasePopup extends JPopupMenu {
     });
     s.add(es3);
 
-    JMenuItem clearS = new JMenuItem("clear S");
+    JMenuItem clearS = new JMenuItem("Clear S");
     clearS.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         event.clearPhase(channel, Phase.PhaseType.S);
@@ -146,6 +146,18 @@ public class PhasePopup extends JPopupMenu {
       }
     });
     s.add(clearS);
+    
+    JMenuItem clearAll = new JMenuItem("Clear");
+    clearAll.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        event.clearPhase(channel, Phase.PhaseType.P);
+        event.clearPhase(channel, Phase.PhaseType.S);
+        parent.validate();
+        parent.repaint();
+      }
+    });
+    add(clearAll);
+
 
   }
 

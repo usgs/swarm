@@ -1,12 +1,12 @@
 package gov.usgs.volcanoes.swarm.picker;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -45,13 +45,16 @@ import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.data.file.FileType;
@@ -75,7 +78,6 @@ import gov.usgs.volcanoes.swarm.Throbber;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanelListener;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
@@ -100,15 +102,13 @@ public class PickerFrame extends SwarmFrame {
   private Box waveBox;
   private PickListPanel pickList;
   private JSplitPane mainPanel;
+  private PickerWavePanel baseWave;
   private final List<PickerWavePanel> waves;
   private final Set<PickerWavePanel> selectedSet;
   private JToolBar toolbar;
   private JLabel statusLabel;
-//  private JToggleButton linkButton;
   private JButton sizeButton;
-//  private JButton syncButton;
   private JButton sortButton;
-  // private JButton removeAllButton;
   private JButton saveButton;
   private JButton saveAllButton;
   private JButton openButton;
@@ -125,7 +125,6 @@ public class PickerFrame extends SwarmFrame {
   private JButton removeButton;
   private JButton compXButton;
   private JButton expXButton;
-  // private JButton copyButton;
   private JButton forwardButton;
   private JButton backButton;
   private JButton gotoButton;
@@ -174,7 +173,6 @@ public class PickerFrame extends SwarmFrame {
 
     JPanel tablePanel = new JPanel();
     tablePanel.setLayout(new BoxLayout(tablePanel, BoxLayout.PAGE_AXIS));
-    // tablePanel.setMinimumSize(new Dimension(tablePanel.getMinimumSize().width, 50));
 
     mainPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, wavePanel, tablePanel);
     mainPanel.setOneTouchExpandable(true);
@@ -183,6 +181,39 @@ public class PickerFrame extends SwarmFrame {
     createWaveButtons();
 
     waveBox = new Box(BoxLayout.Y_AXIS);
+    waveBox.setTransferHandler(new TransferHandler("") {
+      public boolean canImport(TransferSupport supp) {
+        return supp.isDataFlavorSupported(DataFlavor.stringFlavor);
+      }
+      
+      public boolean importData(TransferSupport supp) {
+        if (!canImport(supp)) {
+            return false;
+        }
+
+        Transferable t = supp.getTransferable();
+        String data = null;
+        try {
+          data = (String) t.getTransferData(DataFlavor.stringFlavor);
+        } catch (UnsupportedFlavorException e) {
+          e.printStackTrace();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+
+        // Fetch the drop location
+        DropLocation loc = supp.getDropLocation();
+
+        // Insert the data at this location
+        LOGGER.debug("DROP {} @ {}", data, loc);
+        String[] chans = data.split("\n");
+        for (String chan : chans) {
+          addWave(chan);          
+        }
+        return true;
+    }
+
+    });
     scrollPane = new JScrollPane(waveBox);
     scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -192,16 +223,16 @@ public class PickerFrame extends SwarmFrame {
     JPanel statusPanel = new JPanel();
     statusPanel.setLayout(new BorderLayout());
     statusLabel = new JLabel(" ");
-    // statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 1));
     statusLabel.setBorder(BorderFactory.createEtchedBorder());
     statusPanel.add(statusLabel);
-    statusPanel.setMaximumSize(new Dimension( Integer.MAX_VALUE, statusPanel.getPreferredSize().height));
+    statusPanel
+        .setMaximumSize(new Dimension(Integer.MAX_VALUE, statusPanel.getPreferredSize().height));
     wavePanel.add(statusPanel);
     tablePanel.add(toolbar, BorderLayout.NORTH);
 
     pickList = new PickListPanel(event);
     pickList.setParent(mainPanel);
-    
+
     scrollPane = new JScrollPane(pickList);
     scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -375,22 +406,6 @@ public class PickerFrame extends SwarmFrame {
     toolbar.addSeparator();
 
     waveToolbar = new WaveViewSettingsToolbar(null, toolbar, this);
-
-    // copyButton = SwarmUtil.createToolBarButton(Icons.clipboard,
-    // "Place another copy of wave on clipboard (C or Ctrl-C)", new ActionListener() {
-    // public void actionPerformed(final ActionEvent e) {
-    // // TODO: implement
-    // // if (selected != null)
-    // // {
-    // // WaveViewPanel wvp = new WaveViewPanel(selected);
-    // // wvp.setBackgroundColor(BACKGROUND_COLOR);
-    // // addWave(wvp);
-    // // }
-    // }
-    // });
-    // UiUtils.mapKeyStrokeToButton(this, "C", "clipboard1", copyButton);
-    // UiUtils.mapKeyStrokeToButton(this, "control C", "clipboard2", copyButton);
-    // toolbar.add(copyButton);
 
     toolbar.addSeparator();
 
@@ -795,15 +810,12 @@ public class PickerFrame extends SwarmFrame {
     saveButton.setEnabled(!enable);
     sortButton.setEnabled(!enable);
     saveAllButton.setEnabled(!enable);
-//    syncButton.setEnabled(!enable);
-    // removeAllButton.setEnabled(!enable);
     saveAllButton.setEnabled(!enable);
 
     final boolean allowSingle = (selectedSet.size() == 1);
     upButton.setEnabled(allowSingle);
     downButton.setEnabled(allowSingle);
     sortButton.setEnabled(allowSingle);
-//    syncButton.setEnabled(allowSingle);
     saveButton.setEnabled(allowSingle);
 
     final boolean allowMulti = (selectedSet.size() > 0);
@@ -906,6 +918,7 @@ public class PickerFrame extends SwarmFrame {
   }
 
   public synchronized void setBaseWave(final PickerWavePanel p) {
+    baseWave = p;
     addWave(p);
     doButtonEnables();
     waveBox.validate();
@@ -951,8 +964,21 @@ public class PickerFrame extends SwarmFrame {
     worker.start();
   }
 
-  public synchronized void addWave(final PickerWavePanel p) {
-    LOGGER.debug("Adding listener: {}", selectListener);
+  public synchronized void addWave(final String chan) {
+    PickerWavePanel p2 = new PickerWavePanel(baseWave);
+    p2.setChannel(chan);
+    SeismicDataSource sds = p2.getDataSource();
+    double st = p2.getStartTime();
+    double et = p2.getEndTime();
+    Wave wave = sds.getWave(chan, st, et);
+    if (wave != null && wave.isData()) {
+      p2.setWave(wave, st, et);
+      p2.getWaveViewSettings().autoScaleAmpMemory = false;
+      addWave(p2);
+    }
+  }
+
+    public synchronized void addWave(final PickerWavePanel p) {
     p.addListener(selectListener);
     p.setOffsets(54, 8, 21, 19);
     p.setAllowClose(true);

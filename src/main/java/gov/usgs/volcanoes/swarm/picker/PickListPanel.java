@@ -32,6 +32,7 @@ public class PickListPanel extends JPanel implements EventObserver {
   private static final Color BACKGROUND_COLOR = new Color(255, 255, 255);
   private static final Color SELECTED_BACKGROUND_COLOR = new Color(255, 248, 220);
   // private static final Color SELECTED_BACKGROUND_COLOR = new Color(0, 0, 220);
+  private static final Font TABLE_FONT = new Font(Font.MONOSPACED, Font.PLAIN, 12);
   private final Event event;
   private JPanel pickList;
   private Set<String> selected;
@@ -54,8 +55,8 @@ public class PickListPanel extends JPanel implements EventObserver {
   }
 
   private void writeList(JPanel pickList) {
-//    pickList.setBorder(BorderFactory.createLineBorder(Color.black));
-  pickList.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
+    // pickList.setBorder(BorderFactory.createLineBorder(Color.black));
+    pickList.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
     pickList.setBackground(BACKGROUND_COLOR);
     JLabel label;
     GridBagConstraints c = new GridBagConstraints();
@@ -95,23 +96,25 @@ public class PickListPanel extends JPanel implements EventObserver {
 
     LOGGER.debug("event: {}", event);
     Map<String, EventChannel> channels = event.getChannels();
-    for (String channel : channels.keySet()) {
+    String[] keys = channels.keySet().toArray(new String[0]);
+    int idx = keys.length;
+    while (idx-- > 0) {
       c.gridy++;
+      String chan = keys[idx];
 
-      EventChannel eventChannel = channels.get(channel);
+      EventChannel eventChannel = channels.get(chan);
 
       Phase phase;
 
       phase = eventChannel.getPhase(Phase.PhaseType.P);
       if (phase != null) {
-        writePhase(pickList, channel, phase, c);
+        writePhase(pickList, chan, phase, c);
       }
 
       phase = eventChannel.getPhase(Phase.PhaseType.S);
       if (phase != null) {
-        writePhase(pickList, channel, phase, c);
+        writePhase(pickList, chan, phase, c);
       }
-
     }
 
     c.weighty = 1;
@@ -138,6 +141,7 @@ public class PickListPanel extends JPanel implements EventObserver {
 
     c.fill = GridBagConstraints.NONE;
     final JComboBox<Integer> weight = new JComboBox<Integer>(new Integer[] {0, 1, 2, 3, 4});
+    weight.setFont(TABLE_FONT);
     weight.setSelectedIndex(phase.weight);
     weight.addActionListener(new ActionListener() {
 
@@ -154,6 +158,7 @@ public class PickListPanel extends JPanel implements EventObserver {
     c.fill = GridBagConstraints.NONE;
     Phase.Onset[] onsets = Phase.Onset.values();
     final JComboBox<Phase.Onset> onset = new JComboBox<Phase.Onset>(onsets);
+    onset.setFont(TABLE_FONT);
     int i = 0;
     while (i < onsets.length && onsets[i] != phase.onset) {
       i++;
@@ -177,6 +182,7 @@ public class PickListPanel extends JPanel implements EventObserver {
       Phase.FirstMotion[] firstMotions = Phase.FirstMotion.values();
       final JComboBox<Phase.FirstMotion> firstMotion =
           new JComboBox<Phase.FirstMotion>(firstMotions);
+      firstMotion.setFont(TABLE_FONT);
       int idx = 0;
       while (idx < firstMotions.length && firstMotions[idx] != phase.firstMotion) {
         idx++;
@@ -187,10 +193,10 @@ public class PickListPanel extends JPanel implements EventObserver {
         public void actionPerformed(ActionEvent e) {
           Phase newPhase = new Phase.Builder(phase)
               .firstMotion((Phase.FirstMotion) firstMotion.getSelectedItem()).build();
-           event.setPhase(channel, newPhase);
-           parent.validate();
-           parent.repaint();
-       }
+          event.setPhase(channel, newPhase);
+          parent.validate();
+          parent.repaint();
+        }
       });
       pickList.add(firstMotion, c);
       c.fill = GridBagConstraints.HORIZONTAL;
@@ -238,7 +244,8 @@ public class PickListPanel extends JPanel implements EventObserver {
   }
 
   private JLabel getLabel(String string, boolean selected) {
-    JLabel label = new JLabel(string,  SwingConstants.CENTER);
+    JLabel label = new JLabel(string, SwingConstants.CENTER);
+    label.setFont(TABLE_FONT);
     label.setOpaque(true);
     if (selected) {
       // label.setBackground(SELECTED_BACKGROUND_COLOR);
