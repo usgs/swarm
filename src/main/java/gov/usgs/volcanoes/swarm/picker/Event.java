@@ -53,7 +53,7 @@ public class Event {
     observers.add(observer);
   }
 
-  private void notifyObservers() {
+  public void notifyObservers() {
     for (EventObserver observer : observers) {
       observer.updateEvent();
     }

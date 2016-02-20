@@ -99,6 +99,7 @@ public class PickerFrame extends SwarmFrame {
   private JScrollPane scrollPane;
   private Box waveBox;
   private PickListPanel pickList;
+  private JSplitPane mainPanel;
   private final List<PickerWavePanel> waves;
   private final Set<PickerWavePanel> selectedSet;
   private JToolBar toolbar;
@@ -175,9 +176,8 @@ public class PickerFrame extends SwarmFrame {
    tablePanel.setLayout(new BoxLayout(tablePanel, BoxLayout.PAGE_AXIS));
 //   tablePanel.setMinimumSize(new Dimension(tablePanel.getMinimumSize().width, 50));
 
-    JSplitPane mainPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, wavePanel, tablePanel);
+     mainPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, wavePanel, tablePanel);
     mainPanel.setOneTouchExpandable(true);
-    mainPanel.setDividerLocation(550);
 
     createMainButtons();
     createWaveButtons();
@@ -199,12 +199,16 @@ public class PickerFrame extends SwarmFrame {
     tablePanel.add(toolbar, BorderLayout.NORTH);
 
     pickList = new PickListPanel(event);
+    pickList.setPreferredSize(new Dimension(pickList.getPreferredSize().width,25));
+    pickList.setParent(mainPanel);
     scrollPane = new JScrollPane(pickList);
     scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     scrollPane.getVerticalScrollBar().setUnitIncrement(40);
     tablePanel.add(scrollPane);
 
+    mainPanel.setResizeWeight(.75);
+//    mainPanel.setDividerLocation(550);
     this.setContentPane(mainPanel);
 
     createListeners();
@@ -523,6 +527,9 @@ public class PickerFrame extends SwarmFrame {
           }
         }
         lastClickedIndex = thisIndex;
+        event.notifyObservers();
+        mainPanel.validate();
+        mainPanel.repaint();
       }
 
       @Override
@@ -979,6 +986,7 @@ public class PickerFrame extends SwarmFrame {
     p.setAllowDragging(true);
     p.setDisplayTitle(true);
     p.setEvent(event);
+    p.setParent(mainPanel);
     final int w = scrollPane.getViewport().getSize().width;
     p.setSize(w, calculateWaveHeight());
     p.setBottomBorderColor(Color.GRAY);

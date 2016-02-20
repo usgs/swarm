@@ -1,16 +1,16 @@
 package gov.usgs.volcanoes.swarm.picker;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
+import java.awt.font.TextAttribute;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -20,9 +20,10 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gov.usgs.volcanoes.core.time.Time;
-import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanelListener;
 
 public class PickListPanel extends JPanel implements EventObserver {
   private static final Logger LOGGER = LoggerFactory.getLogger(PickListPanel.class);
@@ -32,10 +33,12 @@ public class PickListPanel extends JPanel implements EventObserver {
   private final Event event;
   private JPanel pickList;
   private Set<String> selected;
+  private Component parent;
 
   public PickListPanel(Event event) {
     super();
     this.event = event;
+    LOGGER.debug("GOT EVENT: {}", event);
     selected = new HashSet<String>();
 
     setLayout(new BorderLayout());
@@ -80,6 +83,7 @@ public class PickListPanel extends JPanel implements EventObserver {
     label = new JLabel("First Motion");
     pickList.add(label, c);
 
+    LOGGER.debug("event: {}", event);
     Map<String, EventChannel> channels = event.getChannels();
     for (String channel : channels.keySet()) {
       c.gridy++;
@@ -130,6 +134,8 @@ public class PickListPanel extends JPanel implements EventObserver {
       public void actionPerformed(ActionEvent e) {
         Phase newPhase = new Phase.Builder(phase).weight(weight.getSelectedIndex()).build();
         event.setPhase(channel, newPhase);
+        parent.validate();
+        parent.repaint();
       }
     });
     pickList.add(weight, c);
@@ -149,6 +155,8 @@ public class PickListPanel extends JPanel implements EventObserver {
         Phase newPhase =
             new Phase.Builder(phase).onset((Phase.Onset) onset.getSelectedItem()).build();
         event.setPhase(channel, newPhase);
+        parent.validate();
+        parent.repaint();
       }
     });
     pickList.add(onset, c);
@@ -169,8 +177,9 @@ public class PickListPanel extends JPanel implements EventObserver {
         public void actionPerformed(ActionEvent e) {
           Phase newPhase = new Phase.Builder(phase)
               .firstMotion((Phase.FirstMotion) firstMotion.getSelectedItem()).build();
+          parent.validate();
+          parent.repaint();
           event.setPhase(channel, newPhase);
-          repaint();
         }
       });
       pickList.add(firstMotion, c);
@@ -181,14 +190,18 @@ public class PickListPanel extends JPanel implements EventObserver {
   }
 
   public void updateEvent() {
+    if (event == null) {
+      return;
+    }
+
     LOGGER.debug("Updating pick list");
     JPanel newList = new JPanel();
     newList.setLayout(new GridBagLayout());
     writeList(newList);
-
     remove(pickList);
     pickList = newList;
     add(pickList, BorderLayout.CENTER);
+    // parent.repaint();
   }
 
   public void deselect(String channel) {
@@ -218,11 +231,27 @@ public class PickListPanel extends JPanel implements EventObserver {
     JLabel label = new JLabel(string);
     label.setOpaque(true);
     if (selected) {
-      label.setBackground(SELECTED_BACKGROUND_COLOR);
+      // label.setBackground(SELECTED_BACKGROUND_COLOR);
+      label.setBackground(BACKGROUND_COLOR);
+      Font font = label.getFont();
+      font = font
+          .deriveFont(Collections.singletonMap(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD));
+      // TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE));
+
+      label.setFont(font);
     } else {
       label.setBackground(BACKGROUND_COLOR);
     }
 
     return label;
+  }
+
+  public void setParent(Component parent) {
+    this.parent = parent;
+  }
+
+  public void repaint() {
+    updateEvent();
+    super.repaint();
   }
 }

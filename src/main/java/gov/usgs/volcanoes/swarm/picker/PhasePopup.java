@@ -1,13 +1,14 @@
 package gov.usgs.volcanoes.swarm.picker;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-
-import gov.usgs.volcanoes.swarm.picker.Phase.Builder;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 
 public class PhasePopup extends JPopupMenu {
   private JMenu p;
@@ -15,14 +16,17 @@ public class PhasePopup extends JPopupMenu {
   private final String channel;
   private final long time;
   private final Event event;
+  private Component parent;
 
   public PhasePopup(final Event event, final String channel, final long time) {
     this.channel = channel;
     this.time = time;
     this.event = event;
 
+    // final Component parentFrame = SwingUtilities.getAncestorNamed("mainPanel", this.getParent());
     p = new JMenu("P");
     add(p);
+
 
     JMenuItem ip0 = new JMenuItem("iP0");
     ip0.addActionListener(new ActionListener() {
@@ -30,6 +34,8 @@ public class PhasePopup extends JPopupMenu {
         Phase phase = new Phase.Builder().onset(Phase.Onset.i).phaseType(Phase.PhaseType.P)
             .firstMotion(Phase.FirstMotion.UP).time(time).weight(0).build();
         event.setPhase(channel, phase);
+        parent.validate();
+        parent.repaint();
       }
     });
     p.add(ip0);
@@ -40,6 +46,8 @@ public class PhasePopup extends JPopupMenu {
         Phase phase = new Phase.Builder().onset(Phase.Onset.i).phaseType(Phase.PhaseType.P)
             .firstMotion(Phase.FirstMotion.UP).time(time).weight(1).build();
         event.setPhase(channel, phase);
+        parent.validate();
+        parent.repaint();
       }
     });
     p.add(ip1);
@@ -50,6 +58,8 @@ public class PhasePopup extends JPopupMenu {
         Phase phase = new Phase.Builder().onset(Phase.Onset.e).phaseType(Phase.PhaseType.P)
             .firstMotion(Phase.FirstMotion.UP).time(time).weight(2).build();
         event.setPhase(channel, phase);
+        parent.validate();
+        parent.repaint();
       }
     });
     p.add(ep2);
@@ -60,6 +70,8 @@ public class PhasePopup extends JPopupMenu {
         Phase phase = new Phase.Builder().onset(Phase.Onset.e).phaseType(Phase.PhaseType.P)
             .firstMotion(Phase.FirstMotion.UP).time(time).weight(3).build();
         event.setPhase(channel, phase);
+        parent.validate();
+        parent.repaint();
       }
     });
     p.add(ep3);
@@ -68,6 +80,8 @@ public class PhasePopup extends JPopupMenu {
     clearP.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         event.clearPhase(channel, Phase.PhaseType.P);
+        parent.validate();
+        parent.repaint();
       }
     });
     p.add(clearP);
@@ -81,6 +95,8 @@ public class PhasePopup extends JPopupMenu {
         Phase phase = new Phase.Builder().onset(Phase.Onset.i).phaseType(Phase.PhaseType.S)
             .firstMotion(Phase.FirstMotion.UP).time(time).weight(0).build();
         event.setPhase(channel, phase);
+        parent.validate();
+        parent.repaint();
       }
     });
     s.add(is0);
@@ -91,6 +107,8 @@ public class PhasePopup extends JPopupMenu {
         Phase phase = new Phase.Builder().onset(Phase.Onset.i).phaseType(Phase.PhaseType.S)
             .firstMotion(Phase.FirstMotion.UP).time(time).weight(1).build();
         event.setPhase(channel, phase);
+        parent.validate();
+        parent.repaint();
       }
     });
     s.add(is1);
@@ -101,6 +119,8 @@ public class PhasePopup extends JPopupMenu {
         Phase phase = new Phase.Builder().onset(Phase.Onset.e).phaseType(Phase.PhaseType.S)
             .firstMotion(Phase.FirstMotion.UP).time(time).weight(2).build();
         event.setPhase(channel, phase);
+        parent.validate();
+        parent.repaint();
       }
     });
     s.add(es2);
@@ -111,6 +131,8 @@ public class PhasePopup extends JPopupMenu {
         Phase phase = new Phase.Builder().onset(Phase.Onset.e).phaseType(Phase.PhaseType.S)
             .firstMotion(Phase.FirstMotion.UP).time(time).weight(3).build();
         event.setPhase(channel, phase);
+        parent.validate();
+        parent.repaint();
       }
     });
     s.add(es3);
@@ -119,9 +141,15 @@ public class PhasePopup extends JPopupMenu {
     clearS.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         event.clearPhase(channel, Phase.PhaseType.S);
+        parent.validate();
+        parent.repaint();
       }
     });
     s.add(clearS);
 
+  }
+
+  public void setParent(Component parent) {
+    this.parent = parent;
   }
 }

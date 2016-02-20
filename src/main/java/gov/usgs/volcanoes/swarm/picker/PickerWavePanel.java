@@ -1,13 +1,12 @@
 package gov.usgs.volcanoes.swarm.picker;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
-import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
-import java.util.ListIterator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
 public class PickerWavePanel extends AbstractWavePanel implements EventObserver {
 
@@ -26,6 +24,7 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
   private static final Color S_BACKGROUND = new Color(128, 128, 255, 192);
 
   private Event event;
+  private Component parent;
 
   public PickerWavePanel(AbstractWavePanel insetWavePanel) {
     super(insetWavePanel);
@@ -39,6 +38,7 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
     LOGGER.debug("New phase: {} @ {}", channel, J2kSec.toDateString(cursorTime));
 
     PhasePopup phasePopup = new PhasePopup(event, channel, J2kSec.asEpoch(cursorTime));
+    phasePopup.setParent(parent);
     phasePopup.show(e.getComponent(), e.getX(), e.getY());
     pauseCursorMark = true;
     WaveViewTime.fireTimeChanged(cursorTime);
@@ -104,5 +104,9 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
 
   public void updateEvent() {
     repaint();
+  }
+
+  public void setParent(Component parent) {
+    this.parent = parent;
   }
 }
