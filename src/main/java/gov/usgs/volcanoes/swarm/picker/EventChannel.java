@@ -47,4 +47,8 @@ public class EventChannel {
         throw new RuntimeException("Unknown phase type.");
     }
   }
+
+  public boolean isEmpty() {
+    return pPhase == null && sPhase == null;
+  }
 }

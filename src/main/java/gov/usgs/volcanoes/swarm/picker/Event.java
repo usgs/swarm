@@ -25,13 +25,21 @@ public class Event {
       channels.put(channel, eChan);
     }
     eChan.setPhase(phase);
+    if (eChan.isEmpty()) {
+      channels.remove(channel);
+    }
     notifyObservers();
   }
 
   public void clearPhase(String channel, Phase.PhaseType type) {
     EventChannel eChan = channels.get(channel);
-    eChan.clearPhase(type);
-    notifyObservers();
+    if (eChan != null) {
+      eChan.clearPhase(type);
+      if (eChan.isEmpty()) {
+        channels.remove(channel);
+      }
+      notifyObservers();      
+    }
   }
 
   public Phase getPhase(String channel, Phase.PhaseType type) {
@@ -60,5 +68,9 @@ public class Event {
   public void remove(String channel) {
     channels.remove(channel);
     notifyObservers();
+  }
+  
+  public boolean isEmpty() {
+    return channels.isEmpty();
   }
 }

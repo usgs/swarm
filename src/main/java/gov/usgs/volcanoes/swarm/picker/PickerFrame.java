@@ -91,7 +91,7 @@ import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
  *
  * @author Tom Parker
  */
-public class PickerFrame extends SwarmFrame {
+public class PickerFrame extends SwarmFrame implements EventObserver {
   private static final Logger LOGGER = LoggerFactory.getLogger(PickerFrame.class);
 
   public static final long serialVersionUID = -1;
@@ -108,10 +108,10 @@ public class PickerFrame extends SwarmFrame {
   private JToolBar toolbar;
   private JLabel statusLabel;
   private JButton sizeButton;
-  private JButton sortButton;
+//  private JButton sortButton;
   private JButton saveButton;
-  private JButton saveAllButton;
-  private JButton openButton;
+//  private JButton saveAllButton;
+//  private JButton openButton;
   private JButton captureButton;
   private JButton histButton;
 
@@ -146,6 +146,7 @@ public class PickerFrame extends SwarmFrame {
   public PickerFrame() {
     super("Picker", true, true, true, false);
     event = new Event();
+    event.addObserver(this);
 
     this.setFocusable(true);
     this.setVisible(true);
@@ -179,6 +180,7 @@ public class PickerFrame extends SwarmFrame {
 
     createMainButtons();
     createWaveButtons();
+    wavePanel.add(toolbar);
 
     waveBox = new Box(BoxLayout.Y_AXIS);
     waveBox.setTransferHandler(new TransferHandler("") {
@@ -228,7 +230,7 @@ public class PickerFrame extends SwarmFrame {
     statusPanel
         .setMaximumSize(new Dimension(Integer.MAX_VALUE, statusPanel.getPreferredSize().height));
     wavePanel.add(statusPanel);
-    tablePanel.add(toolbar, BorderLayout.NORTH);
+//    tablePanel.add(toolbar, BorderLayout.NORTH);
 
     pickList = new PickListPanel(event);
     pickList.setParent(mainPanel);
@@ -247,30 +249,30 @@ public class PickerFrame extends SwarmFrame {
   }
 
   private void createMainButtons() {
-    openButton =
-        SwarmUtil.createToolBarButton(Icons.open, "Open a saved wave", new OpenActionListener());
-    toolbar.add(openButton);
+//    openButton =
+//        SwarmUtil.createToolBarButton(Icons.open, "Open a saved wave", new OpenActionListener());
+//    toolbar.add(openButton);
 
     saveButton =
         SwarmUtil.createToolBarButton(Icons.save, "Save selected wave", new SaveActionListener());
     saveButton.setEnabled(false);
     toolbar.add(saveButton);
 
-    saveAllButton =
-        SwarmUtil.createToolBarButton(Icons.saveall, "Save all waves", new SaveAllActionListener());
-    saveAllButton.setEnabled(false);
-    toolbar.add(saveAllButton);
+//    saveAllButton =
+//        SwarmUtil.createToolBarButton(Icons.saveall, "Save all waves", new SaveAllActionListener());
+//    saveAllButton.setEnabled(false);
+//    toolbar.add(saveAllButton);
 
     toolbar.addSeparator();
 
-    sortButton = SwarmUtil.createToolBarButton(Icons.geosort,
-        "Sort waves by nearest to selected wave", new ActionListener() {
-          public void actionPerformed(final ActionEvent e) {
-            sortChannelsByNearest();
-          }
-        });
-    sortButton.setEnabled(false);
-    toolbar.add(sortButton);
+//    sortButton = SwarmUtil.createToolBarButton(Icons.geosort,
+//        "Sort waves by nearest to selected wave", new ActionListener() {
+//          public void actionPerformed(final ActionEvent e) {
+//            sortChannelsByNearest();
+//          }
+//        });
+//    sortButton.setEnabled(false);
+//    toolbar.add(sortButton);
 
     toolbar.addSeparator();
 
@@ -807,16 +809,14 @@ public class PickerFrame extends SwarmFrame {
 
   private void doButtonEnables() {
     final boolean enable = (waves == null || waves.size() == 0);
-    saveButton.setEnabled(!enable);
-    sortButton.setEnabled(!enable);
-    saveAllButton.setEnabled(!enable);
-    saveAllButton.setEnabled(!enable);
+//    sortButton.setEnabled(!enable);
+//    saveAllButton.setEnabled(!enable);
 
     final boolean allowSingle = (selectedSet.size() == 1);
     upButton.setEnabled(allowSingle);
     downButton.setEnabled(allowSingle);
-    sortButton.setEnabled(allowSingle);
-    saveButton.setEnabled(allowSingle);
+//    sortButton.setEnabled(allowSingle);
+//    saveButton.setEnabled(!event.getChannels().isEmpty());
 
     final boolean allowMulti = (selectedSet.size() > 0);
     backButton.setEnabled(allowMulti);
@@ -1293,5 +1293,11 @@ public class PickerFrame extends SwarmFrame {
     super.setVisible(isVisible);
     if (isVisible)
       toFront();
+  }
+
+
+  public void updateEvent() {
+    LOGGER.debug("event is empty? {}", event.getChannels().isEmpty());
+    saveButton.setEnabled(!event.getChannels().isEmpty());
   }
 }
