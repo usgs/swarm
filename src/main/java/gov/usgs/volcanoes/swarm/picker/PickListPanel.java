@@ -19,6 +19,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.border.Border;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +44,6 @@ public class PickListPanel extends JPanel implements EventObserver {
     selected = new HashSet<String>();
 
     setLayout(new BorderLayout());
-    this.setPreferredSize(new Dimension(this.getPreferredSize().width, 200));
     LOGGER.debug("Event: " + event);
     event.addObserver(this);
     pickList = new JPanel();
@@ -53,7 +54,8 @@ public class PickListPanel extends JPanel implements EventObserver {
   }
 
   private void writeList(JPanel pickList) {
-    pickList.setBorder(BorderFactory.createLineBorder(Color.black));
+//    pickList.setBorder(BorderFactory.createLineBorder(Color.black));
+  pickList.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 3));
     pickList.setBackground(BACKGROUND_COLOR);
     JLabel label;
     GridBagConstraints c = new GridBagConstraints();
@@ -65,22 +67,30 @@ public class PickListPanel extends JPanel implements EventObserver {
     c.ipadx = 3;
     c.ipady = 2;
 
-    label = new JLabel("Time");
+    Border border = BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK);
+
+    label = new JLabel("Time", SwingConstants.CENTER);
+    label.setBorder(border);
     pickList.add(label, c);
 
-    label = new JLabel("Type");
+    label = new JLabel("Type", SwingConstants.CENTER);
+    label.setBorder(border);
     pickList.add(label, c);
 
-    label = new JLabel("Channel");
+    label = new JLabel("Channel", SwingConstants.CENTER);
+    label.setBorder(border);
     pickList.add(label, c);
 
-    label = new JLabel("Weight");
+    label = new JLabel("Weight", SwingConstants.CENTER);
+    label.setBorder(border);
     pickList.add(label, c);
 
-    label = new JLabel("Onset");
+    label = new JLabel("Onset", SwingConstants.CENTER);
+    label.setBorder(border);
     pickList.add(label, c);
 
-    label = new JLabel("First Motion");
+    label = new JLabel("First Motion", SwingConstants.CENTER);
+    label.setBorder(border);
     pickList.add(label, c);
 
     LOGGER.debug("event: {}", event);
@@ -171,16 +181,16 @@ public class PickListPanel extends JPanel implements EventObserver {
       while (idx < firstMotions.length && firstMotions[idx] != phase.firstMotion) {
         idx++;
       }
-      firstMotion.setSelectedIndex(i);
+      firstMotion.setSelectedIndex(idx);
       firstMotion.addActionListener(new ActionListener() {
 
         public void actionPerformed(ActionEvent e) {
           Phase newPhase = new Phase.Builder(phase)
               .firstMotion((Phase.FirstMotion) firstMotion.getSelectedItem()).build();
-          parent.validate();
-          parent.repaint();
-          event.setPhase(channel, newPhase);
-        }
+           event.setPhase(channel, newPhase);
+           parent.validate();
+           parent.repaint();
+       }
       });
       pickList.add(firstMotion, c);
       c.fill = GridBagConstraints.HORIZONTAL;
@@ -228,7 +238,7 @@ public class PickListPanel extends JPanel implements EventObserver {
   }
 
   private JLabel getLabel(String string, boolean selected) {
-    JLabel label = new JLabel(string);
+    JLabel label = new JLabel(string,  SwingConstants.CENTER);
     label.setOpaque(true);
     if (selected) {
       // label.setBackground(SELECTED_BACKGROUND_COLOR);

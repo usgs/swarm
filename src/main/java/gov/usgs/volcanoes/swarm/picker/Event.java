@@ -61,5 +61,6 @@ public class Event {
 
   public void remove(String channel) {
     channels.remove(channel);
+    notifyObservers();
   }
 }

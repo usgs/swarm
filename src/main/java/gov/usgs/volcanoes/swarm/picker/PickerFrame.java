@@ -104,11 +104,11 @@ public class PickerFrame extends SwarmFrame {
   private final Set<PickerWavePanel> selectedSet;
   private JToolBar toolbar;
   private JLabel statusLabel;
-  private JToggleButton linkButton;
+//  private JToggleButton linkButton;
   private JButton sizeButton;
-  private JButton syncButton;
+//  private JButton syncButton;
   private JButton sortButton;
-  private JButton removeAllButton;
+  // private JButton removeAllButton;
   private JButton saveButton;
   private JButton saveAllButton;
   private JButton openButton;
@@ -125,7 +125,7 @@ public class PickerFrame extends SwarmFrame {
   private JButton removeButton;
   private JButton compXButton;
   private JButton expXButton;
-  private JButton copyButton;
+  // private JButton copyButton;
   private JButton forwardButton;
   private JButton backButton;
   private JButton gotoButton;
@@ -157,7 +157,7 @@ public class PickerFrame extends SwarmFrame {
     histories = new HashMap<AbstractWavePanel, Stack<double[]>>();
     createUI();
     LOGGER.debug("Finished creating picker frame.");
-   }
+  }
 
 
   private void createUI() {
@@ -168,15 +168,15 @@ public class PickerFrame extends SwarmFrame {
     LOGGER.debug("picker frame: {} @ {}", this.getSize(), this.getLocation());
 
     toolbar = SwarmUtil.createToolBar();
-    
+
     JPanel wavePanel = new JPanel();
     wavePanel.setLayout(new BoxLayout(wavePanel, BoxLayout.PAGE_AXIS));
-    
-   JPanel tablePanel = new JPanel();
-   tablePanel.setLayout(new BoxLayout(tablePanel, BoxLayout.PAGE_AXIS));
-//   tablePanel.setMinimumSize(new Dimension(tablePanel.getMinimumSize().width, 50));
 
-     mainPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, wavePanel, tablePanel);
+    JPanel tablePanel = new JPanel();
+    tablePanel.setLayout(new BoxLayout(tablePanel, BoxLayout.PAGE_AXIS));
+    // tablePanel.setMinimumSize(new Dimension(tablePanel.getMinimumSize().width, 50));
+
+    mainPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, wavePanel, tablePanel);
     mainPanel.setOneTouchExpandable(true);
 
     createMainButtons();
@@ -192,15 +192,16 @@ public class PickerFrame extends SwarmFrame {
     JPanel statusPanel = new JPanel();
     statusPanel.setLayout(new BorderLayout());
     statusLabel = new JLabel(" ");
-//    statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 1));
+    // statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 1));
     statusLabel.setBorder(BorderFactory.createEtchedBorder());
     statusPanel.add(statusLabel);
+    statusPanel.setMaximumSize(new Dimension( Integer.MAX_VALUE, statusPanel.getPreferredSize().height));
     wavePanel.add(statusPanel);
     tablePanel.add(toolbar, BorderLayout.NORTH);
 
     pickList = new PickListPanel(event);
-    pickList.setPreferredSize(new Dimension(pickList.getPreferredSize().width,25));
     pickList.setParent(mainPanel);
+    
     scrollPane = new JScrollPane(pickList);
     scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -208,7 +209,6 @@ public class PickerFrame extends SwarmFrame {
     tablePanel.add(scrollPane);
 
     mainPanel.setResizeWeight(.75);
-//    mainPanel.setDividerLocation(550);
     this.setContentPane(mainPanel);
 
     createListeners();
@@ -232,24 +232,6 @@ public class PickerFrame extends SwarmFrame {
 
     toolbar.addSeparator();
 
-    linkButton = SwarmUtil.createToolBarToggleButton(Icons.helilink,
-        "Synchronize times with helicorder wave", new ActionListener() {
-          public void actionPerformed(final ActionEvent e) {
-            heliLinked = linkButton.isSelected();
-          }
-        });
-    linkButton.setSelected(heliLinked);
-    toolbar.add(linkButton);
-
-    syncButton = SwarmUtil.createToolBarButton(Icons.clock, "Synchronize times with selected wave",
-        new ActionListener() {
-          public void actionPerformed(final ActionEvent e) {
-            syncChannels();
-          }
-        });
-    syncButton.setEnabled(false);
-    toolbar.add(syncButton);
-
     sortButton = SwarmUtil.createToolBarButton(Icons.geosort,
         "Sort waves by nearest to selected wave", new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
@@ -261,25 +243,16 @@ public class PickerFrame extends SwarmFrame {
 
     toolbar.addSeparator();
 
-    sizeButton = SwarmUtil.createToolBarButton(Icons.resize, "Set clipboard wave size",
-        new ActionListener() {
+    sizeButton =
+        SwarmUtil.createToolBarButton(Icons.resize, "Set wave height", new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
-            doSizePopup(sizeButton.getX(), sizeButton.getY() + 2 * sizeButton.getHeight());
+            doSizePopup();
           }
         });
     toolbar.add(sizeButton);
 
-    removeAllButton = SwarmUtil.createToolBarButton(Icons.deleteall,
-        "Remove all waves from clipboard", new ActionListener() {
-          public void actionPerformed(final ActionEvent e) {
-            removeWaves();
-          }
-        });
-    removeAllButton.setEnabled(false);
-    toolbar.add(removeAllButton);
-
     toolbar.addSeparator();
-    captureButton = SwarmUtil.createToolBarButton(Icons.camera, "Save clipboard image (P)",
+    captureButton = SwarmUtil.createToolBarButton(Icons.camera, "Save pick image (P)",
         new CaptureActionListener());
     UiUtils.mapKeyStrokeToButton(this, "P", "capture", captureButton);
     toolbar.add(captureButton);
@@ -403,21 +376,21 @@ public class PickerFrame extends SwarmFrame {
 
     waveToolbar = new WaveViewSettingsToolbar(null, toolbar, this);
 
-    copyButton = SwarmUtil.createToolBarButton(Icons.clipboard,
-        "Place another copy of wave on clipboard (C or Ctrl-C)", new ActionListener() {
-          public void actionPerformed(final ActionEvent e) {
-            // TODO: implement
-            // if (selected != null)
-            // {
-            // WaveViewPanel wvp = new WaveViewPanel(selected);
-            // wvp.setBackgroundColor(BACKGROUND_COLOR);
-            // addWave(wvp);
-            // }
-          }
-        });
-    UiUtils.mapKeyStrokeToButton(this, "C", "clipboard1", copyButton);
-    UiUtils.mapKeyStrokeToButton(this, "control C", "clipboard2", copyButton);
-    toolbar.add(copyButton);
+    // copyButton = SwarmUtil.createToolBarButton(Icons.clipboard,
+    // "Place another copy of wave on clipboard (C or Ctrl-C)", new ActionListener() {
+    // public void actionPerformed(final ActionEvent e) {
+    // // TODO: implement
+    // // if (selected != null)
+    // // {
+    // // WaveViewPanel wvp = new WaveViewPanel(selected);
+    // // wvp.setBackgroundColor(BACKGROUND_COLOR);
+    // // addWave(wvp);
+    // // }
+    // }
+    // });
+    // UiUtils.mapKeyStrokeToButton(this, "C", "clipboard1", copyButton);
+    // UiUtils.mapKeyStrokeToButton(this, "control C", "clipboard2", copyButton);
+    // toolbar.add(copyButton);
 
     toolbar.addSeparator();
 
@@ -547,6 +520,7 @@ public class PickerFrame extends SwarmFrame {
 
       @Override
       public void waveClosed(final AbstractWavePanel src) {
+        LOGGER.debug("Removing wave: {}", src.getChannel());
         remove(src);
       }
     };
@@ -568,7 +542,7 @@ public class PickerFrame extends SwarmFrame {
     resizeWaves();
   }
 
-  private void doSizePopup(final int x, final int y) {
+  private void doSizePopup() {
     if (popup == null) {
       final String[] labels = new String[] {"Auto", null, "Tiny", "Small", "Medium", "Large"};
       final int[] sizes = new int[] {-1, -1, 50, 100, 160, 230};
@@ -591,7 +565,7 @@ public class PickerFrame extends SwarmFrame {
           popup.addSeparator();
       }
     }
-    popup.show(this, x, y);
+    popup.show(sizeButton.getParent(), sizeButton.getX(), sizeButton.getY());
   }
 
   private class OpenActionListener implements ActionListener {
@@ -821,15 +795,15 @@ public class PickerFrame extends SwarmFrame {
     saveButton.setEnabled(!enable);
     sortButton.setEnabled(!enable);
     saveAllButton.setEnabled(!enable);
-    syncButton.setEnabled(!enable);
-    removeAllButton.setEnabled(!enable);
+//    syncButton.setEnabled(!enable);
+    // removeAllButton.setEnabled(!enable);
     saveAllButton.setEnabled(!enable);
 
     final boolean allowSingle = (selectedSet.size() == 1);
     upButton.setEnabled(allowSingle);
     downButton.setEnabled(allowSingle);
     sortButton.setEnabled(allowSingle);
-    syncButton.setEnabled(allowSingle);
+//    syncButton.setEnabled(allowSingle);
     saveButton.setEnabled(allowSingle);
 
     final boolean allowMulti = (selectedSet.size() > 0);
@@ -1026,7 +1000,7 @@ public class PickerFrame extends SwarmFrame {
     waveToolbar.addSettings(p.getSettings());
   }
 
-  private synchronized void remove(final WaveViewPanel p) {
+  private synchronized void remove(final AbstractWavePanel p) {
     event.remove(p.getChannel());
     int i = 0;
     for (i = 0; i < waveBox.getComponentCount(); i++) {
@@ -1046,6 +1020,8 @@ public class PickerFrame extends SwarmFrame {
     pickList.remove(p.getChannel());
     lastClickedIndex = Math.min(lastClickedIndex, waveBox.getComponentCount() - 1);
     waveToolbar.removeSettings(p.getSettings());
+    event.notifyObservers();
+    validate();
     repaint();
   }
 
@@ -1059,9 +1035,16 @@ public class PickerFrame extends SwarmFrame {
   }
 
   public synchronized void remove() {
-    final WaveViewPanel[] panels = selectedSet.toArray(new WaveViewPanel[0]);
-    for (final WaveViewPanel p : panels)
-      remove(p);
+    final PickerWavePanel[] panels = selectedSet.toArray(new PickerWavePanel[0]);
+    for (final PickerWavePanel p : panels) {
+      LOGGER.debug("removing panel {}", p);
+      waveBox.remove(p);
+      waves.remove(p);
+      event.remove(p.getChannel());
+      // pickList.remove(p);
+      validate();
+      repaint();
+    }
   }
 
   public synchronized void moveDown() {
@@ -1275,7 +1258,7 @@ public class PickerFrame extends SwarmFrame {
     if (waves.size() == 0) {
       final Dimension dim = this.getSize();
       g.setColor(Color.black);
-      g.drawString("Clipboard empty.", dim.width / 2 - 40, dim.height / 2);
+      g.drawString("Picker empty.", dim.width / 2 - 40, dim.height / 2);
     }
   }
 
