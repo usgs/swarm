@@ -156,6 +156,8 @@ public abstract class AbstractWavePanel extends JComponent {
     wave = p.wave;
     displayTitle = p.displayTitle;
     backgroundColor = p.backgroundColor;
+    mark1 = p.mark1;
+    mark2 = p.mark2;
     setupMouseHandler();
     processSettings();
 

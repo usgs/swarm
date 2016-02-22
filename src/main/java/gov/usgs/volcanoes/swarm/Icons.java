@@ -86,6 +86,7 @@ public class Icons {
     public static final ImageIcon throbber_7 = getIcon("images/throbber_7.gif");
     public static final ImageIcon rsam_values = getIcon("images/rsam_values.png");
     public static final ImageIcon rsam_counts = getIcon("images/rsam_counts.png");
+    public static final ImageIcon particle_motion = getIcon("images/bee.png");
 
     private static ImageIcon getIcon(String key) {
         return new ImageIcon(ClassLoader.getSystemResource(key));

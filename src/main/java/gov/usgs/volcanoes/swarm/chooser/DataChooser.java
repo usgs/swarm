@@ -860,6 +860,7 @@ public class DataChooser extends JPanel {
 
   private void createNearest() {
     nearestList = new JList(new DefaultListModel());
+    nearestList.setDragEnabled(true);
     ToolTipManager.sharedInstance().registerComponent(nearestList);
 
     nearestScrollPane = new JScrollPane(nearestList);

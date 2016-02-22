@@ -51,12 +51,10 @@ import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewerFrame;
 
 /**
- * The main UI and application class for Swarm. Only functions directly
- * pertaining to the UI and overall application operation belong here.
+ * The main UI and application class for Swarm. Only functions directly pertaining to the UI and
+ * overall application operation belong here.
  *
- * TODO: resize listener
- * TODO: chooser visibility
- * TODO: name worker thread for better debugging
+ * TODO: resize listener TODO: chooser visibility TODO: name worker thread for better debugging
  *
  * @author Dan Cervelli, Peter Cervelli, and Thomas Parker.
  */
@@ -169,8 +167,8 @@ public class Swarm extends JFrame implements InternalFrameListener {
       }
     });
 
-    m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0), "fullScreenToggle");
-    m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, InputEvent.CTRL_DOWN_MASK),
+    m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0), "fullScreenToggle");
+    m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, InputEvent.CTRL_DOWN_MASK),
         "fullScreenToggle");
     m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SLASH, InputEvent.CTRL_DOWN_MASK),
         "fullScreenToggle");
@@ -311,13 +309,12 @@ public class Swarm extends JFrame implements InternalFrameListener {
     desktop.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
     // disable dragging in fullscreen mode
     /*
-     * desktop.setDesktopManager(new DefaultDesktopManager() { private
-     * static final long serialVersionUID = -1; public void
-     * beginDraggingFrame(JComponent f) { if (fullScreen) return; else
-     * super.beginDraggingFrame(f); }
+     * desktop.setDesktopManager(new DefaultDesktopManager() { private static final long
+     * serialVersionUID = -1; public void beginDraggingFrame(JComponent f) { if (fullScreen) return;
+     * else super.beginDraggingFrame(f); }
      *
-     * public void dragFrame(JComponent f, int x, int y) { if (fullScreen)
-     * return; else super.dragFrame(f, x, y); } });
+     * public void dragFrame(JComponent f, int x, int y) { if (fullScreen) return; else
+     * super.dragFrame(f, x, y); } });
      */
     this.setSize(config.windowWidth, config.windowHeight);
     this.setLocation(config.windowX, config.windowY);
@@ -411,6 +408,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
     waveClipboard.setVisible(!full);
     waveClipboard.toBack();
 
+    // Does this do anything?
+    this.setVisible(true);
+
     if (full) {
       this.setJMenuBar(null);
       config.chooserDividerLocation = split.getDividerLocation();
@@ -432,14 +432,19 @@ public class Swarm extends JFrame implements InternalFrameListener {
       split.setDividerLocation(config.chooserDividerLocation);
       this.setContentPane(split);
     }
-    validate();
 
     for (final JInternalFrame frame : SwarmInternalFrames.getFrames()) {
-      if (frame.isVisible() && frame instanceof Kioskable) {
+      // Why did this check isVisible()?
+//       if (frame.isVisible() && frame instanceof Kioskable) {
+      if (frame instanceof Kioskable) {
         final Kioskable f = (Kioskable) frame;
         f.setKioskMode(full);
+      } else {
+        frame.setVisible(!full);
       }
     }
+    validate();
+
     tileKioskFrames();
   }
 
