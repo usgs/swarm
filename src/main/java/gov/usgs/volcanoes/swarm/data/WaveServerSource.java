@@ -20,15 +20,14 @@ import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 
 /**
- * An implementation of <code>SeismicDataSource</code> that connects to an
- * Earthworm Wave Server.
+ * An implementation of <code>SeismicDataSource</code> that connects to an Earthworm Wave Server.
  * 
  *
  * @author Dan Cervelli
  */
 public class WaveServerSource extends SeismicDataSource {
   private final static Logger LOGGER = LoggerFactory.getLogger(WaveServerSource.class);
-  
+
   private String params;
   private WaveServer waveServer;
   private int timeout = 2000;
@@ -47,6 +46,10 @@ public class WaveServerSource extends SeismicDataSource {
   // explicit default constructor required for reflection
   public WaveServerSource() {}
 
+  public WaveServerSource(WaveServerSource source) {
+    this.name = source.name;
+    parse(source.params);
+  }
   public void parse(String params) {
     this.params = params;
     String[] ss = params.split(":");
@@ -166,11 +169,16 @@ public class WaveServerSource extends SeismicDataSource {
 
     HelicorderData hd = cache.getHelicorder(station, t1, t2, (GulperListener) null);
 
-    if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10))
+    if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10)) {
       GulperList.INSTANCE.requestGulper("ws:" + station, gl, this.getCopy(), station, t1, t2,
           gulpSize, gulpDelay);
+    }
     return hd;
   }
+
+  public SeismicDataSource getCopy() {
+    return new WaveServerSource(this);
+}
 
   public synchronized void notifyDataNotNeeded(String station, double t1, double t2,
       GulperListener gl) {
