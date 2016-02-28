@@ -38,7 +38,7 @@ public class Event {
       if (eChan.isEmpty()) {
         channels.remove(channel);
       }
-      notifyObservers();      
+      notifyObservers();
     }
   }
 
@@ -69,8 +69,20 @@ public class Event {
     channels.remove(channel);
     notifyObservers();
   }
-  
+
   public boolean isEmpty() {
     return channels.isEmpty();
+  }
+
+  public void setCoda(String channel, long time) {
+    EventChannel eChan = channels.get(channel);
+    if (eChan != null) {
+      eChan.setCoda(time);
+    }
+  }
+
+  public long coda(String channel) {
+    EventChannel eChan = channels.get(channel);
+    return eChan.getCodaTime();
   }
 }

@@ -146,7 +146,17 @@ public class PhasePopup extends JPopupMenu {
       }
     });
     s.add(clearS);
-    
+
+    JMenuItem coda = new JMenuItem("Coda");
+    coda.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        event.setCoda(channel, time);
+        parent.validate();
+        parent.repaint();
+      }
+    });
+    add(coda);
+
     JMenuItem clearAll = new JMenuItem("Clear");
     clearAll.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {

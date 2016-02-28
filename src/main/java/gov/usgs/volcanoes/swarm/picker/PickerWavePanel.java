@@ -22,7 +22,7 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
   private static final Font ANNOTATION_FONT = new Font("Monospaced", Font.BOLD, 12);
   private static final Color P_BACKGROUND = new Color(128, 255, 128, 192);
   private static final Color S_BACKGROUND = new Color(128, 128, 255, 192);
-
+  private static final Color CODA_BACKGROUND = new Color(128, 128, 128, 192);
   private Event event;
   private Component parent;
 
@@ -54,12 +54,51 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
     for (Phase.PhaseType type : Phase.PhaseType.values()) {
       Phase phase = event.getPhase(channel, type);
       if (phase != null) {
-        markPhase(g2, phase);
+        Color background;
+        if (phase.phaseType == Phase.PhaseType.P) {
+          markPhase(g2, P_BACKGROUND, phase.time, phase.tag());
+          long time = event.coda(channel);
+          if (time > 0) {
+            markPhase(g2, CODA_BACKGROUND, event.coda(channel), "C");
+          }
+      } else {
+          markPhase(g2, S_BACKGROUND, phase.time, phase.tag());
+        }
       }
     }
     // repaint();
   }
 
+  private void markPhase(Graphics2D g2, Color backgroundColor, long time, String tag) {
+    double j2k = J2kSec.fromEpoch(time);
+    double[] t = getTranslation();
+    if (t == null)
+      return;
+
+    double x = 2 + (j2k - t[1]) / t[0];
+    g2.setColor(DARK_GREEN);
+    g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
+
+    Font oldFont = g2.getFont();
+    g2.setFont(ANNOTATION_FONT);
+
+    FontMetrics fm = g2.getFontMetrics();
+    int width = fm.stringWidth(tag);
+    int height = fm.getAscent();
+
+    int offset = 2;
+    int lw = width + 2 * offset;
+    
+    g2.setColor(backgroundColor);
+
+    g2.fillRect((int) x, 3, lw, height + 2 * offset);
+    g2.setColor(Color.black);
+    g2.drawRect((int) x, 3, lw, height + 2 * offset);
+
+    g2.drawString(tag, (int) x + offset, 3 + (fm.getAscent() + offset));
+    g2.setFont(oldFont);
+  }
+  
   private void markPhase(Graphics2D g2, Phase phase) {
     double j2k = J2kSec.fromEpoch(phase.time);
     double[] t = getTranslation();
@@ -81,10 +120,10 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
     int offset = 2;
     int lw = width + 2 * offset;
     
-    Color background;
+    Color background = null;
     if (phase.phaseType == Phase.PhaseType.P) {
       background = P_BACKGROUND;
-    } else {
+    } else if (phase.phaseType == Phase.PhaseType.S) {
       background = S_BACKGROUND;
     }
     g2.setColor(background);

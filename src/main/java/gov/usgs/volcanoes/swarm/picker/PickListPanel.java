@@ -109,19 +109,38 @@ public class PickListPanel extends JPanel implements EventObserver {
       phase = eventChannel.getPhase(Phase.PhaseType.P);
       if (phase != null) {
         writePhase(pickList, chan, phase, c);
+        long coda = eventChannel.getCodaTime();
+        if (coda > 0) {
+          writeCoda(pickList, chan, coda, c);
+
+        }
       }
 
       phase = eventChannel.getPhase(Phase.PhaseType.S);
       if (phase != null) {
         writePhase(pickList, chan, phase, c);
       }
-    }
+  }
 
     c.weighty = 1;
     c.gridy++;
     JPanel filler = new JPanel();
     filler.setBackground(BACKGROUND_COLOR);
     pickList.add(filler, c);
+  }
+
+  private void writeCoda(JPanel pickList, String channel, long coda, GridBagConstraints c) {
+    boolean isSelected = selected.contains(channel);
+    c.gridy++;
+
+    String time = Time.toDateString(coda);
+    pickList.add(getLabel(time, isSelected), c);
+
+    String phaseT = "C";
+    pickList.add(getLabel(phaseT, isSelected), c);
+
+    pickList.add(getLabel(channel, isSelected), c);
+
   }
 
   public void writePhase(final JPanel pickList, final String channel, final Phase phase,
