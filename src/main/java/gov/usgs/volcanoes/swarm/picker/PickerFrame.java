@@ -34,10 +34,8 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -77,8 +75,7 @@ import gov.usgs.volcanoes.swarm.Throbber;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.picker.hypo71.Hypo71Adapter;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
@@ -111,7 +108,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
   private JButton saveButton;
   private JButton captureButton;
   private JButton histButton;
-  private JButton particleMotionButton;
+  private JButton locateButton;
 
   private final DateFormat saveAllDateFormat;
 
@@ -413,10 +410,15 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
     UiUtils.mapKeyStrokeToButton(this, "DELETE", "remove", removeButton);
     toolbar.add(removeButton);
 
-    particleMotionButton = SwarmUtil.createToolBarButton(Icons.particle_motion, "Particle Motion",
+    locateButton = SwarmUtil.createToolBarButton(Icons.locate, "Locate",
         new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
-            particleMotionPlot();
+            EventLocator locator = new Hypo71Adapter();
+            try {
+              locator.locate(event);
+            } catch (IOException e1) {
+              e1.printStackTrace();
+            };
           }
 
           private void particleMotionPlot() {
@@ -424,7 +426,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
 
           }
         });
-    toolbar.add(particleMotionButton);
+    toolbar.add(locateButton);
 
     toolbar.add(Box.createHorizontalGlue());
 

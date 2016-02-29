@@ -1,5 +1,7 @@
 package gov.usgs.volcanoes.swarm.picker;
 
-public interface EventLocator {
+import java.io.IOException;
 
+public interface EventLocator {
+  public void locate(Event event) throws IOException;
 }
