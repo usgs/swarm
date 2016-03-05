@@ -1,8 +1,5 @@
 package gov.usgs.volcanoes.swarm.map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -49,6 +46,9 @@ import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.map.GeoImageSet;
@@ -179,6 +179,7 @@ public class MapPanel extends JPanel {
   private LabelSetting labelSetting = LabelSetting.SOME;
 
   private List<? extends ClickableGeoLabel> clickableLabels;
+  private List<MapLayer> layers;
 
   public MapPanel() {
     swarmConfig = SwarmConfig.getInstance();
@@ -189,12 +190,18 @@ public class MapPanel extends JPanel {
     layouts = Collections.synchronizedMap(new HashMap<Double, ConfigFile>());
     visiblePanels = Collections.synchronizedList(new ArrayList<MapMiniPanel>());
     selectedPanels = new HashSet<MapMiniPanel>();
+    layers = new ArrayList<MapLayer>();
 
     final Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
     this.setCursor(crosshair);
     createUI();
   }
 
+  public void addLayer(MapLayer layer) {
+    LOGGER.debug("Layer added");
+    layers.add(layer);
+  }
+  
   public void saveLayout(final ConfigFile cf, final String prefix) {
     cf.put(prefix + ".longitude", Double.toString(center.x));
     cf.put(prefix + ".latitude", Double.toString(center.y));
@@ -1017,9 +1024,15 @@ public class MapPanel extends JPanel {
             }
           }
         }
+
+        g2.translate(-dx, -dy);
+        for (MapLayer layer : layers) {
+          layer.draw(g2, range, projection, renderer.getGraphWidth(), renderer.getGraphHeight(), INSET);
+        }
+        g2.translate(dx, dy);
+        
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldaa);
         g2.setTransform(at);
-
       }
     }
   }

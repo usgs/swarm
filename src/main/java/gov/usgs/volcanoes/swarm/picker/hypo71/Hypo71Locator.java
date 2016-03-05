@@ -4,11 +4,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-
-import javax.swing.JOptionPane;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,24 +19,23 @@ import gov.usgs.volcanoes.core.Hypo71.Hypocenter;
 import gov.usgs.volcanoes.core.Hypo71.PhaseRecord;
 import gov.usgs.volcanoes.core.Hypo71.Station;
 import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.hypocenters.Hypocenters;
 import gov.usgs.volcanoes.swarm.picker.Event;
 import gov.usgs.volcanoes.swarm.picker.EventChannel;
 import gov.usgs.volcanoes.swarm.picker.EventLocator;
 import gov.usgs.volcanoes.swarm.picker.Phase;
 
-public class Hypo71Adapter implements EventLocator {
+public class Hypo71Locator implements EventLocator {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(Hypo71Adapter.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(Hypo71Locator.class);
   private ControlCard controlCard;
   private Queue<PhaseRecord> phaseRecordsList;
   private Queue<Station> stationsList;
   private Queue<CrustalModel> crustalModelList;
   private SimpleDateFormat jtimeFormat;
 
-  public Hypo71Adapter() {
-
+  public Hypo71Locator() {
 
     // defaults taken from hypo-test-case-1.properties
     controlCard =
@@ -53,23 +49,21 @@ public class Hypo71Adapter implements EventLocator {
     crustalModelList.add(new CrustalModel(8.0, 25.0));
 
     jtimeFormat = new SimpleDateFormat("yyMMddHH");
-    
+
     stationsList = new LinkedList<Station>();
     phaseRecordsList = new LinkedList<PhaseRecord>();
   }
 
   public void locate(Event event) throws IOException {
-    String error = null;
-    try {
-      generateHypoInputs(event);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      error = "Cannot run hypo please ensure input file has correct data";
-    }
-
-    if (error == null) {
-        Results hypoResult = runHypo(event);
-        LOGGER.debug(hypoResult.getPrintOutput());
+    generateHypoInputs(event);
+    Results hypoResult = runHypo(event);
+    LOGGER.debug(hypoResult.getPrintOutput());
+    for (Hypocenter hypo : hypoResult.getHypocenterOutput()) {
+      double lon = hypo.getLON1() + (hypo.getLON2() / 60);
+      double lat = hypo.getLAT1() + (hypo.getLAT2() / 60);
+      LOGGER.debug("Adding hypo: {}, {} ({} +{}, {} + {})", lon, lat, hypo.getLON1(),
+          hypo.getLON2(), hypo.getLAT1(), hypo.getLAT2());
+      Hypocenters.add(new gov.usgs.volcanoes.swarm.hypocenters.Hypocenter(lat, lon));
     }
   }
 
@@ -149,6 +143,8 @@ public class Hypo71Adapter implements EventLocator {
         String srmk = sPhase.onset + "S" + sPhase.firstMotion + sPhase.weight;
         phaseRecord.setSRMK(srmk);
         long time = sPhase.time;
+
+        phaseRecord.setJTIME(Integer.parseInt(jtimeFormat.format(time)));
 
         float sSec = ((time / 1000) % 60) + ((time % 1000) / 1000f);
         if (sSec < pSec) {

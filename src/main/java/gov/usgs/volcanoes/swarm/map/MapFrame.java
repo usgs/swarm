@@ -3,6 +3,7 @@ package gov.usgs.volcanoes.swarm.map;
 import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -549,6 +550,10 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
       mainPanel.add(toolbar, BorderLayout.NORTH);
       mapPanel.setBorder(border);
     }
+  }
+
+  public void addLayer(MapLayer layer) {
+    mapPanel.addLayer(layer);
   }
 
   public void run() {

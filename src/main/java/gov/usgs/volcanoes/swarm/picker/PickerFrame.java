@@ -75,7 +75,7 @@ import gov.usgs.volcanoes.swarm.Throbber;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.picker.hypo71.Hypo71Adapter;
+import gov.usgs.volcanoes.swarm.picker.hypo71.Hypo71Locator;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
@@ -413,7 +413,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
     locateButton = SwarmUtil.createToolBarButton(Icons.locate, "Locate",
         new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
-            EventLocator locator = new Hypo71Adapter();
+            EventLocator locator = new Hypo71Locator();
             try {
               locator.locate(event);
             } catch (IOException e1) {
