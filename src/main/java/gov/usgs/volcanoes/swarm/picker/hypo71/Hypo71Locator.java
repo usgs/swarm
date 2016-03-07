@@ -10,20 +10,20 @@ import java.util.Queue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.usgs.volcanoes.core.Hypo71.ControlCard;
-import gov.usgs.volcanoes.core.Hypo71.CrustalModel;
-import gov.usgs.volcanoes.core.Hypo71.Hypo71;
-import gov.usgs.volcanoes.core.Hypo71.Hypo71.Results;
-import gov.usgs.volcanoes.core.Hypo71.HypoArchiveOutput;
-import gov.usgs.volcanoes.core.Hypo71.Hypocenter;
-import gov.usgs.volcanoes.core.Hypo71.PhaseRecord;
-import gov.usgs.volcanoes.core.Hypo71.Station;
+import gov.usgs.volcanoes.core.hypo71.ControlCard;
+import gov.usgs.volcanoes.core.hypo71.CrustalModel;
+import gov.usgs.volcanoes.core.hypo71.Hypo71;
+import gov.usgs.volcanoes.core.hypo71.HypoArchiveOutput;
+import gov.usgs.volcanoes.core.hypo71.Hypocenter;
+import gov.usgs.volcanoes.core.hypo71.PhaseRecord;
+import gov.usgs.volcanoes.core.hypo71.Station;
+import gov.usgs.volcanoes.core.hypo71.Hypo71.Results;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.hypocenters.Hypocenters;
 import gov.usgs.volcanoes.swarm.picker.Event;
 import gov.usgs.volcanoes.swarm.picker.EventChannel;
 import gov.usgs.volcanoes.swarm.picker.EventLocator;
+import gov.usgs.volcanoes.swarm.picker.Hypocenters;
 import gov.usgs.volcanoes.swarm.picker.Phase;
 
 public class Hypo71Locator implements EventLocator {
@@ -63,7 +63,7 @@ public class Hypo71Locator implements EventLocator {
       double lat = hypo.getLAT1() + (hypo.getLAT2() / 60);
       LOGGER.debug("Adding hypo: {}, {} ({} +{}, {} + {})", lon, lat, hypo.getLON1(),
           hypo.getLON2(), hypo.getLAT1(), hypo.getLAT2());
-      Hypocenters.add(new gov.usgs.volcanoes.swarm.hypocenters.Hypocenter(lat, lon));
+      Hypocenters.add(new gov.usgs.volcanoes.swarm.picker.Hypocenter(lat, lon));
     }
   }
 

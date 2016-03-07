@@ -5,10 +5,10 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
-import gov.usgs.volcanoes.core.Hypo71.AdjustmentIteration;
-import gov.usgs.volcanoes.core.Hypo71.Hypocenter;
-import gov.usgs.volcanoes.core.Hypo71.Station;
-import gov.usgs.volcanoes.core.Hypo71.Stats;
+import gov.usgs.volcanoes.core.hypo71.AdjustmentIteration;
+import gov.usgs.volcanoes.core.hypo71.Hypocenter;
+import gov.usgs.volcanoes.core.hypo71.Station;
+import gov.usgs.volcanoes.core.hypo71.Stats;
 
 /**
  * This class represents the results of an hypo calculation

@@ -1,4 +1,4 @@
-package gov.usgs.volcanoes.swarm.hypocenters;
+package gov.usgs.volcanoes.swarm.picker;
 
 import java.awt.Color;
 import java.awt.Graphics2D;

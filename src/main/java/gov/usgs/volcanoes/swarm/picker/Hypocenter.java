@@ -1,4 +1,4 @@
-package gov.usgs.volcanoes.swarm.hypocenters;
+package gov.usgs.volcanoes.swarm.picker;
 
 public class Hypocenter {
   public final double lat;
