@@ -7,12 +7,12 @@ public class Hypocenters {
 
   private final static List<Hypocenter> hypocenters;
   private final static List<HypocentersListener> listeners;
-  private final static HypocenterPlotter plotter;
+  private final static HypocenterLayer plotter;
 
   static {
     hypocenters = new ArrayList<Hypocenter>();
     listeners = new ArrayList<HypocentersListener>();
-    plotter = new HypocenterPlotter(hypocenters);
+    plotter = new HypocenterLayer(hypocenters);
   }
 
   /** uninstantiable */

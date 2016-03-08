@@ -2,6 +2,7 @@ package gov.usgs.volcanoes.swarm.picker;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.List;
 
@@ -12,20 +13,29 @@ import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.Projection;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.map.MapLayer;
+import gov.usgs.volcanoes.swarm.map.MapPanel;
 
-public final class HypocenterPlotter implements MapLayer {
+public final class HypocenterLayer implements MapLayer {
 
-  Logger LOGGER = LoggerFactory.getLogger(HypocenterPlotter.class);
+  Logger LOGGER = LoggerFactory.getLogger(HypocenterLayer.class);
   private final List<Hypocenter> hypocenters;
+  private MapPanel mapPanel;
 
-  public HypocenterPlotter(List<Hypocenter> hypocenters) {
+  public HypocenterLayer(List<Hypocenter> hypocenters) {
     this.hypocenters = hypocenters;
-    // Hypocenters.addListener(this);
-    MapFrame.getInstance().addLayer(this);
+    mapPanel = MapFrame.getInstance().addLayer(this);
   }
 
-  public void draw(Graphics2D g2, GeoRange range, Projection projection, int widthPx, int heightPx,
-      int insetPx) {
+  public void draw(Graphics2D g2) {
+
+    if (hypocenters == null) 
+      return;
+    
+    GeoRange range = mapPanel.getRange();
+    Projection projection = mapPanel.getProjection();
+    int widthPx = mapPanel.getGraphWidth();
+    int heightPx = mapPanel.getGraphHeight();
+    int insetPx = mapPanel.getInset();
 
     for (Hypocenter hypocenter : hypocenters) {
       LOGGER.debug("Hypo at {}, {}", hypocenter.lon, hypocenter.lat);
@@ -39,9 +49,24 @@ public final class HypocenterPlotter implements MapLayer {
       res.y = ((1 - (xy.y - ext[2]) / dy) * heightPx + insetPx);
 
       g2.translate(res.x, res.y);
-      g2.setColor(Color.RED);
+      g2.setColor(Color.YELLOW);
+      g2.fillOval(0, 0, 10, 10);
+      g2.setColor(Color.lightGray);
       g2.drawOval(0, 0, 10, 10);
       g2.translate(-res.x, -res.y);
     }
+  }
+
+  public boolean mouseClicked(MouseEvent e) {
+    System.out.println("Mouse clicked. Now what?");
+    return false;
+  }
+
+  public void setMapPanel(MapPanel mapPanel) {
+    this.mapPanel = mapPanel;
+  }
+
+  public void stop() {
+    // nothing to do here
   }
 }

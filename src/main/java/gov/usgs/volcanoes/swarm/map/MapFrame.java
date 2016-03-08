@@ -102,18 +102,29 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
   private Border border;
 
+  private MapSettingsDialog mapSettingsDialog;
+  
   private MapFrame() {
     super("Map", true, true, true, false);
     this.setFocusable(true);
     UiTime.touchTime();
 
+    mapSettingsDialog = new MapSettingsDialog(this);
+
     createUI();
+    addLayers();
 
     updateThread = new Thread(this, "Map Update");
     updateThread.start();
     SwarmOptions.addOptionsListener(this);
   }
 
+  private void addLayers() {
+    MapLayer mapLayer = new gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterLayer();
+    mapLayer.setMapPanel(mapPanel);
+    addLayer(mapLayer);
+  }
+  
   public static MapFrame getInstance() {
     return MapFrameHolder.mapFrame;
   }
@@ -209,8 +220,8 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
     optionsButton =
         SwarmUtil.createToolBarButton(Icons.settings, "Map options", new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
-            final MapSettingsDialog msd = MapSettingsDialog.getInstance(MapFrame.this);
-            msd.setVisible(true);
+            mapSettingsDialog.setToCurrent();
+            mapSettingsDialog.setVisible(true);
           }
         });
     toolbar.add(optionsButton);

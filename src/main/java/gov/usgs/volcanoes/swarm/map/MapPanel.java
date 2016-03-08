@@ -332,22 +332,6 @@ public class MapPanel extends JPanel {
     pane.add(mapImagePanel, new Integer(10));
     add(pane, BorderLayout.CENTER);
 
-    loadLabels();
-
-  }
-
-  public void loadLabels() {
-    if (swarmConfig.labelSource.isEmpty())
-      return;
-
-    try {
-      final Class<?> cl = Class.forName(swarmConfig.labelSource);
-      final LabelSource src = (LabelSource) cl.newInstance();
-      repaint();
-    } catch (final Exception e) {
-      LOGGER.warn("Can't load labelSource {}", swarmConfig.labelSource);
-      e.printStackTrace();
-    }
   }
 
   public void wavesToClipboard() {

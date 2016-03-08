@@ -1,13 +1,6 @@
 package gov.usgs.volcanoes.swarm.map.hypocenters;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
@@ -23,65 +16,97 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.Projection;
 import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.swarm.ConfigListener;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.map.ClickableGeoLabel;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.map.MapLayer;
 import gov.usgs.volcanoes.swarm.map.MapPanel;
 
-public final class HypocenterPlotter implements MapLayer {
+public final class HypocenterLayer implements MapLayer, ConfigListener {
 
   private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
-  
-  private static final Logger LOGGER = LoggerFactory.getLogger(HypocenterPlotter.class);
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(HypocenterLayer.class);
   private static final int REFRESH_INTERVAL = 5 * 60 * 1000;
   private List<Hypocenter> hypocenters;
-  private final String URL =
-      "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.quakeml";
+  private boolean run = true;
 
   private MapPanel panel;
   private SimpleDateFormat dateFormat;
 
-  public HypocenterPlotter() {
+  private Thread refreshThread;
+  private final SwarmConfig swarmConfig;
+
+  public HypocenterLayer() {
     dateFormat = new SimpleDateFormat(DATE_FORMAT);
-    panel = MapFrame.getInstance().addLayer(this);
+    swarmConfig = SwarmConfig.getInstance();
+    swarmConfig.addListener(this);
     startPolling();
   }
 
+  public void setMapPanel(MapPanel mapPanel) {
+    panel = mapPanel;
+  }
+
   private void startPolling() {
-    new Thread() {
+
+    Runnable r = new Runnable() {
       public void run() {
-        try {
-          hypocenters = pollHypocenters();
+        while (run) {
+          try {
+            hypocenters = pollHypocenters();
+          } catch (ParserConfigurationException e) {
+            LOGGER.debug("ParserConfigurationException while retrieving hypocenters ({})", e);
+          } catch (SAXException e) {
+            hypocenters = null;
+            LOGGER.debug("SAXException while retrieving hypocenters. Typically this means there were no hypocenters to display.");
+          } catch (IOException e) {
+            LOGGER.debug("IOException while retrieving hypocenters ({})", e);
+          } catch (DOMException e) {
+            LOGGER.debug("DOMException while retrieving hypocenters ({})", e);
+          } catch (ParseException e) {
+            LOGGER.debug("ParseException while retrieving hypocenters ({})", e);
+          }
+          
           MapFrame.getInstance().repaint();
+          
           try {
             Thread.sleep(REFRESH_INTERVAL);
           } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            LOGGER.debug("hypocenter update interupted.");
           }
-        } catch (ParserConfigurationException e) {
-          LOGGER.debug("ParserConfigurationException while retrieving hypocenters ({})", e);
-        } catch (SAXException e) {
-          LOGGER.debug("SAXException while retrieving hypocenters ({})", e);
-        } catch (IOException e) {
-          LOGGER.debug("IOException while retrieving hypocenters ({})", e);
-        } catch (DOMException e) {
-          LOGGER.debug("DOMException while retrieving hypocenters ({})", e);
-        } catch (ParseException e) {
-          LOGGER.debug("ParseException while retrieving hypocenters ({})", e);
+
         }
       }
-    }.start();
+    };
+    refreshThread = new Thread(r);
+    refreshThread.start();
   }
 
   private List<Hypocenter> pollHypocenters()
       throws ParserConfigurationException, SAXException, IOException, DOMException, ParseException {
+    LOGGER.debug("Polling hypocenters");
+    HypocenterSource hypocenterSource = swarmConfig.getHypocenterSource();
+    if (hypocenterSource == HypocenterSource.NONE) {
+      return null;
+    }
+
     List<Hypocenter> hypocenters = new ArrayList<Hypocenter>();
     DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-    Document doc = dBuilder.parse(URL);
+    Document doc = dBuilder.parse(hypocenterSource.getUrl());
     doc.getDocumentElement().normalize();
 
     NodeList events = doc.getElementsByTagName("event");
@@ -98,22 +123,19 @@ public final class HypocenterPlotter implements MapLayer {
 
       Date date = dateFormat.parse(((Element) origin.getElementsByTagName("time").item(0))
           .getElementsByTagName("value").item(0).getTextContent());
-      
+
       double mag = Double.parseDouble(((Element) event.getElementsByTagName("mag").item(0))
           .getElementsByTagName("value").item(0).getTextContent());
 
-      Hypocenter h = new Hypocenter();
+      Hypocenter h = new Hypocenter.Builder().time(J2kSec.fromDate(date)).build();
       h.location = new Point2D.Double(lon, lat);
       h.text = "M" + mag;
-      h.depth = 0;
-      h.time = J2kSec.fromDate(date);
       hypocenters.add(h);
     }
     return hypocenters;
   }
 
   public void draw(Graphics2D g2) {
-
     if (hypocenters == null)
       return;
 
@@ -123,7 +145,7 @@ public final class HypocenterPlotter implements MapLayer {
     int heightPx = panel.getGraphHeight();
     int insetPx = panel.getInset();
 
-    for (final ClickableGeoLabel label : hypocenters) {
+    for (final Hypocenter label : hypocenters) {
       final Point2D.Double xy =
           projection.forward(new Point2D.Double(label.location.x, label.location.y));
       final double[] ext = range.getProjectedExtents(projection);
@@ -136,7 +158,6 @@ public final class HypocenterPlotter implements MapLayer {
       g2.translate(res.x, res.y);
       label.draw(g2);
       g2.translate(-res.x, -res.y);
-
     }
   }
 
@@ -174,5 +195,15 @@ public final class HypocenterPlotter implements MapLayer {
     }
 
     return handled;
+  }
+
+  public void settingsChanged() {
+    LOGGER.debug("hypocenter plotter sees changed settings.");
+    refreshThread.interrupt();
+  }
+
+  public void stop() {
+    run = false;
+    refreshThread.interrupt();
   }
 }

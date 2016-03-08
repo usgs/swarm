@@ -105,7 +105,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
     checkJavaVersion();
     setupGlobalKeys();
     createUI();
-    new gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterPlotter();
   }
 
   private void checkJavaVersion() {
