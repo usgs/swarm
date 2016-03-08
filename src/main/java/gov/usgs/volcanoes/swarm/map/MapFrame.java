@@ -552,8 +552,10 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
     }
   }
 
-  public void addLayer(MapLayer layer) {
+  public MapPanel addLayer(MapLayer layer) {
     mapPanel.addLayer(layer);
+    
+    return mapPanel;
   }
 
   public void run() {

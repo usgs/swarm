@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.Time;
+import gov.usgs.volcanoes.swarm.map.hypocenters.Hypocenter;
 
 /*
  * A class to retrieve events from IRIS for plotting on the map.

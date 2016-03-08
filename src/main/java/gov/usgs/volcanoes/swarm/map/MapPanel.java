@@ -1,5 +1,8 @@
 package gov.usgs.volcanoes.swarm.map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -33,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,9 +50,6 @@ import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.map.GeoImageSet;
@@ -178,7 +179,6 @@ public class MapPanel extends JPanel {
 
   private LabelSetting labelSetting = LabelSetting.SOME;
 
-  private List<? extends ClickableGeoLabel> clickableLabels;
   private List<MapLayer> layers;
 
   public MapPanel() {
@@ -343,7 +343,6 @@ public class MapPanel extends JPanel {
     try {
       final Class<?> cl = Class.forName(swarmConfig.labelSource);
       final LabelSource src = (LabelSource) cl.newInstance();
-      clickableLabels = src.getLabels();
       repaint();
     } catch (final Exception e) {
       LOGGER.warn("Can't load labelSource {}", swarmConfig.labelSource);
@@ -1014,20 +1013,10 @@ public class MapPanel extends JPanel {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         final AffineTransform at = g2.getTransform();
         g2.setFont(Font.decode("dialog-plain-12"));
-        if (clickableLabels != null) {
-          for (final ClickableGeoLabel label : clickableLabels) {
-            final Point2D.Double xy = getXY(label.location.x, label.location.y);
-            if (xy != null) {
-              g2.translate(xy.x - dx, xy.y - dy);
-              label.draw(g2);
-              g2.translate(-xy.x + dx, -xy.y + dy);
-            }
-          }
-        }
 
         g2.translate(-dx, -dy);
         for (MapLayer layer : layers) {
-          layer.draw(g2, range, projection, renderer.getGraphWidth(), renderer.getGraphHeight(), INSET);
+          layer.draw(g2);
         }
         g2.translate(dx, dy);
         
@@ -1041,6 +1030,22 @@ public class MapPanel extends JPanel {
     return range;
   }
 
+  public Projection getProjection() {
+    return projection;
+  }
+  
+  public int getGraphWidth() {
+    return renderer.getGraphWidth();
+  }
+  
+  public int getGraphHeight() {
+    return renderer.getGraphHeight();
+  }
+  
+  public int getInset() {
+    return INSET;
+  }
+  
   public class MapMouseAdapter extends MouseAdapter {
     @Override
     public void mouseExited(final MouseEvent e) {
@@ -1049,19 +1054,16 @@ public class MapPanel extends JPanel {
 
     @Override
     public void mouseClicked(final MouseEvent e) {
-      if (clickableLabels != null) {
-        for (final ClickableGeoLabel label : clickableLabels) {
-          final Rectangle r = label.getClickBox();
-          final Point2D.Double xy = getXY(label.location.x, label.location.y);
-          if (xy != null) {
-            r.translate((int) xy.x, (int) xy.y);
-            if (r.contains(e.getPoint()))
-              label.mouseClicked(e);
-          }
+      if (layers != null) {
+        boolean handled = false;
+        Iterator<MapLayer> it = layers.iterator();
+        while (it.hasNext() && handled == false) {
+          MapLayer layer = it.next();
+          handled = layer.mouseClicked(e);
         }
       }
     }
-
+    
     @Override
     public void mousePressed(final MouseEvent e) {
       requestFocusInWindow();

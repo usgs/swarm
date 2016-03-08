@@ -7,8 +7,8 @@ import gov.usgs.util.xml.XMLToMap;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.swarm.map.ClickableGeoLabel;
-import gov.usgs.volcanoes.swarm.map.Hypocenter;
 import gov.usgs.volcanoes.swarm.map.LabelSource;
+import gov.usgs.volcanoes.swarm.map.hypocenters.Hypocenter;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;

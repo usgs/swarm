@@ -1,63 +1,81 @@
 package gov.usgs.volcanoes.swarm.map.hypocenters;
 
-public class Hypocenter {
-  
-  /* 
-   * {
-   *    "type":"FeatureCollection",
-   *    "metadata":
-   *        {
-   *            "generated":1457314920000,
-   *            "url":"http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson",
-   *            "title":"USGS Magnitude 2.5+ Earthquakes, Past Day",
-   *            "status":200,
-   *            "api":"1.5.0",
-   *            "count":28
-   *          },
-   *          "features":[
-   *            {
-   *                "type":"Feature",
-   *                "properties":{
-   *                    "mag":4,
-   *                    "place":"28km NW of Fairview, Oklahoma",
-   *                    "time":1457311416660,
-   *                    "updated":1457314429000,
-   *                    "tz":-360,
-   *                    "url":"http://earthquake.usgs.gov/earthquakes/eventpage/us10004vsc",
-   *                    "detail":"http://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/us10004vsc.geojson",
-   *                    "felt":10,
-   *                    "cdi":4.7,
-   *                    "mmi":4.65,
-   *                    "alert":"green",
-   *                    "status":"reviewed",
-   *                    "tsunami":0,
-   *                    "sig":251,
-   *                    "net":"us",
-   *                    "code":"10004vsc",
-   *                    "ids":",us10004vsc,",
-   *                    "sources":",us,",
-   *                    "types":",dyfi,general-link,geoserve,losspager,nearby-cities,origin,phase-data,shakemap,tectonic-summary,",
-   *                    "nst":null,
-   *                    "dmin":0.034,
-   *                    "rms":0.64,
-   *                    "gap":43,
-   *                    "magType":"mb_lg",
-   *                    "type":"earthquake",
-   *                    "title":"M 4.0 - 28km NW of Fairview, Oklahoma"
-   *                  },
-   *                  "geometry":{
-   *                    "type":"Point",
-   *                    "coordinates":[-98.7015,36.4561,3.16]
-   *                    },
-   *                    "id":"us10004vsc"
-   *                 },
-   * */
-   */
-  public final double lat;
-  public final double lon;
+import gov.usgs.math.Geometry;
+import gov.usgs.plot.render.DataPointRenderer;
+import gov.usgs.util.Pair;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.map.ClickableGeoLabel;
+import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
+import gov.usgs.volcanoes.swarm.wave.SwarmMultiMonitors;
 
-  public Hypocenter(double lat, double lon) {
-    this.lat = lat;
-    this.lon = lon;
-  }
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * 
+ * @author Dan Cervelli
+ */
+public class Hypocenter extends ClickableGeoLabel
+{
+	public double time;
+	public double depth;
+	public double magnitude;
+	
+	private static SwarmConfig swarmConfig;
+	
+	public Hypocenter() 
+	{
+		swarmConfig = SwarmConfig.getInstance();
+		
+		DataPointRenderer r = new DataPointRenderer();
+		r.antiAlias = true;
+		r.stroke = new BasicStroke(1.2f);
+		r.filled = true;
+		r.paint = Color.RED;
+		r.color = Color.yellow;
+		r.shape = Geometry.STAR_10;
+		marker = r;
+	}
+	
+	@Override
+	public Rectangle getClickBox()
+	{
+		return new Rectangle(-7, -7, 17, 17);
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e)
+	{
+		Map<String, Metadata> metadata = swarmConfig.getMetadata();
+		List<Pair<Double, String>> nrst = Metadata.findNearest(swarmConfig.getMetadata(), location, true);
+		Set<MultiMonitor> cleared = new HashSet<MultiMonitor>();
+		if (nrst != null)
+		{
+			for (int i = 0, total = 0; i < nrst.size() && total < 10; i++)
+			{
+				String ch = nrst.get(i).item2;
+				if (ch.matches(".* ..Z .*"))
+				{
+					Metadata md = metadata.get(ch);
+					MultiMonitor mm = SwarmMultiMonitors.getMonitor(md.source);
+					if (!cleared.contains(mm))
+					{
+						mm.removeAllWaves();
+						cleared.add(mm);
+					}
+					mm.addChannel(ch);
+					mm.setVisible(true);
+					mm.setPauseStartTime(time - 4);
+					total++;
+				}
+			}
+		}
+	}
 }

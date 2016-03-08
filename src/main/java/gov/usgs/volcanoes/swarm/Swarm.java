@@ -1,5 +1,10 @@
 package gov.usgs.volcanoes.swarm;
 
+import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.KeyboardFocusManager;
@@ -23,11 +28,6 @@ import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
 
 import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
@@ -105,6 +105,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
     checkJavaVersion();
     setupGlobalKeys();
     createUI();
+    new gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterPlotter();
   }
 
   private void checkJavaVersion() {
