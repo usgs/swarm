@@ -84,7 +84,8 @@ public class Hypocenter extends ClickableGeoLabel {
           }
           mm.addChannel(ch);
           mm.setVisible(true);
-          mm.setPauseStartTime(time - 4);
+          mm.setPauseStartTime(time - 1);
+          mm.setSpan(30);
           total++;
         }
       }
@@ -132,4 +133,5 @@ public class Hypocenter extends ClickableGeoLabel {
       return new Hypocenter(this);
     }
   }
+
 }

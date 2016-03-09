@@ -120,6 +120,7 @@ public abstract class AbstractWavePanel extends JComponent {
   protected static final Color DARK_GREEN = new Color(0, 168, 0);
 
   protected boolean pauseCursorMark;
+  protected double time;
 
   public AbstractWavePanel(WaveViewSettings s) {
     swarmConfig = SwarmConfig.getInstance();
@@ -482,11 +483,11 @@ public abstract class AbstractWavePanel extends JComponent {
 
     Dimension size = getSize();
     double[] t = getTranslation();
-    double j2k = Double.NaN;
+    time = Double.NaN;
 
     if (wave != null && t != null && y > yOffset && y < (size.height - bottomHeight) && x > xOffset
         && x < size.width - rightWidth) {
-      j2k = x * t[0] + t[1];
+      time = x * t[0] + t[1];
       double yi = y * -t[2] + t[3];
 
       int[] dataRange = wave.getDataRange();
@@ -497,12 +498,12 @@ public abstract class AbstractWavePanel extends JComponent {
           dataRange[1]);
 
       if (timeSeries) {
-        String utc = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, j2k);
+        String utc = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, time);
         TimeZone tz = swarmConfig.getTimeZone(channel);
-        double tzo = tz.getOffset(J2kSec.asEpoch(j2k));
+        double tzo = tz.getOffset(J2kSec.asEpoch(time));
         if (tzo != 0) {
-          String tza = tz.getDisplayName(tz.inDaylightTime(J2kSec.asDate(j2k)), TimeZone.SHORT);
-          status = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, j2k + tzo) + " (" + tza + "), " + utc
+          String tza = tz.getDisplayName(tz.inDaylightTime(J2kSec.asDate(time)), TimeZone.SHORT);
+          status = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, time + tzo) + " (" + tza + "), " + utc
               + " (UTC)";
         } else
           status = utc;
@@ -532,7 +533,7 @@ public abstract class AbstractWavePanel extends JComponent {
       }
 
       else {
-        double xi = j2k;
+        double xi = time;
         if (settings.viewType == ViewType.SPECTRA && settings.logFreq)
           xi = Math.pow(10.0, xi);
         if (settings.viewType == ViewType.SPECTRA && settings.logPower)
@@ -544,7 +545,7 @@ public abstract class AbstractWavePanel extends JComponent {
     }
 
     if (!pauseCursorMark)
-      WaveViewTime.fireTimeChanged(j2k);
+      WaveViewTime.fireTimeChanged(time);
 
     if (status == null)
       status = " ";

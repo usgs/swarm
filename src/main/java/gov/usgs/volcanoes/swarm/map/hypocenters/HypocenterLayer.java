@@ -1,6 +1,5 @@
 package gov.usgs.volcanoes.swarm.map.hypocenters;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
@@ -102,8 +101,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
     if (hypocenterSource == HypocenterSource.NONE) {
       return null;
     }
-
-    List<Hypocenter> hypocenters = new ArrayList<Hypocenter>();
+    
     DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
     Document doc = dBuilder.parse(hypocenterSource.getUrl());
@@ -111,8 +109,11 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
 
     NodeList events = doc.getElementsByTagName("event");
     LOGGER.debug("Got {} events.", events.getLength());
+    int eventCount = events.getLength();
+    List <Hypocenter> hypocenters = new ArrayList<Hypocenter>(eventCount);
 
-    for (int idx = 0; idx < events.getLength(); idx++) {
+    // add elements in reverse order to encourage plotting recent events on top
+    for (int idx = eventCount - 1; idx > 0; idx--) {
 
       Element event = (Element) events.item(idx);
       Element origin = (Element) event.getElementsByTagName("origin").item(0);
@@ -134,7 +135,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
     }
     return hypocenters;
   }
-
+  
   public void draw(Graphics2D g2) {
     if (hypocenters == null)
       return;

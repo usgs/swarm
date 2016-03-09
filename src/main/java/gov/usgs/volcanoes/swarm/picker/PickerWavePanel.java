@@ -5,13 +5,23 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
+
+import javax.swing.AbstractAction;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.ui.GlobalKeyManager;
+import gov.usgs.volcanoes.core.ui.UiUtils;
+import gov.usgs.volcanoes.swarm.picker.Phase.PhaseType;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
 
@@ -42,9 +52,15 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
     phasePopup.show(e.getComponent(), e.getX(), e.getY());
     pauseCursorMark = true;
     WaveViewTime.fireTimeChanged(cursorTime);
-
   }
 
+  public void instantPick(PhaseType p) {
+    Phase phase = new Phase.Builder().onset(Phase.Onset.i).phaseType(Phase.PhaseType.P)
+        .firstMotion(Phase.FirstMotion.UP).time(J2kSec.asEpoch(time)).weight(1).build();
+
+    event.setPhase(channel, phase);
+    WaveViewTime.fireTimeChanged(time);
+  }
   public void setEvent(Event event) {
     this.event = event;
   }
@@ -61,7 +77,7 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
           if (time > 0) {
             markPhase(g2, CODA_BACKGROUND, event.coda(channel), "C");
           }
-      } else {
+        } else {
           markPhase(g2, S_BACKGROUND, phase.time, phase.tag());
         }
       }
@@ -88,7 +104,7 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
 
     int offset = 2;
     int lw = width + 2 * offset;
-    
+
     g2.setColor(backgroundColor);
 
     g2.fillRect((int) x, 3, lw, height + 2 * offset);
@@ -98,7 +114,7 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
     g2.drawString(tag, (int) x + offset, 3 + (fm.getAscent() + offset));
     g2.setFont(oldFont);
   }
-  
+
   private void markPhase(Graphics2D g2, Phase phase) {
     double j2k = J2kSec.fromEpoch(phase.time);
     double[] t = getTranslation();
@@ -119,7 +135,7 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
 
     int offset = 2;
     int lw = width + 2 * offset;
-    
+
     Color background = null;
     if (phase.phaseType == Phase.PhaseType.P) {
       background = P_BACKGROUND;
@@ -148,4 +164,6 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
   public void setParent(Component parent) {
     this.parent = parent;
   }
+
+
 }

@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -44,6 +46,7 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
@@ -150,8 +153,27 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
     histories = new HashMap<AbstractWavePanel, Stack<double[]>>();
     createUI();
     LOGGER.debug("Finished creating picker frame.");
+
+    // getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("typed q"),
+    // "pPick");
+    getInputMap().put(KeyStroke.getKeyStroke("typed q"), "pPick");
+    getActionMap().put("pPick", new AbstractAction() {
+      private static final long serialVersionUID = -1;
+
+      public void actionPerformed(final ActionEvent e) {
+        findWavePanel();
+      }
+    });
+
   }
 
+  private void findWavePanel() {
+    Point p = MouseInfo.getPointerInfo().getLocation();
+    SwingUtilities.convertPointFromScreen(p, waveBox);
+    int idx = p.y / calculateWaveHeight();
+    PickerWavePanel panel = waves.get(idx);
+    panel.instantPick(Phase.PhaseType.P);
+  }
 
   private void createUI() {
     this.setFrameIcon(Icons.ruler);
@@ -410,22 +432,21 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
     UiUtils.mapKeyStrokeToButton(this, "DELETE", "remove", removeButton);
     toolbar.add(removeButton);
 
-    locateButton = SwarmUtil.createToolBarButton(Icons.locate, "Locate",
-        new ActionListener() {
-          public void actionPerformed(final ActionEvent e) {
-            EventLocator locator = new Hypo71Locator();
-            try {
-              locator.locate(event);
-            } catch (IOException e1) {
-              e1.printStackTrace();
-            };
-          }
+    locateButton = SwarmUtil.createToolBarButton(Icons.locate, "Locate", new ActionListener() {
+      public void actionPerformed(final ActionEvent e) {
+        EventLocator locator = new Hypo71Locator();
+        try {
+          locator.locate(event);
+        } catch (IOException e1) {
+          e1.printStackTrace();
+        };
+      }
 
-          private void particleMotionPlot() {
-            // TODO Auto-generated method stub
+      private void particleMotionPlot() {
+        // TODO Auto-generated method stub
 
-          }
-        });
+      }
+    });
     toolbar.add(locateButton);
 
     toolbar.add(Box.createHorizontalGlue());
@@ -656,7 +677,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
     histButton.setEnabled(allowMulti);
     removeButton.setEnabled(allowMulti);
     gotoButton.setEnabled(allowMulti);
-  }    
+  }
 
   public synchronized PickerWavePanel getSingleSelected() {
     if (selectedSet.size() != 1)
