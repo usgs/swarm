@@ -499,7 +499,7 @@ public abstract class AbstractWavePanel extends JComponent {
       if (timeSeries) {
         String utc = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, j2k);
         TimeZone tz = swarmConfig.getTimeZone(channel);
-        double tzo = tz.getOffset(J2kSec.asEpoch(j2k));
+        double tzo = tz.getOffset(J2kSec.asEpoch(j2k)) / 1000;
         if (tzo != 0) {
           String tza = tz.getDisplayName(tz.inDaylightTime(J2kSec.asDate(j2k)), TimeZone.SHORT);
           status = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, j2k + tzo) + " (" + tza + "), " + utc
