@@ -1035,8 +1035,10 @@ public class WaveClipboardFrame extends SwarmFrame {
   }
 
   public void removeWaves() {
-    while (waves.size() > 0)
+    while (waves.size() > 0) {
       remove(waves.get(0));
+      waves.remove(0);
+    }
 
     waveBox.validate();
     scrollPane.validate();
