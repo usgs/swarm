@@ -1,9 +1,12 @@
-package gov.usgs.volcanoes.swarm.wave;
+package gov.usgs.volcanoes.swarm.picker;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -18,8 +21,6 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,35 +34,42 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
-import javax.swing.JToggleButton;
+import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.data.file.FileType;
 import gov.usgs.plot.data.file.SeismicDataFile;
+import gov.usgs.util.Pair;
 import gov.usgs.volcanoes.core.contrib.PngEncoder;
 import gov.usgs.volcanoes.core.contrib.PngEncoderB;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
 import gov.usgs.volcanoes.core.util.UiUtils;
 import gov.usgs.volcanoes.swarm.FileChooser;
-import gov.usgs.volcanoes.swarm.FileTypeDialog;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwarmFrame;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.SwingWorker;
@@ -69,37 +77,42 @@ import gov.usgs.volcanoes.swarm.Throbber;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanelListener;
+import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
+import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanelListener;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
 
 /**
- * The wave clipboard internal frame.
+ * The picker internal frame. Adapted from the WaveClipboardFrame.
  *
- * @author Dan Cervelli
+ * @author Tom Parker
  */
-public class WaveClipboardFrame extends SwarmFrame {
+public class PickerFrame extends SwarmFrame implements EventObserver {
+  private static final Logger LOGGER = LoggerFactory.getLogger(PickerFrame.class);
+
   public static final long serialVersionUID = -1;
   private static final Color SELECT_COLOR = new Color(200, 220, 241);
   private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
 
   private JScrollPane scrollPane;
   private Box waveBox;
-  private final List<AbstractWavePanel> waves;
-  private final Set<AbstractWavePanel> selectedSet;
+  private PickListPanel pickList;
+  private JSplitPane mainPanel;
+  private PickerWavePanel baseWave;
+  private final List<PickerWavePanel> waves;
+  private final Set<PickerWavePanel> selectedSet;
   private JToolBar toolbar;
-  private JPanel mainPanel;
   private JLabel statusLabel;
-  private JToggleButton linkButton;
   private JButton sizeButton;
-  private JButton syncButton;
-  private JButton sortButton;
-  private JButton removeAllButton;
   private JButton saveButton;
-  private JButton saveAllButton;
-  private JButton openButton;
   private JButton captureButton;
   private JButton histButton;
+  private JButton particleMotionButton;
+
   private final DateFormat saveAllDateFormat;
 
   private WaveViewPanelListener selectListener;
@@ -110,7 +123,6 @@ public class WaveClipboardFrame extends SwarmFrame {
   private JButton removeButton;
   private JButton compXButton;
   private JButton expXButton;
-  private JButton copyButton;
   private JButton forwardButton;
   private JButton backButton;
   private JButton gotoButton;
@@ -119,67 +131,112 @@ public class WaveClipboardFrame extends SwarmFrame {
 
   private final Map<AbstractWavePanel, Stack<double[]>> histories;
 
-  private final HelicorderViewPanelListener linkListener;
-
-  private boolean heliLinked = true;
-
   private Throbber throbber;
 
   private int waveHeight = -1;
 
   private int lastClickedIndex = -1;
 
-  private WaveClipboardFrame() {
-    super("Wave Clipboard", true, true, true, false);
+  private Event event;
+
+  public PickerFrame() {
+    super("Picker", true, true, true, false);
+    event = new Event();
+    event.addObserver(this);
+
     this.setFocusable(true);
-    selectedSet = new HashSet<AbstractWavePanel>();
+    this.setVisible(true);
+    selectedSet = new HashSet<PickerWavePanel>();
     saveAllDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
     saveAllDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-    waves = new ArrayList<AbstractWavePanel>();
+    waves = new ArrayList<PickerWavePanel>();
     histories = new HashMap<AbstractWavePanel, Stack<double[]>>();
     createUI();
-    linkListener = new HelicorderViewPanelListener() {
-      public void insetCreated(final double st, final double et) {
-        if (heliLinked)
-          repositionWaves(st, et);
-      }
-    };
+    LOGGER.debug("Finished creating picker frame.");
   }
 
-  public static WaveClipboardFrame getInstance() {
-    return WaveClipboardFrameHolder.waveClipiboardFrame;
-  }
-
-  public HelicorderViewPanelListener getLinkListener() {
-    return linkListener;
-  }
 
   private void createUI() {
-    this.setFrameIcon(Icons.clipboard);
+    this.setFrameIcon(Icons.ruler);
     this.setSize(swarmConfig.clipboardWidth, swarmConfig.clipboardHeight);
     this.setLocation(swarmConfig.clipboardX, swarmConfig.clipboardY);
     this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+    LOGGER.debug("picker frame: {} @ {}", this.getSize(), this.getLocation());
 
     toolbar = SwarmUtil.createToolBar();
-    mainPanel = new JPanel(new BorderLayout());
+
+    JPanel wavePanel = new JPanel();
+    wavePanel.setLayout(new BoxLayout(wavePanel, BoxLayout.PAGE_AXIS));
+
+    JPanel tablePanel = new JPanel();
+    tablePanel.setLayout(new BoxLayout(tablePanel, BoxLayout.PAGE_AXIS));
+
+    mainPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, wavePanel, tablePanel);
+    mainPanel.setOneTouchExpandable(true);
 
     createMainButtons();
     createWaveButtons();
-
-    mainPanel.add(toolbar, BorderLayout.NORTH);
+    wavePanel.add(toolbar);
 
     waveBox = new Box(BoxLayout.Y_AXIS);
+    waveBox.setTransferHandler(new TransferHandler("") {
+      public boolean canImport(TransferSupport supp) {
+        return supp.isDataFlavorSupported(DataFlavor.stringFlavor);
+      }
+
+      public boolean importData(TransferSupport supp) {
+        if (!canImport(supp)) {
+          return false;
+        }
+
+        Transferable t = supp.getTransferable();
+        String data = null;
+        try {
+          data = (String) t.getTransferData(DataFlavor.stringFlavor);
+        } catch (UnsupportedFlavorException e) {
+          e.printStackTrace();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+
+        // Fetch the drop location
+        DropLocation loc = supp.getDropLocation();
+
+        // Insert the data at this location
+        LOGGER.debug("DROP {} @ {}", data, loc);
+        String[] chans = data.split("\n");
+        for (String chan : chans) {
+          addWave(chan);
+        }
+        return true;
+      }
+
+    });
     scrollPane = new JScrollPane(waveBox);
     scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     scrollPane.getVerticalScrollBar().setUnitIncrement(40);
-    mainPanel.add(scrollPane, BorderLayout.CENTER);
+    wavePanel.add(scrollPane);
 
+    JPanel statusPanel = new JPanel();
+    statusPanel.setLayout(new BorderLayout());
     statusLabel = new JLabel(" ");
-    statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 1));
-    mainPanel.add(statusLabel, BorderLayout.SOUTH);
+    statusLabel.setBorder(BorderFactory.createEtchedBorder());
+    statusPanel.add(statusLabel);
+    statusPanel
+        .setMaximumSize(new Dimension(Integer.MAX_VALUE, statusPanel.getPreferredSize().height));
+    wavePanel.add(statusPanel);
 
-    mainPanel.setBorder(BorderFactory.createEmptyBorder(0, 2, 1, 2));
+    pickList = new PickListPanel(event);
+    pickList.setParent(mainPanel);
+
+    scrollPane = new JScrollPane(pickList);
+    scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+    scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+    scrollPane.getVerticalScrollBar().setUnitIncrement(40);
+    tablePanel.add(scrollPane);
+
+    mainPanel.setResizeWeight(.75);
     this.setContentPane(mainPanel);
 
     createListeners();
@@ -187,70 +244,23 @@ public class WaveClipboardFrame extends SwarmFrame {
   }
 
   private void createMainButtons() {
-    openButton =
-        SwarmUtil.createToolBarButton(Icons.open, "Open a saved wave", new OpenActionListener());
-    toolbar.add(openButton);
-
     saveButton =
         SwarmUtil.createToolBarButton(Icons.save, "Save selected wave", new SaveActionListener());
     saveButton.setEnabled(false);
     toolbar.add(saveButton);
 
-    saveAllButton =
-        SwarmUtil.createToolBarButton(Icons.saveall, "Save all waves", new SaveAllActionListener());
-    saveAllButton.setEnabled(false);
-    toolbar.add(saveAllButton);
-
     toolbar.addSeparator();
 
-    linkButton = SwarmUtil.createToolBarToggleButton(Icons.helilink,
-        "Synchronize times with helicorder wave", new ActionListener() {
+    sizeButton =
+        SwarmUtil.createToolBarButton(Icons.resize, "Set wave height", new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
-            heliLinked = linkButton.isSelected();
-          }
-        });
-    linkButton.setSelected(heliLinked);
-    toolbar.add(linkButton);
-
-    syncButton = SwarmUtil.createToolBarButton(Icons.clock, "Synchronize times with selected wave",
-        new ActionListener() {
-          public void actionPerformed(final ActionEvent e) {
-            syncChannels();
-          }
-        });
-    syncButton.setEnabled(false);
-    toolbar.add(syncButton);
-
-    sortButton = SwarmUtil.createToolBarButton(Icons.geosort,
-        "Sort waves by nearest to selected wave", new ActionListener() {
-          public void actionPerformed(final ActionEvent e) {
-            sortChannelsByNearest();
-          }
-        });
-    sortButton.setEnabled(false);
-    toolbar.add(sortButton);
-
-    toolbar.addSeparator();
-
-    sizeButton = SwarmUtil.createToolBarButton(Icons.resize, "Set clipboard wave size",
-        new ActionListener() {
-          public void actionPerformed(final ActionEvent e) {
-            doSizePopup(sizeButton.getX(), sizeButton.getY() + 2 * sizeButton.getHeight());
+            doSizePopup();
           }
         });
     toolbar.add(sizeButton);
 
-    removeAllButton = SwarmUtil.createToolBarButton(Icons.deleteall,
-        "Remove all waves from clipboard", new ActionListener() {
-          public void actionPerformed(final ActionEvent e) {
-            removeWaves();
-          }
-        });
-    removeAllButton.setEnabled(false);
-    toolbar.add(removeAllButton);
-
     toolbar.addSeparator();
-    captureButton = SwarmUtil.createToolBarButton(Icons.camera, "Save clipboard image (P)",
+    captureButton = SwarmUtil.createToolBarButton(Icons.camera, "Save pick image (P)",
         new CaptureActionListener());
     UiUtils.mapKeyStrokeToButton(this, "P", "capture", captureButton);
     toolbar.add(captureButton);
@@ -374,22 +384,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     waveToolbar = new WaveViewSettingsToolbar(null, toolbar, this);
 
-    copyButton = SwarmUtil.createToolBarButton(Icons.clipboard,
-        "Place another copy of wave on clipboard (C or Ctrl-C)", new ActionListener() {
-          public void actionPerformed(final ActionEvent e) {
-            // TODO: implement
-            // if (selected != null)
-            // {
-            // WaveViewPanel wvp = new WaveViewPanel(selected);
-            // wvp.setBackgroundColor(BACKGROUND_COLOR);
-            // addWave(wvp);
-            // }
-          }
-        });
-    UiUtils.mapKeyStrokeToButton(this, "C", "clipboard1", copyButton);
-    UiUtils.mapKeyStrokeToButton(this, "control C", "clipboard2", copyButton);
-    toolbar.add(copyButton);
-
     toolbar.addSeparator();
 
     upButton = SwarmUtil.createToolBarButton(Icons.up, "Move wave up in clipboard (Up arrow)",
@@ -419,6 +413,19 @@ public class WaveClipboardFrame extends SwarmFrame {
     UiUtils.mapKeyStrokeToButton(this, "DELETE", "remove", removeButton);
     toolbar.add(removeButton);
 
+    particleMotionButton = SwarmUtil.createToolBarButton(Icons.particle_motion, "Particle Motion",
+        new ActionListener() {
+          public void actionPerformed(final ActionEvent e) {
+            particleMotionPlot();
+          }
+
+          private void particleMotionPlot() {
+            // TODO Auto-generated method stub
+
+          }
+        });
+    toolbar.add(particleMotionButton);
+
     toolbar.add(Box.createHorizontalGlue());
 
     throbber = new Throbber();
@@ -428,7 +435,7 @@ public class WaveClipboardFrame extends SwarmFrame {
       private static final long serialVersionUID = 1L;
 
       public void actionPerformed(final ActionEvent e) {
-        for (final AbstractWavePanel wave : waves)
+        for (final PickerWavePanel wave : waves)
           select(wave);
       }
     });
@@ -470,33 +477,37 @@ public class WaveClipboardFrame extends SwarmFrame {
     });
 
     selectListener = new WaveViewPanelAdapter() {
-      @Override
       public void mousePressed(final AbstractWavePanel src, final MouseEvent e,
           final boolean dragging) {
+        PickerWavePanel panel = (PickerWavePanel) src;
+        LOGGER.debug("wave selected.");
         requestFocusInWindow();
         final int thisIndex = getWaveIndex(src);
         if (!e.isControlDown() && !e.isShiftDown() && !e.isAltDown()) {
           deselectAll();
-          select(src);
+          select(panel);
         } else if (e.isControlDown()) {
           if (selectedSet.contains(src))
             deselect(src);
           else
-            select(src);
+            select(panel);
         } else if (e.isShiftDown()) {
           if (lastClickedIndex == -1)
-            select(src);
+            select(panel);
           else {
             deselectAll();
             final int min = Math.min(lastClickedIndex, thisIndex);
             final int max = Math.max(lastClickedIndex, thisIndex);
             for (int i = min; i <= max; i++) {
-              final WaveViewPanel ps = (WaveViewPanel) waveBox.getComponent(i);
+              final PickerWavePanel ps = (PickerWavePanel) waveBox.getComponent(i);
               select(ps);
             }
           }
         }
         lastClickedIndex = thisIndex;
+        event.notifyObservers();
+        mainPanel.validate();
+        mainPanel.repaint();
       }
 
       @Override
@@ -514,6 +525,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
       @Override
       public void waveClosed(final AbstractWavePanel src) {
+        LOGGER.debug("Removing wave: {}", src.getChannel());
         remove(src);
       }
     };
@@ -535,7 +547,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     resizeWaves();
   }
 
-  private void doSizePopup(final int x, final int y) {
+  private void doSizePopup() {
     if (popup == null) {
       final String[] labels = new String[] {"Auto", null, "Tiny", "Small", "Medium", "Large"};
       final int[] sizes = new int[] {-1, -1, 50, 100, 160, 230};
@@ -558,42 +570,7 @@ public class WaveClipboardFrame extends SwarmFrame {
           popup.addSeparator();
       }
     }
-    popup.show(this, x, y);
-  }
-
-  private class OpenActionListener implements ActionListener {
-    public void actionPerformed(final ActionEvent e) {
-      final JFileChooser chooser = FileChooser.getFileChooser();
-      chooser.resetChoosableFileFilters();
-      for (final FileType ft : FileType.getKnownTypes()) {
-        final ExtensionFileFilter f = new ExtensionFileFilter(ft.extension, ft.description);
-        chooser.addChoosableFileFilter(f);
-      }
-      chooser.setDialogTitle("Open Wave");
-      chooser.setFileFilter(chooser.getAcceptAllFileFilter());
-      final File lastPath = new File(swarmConfig.lastPath);
-      chooser.setCurrentDirectory(lastPath);
-      chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-      chooser.setMultiSelectionEnabled(true);
-      final int result = chooser.showOpenDialog(applicationFrame);
-      if (result == JFileChooser.APPROVE_OPTION) {
-        final File[] fs = chooser.getSelectedFiles();
-
-        for (int i = 0; i < fs.length; i++) {
-          if (fs[i].isDirectory()) {
-            final File[] dfs = fs[i].listFiles();
-            if (dfs == null)
-              continue;
-            for (int j = 0; j < dfs.length; j++)
-              openFile(dfs[j]);
-            swarmConfig.lastPath = fs[i].getParent();
-          } else {
-            openFile(fs[i]);
-            swarmConfig.lastPath = fs[i].getParent();
-          }
-        }
-      }
-    }
+    popup.show(sizeButton.getParent(), sizeButton.getX(), sizeButton.getY());
   }
 
   private class SaveActionListener implements ActionListener {
@@ -644,9 +621,7 @@ public class WaveClipboardFrame extends SwarmFrame {
             swarmConfig.lastPath = f.getParent();
             final String fn = f.getPath();
             final SeismicDataFile file = SeismicDataFile.getFile(fn);
-            // String channel = selected.getChannel().replace(' ', '_');
             final Wave wave = selected.getWave();
-            // file.putWave(channel, wave);
             file.putWave(selected.getChannel(), wave);
             file.write();
           } catch (final FileNotFoundException ex) {
@@ -661,143 +636,14 @@ public class WaveClipboardFrame extends SwarmFrame {
     }
   }
 
-  private class SaveAllActionListener implements ActionListener {
-    public void actionPerformed(final ActionEvent e) {
-      if (waves.size() <= 0)
-        return;
 
-      final FileTypeDialog dialog = new FileTypeDialog();
-      FileType fileType = FileType.UNKNOWN;
-      if (!dialog.isOpen() || (dialog.isOpen() && !dialog.isAssumeSame())) {
-        dialog.setVisible(true);
-
-        if (dialog.isCancelled())
-          fileType = FileType.UNKNOWN;
-        else
-          fileType = dialog.getFileType();
-
-      }
-
-      final JFileChooser chooser = FileChooser.getFileChooser();
-      chooser.resetChoosableFileFilters();
-      chooser.setMultiSelectionEnabled(false);
-      chooser.setDialogTitle("Save All Files");
-      final File lastPath = new File(swarmConfig.lastPath);
-      chooser.setCurrentDirectory(lastPath);
-
-      if (!fileType.isCollective)
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-      else
-        chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-
-      final int result = chooser.showSaveDialog(applicationFrame);
-      if (result == JFileChooser.CANCEL_OPTION)
-        return;
-
-      final File f = chooser.getSelectedFile();
-
-      if (f == null) {
-        JOptionPane.showMessageDialog(applicationFrame, "Save location not understood.", "Error",
-            JOptionPane.ERROR_MESSAGE);
-        return;
-      }
-
-      if (result == JFileChooser.APPROVE_OPTION) {
-        try {
-          if (f.exists() && !f.isDirectory())
-            return;
-          if (!f.exists())
-            f.mkdir();
-          for (final AbstractWavePanel wvp : waves) {
-            Wave sw = wvp.getWave();
-
-            if (sw != null) {
-              sw = sw.subset(wvp.getStartTime(), wvp.getEndTime());
-              final String date = saveAllDateFormat.format(J2kSec.asDate(sw.getStartTime()));
-              final File dir = new File(f.getPath() + File.separatorChar + date);
-              if (!dir.exists())
-                dir.mkdir();
-
-              swarmConfig.lastPath = f.getParent();
-              final String fn =
-                  dir + File.separator + wvp.getChannel().replace(' ', '_') + fileType.extension;
-              final SeismicDataFile file = SeismicDataFile.getFile(fn);
-              file.putWave(wvp.getChannel(), sw);
-              file.write();
-            }
-          }
-          swarmConfig.lastPath = f.getPath();
-        } catch (final FileNotFoundException ex) {
-          JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "Directory does not exist.",
-              "Error", JOptionPane.ERROR_MESSAGE);
-        } catch (final IOException ex) {
-          JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "Error writing file.", "Error",
-              JOptionPane.ERROR_MESSAGE);
-        }
-      }
-    }
-  }
-
-  public void openFile(final File f) {
-    SeismicDataFile file = SeismicDataFile.getFile(f);
-    if (file == null) {
-      final FileTypeDialog dialog = new FileTypeDialog();
-      FileType fileType = FileType.UNKNOWN;
-      if (!dialog.isOpen() || (dialog.isOpen() && !dialog.isAssumeSame())) {
-        dialog.setVisible(true);
-
-        if (dialog.isCancelled())
-          fileType = FileType.UNKNOWN;
-        else
-          fileType = dialog.getFileType();
-
-      }
-      file = SeismicDataFile.getFile(f, fileType);
-    }
-
-    if (file == null) {
-      JOptionPane.showMessageDialog(applicationFrame,
-          "There was an error opening the file, '" + f.getName() + "'.", "Error",
-          JOptionPane.ERROR_MESSAGE);
-      return;
-    }
-
-    try {
-      file.read();
-    } catch (final IOException e) {
-      JOptionPane.showMessageDialog(applicationFrame,
-          "There was an error opening the file, '" + f.getName() + "'.\n" + e.getMessage(), "Error",
-          JOptionPane.ERROR_MESSAGE);
-    }
-
-    for (final String channel : file.getChannels()) {
-      final WaveViewPanel wvp = new WaveViewPanel();
-      wvp.setChannel(channel);
-      final CachedDataSource cache = CachedDataSource.getInstance();
-
-      final Wave wave = file.getWave(channel);
-      cache.putWave(channel, wave);
-      wvp.setDataSource(cache);
-      wvp.setWave(wave, wave.getStartTime(), wave.getEndTime());
-      WaveClipboardFrame.this.addWave(new WaveViewPanel(wvp));
-    }
-  }
 
   private void doButtonEnables() {
     final boolean enable = (waves == null || waves.size() == 0);
-    saveButton.setEnabled(!enable);
-    sortButton.setEnabled(!enable);
-    saveAllButton.setEnabled(!enable);
-    syncButton.setEnabled(!enable);
-    removeAllButton.setEnabled(!enable);
-    saveAllButton.setEnabled(!enable);
 
     final boolean allowSingle = (selectedSet.size() == 1);
     upButton.setEnabled(allowSingle);
     downButton.setEnabled(allowSingle);
-    sortButton.setEnabled(allowSingle);
-    syncButton.setEnabled(allowSingle);
-    saveButton.setEnabled(allowSingle);
 
     final boolean allowMulti = (selectedSet.size() > 0);
     backButton.setEnabled(allowMulti);
@@ -808,43 +654,14 @@ public class WaveClipboardFrame extends SwarmFrame {
     histButton.setEnabled(allowMulti);
     removeButton.setEnabled(allowMulti);
     gotoButton.setEnabled(allowMulti);
-  }
+  }    
 
-  public synchronized void sortChannelsByNearest() {
-    final AbstractWavePanel p = getSingleSelected();
-    if (p == null)
-      return;
-
-    final ArrayList<AbstractWavePanel> sorted = new ArrayList<AbstractWavePanel>(waves.size());
-    for (final AbstractWavePanel wave : waves)
-      sorted.add(wave);
-
-    final Metadata smd = swarmConfig.getMetadata(p.getChannel());
-    if (smd == null || Double.isNaN(smd.getLongitude()) || Double.isNaN(smd.getLatitude()))
-      return;
-
-    Collections.sort(sorted, new Comparator<AbstractWavePanel>() {
-      public int compare(final AbstractWavePanel wvp1, final AbstractWavePanel wvp2) {
-        Metadata md = swarmConfig.getMetadata(wvp1.getChannel());
-        final double d1 = smd.distanceTo(md);
-        md = swarmConfig.getMetadata(wvp2.getChannel());
-        final double d2 = smd.distanceTo(md);
-        return Double.compare(d1, d2);
-      }
-    });
-
-    removeWaves();
-    for (final AbstractWavePanel wave : sorted)
-      addWave(wave);
-    select(p);
-  }
-
-  public synchronized AbstractWavePanel getSingleSelected() {
+  public synchronized PickerWavePanel getSingleSelected() {
     if (selectedSet.size() != 1)
       return null;
 
-    AbstractWavePanel p = null;
-    for (final AbstractWavePanel panel : selectedSet)
+    PickerWavePanel p = null;
+    for (final PickerWavePanel panel : selectedSet)
       p = panel;
 
     return p;
@@ -863,7 +680,7 @@ public class WaveClipboardFrame extends SwarmFrame {
       @Override
       public Object construct() {
         List<AbstractWavePanel> copy = null;
-        synchronized (WaveClipboardFrame.this) {
+        synchronized (PickerFrame.this) {
           copy = new ArrayList<AbstractWavePanel>(waves);
         }
         for (final AbstractWavePanel wvp : copy) {
@@ -894,30 +711,88 @@ public class WaveClipboardFrame extends SwarmFrame {
     });
   }
 
-  public WaveViewPanel getSelected() {
-    return null;
-    // return selected;
+  public synchronized void setBaseWave(final PickerWavePanel p) {
+    baseWave = p;
+    addWave(p);
+    doButtonEnables();
+    waveBox.validate();
+
+    String channel = p.getChannel();
+
+    final List<Pair<Double, String>> nrst =
+        Metadata.findNearest(SwarmConfig.getInstance().getMetadata(), channel);
+
+    final SwingWorker worker = new SwingWorker() {
+      @Override
+      public Object construct() {
+        for (Pair<Double, String> item : nrst) {
+          if (item.item1 > 20000) {
+            break;
+          } else if (item.item2.matches(".*(B|E|H)H(Z|E|N).*")) {
+            PickerWavePanel p2 = new PickerWavePanel(p);
+            p2.setChannel(item.item2);
+            SeismicDataSource sds = p2.getDataSource();
+            double st = p2.getStartTime();
+            double et = p2.getEndTime();
+            Wave wave = sds.getWave(item.item2, st, et);
+            if (wave != null && wave.isData()) {
+              p2.setWave(wave, st, et);
+              p2.getWaveViewSettings().autoScaleAmpMemory = false;
+              addWave(p2);
+              System.out.println(String.format("%s (%.1f km)", item.item2, item.item1 / 1000));
+            } else {
+              LOGGER.debug("Skipping {}, no data.", item.item2);
+            }
+          }
+        }
+        return null;
+      }
+
+      @Override
+      public void finished() {
+        waveBox.validate();
+        validate();
+        repaint();
+      }
+    };
+    worker.start();
   }
 
-  public synchronized void addWave(final AbstractWavePanel p) {
+  public synchronized void addWave(final String chan) {
+    PickerWavePanel p2 = new PickerWavePanel(baseWave);
+    p2.setChannel(chan);
+    SeismicDataSource sds = p2.getDataSource();
+    double st = p2.getStartTime();
+    double et = p2.getEndTime();
+    Wave wave = sds.getWave(chan, st, et);
+    if (wave != null && wave.isData()) {
+      p2.setWave(wave, st, et);
+      p2.getWaveViewSettings().autoScaleAmpMemory = false;
+      addWave(p2);
+    }
+  }
+
+  public synchronized void addWave(final PickerWavePanel p) {
     p.addListener(selectListener);
     p.setOffsets(54, 8, 21, 19);
     p.setAllowClose(true);
     p.setStatusLabel(statusLabel);
     p.setAllowDragging(true);
     p.setDisplayTitle(true);
+    p.setEvent(event);
+    p.setParent(mainPanel);
     final int w = scrollPane.getViewport().getSize().width;
     p.setSize(w, calculateWaveHeight());
     p.setBottomBorderColor(Color.GRAY);
     p.createImage();
     waveBox.add(p);
     waves.add(p);
-    doButtonEnables();
-    waveBox.validate();
+    LOGGER.debug("{} panels; {} waves", waveBox.getComponentCount(), waves.size());
   }
 
   private synchronized void deselect(final AbstractWavePanel p) {
     selectedSet.remove(p);
+    pickList.deselect(p.getChannel());
     waveToolbar.removeSettings(p.getSettings());
     p.setBackgroundColor(BACKGROUND_COLOR);
     p.createImage();
@@ -925,15 +800,18 @@ public class WaveClipboardFrame extends SwarmFrame {
   }
 
   private synchronized void deselectAll() {
-    final WaveViewPanel[] panels = selectedSet.toArray(new WaveViewPanel[0]);
-    for (final WaveViewPanel p : panels)
+    final AbstractWavePanel[] panels = selectedSet.toArray(new AbstractWavePanel[0]);
+    pickList.deselectAll();
+    for (final AbstractWavePanel p : panels) {
       deselect(p);
+    }
   }
 
-  private synchronized void select(final AbstractWavePanel p) {
+  private synchronized void select(final PickerWavePanel p) {
     if (p == null || selectedSet.contains(p))
       return;
 
+    pickList.select(p.getChannel());
     selectedSet.add(p);
     doButtonEnables();
     p.setBackgroundColor(SELECT_COLOR);
@@ -942,7 +820,8 @@ public class WaveClipboardFrame extends SwarmFrame {
     waveToolbar.addSettings(p.getSettings());
   }
 
-  private synchronized void remove(final WaveViewPanel p) {
+  private synchronized void remove(final AbstractWavePanel p) {
+    event.remove(p.getChannel());
     int i = 0;
     for (i = 0; i < waveBox.getComponentCount(); i++) {
       if (p == waveBox.getComponent(i))
@@ -958,8 +837,11 @@ public class WaveClipboardFrame extends SwarmFrame {
     doButtonEnables();
     waveBox.validate();
     selectedSet.remove(p);
+    pickList.remove(p.getChannel());
     lastClickedIndex = Math.min(lastClickedIndex, waveBox.getComponentCount() - 1);
     waveToolbar.removeSettings(p.getSettings());
+    event.notifyObservers();
+    validate();
     repaint();
   }
 
@@ -973,13 +855,20 @@ public class WaveClipboardFrame extends SwarmFrame {
   }
 
   public synchronized void remove() {
-    final WaveViewPanel[] panels = selectedSet.toArray(new WaveViewPanel[0]);
-    for (final WaveViewPanel p : panels)
-      remove(p);
+    final PickerWavePanel[] panels = selectedSet.toArray(new PickerWavePanel[0]);
+    for (final PickerWavePanel p : panels) {
+      LOGGER.debug("removing panel {}", p);
+      waveBox.remove(p);
+      waves.remove(p);
+      event.remove(p.getChannel());
+      // pickList.remove(p);
+      validate();
+      repaint();
+    }
   }
 
   public synchronized void moveDown() {
-    final AbstractWavePanel p = getSingleSelected();
+    final PickerWavePanel p = getSingleSelected();
     if (p == null)
       return;
 
@@ -996,7 +885,7 @@ public class WaveClipboardFrame extends SwarmFrame {
   }
 
   public synchronized void moveUp() {
-    final AbstractWavePanel p = getSingleSelected();
+    final PickerWavePanel p = getSingleSelected();
     if (p == null)
       return;
 
@@ -1035,10 +924,8 @@ public class WaveClipboardFrame extends SwarmFrame {
   }
 
   public void removeWaves() {
-    while (waves.size() > 0) {
+    while (waves.size() > 0)
       remove(waves.get(0));
-      waves.remove(0);
-    }
 
     waveBox.validate();
     scrollPane.validate();
@@ -1191,18 +1078,21 @@ public class WaveClipboardFrame extends SwarmFrame {
     if (waves.size() == 0) {
       final Dimension dim = this.getSize();
       g.setColor(Color.black);
-      g.drawString("Clipboard empty.", dim.width / 2 - 40, dim.height / 2);
+      g.drawString("Picker empty.", dim.width / 2 - 40, dim.height / 2);
     }
   }
 
   @Override
   public void setVisible(final boolean isVisible) {
+    LOGGER.debug("Visible = {}", isVisible);
     super.setVisible(isVisible);
     if (isVisible)
       toFront();
   }
 
-  private static class WaveClipboardFrameHolder {
-    public static WaveClipboardFrame waveClipiboardFrame = new WaveClipboardFrame();
+
+  public void updateEvent() {
+    LOGGER.debug("event is empty? {}", event.getChannels().isEmpty());
+    saveButton.setEnabled(!event.getChannels().isEmpty());
   }
 }

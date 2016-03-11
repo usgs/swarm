@@ -571,7 +571,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     wavePanel.add(panel);
     panel.addListener(new WaveViewPanelAdapter() {
       @Override
-      public void mousePressed(final WaveViewPanel src, final MouseEvent e,
+      public void mousePressed(final AbstractWavePanel src, final MouseEvent e,
           final boolean dragging) {
         requestFocusInWindow();
         select(panel);
@@ -590,7 +590,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     }
   }
 
-  public void select(final WaveViewPanel p) {
+  public void select(final AbstractWavePanel p) {
     deselect();
     for (int i = 0; i < panels.size(); i++) {
       final WaveViewPanel panel = panels.get(i);

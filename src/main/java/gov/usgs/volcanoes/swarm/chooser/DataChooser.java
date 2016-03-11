@@ -786,7 +786,7 @@ public class DataChooser extends JPanel {
     dataTree = new JTree(rootNode);
     dataTree.setRootVisible(false);
     dataTree.setBorder(BorderFactory.createEmptyBorder(1, 2, 0, 0));
-
+    dataTree.setDragEnabled(true);
     model = new DefaultTreeModel(rootNode);
     dataTree.setModel(model);
 
@@ -860,6 +860,7 @@ public class DataChooser extends JPanel {
 
   private void createNearest() {
     nearestList = new JList(new DefaultListModel());
+    nearestList.setDragEnabled(true);
     ToolTipManager.sharedInstance().registerComponent(nearestList);
 
     nearestScrollPane = new JScrollPane(nearestList);

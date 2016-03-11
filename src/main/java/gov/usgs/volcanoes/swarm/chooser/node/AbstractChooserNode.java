@@ -21,6 +21,6 @@ abstract public class AbstractChooserNode extends DefaultMutableTreeNode {
     }
     
     public String toString() {
-        return "chooserNode";
+        return label;
     }
 }
