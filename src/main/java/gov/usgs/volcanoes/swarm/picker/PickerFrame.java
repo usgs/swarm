@@ -153,6 +153,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
     histories = new HashMap<AbstractWavePanel, Stack<double[]>>();
     createUI();
     LOGGER.debug("Finished creating picker frame.");
+    this.setVisible(true);
 
     // getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("typed q"),
     // "pPick");
@@ -167,6 +168,11 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
 
   }
 
+  public PickerFrame(gov.usgs.volcanoes.swarm.event.Event event) {
+    this();
+//    this.event = event;
+  }
+  
   private void findWavePanel() {
     Point p = MouseInfo.getPointerInfo().getLocation();
     SwingUtilities.convertPointFromScreen(p, waveBox);

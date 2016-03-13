@@ -69,4 +69,9 @@ public final class HypocenterLayer implements MapLayer {
   public void stop() {
     // nothing to do here
   }
+
+  public boolean mouseMoved(MouseEvent e) {
+    // TODO Auto-generated method stub
+    return false;
+  }
 }

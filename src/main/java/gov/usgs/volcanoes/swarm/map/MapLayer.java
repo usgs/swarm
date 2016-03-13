@@ -13,5 +13,6 @@ public interface MapLayer {
   public boolean mouseClicked(MouseEvent e);
   public void setMapPanel(MapPanel mapPanel);
   public void stop();
+  public boolean mouseMoved(MouseEvent e);
 
 }

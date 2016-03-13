@@ -1106,6 +1106,17 @@ public class MapPanel extends JPanel {
       final Point2D.Double latLon = getLonLat(e.getX(), e.getY());
       if (latLon != null)
         MapFrame.getInstance().setStatusText(Util.lonLatToString(latLon));
+      
+      if (layers != null) {
+        boolean handled = false;
+        Iterator<MapLayer> it = layers.iterator();
+        while (it.hasNext() && handled == false) {
+          MapLayer layer = it.next();
+          handled = layer.mouseMoved(e);
+        }
+        resetImage();
+      }
+
     }
 
     public void mouseDragged(final MouseEvent e) {
