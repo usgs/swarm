@@ -15,10 +15,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -70,7 +70,8 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
   private Point hoverLocation;
 
   public HypocenterLayer() {
-    events = new HashMap<String, Event>();
+//    events = new HashMap<String, Event>();
+  events = new ConcurrentHashMap<String, Event>();
     dateFormat = new SimpleDateFormat(DATE_FORMAT);
     swarmConfig = SwarmConfig.getInstance();
     swarmConfig.addListener(this);
@@ -206,7 +207,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
 
     String mag = String.format("Mag: %.2f", (hoverEvent.getPerferredMagnitude().getMag()));
     text.add(mag);
-    
+
     String date = Time.format(Time.STANDARD_TIME_FORMAT, new Date(origin.getTime()));
     text.add(date);
 
@@ -235,6 +236,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
 
   public boolean mouseClicked(final MouseEvent e) {
 
+    hoverEvent = null;
     if (events.size() < 1l) {
       return false;
     }
@@ -265,12 +267,33 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
 
       if (r.contains(e.getPoint())) {
         LOGGER.debug("event clicked");
-        Swarm.openPicker(event);
+        try {
+          Swarm.openPicker(getDetailedEvent(event.getEventSource() + event.getEvid()));
+        } catch (ParserConfigurationException e1) {
+          e1.printStackTrace();
+        } catch (SAXException e1) {
+          LOGGER.debug("SAXExcepton");
+        } catch (IOException e1) {
+          e1.printStackTrace();
+        }
         return true;
       }
     }
 
     return handled;
+  }
+
+  private Event getDetailedEvent(String evid) throws ParserConfigurationException, SAXException, IOException {
+    String url = "http://earthquake.usgs.gov/fdsnws/event/1/query?eventid=" + evid;
+
+    DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+    DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+    Document doc = dBuilder.parse(url);
+    doc.getDocumentElement().normalize();
+
+    NodeList eventElements = doc.getElementsByTagName("event");
+    LOGGER.debug("Got {} events.", eventElements.getLength());
+    return new Event((Element) eventElements.item(0));
   }
 
   public void settingsChanged() {

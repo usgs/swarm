@@ -20,7 +20,7 @@ import gov.usgs.volcanoes.core.hypo71.Station;
 import gov.usgs.volcanoes.core.hypo71.Hypo71.Results;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.picker.Event;
+import gov.usgs.volcanoes.swarm.picker.EventOld;
 import gov.usgs.volcanoes.swarm.picker.EventChannel;
 import gov.usgs.volcanoes.swarm.picker.EventLocator;
 import gov.usgs.volcanoes.swarm.picker.Hypocenters;
@@ -54,7 +54,7 @@ public class Hypo71Locator implements EventLocator {
     phaseRecordsList = new LinkedList<PhaseRecord>();
   }
 
-  public void locate(Event event) throws IOException {
+  public void locate(EventOld event) throws IOException {
     generateHypoInputs(event);
     Results hypoResult = runHypo(event);
     LOGGER.debug(hypoResult.getPrintOutput());
@@ -67,7 +67,7 @@ public class Hypo71Locator implements EventLocator {
     }
   }
 
-  private Results runHypo(Event event) throws IOException {
+  private Results runHypo(EventOld event) throws IOException {
 
     Hypo71 hypoCalculator = new Hypo71();
 
@@ -101,7 +101,7 @@ public class Hypo71Locator implements EventLocator {
   /**
    * Generates hypo inputs either from an archived file or from objects in memory
    */
-  private void generateHypoInputs(Event event) {
+  private void generateHypoInputs(EventOld event) {
 
     for (String channel : event.getChannels().keySet()) {
       String station = channel.split(" ")[0];

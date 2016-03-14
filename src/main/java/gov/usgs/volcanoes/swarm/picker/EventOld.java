@@ -8,12 +8,12 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Event {
-  private static final Logger LOGGER = LoggerFactory.getLogger(Event.class);
+public class EventOld {
+  private static final Logger LOGGER = LoggerFactory.getLogger(EventOld.class);
   private final Map<String, EventChannel> channels;
   private final List<EventObserver> observers;
 
-  public Event() {
+  public EventOld() {
     channels = new LinkedHashMap<String, EventChannel>();
     observers = new ArrayList<EventObserver>();
   }

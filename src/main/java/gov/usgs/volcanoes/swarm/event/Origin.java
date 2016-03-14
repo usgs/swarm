@@ -3,7 +3,11 @@ package gov.usgs.volcanoes.swarm.event;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -13,9 +17,15 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+
 public class Origin {
   private static final Logger LOGGER = LoggerFactory.getLogger(Origin.class);
-  private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
+  private static final List<String> DATE_FORMATS = new ArrayList<String>();
+
+  static {
+    DATE_FORMATS.add("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+    DATE_FORMATS.add("yyyy-MM-dd'T'HH:mm:ss.SS");
+  }
 
   public final String publicId;
   private double latitude;
@@ -27,30 +37,39 @@ public class Origin {
 
   public Origin(Element originElement, Map<String, Pick> picks) {
     this.publicId = originElement.getAttribute("publicId");
+    arrivals = new HashMap<String, Arrival>();
+    
     LOGGER.debug("new origin {}", publicId);
 
-    this.longitude = Double
-        .parseDouble(originElement.getElementsByTagName("longitude").item(0).getTextContent());
-    this.latitude =
-        Double.parseDouble(originElement.getElementsByTagName("latitude").item(0).getTextContent());
+    Element lonElement = (Element) originElement.getElementsByTagName("longitude").item(0);
+    longitude = Double.parseDouble(lonElement.getElementsByTagName("value").item(0).getTextContent());
+
+    Element latElement = (Element) originElement.getElementsByTagName("latitude").item(0);
+    latitude = Double.parseDouble(latElement.getElementsByTagName("value").item(0).getTextContent());
 
     Element depthElement = (Element) originElement.getElementsByTagName("depth").item(0);
     depth = Double.parseDouble(depthElement.getElementsByTagName("value").item(0).getTextContent());
 
-    DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    
+
     Element timeElement = (Element) originElement.getElementsByTagName("time").item(0);
-    try {
-      time = dateFormat.parse(timeElement.getElementsByTagName("value").item(0).getTextContent()).getTime();
-    } catch (DOMException e) {
-      LOGGER.debug("DOMException parsing origin");
-    } catch (ParseException e) {
-      LOGGER.debug("{ParseException parsing origin");
+    time = 0;
+    Iterator<String> it = DATE_FORMATS.iterator();
+    while (it.hasNext() && time < 1) {
+      String format = it.next();
+      DateFormat dateFormat = new SimpleDateFormat(format);
+      dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+      try {
+        time = dateFormat.parse(timeElement.getElementsByTagName("value").item(0).getTextContent())
+            .getTime();
+      } catch (DOMException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (ParseException e) {
+        System.out.println(timeElement.getElementsByTagName("value").item(0).getTextContent()
+            + " didn't match " + format);
+      }
     }
     
-    
-
     parseArrivals(originElement.getElementsByTagName("arrival"), picks);
   }
 
@@ -76,5 +95,9 @@ public class Origin {
 
   public long getTime() {
     return time;
+  }
+
+  public Collection<Arrival> getArrivals() {
+    return arrivals.values();
   }
 }

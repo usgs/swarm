@@ -78,6 +78,7 @@ import gov.usgs.volcanoes.swarm.Throbber;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.event.Event;
 import gov.usgs.volcanoes.swarm.picker.hypo71.Hypo71Locator;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
@@ -141,7 +142,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
 
   public PickerFrame() {
     super("Picker", true, true, true, false);
-    event = new Event();
+    event = new Event("testIId");
     event.addObserver(this);
 
     this.setFocusable(true);
@@ -168,9 +169,32 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
 
   }
 
-  public PickerFrame(gov.usgs.volcanoes.swarm.event.Event event) {
-    this();
-//    this.event = event;
+  public PickerFrame(Event event) {
+    super("Picker", true, true, true, false);
+    this.event = event;
+    event.addObserver(this);
+
+    this.setFocusable(true);
+    this.setVisible(true);
+    selectedSet = new HashSet<PickerWavePanel>();
+    saveAllDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+    saveAllDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+    waves = new ArrayList<PickerWavePanel>();
+    histories = new HashMap<AbstractWavePanel, Stack<double[]>>();
+    createUI();
+    LOGGER.debug("Finished creating picker frame.");
+    this.setVisible(true);
+
+    // getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("typed q"),
+    // "pPick");
+    getInputMap().put(KeyStroke.getKeyStroke("typed q"), "pPick");
+    getActionMap().put("pPick", new AbstractAction() {
+      private static final long serialVersionUID = -1;
+
+      public void actionPerformed(final ActionEvent e) {
+        findWavePanel();
+      }
+    });
   }
   
   private void findWavePanel() {
@@ -441,11 +465,11 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
     locateButton = SwarmUtil.createToolBarButton(Icons.locate, "Locate", new ActionListener() {
       public void actionPerformed(final ActionEvent e) {
         EventLocator locator = new Hypo71Locator();
-        try {
-          locator.locate(event);
-        } catch (IOException e1) {
-          e1.printStackTrace();
-        };
+//        try {
+//          locator.locate(event);
+//        } catch (IOException e1) {
+//          e1.printStackTrace();
+//        };
       }
 
       private void particleMotionPlot() {
@@ -534,7 +558,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
           }
         }
         lastClickedIndex = thisIndex;
-        event.notifyObservers();
+//        event.notifyObservers();
         mainPanel.validate();
         mainPanel.repaint();
       }
@@ -808,7 +832,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
     p.setStatusLabel(statusLabel);
     p.setAllowDragging(true);
     p.setDisplayTitle(true);
-    p.setEvent(event);
+//    p.setEvent(event);
     p.setParent(mainPanel);
     final int w = scrollPane.getViewport().getSize().width;
     p.setSize(w, calculateWaveHeight());
@@ -850,7 +874,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
   }
 
   private synchronized void remove(final AbstractWavePanel p) {
-    event.remove(p.getChannel());
+//    event.remove(p.getChannel());
     int i = 0;
     for (i = 0; i < waveBox.getComponentCount(); i++) {
       if (p == waveBox.getComponent(i))
@@ -869,7 +893,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
     pickList.remove(p.getChannel());
     lastClickedIndex = Math.min(lastClickedIndex, waveBox.getComponentCount() - 1);
     waveToolbar.removeSettings(p.getSettings());
-    event.notifyObservers();
+//    event.notifyObservers();
     validate();
     repaint();
   }
@@ -889,7 +913,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
       LOGGER.debug("removing panel {}", p);
       waveBox.remove(p);
       waves.remove(p);
-      event.remove(p.getChannel());
+//      event.remove(p.getChannel());
       // pickList.remove(p);
       validate();
       repaint();
@@ -1121,7 +1145,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
 
 
   public void updateEvent() {
-    LOGGER.debug("event is empty? {}", event.getChannels().isEmpty());
-    saveButton.setEnabled(!event.getChannels().isEmpty());
+//    LOGGER.debug("event is empty? {}", event.getChannels().isEmpty());
+//    saveButton.setEnabled(!event.getChannels().isEmpty());
   }
 }

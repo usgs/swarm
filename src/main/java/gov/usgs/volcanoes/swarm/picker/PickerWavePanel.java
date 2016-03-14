@@ -33,7 +33,7 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
   private static final Color P_BACKGROUND = new Color(128, 255, 128, 192);
   private static final Color S_BACKGROUND = new Color(128, 128, 255, 192);
   private static final Color CODA_BACKGROUND = new Color(128, 128, 128, 192);
-  private Event event;
+  private EventOld event;
   private Component parent;
 
   public PickerWavePanel(AbstractWavePanel insetWavePanel) {
@@ -61,7 +61,7 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
     event.setPhase(channel, phase);
     WaveViewTime.fireTimeChanged(time);
   }
-  public void setEvent(Event event) {
+  public void setEvent(EventOld event) {
     this.event = event;
   }
 

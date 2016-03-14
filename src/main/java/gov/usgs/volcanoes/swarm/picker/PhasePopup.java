@@ -15,10 +15,10 @@ public class PhasePopup extends JPopupMenu {
   private JMenu s;
   private final String channel;
   private final long time;
-  private final Event event;
+  private final EventOld event;
   private Component parent;
 
-  public PhasePopup(final Event event, final String channel, final long time) {
+  public PhasePopup(final EventOld event, final String channel, final long time) {
     this.channel = channel;
     this.time = time;
     this.event = event;

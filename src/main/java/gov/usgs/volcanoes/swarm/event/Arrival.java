@@ -17,8 +17,16 @@ public Arrival(Element arrivalElement, Map<String, Pick> picks) {
   this.publicId = arrivalElement.getAttribute("publicID");
   LOGGER.debug("new arrival {}", publicId);
   
-  this.phase = arrivalElement.getAttribute("phase");
-  this.pick = picks.get(arrivalElement.getAttribute("pickID"));
+//  this.phase = arrivalElement.getAttribute("phase");
+  this.pick = picks.get(arrivalElement.getElementsByTagName("pickID").item(0).getTextContent());
+  this.phase = arrivalElement.getElementsByTagName("phase").item(0).getTextContent();
 }
   
+public Pick getPick() {
+  return pick;
+}
+
+public String getPhase() {
+  return phase;
+}
 }
