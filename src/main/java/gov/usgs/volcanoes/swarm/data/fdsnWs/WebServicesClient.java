@@ -5,11 +5,13 @@ import edu.sc.seis.seisFile.mseed.DataRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.swarm.ChannelInfo;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.data.DataSelectReader;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 
@@ -223,7 +225,7 @@ public class WebServicesClient extends AbstractDataRecordClient {
     }
     return wave;
   }
-  
+
   /**
    * Retrieve a single waveform without providing full SDS functions.
    * 
@@ -234,33 +236,34 @@ public class WebServicesClient extends AbstractDataRecordClient {
    * @param t2 the end time.
    * @return the raw data.
    */
-  public static Wave getWave(final String wsDataSelectUrl, final ChannelInfo channelInfo, final double t1, final double t2) {
+  public static Wave getWave(final String code, final double t1, final double t2) {
     final Date begin = getDate(t1);
     final Date end = getDate(t2);
-    final List<Wave> waves = createWaves();
-    final DataSelectReader reader = new DataSelectReader(wsDataSelectUrl) {
-      /**
-       * Process a data record.
-       * 
-       * @param dr the data record.
-       * @return true if data record should be added to the list, false
-       *         otherwise.
-       */
-      public boolean processRecord(DataRecord dr) {
-        try {
-          addWaves(waves, dr);
-        } catch (Exception ex) {
-          LOGGER.warn("could not get web service raw data ({}): {}", channelInfo, ex.getMessage());
-        }
-        return true;
-      }
-    };
+    final List<Wave> waves = new ArrayList<Wave>();
+    final DataSelectReader reader =
+        new DataSelectReader(SwarmConfig.getInstance().fdsnDataselectURL) {
+          /**
+           * Process a data record.
+           * 
+           * @param dr the data record.
+           * @return true if data record should be added to the list, false
+           *         otherwise.
+           */
+          public boolean processRecord(DataRecord dr) {
+            try {
+              addWaves(waves, dr);
+            } catch (Exception ex) {
+              LOGGER.warn("could not get web service raw data ({}): {}", code, ex.getMessage());
+            }
+            return true;
+          }
+        };
     try {
-      final String query = reader.createQuery(channelInfo.getNetwork(), channelInfo.getStation(),
-          channelInfo.getLocation(), channelInfo.getChannel(), begin, end);
+      String[] comps = code.split("\\$"); 
+      final String query = reader.createQuery(comps[2], comps[0], (comps.length > 3 ? comps[3] : "--"), comps[1], begin, end);
       reader.read(query, (List<DataRecord>) null);
     } catch (Exception ex) {
-      LOGGER.warn("could not get web service raw data ({}): {}", channelInfo, ex.getMessage());
+      LOGGER.warn("could not get web service raw data ({}): {}", code, ex.getMessage());
     }
     Wave wave = join(waves);
     if (wave != null && WebServiceUtils.isDebug()) {

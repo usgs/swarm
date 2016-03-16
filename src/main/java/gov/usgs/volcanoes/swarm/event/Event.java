@@ -76,7 +76,9 @@ public class Event {
     evid = StringUtils.stringToString(event.getAttribute("catalog:eventid"), evid);
     
     Element descriptionElement = (Element) event.getElementsByTagName("description").item(0);
-    description = StringUtils.stringToString(descriptionElement.getElementsByTagName("text").item(0).getTextContent(), description);
+    if (descriptionElement != null) {
+      description = StringUtils.stringToString(descriptionElement.getElementsByTagName("text").item(0).getTextContent(), description);
+    }
 
     notifyObservers();
   }

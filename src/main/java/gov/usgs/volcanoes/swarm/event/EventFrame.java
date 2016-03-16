@@ -33,11 +33,14 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmFrame;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesClient;
-import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
 import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
@@ -57,84 +60,48 @@ public class EventFrame extends SwarmFrame implements EventObserver {
   private JSplitPane mainPanel;
   private Event event;
   private SeismicDataSource seismicDataSource;
+  private final JPanel pickBox;
 
   public EventFrame(Event event) {
     super("Event - " + event.getEvid(), true, true, true, false);
     this.event = event;
-
     event.addObserver(this);
     this.setFocusable(true);
-    createUI();
     createListeners();
-    this.setVisible(true);
-    fetchDetailedEvent(event);
-  }
 
-  private void fetchDetailedEvent(Event event) {
-    final String neicEvid = event.getEventSource() + event.getEvid();
-    final Event workingEvent = event;
+    pickBox = new JPanel();
+    pickBox.setLayout(new BoxLayout(pickBox, BoxLayout.PAGE_AXIS));
 
-    new Thread() {
-      public void run() {
-        String url = "http://earthquake.usgs.gov/fdsnws/event/1/query?eventid=" + neicEvid;
-
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = null;
-        Document doc = null;
-        try {
-
-          dBuilder = dbFactory.newDocumentBuilder();
-          doc = dBuilder.parse(url);
-          doc.getDocumentElement().normalize();
-          NodeList eventElements = doc.getElementsByTagName("event");
-          LOGGER.debug("Got {} events.", eventElements.getLength());
-          workingEvent.updateEvent((Element) eventElements.item(0));
-
-          WebServicesClient.getWave(wsDataSelectUrl, channelInfo, t1, t2);
-          
-        } catch (SAXException e1) {
-          // TODO Auto-generated catch block
-          e1.printStackTrace();
-        } catch (IOException e1) {
-          // TODO Auto-generated catch block
-          e1.printStackTrace();
-        } catch (ParserConfigurationException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
-      }
-    }.start();
-  }
-
-  private void createUI() {
-    this.setFrameIcon(Icons.ruler);
-    this.setSize(swarmConfig.clipboardWidth, swarmConfig.clipboardHeight);
-    this.setLocation(swarmConfig.clipboardX, swarmConfig.clipboardY);
-    this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+    setFrameIcon(Icons.ruler);
+    setSize(swarmConfig.clipboardWidth, swarmConfig.clipboardHeight);
+    setLocation(swarmConfig.clipboardX, swarmConfig.clipboardY);
+    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     LOGGER.debug("event frame: {} @ {}", this.getSize(), this.getLocation());
-
-    // JPanel pickPanel = new JPanel();
-    // pickPanel.setLayout(new BoxLayout(pickPanel, BoxLayout.PAGE_AXIS));
 
     mainPanel =
         new JSplitPane(JSplitPane.VERTICAL_SPLIT, createParameterPanel(), createPickPanel());
     mainPanel.setOneTouchExpandable(true);
 
+    setContentPane(mainPanel);
+    this.setVisible(true);
 
-    // scrollPane = new JScrollPane(createParameterPanel());
-    // parameterPanel.add(scrollPane, BorderLayout.NORTH);
+    // fetchDetailedEvent();
 
-    // Box pickBox = new Box(BoxLayout.Y_AXIS);
-    // scrollPane = new JScrollPane(pickBox);
-    // scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-    // scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-    // scrollPane.getVerticalScrollBar().setUnitIncrement(40);
-    // pickPanel.add(scrollPane, BorderLayout.NORTH);
+    new SwingWorker() {
+      @Override
+      public Object construct() {
+        fetchDetailedEvent();
+        populatePicks();
+        return null;
+      }
 
-    // mainPanel.setResizeWeight(.25);
-    this.setContentPane(mainPanel);
+      @Override
+      public void finished() {
+        repaint();
+      }
+    }.start();
+
   }
-
 
   private Component createParameterPanel() {
     Origin origin = event.getPreferredOrigin();
@@ -212,24 +179,6 @@ public class EventFrame extends SwarmFrame implements EventObserver {
   }
 
   private Component createPickPanel() {
-    Box pickBox = new Box(BoxLayout.Y_AXIS);
-
-    Origin origin = event.getPreferredOrigin();
-    Magnitude magnitude = event.getPerferredMagnitude();
-
-    long firstPick = Long.MAX_VALUE;
-    long lastPick = Long.MIN_VALUE;
-    for (Arrival arrival : origin.getArrivals()) {
-      WaveViewPanel wavePanel = new WaveViewPanel();
-
-      Pick pick = arrival.getPick();
-      firstPick = Math.min(pick.getTime(), firstPick);
-      lastPick = Math.max(pick.getTime(), lastPick);
-      String channel = pick.getChannel();
-      wavePanel.setChannel(channel);
-
-      pickBox.add(wavePanel);
-    }
 
     JScrollPane scrollPane = new JScrollPane(pickBox);
     scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -239,36 +188,77 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     return scrollPane;
   }
 
-  // public synchronized void addWave(final String chan) {
-  // SeismicDataSource sds = p2.getDataSource();
-  // double st = p2.getStartTime();
-  // double et = p2.getEndTime();
-  // Wave wave = sds.getWave(chan, st, et);
-  // if (wave != null && wave.isData()) {
-  // p2.setWave(wave, st, et);
-  // p2.getWaveViewSettings().autoScaleAmpMemory = false;
-  // addWave(p2);
-  // }
-  // }
-  //
-  // public synchronized void addWave(final PickerWavePanel p) {
-  // p.addListener(selectListener);
-  // p.setOffsets(54, 8, 21, 19);
-  // p.setAllowClose(true);
-  // p.setStatusLabel(statusLabel);
-  // p.setAllowDragging(true);
-  // p.setDisplayTitle(true);
-  //// p.setEvent(event);
-  // p.setParent(mainPanel);
-  // final int w = scrollPane.getViewport().getSize().width;
-  // p.setSize(w, calculateWaveHeight());
-  // p.setBottomBorderColor(Color.GRAY);
-  // p.createImage();
-  // waveBox.add(p);
-  // waves.add(p);
-  // LOGGER.debug("{} panels; {} waves", waveBox.getComponentCount(), waves.size());
-  // }
+  public void fetchDetailedEvent() {
+    final String neicEvid = event.getEventSource() + event.getEvid();
+    final Event workingEvent = event;
+    String url = "http://earthquake.usgs.gov/fdsnws/event/1/query?eventid=" + neicEvid;
 
+    DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+    DocumentBuilder dBuilder = null;
+    Document doc = null;
+    
+    try {
+      dBuilder = dbFactory.newDocumentBuilder();
+      doc = dBuilder.parse(url);
+      doc.getDocumentElement().normalize();
+      NodeList eventElements = doc.getElementsByTagName("event");
+      workingEvent.updateEvent((Element) eventElements.item(0));
+    } catch (SAXException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    } catch (IOException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    } catch (ParserConfigurationException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  private void populatePicks() {
+    Origin origin = event.getPreferredOrigin();
+    
+    long firstPick = Long.MAX_VALUE;
+    long lastPick = Long.MIN_VALUE;
+    for (Arrival arrival : origin.getArrivals()) {
+      Pick pick = arrival.getPick();
+      firstPick = Math.min(pick.getTime(), firstPick);
+      lastPick = Math.max(pick.getTime(), lastPick);
+    }
+
+    double waveStart = J2kSec.fromEpoch(firstPick) - 1;
+    double waveEnd = J2kSec.fromEpoch(lastPick) + 1;
+    LOGGER.debug("wave span {} - {}", waveStart, waveEnd);
+
+    for (Arrival arrival : origin.getArrivals()) {
+      Pick pick = arrival.getPick();
+
+      WaveViewPanel wavePanel = new WaveViewPanel();
+      wavePanel.setChannel(pick.getChannel());
+      Wave wave = WebServicesClient.getWave(pick.getChannel(), waveStart, waveEnd);
+      if (wave == null) {
+        continue;
+      }
+      LOGGER.debug("Got {} samples", wave.numSamples());
+      wavePanel.setWave(wave, waveStart, waveEnd);
+      wavePanel.setSize(600, 200);
+      wavePanel.getWaveViewSettings().autoScaleAmpMemory = false;
+
+      pickBox.add(Box.createVerticalGlue());
+
+      pickBox.add(wavePanel);
+      pickBox.add(Box.createVerticalGlue());
+      pickBox.add(new JLabel(pick.getChannel()));
+
+      wavePanel.repaint();
+      pickBox.repaint();
+      mainPanel.repaint();
+      EventFrame.this.repaint();
+
+      LOGGER.debug("pickBox {}", pickBox.countComponents());
+    }    
+  }
+  
   @Override
   public void paint(final Graphics g) {
     super.paint(g);
@@ -286,7 +276,6 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     if (isVisible)
       toFront();
   }
-
 
   public void eventUpdated() {
     mainPanel.setTopComponent(createParameterPanel());
@@ -315,8 +304,5 @@ public class EventFrame extends SwarmFrame implements EventObserver {
       @Override
       public void componentResized(final ComponentEvent e) {}
     });
-
-
   }
-
 }

@@ -437,7 +437,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
     for (final JInternalFrame frame : SwarmInternalFrames.getFrames()) {
       // Why did this check isVisible()?
-//       if (frame.isVisible() && frame instanceof Kioskable) {
+      // if (frame.isVisible() && frame instanceof Kioskable) {
       if (frame instanceof Kioskable) {
         final Kioskable f = (Kioskable) frame;
         f.setKioskMode(full);
@@ -588,8 +588,8 @@ public class Swarm extends JFrame implements InternalFrameListener {
     pickerFrame.setBaseWave(p);
     return pickerFrame;
   }
-  
-  public static PickerFrame  openPicker(Event event) {
+
+  public static PickerFrame openPicker(Event event) {
     PickerFrame pickerFrame = new PickerFrame(event);
     pickerFrame.setVisible(true);
     pickerFrame.requestFocus();
@@ -967,11 +967,12 @@ public class Swarm extends JFrame implements InternalFrameListener {
       swarm.parseKiosk();
   }
 
-  public static EventFrame openEvent(Event event) {
-    EventFrame eventFrame = new EventFrame(event);
+  public static EventFrame openEvent(final Event event) {
+    final EventFrame eventFrame = new EventFrame(event);
     eventFrame.setVisible(true);
     eventFrame.requestFocus();
     SwarmInternalFrames.add(eventFrame);
+
     return eventFrame;
   }
 
