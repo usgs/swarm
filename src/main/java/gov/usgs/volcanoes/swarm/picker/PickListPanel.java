@@ -1,5 +1,8 @@
 package gov.usgs.volcanoes.swarm.picker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -22,12 +25,10 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.swarm.event.Arrival;
 import gov.usgs.volcanoes.swarm.event.Event;
+import gov.usgs.volcanoes.swarm.event.EventObserver;
 import gov.usgs.volcanoes.swarm.event.Origin;
 import gov.usgs.volcanoes.swarm.event.Pick;
 
@@ -96,7 +97,6 @@ public class PickListPanel extends JPanel implements EventObserver {
     label = new JLabel("First Motion", SwingConstants.CENTER);
     label.setBorder(border);
     pickList.add(label, c);
-
     LOGGER.debug("event: {} : {}", event, event.getPreferredOrigin());
     Origin origin = event.getPreferredOrigin();
     if (origin != null) {
@@ -158,7 +158,6 @@ public class PickListPanel extends JPanel implements EventObserver {
   public void writeArrival(final JPanel pickList, final Arrival arrival,
       final GridBagConstraints c) {
     c.gridy++;
-
     boolean isSelected = selected.contains(arrival);
     Pick pick = arrival.getPick();
 
@@ -185,7 +184,6 @@ public class PickListPanel extends JPanel implements EventObserver {
     });
     pickList.add(weight, c);
     c.fill = GridBagConstraints.HORIZONTAL;
-
     c.fill = GridBagConstraints.NONE;
     Phase.Onset[] onsets = Phase.Onset.values();
     final JComboBox<Phase.Onset> onset = new JComboBox<Phase.Onset>(onsets);
@@ -319,7 +317,7 @@ public class PickListPanel extends JPanel implements EventObserver {
     }
   }
 
-  public void updateEvent() {
+  public void eventUpdated() {
     if (event == null) {
       return;
     }
@@ -382,7 +380,10 @@ public class PickListPanel extends JPanel implements EventObserver {
   }
 
   public void repaint() {
-    updateEvent();
+    eventUpdated();
     super.repaint();
+    
+    
+    
   }
 }

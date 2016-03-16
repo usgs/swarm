@@ -1,5 +1,8 @@
 package gov.usgs.volcanoes.swarm.picker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -54,9 +57,6 @@ import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.data.file.FileType;
 import gov.usgs.plot.data.file.SeismicDataFile;
@@ -79,6 +79,7 @@ import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.event.Event;
+import gov.usgs.volcanoes.swarm.event.EventObserver;
 import gov.usgs.volcanoes.swarm.picker.hypo71.Hypo71Locator;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
@@ -1144,7 +1145,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
   }
 
 
-  public void updateEvent() {
+  public void eventUpdated() {
 //    LOGGER.debug("event is empty? {}", event.getChannels().isEmpty());
 //    saveButton.setEnabled(!event.getChannels().isEmpty());
   }

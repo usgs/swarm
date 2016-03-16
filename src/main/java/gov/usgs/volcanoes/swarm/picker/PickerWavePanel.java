@@ -1,26 +1,18 @@
 package gov.usgs.volcanoes.swarm.picker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
-import java.awt.MouseInfo;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 
-import javax.swing.AbstractAction;
-import javax.swing.JComponent;
-import javax.swing.KeyStroke;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.ui.GlobalKeyManager;
-import gov.usgs.volcanoes.core.ui.UiUtils;
+import gov.usgs.volcanoes.swarm.event.EventObserver;
 import gov.usgs.volcanoes.swarm.picker.Phase.PhaseType;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
@@ -157,7 +149,7 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
     pauseCursorMark = false;
   }
 
-  public void updateEvent() {
+  public void eventUpdated() {
     repaint();
   }
 

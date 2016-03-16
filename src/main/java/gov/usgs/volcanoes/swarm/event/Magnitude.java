@@ -24,5 +24,9 @@ public class Magnitude {
   public double getMag() {
     return mag;
   }
+  
+  public String getType() {
+    return type;
+  }
 
 }

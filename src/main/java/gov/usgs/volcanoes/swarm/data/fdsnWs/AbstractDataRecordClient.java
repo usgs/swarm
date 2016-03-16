@@ -43,7 +43,7 @@ public abstract class AbstractDataRecordClient {
    * @throws UnsupportedCompressionType
    * @throws CodecException
    */
-  public List<Wave> addWaves(final List<Wave> waves, final DataRecord dr)
+  public static List<Wave> addWaves(final List<Wave> waves, final DataRecord dr)
       throws UnsupportedCompressionType, CodecException {
     for (Blockette blockette : dr.getBlockettes(1000)) {
       if (blockette instanceof Blockette1000) {
@@ -67,7 +67,7 @@ public abstract class AbstractDataRecordClient {
    * 
    * @return the list of waves.
    */
-  public List<Wave> createWaves() {
+  public static List<Wave> createWaves() {
     return new ArrayList<Wave>();
   }
 
@@ -84,7 +84,7 @@ public abstract class AbstractDataRecordClient {
    * @param t the time.
    * @return the date.
    */
-  protected Date getDate(double t) {
+  protected static Date getDate(double t) {
     return J2kSec.asDate(t);
   }
 
@@ -94,7 +94,7 @@ public abstract class AbstractDataRecordClient {
    * @param date the date.
    * @return the text.
    */
-  protected String getDateText(Date date) {
+  protected static String getDateText(Date date) {
     return WebServiceUtils.getDateText(date);
   }
 
@@ -104,7 +104,7 @@ public abstract class AbstractDataRecordClient {
    * @param date the date.
    * @return the text.
    */
-  protected String getDateText(double t) {
+  protected static String getDateText(double t) {
     return getDateText(getDate(t));
   }
 
@@ -133,7 +133,7 @@ public abstract class AbstractDataRecordClient {
    * @param waves the list of <code>Wave</code> s
    * @return the new joined wave
    */
-  public Wave join(List<Wave> waves) {
+  public static Wave join(List<Wave> waves) {
     // TODO ensure index is good and no gaps?
     return Wave.join(waves);
   }

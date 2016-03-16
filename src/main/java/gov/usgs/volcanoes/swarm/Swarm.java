@@ -1,5 +1,10 @@
 package gov.usgs.volcanoes.swarm;
 
+import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.KeyboardFocusManager;
@@ -24,12 +29,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
-
-import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
-
 import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.time.CurrentTime;
@@ -40,6 +39,7 @@ import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.event.Event;
+import gov.usgs.volcanoes.swarm.event.EventFrame;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
 import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
@@ -965,6 +965,14 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
     if (Swarm.config.isKiosk())
       swarm.parseKiosk();
+  }
+
+  public static EventFrame openEvent(Event event) {
+    EventFrame eventFrame = new EventFrame(event);
+    eventFrame.setVisible(true);
+    eventFrame.requestFocus();
+    SwarmInternalFrames.add(eventFrame);
+    return eventFrame;
   }
 
 

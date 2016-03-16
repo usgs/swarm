@@ -1,12 +1,14 @@
 package gov.usgs.volcanoes.swarm.picker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import gov.usgs.volcanoes.swarm.event.EventObserver;
 
 public class EventOld {
   private static final Logger LOGGER = LoggerFactory.getLogger(EventOld.class);
@@ -61,7 +63,7 @@ public class EventOld {
 
   public void notifyObservers() {
     for (EventObserver observer : observers) {
-      observer.updateEvent();
+      observer.eventUpdated();
     }
   }
 

@@ -1,5 +1,13 @@
 package gov.usgs.volcanoes.swarm.map.hypocenters;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -24,14 +32,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
 import gov.usgs.plot.render.DataPointRenderer;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.Projection;
@@ -41,6 +41,7 @@ import gov.usgs.volcanoes.swarm.ConfigListener;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.event.Event;
+import gov.usgs.volcanoes.swarm.event.Magnitude;
 import gov.usgs.volcanoes.swarm.event.Origin;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.map.MapLayer;
@@ -70,8 +71,8 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
   private Point hoverLocation;
 
   public HypocenterLayer() {
-//    events = new HashMap<String, Event>();
-  events = new ConcurrentHashMap<String, Event>();
+    // events = new HashMap<String, Event>();
+    events = new ConcurrentHashMap<String, Event>();
     dateFormat = new SimpleDateFormat(DATE_FORMAT);
     swarmConfig = SwarmConfig.getInstance();
     swarmConfig.addListener(this);
@@ -189,27 +190,52 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
       renderer.renderAtOrigin(g2);
 
       if (event == hoverEvent) {
-        drawPopup(g2);
       }
       g2.translate(-res.x, -res.y);
     }
+
+    drawPopup(g2);
   }
 
   private void drawPopup(Graphics2D g2) {
+    if (hoverEvent == null) {
+      return;
+    }
     Origin origin = hoverEvent.getPreferredOrigin();
+    GeoRange range = panel.getRange();
+    Projection projection = panel.getProjection();
+    int widthPx = panel.getGraphWidth();
+    int heightPx = panel.getGraphHeight();
+    int insetPx = panel.getInset();
+
+    final Point2D.Double xy =
+        projection.forward(new Point2D.Double(origin.getLongitude(), origin.getLatitude()));
+    final double[] ext = range.getProjectedExtents(projection);
+    final double dx = (ext[1] - ext[0]);
+    final double dy = (ext[3] - ext[2]);
+    final Point2D.Double res = new Point2D.Double();
+    res.x = (((xy.x - ext[0]) / dx) * widthPx + insetPx);
+    res.y = ((1 - (xy.y - ext[2]) / dy) * heightPx + insetPx);
+
+    g2.translate(res.x, res.y);
 
     g2.setStroke(new BasicStroke(1.2f));
     g2.setColor(new Color(0, 0, 0, 64));
 
     List<String> text = new ArrayList<String>(3);
-    String depth = String.format("Depth: %.2f km", (origin.getDepth() / 1000));
-    text.add(depth);
+    // String depth = String.format("Depth: %.2f km", (origin.getDepth() / 1000));
+    // text.add(depth);
 
-    String mag = String.format("Mag: %.2f", (hoverEvent.getPerferredMagnitude().getMag()));
+    Magnitude magElement = hoverEvent.getPerferredMagnitude();
+    String mag = String.format("%.2f %s at %.2f km depth", magElement.getMag(),
+        magElement.getType(), (origin.getDepth() / 1000));
     text.add(mag);
 
     String date = Time.format(Time.STANDARD_TIME_FORMAT, new Date(origin.getTime()));
-    text.add(date);
+    text.add(date + " UTC");
+
+    String description = hoverEvent.getDescription();
+    text.add(description);
 
     FontMetrics fm = g2.getFontMetrics();
     int height = 2 * POPUP_PADDING;
@@ -232,6 +258,8 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
       Rectangle2D bounds = fm.getStringBounds(string, g2);
       baseY += (int) (Math.ceil(bounds.getHeight()) + 2);
     }
+    g2.translate(-res.x, -res.y);
+
   }
 
   public boolean mouseClicked(final MouseEvent e) {
@@ -267,15 +295,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
 
       if (r.contains(e.getPoint())) {
         LOGGER.debug("event clicked");
-        try {
-          Swarm.openPicker(getDetailedEvent(event.getEventSource() + event.getEvid()));
-        } catch (ParserConfigurationException e1) {
-          e1.printStackTrace();
-        } catch (SAXException e1) {
-          LOGGER.debug("SAXExcepton");
-        } catch (IOException e1) {
-          e1.printStackTrace();
-        }
+        Swarm.openEvent(event);
         return true;
       }
     }
@@ -283,7 +303,8 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
     return handled;
   }
 
-  private Event getDetailedEvent(String evid) throws ParserConfigurationException, SAXException, IOException {
+  private Event getDetailedEvent(String evid)
+      throws ParserConfigurationException, SAXException, IOException {
     String url = "http://earthquake.usgs.gov/fdsnws/event/1/query?eventid=" + evid;
 
     DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -322,7 +343,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
     while (it.hasNext() && handled == false) {
       Event event = it.next();
       Origin origin = event.getPreferredOrigin();
-      final Rectangle r = new Rectangle(-7, -7, 17, 17);
+      final Rectangle r = new Rectangle(0, 0, 10, 10);
 
       final Point2D.Double xy =
           projection.forward(new Point2D.Double(origin.getLongitude(), origin.getLatitude()));

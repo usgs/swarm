@@ -223,4 +223,51 @@ public class WebServicesClient extends AbstractDataRecordClient {
     }
     return wave;
   }
+  
+  /**
+   * Retrieve a single waveform without providing full SDS functions.
+   * 
+   * TODO: integrate with getRawData(). should all SDSs have a static wave retrieval method?
+   * 
+   * @param channelInfo the channel information.
+   * @param t1 the start time.
+   * @param t2 the end time.
+   * @return the raw data.
+   */
+  public static Wave getWave(final String wsDataSelectUrl, final ChannelInfo channelInfo, final double t1, final double t2) {
+    final Date begin = getDate(t1);
+    final Date end = getDate(t2);
+    final List<Wave> waves = createWaves();
+    final DataSelectReader reader = new DataSelectReader(wsDataSelectUrl) {
+      /**
+       * Process a data record.
+       * 
+       * @param dr the data record.
+       * @return true if data record should be added to the list, false
+       *         otherwise.
+       */
+      public boolean processRecord(DataRecord dr) {
+        try {
+          addWaves(waves, dr);
+        } catch (Exception ex) {
+          LOGGER.warn("could not get web service raw data ({}): {}", channelInfo, ex.getMessage());
+        }
+        return true;
+      }
+    };
+    try {
+      final String query = reader.createQuery(channelInfo.getNetwork(), channelInfo.getStation(),
+          channelInfo.getLocation(), channelInfo.getChannel(), begin, end);
+      reader.read(query, (List<DataRecord>) null);
+    } catch (Exception ex) {
+      LOGGER.warn("could not get web service raw data ({}): {}", channelInfo, ex.getMessage());
+    }
+    Wave wave = join(waves);
+    if (wave != null && WebServiceUtils.isDebug()) {
+      LOGGER.debug("web service raw data ({}, {})", getDateText(wave.getStartTime()),
+          getDateText(wave.getEndTime()) + ")");
+    }
+    return wave;
+  }
+
 }

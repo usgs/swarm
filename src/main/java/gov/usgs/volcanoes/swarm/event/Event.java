@@ -1,18 +1,24 @@
 package gov.usgs.volcanoes.swarm.event;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
-import gov.usgs.volcanoes.swarm.picker.EventObserver;
+import gov.usgs.volcanoes.core.util.StringUtils;
+
 
 public class Event {
   private static final Logger LOGGER = LoggerFactory.getLogger(Event.class);
@@ -42,14 +48,14 @@ public class Event {
   public Event(Element event) {
     this(event.getAttribute("publicID"));
 
-    parseEvent(event);
+    updateEvent(event);
   }
 
   public void addObserver(EventObserver observer) {
     observers.add(observer);
   }
 
-  private void parseEvent(Element event) {
+  public void updateEvent(Element event) {
 
     // order matters.
     parsePicks(event.getElementsByTagName("pick"));
@@ -66,11 +72,22 @@ public class Event {
       preferredMagnitude = (Magnitude) magnitudes.values().toArray()[0];
     }
 
-    eventSource = event.getAttribute("catalog:eventsource");
-    evid = event.getAttribute("catalog:eventid");
+    eventSource = StringUtils.stringToString(event.getAttribute("catalog:eventsource"), eventSource);
+    evid = StringUtils.stringToString(event.getAttribute("catalog:eventid"), evid);
+    
+    Element descriptionElement = (Element) event.getElementsByTagName("description").item(0);
+    description = StringUtils.stringToString(descriptionElement.getElementsByTagName("text").item(0).getTextContent(), description);
+
+    notifyObservers();
   }
 
+  private void notifyObservers() {
+    for (EventObserver observer : observers) {
+      observer.eventUpdated();
+    }
+  }
   private void parsePicks(NodeList pickElements) {
+    picks.clear();
     int pickCount = pickElements.getLength();
     for (int idx = 0; idx < pickCount; idx++) {
       Pick pick = new Pick((Element) pickElements.item(idx));
@@ -80,6 +97,7 @@ public class Event {
 
 
   private void parseOrigins(NodeList originElements) {
+    origins.clear();
     int originCount = originElements.getLength();
     for (int idx = 0; idx < originCount; idx++) {
       Origin origin = new Origin((Element) originElements.item(idx), picks);
@@ -93,8 +111,9 @@ public class Event {
   }
 
   private void parseMagnitudes(NodeList magnitudeElements) {
-    int originCount = magnitudeElements.getLength();
-    for (int idx = 0; idx < originCount; idx++) {
+    magnitudes.clear();
+    int magnitudeCount = magnitudeElements.getLength();
+    for (int idx = 0; idx < magnitudeCount; idx++) {
       Magnitude magnitude = new Magnitude((Element) magnitudeElements.item(idx));
       magnitudes.put(magnitude.publicId, magnitude);
     }
@@ -115,4 +134,21 @@ public class Event {
     return null;
   }
 
+  public String getDescription() {
+    return description;
+  }
+
+private Event getDetailedEvent(String evid)
+     throws ParserConfigurationException, SAXException, IOException {
+   String url = "http://earthquake.usgs.gov/fdsnws/event/1/query?eventid=" + evid;
+
+   DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+   DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+   Document doc = dBuilder.parse(url);
+   doc.getDocumentElement().normalize();
+
+   NodeList eventElements = doc.getElementsByTagName("event");
+   LOGGER.debug("Got {} events.", eventElements.getLength());
+   return new Event((Element) eventElements.item(0));
+ }
 }
