@@ -631,7 +631,6 @@ public class MapPanel extends JPanel {
 
   private BufferedImage updateMapRenderer() {
     BufferedImage mi = null;
-    final CodeTimer ct = new CodeTimer("whole map");
     try {
       swarmConfig.mapScale = scale;
       swarmConfig.mapLongitude = center.x;
@@ -646,9 +645,7 @@ public class MapPanel extends JPanel {
       LOGGER.debug("map scale: " + scale);
       LOGGER.debug("center: " + center.x + " " + center.y);
       final MapRenderer mr = new MapRenderer(range, projection);
-      ct.mark("pre bg");
       image = images.getMapBackground(projection, range, width, scale);
-      ct.mark("bg");
       mr.setLocation(INSET, INSET, width);
       mr.setMapImage(image);
       mr.setGeoLabelSet(labels);
@@ -677,12 +674,9 @@ public class MapPanel extends JPanel {
       final Plot plot = new Plot();
       plot.setSize(mapImagePanel.getWidth(), mapImagePanel.getHeight());
       plot.addRenderer(renderer);
-      ct.mark("pre plot");
       mi = plot.getAsBufferedImage(false);
-      ct.mark("plot");
       dragDX = Integer.MAX_VALUE;
       dragDY = Integer.MAX_VALUE;
-      ct.stopAndReport();
     } catch (final Exception e) {
       LOGGER.error("Exception during map creation. {}", e);
     } finally {

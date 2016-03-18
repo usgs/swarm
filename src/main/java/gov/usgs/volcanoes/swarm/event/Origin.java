@@ -20,12 +20,6 @@ import org.w3c.dom.NodeList;
 
 public class Origin {
   private static final Logger LOGGER = LoggerFactory.getLogger(Origin.class);
-  private static final List<String> DATE_FORMATS = new ArrayList<String>();
-
-  static {
-    DATE_FORMATS.add("yyyy-MM-dd'T'HH:mm:ss.SSSX");
-    DATE_FORMATS.add("yyyy-MM-dd'T'HH:mm:ss.SS");
-  }
 
   public final String publicId;
   private double latitude;
@@ -53,22 +47,7 @@ public class Origin {
 
     Element timeElement = (Element) originElement.getElementsByTagName("time").item(0);
     time = 0;
-    Iterator<String> it = DATE_FORMATS.iterator();
-    while (it.hasNext() && time < 1) {
-      String format = it.next();
-      DateFormat dateFormat = new SimpleDateFormat(format);
-      dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-      try {
-        time = dateFormat.parse(timeElement.getElementsByTagName("value").item(0).getTextContent())
-            .getTime();
-      } catch (DOMException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (ParseException e) {
-        System.out.println(timeElement.getElementsByTagName("value").item(0).getTextContent()
-            + " didn't match " + format);
-      }
-    }
+    time = QuakeMlUtils.parseTime(timeElement.getElementsByTagName("value").item(0).getTextContent());
     
     parseArrivals(originElement.getElementsByTagName("arrival"), picks);
   }

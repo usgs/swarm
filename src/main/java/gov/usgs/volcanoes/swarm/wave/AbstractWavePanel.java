@@ -86,7 +86,7 @@ public abstract class AbstractWavePanel extends JComponent {
    */
   protected SeismicDataSource source;
   /**
-   * A flag to indicate wheter the plot should display a title. Currently used when the plot is on
+   * A flag to indicate whether the plot should display a title. Currently used when the plot is on
    * the clipboard or monitor.
    */
   protected boolean displayTitle;
@@ -622,15 +622,11 @@ public abstract class AbstractWavePanel extends JComponent {
     final Runnable r = new Runnable() {
       public void run() {
         if (getWidth() > 0 && getHeight() > 0) {
-          LOGGER.debug("PAINTING");
           BufferedImage bi =
               new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
           Graphics2D ig = (Graphics2D) bi.getGraphics();
           constructPlot(ig);
           setImage(bi);
-          
-        } else {
-          LOGGER.debug("SKIPPING SIZE");
         }
       }
     };
@@ -647,8 +643,10 @@ public abstract class AbstractWavePanel extends JComponent {
         }
       };
       worker.start();
-    } else
+    } else {
+
       r.run();
+    }
   }
 
   /**
@@ -706,8 +704,6 @@ public abstract class AbstractWavePanel extends JComponent {
    * @param g the graphics context
    */
   public void paint(Graphics g) {
-    LOGGER.debug("START PAINTING WAVE");
-
     Graphics2D g2 = (Graphics2D) g;
     Dimension dim = this.getSize();
     if (wave == null) {
@@ -724,7 +720,6 @@ public abstract class AbstractWavePanel extends JComponent {
         g2.drawString(error, dim.width / 2 - w / 2, dim.height / 2);
       }
     } else {
-      LOGGER.debug("PAINTING WAVE");
       BufferedImage bi = getImage();
       if (bi != null)
         g2.drawImage(bi, 0, 0, null);
@@ -753,8 +748,6 @@ public abstract class AbstractWavePanel extends JComponent {
       g2.setColor(borderColor);
       g2.drawRect(0, 0, dim.width - 1, dim.height - 2);
     }
-    
-    LOGGER.debug("finished painting wave");
   }
 
   public void setUseFilterLabel(boolean b) {

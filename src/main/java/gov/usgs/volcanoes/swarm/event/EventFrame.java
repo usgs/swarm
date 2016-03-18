@@ -15,8 +15,11 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -38,7 +41,6 @@ import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmFrame;
 import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesClient;
 import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
@@ -58,9 +60,10 @@ public class EventFrame extends SwarmFrame implements EventObserver {
   public static final long serialVersionUID = -1;
 
   private JSplitPane mainPanel;
+  private JScrollPane pickScrollPane;
   private Event event;
   private SeismicDataSource seismicDataSource;
-  private final JPanel pickBox;
+  private final PickPanel pickBox;
 
   public EventFrame(Event event) {
     super("Event - " + event.getEvid(), true, true, true, false);
@@ -69,7 +72,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     this.setFocusable(true);
     createListeners();
 
-    pickBox = new JPanel();
+    pickBox = new PickPanel();
     pickBox.setLayout(new BoxLayout(pickBox, BoxLayout.PAGE_AXIS));
 
     setFrameIcon(Icons.ruler);
@@ -78,14 +81,13 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     LOGGER.debug("event frame: {} @ {}", this.getSize(), this.getLocation());
 
-    mainPanel =
-        new JSplitPane(JSplitPane.VERTICAL_SPLIT, createParameterPanel(), createPickPanel());
+
+    pickScrollPane = createPickPanel();
+    mainPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, createParameterPanel(), pickScrollPane);
     mainPanel.setOneTouchExpandable(true);
 
     setContentPane(mainPanel);
     this.setVisible(true);
-
-    // fetchDetailedEvent();
 
     new SwingWorker() {
       @Override
@@ -100,7 +102,6 @@ public class EventFrame extends SwarmFrame implements EventObserver {
         repaint();
       }
     }.start();
-
   }
 
   private Component createParameterPanel() {
@@ -178,12 +179,18 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     return parameterPanel;
   }
 
-  private Component createPickPanel() {
+  private JScrollPane createPickPanel() {
 
-    JScrollPane scrollPane = new JScrollPane(pickBox);
+    final JScrollPane scrollPane = new JScrollPane(pickBox);
     scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     scrollPane.getVerticalScrollBar().setUnitIncrement(40);
+    scrollPane.addComponentListener(new ComponentAdapter() {
+      @Override
+      public void componentResized(final ComponentEvent e) {
+        scrollPane.getViewport().setSize(scrollPane.getWidth(), scrollPane.getViewport().getHeight());
+      }
+    });
 
     return scrollPane;
   }
@@ -196,7 +203,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder dBuilder = null;
     Document doc = null;
-    
+
     try {
       dBuilder = dbFactory.newDocumentBuilder();
       doc = dBuilder.parse(url);
@@ -217,7 +224,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
 
   private void populatePicks() {
     Origin origin = event.getPreferredOrigin();
-    
+
     long firstPick = Long.MAX_VALUE;
     long lastPick = Long.MIN_VALUE;
     for (Arrival arrival : origin.getArrivals()) {
@@ -230,35 +237,16 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     double waveEnd = J2kSec.fromEpoch(lastPick) + 1;
     LOGGER.debug("wave span {} - {}", waveStart, waveEnd);
 
+    pickBox.setStart(waveStart);
+    pickBox.setEnd(waveEnd);
+
     for (Arrival arrival : origin.getArrivals()) {
-      Pick pick = arrival.getPick();
-
-      WaveViewPanel wavePanel = new WaveViewPanel();
-      wavePanel.setChannel(pick.getChannel());
-      Wave wave = WebServicesClient.getWave(pick.getChannel(), waveStart, waveEnd);
-      if (wave == null) {
-        continue;
-      }
-      LOGGER.debug("Got {} samples", wave.numSamples());
-      wavePanel.setWave(wave, waveStart, waveEnd);
-      wavePanel.setSize(600, 200);
-      wavePanel.getWaveViewSettings().autoScaleAmpMemory = false;
-
-      pickBox.add(Box.createVerticalGlue());
-
-      pickBox.add(wavePanel);
-      pickBox.add(Box.createVerticalGlue());
-      pickBox.add(new JLabel(pick.getChannel()));
-
-      wavePanel.repaint();
-      pickBox.repaint();
-      mainPanel.repaint();
-      EventFrame.this.repaint();
-
+      pickBox.addPick(arrival);
+      mainPanel.validate();
       LOGGER.debug("pickBox {}", pickBox.countComponents());
-    }    
+    }
   }
-  
+
   @Override
   public void paint(final Graphics g) {
     super.paint(g);
@@ -305,4 +293,10 @@ public class EventFrame extends SwarmFrame implements EventObserver {
       public void componentResized(final ComponentEvent e) {}
     });
   }
+
+  // private synchronized void createImage() {
+  // if (getWidth() > 0 && getHeight() > 0)
+  // image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+  // }
+
 }
