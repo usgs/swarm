@@ -1013,11 +1013,19 @@ public class MapPanel extends JPanel {
   }
   
   public int getGraphWidth() {
-    return renderer.getGraphWidth();
+    int width = 0;
+    if (renderer != null) {
+      width = renderer.getGraphWidth();
+    }
+    return width;
   }
   
   public int getGraphHeight() {
-    return renderer.getGraphHeight();
+    int height = 0;
+    if (renderer != null) {
+      height = renderer.getGraphHeight();
+    }
+    return height;
   }
   
   public int getInset() {

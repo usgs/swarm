@@ -14,7 +14,8 @@ public class QuakeMlUtils {
     String inString = timeString;
     timeString = timeString.replaceFirst("\\.(\\d)Z?", ".$100Z");
     timeString = timeString.replaceFirst("\\.(\\d{2})Z?$", ".$10Z");
-    
+    timeString = timeString.replaceFirst(":(\\d{2})Z?$", ":$1.000Z");
+
     long time = Long.MIN_VALUE;
     SimpleDateFormat dateF = new SimpleDateFormat(DATE_FORMAT);
     try {

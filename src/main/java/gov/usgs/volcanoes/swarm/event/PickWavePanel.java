@@ -4,19 +4,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.swarm.picker.Phase;
+import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
 
 public class PickWavePanel extends AbstractWavePanel implements EventObserver {
 
@@ -25,16 +27,39 @@ public class PickWavePanel extends AbstractWavePanel implements EventObserver {
   private static final Font ANNOTATION_FONT = new Font("Monospaced", Font.BOLD, 12);
   private static final Color P_BACKGROUND = new Color(128, 255, 128, 192);
   private static final Color S_BACKGROUND = new Color(128, 128, 255, 192);
-  private static final Color CODA_BACKGROUND = new Color(128, 128, 128, 192);
+  private static final Color RESIDUAL_COLOR = new Color(128, 128, 128, 32);
   private final List<Arrival> arrivals;
+  private final Stack<double[]> zoomHistory;
 
   public PickWavePanel() {
     super();
+    allowDragging = true;
     arrivals = new ArrayList<Arrival>();
+    zoomHistory = new Stack<double[]>();
+    createListeners();
   }
 
   public void addArrival(Arrival arrival) {
     arrivals.add(arrival);
+  }
+
+
+  private void createListeners() {
+    WaveViewTime.addTimeListener(new TimeListener() {
+      public void timeChanged(final double j2k) {
+        setCursorMark(j2k);
+      }
+    });
+
+    this.addListener(new WaveViewPanelAdapter() {
+      @Override
+      public void waveZoomed(final AbstractWavePanel src, final double st, final double et,
+          final double nst, final double net) {
+        final double[] t = new double[] {st, et};
+        zoomHistory.push(t);
+        zoom(nst, net);
+      }
+    });
   }
 
   @Override
@@ -42,15 +67,24 @@ public class PickWavePanel extends AbstractWavePanel implements EventObserver {
     for (Arrival arrival : arrivals) {
       Pick pick = arrival.getPick();
 
-      String tag = arrival.getPhase();
+      String tag = arrival.getTag();
       double j2k = J2kSec.fromEpoch(pick.getTime());
       double[] t = getTranslation();
       if (t == null)
         continue;
-      
+
       double x = 2 + (j2k - t[1]) / t[0];
       g2.setColor(DARK_GREEN);
       g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
+
+      double residual = arrival.getTimeResidual();
+      if (residual != 0) {
+        double residualMark = 2 + (j2k + residual - t[1]) / t[0];
+        g2.setColor(RESIDUAL_COLOR);
+        g2.fill(new Rectangle2D.Double(Math.min(x, residualMark), yOffset,
+            Math.abs(x - residualMark), getHeight() - bottomHeight - 1));
+      }
+      
       g2.setFont(ANNOTATION_FONT);
 
       FontMetrics fm = g2.getFontMetrics();
@@ -60,7 +94,11 @@ public class PickWavePanel extends AbstractWavePanel implements EventObserver {
       int offset = 2;
       int lw = width + 2 * offset;
 
-      g2.setColor(backgroundColor);
+      if (tag.indexOf('P') != -1) {
+        g2.setColor(P_BACKGROUND);
+      } else if (tag.indexOf('S') != -1) {
+        g2.setColor(S_BACKGROUND);
+      }
 
       g2.fillRect((int) x, 3, lw, height + 2 * offset);
       g2.setColor(Color.black);
@@ -68,43 +106,6 @@ public class PickWavePanel extends AbstractWavePanel implements EventObserver {
 
       g2.drawString(tag, (int) x + offset, 3 + (fm.getAscent() + offset));
     }
-  }
-
-  private void markPhase(Graphics2D g2, Phase phase) {
-    double j2k = J2kSec.fromEpoch(phase.time);
-    double[] t = getTranslation();
-    if (t == null)
-      return;
-
-    double x = 2 + (j2k - t[1]) / t[0];
-    g2.setColor(DARK_GREEN);
-    g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
-
-    String tag = phase.tag();
-    Font oldFont = g2.getFont();
-    g2.setFont(ANNOTATION_FONT);
-
-    FontMetrics fm = g2.getFontMetrics();
-    int width = fm.stringWidth(tag);
-    int height = fm.getAscent();
-
-    int offset = 2;
-    int lw = width + 2 * offset;
-
-    Color background = null;
-    if (phase.phaseType == Phase.PhaseType.P) {
-      background = P_BACKGROUND;
-    } else if (phase.phaseType == Phase.PhaseType.S) {
-      background = S_BACKGROUND;
-    }
-    g2.setColor(background);
-
-    g2.fillRect((int) x, 3, lw, height + 2 * offset);
-    g2.setColor(Color.black);
-    g2.drawRect((int) x, 3, lw, height + 2 * offset);
-
-    g2.drawString(tag, (int) x + offset, 3 + (fm.getAscent() + offset));
-    g2.setFont(oldFont);
   }
 
   @Override
@@ -119,6 +120,6 @@ public class PickWavePanel extends AbstractWavePanel implements EventObserver {
   @Override
   protected void processRightMousePress(MouseEvent e) {
     // TODO Auto-generated method stub
-    
+
   }
 }

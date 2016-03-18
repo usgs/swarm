@@ -122,13 +122,22 @@ public abstract class AbstractWavePanel extends JComponent {
   protected boolean pauseCursorMark;
   protected double time;
 
-  public AbstractWavePanel(WaveViewSettings s) {
+
+  public AbstractWavePanel() {
+    super();
     swarmConfig = SwarmConfig.getInstance();
-    settings = s;
-    s.view = this;
     pauseCursorMark = false;
     backgroundColor = new Color(0xf7, 0xf7, 0xf7);
+    settings = new WaveViewSettings();
+
     setupMouseHandler();
+
+  }
+
+  public AbstractWavePanel(WaveViewSettings s) {
+    this();
+    settings = s;
+    s.view = this;
   }
 
   /**
@@ -138,8 +147,8 @@ public abstract class AbstractWavePanel extends JComponent {
    * @param p the source WaveViewPanel
    */
   public AbstractWavePanel(AbstractWavePanel p) {
+    this();
 
-    swarmConfig = SwarmConfig.getInstance();
     channel = p.channel;
     source = p.source;
     startTime = p.startTime;
@@ -147,21 +156,22 @@ public abstract class AbstractWavePanel extends JComponent {
     bias = p.bias;
     maxSpectraPower = p.maxSpectraPower;
     maxSpectrogramPower = p.maxSpectrogramPower;
-    translation = new double[8];
-    if (p.translation != null)
-      System.arraycopy(p.translation, 0, translation, 0, 8);
     timeSeries = p.timeSeries;
     allowDragging = p.allowDragging;
-    settings = new WaveViewSettings(p.settings);
-    settings.view = this;
     wave = p.wave;
     displayTitle = p.displayTitle;
     backgroundColor = p.backgroundColor;
     mark1 = p.mark1;
     mark2 = p.mark2;
-    setupMouseHandler();
-    processSettings();
 
+    translation = new double[8];
+    if (p.translation != null)
+      System.arraycopy(p.translation, 0, translation, 0, 8);
+    
+    settings = new WaveViewSettings(p.settings);
+    settings.view = this;
+
+    processSettings();
   }
 
   public void setOffsets(int xo, int yo, int rw, int bh) {
@@ -503,8 +513,8 @@ public abstract class AbstractWavePanel extends JComponent {
         double tzo = tz.getOffset(J2kSec.asEpoch(time));
         if (tzo != 0) {
           String tza = tz.getDisplayName(tz.inDaylightTime(J2kSec.asDate(time)), TimeZone.SHORT);
-          status = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, time + tzo) + " (" + tza + "), " + utc
-              + " (UTC)";
+          status = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, time + tzo) + " (" + tza + "), "
+              + utc + " (UTC)";
         } else
           status = utc;
 
@@ -996,11 +1006,6 @@ public abstract class AbstractWavePanel extends JComponent {
     g2.setPaint(new Color(255, 255, 0, 128));
     g2.fillRect(x1, yOffset + 1, width, getSize().height - bottomHeight - yOffset);
     g2.setPaint(pnt);
-  }
-
-
-  public AbstractWavePanel() {
-    super();
   }
 
   public void setCursorMark(double j2k) {

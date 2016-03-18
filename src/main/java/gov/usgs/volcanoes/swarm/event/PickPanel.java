@@ -13,24 +13,34 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
 
 import gov.usgs.plot.data.Wave;
-import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesClient;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanelListener;
 
 public class PickPanel extends JPanel implements Scrollable {
   private static final long serialVersionUID = 1L;
   private static final Logger LOGGER = LoggerFactory.getLogger(PickPanel.class);
 
+  private static final String IRIS_DATASELECT_URL = "http://service.iris.edu/fdsnws/dataselect/1/query";
+  private static final String IRIS_STATION_URL = "http://service.iris.edu/fdsnws/station/1/query";
+    
   private BufferedImage image;
   private final Map<String, PickWavePanel> panels;
   private double startJ2k;
   private double endJ2k;
+  private WaveViewPanelListener selectListener;
+  private final Map<String, SeismicDataSource> seismicSources;
 
   public PickPanel() {
     panels = new HashMap<String, PickWavePanel>();
+    seismicSources = new HashMap<String, SeismicDataSource>();
+    
     setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
     addComponentListener(new ComponentAdapter() {
       @Override
@@ -46,6 +56,7 @@ public class PickPanel extends JPanel implements Scrollable {
     });
   }
   
+
   public void setStart(Double startJ2k) {
     this.startJ2k = startJ2k;
   }
@@ -78,32 +89,57 @@ public class PickPanel extends JPanel implements Scrollable {
 
   public void addPick(Arrival arrival) {
     Pick pick = arrival.getPick();
-    PickWavePanel wavePanel = panels.get(pick.getChannel());
+    String channel = pick.getChannel();
+    PickWavePanel wavePanel = panels.get(channel);
     if (wavePanel == null) {
       wavePanel = new PickWavePanel();
-      wavePanel.setChannel(pick.getChannel());
-      Wave wave = WebServicesClient.getWave(pick.getChannel(), startJ2k, endJ2k);
-      panels.put(pick.getChannel(), wavePanel);      
-      wavePanel.setWave(wave, startJ2k, endJ2k);
-      add(wavePanel);
-      wavePanel.setSize(getWidth(), 200);
-      wavePanel.setDisplayTitle(true);
-      wavePanel.setOffsets(60, 0, 0, 0);
-      wavePanel.createImage();
+      wavePanel.setChannel(channel);
+      
+      SeismicDataSource source = seismicSources.get(channel);
+      if (source == null) {
+        source = new WebServicesSource();
+        source.parse(buildParams(channel));
+      }
+      wavePanel.setDataSource(source);
+      Wave wave = source.getWave(channel, startJ2k, endJ2k);
+      if (wave != null) {
+        panels.put(pick.getChannel(), wavePanel);      
+        wavePanel.setWave(wave, startJ2k, endJ2k);
+        add(wavePanel);
+        add(Box.createRigidArea(new Dimension(0, 10)));
+        wavePanel.setSize(getWidth(), 200);
+        wavePanel.setDisplayTitle(true);
+        wavePanel.setOffsets(60, 0, 5, 15);
+        wavePanel.createImage();
+        wavePanel.addListener(selectListener);
+      }
     }
     
     wavePanel.addArrival(arrival);
-//    
-//    if (wave == null) {
-//      return;
-//    }
-
-//    LOGGER.debug("Got {} samples", wave.numSamples());
   }
   
+  private String buildParams(String channel) {
+    String[] comps = channel.split("\\$");
+    LOGGER.debug("SPLIT {}", channel);
+    StringBuilder sb = new StringBuilder();
+    sb.append(comps[2]).append("|");
+    sb.append(comps[0]).append("|");
+    
+    if (comps.length > 3) {
+      sb.append(comps[3]).append("|");      
+    } else {
+      sb.append("--|");
+    }
+    sb.append(comps[1]).append("|");
+    sb.append(3600).append("|");
+    sb.append(1000).append("|");
+    sb.append(IRIS_DATASELECT_URL).append("|");
+    sb.append(IRIS_STATION_URL);
+
+    return sb.toString();
+  }
   private synchronized void resizeWaves() {
-    for (int idx = 0; idx < panels.size(); idx++) {
-      PickWavePanel panel = panels.get(idx);
+    for (PickWavePanel panel : panels.values().toArray(new PickWavePanel[0])) {
       Dimension d = panel.getSize();
       
       panel.setSize(getWidth(), d.height);
