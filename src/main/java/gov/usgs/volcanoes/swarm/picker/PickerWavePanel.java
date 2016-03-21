@@ -7,9 +7,13 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
+
+import javax.swing.JScrollPane;
 
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.event.EventObserver;
@@ -106,43 +110,59 @@ public class PickerWavePanel extends AbstractWavePanel implements EventObserver 
     g2.drawString(tag, (int) x + offset, 3 + (fm.getAscent() + offset));
     g2.setFont(oldFont);
   }
+  
+  /**
+   * Paints the component on the specified graphics context.
+   * 
+   * @param g the graphics context
+   */
+  public void paint(Graphics g) {
 
-  private void markPhase(Graphics2D g2, Phase phase) {
-    double j2k = J2kSec.fromEpoch(phase.time);
-    double[] t = getTranslation();
-    if (t == null)
+    Rectangle rect = ((JScrollPane)getParent()).getVisibleRect();
+    if (!rect.intersects(getBounds())) {
       return;
-
-    double x = 2 + (j2k - t[1]) / t[0];
-    g2.setColor(DARK_GREEN);
-    g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
-
-    String tag = phase.tag();
-    Font oldFont = g2.getFont();
-    g2.setFont(ANNOTATION_FONT);
-
-    FontMetrics fm = g2.getFontMetrics();
-    int width = fm.stringWidth(tag);
-    int height = fm.getAscent();
-
-    int offset = 2;
-    int lw = width + 2 * offset;
-
-    Color background = null;
-    if (phase.phaseType == Phase.PhaseType.P) {
-      background = P_BACKGROUND;
-    } else if (phase.phaseType == Phase.PhaseType.S) {
-      background = S_BACKGROUND;
     }
-    g2.setColor(background);
+    
+    super.paint(g);
+  }    
+            
 
-    g2.fillRect((int) x, 3, lw, height + 2 * offset);
-    g2.setColor(Color.black);
-    g2.drawRect((int) x, 3, lw, height + 2 * offset);
-
-    g2.drawString(tag, (int) x + offset, 3 + (fm.getAscent() + offset));
-    g2.setFont(oldFont);
-  }
+//  private void markPhase(Graphics2D g2, Phase phase) {
+//    double j2k = J2kSec.fromEpoch(phase.time);
+//    double[] t = getTranslation();
+//    if (t == null)
+//      return;
+//
+//    double x = 2 + (j2k - t[1]) / t[0];
+//    g2.setColor(DARK_GREEN);
+//    g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
+//
+//    String tag = phase.tag();
+//    Font oldFont = g2.getFont();
+//    g2.setFont(ANNOTATION_FONT);
+//
+//    FontMetrics fm = g2.getFontMetrics();
+//    int width = fm.stringWidth(tag);
+//    int height = fm.getAscent();
+//
+//    int offset = 2;
+//    int lw = width + 2 * offset;
+//
+//    Color background = null;
+//    if (phase.phaseType == Phase.PhaseType.P) {
+//      background = P_BACKGROUND;
+//    } else if (phase.phaseType == Phase.PhaseType.S) {
+//      background = S_BACKGROUND;
+//    }
+//    g2.setColor(background);
+//
+//    g2.fillRect((int) x, 3, lw, height + 2 * offset);
+//    g2.setColor(Color.black);
+//    g2.drawRect((int) x, 3, lw, height + 2 * offset);
+//
+//    g2.drawString(tag, (int) x + offset, 3 + (fm.getAscent() + offset));
+//    g2.setFont(oldFont);
+//  }
 
   @Override
   protected void processRightMouseRelease(MouseEvent e) {

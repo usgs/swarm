@@ -1,18 +1,23 @@
 package gov.usgs.volcanoes.swarm.event;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+
+import javax.swing.JScrollPane;
+import javax.swing.JViewport;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
@@ -30,6 +35,7 @@ public class PickWavePanel extends AbstractWavePanel implements EventObserver {
   private static final Color RESIDUAL_COLOR = new Color(128, 128, 128, 32);
   private final List<Arrival> arrivals;
   private final Stack<double[]> zoomHistory;
+private JViewport viewport;
 
   public PickWavePanel() {
     super();
@@ -122,4 +128,9 @@ public class PickWavePanel extends AbstractWavePanel implements EventObserver {
     // TODO Auto-generated method stub
 
   }
+  
+  public void setViewport(JViewport viewport) {
+    this.viewport = viewport;
+  }    
+         
 }

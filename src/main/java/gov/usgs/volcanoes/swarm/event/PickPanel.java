@@ -1,8 +1,5 @@
 package gov.usgs.volcanoes.swarm.event;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -13,10 +10,14 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JViewport;
 import javax.swing.Scrollable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
@@ -34,10 +35,12 @@ public class PickPanel extends JPanel implements Scrollable {
   private final Map<String, PickWavePanel> panels;
   private double startJ2k;
   private double endJ2k;
+  private final JLabel statusLabel;
   private WaveViewPanelListener selectListener;
   private final Map<String, SeismicDataSource> seismicSources;
 
-  public PickPanel() {
+  public PickPanel(JLabel statusLabel) {
+    this.statusLabel = statusLabel;
     panels = new HashMap<String, PickWavePanel>();
     seismicSources = new HashMap<String, SeismicDataSource>();
     
@@ -93,8 +96,9 @@ public class PickPanel extends JPanel implements Scrollable {
     PickWavePanel wavePanel = panels.get(channel);
     if (wavePanel == null) {
       wavePanel = new PickWavePanel();
+      wavePanel.setStatusLabel(statusLabel);
       wavePanel.setChannel(channel);
-      
+      wavePanel.setViewport(((JViewport)getParent()));
       SeismicDataSource source = seismicSources.get(channel);
       if (source == null) {
         source = new WebServicesSource();
@@ -106,10 +110,12 @@ public class PickPanel extends JPanel implements Scrollable {
         panels.put(pick.getChannel(), wavePanel);      
         wavePanel.setWave(wave, startJ2k, endJ2k);
         add(wavePanel);
-        add(Box.createRigidArea(new Dimension(0, 10)));
-        wavePanel.setSize(getWidth(), 200);
+//        add(Box.createRigidArea(new Dimension(0, 10)));
+//        p.setSize(w, calculateWaveHeight());
+        wavePanel.setBottomBorderColor(Color.GRAY);
+        wavePanel.setSize(getWidth(), 100);
         wavePanel.setDisplayTitle(true);
-        wavePanel.setOffsets(60, 0, 5, 15);
+        wavePanel.setOffsets(54, 8, 21, 19);
         wavePanel.createImage();
         wavePanel.addListener(selectListener);
       }

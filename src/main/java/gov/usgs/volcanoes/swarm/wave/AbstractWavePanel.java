@@ -2,9 +2,6 @@ package gov.usgs.volcanoes.swarm.wave;
 
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -12,6 +9,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Paint;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -22,8 +20,12 @@ import java.util.TimeZone;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.usgs.math.Filter;
 import gov.usgs.plot.Plot;
@@ -167,7 +169,7 @@ public abstract class AbstractWavePanel extends JComponent {
     translation = new double[8];
     if (p.translation != null)
       System.arraycopy(p.translation, 0, translation, 0, 8);
-    
+
     settings = new WaveViewSettings(p.settings);
     settings.view = this;
 
@@ -569,7 +571,7 @@ public abstract class AbstractWavePanel extends JComponent {
       else
         status = pre;
     }
-
+    
     if (status != null && statusLabel != null) {
       final String st = status;
       SwingUtilities.invokeLater(new Runnable() {
@@ -714,6 +716,7 @@ public abstract class AbstractWavePanel extends JComponent {
    * @param g the graphics context
    */
   public void paint(Graphics g) {
+
     Graphics2D g2 = (Graphics2D) g;
     Dimension dim = this.getSize();
     if (wave == null) {

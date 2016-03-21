@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TimeZone;
-import java.util.TreeSet;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -42,6 +41,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.log4j.Layout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -70,8 +70,8 @@ import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
  *
  * @author Tom Parker
  */
-public class EventFrame extends SwarmFrame implements EventObserver {
-  private static final Logger LOGGER = LoggerFactory.getLogger(EventFrame.class);
+public class EventFrame3 extends SwarmFrame implements EventObserver {
+  private static final Logger LOGGER = LoggerFactory.getLogger(EventFrame3.class);
   private static final Color BACKGROUND_COLOR = new Color(255, 255, 255);
   private static final Font KEY_FONT = Font.decode("dialog-BOLD-12");
   private static final Font VALUE_FONT = Font.decode("dialog-12");
@@ -79,7 +79,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
   public static final long serialVersionUID = -1;
 
   private JSplitPane mainPanel;
-  private JPanel pickPanel;
+  private Component pickPanel;
   private Event event;
   private SeismicDataSource seismicDataSource;
   private final PickPanel pickBox;
@@ -109,7 +109,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
   private final Set<PickerWavePanel> selectedSet;
   private boolean closing = false;
 
-  public EventFrame(Event event) {
+  public EventFrame3(Event event) {
     super("Event - " + event.getEvid(), true, true, true, false);
     this.event = event;
     statusLabel = new JLabel(" ");
@@ -170,17 +170,12 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     c.ipady = 2;
 
     JLabel label;
-
+    
     label = new JLabel("Event source: ", SwingConstants.LEFT);
     label.setFont(KEY_FONT);
     parameterPanel.add(label, c);
 
-    String source = Networks.getInstance().getName(event.getEventSource().toUpperCase());
-    if (source == null) {
-      source = event.getEventSource();
-    }
-    label = new JLabel(Networks.getInstance().getName(event.getEventSource().toUpperCase()),
-        SwingConstants.LEFT);
+    label = new JLabel(event.getEventSource(), SwingConstants.LEFT);
     label.setFont(VALUE_FONT);
     parameterPanel.add(label, c);
 
@@ -226,56 +221,8 @@ public class EventFrame extends SwarmFrame implements EventObserver {
       parameterPanel.add(label, c);
     }
     c.gridy++;
-
-    label = new JLabel("Error (RMS): ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    double error = origin.getStandardError();
-    if (!Double.isNaN(error)) {
-      label = new JLabel("" + error, SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
-    }
-    c.gridy++;
-
-    label = new JLabel("Azimuthal gap: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    double gap = origin.getAzimuthalGap();
-    if (!Double.isNaN(gap)) {
-      label = new JLabel("" + gap + "\u00B0", SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
-    }
-    c.gridy++;
-
-    label = new JLabel("Nearest station: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    double distance = origin.getMinimumDistance();
-    if (!Double.isNaN(distance)) {
-      label = new JLabel("" + distance + "\u00B0", SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
-    }
-    c.gridy++;
-
-    label = new JLabel("Phase count: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    int phaseCount = origin.getPhaseCount();
-    if (phaseCount > 0) {
-      label = new JLabel("" + phaseCount, SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
-    }
-    c.gridy++;
-
-   label = new JLabel("Magnitude: ", SwingConstants.LEFT);
+    
+    label = new JLabel("Magnitude: ", SwingConstants.LEFT);
     label.setFont(KEY_FONT);
     parameterPanel.add(label, c);
 
@@ -290,39 +237,14 @@ public class EventFrame extends SwarmFrame implements EventObserver {
       parameterPanel.add(label, c);
     }
     c.gridy++;
-
-    label = new JLabel("Evalutation: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    String evaluationTag = "";
-
-    Origin.EvaluationMode evaluationMode = origin.getEvaluationMode();
-    if (evaluationMode != null) {
-      evaluationTag += evaluationMode.toString().toLowerCase();
-    }
-
-    Origin.EvaluationStatus evaluationStatus = origin.getEvaluationStatus();
-    if (evaluationStatus != null) {
-      if (evaluationTag.length() > 0) {
-        evaluationTag += " / ";
-      }
-      evaluationTag += evaluationStatus.toString().toLowerCase();
-    }
-
-    label = new JLabel(evaluationTag, SwingConstants.LEFT);
-    label.setFont(VALUE_FONT);
-    parameterPanel.add(label, c);
-
-    c.gridy++;
-
+    
     label = new JLabel("Event id: ", SwingConstants.LEFT);
     label.setFont(KEY_FONT);
     parameterPanel.add(label, c);
 
-    label = new JLabel(event.getEvid(), SwingConstants.LEFT);
-    label.setFont(VALUE_FONT);
-    parameterPanel.add(label, c);
+      label = new JLabel(event.getEvid(), SwingConstants.LEFT);
+      label.setFont(VALUE_FONT);
+      parameterPanel.add(label, c);
     c.gridy++;
 
     c.weighty = 1;
@@ -340,31 +262,56 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     return scrollPane;
   }
 
-  private JPanel createPickPanel() {
+  private Component createPickPanel() {
 
-    toolbar = SwarmUtil.createToolBar();
-    createMainButtons();
-    createWaveButtons();
-    final JScrollPane scrollPane = new JScrollPane(pickBox);
+//    toolbar = SwarmUtil.createToolBar();
+//    createMainButtons();
+//    createWaveButtons();
+    
+    GridBagLayout layout = new GridBagLayout();
+    GridBagConstraints c = new GridBagConstraints();
+
+
+    c.fill = GridBagConstraints.NONE;
+    c.anchor = GridBagConstraints.NORTHWEST;
+    c.gridy = 0;
+    c.gridx = GridBagConstraints.RELATIVE;
+    c.ipadx = 3;
+    c.ipady = 2;
+
+    JPanel tablePanel = new JPanel(layout);
+    
+    tablePanel.add(new JLabel("AAAAAAAAAAAAAAAAAA", SwingConstants.LEFT), c);
+    tablePanel.add(new JLabel("Event id", SwingConstants.LEFT), c);
+    tablePanel.add(new JLabel("XXX", SwingConstants.LEFT), c);
+
+    final JScrollPane scrollPane = new JScrollPane(tablePanel);
     scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     scrollPane.getVerticalScrollBar().setUnitIncrement(40);
 
-    JPanel pickPanel = new JPanel();
-    pickPanel.setLayout(new BoxLayout(pickPanel, BoxLayout.PAGE_AXIS));
-    LOGGER.info("Adding toolbar");
-    pickPanel.add(toolbar);
-    pickPanel.add(scrollPane);
+    JPanel headerPanel = new JPanel(layout);
+    scrollPane.setColumnHeaderView(headerPanel);
+    c.gridy = 0;
+    headerPanel.add(new JLabel("Event id", SwingConstants.LEFT), c);
+    headerPanel.add(new JLabel("XXX", SwingConstants.LEFT), c);
+    headerPanel.add(new JLabel("AAAAAAAAAAAAAAAAAA", SwingConstants.LEFT), c);
 
-    JPanel statusPanel = new JPanel();
-    statusPanel.setLayout(new BorderLayout());
-    statusLabel.setBorder(BorderFactory.createEtchedBorder());
-    statusPanel.add(statusLabel);
-    statusPanel
-        .setMaximumSize(new Dimension(Integer.MAX_VALUE, statusPanel.getPreferredSize().height));
-    pickPanel.add(statusPanel);
+//    JPanel pickPanel = new JPanel();
+//    pickPanel.setLayout(new BoxLayout(pickPanel, BoxLayout.PAGE_AXIS));
+//    LOGGER.info("Adding toolbar");
+//    pickPanel.add(toolbar);
+//    pickPanel.add(scrollPane);
+//
+//    JPanel statusPanel = new JPanel();
+//    statusPanel.setLayout(new BorderLayout());
+//    statusLabel.setBorder(BorderFactory.createEtchedBorder());
+//    statusPanel.add(statusLabel);
+//    statusPanel
+//        .setMaximumSize(new Dimension(Integer.MAX_VALUE, statusPanel.getPreferredSize().height));
+//    pickPanel.add(statusPanel);
 
-    return pickPanel;
+    return scrollPane;
   }
 
   private void createMainButtons() {
@@ -791,9 +738,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     pickBox.setEnd(waveEnd);
 
     throbber.increment();
-    TreeSet<Arrival> arrivals = new TreeSet<Arrival>(Arrival.distanceComparator());
-    arrivals.addAll(origin.getArrivals());
-    for (Arrival arrival : arrivals) {
+    for (Arrival arrival : origin.getArrivals()) {
       if (closing) {
         break;
       }
@@ -839,7 +784,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
       public void internalFrameClosing(final InternalFrameEvent e) {
         closing = true;
         dispose();
-        SwarmInternalFrames.remove(EventFrame.this);
+        SwarmInternalFrames.remove(EventFrame3.this);
       }
 
       @Override

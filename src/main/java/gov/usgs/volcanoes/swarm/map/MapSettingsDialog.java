@@ -136,7 +136,7 @@ public class MapSettingsDialog extends SwarmDialog {
     builder.append(allLabels);
 
     builder.nextLine();
-    builder.append("Hypocenter Source:");
+    builder.append("NEIC Event Summary");
     builder.append(hypocenterSource, 3);
 
     dialogPanel = builder.getPanel();

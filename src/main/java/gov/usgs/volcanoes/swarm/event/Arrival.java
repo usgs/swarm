@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
+import java.util.Comparator;
 import java.util.Map;
 
 import gov.usgs.volcanoes.swarm.event.Pick.Onset;
@@ -16,6 +17,7 @@ public class Arrival {
   private Pick pick;
   private String phase;
   private double timeResidual;
+  private double distance;
 
   public Arrival(Element arrivalElement, Map<String, Pick> picks) {
     this.publicId = arrivalElement.getAttribute("publicID");
@@ -26,7 +28,9 @@ public class Arrival {
     phase = arrivalElement.getElementsByTagName("phase").item(0).getTextContent();
     timeResidual = Double
         .parseDouble(arrivalElement.getElementsByTagName("timeResidual").item(0).getTextContent());
-  }
+    distance = Double
+        .parseDouble(arrivalElement.getElementsByTagName("distance").item(0).getTextContent());
+ }
 
   public Pick getPick() {
     return pick;
@@ -61,4 +65,13 @@ public class Arrival {
     
     return sb.toString();
   }
+  
+  public static Comparator<Arrival> distanceComparator() {
+    return new Comparator<Arrival>() {
+      public int compare(final Arrival e1, final Arrival e2) {
+        return Double.compare(e1.distance, e2.distance);
+      }
+    };
+  }
+
 }

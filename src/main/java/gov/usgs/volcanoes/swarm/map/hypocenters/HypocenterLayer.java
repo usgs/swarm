@@ -303,19 +303,6 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
     return handled;
   }
 
-  private Event getDetailedEvent(String evid)
-      throws ParserConfigurationException, SAXException, IOException {
-    String url = "http://earthquake.usgs.gov/fdsnws/event/1/query?eventid=" + evid;
-
-    DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-    Document doc = dBuilder.parse(url);
-    doc.getDocumentElement().normalize();
-
-    NodeList eventElements = doc.getElementsByTagName("event");
-    LOGGER.debug("Got {} events.", eventElements.getLength());
-    return new Event((Element) eventElements.item(0));
-  }
 
   public void settingsChanged() {
     LOGGER.debug("hypocenter plotter sees changed settings.");
@@ -334,6 +321,9 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
 
     GeoRange range = panel.getRange();
     Projection projection = panel.getProjection();
+    if (projection == null) {
+      return false;
+    }
     int widthPx = panel.getGraphWidth();
     int heightPx = panel.getGraphHeight();
     int insetPx = panel.getInset();
@@ -343,6 +333,9 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
     while (it.hasNext() && handled == false) {
       Event event = it.next();
       Origin origin = event.getPreferredOrigin();
+      if (origin == null) {
+        continue;
+      }
       final Rectangle r = new Rectangle(0, 0, 10, 10);
 
       final Point2D.Double xy =

@@ -18,6 +18,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
 
 
 public class Event {
@@ -28,7 +29,7 @@ public class Event {
   private final Map<String, Magnitude> magnitudes;
   private final Map<String, Pick> picks;
   private final List<EventObserver> observers;
-
+  
   private Origin preferredOrigin;
   private Magnitude preferredMagnitude;
   private String description;
@@ -72,12 +73,14 @@ public class Event {
       preferredMagnitude = (Magnitude) magnitudes.values().toArray()[0];
     }
 
-    eventSource = StringUtils.stringToString(event.getAttribute("catalog:eventsource"), eventSource);
+    eventSource =
+        StringUtils.stringToString(event.getAttribute("catalog:eventsource"), eventSource);
     evid = StringUtils.stringToString(event.getAttribute("catalog:eventid"), evid);
-    
+
     Element descriptionElement = (Element) event.getElementsByTagName("description").item(0);
     if (descriptionElement != null) {
-      description = StringUtils.stringToString(descriptionElement.getElementsByTagName("text").item(0).getTextContent(), description);
+      description = StringUtils.stringToString(
+          descriptionElement.getElementsByTagName("text").item(0).getTextContent(), description);
     }
 
     notifyObservers();
@@ -88,6 +91,7 @@ public class Event {
       observer.eventUpdated();
     }
   }
+
   private void parsePicks(NodeList pickElements) {
     picks.clear();
     int pickCount = pickElements.getLength();
@@ -128,10 +132,11 @@ public class Event {
   public String getEventSource() {
     return eventSource;
   }
-  
+
   public String getEvid() {
     return evid;
   }
+
   public String getDataid() {
     return null;
   }
@@ -140,17 +145,7 @@ public class Event {
     return description;
   }
 
-private Event getDetailedEvent(String evid)
-     throws ParserConfigurationException, SAXException, IOException {
-   String url = "http://earthquake.usgs.gov/fdsnws/event/1/query?eventid=" + evid;
-
-   DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-   DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-   Document doc = dBuilder.parse(url);
-   doc.getDocumentElement().normalize();
-
-   NodeList eventElements = doc.getElementsByTagName("event");
-   LOGGER.debug("Got {} events.", eventElements.getLength());
-   return new Event((Element) eventElements.item(0));
- }
+  public void setDescription(String description) {
+    this.description = description;
+  }
 }
