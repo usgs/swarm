@@ -1,8 +1,5 @@
 package gov.usgs.volcanoes.swarm.event;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -32,22 +29,25 @@ import javax.swing.JViewport;
 import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.core.contrib.PngEncoder;
 import gov.usgs.volcanoes.core.contrib.PngEncoderB;
 import gov.usgs.volcanoes.swarm.FileChooser;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
+import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
-import gov.usgs.volcanoes.swarm.picker.Phase;
-import gov.usgs.volcanoes.swarm.picker.PickerWavePanel;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelListener;
 
-public class PickPanel extends JPanel implements Scrollable {
+public class PickPanel extends JPanel implements Scrollable, PickToolBarListener {
   private static final long serialVersionUID = 1L;
   private static final Logger LOGGER = LoggerFactory.getLogger(PickPanel.class);
   private static final int DEFAULT_WAVE_PANEL_HEIGHT = 150;
@@ -72,13 +72,15 @@ public class PickPanel extends JPanel implements Scrollable {
   private final Map<String, SeismicDataSource> seismicSources;
   private int wavePanelHeight;
   private int lastClickedIndex;
+  private final Set<PickBoxListener> listeners;
 
   public PickPanel(JLabel statusLabel) {
     this.statusLabel = statusLabel;
     panels = new HashMap<String, PickWavePanel>();
     seismicSources = new HashMap<String, SeismicDataSource>();
     histories = new HashMap<AbstractWavePanel, Stack<double[]>>();
-//    selectedSet = new HashSet<PickWavePanel>();
+    listeners = new HashSet<PickBoxListener>();
+    // selectedSet = new HashSet<PickWavePanel>();
     selectedSet = new ConcurrentSkipListSet<PickWavePanel>();
     wavePanelHeight = DEFAULT_WAVE_PANEL_HEIGHT;
 
@@ -100,9 +102,9 @@ public class PickPanel extends JPanel implements Scrollable {
       public void mousePressed(final AbstractWavePanel src, final MouseEvent e,
           final boolean dragging) {
         PickWavePanel panel = (PickWavePanel) src;
-        LOGGER.debug("wave selected.");
         requestFocusInWindow();
         final int thisIndex = getWaveIndex(src);
+
         if (!e.isControlDown() && !e.isShiftDown() && !e.isAltDown()) {
           deselectAll();
           select(panel);
@@ -151,14 +153,22 @@ public class PickPanel extends JPanel implements Scrollable {
     };
   }
 
+  public void addListener(PickBoxListener listener) {
+    listeners.add(listener);
+  }
+  
   protected int getWaveIndex(AbstractWavePanel src) {
 
-    int panelIndex = -1;
     AbstractWavePanel[] wavePanels = panels.values().toArray(new AbstractWavePanel[0]);
+
     int idx = 0;
+    int panelIndex = -1;
     while (panelIndex < 0 && idx < wavePanels.length) {
+
       if (src == wavePanels[idx]) {
         panelIndex = idx;
+      } else {
+        idx++;
       }
     }
 
@@ -251,7 +261,7 @@ public class PickPanel extends JPanel implements Scrollable {
     return sb.toString();
   }
 
-  private  void resizeWaves() {
+  private void resizeWaves() {
     for (PickWavePanel panel : panels.values().toArray(new PickWavePanel[0])) {
       Dimension d = panel.getSize();
 
@@ -340,20 +350,24 @@ public class PickPanel extends JPanel implements Scrollable {
   }
 
 
-  private  void deselect(final AbstractWavePanel p) {
+  private void deselect(final AbstractWavePanel p) {
+    LOGGER.debug("start deselect");
     selectedSet.remove(p);
     p.setBackgroundColor(BACKGROUND_COLOR);
     p.createImage();
+    LOGGER.debug("complete deselect");
   }
 
-  private  void deselectAll() {
+  private void deselectAll() {
     final AbstractWavePanel[] panels = selectedSet.toArray(new AbstractWavePanel[0]);
     for (final AbstractWavePanel p : panels) {
       deselect(p);
     }
+    notifyListeners();
   }
 
-  private  void select(final PickWavePanel p) {
+  private void select(final PickWavePanel p) {
+    LOGGER.debug("start select");
     if (p == null || selectedSet.contains(p))
       return;
 
@@ -361,8 +375,14 @@ public class PickPanel extends JPanel implements Scrollable {
     p.setBackgroundColor(SELECT_COLOR);
     DataChooser.getInstance().setNearest(p.getChannel());
     p.createImage();
+    notifyListeners();
   }
 
+  private void notifyListeners() {
+    for (PickBoxListener listener : listeners) {
+      listener.selectCountChanged(selectedSet.size());
+    }
+  }
   private void findWavePanel() {
     Point p = MouseInfo.getPointerInfo().getLocation();
     SwingUtilities.convertPointFromScreen(p, this);
@@ -378,5 +398,80 @@ public class PickPanel extends JPanel implements Scrollable {
     }
     history.push(t);
   }
+
+  public void scaleTime(final AbstractWavePanel wvp, final double pct) {
+    final double st = wvp.getStartTime();
+    final double et = wvp.getEndTime();
+    final double[] t = new double[] {st, et};
+    addHistory(wvp, t);
+    final double dt = (et - st) * (1 - pct);
+    final double mt = (et - st) / 2 + st;
+    final double nst = mt - dt / 2;
+    final double net = mt + dt / 2;
+    fetchNewWave(wvp, nst, net);
+  }
+  public void scaleTime(final double pct) {
+    for (final AbstractWavePanel p : selectedSet)
+      scaleTime(p, pct);
+  }
+
+  public void back(final AbstractWavePanel wvp) {
+    final Stack<double[]> history = histories.get(wvp);
+    if (history == null || history.empty())
+      return;
+
+    final double[] t = history.pop();
+//    fetchNewWave(wvp, t[0], t[1]);
+  }
+
+  public void back() {
+    for (final AbstractWavePanel p : selectedSet)
+      back(p);
+  }
+
+  private void shiftTime(final AbstractWavePanel wvp, final double pct) {
+    LOGGER.debug("shifting time {}", pct);
+    final double st = wvp.getStartTime();
+    final double et = wvp.getEndTime();
+    final double[] t = new double[] {st, et};
+    addHistory(wvp, t);
+    final double dt = (et - st) * pct;
+    final double nst = st + dt;
+    final double net = et + dt;
+    fetchNewWave(wvp, nst, net);
+  }
+
+  public void shiftTime(final double pct) {
+    for (final AbstractWavePanel p : selectedSet)
+      shiftTime(p, pct);
+  }
+  
+  // TODO: This isn't right, this should be a method of waveviewpanel
+  private void fetchNewWave(final AbstractWavePanel wvp, final double nst, final double net) {
+    final SwingWorker worker = new SwingWorker() {
+      @Override
+      public Object construct() {
+//        throbber.increment();
+        final SeismicDataSource sds = wvp.getDataSource();
+        // Hacky fix for bug #84
+        Wave sw = null;
+        if (sds instanceof CachedDataSource)
+          sw = ((CachedDataSource) sds).getBestWave(wvp.getChannel(), nst, net);
+        else
+          sw = sds.getWave(wvp.getChannel(), nst, net);
+        wvp.setWave(sw, nst, net);
+        wvp.repaint();
+        return null;
+      }
+
+      @Override
+      public void finished() {
+//        throbber.decrement();
+        repaint();
+      }
+    };
+    worker.start();
+  }
+
 
 }

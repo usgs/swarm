@@ -25,7 +25,7 @@ import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
 
-public class PickWavePanel extends AbstractWavePanel implements EventObserver {
+public class PickWavePanel extends AbstractWavePanel implements EventObserver, Comparable<PickWavePanel> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PickWavePanel.class);
 
@@ -131,6 +131,10 @@ private JViewport viewport;
   
   public void setViewport(JViewport viewport) {
     this.viewport = viewport;
+  }
+
+  public int compareTo(PickWavePanel o) {
+    return Arrival.distanceComparator().compare(arrivals.get(0),o.arrivals.get(0));
   }    
          
 }
