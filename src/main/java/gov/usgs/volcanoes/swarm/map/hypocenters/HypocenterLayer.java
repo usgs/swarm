@@ -165,8 +165,13 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
       Origin origin = event.getPreferredOrigin();
 
       LOGGER.debug("Plotting event at {}, {}", origin.getLongitude(), origin.getLatitude());
-      final Point2D.Double xy =
-          projection.forward(new Point2D.Double(origin.getLongitude(), origin.getLatitude()));
+      Point2D.Double originLoc = new Point2D.Double(origin.getLongitude(), origin.getLatitude());
+      if (!range.contains(originLoc)) {
+        continue;
+      }
+
+      final Point2D.Double xy = projection.forward(originLoc);
+
       final double[] ext = range.getProjectedExtents(projection);
       final double dx = (ext[1] - ext[0]);
       final double dy = (ext[3] - ext[2]);
@@ -175,7 +180,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
       res.y = ((1 - (xy.y - ext[2]) / dy) * heightPx + insetPx);
 
       g2.translate(res.x, res.y);
-      long age = J2kSec.asEpoch(J2kSec.now());
+      long age = J2kSec.asEpoch(J2kSec.now()) - origin.getTime();
       if (event == hoverEvent) {
         renderer.paint = Color.GREEN;
       } else if (age < ONE_HOUR) {

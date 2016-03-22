@@ -1,53 +1,48 @@
 package gov.usgs.volcanoes.swarm.event;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
-import java.util.TimeZone;
-import java.util.TreeSet;
-
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JToolBar;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingConstants;
-import javax.swing.WindowConstants;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+import java.util.TreeSet;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JToolBar;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.WindowConstants;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.core.time.J2kSec;
@@ -62,7 +57,6 @@ import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.picker.PickerWavePanel;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanelListener;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
 
 /**
@@ -72,49 +66,45 @@ import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
  */
 public class EventFrame extends SwarmFrame implements EventObserver {
   private static final Logger LOGGER = LoggerFactory.getLogger(EventFrame.class);
-  private static final Color BACKGROUND_COLOR = new Color(255, 255, 255);
   private static final Font KEY_FONT = Font.decode("dialog-BOLD-12");
   private static final Font VALUE_FONT = Font.decode("dialog-12");
 
   public static final long serialVersionUID = -1;
 
-  private JSplitPane mainPanel;
-  private JPanel pickPanel;
-  private Event event;
-  private SeismicDataSource seismicDataSource;
   private final PickPanel pickBox;
-  private JToolBar toolbar;
   private final JLabel statusLabel;
+  private final Map<AbstractWavePanel, Stack<double[]>> histories;
+  private final Set<PickerWavePanel> selectedSet;
+
+  private JSplitPane mainPanel;
+  private Event event;
+  private JToolBar toolbar;
   private JButton sizeButton;
   private JButton saveButton;
   private JButton captureButton;
   private JButton histButton;
-  private JButton locateButton;
 
-  private final DateFormat saveAllDateFormat;
-
-  private WaveViewPanelListener selectListener;
   private WaveViewSettingsToolbar waveToolbar;
 
-  private JButton upButton;
-  private JButton downButton;
-  private JButton removeButton;
   private JButton compXButton;
   private JButton expXButton;
   private JButton forwardButton;
   private JButton backButton;
   private JButton gotoButton;
   private Throbber throbber;
-  private final Map<AbstractWavePanel, Stack<double[]>> histories;
-  private final Set<PickerWavePanel> selectedSet;
+  private JPopupMenu popup;
+  private int waveHeight;
+
   private boolean closing = false;
 
   public EventFrame(Event event) {
     super("Event - " + event.getEvid(), true, true, true, false);
     this.event = event;
+
     statusLabel = new JLabel(" ");
-    saveAllDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-    saveAllDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+    pickBox = new PickPanel(statusLabel);
+    pickBox.setLayout(new BoxLayout(pickBox, BoxLayout.PAGE_AXIS));
+
     histories = new HashMap<AbstractWavePanel, Stack<double[]>>();
     selectedSet = new HashSet<PickerWavePanel>();
 
@@ -122,18 +112,14 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     this.setFocusable(true);
     createListeners();
 
-    pickBox = new PickPanel(statusLabel);
-    pickBox.setLayout(new BoxLayout(pickBox, BoxLayout.PAGE_AXIS));
-
     setFrameIcon(Icons.ruler);
     setSize(swarmConfig.clipboardWidth, swarmConfig.clipboardHeight);
     setLocation(swarmConfig.clipboardX, swarmConfig.clipboardY);
     setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     LOGGER.debug("event frame: {} @ {}", this.getSize(), this.getLocation());
 
-
-    pickPanel = createPickPanel();
-    mainPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, createParameterPanel(), pickPanel);
+    mainPanel =
+        new JSplitPane(JSplitPane.VERTICAL_SPLIT, ParameterPanel.create(event), createPickPanel());
     mainPanel.setOneTouchExpandable(true);
 
     setContentPane(mainPanel);
@@ -154,191 +140,6 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     }.start();
   }
 
-  private Component createParameterPanel() {
-    Origin origin = event.getPreferredOrigin();
-    Magnitude magnitude = event.getPerferredMagnitude();
-
-    JPanel parameterPanel = new JPanel(new GridBagLayout());
-    GridBagConstraints c = new GridBagConstraints();
-
-
-    c.fill = GridBagConstraints.NONE;
-    c.anchor = GridBagConstraints.NORTHWEST;
-    c.gridy = 0;
-    c.gridx = GridBagConstraints.RELATIVE;
-    c.ipadx = 3;
-    c.ipady = 2;
-
-    JLabel label;
-
-    label = new JLabel("Event source: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    String source = Networks.getInstance().getName(event.getEventSource().toUpperCase());
-    if (source == null) {
-      source = event.getEventSource();
-    }
-    label = new JLabel(Networks.getInstance().getName(event.getEventSource().toUpperCase()),
-        SwingConstants.LEFT);
-    label.setFont(VALUE_FONT);
-    parameterPanel.add(label, c);
-
-    c.gridy++;
-
-    label = new JLabel("Description: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    // wrap description to support multi-line descriptions
-    String description = event.getDescription();
-    description = description.replace("\n", "<BR>");
-    description = "<HTML>" + description + "</HTML>";
-    label = new JLabel(description, SwingConstants.LEFT);
-    label.setFont(VALUE_FONT);
-    parameterPanel.add(label, c);
-
-    c.gridy++;
-
-    label = new JLabel("Origin date: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    if (origin != null) {
-      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-      String date = dateFormat.format(event.getPreferredOrigin().getTime());
-      label = new JLabel(date, SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
-    }
-    c.gridy++;
-
-
-    label = new JLabel("Hypocenter: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    if (origin != null) {
-      String loc = origin.getLatitude() + ", " + origin.getLongitude();
-      loc += " at " + (origin.getDepth() / 1000) + " km depth";
-      label = new JLabel(loc, SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
-    }
-    c.gridy++;
-
-    label = new JLabel("Error (RMS): ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    double error = origin.getStandardError();
-    if (!Double.isNaN(error)) {
-      label = new JLabel("" + error, SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
-    }
-    c.gridy++;
-
-    label = new JLabel("Azimuthal gap: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    double gap = origin.getAzimuthalGap();
-    if (!Double.isNaN(gap)) {
-      label = new JLabel("" + gap + "\u00B0", SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
-    }
-    c.gridy++;
-
-    label = new JLabel("Nearest station: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    double distance = origin.getMinimumDistance();
-    if (!Double.isNaN(distance)) {
-      label = new JLabel("" + distance + "\u00B0", SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
-    }
-    c.gridy++;
-
-    label = new JLabel("Phase count: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    int phaseCount = origin.getPhaseCount();
-    if (phaseCount > 0) {
-      label = new JLabel("" + phaseCount, SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
-    }
-    c.gridy++;
-
-   label = new JLabel("Magnitude: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    if (magnitude != null) {
-      String mag = String.format("%s %s", magnitude.getMag(), magnitude.getType());
-      String uncertaintly = magnitude.getUncertainty();
-      if (uncertaintly != null) {
-        mag += " (" + uncertaintly + ")";
-      }
-      label = new JLabel(mag, SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
-    }
-    c.gridy++;
-
-    label = new JLabel("Evalutation: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    String evaluationTag = "";
-
-    Origin.EvaluationMode evaluationMode = origin.getEvaluationMode();
-    if (evaluationMode != null) {
-      evaluationTag += evaluationMode.toString().toLowerCase();
-    }
-
-    Origin.EvaluationStatus evaluationStatus = origin.getEvaluationStatus();
-    if (evaluationStatus != null) {
-      if (evaluationTag.length() > 0) {
-        evaluationTag += " / ";
-      }
-      evaluationTag += evaluationStatus.toString().toLowerCase();
-    }
-
-    label = new JLabel(evaluationTag, SwingConstants.LEFT);
-    label.setFont(VALUE_FONT);
-    parameterPanel.add(label, c);
-
-    c.gridy++;
-
-    label = new JLabel("Event id: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    label = new JLabel(event.getEvid(), SwingConstants.LEFT);
-    label.setFont(VALUE_FONT);
-    parameterPanel.add(label, c);
-    c.gridy++;
-
-    c.weighty = 1;
-    c.weightx = 1;
-    c.gridy++;
-    c.gridx = 10;
-    JPanel filler = new JPanel();
-    parameterPanel.add(filler, c);
-
-    final JScrollPane scrollPane = new JScrollPane(parameterPanel);
-    scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-    scrollPane.getVerticalScrollBar().setUnitIncrement(40);
-
-    return scrollPane;
-  }
 
   private JPanel createPickPanel() {
 
@@ -368,13 +169,6 @@ public class EventFrame extends SwarmFrame implements EventObserver {
   }
 
   private void createMainButtons() {
-    saveButton =
-        SwarmUtil.createToolBarButton(Icons.save, "Save selected wave", new SaveActionListener());
-    saveButton.setEnabled(false);
-    toolbar.add(saveButton);
-
-    toolbar.addSeparator();
-
     sizeButton =
         SwarmUtil.createToolBarButton(Icons.resize, "Set wave height", new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
@@ -596,146 +390,36 @@ public class EventFrame extends SwarmFrame implements EventObserver {
       shiftTime(p, pct);
   }
 
-  // TODO: don't write image on event thread
-  // TODO: unify with MapFrame.CaptureActionListener
   class CaptureActionListener implements ActionListener {
     public void actionPerformed(final ActionEvent e) {
-      // if (waves == null || waves.size() == 0)
-      // return;
-      //
-      // final JFileChooser chooser = FileChooser.getFileChooser();
-      // final File lastPath = new File(swarmConfig.lastPath);
-      // chooser.setCurrentDirectory(lastPath);
-      // chooser.setSelectedFile(new File("clipboard.png"));
-      // chooser.setDialogTitle("Save Clipboard Screen Capture");
-      // final int result = chooser.showSaveDialog(applicationFrame);
-      // File f = null;
-      // if (result == JFileChooser.APPROVE_OPTION) {
-      // f = chooser.getSelectedFile();
-      //
-      // if (f.exists()) {
-      // final int choice = JOptionPane.showConfirmDialog(applicationFrame,
-      // "File exists, overwrite?", "Confirm", JOptionPane.YES_NO_OPTION);
-      // if (choice != JOptionPane.YES_OPTION)
-      // return;
-      // }
-      // swarmConfig.lastPath = f.getParent();
-      // }
-      // if (f == null)
-      // return;
-      //
-      // int height = 0;
-      // final int width = waves.get(0).getWidth();
-      // for (final AbstractWavePanel panel : waves)
-      // height += panel.getHeight();
-      //
-      // final BufferedImage image = new BufferedImage(width, height,
-      // BufferedImage.TYPE_4BYTE_ABGR);
-      // final Graphics g = image.getGraphics();
-      // for (final AbstractWavePanel panel : waves) {
-      // panel.paint(g);
-      // g.translate(0, panel.getHeight());
-      // }
-      // try {
-      // final PngEncoderB png = new PngEncoderB(image, false, PngEncoder.FILTER_NONE, 7);
-      // final FileOutputStream out = new FileOutputStream(f);
-      // final byte[] bytes = png.pngEncode();
-      // out.write(bytes);
-      // out.close();
-      // } catch (final Exception ex) {
-      // ex.printStackTrace();
-      // }
-    }
-  }
-
-
-  private class SaveActionListener implements ActionListener {
-    public void actionPerformed(final ActionEvent e) {
-      // final AbstractWavePanel selected = getSingleSelected();
-      // if (selected == null)
-      // return;
-      //
-      // final JFileChooser chooser = FileChooser.getFileChooser();
-      // chooser.resetChoosableFileFilters();
-      // chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-      // chooser.setMultiSelectionEnabled(false);
-      // chooser.setDialogTitle("Save Wave");
-      //
-      // for (final FileType ft : FileType.values()) {
-      // if (ft == FileType.UNKNOWN)
-      // continue;
-      //
-      // final ExtensionFileFilter f = new ExtensionFileFilter(ft.extension, ft.description);
-      // chooser.addChoosableFileFilter(f);
-      // }
-      //
-      // chooser.setFileFilter(chooser.getAcceptAllFileFilter());
-      //
-      // final File lastPath = new File(swarmConfig.lastPath);
-      // chooser.setCurrentDirectory(lastPath);
-      // final String fileName = selected.getChannel().replace(' ', '_') + ".sac";
-      // chooser.setSelectedFile(new File(fileName));
-      // final int result = chooser.showSaveDialog(applicationFrame);
-      // if (result == JFileChooser.APPROVE_OPTION) {
-      // final File f = chooser.getSelectedFile();
-      // boolean confirm = true;
-      // if (f.exists()) {
-      // if (f.isDirectory()) {
-      // JOptionPane.showMessageDialog(applicationFrame,
-      // "You can not select an existing directory.", "Error", JOptionPane.ERROR_MESSAGE);
-      // return;
-      // }
-      // confirm = false;
-      // final int choice = JOptionPane.showConfirmDialog(applicationFrame,
-      // "File exists, overwrite?", "Confirm", JOptionPane.YES_NO_OPTION);
-      // if (choice == JOptionPane.YES_OPTION)
-      // confirm = true;
-      // }
-      //
-      // if (confirm) {
-      // try {
-      // swarmConfig.lastPath = f.getParent();
-      // final String fn = f.getPath();
-      // final SeismicDataFile file = SeismicDataFile.getFile(fn);
-      // final Wave wave = selected.getWave();
-      // file.putWave(selected.getChannel(), wave);
-      // file.write();
-      // } catch (final FileNotFoundException ex) {
-      // JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "Directory does not exist.",
-      // "Error", JOptionPane.ERROR_MESSAGE);
-      // } catch (final IOException ex) {
-      // JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "Error writing file.",
-      // "Error", JOptionPane.ERROR_MESSAGE);
-      // }
-      // }
-      // }
+      pickBox.writeImage();
     }
   }
 
   private void doSizePopup() {
-    // if (popup == null) {
-    // final String[] labels = new String[] {"Auto", null, "Tiny", "Small", "Medium", "Large"};
-    // final int[] sizes = new int[] {-1, -1, 50, 100, 160, 230};
-    // popup = new JPopupMenu();
-    // final ButtonGroup group = new ButtonGroup();
-    // for (int i = 0; i < labels.length; i++) {
-    // if (labels[i] != null) {
-    // final int size = sizes[i];
-    // final JRadioButtonMenuItem mi = new JRadioButtonMenuItem(labels[i]);
-    // mi.addActionListener(new ActionListener() {
-    // public void actionPerformed(final ActionEvent e) {
-    // setWaveHeight(size);
-    // }
-    // });
-    // if (waveHeight == size)
-    // mi.setSelected(true);
-    // group.add(mi);
-    // popup.add(mi);
-    // } else
-    // popup.addSeparator();
-    // }
-    // }
-    // popup.show(sizeButton.getParent(), sizeButton.getX(), sizeButton.getY());
+    if (popup == null) {
+      final String[] labels = new String[] {"Auto", null, "Tiny", "Small", "Medium", "Large"};
+      final int[] sizes = new int[] {-1, -1, 50, 100, 160, 230};
+      popup = new JPopupMenu();
+      final ButtonGroup group = new ButtonGroup();
+      for (int i = 0; i < labels.length; i++) {
+        if (labels[i] != null) {
+          final int size = sizes[i];
+          final JRadioButtonMenuItem mi = new JRadioButtonMenuItem(labels[i]);
+          mi.addActionListener(new ActionListener() {
+            public void actionPerformed(final ActionEvent e) {
+              pickBox.setWaveHeight(size);
+            }
+          });
+          if (waveHeight == size)
+            mi.setSelected(true);
+          group.add(mi);
+          popup.add(mi);
+        } else
+          popup.addSeparator();
+      }
+    }
+    popup.show(sizeButton.getParent(), sizeButton.getX(), sizeButton.getY());
   }
 
   public void fetchDetailedEvent() {
@@ -807,11 +491,6 @@ public class EventFrame extends SwarmFrame implements EventObserver {
   @Override
   public void paint(final Graphics g) {
     super.paint(g);
-    // if (waves.size() == 0) {
-    // final Dimension dim = this.getSize();
-    // g.setColor(Color.black);
-    // g.drawString("Picker empty.", dim.width / 2 - 40, dim.height / 2);
-    // }
   }
 
   @Override
@@ -823,7 +502,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
   }
 
   public void eventUpdated() {
-    mainPanel.setTopComponent(createParameterPanel());
+    mainPanel.setTopComponent(ParameterPanel.create(event));
     mainPanel.setBottomComponent(createPickPanel());
   }
 
@@ -851,10 +530,4 @@ public class EventFrame extends SwarmFrame implements EventObserver {
       public void componentResized(final ComponentEvent e) {}
     });
   }
-
-  // private synchronized void createImage() {
-  // if (getWidth() > 0 && getHeight() > 0)
-  // image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
-  // }
-
 }
