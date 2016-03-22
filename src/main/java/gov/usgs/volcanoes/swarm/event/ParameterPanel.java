@@ -81,6 +81,17 @@ public class ParameterPanel {
     }
     c.gridy++;
 
+    label = new JLabel("Type: ", SwingConstants.LEFT);
+    label.setFont(KEY_FONT);
+    parameterPanel.add(label, c);
+
+    if (origin != null) {
+      label = new JLabel(event.getType(), SwingConstants.LEFT);
+      label.setFont(VALUE_FONT);
+      parameterPanel.add(label, c);
+    }
+    c.gridy++;
+
 
     label = new JLabel("Hypocenter: ", SwingConstants.LEFT);
     label.setFont(KEY_FONT);

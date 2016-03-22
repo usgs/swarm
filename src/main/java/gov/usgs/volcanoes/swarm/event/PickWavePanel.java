@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Stack;
 
@@ -70,6 +71,10 @@ private JViewport viewport;
 
   @Override
   protected void annotateImage(Graphics2D g2) {
+    if (getVisibleRect().isEmpty()) {
+      return;
+    }
+    
     for (Arrival arrival : arrivals) {
       Pick pick = arrival.getPick();
 
@@ -125,8 +130,7 @@ private JViewport viewport;
 
   @Override
   protected void processRightMousePress(MouseEvent e) {
-    // TODO Auto-generated method stub
-
+    settings.cycleType();
   }
   
   public void setViewport(JViewport viewport) {
@@ -137,4 +141,12 @@ private JViewport viewport;
     return Arrival.distanceComparator().compare(arrivals.get(0),o.arrivals.get(0));
   }    
          
+  public static Comparator<PickWavePanel> distanceComparator() {
+    return new Comparator<PickWavePanel>() {
+      public int compare(final PickWavePanel e1, final PickWavePanel e2) {
+        return Arrival.distanceComparator().compare(e1.arrivals.get(0),e2.arrivals.get(0));
+      }
+    };
+  }
+
 }

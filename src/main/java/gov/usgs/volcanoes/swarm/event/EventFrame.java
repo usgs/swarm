@@ -1,34 +1,23 @@
 package gov.usgs.volcanoes.swarm.event;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
 import java.util.TreeSet;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JToolBar;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameAdapter;
@@ -37,27 +26,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
-import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.util.UiUtils;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmFrame;
-import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.Throbber;
-import gov.usgs.volcanoes.swarm.data.CachedDataSource;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
-import gov.usgs.volcanoes.swarm.picker.PickerWavePanel;
-import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
 
 /**
  * The picker internal frame. Adapted from the WaveClipboardFrame.
@@ -66,20 +39,14 @@ import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
  */
 public class EventFrame extends SwarmFrame implements EventObserver {
   private static final Logger LOGGER = LoggerFactory.getLogger(EventFrame.class);
-  private static final Font KEY_FONT = Font.decode("dialog-BOLD-12");
-  private static final Font VALUE_FONT = Font.decode("dialog-12");
-
   public static final long serialVersionUID = -1;
 
-  private final PickPanel pickBox;
+  private final PickBox pickBox;
   private final JLabel statusLabel;
-  private final Map<AbstractWavePanel, Stack<double[]>> histories;
-  private final Set<PickerWavePanel> selectedSet;
+  private final Event event;
 
   private JSplitPane mainPanel;
-  private Event event;
   private PickToolBar toolbar;
-
   private boolean closing = false;
 
   public EventFrame(Event event) {
@@ -87,11 +54,8 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     this.event = event;
 
     statusLabel = new JLabel(" ");
-    pickBox = new PickPanel(statusLabel);
+    pickBox = new PickBox(statusLabel);
     pickBox.setLayout(new BoxLayout(pickBox, BoxLayout.PAGE_AXIS));
-
-    histories = new HashMap<AbstractWavePanel, Stack<double[]>>();
-    selectedSet = new HashSet<PickerWavePanel>();
 
     event.addObserver(this);
     this.setFocusable(true);
@@ -101,7 +65,6 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     setSize(swarmConfig.clipboardWidth, swarmConfig.clipboardHeight);
     setLocation(swarmConfig.clipboardX, swarmConfig.clipboardY);
     setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-    LOGGER.debug("event frame: {} @ {}", this.getSize(), this.getLocation());
 
     mainPanel =
         new JSplitPane(JSplitPane.VERTICAL_SPLIT, ParameterPanel.create(event), createPickPanel());
@@ -109,7 +72,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
 
     setContentPane(mainPanel);
     this.setVisible(true);
-
+    
     new SwingWorker() {
       @Override
       public Object construct() {
@@ -128,16 +91,17 @@ public class EventFrame extends SwarmFrame implements EventObserver {
 
   private JPanel createPickPanel() {
 
-    toolbar = new PickToolBar();
+    JPanel pickPanel = new JPanel();
+    pickPanel.setLayout(new BoxLayout(pickPanel, BoxLayout.PAGE_AXIS));
+
+    toolbar = new PickToolBar(pickBox);
+    pickPanel.add(toolbar);
+    pickBox.addListener(toolbar);
+
     final JScrollPane scrollPane = new JScrollPane(pickBox);
     scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     scrollPane.getVerticalScrollBar().setUnitIncrement(40);
-
-    JPanel pickPanel = new JPanel();
-    pickPanel.setLayout(new BoxLayout(pickPanel, BoxLayout.PAGE_AXIS));
-    LOGGER.info("Adding toolbar");
-    pickPanel.add(toolbar);
     pickPanel.add(scrollPane);
 
     JPanel statusPanel = new JPanel();
@@ -199,7 +163,6 @@ public class EventFrame extends SwarmFrame implements EventObserver {
 
     double waveStart = J2kSec.fromEpoch(firstPick) - 1;
     double waveEnd = J2kSec.fromEpoch(lastPick) + 1;
-    LOGGER.debug("wave span {} - {}", waveStart, waveEnd);
 
     pickBox.setStart(waveStart);
     pickBox.setEnd(waveEnd);
@@ -213,19 +176,12 @@ public class EventFrame extends SwarmFrame implements EventObserver {
       }
       pickBox.addPick(arrival);
       mainPanel.validate();
-      LOGGER.debug("pickBox {}", pickBox.countComponents());
     }
     toolbar.decrementThrobber();
   }
 
   @Override
-  public void paint(final Graphics g) {
-    super.paint(g);
-  }
-
-  @Override
   public void setVisible(final boolean isVisible) {
-    LOGGER.debug("Visible = {}", isVisible);
     super.setVisible(isVisible);
     if (isVisible)
       toFront();
@@ -254,12 +210,5 @@ public class EventFrame extends SwarmFrame implements EventObserver {
       @Override
       public void internalFrameClosed(final InternalFrameEvent e) {}
     });
-
-    this.addComponentListener(new ComponentAdapter() {
-      @Override
-      public void componentResized(final ComponentEvent e) {}
-    });
   }
-
-
- }
+}

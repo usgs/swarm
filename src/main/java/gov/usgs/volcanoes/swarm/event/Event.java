@@ -2,23 +2,16 @@ package gov.usgs.volcanoes.swarm.event;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import gov.usgs.volcanoes.core.util.StringUtils;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
 
 
 public class Event {
@@ -29,12 +22,13 @@ public class Event {
   private final Map<String, Magnitude> magnitudes;
   private final Map<String, Pick> picks;
   private final List<EventObserver> observers;
-  
+
   private Origin preferredOrigin;
   private Magnitude preferredMagnitude;
   private String description;
   private String eventSource;
   private String evid;
+  private String type;
 
   public Event(String publicId) {
     this.publicId = publicId;
@@ -82,6 +76,23 @@ public class Event {
       description = StringUtils.stringToString(
           descriptionElement.getElementsByTagName("text").item(0).getTextContent(), description);
     }
+
+    // Element typeElement = (Element) event.getElementsByTagName("type").item(0);
+    NodeList childList = event.getChildNodes();
+    String newType = null;
+    int idx = 0;
+    while (type == null && idx < childList.getLength()) {
+      Node node = childList.item(idx);
+      if (node.getNodeType() == Node.ELEMENT_NODE) {
+        Element element = (Element) node;
+        if (element.getTagName() == "type") {
+          type = element.getTextContent();
+        }
+        idx++;
+      }
+    }
+    
+    type = StringUtils.stringToString(newType, type);
 
     notifyObservers();
   }
@@ -143,6 +154,10 @@ public class Event {
 
   public String getDescription() {
     return description;
+  }
+
+  public String getType() {
+    return type;
   }
 
   public void setDescription(String description) {
