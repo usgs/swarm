@@ -47,6 +47,8 @@ import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelListener;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsDialog;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
 
 public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
@@ -77,19 +79,21 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   private int wavePanelHeight;
   private int lastClickedIndex;
   private final Set<PickBoxListener> listeners;
+  private JLabel emptyArrivalLabel;
 
   public PickBox(JLabel statusLabel) {
     this.statusLabel = statusLabel;
     panels = new CopyOnWriteArrayList<PickWavePanel>();
-    
+
     seismicSources = new HashMap<String, SeismicDataSource>();
     histories = new HashMap<AbstractWavePanel, Stack<double[]>>();
     listeners = new HashSet<PickBoxListener>();
     // selectedSet = new HashSet<PickWavePanel>();
     selectedSet = new ConcurrentSkipListSet<PickWavePanel>();
     wavePanelHeight = DEFAULT_WAVE_PANEL_HEIGHT;
-
     setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+    emptyArrivalLabel = new JLabel("No arrivals available.");
+    add(emptyArrivalLabel);
     addComponentListener(new ComponentAdapter() {
       @Override
       public void componentMoved(final ComponentEvent e) {
@@ -195,22 +199,16 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
 
   @Override
   public void paint(final Graphics g) {
-//    if (getWidth() <= 0 || getHeight() <= 0)
-//      return;
-
-    if (image == null || panels.size() == 0) {
-      super.paint(g);
-      final Dimension dim = this.getSize();
-      g.setColor(Color.black);
-      g.drawString("Monitor empty.", dim.width / 2 - 40, dim.height / 2);
-    } else {
-      super.paint(image.getGraphics());
-      g.drawImage(image, 0, 0, null);
-      g.setColor(Color.WHITE);
+    if (image == null) {
+      createImage();
     }
+    super.paint(image.getGraphics());
+    g.drawImage(image, 0, 0, null);
+    g.setColor(Color.WHITE);
   }
 
   public void addPick(Arrival arrival) {
+    this.remove(emptyArrivalLabel);
     Pick pick = arrival.getPick();
     String channel = pick.getChannel();
     int index = panels.lastIndexOf(channel);
@@ -430,7 +428,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
       return;
 
     final double[] t = history.pop();
-     fetchNewWave(wvp, t[0], t[1]);
+    fetchNewWave(wvp, t[0], t[1]);
   }
 
   public void back() {
@@ -469,7 +467,6 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
         else
           sw = sds.getWave(wvp.getChannel(), nst, net);
         wvp.setWave(sw, nst, net);
-        wvp.repaint();
         return null;
       }
 
@@ -483,8 +480,16 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   }
 
   public void displaySettingsDialog() {
-    // TODO Auto-generated method stub
-
+    if (panels.size() == 0)
+      return;
+    
+    WaveViewSettings s = panels.get(0).getSettings();
+    WaveViewSettingsDialog wvsd = WaveViewSettingsDialog.getInstance(s, selectedSet.size());
+    wvsd.setVisible(true);
+    for (PickWavePanel panel : selectedSet) {
+      WaveViewSettings settings= panel.getSettings();
+      settings.copy(s);
+    }
   }
 
   public void mapKeyStroke(String keyStroke, String name, AbstractButton button) {

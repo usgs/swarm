@@ -367,7 +367,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     picker.setEnabled(false);
     UiUtils.mapKeyStrokeToButton(this, "control P", "picker1", picker);
     UiUtils.mapKeyStrokeToButton(this, "P", "picker2", picker);
-    toolBar.add(picker);
+//    toolBar.add(picker);
 
     removeWave = SwarmUtil.createToolBarButton(Icons.delete, "Remove inset wave (Delete or Escape)",
         new ActionListener() {
