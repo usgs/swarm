@@ -41,7 +41,7 @@ public enum HypocenterSource {
 
   public static HypocenterSource fromUrl(String hypocenterUrl) {
     for (HypocenterSource source : HypocenterSource.values()) {
-      if (source.url == hypocenterUrl) {
+      if (source.url.equals(hypocenterUrl)) {
         return source;
       }
     }
