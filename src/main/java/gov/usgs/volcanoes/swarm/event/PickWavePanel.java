@@ -1,11 +1,17 @@
+/**
+ * I waive copyright and related rights in the this work worldwide
+ * through the CC0 1.0 Universal public domain dedication.
+ * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ */
 package gov.usgs.volcanoes.swarm.event;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
@@ -14,11 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Stack;
 
-import javax.swing.JScrollPane;
 import javax.swing.JViewport;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
@@ -26,17 +28,24 @@ import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
 
-public class PickWavePanel extends AbstractWavePanel implements EventObserver, Comparable<PickWavePanel> {
+/**
+ * A wave panel which adds pick annotations.
+ * 
+ * @author Tom Parker
+ *
+ */
+public class PickWavePanel extends AbstractWavePanel
+    implements EventObserver, Comparable<PickWavePanel> {
 
+  private static final long serialVersionUID = 1L;
   private static final Logger LOGGER = LoggerFactory.getLogger(PickWavePanel.class);
-
   private static final Font ANNOTATION_FONT = new Font("Monospaced", Font.BOLD, 12);
   private static final Color P_BACKGROUND = new Color(128, 255, 128, 192);
   private static final Color S_BACKGROUND = new Color(128, 128, 255, 192);
   private static final Color RESIDUAL_COLOR = new Color(128, 128, 128, 32);
+
   private final List<Arrival> arrivals;
   private final Stack<double[]> zoomHistory;
-private JViewport viewport;
 
   public PickWavePanel() {
     super();
@@ -74,7 +83,7 @@ private JViewport viewport;
     if (getVisibleRect().isEmpty()) {
       return;
     }
-    
+
     for (Arrival arrival : arrivals) {
       Pick pick = arrival.getPick();
 
@@ -95,7 +104,7 @@ private JViewport viewport;
         g2.fill(new Rectangle2D.Double(Math.min(x, residualMark), yOffset,
             Math.abs(x - residualMark), getHeight() - bottomHeight - 1));
       }
-      
+
       g2.setFont(ANNOTATION_FONT);
 
       FontMetrics fm = g2.getFontMetrics();
@@ -132,19 +141,15 @@ private JViewport viewport;
   protected void processRightMousePress(MouseEvent e) {
     settings.cycleType();
   }
-  
-  public void setViewport(JViewport viewport) {
-    this.viewport = viewport;
-  }
 
   public int compareTo(PickWavePanel o) {
-    return Arrival.distanceComparator().compare(arrivals.get(0),o.arrivals.get(0));
-  }    
-         
+    return Arrival.distanceComparator().compare(arrivals.get(0), o.arrivals.get(0));
+  }
+
   public static Comparator<PickWavePanel> distanceComparator() {
     return new Comparator<PickWavePanel>() {
       public int compare(final PickWavePanel e1, final PickWavePanel e2) {
-        return Arrival.distanceComparator().compare(e1.arrivals.get(0),e2.arrivals.get(0));
+        return Arrival.distanceComparator().compare(e1.arrivals.get(0), e2.arrivals.get(0));
       }
     };
   }

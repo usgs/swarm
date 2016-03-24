@@ -1,3 +1,9 @@
+/**
+ * I waive copyright and related rights in the this work worldwide
+ * through the CC0 1.0 Universal public domain dedication.
+ * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ */
+
 package gov.usgs.volcanoes.swarm.event;
 
 import org.slf4j.Logger;
@@ -21,13 +27,17 @@ public class ParameterPanel {
   private static final Font VALUE_FONT = Font.decode("dialog-12");
 
   private ParameterPanel() {}
-  
+
   public static Component create(Event event) {
     Origin origin = event.getPreferredOrigin();
     Magnitude magnitude = event.getPerferredMagnitude();
 
     JPanel parameterPanel = new JPanel(new GridBagLayout());
     GridBagConstraints c = new GridBagConstraints();
+    if (origin == null) {
+      LOGGER.error("Cannot find perferred origin.");
+      return parameterPanel;
+    }
 
 
     c.fill = GridBagConstraints.NONE;
@@ -37,126 +47,79 @@ public class ParameterPanel {
     c.ipadx = 3;
     c.ipady = 2;
 
-    JLabel label;
-
-    label = new JLabel("Event source: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
+    addKey("Event source: ", parameterPanel, c);
 
     String source = Networks.getInstance().getName(event.getEventSource().toUpperCase());
     if (source == null) {
       source = event.getEventSource();
     }
-    label = new JLabel(Networks.getInstance().getName(event.getEventSource().toUpperCase()),
-        SwingConstants.LEFT);
-    label.setFont(VALUE_FONT);
-    parameterPanel.add(label, c);
+    addValue(source, parameterPanel, c);
 
     c.gridy++;
-
-    label = new JLabel("Description: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
+    addKey("Description: ", parameterPanel, c);
 
     // wrap description to support multi-line descriptions
     String description = event.getDescription();
     description = description.replace("\n", "<BR>");
     description = "<HTML>" + description + "</HTML>";
-    label = new JLabel(description, SwingConstants.LEFT);
-    label.setFont(VALUE_FONT);
-    parameterPanel.add(label, c);
+    addValue(description, parameterPanel, c);
 
     c.gridy++;
+    addKey("Origin date: ", parameterPanel, c);
 
-    label = new JLabel("Origin date: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    String date = dateFormat.format(event.getPreferredOrigin().getTime());
+    addValue(date, parameterPanel, c);
+
+    c.gridy++;
+    addKey("Type: ", parameterPanel, c);
 
     if (origin != null) {
-      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-      String date = dateFormat.format(event.getPreferredOrigin().getTime());
-      label = new JLabel(date, SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
+      addValue(event.getType(), parameterPanel, c);
     }
+
     c.gridy++;
+    addKey("Hypocenter: ", parameterPanel, c);
 
-    label = new JLabel("Type: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
+    String loc = origin.getLatitude() + ", " + origin.getLongitude();
+    loc += " at " + (origin.getDepth() / 1000) + " km depth";
+    addValue(loc, parameterPanel, c);
 
-    if (origin != null) {
-      label = new JLabel(event.getType(), SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
-    }
     c.gridy++;
-
-
-    label = new JLabel("Hypocenter: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    if (origin != null) {
-      String loc = origin.getLatitude() + ", " + origin.getLongitude();
-      loc += " at " + (origin.getDepth() / 1000) + " km depth";
-      label = new JLabel(loc, SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
-    }
-    c.gridy++;
-
-    label = new JLabel("Error (RMS): ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
+    addKey("Error (RMS): ", parameterPanel, c);
 
     double error = origin.getStandardError();
     if (!Double.isNaN(error)) {
-      label = new JLabel("" + error, SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
+      addValue(Double.toString(error), parameterPanel, c);
     }
-    c.gridy++;
 
-    label = new JLabel("Azimuthal gap: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
+    c.gridy++;
+    addKey("Azimuthal gap: ", parameterPanel, c);
 
     double gap = origin.getAzimuthalGap();
     if (!Double.isNaN(gap)) {
-      label = new JLabel("" + gap + "\u00B0", SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
+      addValue(gap + "\u00B0", parameterPanel, c);
     }
-    c.gridy++;
 
-    label = new JLabel("Nearest station: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
+    c.gridy++;
+    addKey("Nearest station: ", parameterPanel, c);
 
     double distance = origin.getMinimumDistance();
     if (!Double.isNaN(distance)) {
-      label = new JLabel("" + distance + "\u00B0", SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
+      String tag = distance + "\u00B0" + " \u2248" + String.format("%.2f", Math.toRadians(distance * 6371)) + " km";
+      addValue(tag, parameterPanel, c);
     }
-    c.gridy++;
 
-    label = new JLabel("Phase count: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
+    c.gridy++;
+    addKey("Phase count: ", parameterPanel, c);
 
     int phaseCount = origin.getPhaseCount();
     if (phaseCount > 0) {
-      label = new JLabel("" + phaseCount, SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
+      addValue(Integer.toString(phaseCount), parameterPanel, c);
     }
-    c.gridy++;
 
-   label = new JLabel("Magnitude: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
+    c.gridy++;
+    addKey("Magnitude: ", parameterPanel, c);
 
     if (magnitude != null) {
       String mag = String.format("%s %s", magnitude.getMag(), magnitude.getType());
@@ -164,18 +127,13 @@ public class ParameterPanel {
       if (uncertaintly != null) {
         mag += " (" + uncertaintly + ")";
       }
-      label = new JLabel(mag, SwingConstants.LEFT);
-      label.setFont(VALUE_FONT);
-      parameterPanel.add(label, c);
+      addValue(mag, parameterPanel, c);
     }
-    c.gridy++;
 
-    label = new JLabel("Evalutation: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
+    c.gridy++;
+    addKey("Evalutation: ", parameterPanel, c);
 
     String evaluationTag = "";
-
     Origin.EvaluationMode evaluationMode = origin.getEvaluationMode();
     if (evaluationMode != null) {
       evaluationTag += evaluationMode.toString().toLowerCase();
@@ -188,21 +146,12 @@ public class ParameterPanel {
       }
       evaluationTag += evaluationStatus.toString().toLowerCase();
     }
+    addValue(evaluationTag, parameterPanel, c);
 
-    label = new JLabel(evaluationTag, SwingConstants.LEFT);
-    label.setFont(VALUE_FONT);
-    parameterPanel.add(label, c);
 
     c.gridy++;
-
-    label = new JLabel("Event id: ", SwingConstants.LEFT);
-    label.setFont(KEY_FONT);
-    parameterPanel.add(label, c);
-
-    label = new JLabel(event.getEvid(), SwingConstants.LEFT);
-    label.setFont(VALUE_FONT);
-    parameterPanel.add(label, c);
-    c.gridy++;
+    addKey("Event id: ", parameterPanel, c);
+    addValue(event.getEvid(), parameterPanel, c);
 
     c.weighty = 1;
     c.weightx = 1;
@@ -217,6 +166,22 @@ public class ParameterPanel {
     scrollPane.getVerticalScrollBar().setUnitIncrement(40);
 
     return scrollPane;
+  }
+
+  private static void addKey(String labelS, JPanel parameterPanel, GridBagConstraints c) {
+    addLabel(labelS, KEY_FONT, parameterPanel, c);
+  }
+
+  private static void addValue(String labelS, JPanel parameterPanel, GridBagConstraints c) {
+    addLabel(labelS, VALUE_FONT, parameterPanel, c);
+  }
+
+  private static void addLabel(String labelS, Font font, JPanel parameterPanel,
+      GridBagConstraints c) {
+    JLabel label = new JLabel(labelS, SwingConstants.LEFT);
+    label.setFont(font);
+    parameterPanel.add(label, c);
+
   }
 
 }

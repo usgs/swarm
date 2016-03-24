@@ -1,18 +1,29 @@
+/**
+ * I waive copyright and related rights in the this work worldwide
+ * through the CC0 1.0 Universal public domain dedication.
+ * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ */
+
 package gov.usgs.volcanoes.swarm.event;
 
-import java.io.BufferedReader;
-import java.io.File;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+/**
+ * Translate FDSN network codes into organizational names.
+ * 
+ * @author Tom Parker
+ *
+ */
 public class Networks {
   private final static Logger LOGGER = LoggerFactory.getLogger(Networks.class);
 
@@ -25,9 +36,9 @@ public class Networks {
 
   private Networks() {
     networks = new HashMap<String, String>();
-    FileReader reader = null;
+    Reader reader = null;
     try {
-      reader = new FileReader(new File(ClassLoader.getSystemResource(NETWORKS_FILE).getFile()));
+      reader = new InputStreamReader(ClassLoader.getSystemResource(NETWORKS_FILE).openStream());
 
       try {
         List<String> fields = Networks.parseLine(reader);
@@ -41,10 +52,6 @@ public class Networks {
       }
     } catch (IOException e) {
       LOGGER.info("Unable to read networks", e);
-      // } catch (URISyntaxException e) {
-      // // TODO Auto-generated catch block
-      // LOGGER.debug("DASDSA ", e);
-      // e.printStackTrace();
     } finally {
       if (reader != null) {
         try {

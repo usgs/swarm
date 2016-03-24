@@ -1,16 +1,27 @@
+/**
+ * I waive copyright and related rights in the this work worldwide
+ * through the CC0 1.0 Universal public domain dedication.
+ * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ */
+
 package gov.usgs.volcanoes.swarm.event;
 
-import java.text.ParseException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * Holder for QuakeML origin.
+ * 
+ * @author Tom Parker
+ *
+ */
 public class Origin {
   private static final Logger LOGGER = LoggerFactory.getLogger(Origin.class);
 

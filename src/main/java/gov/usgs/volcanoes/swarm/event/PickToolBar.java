@@ -1,3 +1,9 @@
+/**
+ * I waive copyright and related rights in the this work worldwide
+ * through the CC0 1.0 Universal public domain dedication.
+ * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ */
+
 package gov.usgs.volcanoes.swarm.event;
 
 import org.slf4j.Logger;
@@ -20,6 +26,12 @@ import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.Throbber;
 import gov.usgs.volcanoes.swarm.wave.WaveViewToolBar;
 
+/**
+ * Toolbar used in event frame.
+ * 
+ * @author Tom Parker
+ *
+ */
 public class PickToolBar extends JToolBar implements PickBoxListener {
   private static final long serialVersionUID = 1L;
   private final static Logger LOGGER = LoggerFactory.getLogger(PickToolBar.class);

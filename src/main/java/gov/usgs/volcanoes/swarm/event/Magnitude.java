@@ -1,8 +1,19 @@
+/**
+ * I waive copyright and related rights in the this work worldwide
+ * through the CC0 1.0 Universal public domain dedication.
+ * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ */
+
 package gov.usgs.volcanoes.swarm.event;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
+/**
+ * Holder for QuakeML magnitude.
+ * 
+ * @author Tom Parker
+ *
+ */
 public class Magnitude {
 
   public final String publicId;
@@ -13,7 +24,6 @@ public class Magnitude {
   
   public Magnitude(Element magnitudeElement) {
     publicId = magnitudeElement.getAttribute("publicId");
-//    mag = Double.parseDouble(magnitudeElement.getElementsByTagName("mag").item(0).getTextContent());
     type = magnitudeElement.getElementsByTagName("type").item(0).getTextContent();
     
     Element magElement = (Element) magnitudeElement.getElementsByTagName("mag").item(0);

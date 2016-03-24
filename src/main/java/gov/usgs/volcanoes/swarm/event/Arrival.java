@@ -1,3 +1,9 @@
+/**
+ * I waive copyright and related rights in the this work worldwide
+ * through the CC0 1.0 Universal public domain dedication.
+ * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ */
+
 package gov.usgs.volcanoes.swarm.event;
 
 import org.slf4j.Logger;
@@ -10,6 +16,12 @@ import java.util.Map;
 import gov.usgs.volcanoes.swarm.event.Pick.Onset;
 import gov.usgs.volcanoes.swarm.event.Pick.Polarity;
 
+/**
+ * Holder for QuakeML arrival.
+ * 
+ * @author Tom Parker
+ *
+ */
 public class Arrival {
   Logger LOGGER = LoggerFactory.getLogger(Arrival.class);
 

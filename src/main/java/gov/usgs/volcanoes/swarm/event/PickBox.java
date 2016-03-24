@@ -1,3 +1,9 @@
+/**
+ * I waive copyright and related rights in the this work worldwide
+ * through the CC0 1.0 Universal public domain dedication.
+ * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ */
+
 package gov.usgs.volcanoes.swarm.event;
 
 import org.slf4j.Logger;
@@ -29,10 +35,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JViewport;
 import javax.swing.Scrollable;
 
 import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.core.CodeTimer;
 import gov.usgs.volcanoes.core.contrib.PngEncoder;
 import gov.usgs.volcanoes.core.contrib.PngEncoderB;
 import gov.usgs.volcanoes.core.time.J2kSec;
@@ -48,26 +54,28 @@ import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelListener;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsDialog;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsDialog;
 
+/**
+ * A panel to display picks for a single event.
+ * 
+ * @author Tom Parker
+ *
+ */
 public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   private static final long serialVersionUID = 1L;
   private static final Logger LOGGER = LoggerFactory.getLogger(PickBox.class);
   private static final int DEFAULT_WAVE_PANEL_HEIGHT = 150;
   private static final Color SELECT_COLOR = new Color(200, 220, 241);
   private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
-
-  private static final String IRIS_DATASELECT_URL =
-      "http://service.iris.edu/fdsnws/dataselect/1/query";
-  private static final String IRIS_STATION_URL = "http://service.iris.edu/fdsnws/station/1/query";
-
-  protected static final JFrame applicationFrame = Swarm.getApplicationFrame();
-  private static final SwarmConfig swarmConfig = SwarmConfig.getInstance();
+  private static final String DATASELECT_URL = "http://service.iris.edu/fdsnws/dataselect/1/query";
+  private static final String STATION_URL = "http://service.iris.edu/fdsnws/station/1/query";
+  private static final JFrame APPLICATION_FRAME = Swarm.getApplicationFrame();
+  private static final SwarmConfig SWARM_CONFIG = SwarmConfig.getInstance();
 
   private final Map<AbstractWavePanel, Stack<double[]>> histories;
   private final Set<PickWavePanel> selectedSet;
-  // private final Map<String, PickWavePanel> panels;
   private final List<PickWavePanel> panels;
 
   private BufferedImage image;
@@ -88,7 +96,6 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     seismicSources = new HashMap<String, SeismicDataSource>();
     histories = new HashMap<AbstractWavePanel, Stack<double[]>>();
     listeners = new HashSet<PickBoxListener>();
-    // selectedSet = new HashSet<PickWavePanel>();
     selectedSet = new ConcurrentSkipListSet<PickWavePanel>();
     wavePanelHeight = DEFAULT_WAVE_PANEL_HEIGHT;
     setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -208,16 +215,16 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   }
 
   public void addPick(Arrival arrival) {
+    CodeTimer timer = new CodeTimer("arrival");
     this.remove(emptyArrivalLabel);
     Pick pick = arrival.getPick();
     String channel = pick.getChannel();
-    int index = panels.lastIndexOf(channel);
-    PickWavePanel wavePanel;
-    if (index < 0) {
+    
+    PickWavePanel wavePanel = findPanel(channel);
+    if (wavePanel == null) {
       wavePanel = new PickWavePanel();
       wavePanel.setStatusLabel(statusLabel);
       wavePanel.setChannel(channel);
-      wavePanel.setViewport(((JViewport) getParent()));
       SeismicDataSource source = seismicSources.get(channel);
       if (source == null) {
         source = new WebServicesSource();
@@ -229,8 +236,6 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
         panels.add(wavePanel);
         wavePanel.setWave(wave, startJ2k, endJ2k);
         add(wavePanel);
-        // add(Box.createRigidArea(new Dimension(0, 10)));
-        // p.setSize(w, calculateWaveHeight());
         wavePanel.setBottomBorderColor(Color.GRAY);
         wavePanel.setSize(getWidth(), wavePanelHeight);
         wavePanel.setDisplayTitle(true);
@@ -238,11 +243,10 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
         wavePanel.createImage();
         wavePanel.addListener(selectListener);
       }
-    } else {
-      wavePanel = panels.get(index);
     }
 
     wavePanel.addArrival(arrival);
+    timer.stopAndReport();
   }
 
   private String buildParams(String channel) {
@@ -260,8 +264,8 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     sb.append(comps[1]).append("|");
     sb.append(3600).append("|");
     sb.append(1000).append("|");
-    sb.append(IRIS_DATASELECT_URL).append("|");
-    sb.append(IRIS_STATION_URL);
+    sb.append(DATASELECT_URL).append("|");
+    sb.append(STATION_URL);
 
     return sb.toString();
   }
@@ -310,13 +314,13 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     chooser.setCurrentDirectory(lastPath);
     chooser.setSelectedFile(new File("clipboard.png"));
     chooser.setDialogTitle("Save Clipboard Screen Capture");
-    final int result = chooser.showSaveDialog(applicationFrame);
+    final int result = chooser.showSaveDialog(APPLICATION_FRAME);
     File f = null;
     if (result == JFileChooser.APPROVE_OPTION) {
       f = chooser.getSelectedFile();
 
       if (f.exists()) {
-        final int choice = JOptionPane.showConfirmDialog(applicationFrame,
+        final int choice = JOptionPane.showConfirmDialog(APPLICATION_FRAME,
             "File exists, overwrite?", "Confirm", JOptionPane.YES_NO_OPTION);
         if (choice != JOptionPane.YES_OPTION)
           return;
@@ -382,6 +386,15 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     }
   }
 
+  private PickWavePanel findPanel(String channel) {
+    for (PickWavePanel panel : panels) {
+      if (panel.getChannel().equals(channel)) {
+        return panel;
+      }
+    }
+    return null;
+  }
+
   private int findPanelIndex(PickWavePanel panel) {
     int panelIdx = -1;
     int searchIdx = 0;
@@ -392,7 +405,6 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
         searchIdx++;
       }
     }
-    LOGGER.debug("FOUND PANEL {}", panelIdx);
     return panelIdx;
   }
 
@@ -458,7 +470,6 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     final SwingWorker worker = new SwingWorker() {
       @Override
       public Object construct() {
-        // throbber.increment();
         final SeismicDataSource sds = wvp.getDataSource();
         // Hacky fix for bug #84
         Wave sw = null;
@@ -472,7 +483,6 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
 
       @Override
       public void finished() {
-        // throbber.decrement();
         repaint();
       }
     };
@@ -482,12 +492,12 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   public void displaySettingsDialog() {
     if (panels.size() == 0)
       return;
-    
+
     WaveViewSettings s = panels.get(0).getSettings();
     WaveViewSettingsDialog wvsd = WaveViewSettingsDialog.getInstance(s, selectedSet.size());
     wvsd.setVisible(true);
     for (PickWavePanel panel : selectedSet) {
-      WaveViewSettings settings= panel.getSettings();
+      WaveViewSettings settings = panel.getSettings();
       settings.copy(s);
     }
   }
@@ -512,7 +522,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
 
       j2k = J2kSec.parse("yyyyMMddHHmmss", t);
     } catch (final Exception e) {
-      JOptionPane.showMessageDialog(applicationFrame, "Illegal time value.", "Error",
+      JOptionPane.showMessageDialog(APPLICATION_FRAME, "Illegal time value.", "Error",
           JOptionPane.ERROR_MESSAGE);
     }
 
@@ -527,7 +537,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
       }
 
       final double tzo =
-          swarmConfig.getTimeZone(wvp.getChannel()).getOffset(System.currentTimeMillis()) / 1000;
+          SWARM_CONFIG.getTimeZone(wvp.getChannel()).getOffset(System.currentTimeMillis()) / 1000;
 
       final double nst = j2k - tzo - dt / 2;
       final double net = nst + dt;
