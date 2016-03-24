@@ -7,7 +7,8 @@ public class EventChannel {
   private final static Logger LOGGER = LoggerFactory.getLogger(EventChannel.class);
   private Phase pPhase;
   private Phase sPhase;
-  
+  private long codaTime;
+
   private int maxAmplitude;
   private long duration;
 
@@ -23,11 +24,12 @@ public class EventChannel {
         throw new RuntimeException("Unknown phase type.");
     }
   }
-  
+
   public void clearPhase(Phase.PhaseType type) {
     switch (type) {
       case P:
         pPhase = null;
+        codaTime = 0;
         break;
       case S:
         sPhase = null;
@@ -36,7 +38,7 @@ public class EventChannel {
         throw new RuntimeException("Unknown phase type.");
     }
   }
-  
+
   public Phase getPhase(Phase.PhaseType type) {
     switch (type) {
       case P:
@@ -50,5 +52,13 @@ public class EventChannel {
 
   public boolean isEmpty() {
     return pPhase == null && sPhase == null;
+  }
+
+  public void setCoda(long time) {
+    codaTime = time;
+  }
+
+  public long getCodaTime() {
+    return codaTime;
   }
 }

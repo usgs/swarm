@@ -2,9 +2,6 @@ package gov.usgs.volcanoes.swarm.wave;
 
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -12,6 +9,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Paint;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -22,8 +20,12 @@ import java.util.TimeZone;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.usgs.math.Filter;
 import gov.usgs.plot.Plot;
@@ -86,7 +88,7 @@ public abstract class AbstractWavePanel extends JComponent {
    */
   protected SeismicDataSource source;
   /**
-   * A flag to indicate wheter the plot should display a title. Currently used when the plot is on
+   * A flag to indicate whether the plot should display a title. Currently used when the plot is on
    * the clipboard or monitor.
    */
   protected boolean displayTitle;
@@ -120,14 +122,24 @@ public abstract class AbstractWavePanel extends JComponent {
   protected static final Color DARK_GREEN = new Color(0, 168, 0);
 
   protected boolean pauseCursorMark;
+  protected double time;
 
-  public AbstractWavePanel(WaveViewSettings s) {
+
+  public AbstractWavePanel() {
+    super();
     swarmConfig = SwarmConfig.getInstance();
-    settings = s;
-    s.view = this;
     pauseCursorMark = false;
     backgroundColor = new Color(0xf7, 0xf7, 0xf7);
+    settings = new WaveViewSettings();
+
     setupMouseHandler();
+
+  }
+
+  public AbstractWavePanel(WaveViewSettings s) {
+    this();
+    settings = s;
+    s.view = this;
   }
 
   /**
@@ -137,8 +149,8 @@ public abstract class AbstractWavePanel extends JComponent {
    * @param p the source WaveViewPanel
    */
   public AbstractWavePanel(AbstractWavePanel p) {
+    this();
 
-    swarmConfig = SwarmConfig.getInstance();
     channel = p.channel;
     source = p.source;
     startTime = p.startTime;
@@ -146,21 +158,22 @@ public abstract class AbstractWavePanel extends JComponent {
     bias = p.bias;
     maxSpectraPower = p.maxSpectraPower;
     maxSpectrogramPower = p.maxSpectrogramPower;
-    translation = new double[8];
-    if (p.translation != null)
-      System.arraycopy(p.translation, 0, translation, 0, 8);
     timeSeries = p.timeSeries;
     allowDragging = p.allowDragging;
-    settings = new WaveViewSettings(p.settings);
-    settings.view = this;
     wave = p.wave;
     displayTitle = p.displayTitle;
     backgroundColor = p.backgroundColor;
     mark1 = p.mark1;
     mark2 = p.mark2;
-    setupMouseHandler();
-    processSettings();
 
+    translation = new double[8];
+    if (p.translation != null)
+      System.arraycopy(p.translation, 0, translation, 0, 8);
+
+    settings = new WaveViewSettings(p.settings);
+    settings.view = this;
+
+    processSettings();
   }
 
   public void setOffsets(int xo, int yo, int rw, int bh) {
@@ -482,11 +495,11 @@ public abstract class AbstractWavePanel extends JComponent {
 
     Dimension size = getSize();
     double[] t = getTranslation();
-    double j2k = Double.NaN;
+    time = Double.NaN;
 
     if (wave != null && t != null && y > yOffset && y < (size.height - bottomHeight) && x > xOffset
         && x < size.width - rightWidth) {
-      j2k = x * t[0] + t[1];
+      time = x * t[0] + t[1];
       double yi = y * -t[2] + t[3];
 
       int[] dataRange = wave.getDataRange();
@@ -497,13 +510,13 @@ public abstract class AbstractWavePanel extends JComponent {
           dataRange[1]);
 
       if (timeSeries) {
-        String utc = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, j2k);
+        String utc = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, time);
         TimeZone tz = swarmConfig.getTimeZone(channel);
         double tzo = tz.getOffset(J2kSec.asEpoch(j2k)) / 1000;
         if (tzo != 0) {
-          String tza = tz.getDisplayName(tz.inDaylightTime(J2kSec.asDate(j2k)), TimeZone.SHORT);
-          status = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, j2k + tzo) + " (" + tza + "), " + utc
-              + " (UTC)";
+          String tza = tz.getDisplayName(tz.inDaylightTime(J2kSec.asDate(time)), TimeZone.SHORT);
+          status = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, time + tzo) + " (" + tza + "), "
+              + utc + " (UTC)";
         } else
           status = utc;
 
@@ -532,7 +545,7 @@ public abstract class AbstractWavePanel extends JComponent {
       }
 
       else {
-        double xi = j2k;
+        double xi = time;
         if (settings.viewType == ViewType.SPECTRA && settings.logFreq)
           xi = Math.pow(10.0, xi);
         if (settings.viewType == ViewType.SPECTRA && settings.logPower)
@@ -544,7 +557,7 @@ public abstract class AbstractWavePanel extends JComponent {
     }
 
     if (!pauseCursorMark)
-      WaveViewTime.fireTimeChanged(j2k);
+      WaveViewTime.fireTimeChanged(time);
 
     if (status == null)
       status = " ";
@@ -558,7 +571,7 @@ public abstract class AbstractWavePanel extends JComponent {
       else
         status = pre;
     }
-
+    
     if (status != null && statusLabel != null) {
       final String st = status;
       SwingUtilities.invokeLater(new Runnable() {
@@ -642,8 +655,10 @@ public abstract class AbstractWavePanel extends JComponent {
         }
       };
       worker.start();
-    } else
+    } else {
+
       r.run();
+    }
   }
 
   /**
@@ -701,6 +716,9 @@ public abstract class AbstractWavePanel extends JComponent {
    * @param g the graphics context
    */
   public void paint(Graphics g) {
+if (getVisibleRect().isEmpty()) {
+  return;
+}
     Graphics2D g2 = (Graphics2D) g;
     Dimension dim = this.getSize();
     if (wave == null) {
@@ -993,11 +1011,6 @@ public abstract class AbstractWavePanel extends JComponent {
     g2.setPaint(new Color(255, 255, 0, 128));
     g2.fillRect(x1, yOffset + 1, width, getSize().height - bottomHeight - yOffset);
     g2.setPaint(pnt);
-  }
-
-
-  public AbstractWavePanel() {
-    super();
   }
 
   public void setCursorMark(double j2k) {

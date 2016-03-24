@@ -1,9 +1,14 @@
 package gov.usgs.volcanoes.swarm.picker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -34,10 +39,8 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -46,15 +49,13 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.data.file.FileType;
@@ -77,8 +78,9 @@ import gov.usgs.volcanoes.swarm.Throbber;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.event.Event;
+import gov.usgs.volcanoes.swarm.event.EventObserver;
+import gov.usgs.volcanoes.swarm.picker.hypo71.Hypo71Locator;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
@@ -111,7 +113,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
   private JButton saveButton;
   private JButton captureButton;
   private JButton histButton;
-  private JButton particleMotionButton;
+  private JButton locateButton;
 
   private final DateFormat saveAllDateFormat;
 
@@ -141,7 +143,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
 
   public PickerFrame() {
     super("Picker", true, true, true, false);
-    event = new Event();
+    event = new Event("testIId");
     event.addObserver(this);
 
     this.setFocusable(true);
@@ -153,8 +155,56 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
     histories = new HashMap<AbstractWavePanel, Stack<double[]>>();
     createUI();
     LOGGER.debug("Finished creating picker frame.");
+    this.setVisible(true);
+
+    // getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("typed q"),
+    // "pPick");
+    getInputMap().put(KeyStroke.getKeyStroke("typed q"), "pPick");
+    getActionMap().put("pPick", new AbstractAction() {
+      private static final long serialVersionUID = -1;
+
+      public void actionPerformed(final ActionEvent e) {
+        findWavePanel();
+      }
+    });
+
   }
 
+  public PickerFrame(Event event) {
+    super("Picker", true, true, true, false);
+    this.event = event;
+    event.addObserver(this);
+
+    this.setFocusable(true);
+    this.setVisible(true);
+    selectedSet = new HashSet<PickerWavePanel>();
+    saveAllDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+    saveAllDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+    waves = new ArrayList<PickerWavePanel>();
+    histories = new HashMap<AbstractWavePanel, Stack<double[]>>();
+    createUI();
+    LOGGER.debug("Finished creating picker frame.");
+    this.setVisible(true);
+
+    // getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("typed q"),
+    // "pPick");
+    getInputMap().put(KeyStroke.getKeyStroke("typed q"), "pPick");
+    getActionMap().put("pPick", new AbstractAction() {
+      private static final long serialVersionUID = -1;
+
+      public void actionPerformed(final ActionEvent e) {
+        findWavePanel();
+      }
+    });
+  }
+  
+  private void findWavePanel() {
+    Point p = MouseInfo.getPointerInfo().getLocation();
+    SwingUtilities.convertPointFromScreen(p, waveBox);
+    int idx = p.y / calculateWaveHeight();
+    PickerWavePanel panel = waves.get(idx);
+    panel.instantPick(Phase.PhaseType.P);
+  }
 
   private void createUI() {
     this.setFrameIcon(Icons.ruler);
@@ -413,18 +463,22 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
     UiUtils.mapKeyStrokeToButton(this, "DELETE", "remove", removeButton);
     toolbar.add(removeButton);
 
-    particleMotionButton = SwarmUtil.createToolBarButton(Icons.particle_motion, "Particle Motion",
-        new ActionListener() {
-          public void actionPerformed(final ActionEvent e) {
-            particleMotionPlot();
-          }
+    locateButton = SwarmUtil.createToolBarButton(Icons.locate, "Locate", new ActionListener() {
+      public void actionPerformed(final ActionEvent e) {
+        EventLocator locator = new Hypo71Locator();
+//        try {
+//          locator.locate(event);
+//        } catch (IOException e1) {
+//          e1.printStackTrace();
+//        };
+      }
 
-          private void particleMotionPlot() {
-            // TODO Auto-generated method stub
+      private void particleMotionPlot() {
+        // TODO Auto-generated method stub
 
-          }
-        });
-    toolbar.add(particleMotionButton);
+      }
+    });
+    toolbar.add(locateButton);
 
     toolbar.add(Box.createHorizontalGlue());
 
@@ -505,7 +559,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
           }
         }
         lastClickedIndex = thisIndex;
-        event.notifyObservers();
+//        event.notifyObservers();
         mainPanel.validate();
         mainPanel.repaint();
       }
@@ -654,7 +708,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
     histButton.setEnabled(allowMulti);
     removeButton.setEnabled(allowMulti);
     gotoButton.setEnabled(allowMulti);
-  }    
+  }
 
   public synchronized PickerWavePanel getSingleSelected() {
     if (selectedSet.size() != 1)
@@ -779,7 +833,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
     p.setStatusLabel(statusLabel);
     p.setAllowDragging(true);
     p.setDisplayTitle(true);
-    p.setEvent(event);
+//    p.setEvent(event);
     p.setParent(mainPanel);
     final int w = scrollPane.getViewport().getSize().width;
     p.setSize(w, calculateWaveHeight());
@@ -821,7 +875,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
   }
 
   private synchronized void remove(final AbstractWavePanel p) {
-    event.remove(p.getChannel());
+//    event.remove(p.getChannel());
     int i = 0;
     for (i = 0; i < waveBox.getComponentCount(); i++) {
       if (p == waveBox.getComponent(i))
@@ -840,7 +894,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
     pickList.remove(p.getChannel());
     lastClickedIndex = Math.min(lastClickedIndex, waveBox.getComponentCount() - 1);
     waveToolbar.removeSettings(p.getSettings());
-    event.notifyObservers();
+//    event.notifyObservers();
     validate();
     repaint();
   }
@@ -860,7 +914,7 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
       LOGGER.debug("removing panel {}", p);
       waveBox.remove(p);
       waves.remove(p);
-      event.remove(p.getChannel());
+//      event.remove(p.getChannel());
       // pickList.remove(p);
       validate();
       repaint();
@@ -1091,8 +1145,8 @@ public class PickerFrame extends SwarmFrame implements EventObserver {
   }
 
 
-  public void updateEvent() {
-    LOGGER.debug("event is empty? {}", event.getChannels().isEmpty());
-    saveButton.setEnabled(!event.getChannels().isEmpty());
+  public void eventUpdated() {
+//    LOGGER.debug("event is empty? {}", event.getChannels().isEmpty());
+//    saveButton.setEnabled(!event.getChannels().isEmpty());
   }
 }

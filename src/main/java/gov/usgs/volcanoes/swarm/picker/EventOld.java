@@ -1,19 +1,21 @@
 package gov.usgs.volcanoes.swarm.picker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import gov.usgs.volcanoes.swarm.event.EventObserver;
 
-public class Event {
-  private static final Logger LOGGER = LoggerFactory.getLogger(Event.class);
+public class EventOld {
+  private static final Logger LOGGER = LoggerFactory.getLogger(EventOld.class);
   private final Map<String, EventChannel> channels;
   private final List<EventObserver> observers;
 
-  public Event() {
+  public EventOld() {
     channels = new LinkedHashMap<String, EventChannel>();
     observers = new ArrayList<EventObserver>();
   }
@@ -38,7 +40,7 @@ public class Event {
       if (eChan.isEmpty()) {
         channels.remove(channel);
       }
-      notifyObservers();      
+      notifyObservers();
     }
   }
 
@@ -61,7 +63,7 @@ public class Event {
 
   public void notifyObservers() {
     for (EventObserver observer : observers) {
-      observer.updateEvent();
+      observer.eventUpdated();
     }
   }
 
@@ -69,8 +71,20 @@ public class Event {
     channels.remove(channel);
     notifyObservers();
   }
-  
+
   public boolean isEmpty() {
     return channels.isEmpty();
+  }
+
+  public void setCoda(String channel, long time) {
+    EventChannel eChan = channels.get(channel);
+    if (eChan != null) {
+      eChan.setCoda(time);
+    }
+  }
+
+  public long coda(String channel) {
+    EventChannel eChan = channels.get(channel);
+    return eChan.getCodaTime();
   }
 }
