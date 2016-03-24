@@ -44,8 +44,6 @@ import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
 import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
-import gov.usgs.volcanoes.swarm.picker.PickerFrame;
-import gov.usgs.volcanoes.swarm.picker.PickerWavePanel;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
 import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
@@ -578,24 +576,24 @@ public class Swarm extends JFrame implements InternalFrameListener {
     return frame;
   }
 
-  public static PickerFrame openPicker(final WaveViewPanel insetWavePanel) {
-    PickerWavePanel p = new PickerWavePanel(insetWavePanel);
-    p.setDataSource(insetWavePanel.getDataSource().getCopy());
-    PickerFrame pickerFrame = new PickerFrame();
-    pickerFrame.setVisible(true);
-    pickerFrame.requestFocus();
-    SwarmInternalFrames.add(pickerFrame);
-    pickerFrame.setBaseWave(p);
-    return pickerFrame;
-  }
+//  public static PickerFrame openPicker(final WaveViewPanel insetWavePanel) {
+//    PickerWavePanel p = new PickerWavePanel(insetWavePanel);
+//    p.setDataSource(insetWavePanel.getDataSource().getCopy());
+//    PickerFrame pickerFrame = new PickerFrame();
+//    pickerFrame.setVisible(true);
+//    pickerFrame.requestFocus();
+//    SwarmInternalFrames.add(pickerFrame);
+//    pickerFrame.setBaseWave(p);
+//    return pickerFrame;
+//  }
 
-  public static PickerFrame openPicker(Event event) {
-    PickerFrame pickerFrame = new PickerFrame(event);
-    pickerFrame.setVisible(true);
-    pickerFrame.requestFocus();
-    SwarmInternalFrames.add(pickerFrame);
-    return pickerFrame;
-  }
+//  public static PickerFrame openPicker(Event event) {
+//    PickerFrame pickerFrame = new PickerFrame(event);
+//    pickerFrame.setVisible(true);
+//    pickerFrame.requestFocus();
+//    SwarmInternalFrames.add(pickerFrame);
+//    return pickerFrame;
+//  }
 
 
   public void saveLayout(String name) {
