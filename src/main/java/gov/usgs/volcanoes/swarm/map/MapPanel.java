@@ -1116,7 +1116,9 @@ public class MapPanel extends JPanel {
           MapLayer layer = it.next();
           handled = layer.mouseMoved(e);
         }
-        resetImage();
+        if (handled == true) {
+          repaint();
+        }
       }
 
     }

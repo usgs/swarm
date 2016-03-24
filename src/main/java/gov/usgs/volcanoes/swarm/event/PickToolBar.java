@@ -36,6 +36,7 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
   private final static Logger LOGGER = LoggerFactory.getLogger(PickToolBar.class);
 
   private final JButton sizeButton;
+  private final JButton sortButton;
   private final JButton captureButton;
   private final JButton histButton;
 
@@ -57,6 +58,7 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
     setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
 
     sizeButton = createSizeButton();
+    sortButton = createSortButton();
     captureButton = createCaptureButton();
     backButton = createBackButton();
     compXButton = createCompXButton();
@@ -74,6 +76,7 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
 
   public void placeButtons() {
     add(sizeButton);
+    add(sortButton);
     addSeparator();
     add(captureButton);
     addSeparator();
@@ -94,6 +97,8 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
     forwardButton.setEnabled(enable);
     backButton.setEnabled(enable);
     waveViewToolBar.setEnabled(enable);
+
+    sortButton.setEnabled(count == 1);
   }
 
   private JButton createSizeButton() {
@@ -114,6 +119,18 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
     listener.mapKeyStroke("P", "capture", captureButton);
 
     return captureButton;
+  }
+  
+  
+  private JButton createSortButton() {
+    JButton sortButton = SwarmUtil.createToolBarButton(Icons.geosort,
+        "Sort waves by nearest to selected wave", new ActionListener() {
+          public void actionPerformed(final ActionEvent e) {
+            listener.sortChannelsByNearest();
+          }
+        });
+    
+    return sortButton;
   }
 
   private JButton createBackButton() {

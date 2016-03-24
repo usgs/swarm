@@ -35,6 +35,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import gov.usgs.plot.render.DataPointRenderer;
 import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.Projection;
+import gov.usgs.volcanoes.core.CodeTimer;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.swarm.ConfigListener;
@@ -79,9 +80,9 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
 
     renderer = new DataPointRenderer();
     renderer.antiAlias = true;
-    renderer.stroke = new BasicStroke(1.2f);
+    renderer.stroke = new BasicStroke(2f);
     renderer.filled = true;
-    renderer.color = Color.LIGHT_GRAY;
+    renderer.color = Color.BLACK;
     // r.shape = Geometry.STAR_10;
     renderer.shape = new Ellipse2D.Float(0f, 0f, 7f, 7f);
 
@@ -164,7 +165,6 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
     for (final Event event : events.values()) {
       Origin origin = event.getPreferredOrigin();
 
-      LOGGER.debug("Plotting event at {}, {}", origin.getLongitude(), origin.getLatitude());
       Point2D.Double originLoc = new Point2D.Double(origin.getLongitude(), origin.getLatitude());
       if (!range.contains(originLoc)) {
         continue;
@@ -329,6 +329,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
     if (projection == null) {
       return false;
     }
+    
     int widthPx = panel.getGraphWidth();
     int heightPx = panel.getGraphHeight();
     int insetPx = panel.getInset();
@@ -341,8 +342,15 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
       if (origin == null) {
         continue;
       }
+
+      Point2D.Double originLoc = new Point2D.Double(origin.getLongitude(), origin.getLatitude());
+      if (!range.contains(originLoc)) {
+        continue;
+      }
+      
       final Rectangle r = new Rectangle(0, 0, 10, 10);
 
+      
       final Point2D.Double xy =
           projection.forward(new Point2D.Double(origin.getLongitude(), origin.getLatitude()));
       final double[] ext = range.getProjectedExtents(projection);
@@ -362,9 +370,9 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
 
         hoverEvent = null;
         hoverLocation = e.getPoint();
+        handled = true;
       }
     }
-
     return handled;
   }
 }

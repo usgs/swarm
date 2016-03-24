@@ -551,4 +551,9 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     for (final AbstractWavePanel p : selectedSet)
       gotoTime(p, t);
   }
+
+  public void sortChannelsByNearest() {
+    // TODO Auto-generated method stub
+    
+  }
 }

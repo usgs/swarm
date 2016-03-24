@@ -16,12 +16,12 @@ public enum HypocenterSource {
   WEEK_45("1 Week - M4.5+", "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.quakeml"),
   WEEK_25("1 Week - M2.5+", "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.quakeml"),
   WEEK_1("1 Week - M1.0+", "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_week.quakeml"), 
-  WEEK_ALL("1 Week - All", "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/All_week.quakeml"),
+  WEEK_ALL("1 Week - All", "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.quakeml"),
   MONTH_SIG("1 Month - Significant", "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.quakeml"),
   MONTH_45("1 Month - M4.5+", "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_month.quakeml"), 
   MONTH_25("1 Month - M2.5+", "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_month.quakeml"), 
   MONTH_1("1 Month - M1.0+", "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_month.quakeml"), 
-  MONTH_ALL("1 Month - All", "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/All_month.quakeml");
+  MONTH_ALL("1 Month - All", "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.quakeml");
   
   private String label;
   private String url;

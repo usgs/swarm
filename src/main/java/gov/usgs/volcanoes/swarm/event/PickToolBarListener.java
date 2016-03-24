@@ -23,4 +23,6 @@ public interface PickToolBarListener extends WaveViewToolBarListener {
   public void shiftTime(final double pct);
 
   public void writeImage();
+
+  public void sortChannelsByNearest();
 }

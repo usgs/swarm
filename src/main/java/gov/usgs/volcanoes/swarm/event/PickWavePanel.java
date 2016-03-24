@@ -148,4 +148,12 @@ public class PickWavePanel extends AbstractWavePanel
     };
   }
 
+  public static Comparator<PickWavePanel> stationDistanceComparator(final PickWavePanel panel) {
+    return new Comparator<PickWavePanel>() {
+      public int compare(final PickWavePanel e1, final PickWavePanel e2) {
+        return Arrival.distanceComparator().compare(e1.arrivals.get(0), e2.arrivals.get(0));
+      }
+    };
+  }
+
 }
