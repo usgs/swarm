@@ -5,9 +5,6 @@
  */
 package gov.usgs.volcanoes.swarm.event;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -19,8 +16,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Stack;
-
-import javax.swing.JViewport;
 
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
@@ -38,7 +33,6 @@ public class PickWavePanel extends AbstractWavePanel
     implements EventObserver, Comparable<PickWavePanel> {
 
   private static final long serialVersionUID = 1L;
-  private static final Logger LOGGER = LoggerFactory.getLogger(PickWavePanel.class);
   private static final Font ANNOTATION_FONT = new Font("Monospaced", Font.BOLD, 12);
   private static final Color P_BACKGROUND = new Color(128, 255, 128, 192);
   private static final Color S_BACKGROUND = new Color(128, 128, 255, 192);

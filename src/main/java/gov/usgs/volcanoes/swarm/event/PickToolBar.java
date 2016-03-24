@@ -20,7 +20,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToolBar;
 
-import gov.usgs.volcanoes.core.util.UiUtils;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.Throbber;
