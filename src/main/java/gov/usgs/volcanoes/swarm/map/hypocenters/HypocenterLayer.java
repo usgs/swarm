@@ -209,6 +209,17 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
     Origin origin = hoverEvent.getPreferredOrigin();
     GeoRange range = panel.getRange();
     Projection projection = panel.getProjection();
+    List<String> text = generatePopupText(origin);
+    
+    FontMetrics fm = g2.getFontMetrics();
+    int popupHeight = 2 * POPUP_PADDING;
+    int popupWidth = 0;
+    for (String string : text) {
+      Rectangle2D bounds = fm.getStringBounds(string, g2);
+      popupHeight += (int) (Math.ceil(bounds.getHeight()) + 2);
+      popupWidth = Math.max(popupWidth, (int) (Math.ceil(bounds.getWidth()) + 2 * POPUP_PADDING));
+    }
+
     int widthPx = panel.getGraphWidth();
     int heightPx = panel.getGraphHeight();
     int insetPx = panel.getInset();
@@ -219,18 +230,37 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
     final double dx = (ext[1] - ext[0]);
     final double dy = (ext[3] - ext[2]);
     final Point2D.Double res = new Point2D.Double();
+    
     res.x = (((xy.x - ext[0]) / dx) * widthPx + insetPx);
+    int maxX = widthPx - popupWidth + POPUP_PADDING;
+    res.x = Math.min(res.x, maxX);
+    
     res.y = ((1 - (xy.y - ext[2]) / dy) * heightPx + insetPx);
+    if (res.y < ( insetPx + popupHeight)) {
+      res.y += popupHeight;
+    }
 
     g2.translate(res.x, res.y);
 
     g2.setStroke(new BasicStroke(1.2f));
-    g2.setColor(new Color(0, 0, 0, 64));
+    g2.setColor(new Color(0, 0, 0, 128));
+    g2.drawRect(0, -(popupHeight - POPUP_PADDING), popupWidth, popupHeight);
+    g2.fillRect(0, -(popupHeight - POPUP_PADDING), popupWidth, popupHeight);
 
+    g2.setColor(Color.WHITE);
+    int baseY = POPUP_PADDING;
+    for (String string : text) {
+      g2.drawString(string, POPUP_PADDING, -baseY);
+      Rectangle2D bounds = fm.getStringBounds(string, g2);
+      baseY += (int) (Math.ceil(bounds.getHeight()) + 2);
+    }
+    g2.translate(-res.x, -res.y);
+
+  }
+
+  private List<String> generatePopupText(Origin origin) {
     List<String> text = new ArrayList<String>(3);
-    // String depth = String.format("Depth: %.2f km", (origin.getDepth() / 1000));
-    // text.add(depth);
-
+    
     Magnitude magElement = hoverEvent.getPerferredMagnitude();
     String mag = String.format("%.2f %s at %.2f km depth", magElement.getMag(),
         magElement.getType(), (origin.getDepth() / 1000));
@@ -242,29 +272,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
     String description = hoverEvent.getDescription();
     text.add(description);
 
-    FontMetrics fm = g2.getFontMetrics();
-    int height = 2 * POPUP_PADDING;
-    int width = 0;
-    for (String string : text) {
-      Rectangle2D bounds = fm.getStringBounds(string, g2);
-      height += (int) (Math.ceil(bounds.getHeight()) + 2);
-      width = Math.max(width, (int) (Math.ceil(bounds.getWidth()) + 2 * POPUP_PADDING));
-    }
-
-    g2.setStroke(new BasicStroke(1.2f));
-    g2.setColor(new Color(0, 0, 0, 128));
-    g2.drawRect(0, -(height - POPUP_PADDING), width, height);
-    g2.fillRect(0, -(height - POPUP_PADDING), width, height);
-
-    g2.setColor(Color.WHITE);
-    int baseY = POPUP_PADDING;
-    for (String string : text) {
-      g2.drawString(string, POPUP_PADDING, -baseY);
-      Rectangle2D bounds = fm.getStringBounds(string, g2);
-      baseY += (int) (Math.ceil(bounds.getHeight()) + 2);
-    }
-    g2.translate(-res.x, -res.y);
-
+    return text;
   }
 
   public boolean mouseClicked(final MouseEvent e) {

@@ -24,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JViewport;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameAdapter;
@@ -79,6 +80,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     mainPanel =
         new JSplitPane(JSplitPane.VERTICAL_SPLIT, ParameterPanel.create(event), createPickPanel());
     mainPanel.setOneTouchExpandable(true);
+    mainPanel.setDividerLocation(0.25);
 
     setContentPane(mainPanel);
     setFrameIcon(Icons.ruler);
@@ -90,7 +92,6 @@ public class EventFrame extends SwarmFrame implements EventObserver {
 
     this.setVisible(true);
     this.setFocusable(true);
-
     updateEvent();
   }
 
@@ -105,6 +106,10 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     scrollPane.getVerticalScrollBar().setUnitIncrement(40);
+    
+    JViewport viewPort = scrollPane.getViewport();
+    viewPort.setScrollMode(JViewport.BLIT_SCROLL_MODE);
+    
     pickPanel.add(scrollPane);
 
     JPanel statusPanel = new JPanel();
@@ -232,7 +237,9 @@ public class EventFrame extends SwarmFrame implements EventObserver {
   }
 
   public void eventUpdated() {
+    int loc = mainPanel.getDividerLocation();
     mainPanel.setTopComponent(ParameterPanel.create(event));
     mainPanel.setBottomComponent(createPickPanel());
+    mainPanel.setDividerLocation(loc);
   }
 }
