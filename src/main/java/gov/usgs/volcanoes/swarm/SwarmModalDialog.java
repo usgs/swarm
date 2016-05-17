@@ -24,7 +24,7 @@ import com.jgoodies.forms.builder.ButtonBarBuilder;
 /**
  * @author Dan Cervelli
  */
-public class SwarmDialog extends JDialog {
+public class SwarmModalDialog extends JDialog {
     private static final long serialVersionUID = -1;
 
     protected JButton okButton;
@@ -40,8 +40,8 @@ public class SwarmDialog extends JDialog {
     protected static SwarmConfig swarmConfig;
     protected static final JFrame applicationFrame = Swarm.getApplicationFrame();
 
-    protected SwarmDialog(JFrame parent, String title, boolean modal) {
-        super(parent, title, modal);
+    protected SwarmModalDialog(JFrame parent, String title) {
+        super(parent, title, true);
         swarmConfig = SwarmConfig.getInstance();
         setResizable(false);
         this.parent = parent;

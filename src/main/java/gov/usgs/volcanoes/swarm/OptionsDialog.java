@@ -29,7 +29,7 @@ import gov.usgs.volcanoes.swarm.options.SwarmOptions;
  * @author Dan Cervelli
  * @version $Id: OptionsDialog.java,v 1.7 2007-05-21 02:38:41 dcervelli Exp $
  */
-public class OptionsDialog extends SwarmDialog {
+public class OptionsDialog extends SwarmModalDialog {
   private static final long serialVersionUID = 1L;
   private static final JFrame applicationFrame = Swarm.getApplicationFrame();
 
@@ -55,7 +55,7 @@ public class OptionsDialog extends SwarmDialog {
   private JLabel wmsStylesLabel;
 
   public OptionsDialog() {
-    super(applicationFrame, "Options", true);
+    super(applicationFrame, "Options");
     createUI();
     setCurrentValues();
     setSizeAndLocation();

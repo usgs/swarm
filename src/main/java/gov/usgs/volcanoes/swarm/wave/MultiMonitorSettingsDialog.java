@@ -10,7 +10,7 @@ import javax.swing.JTextField;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
-import gov.usgs.volcanoes.swarm.SwarmDialog;
+import gov.usgs.volcanoes.swarm.SwarmModalDialog;
 
 /**
  * A dialog for Monitor Mode Settings.
@@ -18,7 +18,7 @@ import gov.usgs.volcanoes.swarm.SwarmDialog;
  * 
  * @author Dan Cervelli
  */
-public class MultiMonitorSettingsDialog extends SwarmDialog {
+public class MultiMonitorSettingsDialog extends SwarmModalDialog {
     public static final long serialVersionUID = -1;
 
     private MultiMonitor monitor;
@@ -32,7 +32,7 @@ public class MultiMonitorSettingsDialog extends SwarmDialog {
     private static MultiMonitorSettingsDialog dialog;
 
     private MultiMonitorSettingsDialog() {
-        super(applicationFrame, "Monitor Settings", true);
+        super(applicationFrame, "Monitor Settings");
         createUI();
         // setToCurrent();
         // setCurrentValues();

@@ -17,13 +17,13 @@ import javax.swing.border.EmptyBorder;
 
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.SwarmDialog;
+import gov.usgs.volcanoes.swarm.SwarmModalDialog;
 
 /**
  *
  * @author Dan Cervelli
  */
-public class EditDataSourceDialog extends SwarmDialog {
+public class EditDataSourceDialog extends SwarmModalDialog {
   private static final long serialVersionUID = 1L;
   private static final JFrame applicationFrame = Swarm.getApplicationFrame();
 
@@ -39,7 +39,7 @@ public class EditDataSourceDialog extends SwarmDialog {
   private String result;
 
   public EditDataSourceDialog(String s) {
-    super(applicationFrame, "", true);
+    super(applicationFrame, "");
     createPanels();
     source = s;
     if (source == null) {

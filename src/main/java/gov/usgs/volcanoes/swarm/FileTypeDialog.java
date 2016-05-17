@@ -20,7 +20,7 @@ import javax.swing.JScrollPane;
 /*
  * @author Tom Parker
  */
-public class FileTypeDialog extends SwarmDialog {
+public class FileTypeDialog extends SwarmModalDialog {
     private static final long serialVersionUID = 1L;
     private static final JFrame applicationFrame = Swarm.getApplicationFrame();
     private JLabel filename;
@@ -30,7 +30,7 @@ public class FileTypeDialog extends SwarmDialog {
     private boolean opened = false;
 
     public FileTypeDialog() {
-        super(applicationFrame, "Select File Type", true);
+        super(applicationFrame, "Select File Type");
         setSizeAndLocation();
     }
 

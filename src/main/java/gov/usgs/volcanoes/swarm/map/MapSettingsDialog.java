@@ -21,7 +21,8 @@ import org.slf4j.LoggerFactory;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
-import gov.usgs.volcanoes.swarm.SwarmDialog;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.SwarmModalDialog;
 import gov.usgs.volcanoes.swarm.map.MapPanel.LabelSetting;
 import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterSource;
 
@@ -29,7 +30,7 @@ import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterSource;
  * 
  * @author Dan Cervelli
  */
-public class MapSettingsDialog extends SwarmDialog {
+public class MapSettingsDialog extends SwarmModalDialog {
   public static final long serialVersionUID = -1;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MapSettingsDialog.class);
@@ -53,7 +54,7 @@ public class MapSettingsDialog extends SwarmDialog {
   private MapFrame mapFrame;
 
   public MapSettingsDialog(MapFrame mapFrame) {
-    super(applicationFrame, "Map Settings", true);
+    super(applicationFrame, "Map Settings");
     this.mapFrame = mapFrame;
     createUI();
     setToCurrent();
@@ -75,7 +76,6 @@ public class MapSettingsDialog extends SwarmDialog {
     labelGroup.add(noLabels);
     mapLine = new JButton();
     hypocenterSource = new JComboBox(HypocenterSource.values());
-
     lineChooser = new JColorChooser();
     lineChooser.setPreviewPanel(new MapLinePreview());
 
