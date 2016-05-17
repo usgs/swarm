@@ -88,7 +88,6 @@ public class MapLinePreview extends JPanel {
         }
         
         private void updateLineWidth(String w) {
-            System.out.println("-- " + w);
             try {
                 lineWidth = Integer.parseInt(w);
                 widthBox.setBackground(Color.white);
