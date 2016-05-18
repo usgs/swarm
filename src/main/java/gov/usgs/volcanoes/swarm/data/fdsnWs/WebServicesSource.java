@@ -32,28 +32,30 @@ public class WebServicesSource extends SeismicDataSource {
   public static final String PARAM_FMT_TEXT = "%s|%s|%s|%s|%d|%d|%s|%s";
   /** instance counter */
   private static int counter = 0;
-  /** The channel. */
-  private String chan;
-  /** Web Services Client. */
-  private WebServicesClient client;
   /** instance count */
   private final int count = ++counter;
+  /** Web Services Client. */
+  private WebServicesClient client;
+  /** The colon separated parameters. */
+  private String params;
   /** The gulp delay. */
   private int gulpDelay;
   /** The gulp size. */
   private int gulpSize;
-  /** The location. */
-  private String loc;
-  /** The network. */
-  private String net;
-  /** The colon separated parameters. */
-  private String params;
-  /** The station. */
-  private String sta;
-  /** Web Services dataselect URL. */
-  private String wsDataSelectUrl;
-  /** Web Services station URL. */
-  private String wsStationUrl;
+  // /** The channel. */
+  // private String chan;
+  // /** The location. */
+  // private String loc;
+  // /** The network. */
+  // private String net;
+  // /** The station. */
+  // private String sta;
+  // /** Web Services dataselect URL. */
+  // private String wsDataSelectUrl;
+  // /** Web Services station URL. */
+  // private String wsStationUrl;
+
+  private String configString;
 
   static {
     typeString = DataSourceType.getShortName(WebServicesSource.class);
@@ -65,14 +67,16 @@ public class WebServicesSource extends SeismicDataSource {
     this.params = params;
     String[] ss = params.split(PARAM_SPLIT_TEXT);
     int ssIndex = 0;
-    net = ss[ssIndex++];
-    sta = ss[ssIndex++];
-    loc = ss[ssIndex++];
-    chan = ss[ssIndex++];
+    String net = ss[ssIndex++];
+    String sta = ss[ssIndex++];
+    String loc = ss[ssIndex++];
+    String chan = ss[ssIndex++];
     gulpSize = Integer.parseInt(ss[ssIndex++]);
     gulpDelay = Integer.parseInt(ss[ssIndex++]);
-    wsDataSelectUrl = ss[ssIndex++];
-    wsStationUrl = ss[ssIndex++];
+    String wsDataSelectUrl = ss[ssIndex++];
+    String wsStationUrl = ss[ssIndex++];
+    configString = String.format("%s;%s:" + PARAM_FMT_TEXT, name, typeString, net, sta, loc, chan,
+        gulpSize, gulpDelay, wsDataSelectUrl, wsStationUrl);
     client = new WebServicesClient(this, net, sta, loc, chan, wsDataSelectUrl, wsStationUrl);
     LOGGER.debug("web service started {}", count);
   }
@@ -209,7 +213,6 @@ public class WebServicesSource extends SeismicDataSource {
    * @return the configuration string.
    */
   public String toConfigString() {
-    return String.format("%s;%s:" + PARAM_FMT_TEXT, name, typeString, net, sta, loc, chan, gulpSize,
-        gulpDelay, wsDataSelectUrl, wsStationUrl);
+    return configString;
   }
 }

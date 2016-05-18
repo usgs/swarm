@@ -54,7 +54,7 @@ public class MapSettingsDialog extends SwarmModalDialog {
   private MapFrame mapFrame;
 
   public MapSettingsDialog(MapFrame mapFrame) {
-    super(applicationFrame, "Map Settings");
+    super(applicationFrame, "Map Settings", "mapSettings.md");
     this.mapFrame = mapFrame;
     createUI();
     setToCurrent();
