@@ -167,8 +167,8 @@ public class Swarm extends JFrame implements InternalFrameListener {
       }
     });
 
-    m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0), "fullScreenToggle");
-    m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, InputEvent.CTRL_DOWN_MASK),
+    m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0), "fullScreenToggle");
+    m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, InputEvent.CTRL_DOWN_MASK),
         "fullScreenToggle");
     m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SLASH, InputEvent.CTRL_DOWN_MASK),
         "fullScreenToggle");
