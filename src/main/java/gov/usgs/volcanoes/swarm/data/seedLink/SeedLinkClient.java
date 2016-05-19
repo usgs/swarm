@@ -561,7 +561,7 @@ public class SeedLinkClient extends BaseSLClient
 			{
 				try
 				{
-					threadSyncObj.wait();
+                    threadSyncObj.wait();
 				}
 				catch (InterruptedException ex)
 				{
