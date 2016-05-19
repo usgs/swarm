@@ -84,7 +84,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
     renderer.filled = true;
     renderer.color = Color.BLACK;
     // r.shape = Geometry.STAR_10;
-    renderer.shape = new Ellipse2D.Float(0f, 0f, 7f, 7f);
+    renderer.shape = new Ellipse2D.Float(0f, 0f, 5f, 5f);
 
     startPolling();
   }
@@ -180,13 +180,20 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
       res.y = ((1 - (xy.y - ext[2]) / dy) * heightPx + insetPx);
 
       g2.translate(res.x, res.y);
+
+      double mag = event.getPerferredMagnitude().getMag();
+      float diameter = (float) (2.5 + mag * 9/2.5);
+      diameter = Math.min(diameter, 10);
+      diameter = Math.max(diameter, 1);
+
       long age = J2kSec.asEpoch(J2kSec.now()) - origin.getTime();
+      renderer.shape = new Ellipse2D.Float(0f, 0f, diameter, diameter);
       if (event == hoverEvent) {
         renderer.paint = Color.GREEN;
       } else if (age < ONE_HOUR) {
         renderer.paint = Color.RED;
       } else if (age < ONE_DAY) {
-        renderer.paint = Color.ORANGE;
+        renderer.paint = Color.CYAN;
       } else if (age < ONE_WEEK) {
         renderer.paint = Color.YELLOW;
       } else {
