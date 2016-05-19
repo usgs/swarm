@@ -1,4 +1,4 @@
-package gov.usgs.volcanoes.swarm.data;
+package gov.usgs.volcanoes.swarm.data.fdsnWs;
 
 import edu.sc.seis.seisFile.SeisFileException;
 import edu.sc.seis.seisFile.StringMSeedQueryReader;
@@ -23,7 +23,6 @@ import java.util.TimeZone;
 
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.Version;
-import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServiceUtils;
 
 /**
  * The data select reader reads data from the web services. This class a based
