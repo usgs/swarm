@@ -15,7 +15,7 @@ import java.awt.event.MouseEvent;
  */
 abstract public class ClickableGeoLabel extends GeoLabel
 {
-	abstract public void mouseClicked(MouseEvent e);
+	abstract public boolean mouseClicked(MouseEvent e);
 	abstract public Rectangle getClickBox();
 	
 	public ClickableGeoLabel()

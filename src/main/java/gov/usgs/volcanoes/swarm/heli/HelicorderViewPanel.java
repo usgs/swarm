@@ -1,5 +1,8 @@
 package gov.usgs.volcanoes.swarm.heli;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -28,9 +31,6 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.plot.data.HelicorderData;
@@ -49,7 +49,6 @@ import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.options.SwarmOptions;
 import gov.usgs.volcanoes.swarm.options.SwarmOptionsListener;
-import gov.usgs.volcanoes.swarm.picker.PickerFrame;
 import gov.usgs.volcanoes.swarm.time.UiTime;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
@@ -865,11 +864,11 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
       clearMarks();
   }
 
-  public void insetToPicker() {
-    if (insetWavePanel != null) {
-      LOGGER.debug("Sending wave to picker");
-      Swarm.openPicker(insetWavePanel);
-    }
-  }
+//  public void insetToPicker() {
+//    if (insetWavePanel != null) {
+//      LOGGER.debug("Sending wave to picker");
+//      Swarm.openPicker(insetWavePanel);
+//    }
+//  }
 
 }
