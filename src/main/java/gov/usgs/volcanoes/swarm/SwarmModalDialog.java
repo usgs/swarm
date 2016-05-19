@@ -1,6 +1,8 @@
 package gov.usgs.volcanoes.swarm;
 
 
+import com.jgoodies.forms.builder.ButtonBarBuilder;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Point;
@@ -10,25 +12,32 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.StyledDocument;
 
 import gov.usgs.volcanoes.core.util.UiUtils;
-
-import com.jgoodies.forms.builder.ButtonBarBuilder;
 
 /**
  * @author Dan Cervelli
  */
-public class SwarmDialog extends JDialog {
+public class SwarmModalDialog extends JDialog {
     private static final long serialVersionUID = -1;
 
     protected JButton okButton;
     protected JButton cancelButton;
+    protected JButton helpButton;
+    
     protected JPanel buttonPanel;
 
     protected JPanel mainPanel;
@@ -39,13 +48,19 @@ public class SwarmDialog extends JDialog {
 
     protected static SwarmConfig swarmConfig;
     protected static final JFrame applicationFrame = Swarm.getApplicationFrame();
+    protected String helpFile;
 
-    protected SwarmDialog(JFrame parent, String title, boolean modal) {
-        super(parent, title, modal);
+    protected SwarmModalDialog(JFrame parent, String title, String helpFile) {
+        super(parent, title, true);
+        this.helpFile = helpFile;
         swarmConfig = SwarmConfig.getInstance();
         setResizable(false);
         this.parent = parent;
         createUI();
+    }
+    
+    protected SwarmModalDialog(JFrame parent, String title) {
+      this(parent, title, null);
     }
 
     protected void setSizeAndLocation() {
@@ -70,6 +85,7 @@ public class SwarmDialog extends JDialog {
                 }
             }
         });
+
         cancelButton = new JButton("Cancel");
         cancelButton.setMnemonic('C');
         cancelButton.addActionListener(new ActionListener() {
@@ -95,17 +111,30 @@ public class SwarmDialog extends JDialog {
             }
         });
 
-        // buttonPanel = ButtonBarFactory.buildOKCancelBar(okButton,
-        // cancelButton);
         ButtonBarBuilder builder = new ButtonBarBuilder();
         builder.addGlue();
-        builder.addButton(okButton, cancelButton);
+
+        if (helpFile != null) {
+          helpButton = new JButton("Help");
+          helpButton.setMnemonic('H');
+          
+          helpButton.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+                HelpDialog.displayHelp(parent, helpFile);
+               }
+          });
+          builder.addButton(okButton, cancelButton, helpButton);
+        } else { 
+          builder.addButton(okButton, cancelButton);
+        }
         buttonPanel = builder.getPanel();
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 10));
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         this.setContentPane(mainPanel);
     }
-
+    
+    
+    
     protected boolean allowOK() {
         return true;
     }

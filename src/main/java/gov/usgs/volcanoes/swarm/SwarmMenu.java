@@ -398,13 +398,13 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
         }
     }
 
-    private class RemoveLayoutDialog extends SwarmDialog {
+    private class RemoveLayoutDialog extends SwarmModalDialog {
         private static final long serialVersionUID = 1L;
         private JList layoutList;
         private DefaultListModel model;
 
         protected RemoveLayoutDialog() {
-            super(Swarm.getApplicationFrame(), "Remove Layouts", true);
+            super(Swarm.getApplicationFrame(), "Remove Layouts");
             setSizeAndLocation();
         }
 

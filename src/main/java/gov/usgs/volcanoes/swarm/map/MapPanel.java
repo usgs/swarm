@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -178,7 +179,7 @@ public class MapPanel extends JPanel {
 
   private LabelSetting labelSetting = LabelSetting.SOME;
 
-  private List<? extends ClickableGeoLabel> clickableLabels;
+  private List<MapLayer> layers;
 
   public MapPanel() {
     swarmConfig = SwarmConfig.getInstance();
@@ -189,12 +190,18 @@ public class MapPanel extends JPanel {
     layouts = Collections.synchronizedMap(new HashMap<Double, ConfigFile>());
     visiblePanels = Collections.synchronizedList(new ArrayList<MapMiniPanel>());
     selectedPanels = new HashSet<MapMiniPanel>();
+    layers = new ArrayList<MapLayer>();
 
     final Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
     this.setCursor(crosshair);
     createUI();
   }
 
+  public void addLayer(MapLayer layer) {
+    LOGGER.debug("Layer added");
+    layers.add(layer);
+  }
+  
   public void saveLayout(final ConfigFile cf, final String prefix) {
     cf.put(prefix + ".longitude", Double.toString(center.x));
     cf.put(prefix + ".latitude", Double.toString(center.y));
@@ -325,23 +332,6 @@ public class MapPanel extends JPanel {
     pane.add(mapImagePanel, new Integer(10));
     add(pane, BorderLayout.CENTER);
 
-    loadLabels();
-
-  }
-
-  public void loadLabels() {
-    if (swarmConfig.labelSource.isEmpty())
-      return;
-
-    try {
-      final Class<?> cl = Class.forName(swarmConfig.labelSource);
-      final LabelSource src = (LabelSource) cl.newInstance();
-      clickableLabels = src.getLabels();
-      repaint();
-    } catch (final Exception e) {
-      LOGGER.warn("Can't load labelSource {}", swarmConfig.labelSource);
-      e.printStackTrace();
-    }
   }
 
   public void wavesToClipboard() {
@@ -641,7 +631,6 @@ public class MapPanel extends JPanel {
 
   private BufferedImage updateMapRenderer() {
     BufferedImage mi = null;
-    final CodeTimer ct = new CodeTimer("whole map");
     try {
       swarmConfig.mapScale = scale;
       swarmConfig.mapLongitude = center.x;
@@ -656,9 +645,7 @@ public class MapPanel extends JPanel {
       LOGGER.debug("map scale: " + scale);
       LOGGER.debug("center: " + center.x + " " + center.y);
       final MapRenderer mr = new MapRenderer(range, projection);
-      ct.mark("pre bg");
       image = images.getMapBackground(projection, range, width, scale);
-      ct.mark("bg");
       mr.setLocation(INSET, INSET, width);
       mr.setMapImage(image);
       mr.setGeoLabelSet(labels);
@@ -687,12 +674,9 @@ public class MapPanel extends JPanel {
       final Plot plot = new Plot();
       plot.setSize(mapImagePanel.getWidth(), mapImagePanel.getHeight());
       plot.addRenderer(renderer);
-      ct.mark("pre plot");
       mi = plot.getAsBufferedImage(false);
-      ct.mark("plot");
       dragDX = Integer.MAX_VALUE;
       dragDY = Integer.MAX_VALUE;
-      ct.stopAndReport();
     } catch (final Exception e) {
       LOGGER.error("Exception during map creation. {}", e);
     } finally {
@@ -1007,19 +991,15 @@ public class MapPanel extends JPanel {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         final AffineTransform at = g2.getTransform();
         g2.setFont(Font.decode("dialog-plain-12"));
-        if (clickableLabels != null) {
-          for (final ClickableGeoLabel label : clickableLabels) {
-            final Point2D.Double xy = getXY(label.location.x, label.location.y);
-            if (xy != null) {
-              g2.translate(xy.x - dx, xy.y - dy);
-              label.draw(g2);
-              g2.translate(-xy.x + dx, -xy.y + dy);
-            }
-          }
+
+        g2.translate(-dx, -dy);
+        for (MapLayer layer : layers) {
+          layer.draw(g2);
         }
+        g2.translate(dx, dy);
+        
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldaa);
         g2.setTransform(at);
-
       }
     }
   }
@@ -1028,6 +1008,30 @@ public class MapPanel extends JPanel {
     return range;
   }
 
+  public Projection getProjection() {
+    return projection;
+  }
+  
+  public int getGraphWidth() {
+    int width = 0;
+    if (renderer != null) {
+      width = renderer.getGraphWidth();
+    }
+    return width;
+  }
+  
+  public int getGraphHeight() {
+    int height = 0;
+    if (renderer != null) {
+      height = renderer.getGraphHeight();
+    }
+    return height;
+  }
+  
+  public int getInset() {
+    return INSET;
+  }
+  
   public class MapMouseAdapter extends MouseAdapter {
     @Override
     public void mouseExited(final MouseEvent e) {
@@ -1036,19 +1040,16 @@ public class MapPanel extends JPanel {
 
     @Override
     public void mouseClicked(final MouseEvent e) {
-      if (clickableLabels != null) {
-        for (final ClickableGeoLabel label : clickableLabels) {
-          final Rectangle r = label.getClickBox();
-          final Point2D.Double xy = getXY(label.location.x, label.location.y);
-          if (xy != null) {
-            r.translate((int) xy.x, (int) xy.y);
-            if (r.contains(e.getPoint()))
-              label.mouseClicked(e);
-          }
+      if (layers != null) {
+        boolean handled = false;
+        Iterator<MapLayer> it = layers.iterator();
+        while (it.hasNext() && handled == false) {
+          MapLayer layer = it.next();
+          handled = layer.mouseClicked(e);
         }
       }
     }
-
+    
     @Override
     public void mousePressed(final MouseEvent e) {
       requestFocusInWindow();
@@ -1107,6 +1108,19 @@ public class MapPanel extends JPanel {
       final Point2D.Double latLon = getLonLat(e.getX(), e.getY());
       if (latLon != null)
         MapFrame.getInstance().setStatusText(Util.lonLatToString(latLon));
+      
+      if (layers != null) {
+        boolean handled = false;
+        Iterator<MapLayer> it = layers.iterator();
+        while (it.hasNext() && handled == false) {
+          MapLayer layer = it.next();
+          handled = layer.mouseMoved(e);
+        }
+        if (handled == true) {
+          repaint();
+        }
+      }
+
     }
 
     public void mouseDragged(final MouseEvent e) {
