@@ -3,6 +3,7 @@ package gov.usgs.volcanoes.swarm;
 import org.pegdown.PegDownProcessor;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.util.Scanner;
 
 import javax.swing.BoxLayout;
@@ -26,11 +27,11 @@ public final class HelpDialog {
     
     htmlPane.setContentType("text/html");
     htmlPane.setText(pegdownProcessor.markdownToHtml(text));
+    htmlPane.setPreferredSize(new Dimension(500, 600));
+
     JScrollPane paneScrollPane = new JScrollPane(htmlPane);
-
     helpPanel.add(paneScrollPane);
-  
-
+    
     JOptionPane.showMessageDialog(parent,
         helpPanel,
         "A plain message",
