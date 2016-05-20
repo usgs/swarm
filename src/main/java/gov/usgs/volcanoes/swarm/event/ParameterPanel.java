@@ -21,6 +21,11 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
+import gov.usgs.volcanoes.core.quakeml.Event;
+import gov.usgs.volcanoes.core.quakeml.Magnitude;
+import gov.usgs.volcanoes.core.quakeml.Networks;
+import gov.usgs.volcanoes.core.quakeml.Origin;
+
 public class ParameterPanel {
   private static final Logger LOGGER = LoggerFactory.getLogger(ParameterPanel.class);
   private static final Font KEY_FONT = Font.decode("dialog-BOLD-12");

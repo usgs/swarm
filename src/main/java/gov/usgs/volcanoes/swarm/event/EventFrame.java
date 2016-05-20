@@ -34,6 +34,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import gov.usgs.volcanoes.core.CodeTimer;
+import gov.usgs.volcanoes.core.quakeml.Arrival;
+import gov.usgs.volcanoes.core.quakeml.Event;
+import gov.usgs.volcanoes.core.quakeml.EventObserver;
+import gov.usgs.volcanoes.core.quakeml.Origin;
+import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmFrame;

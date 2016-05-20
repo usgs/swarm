@@ -864,11 +864,11 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
       clearMarks();
   }
 
-//  public void insetToPicker() {
-//    if (insetWavePanel != null) {
-//      LOGGER.debug("Sending wave to picker");
-//      Swarm.openPicker(insetWavePanel);
-//    }
-//  }
+  public void insetToPicker() {
+    if (insetWavePanel != null) {
+      LOGGER.debug("Sending wave to picker");
+      Swarm.openPicker(insetWavePanel);
+    }
+  }
 
 }

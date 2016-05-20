@@ -17,6 +17,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Stack;
 
+import gov.usgs.volcanoes.core.quakeml.Arrival;
+import gov.usgs.volcanoes.core.quakeml.EventObserver;
+import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;

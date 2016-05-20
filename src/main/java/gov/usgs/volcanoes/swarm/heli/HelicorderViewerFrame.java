@@ -100,7 +100,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
   private JButton compY;
   private JButton expY;
   private JButton clipboard;
-//  private JButton picker;
+  private JButton picker;
   private JButton removeWave;
   private JButton capture;
   private JFileChooser chooser;
@@ -358,16 +358,16 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     UiUtils.mapKeyStrokeToButton(this, "C", "clipboard2", clipboard);
     toolBar.add(clipboard);
 
-//    picker = SwarmUtil.createToolBarButton(Icons.ruler,
-//        "Copy inset to picker (P)", new ActionListener() {
-//          public void actionPerformed(final ActionEvent e) {
-//            helicorderViewPanel.insetToPicker();
-//          }
-//        });
-//    picker.setEnabled(false);
-//    UiUtils.mapKeyStrokeToButton(this, "control P", "picker1", picker);
-//    UiUtils.mapKeyStrokeToButton(this, "P", "picker2", picker);
-//    toolBar.add(picker);
+    picker = SwarmUtil.createToolBarButton(Icons.ruler,
+        "Copy inset to picker (P)", new ActionListener() {
+          public void actionPerformed(final ActionEvent e) {
+            helicorderViewPanel.insetToPicker();
+          }
+        });
+    picker.setEnabled(false);
+    UiUtils.mapKeyStrokeToButton(this, "control P", "picker1", picker);
+    UiUtils.mapKeyStrokeToButton(this, "P", "picker2", picker);
+    toolBar.add(picker);
 
     removeWave = SwarmUtil.createToolBarButton(Icons.delete, "Remove inset wave (Delete or Escape)",
         new ActionListener() {
@@ -597,7 +597,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
       public void run() {
         clipboard.setEnabled(b);
         removeWave.setEnabled(b);
-//        picker.setEnabled(b);
+        picker.setEnabled(b);
      }
     });
   }

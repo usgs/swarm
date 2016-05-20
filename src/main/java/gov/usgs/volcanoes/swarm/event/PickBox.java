@@ -41,6 +41,8 @@ import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.core.CodeTimer;
 import gov.usgs.volcanoes.core.contrib.PngEncoder;
 import gov.usgs.volcanoes.core.contrib.PngEncoderB;
+import gov.usgs.volcanoes.core.quakeml.Arrival;
+import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.UiUtils;
 import gov.usgs.volcanoes.swarm.FileChooser;
