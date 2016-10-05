@@ -31,6 +31,7 @@ import javax.swing.UIManager;
 
 import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.quakeml.Event;
 import gov.usgs.volcanoes.core.time.CurrentTime;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.ui.GlobalKeyManager;
@@ -38,7 +39,6 @@ import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.event.Event;
 import gov.usgs.volcanoes.swarm.event.EventFrame;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;

@@ -21,6 +21,10 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
+import gov.usgs.volcanoes.core.quakeml.Event;
+import gov.usgs.volcanoes.core.quakeml.Magnitude;
+import gov.usgs.volcanoes.core.quakeml.Origin;
+
 public class ParameterPanel {
   private static final Logger LOGGER = LoggerFactory.getLogger(ParameterPanel.class);
   private static final Font KEY_FONT = Font.decode("dialog-BOLD-12");
@@ -75,7 +79,7 @@ public class ParameterPanel {
     addKey("Type: ", parameterPanel, c);
 
     if (origin != null) {
-      addValue(event.getType(), parameterPanel, c);
+      addValue(event.getTypeDescription(), parameterPanel, c);
     }
 
     c.gridy++;

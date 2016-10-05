@@ -1,9 +1,11 @@
 package gov.usgs.volcanoes.swarm.map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.Insets;
-import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -13,6 +15,7 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.MalformedURLException;
 import java.text.ParseException;
 
 import javax.swing.BorderFactory;
@@ -36,7 +39,6 @@ import gov.usgs.proj.GeoRange;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.contrib.PngEncoder;
 import gov.usgs.volcanoes.core.contrib.PngEncoderB;
-import gov.usgs.volcanoes.core.time.CurrentTime;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.UiUtils;
 import gov.usgs.volcanoes.swarm.FileChooser;
@@ -48,6 +50,7 @@ import gov.usgs.volcanoes.swarm.Throbber;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanelListener;
 import gov.usgs.volcanoes.swarm.map.MapPanel.DragMode;
 import gov.usgs.volcanoes.swarm.map.MapPanel.LabelSetting;
+import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterLayer;
 import gov.usgs.volcanoes.swarm.options.SwarmOptions;
 import gov.usgs.volcanoes.swarm.options.SwarmOptionsListener;
 import gov.usgs.volcanoes.swarm.time.UiTime;
@@ -61,7 +64,9 @@ import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
  */
 public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOptionsListener {
   private static final long serialVersionUID = 1L;
+  private static final Logger LOGGER = LoggerFactory.getLogger(MapFrame.class);
 
+  
   private JToolBar toolbar;
   private JPanel mainPanel;
   private JButton optionsButton;
@@ -120,9 +125,14 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
   }
 
   private void addLayers() {
-    MapLayer mapLayer = new gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterLayer();
-    mapLayer.setMapPanel(mapPanel);
-    addLayer(mapLayer);
+    MapLayer mapLayer;
+    try {
+      mapLayer = new HypocenterLayer();
+      mapLayer.setMapPanel(mapPanel);
+      addLayer(mapLayer);
+   } catch (MalformedURLException ex) {
+     LOGGER.error("Unable to load layer. {}", ex);
+    }
   }
   
   public static MapFrame getInstance() {
