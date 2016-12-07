@@ -939,6 +939,7 @@ public class MapPanel extends JPanel {
 
     @Override
     public void paintComponent(final Graphics g) {
+
       if (renderer == null || mapImage == null) {
         final Dimension d = getSize();
         g.drawString("Loading map...", d.width / 2 - 50, d.height / 2);
