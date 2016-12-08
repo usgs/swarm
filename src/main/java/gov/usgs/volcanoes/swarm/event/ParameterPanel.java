@@ -14,6 +14,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -71,7 +72,8 @@ public class ParameterPanel {
     c.gridy++;
     addKey("Origin date: ", parameterPanel, c);
 
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
+    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     String date = dateFormat.format(event.getPreferredOrigin().getTime());
     addValue(date, parameterPanel, c);
 
