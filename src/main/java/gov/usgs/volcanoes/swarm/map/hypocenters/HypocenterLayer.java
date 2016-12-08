@@ -71,7 +71,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 
 		renderer = new DataPointRenderer();
 		renderer.antiAlias = true;
-		renderer.stroke = new BasicStroke(2f);
+		renderer.stroke = new BasicStroke(1f);
 		renderer.filled = true;
 		renderer.color = Color.BLACK;
 		// r.shape = Geometry.STAR_10;
