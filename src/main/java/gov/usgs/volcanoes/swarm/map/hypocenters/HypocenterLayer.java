@@ -120,27 +120,51 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 			g2.translate(res.x, res.y);
 
 			double mag = event.getPerferredMagnitude().getMag();
-			float diameter = (float) (2.5 + mag * 9 / 2.5);
-			diameter = Math.min(diameter, 10);
-			diameter = Math.max(diameter, 1);
+			float diameter;
+			// float diameter = (float) (2.5 + mag * 9 / 2.5);
+			// diameter = Math.min(diameter, 10);
+			// diameter = Math.max(diameter, 1);
+
+			if (mag > 7) {
+				diameter = 25;
+			} else if (mag > 6) {
+				diameter = 21;
+			} else if (mag > 5) {
+				diameter = 17;
+			} else if (mag > 4) {
+				diameter = 13;
+			} else if (mag > 3) {
+				diameter = 11;
+			} else if (mag > 2) {
+				diameter = 9;
+			} else if (mag > 1) {
+				diameter = 7;
+			} else {
+				diameter = 5;
+			}
 
 			long age = J2kSec.asEpoch(J2kSec.now()) - origin.getTime();
 			renderer.shape = new Ellipse2D.Float(0f, 0f, diameter, diameter);
+			Color markerColor;
 			if (event == hoverEvent) {
-				renderer.paint = Color.GREEN;
+				markerColor = Color.GREEN;
 			} else if (age < ONE_HOUR) {
-				renderer.paint = Color.RED;
+				markerColor = Color.RED;
 			} else if (age < ONE_DAY) {
-				renderer.paint = Color.CYAN;
+				// renderer.paint = Color.CYAN;
+				markerColor = Color.ORANGE;
 			} else if (age < ONE_WEEK) {
-				renderer.paint = Color.YELLOW;
+				markerColor = Color.YELLOW;
 			} else {
-				renderer.paint = Color.WHITE;
+				markerColor = Color.WHITE;
 			}
+
+			int alpha = 0x80FFFFFF;
+			renderer.paint = new Color(alpha & markerColor.getRGB(), true);
 			renderer.renderAtOrigin(g2);
 
-			if (event == hoverEvent) {
-			}
+//			if (event == hoverEvent) {
+//			}
 			g2.translate(-res.x, -res.y);
 		}
 
