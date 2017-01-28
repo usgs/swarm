@@ -494,7 +494,7 @@
 		<dependency>
 			<groupId>edu.sc.seis</groupId>
 			<artifactId>seisFile</artifactId>
-			<version>1.6.3</version>
+			<version>1.7.2</version>
 		</dependency>
 		<dependency>
 			<groupId>net.alomax</groupId>
