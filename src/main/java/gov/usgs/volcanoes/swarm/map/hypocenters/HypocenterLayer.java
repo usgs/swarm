@@ -77,11 +77,13 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 		
 		HypocenterSource hypocenterSource = swarmConfig.getHypocenterSource();
 
-		URL quakemlUrl = new URL(hypocenterSource.getUrl());
-		if (quakemlUrl != null) {
-			quakemlSource = new QuakemlSource(quakemlUrl, (long) REFRESH_INTERVAL);
-			quakemlSource.addObserver(this);
-			update(quakemlSource);
+		if (hypocenterSource != HypocenterSource.NONE) {
+			URL quakemlUrl = new URL(hypocenterSource.getUrl());
+			if (quakemlUrl != null) {
+				quakemlSource = new QuakemlSource(quakemlUrl, (long) REFRESH_INTERVAL);
+				quakemlSource.addObserver(this);
+				update(quakemlSource);
+			}			
 		}
 	}
 
