@@ -12,7 +12,7 @@ public interface MapLayer {
   public void draw(Graphics2D g2);
   public boolean mouseClicked(MouseEvent e);
   public void setMapPanel(MapPanel mapPanel);
-  public void stop();
+  public void setVisible(boolean isVisible);
   public boolean mouseMoved(MouseEvent e);
 
 }

@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -195,6 +196,8 @@ public class MapPanel extends JPanel {
     final Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
     this.setCursor(crosshair);
     createUI();
+    
+    
   }
 
   public void addLayer(MapLayer layer) {
@@ -685,6 +688,14 @@ public class MapPanel extends JPanel {
     return mi;
   }
 
+  @Override
+  public void setVisible(boolean isVisible) {
+      for (MapLayer layer : layers) {
+      	layer.setVisible(isVisible);
+      }
+  }
+
+
   private Pair<List<JComponent>, List<Line2D.Double>> updateMiniPanels() {
     final List<JComponent> compsToAdd = new ArrayList<JComponent>();
     final List<Line2D.Double> linesToAdd = new ArrayList<Line2D.Double>();
@@ -817,6 +828,7 @@ public class MapPanel extends JPanel {
 
         return new Boolean(true);
       }
+      
 
       @Override
       public void finished() {
@@ -1123,6 +1135,7 @@ public class MapPanel extends JPanel {
       }
 
     }
+    
 
     public void mouseDragged(final MouseEvent e) {
       mouseNow = e.getPoint();

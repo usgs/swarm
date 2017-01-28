@@ -1,13 +1,9 @@
 package gov.usgs.volcanoes.swarm.map.hypocenters;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
@@ -15,13 +11,15 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.usgs.plot.render.DataPointRenderer;
 import gov.usgs.proj.GeoRange;
@@ -43,29 +41,31 @@ import gov.usgs.volcanoes.swarm.map.MapPanel;
 public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlObserver {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HypocenterLayer.class);
 	private static final int REFRESH_INTERVAL = 5 * 60 * 1000;
-	private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 	private static final int ONE_HOUR = 60 * 60 * 1000;
 	private static final int ONE_DAY = ONE_HOUR * 24;
 	private static final int ONE_WEEK = ONE_DAY * 7;
 
 	private static final int POPUP_PADDING = 2;
 
-	// private List<Hypocenter> hypocenters;
+	private static final int[] markerSize = { 5, 7, 9, 11, 13, 17,21, 25};
+	
+	private static final Color ORANGE = new Color(225, 175, 0, 200);
+	private static final Color RED = new Color(200, 0, 0, 200);
+	private static final Color YELLOW = new Color(225, 225, 0, 200);
+	private static final Color WHITE = new Color(200, 200, 200, 200);
+	private static final Color GREEN = new Color(0, 200, 0, 200);
+
 	private final Map<String, Event> events;
-	private boolean run = true;
 
 	private MapPanel panel;
-	private SimpleDateFormat dateFormat;
 
 	private final SwarmConfig swarmConfig;
 	private final DataPointRenderer renderer;
 	private QuakemlSource quakemlSource;
 	private Event hoverEvent;
-	private Point hoverLocation;
 
 	public HypocenterLayer() throws MalformedURLException {
 		events = new ConcurrentHashMap<String, Event>();
-		dateFormat = new SimpleDateFormat(DATE_FORMAT);
 		swarmConfig = SwarmConfig.getInstance();
 		swarmConfig.addListener(this);
 
@@ -74,8 +74,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 		renderer.stroke = new BasicStroke(1f);
 		renderer.filled = true;
 		renderer.color = Color.BLACK;
-		// r.shape = Geometry.STAR_10;
-		renderer.shape = new Ellipse2D.Float(0f, 0f, 5f, 5f);
+		
 		HypocenterSource hypocenterSource = swarmConfig.getHypocenterSource();
 
 		URL quakemlUrl = new URL(hypocenterSource.getUrl());
@@ -121,54 +120,39 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 
 			double mag = event.getPerferredMagnitude().getMag();
 			float diameter;
-			// float diameter = (float) (2.5 + mag * 9 / 2.5);
-			// diameter = Math.min(diameter, 10);
-			// diameter = Math.max(diameter, 1);
 
-			if (mag > 7) {
-				diameter = 25;
-			} else if (mag > 6) {
-				diameter = 21;
-			} else if (mag > 5) {
-				diameter = 17;
-			} else if (mag > 4) {
-				diameter = 13;
-			} else if (mag > 3) {
-				diameter = 11;
-			} else if (mag > 2) {
-				diameter = 9;
-			} else if (mag > 1) {
-				diameter = 7;
-			} else {
-				diameter = 5;
-			}
-
+			diameter = getMarkerSize(mag);
+			
 			long age = J2kSec.asEpoch(J2kSec.now()) - origin.getTime();
 			renderer.shape = new Ellipse2D.Float(0f, 0f, diameter, diameter);
 			Color markerColor;
 			if (event == hoverEvent) {
-				markerColor = Color.GREEN;
+				markerColor = GREEN;
 			} else if (age < ONE_HOUR) {
-				markerColor = Color.RED;
+				markerColor = RED;
 			} else if (age < ONE_DAY) {
-				// renderer.paint = Color.CYAN;
-				markerColor = Color.ORANGE;
+				markerColor = ORANGE;
 			} else if (age < ONE_WEEK) {
-				markerColor = Color.YELLOW;
+				markerColor = YELLOW;
 			} else {
-				markerColor = Color.WHITE;
+				markerColor = WHITE;
 			}
 
-			int alpha = 0x80FFFFFF;
-			renderer.paint = new Color(alpha & markerColor.getRGB(), true);
+//			int alpha = 0x80FFFFFF;
+//			renderer.paint = new Color(alpha & markerColor.getRGB(), true);
+			renderer.paint = markerColor;
 			renderer.renderAtOrigin(g2);
 
-//			if (event == hoverEvent) {
-//			}
 			g2.translate(-res.x, -res.y);
 		}
 
 		drawPopup(g2);
+	}
+
+	private int getMarkerSize(double mag) {
+		int markerMag = Integer.max((int)mag, 0);
+		markerMag = Integer.min(markerMag,  markerSize.length);
+		return markerSize[markerMag];
 	}
 
 	private void drawPopup(Graphics2D g2) {
@@ -243,47 +227,21 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 		return text;
 	}
 
+	
 	public boolean mouseClicked(final MouseEvent e) {
-
-		hoverEvent = null;
-		if (events.size() < 1l) {
-			return false;
-		}
-
-		GeoRange range = panel.getRange();
-		Projection projection = panel.getProjection();
-		int widthPx = panel.getGraphWidth();
-		int heightPx = panel.getGraphHeight();
-		int insetPx = panel.getInset();
-
-		Iterator<Event> it = events.values().iterator();
 		boolean handled = false;
-		while (it.hasNext() && handled == false) {
-			Event event = it.next();
-			Origin origin = event.getPreferredOrigin();
-			final Rectangle r = new Rectangle(-7, -7, 17, 17);
 
-			final Point2D.Double xy = projection
-					.forward(new Point2D.Double(origin.getLongitude(), origin.getLatitude()));
-			final double[] ext = range.getProjectedExtents(projection);
-			final double dx = (ext[1] - ext[0]);
-			final double dy = (ext[3] - ext[2]);
-			final Point2D.Double res = new Point2D.Double();
-			res.x = (((xy.x - ext[0]) / dx) * widthPx + insetPx);
-			res.y = ((1 - (xy.y - ext[2]) / dy) * heightPx + insetPx);
-
-			r.translate((int) res.x, (int) res.y);
-
-			if (r.contains(e.getPoint())) {
-				LOGGER.debug("event clicked");
-				Swarm.openEvent(event);
-				return true;
-			}
+		if (hoverEvent != null) {
+			LOGGER.debug("Opening event {}", hoverEvent.getEvid());
+			Swarm.openEvent(hoverEvent);
+			handled = true;
+			hoverEvent = null;
 		}
-
+		
 		return handled;
 	}
 
+	
 	public void settingsChanged() {
 		LOGGER.debug("hypocenter plotter sees changed settings.");
 		HypocenterSource hypocenterSource = swarmConfig.getHypocenterSource();
@@ -293,15 +251,12 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 		try {
 			quakemlSource.stop();
 			quakemlSource = new QuakemlSource(new URL(hypocenterSource.getUrl()), (long) REFRESH_INTERVAL);
+			quakemlSource.start();
 			quakemlSource.addObserver(this);
 			update(quakemlSource);
 		} catch (MalformedURLException ex) {
 			LOGGER.error("Unable to load hypocenter URL.", ex);
 		}
-	}
-
-	public void stop() {
-		run = false;
 	}
 
 	public boolean mouseMoved(MouseEvent e) {
@@ -323,6 +278,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 		boolean handled = false;
 		while (it.hasNext() && handled == false) {
 			Event event = it.next();
+			
 			Origin origin = event.getPreferredOrigin();
 			if (origin == null) {
 				continue;
@@ -333,7 +289,8 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 				continue;
 			}
 
-			final Rectangle r = new Rectangle(0, 0, 10, 10);
+			int markerDiameter = getMarkerSize(event.getPerferredMagnitude().getMag());
+			final Rectangle r = new Rectangle(0, 0, markerDiameter, markerDiameter);
 
 			final Point2D.Double xy = projection
 					.forward(new Point2D.Double(origin.getLongitude(), origin.getLatitude()));
@@ -353,7 +310,6 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 				LOGGER.debug("unset hover event {}", event.publicId);
 
 				hoverEvent = null;
-				hoverLocation = e.getPoint();
 				handled = true;
 			}
 		}
@@ -366,5 +322,10 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 		if (MapFrame.getInstance() != null) {
 			MapFrame.getInstance().repaint();
 		}
+	}
+
+	public void setVisible(boolean isVisible) {
+		LOGGER.debug("Setting hypocenter update to {}", isVisible);
+		quakemlSource.doUpdate(isVisible);
 	}
 }

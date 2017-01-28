@@ -72,7 +72,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
    * @param event Event to display
    */
   public EventFrame(Event event) {
-    super("Event - " + event.getEvid(), true, true, true, false);
+    super("Event - " + event.getEventSource() + event.getEvid(), true, true, true, false);
     this.event = event;
     event.addObserver(this);
 
