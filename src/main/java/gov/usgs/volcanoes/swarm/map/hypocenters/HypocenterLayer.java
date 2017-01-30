@@ -47,8 +47,8 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 
 	private static final int POPUP_PADDING = 2;
 
-	private static final int[] markerSize = { 5, 7, 9, 11, 13, 17,21, 25};
-	
+	private static final int[] markerSize = { 5, 7, 9, 11, 13, 17, 21, 25 };
+
 	private static final Color ORANGE = new Color(225, 175, 0, 200);
 	private static final Color RED = new Color(200, 0, 0, 200);
 	private static final Color YELLOW = new Color(225, 225, 0, 200);
@@ -74,7 +74,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 		renderer.stroke = new BasicStroke(1f);
 		renderer.filled = true;
 		renderer.color = Color.BLACK;
-		
+
 		HypocenterSource hypocenterSource = swarmConfig.getHypocenterSource();
 
 		if (hypocenterSource != HypocenterSource.NONE) {
@@ -83,7 +83,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 				quakemlSource = new QuakemlSource(quakemlUrl, (long) REFRESH_INTERVAL);
 				quakemlSource.addObserver(this);
 				update(quakemlSource);
-			}			
+			}
 		}
 	}
 
@@ -124,7 +124,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 			float diameter;
 
 			diameter = getMarkerSize(mag);
-			
+
 			long age = J2kSec.asEpoch(J2kSec.now()) - origin.getTime();
 			renderer.shape = new Ellipse2D.Float(0f, 0f, diameter, diameter);
 			Color markerColor;
@@ -140,8 +140,8 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 				markerColor = WHITE;
 			}
 
-//			int alpha = 0x80FFFFFF;
-//			renderer.paint = new Color(alpha & markerColor.getRGB(), true);
+			// int alpha = 0x80FFFFFF;
+			// renderer.paint = new Color(alpha & markerColor.getRGB(), true);
 			renderer.paint = markerColor;
 			renderer.renderAtOrigin(g2);
 
@@ -152,8 +152,8 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 	}
 
 	private int getMarkerSize(double mag) {
-		int markerMag = Integer.max((int)mag, 0);
-		markerMag = Integer.min(markerMag,  markerSize.length);
+		int markerMag = Integer.max((int) mag, 0);
+		markerMag = Integer.min(markerMag, markerSize.length);
 		return markerSize[markerMag];
 	}
 
@@ -229,7 +229,6 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 		return text;
 	}
 
-	
 	public boolean mouseClicked(final MouseEvent e) {
 		boolean handled = false;
 
@@ -239,19 +238,27 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 			handled = true;
 			hoverEvent = null;
 		}
-		
+
 		return handled;
 	}
 
-	
 	public void settingsChanged() {
 		LOGGER.debug("hypocenter plotter sees changed settings.");
-		HypocenterSource hypocenterSource = swarmConfig.getHypocenterSource();
-		if (quakemlSource == null) {
+		if (quakemlSource != null) {
+			quakemlSource.stop();
+		}
+		
+		HypocenterSource hypocenterSource = swarmConfig.getHypocenterSource();		
+		if (hypocenterSource == HypocenterSource.NONE) {
+			events.clear();
+			if (MapFrame.getInstance() != null) {
+				MapFrame.getInstance().repaint();
+			}
 			return;
 		}
+
 		try {
-			quakemlSource.stop();
+			LOGGER.debug("New hypocenter source: {}", hypocenterSource);
 			quakemlSource = new QuakemlSource(new URL(hypocenterSource.getUrl()), (long) REFRESH_INTERVAL);
 			quakemlSource.start();
 			quakemlSource.addObserver(this);
@@ -280,7 +287,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 		boolean handled = false;
 		while (it.hasNext() && handled == false) {
 			Event event = it.next();
-			
+
 			Origin origin = event.getPreferredOrigin();
 			if (origin == null) {
 				continue;
@@ -328,6 +335,8 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 
 	public void setVisible(boolean isVisible) {
 		LOGGER.debug("Setting hypocenter update to {}", isVisible);
-		quakemlSource.doUpdate(isVisible);
+		if (quakemlSource != null) {
+			quakemlSource.doUpdate(isVisible);
+		}
 	}
 }
