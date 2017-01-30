@@ -156,6 +156,8 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
       final String w = "wave-" + i;
       final String channel = cf.getString(w + ".channel");
       final ConfigFile scf = cf.getSubConfig(w);
+      
+      //TODO: why is wvp discarded?
       final WaveViewPanel wvp = addChannel(channel);
       wvp.getSettings().set(scf);
     }

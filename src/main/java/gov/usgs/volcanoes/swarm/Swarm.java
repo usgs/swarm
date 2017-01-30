@@ -1,5 +1,10 @@
 package gov.usgs.volcanoes.swarm;
 
+import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.KeyboardFocusManager;
@@ -24,11 +29,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
-
 import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.time.CurrentTime;
@@ -38,12 +38,12 @@ import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.event.Event;
+import gov.usgs.volcanoes.swarm.event.EventFrame;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
 import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
-import gov.usgs.volcanoes.swarm.picker.PickerFrame;
-import gov.usgs.volcanoes.swarm.picker.PickerWavePanel;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
 import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
@@ -167,8 +167,8 @@ public class Swarm extends JFrame implements InternalFrameListener {
       }
     });
 
-    m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0), "fullScreenToggle");
-    m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, InputEvent.CTRL_DOWN_MASK),
+    m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0), "fullScreenToggle");
+    m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, InputEvent.CTRL_DOWN_MASK),
         "fullScreenToggle");
     m.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SLASH, InputEvent.CTRL_DOWN_MASK),
         "fullScreenToggle");
@@ -435,7 +435,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
     for (final JInternalFrame frame : SwarmInternalFrames.getFrames()) {
       // Why did this check isVisible()?
-//       if (frame.isVisible() && frame instanceof Kioskable) {
+      // if (frame.isVisible() && frame instanceof Kioskable) {
       if (frame instanceof Kioskable) {
         final Kioskable f = (Kioskable) frame;
         f.setKioskMode(full);
@@ -576,16 +576,25 @@ public class Swarm extends JFrame implements InternalFrameListener {
     return frame;
   }
 
-  public static PickerFrame openPicker(final WaveViewPanel insetWavePanel) {
-    PickerWavePanel p = new PickerWavePanel(insetWavePanel);
-    p.setDataSource(insetWavePanel.getDataSource().getCopy());
-    PickerFrame pickerFrame = new PickerFrame();
-    pickerFrame.setVisible(true);
-    pickerFrame.requestFocus();
-    SwarmInternalFrames.add(pickerFrame);
-    pickerFrame.setBaseWave(p);
-    return pickerFrame;
-  }
+//  public static PickerFrame openPicker(final WaveViewPanel insetWavePanel) {
+//    PickerWavePanel p = new PickerWavePanel(insetWavePanel);
+//    p.setDataSource(insetWavePanel.getDataSource().getCopy());
+//    PickerFrame pickerFrame = new PickerFrame();
+//    pickerFrame.setVisible(true);
+//    pickerFrame.requestFocus();
+//    SwarmInternalFrames.add(pickerFrame);
+//    pickerFrame.setBaseWave(p);
+//    return pickerFrame;
+//  }
+
+//  public static PickerFrame openPicker(Event event) {
+//    PickerFrame pickerFrame = new PickerFrame(event);
+//    pickerFrame.setVisible(true);
+//    pickerFrame.requestFocus();
+//    SwarmInternalFrames.add(pickerFrame);
+//    return pickerFrame;
+//  }
+
 
   public void saveLayout(String name) {
     final boolean fixedName = (name != null);
@@ -955,5 +964,15 @@ public class Swarm extends JFrame implements InternalFrameListener {
     if (Swarm.config.isKiosk())
       swarm.parseKiosk();
   }
+
+  public static EventFrame openEvent(final Event event) {
+    final EventFrame eventFrame = new EventFrame(event);
+    eventFrame.setVisible(true);
+    eventFrame.requestFocus();
+    SwarmInternalFrames.add(eventFrame);
+
+    return eventFrame;
+  }
+
 
 }

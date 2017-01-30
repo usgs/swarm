@@ -1,8 +1,5 @@
 package gov.usgs.volcanoes.swarm;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
@@ -16,21 +13,30 @@ import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gov.usgs.plot.map.WMSGeoImageSet;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.swarm.data.DataSourceType;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterLayer;
+import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterSource;
 
 /**
- * Swarm configuration class.
- *
+ * Swarm configuration class. 
+ * 
+ * TODO: This is getting our of hand. Extract configs for individual components. e.g. map
+ * 
  * @author Dan Cervelli
  */
 public class SwarmConfig {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SwarmConfig.class);
 
+  private final List<ConfigListener> listeners;
+  
   private static String[] DEFAULT_SERVERS =
       new String[] {"AVO Winston;wws:pubavo1.wr.usgs.gov:16022:10000:1"
       // "IRIS DMC - New
@@ -86,6 +92,7 @@ public class SwarmConfig {
   public int mapWidth;
   public int mapHeight;
   public boolean mapMaximized;
+  private HypocenterSource hypocenterSource;
 
   public double mapScale;
   public double mapLongitude;
@@ -111,14 +118,33 @@ public class SwarmConfig {
   public String wmsLayer;
   public String wmsStyles;
 
-  public String labelSource;
   public String fdsnDataselectURL;
   public String fdsnStationURL;
 
-  private SwarmConfig() {}
+  private SwarmConfig() {
+    listeners = new ArrayList<ConfigListener>();
+  }
 
+  public void addListener(ConfigListener configListener) {
+    listeners.add(configListener);
+  }
+  
+  private void notifyListeners() {
+    for (ConfigListener listener : listeners) {
+      listener.settingsChanged();
+    }  
+  }
   public static SwarmConfig getInstance() {
     return SwarmConfigHolder.swarmConfig;
+  }
+  
+  public void setHypocenterSource(HypocenterSource hypocenterSource) {
+    this.hypocenterSource = hypocenterSource;
+    notifyListeners();
+  }
+  
+  public HypocenterSource getHypocenterSource() {
+    return hypocenterSource;
   }
 
   public void createConfig(final String[] args) {
@@ -261,11 +287,10 @@ public class SwarmConfig {
   }
 
   /**
-   * Sets Swarm configuration variables based on the contents of a ConfigFile;
-   * sets default values if missing.
+   * Sets Swarm configuration variables based on the contents of a ConfigFile; sets default values
+   * if missing.
    *
-   * @param config
-   *          the configuration information
+   * @param config the configuration information
    */
   public void parseConfig(final ConfigFile config) {
     configFilename = config.getString("configFile");
@@ -341,8 +366,8 @@ public class SwarmConfig {
         StringUtils.stringToString(config.getString("wmsLayer"), WMSGeoImageSet.DEFAULT_LAYER);
     wmsStyles =
         StringUtils.stringToString(config.getString("wmsStyles"), WMSGeoImageSet.DEFAULT_STYLE);
-
-    labelSource = StringUtils.stringToString(config.getString("labelSource"), "");
+    
+    hypocenterSource = HypocenterSource.valueOf(StringUtils.stringToString(config.getString("hypocenterSource"), "NONE"));
 
     fdsnDataselectURL = StringUtils.stringToString(config.getString("fdsnDataselectURL"),
         "http://service.iris.edu/fdsnws/dataselect/1/query");
@@ -497,7 +522,7 @@ public class SwarmConfig {
     config.put("wmsLayer", wmsLayer);
     config.put("wmsStyles", wmsStyles);
 
-    config.put("labelSource", labelSource);
+    config.put("hypocenterSource", hypocenterSource.name());
 
     config.put("fdsnDataselectURL", fdsnDataselectURL);
     config.put("fdsnStationURL", fdsnStationURL);

@@ -29,7 +29,7 @@ import gov.usgs.util.GridBagHelper;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.SwarmDialog;
+import gov.usgs.volcanoes.swarm.SwarmModalDialog;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsDialog;
@@ -38,7 +38,7 @@ import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsDialog;
  * 
  * @author Dan Cervelli
  */
-public class HelicorderViewerSettingsDialog extends SwarmDialog {
+public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
   public static final long serialVersionUID = -1;
 
   private HelicorderViewerSettings settings;
@@ -68,7 +68,7 @@ public class HelicorderViewerSettingsDialog extends SwarmDialog {
   private HelicorderViewerSettingsDialog() {
     // super(Swarm.getApplication(), "Helicorder View Settings", true,
     // WIDTH, HEIGHT);
-    super(Swarm.getApplicationFrame(), "Helicorder View Settings", true);
+    super(Swarm.getApplicationFrame(), "Helicorder View Settings");
     utcDateFormat = new SimpleDateFormat("yyyyMMddHHmm");
     utcDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
