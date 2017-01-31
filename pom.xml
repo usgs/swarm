@@ -529,7 +529,7 @@
 		<dependency>
 			<groupId>gov.usgs.volcanoes</groupId>
 			<artifactId>volcano-core</artifactId>
-			<version>[1.3.3,)</version>
+			<version>[1.3.7,)</version>
 		</dependency>
 		<dependency>
 			<groupId>gov.usgs.volcanoes</groupId>
