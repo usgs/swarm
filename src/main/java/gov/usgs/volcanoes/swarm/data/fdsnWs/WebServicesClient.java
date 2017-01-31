@@ -12,6 +12,7 @@ import java.util.List;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.swarm.ChannelInfo;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.data.DataSelectReader;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 
 public class WebServicesClient extends AbstractDataRecordClient {
