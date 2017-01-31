@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TimeZone;
+import java.util.TreeSet;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -386,10 +387,10 @@ public class WaveClipboardFrame extends SwarmFrame {
 
 		toolbar.addSeparator();
 
-		upButton = SwarmUtil.createToolBarButton(Icons.up, "Move wave up in clipboard (Up arrow)",
+		upButton = SwarmUtil.createToolBarButton(Icons.up, "Move wave(s) up in clipboard (Up arrow)",
 				new ActionListener() {
 					public void actionPerformed(final ActionEvent e) {
-						moveUp();
+						moveWaves(-1);
 					}
 				});
 		UiUtils.mapKeyStrokeToButton(this, "UP", "up", upButton);
@@ -398,7 +399,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 		downButton = SwarmUtil.createToolBarButton(Icons.down, "Move wave down in clipboard (Down arrow)",
 				new ActionListener() {
 					public void actionPerformed(final ActionEvent e) {
-						moveDown();
+						moveWaves(1);
 					}
 				});
 		UiUtils.mapKeyStrokeToButton(this, "DOWN", "down", downButton);
@@ -788,13 +789,13 @@ public class WaveClipboardFrame extends SwarmFrame {
 		saveAllButton.setEnabled(!enable);
 
 		final boolean allowSingle = (selectedSet.size() == 1);
-		upButton.setEnabled(allowSingle);
-		downButton.setEnabled(allowSingle);
 		sortButton.setEnabled(allowSingle);
 		syncButton.setEnabled(allowSingle);
 		saveButton.setEnabled(allowSingle);
 
 		final boolean allowMulti = (selectedSet.size() > 0);
+		upButton.setEnabled(allowMulti);
+		downButton.setEnabled(allowMulti);
 		backButton.setEnabled(allowMulti);
 		expXButton.setEnabled(allowMulti);
 		compXButton.setEnabled(allowMulti);
@@ -990,19 +991,34 @@ public class WaveClipboardFrame extends SwarmFrame {
 		repaint();
 	}
 
-	public synchronized void moveUp() {
-		final AbstractWavePanel p = getSingleSelected();
-		if (p == null)
-			return;
+	public synchronized void moveWaves(int i) {
+		final WaveViewPanel[] panels = selectedSet.toArray(new WaveViewPanel[0]);
 
-		final int i = waves.indexOf(p);
-		if (i == 0)
-			return;
+		List<Integer> panelIdx = new ArrayList<Integer>();
+		for (int idx = 0; idx < panels.length; idx++) {
+			panelIdx.add(waves.indexOf(panels[idx]));
+		}
 
-		waves.remove(i);
-		waves.add(i - 1, p);
-		waveBox.remove(p);
-		waveBox.add(p, i - 1);
+		Collections.sort(panelIdx);
+		if (i > 0) {
+			Collections.reverse(panelIdx);
+			if (panelIdx.get(0) + i > waves.size() - 1) {
+				return;
+			}
+		} else {
+			if (panelIdx.get(0) + i < 0) {
+				return;
+			}
+		}
+
+		for (int idx : panelIdx) {
+			AbstractWavePanel p = waves.get(idx);
+			waves.remove(idx);
+			waves.add(idx + i, p);
+			waveBox.remove(p);
+			waveBox.add(p, idx + i);
+		}
+
 		waveBox.validate();
 		repaint();
 	}
