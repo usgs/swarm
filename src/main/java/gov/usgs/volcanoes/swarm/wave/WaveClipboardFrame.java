@@ -942,7 +942,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     waveToolbar.addSettings(p.getSettings());
   }
 
-  private synchronized void remove(final WaveViewPanel p) {
+  private synchronized void remove(final AbstractWavePanel p) {
     int i = 0;
     for (i = 0; i < waveBox.getComponentCount(); i++) {
       if (p == waveBox.getComponent(i))
@@ -1037,7 +1037,6 @@ public class WaveClipboardFrame extends SwarmFrame {
   public void removeWaves() {
     while (waves.size() > 0) {
       remove(waves.get(0));
-      waves.remove(0);
     }
 
     waveBox.validate();
