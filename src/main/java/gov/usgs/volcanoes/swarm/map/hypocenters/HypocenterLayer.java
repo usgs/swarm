@@ -131,13 +131,13 @@ public final class HypocenterLayer implements MapLayer, ConfigListener {
 
   private void pollHypocenters()
       throws ParserConfigurationException, SAXException, IOException, DOMException, ParseException {
-    LOGGER.debug("Polling hypocenters");
     events.clear();
     HypocenterSource hypocenterSource = swarmConfig.getHypocenterSource();
     if (hypocenterSource == HypocenterSource.NONE) {
       return;
     }
 
+    LOGGER.debug("Polling hypocenters");
     DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
     Document doc = dBuilder.parse(hypocenterSource.getUrl());
