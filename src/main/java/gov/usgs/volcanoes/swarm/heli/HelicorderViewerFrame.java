@@ -75,9 +75,12 @@ import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
 public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
   public static final long serialVersionUID = -1;
 
+  private static final int MINUTE = 60;
+  private static final int HOUR = MINUTE * 60;
+  
   // minutes * 60 = seconds
   public static final int[] chunkValues =
-      new int[] {10 * 60, 15 * 60, 20 * 60, 30 * 60, 60 * 60, 120 * 60, 180 * 60, 360 * 60};
+      new int[] {10 * MINUTE, 15 * MINUTE, 20 * MINUTE, 30 * MINUTE, 1 * HOUR, 2 * HOUR, 180 * MINUTE, 6 * HOUR};
 
   // hours * 60 = minutes
   public static final int[] spanValues =
@@ -85,7 +88,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
           144 * 60, 168 * 60, 192 * 60, 216 * 60, 240 * 60, 264 * 60, 288 * 60, 312 * 60, 336 * 60};
 
   // seconds
-  public static final int[] zoomValues = new int[] {1, 2, 5, 10, 20, 30, 60, 120, 300, 600};
+  public static final int[] zoomValues = new int[] {1, 2, 5, 10, 20, 30, MINUTE, 2 * MINUTE, 5 * MINUTE, 10 * MINUTE, 20 * MINUTE, 40 * MINUTE, 1 * HOUR, 90 * MINUTE};
 
   private final RefreshThread refreshThread;
   private final SeismicDataSource dataSource;
