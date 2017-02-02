@@ -1,8 +1,5 @@
 package gov.usgs.volcanoes.swarm.heli;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -31,6 +28,9 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.plot.data.HelicorderData;
@@ -44,7 +44,6 @@ import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.options.SwarmOptions;
@@ -175,8 +174,6 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 			double j2k = insetWavePanel.getStartTime()
 					+ (insetWavePanel.getEndTime() - insetWavePanel.getStartTime()) / 2;
 			loadInsetWave(j2k - zoomOffset, j2k + zoomOffset);
-			System.err.println("MOVING INSET");
-			moveInset(0);
 		}
 
 		repaint();
@@ -434,30 +431,30 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 		}
 	}
 
+	/**
+	 * Move selected wave window.
+	 * 
+	 * @param offset
+	 *            window lengths to move
+	 */
 	public void moveInset(int offset) {
-		if (insetWavePanel != null) {
-			double st = insetWavePanel.getStartTime();
-			double et = insetWavePanel.getEndTime();
-			double dt = et - st;
-			double nst = st + dt * offset;
-			double net = et + dt * offset;
-
-			int row = heliRenderer.getRow(st + dt * offset + (dt / 2));
-			if (row < 0 || row >= heliRenderer.getNumRows())
-				return;
-
-			loadInsetWave(nst, net);
-			int height = insetHeight;
-			
-			int rowSpan = (int) Math.ceil(dt / heliRenderer.getTimeChunk());
-			if (row * translation[ROW_HEIGHT] + translation[GRAPH_Y] > height + translation[GRAPH_Y]) {
-				int y = (int) Math.ceil((row - rowSpan) * translation[ROW_HEIGHT] + translation[GRAPH_Y]);
-				insetWavePanel.setLocation(0, y - height);
-			} else {
-				int y = (int) Math.ceil((row + 1 + rowSpan) * translation[ROW_HEIGHT] + translation[GRAPH_Y]);
-				insetWavePanel.setLocation(0, y);
-			}
+		if (insetWavePanel == null) {
+			return;
 		}
+
+		double st = insetWavePanel.getStartTime();
+		double et = insetWavePanel.getEndTime();
+		double dt = et - st;
+		double newStartTime = st + dt * offset;
+		double newEndTime = et + dt * offset;
+
+		int firstRow = heliRenderer.getRow(newStartTime);
+		int lastRow = heliRenderer.getRow(newEndTime);
+		if (lastRow < 0 || firstRow > heliRenderer.getNumRows() - 1) {
+			return;
+		}
+
+		loadInsetWave(newStartTime, newEndTime);
 	}
 
 	public void createWaveInset(final double j2k, final int mx, final int my) {
@@ -494,7 +491,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 
 		insetWavePanel.setSize(d.width + 2, height);
 		double zoomOffset = parent.getHelicorderViewerSettings().waveZoomOffset;
-		int rowSpan = (int) Math.ceil( 2 * zoomOffset / heliRenderer.getTimeChunk());
+		int rowSpan = (int) Math.ceil(2 * zoomOffset / heliRenderer.getTimeChunk());
 		if (insetY - heliRenderer.getRowHeight() > height + translation[GRAPH_Y]) {
 			int y = (int) Math.ceil((row - rowSpan) * translation[ROW_HEIGHT] + translation[GRAPH_Y]);
 			insetWavePanel.setLocation(-1, y - height);
@@ -575,7 +572,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 		worker.start();
 	}
 
-	public void setResized(boolean b) {
+	protected void setResized(boolean b) {
 		resized = b;
 	}
 
@@ -779,20 +776,8 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 		Graphics2D g2 = (Graphics2D) g;
 		Dimension d = this.getSize();
 		if (heliData == null) {
-			// if (parent.isWorking())
-			// g2.drawString("Attempting to retrieve data...", d.width / 2 - 75,
-			// d.height / 2);
-			// else
 			if (!parent.isWorking()) {
-				// g2.drawString("The server returned no helicorder data.",
-				// d.width / 2 - 150, d.height / 2);
 				parent.setStatus("The server returned no helicorder data.");
-				// double start = settings.getBottomTime() - settings.span * 60;
-				// double end = settings.getBottomTime();
-				// g2.drawString(String.format("Time range: %s to %s",
-				// Time.format(Time.STANDARD_TIME_FORMAT, start),
-				// Time.format(Time.STANDARD_TIME_FORMAT, end)),
-				// d.width / 2 - 100, d.height / 2 + 16);
 			}
 		} else if (displayImage != null)
 			g2.drawImage(displayImage, 0, 0, null);
@@ -805,18 +790,28 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 			// insetWavePanel
 			double t1 = insetWavePanel.getStartTime();
 			double t2 = insetWavePanel.getEndTime();
+			double dt = t2 - t1;
 			double spanCenter = (t2 - t1) / 2 + t1;
 			int row = heliRenderer.getRow(spanCenter);
+
+			int rowSpan = (int) Math.ceil(dt / heliRenderer.getMaxX()) + 1;
+			double rowHeight = translation[ROW_HEIGHT];
+			double graphY = translation[GRAPH_Y];
+
 			if (resized) {
 				insetWavePanel.setSize(d.width, insetHeight);
 				insetWavePanel.createImage();
-				if (row * translation[2] > insetHeight + translation[3]) {
-					int y = (int) Math.ceil((row - 1) * translation[2] + translation[3]);
-					insetWavePanel.setLocation(0, y - insetHeight);
-				} else {
-					int y = (int) Math.ceil((row + 2) * translation[2] + translation[3]);
-					insetWavePanel.setLocation(0, y);
-				}
+			}
+
+			int panelY;
+			if ((row - rowSpan) * rowHeight > insetHeight + graphY) {
+				panelY = (int) Math.ceil((row - rowSpan) * rowHeight + graphY - insetHeight);
+			} else {
+				panelY = (int) Math.ceil((row + rowSpan) * rowHeight + graphY);
+			}
+
+			if (panelY != insetWavePanel.getLocation().y) {
+				insetWavePanel.setLocation(0, panelY);
 			}
 
 			// now it's safe to draw the waveInsetPanel
@@ -828,11 +823,17 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 			g.drawRect(0, 0, wvd.width - 1, wvd.height);
 			g2.translate(-p.x, -p.y);
 
+			/*
+			 * Not sure what below is meant to address. I removed the check
+			 * because negative row offsets were necessary to handle multi-row
+			 * highlights. If there's a problem with wave loading, find a more
+			 * direct fix. --tjp
+			 */
 			// fixes bug where highlight was being drawn before wave loaded
-			if (row < 0)
-				return;
+			// if (row < 0)
+			// return;
 
-			// finally, draw the highlight. 
+			// finally, draw the highlight.
 			Paint pnt = g2.getPaint();
 			g2.setPaint(new Color(255, 255, 0, 128));
 			Rectangle2D.Double rect = new Rectangle2D.Double();
@@ -840,40 +841,44 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 			int zoomTimeSpan = parent.getHelicorderViewerSettings().waveZoomOffset * 2;
 			double zoomPixelSpan = 1.0 / translation[PIXEL_TIME_SPAN] * zoomTimeSpan;
 
-			// hightlight left
+			// highlight left
 			int highlightStart = (int) heliRenderer.helicorderGetXPixel(spanCenter);
 			int highlightSpan = (int) (zoomPixelSpan / 2);
-			int row_offset = 0;
-			while (highlightSpan > 0) {
+			int rowOffset = 0;
+			while (highlightSpan > 0 && row - rowOffset >= 0) {
 				int width = Math.min(highlightSpan, (int) (highlightStart - translation[GRAPH_LEFT]));
 
-				rect.setRect(highlightStart - width,
-						(int) Math.ceil((row - row_offset++) * translation[ROW_HEIGHT] + translation[GRAPH_Y]), width,
-						(int) Math.ceil(translation[ROW_HEIGHT]));
+				if (row - rowOffset < heliRenderer.getNumRows()) {
+					rect.setRect(highlightStart - width,
+							(int) Math.ceil((row - rowOffset) * translation[ROW_HEIGHT] + translation[GRAPH_Y]), width,
+							(int) Math.ceil(translation[ROW_HEIGHT]));
 					g2.fill(rect);
-					
-					highlightSpan -= width;
-					highlightStart = (int) translation[GRAPH_RIGHT];
+				}
+				highlightSpan -= width;
+				highlightStart = (int) translation[GRAPH_RIGHT];
+				rowOffset++;
 
 			}
-			
-			// hightlight right
+
+			// highlight right
 			highlightStart = (int) heliRenderer.helicorderGetXPixel(spanCenter);
 			highlightSpan = (int) (zoomPixelSpan / 2);
-			row_offset = 0;
-			while (highlightSpan > 0) {
+			rowOffset = 0;
+			while (highlightSpan > 0 && row + rowOffset < heliRenderer.getNumRows()) {
 				int width = Math.min(highlightSpan, (int) (translation[GRAPH_RIGHT] - highlightStart));
 
-				rect.setRect(highlightStart,
-						(int) Math.ceil((row + row_offset++) * translation[ROW_HEIGHT] + translation[GRAPH_Y]), width,
-						(int) Math.ceil(translation[ROW_HEIGHT]));
+				if (row + rowOffset >= 0) {
+					rect.setRect(highlightStart,
+							(int) Math.ceil((row + rowOffset) * translation[ROW_HEIGHT] + translation[GRAPH_Y]), width,
+							(int) Math.ceil(translation[ROW_HEIGHT]));
 					g2.fill(rect);
-					
-					highlightSpan -= width;
-					highlightStart = (int) translation[GRAPH_LEFT];
+				}
 
+				highlightSpan -= width;
+				highlightStart = (int) translation[GRAPH_LEFT];
+				rowOffset++;
 			}
-			
+
 			g2.setPaint(pnt);
 		}
 
