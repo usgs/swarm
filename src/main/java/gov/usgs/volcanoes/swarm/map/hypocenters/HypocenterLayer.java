@@ -152,8 +152,8 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 	}
 
 	private int getMarkerSize(double mag) {
-		int markerMag = Integer.max((int) mag, 0);
-		markerMag = Integer.min(markerMag, markerSize.length);
+		int markerMag = Math.max((int) mag, 0);
+		markerMag = Math.min(markerMag, markerSize.length);
 		return markerSize[markerMag];
 	}
 
