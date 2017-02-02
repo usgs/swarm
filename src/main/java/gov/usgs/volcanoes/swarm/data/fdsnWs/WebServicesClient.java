@@ -1,18 +1,16 @@
 package gov.usgs.volcanoes.swarm.data.fdsnWs;
 
-import edu.sc.seis.seisFile.mseed.DataRecord;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import edu.sc.seis.seisFile.mseed.DataRecord;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.swarm.ChannelInfo;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.data.DataSelectReader;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 
 public class WebServicesClient extends AbstractDataRecordClient {
