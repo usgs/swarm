@@ -153,8 +153,8 @@ public class AboutDialog extends JDialog implements Runnable {
 		pane.setBorder(LineBorder.createBlackLineBorder());
 		pane.setContentType("text/html");
 		pane.setText("<HTML><DIV style=\"text-align: center;\">" + "<SPAN style=\"color: red;\">SWARM:</SPAN><BR>"
-				+ "<SPAN style=\"color: blue;\">Seismic Wave Analysis/</SPAN><BR>"
-				+ "<SPAN style=\"color: blue;\">Real-time Monitoring/</SPAN><BR>https://volcanoes.usgs.gov/software/swarm/<br>" + "Version: " + Version.POM_VERSION
+				+ "<SPAN style=\"color: blue;\">Seismic Wave Analysis / "
+				+ "Real-time Monitoring</SPAN><BR>https://volcanoes.usgs.gov/software/swarm/<br>" + "Version: " + Version.POM_VERSION
 				+ "<BR></DIV>"
 				+ "</HTML>");
 		return pane;
