@@ -14,12 +14,17 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+
+import gov.usgs.volcanoes.core.quakeml.Event;
+import gov.usgs.volcanoes.core.quakeml.Magnitude;
+import gov.usgs.volcanoes.core.quakeml.Origin;
 
 public class ParameterPanel {
   private static final Logger LOGGER = LoggerFactory.getLogger(ParameterPanel.class);
@@ -67,7 +72,8 @@ public class ParameterPanel {
     c.gridy++;
     addKey("Origin date: ", parameterPanel, c);
 
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
+    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     String date = dateFormat.format(event.getPreferredOrigin().getTime());
     addValue(date, parameterPanel, c);
 
@@ -75,7 +81,7 @@ public class ParameterPanel {
     addKey("Type: ", parameterPanel, c);
 
     if (origin != null) {
-      addValue(event.getType(), parameterPanel, c);
+      addValue(event.getTypeDescription(), parameterPanel, c);
     }
 
     c.gridy++;
