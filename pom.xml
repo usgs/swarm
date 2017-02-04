@@ -222,7 +222,7 @@
 							<minimizeJar>true</minimizeJar>
 							<filters>
 								<filter>
-									<artifact>org.apache:log4j</artifact>
+									<artifact>log4j:log4j</artifact>
 									<includes>
 										<include>org/apache/log4j/**</include>
 									</includes>
@@ -281,7 +281,7 @@
 									<include>com.martiansoftware:jsap</include>
 									<include>net.sourceforge.jtransforms:jtransforms</include>
 									<include>org.slf4j:*</include>
-									<include>org.apache:log4j</include>
+									<include>log4j:log4j</include>
 									<include>net.alomax:*</include>
 									<include>edu.sc.seis:*</include>
 									<include>colt:colt</include>
@@ -553,9 +553,9 @@
 			<version>1.7.1</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache</groupId>
+			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>[1.2.13,)</version>
+			<version>1.2.13</version>
 		</dependency>
 		<dependency>
 			<groupId>gov.usgs.volcanoes</groupId>
