@@ -1,7 +1,7 @@
 package gov.usgs.volcanoes.swarm.wave;
 
 import gov.usgs.volcanoes.core.math.Butterworth.FilterType;
-import gov.usgs.volcanoes.swarm.SwarmDialog;
+import gov.usgs.volcanoes.swarm.SwarmModalDialog;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
 
 import java.awt.BorderLayout;
@@ -24,7 +24,7 @@ import com.jgoodies.forms.layout.FormLayout;
  * 
  * @author Dan Cervelli
  */
-public class WaveViewSettingsDialog extends SwarmDialog {
+public class WaveViewSettingsDialog extends SwarmModalDialog {
     private static final long serialVersionUID = 1L;
 
     private JPanel dialogPanel;
@@ -72,7 +72,7 @@ public class WaveViewSettingsDialog extends SwarmDialog {
     private int settingsCount;
 
     private WaveViewSettingsDialog() {
-        super(applicationFrame, "Wave Settings", true);
+        super(applicationFrame, "Wave Settings");
         createUI();
         setSizeAndLocation();
     }

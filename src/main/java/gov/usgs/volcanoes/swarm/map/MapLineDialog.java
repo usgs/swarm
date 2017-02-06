@@ -2,12 +2,12 @@ package gov.usgs.volcanoes.swarm.map;
 
 import javax.swing.JFrame;
 
-import gov.usgs.volcanoes.swarm.SwarmDialog;
+import gov.usgs.volcanoes.swarm.SwarmModalDialog;
 
-public class MapLineDialog extends SwarmDialog {
+public class MapLineDialog extends SwarmModalDialog {
 
-    protected MapLineDialog(JFrame parent, String title, boolean modal) {
-        super(parent, title, modal);
+    protected MapLineDialog(JFrame parent, String title) {
+        super(parent, title);
     }
 
 }

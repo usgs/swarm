@@ -2,7 +2,7 @@ package gov.usgs.volcanoes.swarm.rsam;
 
 import gov.usgs.math.BinSize;
 import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.SwarmDialog;
+import gov.usgs.volcanoes.swarm.SwarmModalDialog;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
 
 import java.awt.BorderLayout;
@@ -29,7 +29,7 @@ import com.jgoodies.forms.layout.FormLayout;
  * 
  * @author Tom Parker
  */
-public class RsamViewSettingsDialog extends SwarmDialog {
+public class RsamViewSettingsDialog extends SwarmModalDialog {
     private static final long serialVersionUID = 1L;
 
     private JPanel dialogPanel;
@@ -60,7 +60,7 @@ public class RsamViewSettingsDialog extends SwarmDialog {
     private JTextField scaleMin;
 
     private RsamViewSettingsDialog() {
-        super(applicationFrame, "RSAM Settings", true);
+        super(applicationFrame, "RSAM Settings");
         this.setIconImage(Icons.rsam_values.getImage());
         createUI();
         setSizeAndLocation();
