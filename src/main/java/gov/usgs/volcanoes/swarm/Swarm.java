@@ -606,7 +606,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
             "Save Layout", JOptionPane.INFORMATION_MESSAGE, null, null, lastLayout);
         name = name.trim();
       }
-      if (name != null && "".equals(name)) {
+      if (name != null && !"".equals(name)) {
         if (Swarm.config.layouts.containsKey(name)) {
           boolean overwrite = false;
           if (!fixedName) {
