@@ -52,7 +52,7 @@ import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
  */
 public class EventFrame extends SwarmFrame implements EventObserver {
   private static final Logger LOGGER = LoggerFactory.getLogger(EventFrame.class);
-  private static final String EVENT_URL = "http://earthquake.usgs.gov/fdsnws/event/1/query?eventid=";
+  private static final String EVENT_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?eventid=";
       
   /** default */
   public static final long serialVersionUID = -1;
