@@ -1,3 +1,9 @@
+## Version 2.6.1
+  * write SAC files with correct headers
+  * Use HTTPS for earthquake summary files
+  * Fix error saving Layouts
+  * code cleanup
+  
 ## Version 2.6.0
   * Add option to plot hypocenters from NEIC summary files on map
   * Add event inspector dialog
