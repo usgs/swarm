@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TimeZone;
-import java.util.TreeSet;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -682,10 +681,15 @@ public class WaveClipboardFrame extends SwarmFrame {
 			final File lastPath = new File(swarmConfig.lastPath);
 			chooser.setCurrentDirectory(lastPath);
 
-			if (!fileType.isCollective)
-				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			else
-				chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+			if(fileType.equals(FileType.SEISAN)){
+				// Seisan files are multiplexed, i.e. can contain multiple stations.
+				chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			}else{
+				if (!fileType.isCollective)
+					chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				else
+					chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+			}
 
 			final int result = chooser.showSaveDialog(applicationFrame);
 			if (result == JFileChooser.CANCEL_OPTION)
@@ -701,26 +705,37 @@ public class WaveClipboardFrame extends SwarmFrame {
 
 			if (result == JFileChooser.APPROVE_OPTION) {
 				try {
-					if (f.exists() && !f.isDirectory())
-						return;
-					if (!f.exists())
-						f.mkdir();
-					for (final AbstractWavePanel wvp : waves) {
-						Wave sw = wvp.getWave();
-
-						if (sw != null) {
-							sw = sw.subset(wvp.getStartTime(), wvp.getEndTime());
-							final String date = saveAllDateFormat.format(J2kSec.asDate(sw.getStartTime()));
-							final File dir = new File(f.getPath() + File.separatorChar + date);
-							if (!dir.exists())
-								dir.mkdir();
-
-							swarmConfig.lastPath = f.getParent();
-							final String fn = dir + File.separator + wvp.getChannel().replace(' ', '_')
-									+ fileType.extension;
-							final SeismicDataFile file = SeismicDataFile.getFile(fn);
-							file.putWave(wvp.getChannel(), sw);
-							file.write();
+					if(fileType.equals(FileType.SEISAN)){
+						final SeismicDataFile file = SeismicDataFile.getFile(f.getAbsolutePath(), FileType.SEISAN);
+						for (final AbstractWavePanel wvp : waves) {
+							Wave sw = wvp.getWave();	
+							if (sw != null) {
+								sw = sw.subset(wvp.getStartTime(), wvp.getEndTime());
+								file.putWave(wvp.getChannel(), sw);
+								file.write();
+							}
+						}
+					}else{
+						if (f.exists() && !f.isDirectory())
+							return;
+						if (!f.exists())
+							f.mkdir();
+						for (final AbstractWavePanel wvp : waves) {
+							Wave sw = wvp.getWave();
+	
+							if (sw != null) {
+								sw = sw.subset(wvp.getStartTime(), wvp.getEndTime());
+								final String date = saveAllDateFormat.format(J2kSec.asDate(sw.getStartTime()));
+								final File dir = new File(f.getPath() + File.separatorChar + date);
+								if (!dir.exists())
+									dir.mkdir();
+								swarmConfig.lastPath = f.getParent();
+								final String fn = dir + File.separator + wvp.getChannel().replace(' ', '_')
+										+ fileType.extension;
+								final SeismicDataFile file = SeismicDataFile.getFile(fn);
+								file.putWave(wvp.getChannel(), sw);
+								file.write();
+							}
 						}
 					}
 					swarmConfig.lastPath = f.getPath();
