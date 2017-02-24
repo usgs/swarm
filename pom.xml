@@ -59,6 +59,15 @@
 				<active>false</active>
 			</properties>
 		</developer>
+		<developer>
+			<id>dnorgaard</id>
+			<name>Diana Norgaard</name>
+			<email>dnorgaard@usgs.gov</email>
+			<organization>U.S. Geological Survey, Volcano Disaster Assistance Program</organization>
+			<properties>
+				<active>false</active>
+			</properties>
+		</developer>
 	</developers>
 
 	<contributors>
