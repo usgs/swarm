@@ -2,6 +2,7 @@
   * Write multiplexed Seisan files
   * Use UTC for clipboard "go to time" button
   * Use 6 digits for the fraction portion of frequency status lines
+  * Correct station encoding in SAC headers
   
 ## Version 2.6.1
   * write SAC files with correct headers
