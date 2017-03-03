@@ -550,7 +550,7 @@ public abstract class AbstractWavePanel extends JComponent {
           xi = Math.pow(10.0, xi);
         if (settings.viewType == ViewType.SPECTRA && settings.logPower)
           yi = Math.pow(10.0, yi);
-        status = String.format("%s, Frequency (Hz): %.3f, Power: %.3f", waveInfo, xi, yi);
+        status = String.format("%s, Frequency (Hz): %.6f, Power: %.3f", waveInfo, xi, yi);
       }
     } else {
       status = " ";

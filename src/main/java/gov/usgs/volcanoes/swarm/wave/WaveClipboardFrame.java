@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TimeZone;
-import java.util.TreeSet;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -1065,42 +1065,42 @@ public class WaveClipboardFrame extends SwarmFrame {
 		history.push(t);
 	}
 
-	public void gotoTime(final AbstractWavePanel wvp, String t) {
-		double j2k = Double.NaN;
-		try {
-			if (t.length() == 12)
-				t = t + "30";
-
-			j2k = J2kSec.parse("yyyyMMddHHmmss", t);
-		} catch (final Exception e) {
-			JOptionPane.showMessageDialog(applicationFrame, "Illegal time value.", "Error", JOptionPane.ERROR_MESSAGE);
+	private void gotoTime(final AbstractWavePanel wvp, double j2k) {
+		double dt = 60;
+		if (wvp.getWave() != null) {
+			final double st = wvp.getStartTime();
+			final double et = wvp.getEndTime();
+			final double[] ts = new double[] { st, et };
+			addHistory(wvp, ts);
+			dt = (et - st);
 		}
 
-		if (!Double.isNaN(j2k)) {
-			double dt = 60;
-			if (wvp.getWave() != null) {
-				final double st = wvp.getStartTime();
-				final double et = wvp.getEndTime();
-				final double[] ts = new double[] { st, et };
-				addHistory(wvp, ts);
-				dt = (et - st);
+		final double nst = j2k;
+		final double net = nst + dt;
+
+		fetchNewWave(wvp, nst, net);
+	}
+
+	private void gotoTime(String t) {
+		if (t.length() == 12) {
+			t += "30";
+		}
+
+		try {
+			Double j2k = J2kSec.parse("yyyyMMddHHmmss", t);
+			if (j2k.isNaN()) {
+				throw new ParseException(t, 0);
 			}
 
-			final double tzo = swarmConfig.getTimeZone(wvp.getChannel()).getOffset(System.currentTimeMillis()) / 1000;
-
-			final double nst = j2k - tzo - dt / 2;
-			final double net = nst + dt;
-
-			fetchNewWave(wvp, nst, net);
+			for (final AbstractWavePanel p : selectedSet) {
+				gotoTime(p, j2k);
+			}
+		} catch (final ParseException e) {
+			JOptionPane.showMessageDialog(applicationFrame, "Illegal time value.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
-	public void gotoTime(final String t) {
-		for (final AbstractWavePanel p : selectedSet)
-			gotoTime(p, t);
-	}
-
-	public void scaleTime(final AbstractWavePanel wvp, final double pct) {
+	private void scaleTime(final AbstractWavePanel wvp, final double pct) {
 		final double st = wvp.getStartTime();
 		final double et = wvp.getEndTime();
 		final double[] t = new double[] { st, et };
@@ -1159,6 +1159,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
 	// TODO: This isn't right, this should be a method of waveviewpanel
 	private void fetchNewWave(final AbstractWavePanel wvp, final double nst, final double net) {
+		System.err.println("Fetching new wave " + J2kSec.toDateString(nst) + " -> " + J2kSec.toDateString(net));
 		final SwingWorker worker = new SwingWorker() {
 			@Override
 			public Object construct() {
