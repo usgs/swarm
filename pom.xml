@@ -4,7 +4,7 @@
 
 	<groupId>gov.usgs.volcanoes</groupId>
 	<artifactId>swarm</artifactId>
-	<version>2.6.1</version>
+	<version>2.6.2</version>
 	<packaging>jar</packaging>
 
 	<name>Swarm</name>
@@ -65,7 +65,7 @@
 			<email>dnorgaard@usgs.gov</email>
 			<organization>U.S. Geological Survey, Volcano Disaster Assistance Program</organization>
 			<properties>
-				<active>false</active>
+				<active>true</active>
 			</properties>
 		</developer>
 	</developers>
