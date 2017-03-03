@@ -65,7 +65,7 @@
 			<email>dnorgaard@usgs.gov</email>
 			<organization>U.S. Geological Survey, Volcano Disaster Assistance Program</organization>
 			<properties>
-				<active>false</active>
+				<active>true</active>
 			</properties>
 		</developer>
 	</developers>
