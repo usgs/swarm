@@ -1,3 +1,8 @@
+## Version 2.6.2
+  * Write multiplexed Seisan files
+  * Use UTC for clipboard "go to time" button
+  * Use 6 digits for the fraction portion of frequency status lines
+  
 ## Version 2.6.1
   * write SAC files with correct headers
   * Use HTTPS for earthquake summary files
