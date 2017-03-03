@@ -1066,10 +1066,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 	}
 
 	private void gotoTime(final AbstractWavePanel wvp, double j2k) {
-		if (!Double.isNaN(j2k)) {
-			return;
-		}
-
 		double dt = 60;
 		if (wvp.getWave() != null) {
 			final double st = wvp.getStartTime();
@@ -1079,15 +1075,13 @@ public class WaveClipboardFrame extends SwarmFrame {
 			dt = (et - st);
 		}
 
-		final double tzo = swarmConfig.getTimeZone(wvp.getChannel()).getOffset(System.currentTimeMillis()) / 1000;
-
-		final double nst = j2k - tzo - dt / 2;
+		final double nst = j2k;
 		final double net = nst + dt;
 
 		fetchNewWave(wvp, nst, net);
 	}
 
-	public void gotoTime(String t) {
+	private void gotoTime(String t) {
 		if (t.length() == 12) {
 			t += "30";
 		}
@@ -1106,7 +1100,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 		}
 	}
 
-	public void scaleTime(final AbstractWavePanel wvp, final double pct) {
+	private void scaleTime(final AbstractWavePanel wvp, final double pct) {
 		final double st = wvp.getStartTime();
 		final double et = wvp.getEndTime();
 		final double[] t = new double[] { st, et };
@@ -1165,6 +1159,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
 	// TODO: This isn't right, this should be a method of waveviewpanel
 	private void fetchNewWave(final AbstractWavePanel wvp, final double nst, final double net) {
+		System.err.println("Fetching new wave " + J2kSec.toDateString(nst) + " -> " + J2kSec.toDateString(net));
 		final SwingWorker worker = new SwingWorker() {
 			@Override
 			public Object construct() {
