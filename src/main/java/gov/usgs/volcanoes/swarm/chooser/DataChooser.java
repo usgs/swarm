@@ -93,8 +93,8 @@ import gov.usgs.volcanoes.swarm.wave.SwarmMultiMonitors;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 
 /**
- * TODO: tooltip over data source describes data source 
- * TODO: confirm box on remove source
+ * TODO: tooltip over data source describes data source TODO: refresh data
+ * source TODO: confirm box on remove source
  * 
  * @author Dan Cervelli
  */
@@ -105,11 +105,15 @@ public class DataChooser extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private static final String OPENING_MESSAGE = Messages.getString("DataChooser.treeOpening"); //$NON-NLS-1$
 
-    private static final String[] TIME_VALUES = new String[] {"Now"}; // "Today (Local)",
-                                                                    // "Today (UTC)",
-                                                                    // "Yesterday (Local)",
-                                                                    // "Yesterday (UTC)"
-                                                                    // };
+	private static final String[] TIME_VALUES = new String[] { "Now" }; // "Today
+																		// (Local)",
+																		// "Today
+																		// (UTC)",
+																		// "Yesterday
+																		// (Local)",
+																		// "Yesterday
+																		// (UTC)"
+																		// };
 
 	private static final int MAX_CHANNELS_AT_ONCE = 500;
 	public static final Color LINE_COLOR = new Color(0xac, 0xa8, 0x99);
@@ -122,7 +126,7 @@ public class DataChooser extends JPanel {
 	private JTree dataTree;
 	private JScrollPane treeScrollPane;
 	private JLabel nearestLabel;
-	private JList<String> nearestList;
+	private JList nearestList;
 	private JScrollPane nearestScrollPane;
 	private JSplitPane split;
 	private JPanel nearestPanel;
@@ -137,9 +141,8 @@ public class DataChooser extends JPanel {
 	private JButton closeButton;
 	private JButton collapseButton;
 	private JButton deleteButton;
-	private JButton refreshButton;
 
-	private JComboBox<String> timeBox;
+	private JComboBox timeBox;
 	private JButton heliButton;
 	private JButton clipboardButton;
 	private JButton monitorButton;
@@ -156,9 +159,6 @@ public class DataChooser extends JPanel {
 
 	private DefaultTreeModel model;
 
-	/**
-	 * 
-	 */
 	private DataChooser() {
 		super(new BorderLayout());
 
@@ -181,30 +181,17 @@ public class DataChooser extends JPanel {
 		addServers(SwarmConfig.getInstance().sources);
 	}
 
-	/**
-	 * @return
-	 */
 	public static DataChooser getInstance() {
 		return INSTANCE;
 	}
 
-	/**
-	 * FileSourceListener
-	 *
-	 */
 	private class FileSourceListener implements SeismicDataSourceListener {
 		Map<String, ProgressNode> progressNodes;
 
-		/**
-		 * 
-		 */
 		public FileSourceListener() {
 			progressNodes = new HashMap<String, ProgressNode>();
 		}
 
-		/* (non-Javadoc)
-		 * @see gov.usgs.volcanoes.swarm.data.SeismicDataSourceListener#channelsUpdated()
-		 */
 		public synchronized void channelsUpdated() {
 			List<String> ch = filesNode.getSource().getChannels();
 			if (ch == null && filesNodeInTree) {
@@ -222,9 +209,6 @@ public class DataChooser extends JPanel {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see gov.usgs.volcanoes.swarm.data.SeismicDataSourceListener#channelsProgress(java.lang.String, double)
-		 */
 		public synchronized void channelsProgress(String id, double p) {
 			ProgressNode pn = progressNodes.get(id);
 			boolean ins = false;
@@ -250,26 +234,15 @@ public class DataChooser extends JPanel {
 			dataTree.repaint();
 		}
 
-		/* (non-Javadoc)
-		 * @see gov.usgs.volcanoes.swarm.data.SeismicDataSourceListener#helicorderProgress(java.lang.String, double)
-		 */
 		public void helicorderProgress(String channel, double progress) {
 		}
 	}
 
-	/**
-	 * @param cf
-	 * @param prefix
-	 */
 	public void saveLayout(ConfigFile cf, String prefix) {
 		for (String src : openedSources)
 			cf.put(prefix + ".source", src);
 	}
 
-	/**
-	 * @param cf
-	 * @param listener
-	 */
 	public void processLayout(ConfigFile cf, ActionListener listener) {
 		List<String> srcs = cf.getList("source");
 		for (String src : srcs) {
@@ -284,9 +257,6 @@ public class DataChooser extends JPanel {
 		}
 	}
 
-	/**
-	 * Create tool bar at top of data chooser
-	 */
 	private void createToolBar() {
 		toolBar = SwarmUtil.createToolBar();
 
@@ -296,6 +266,10 @@ public class DataChooser extends JPanel {
 					public void actionPerformed(ActionEvent e) {
 						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
+								// EditDataSourceDialog d = new
+								// EditDataSourceDialog(null);
+								// d.setVisible(true);
+								// String nds = d.getResult();
 								if (src_dialog == null) {
 									src_dialog = new EditDataSourceDialog(null);
 								}
@@ -322,6 +296,10 @@ public class DataChooser extends JPanel {
 							SeismicDataSource sds = servers.get(0).getSource();
 							if (sds.isStoreInUserConfig()) {
 								String selected = servers.get(0).getSource().toConfigString();
+								// EditDataSourceDialog d = new
+								// EditDataSourceDialog(selected);
+								// d.setVisible(true);
+								// String eds = d.getResult();
 								if (src_dialog_selected == null) {
 									src_dialog_selected = new EditDataSourceDialog(selected);
 								} else {
@@ -336,6 +314,8 @@ public class DataChooser extends JPanel {
 									if (newSource == null)
 										return;
 									removeServer(servers.get(0));
+									// String svn = eds.substring(0,
+									// eds.indexOf(";"));
 									String svn = eds.substring(0, eds.indexOf(";"));
 
 									SwarmConfig.getInstance().removeSource(svn);
@@ -371,26 +351,12 @@ public class DataChooser extends JPanel {
 					}
 				});
 		toolBar.add(deleteButton);
-		
-		refreshButton = SwarmUtil.createToolBarButton(Icons.refresh, 
-				Messages.getString("DataChooser.refreshSourceToolTip"), 
-				new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						List<ServerNode> servers = getSelectedServers();
-						if (servers != null) {
-							for (ServerNode server : servers) {
-								dataSourceSelected(server, null);
-							}
-						}
-					}
-				});
-		toolBar.add(refreshButton);
 
 		toolBar.add(Box.createHorizontalGlue());
 
 		closeButton = SwarmUtil.createToolBarButton(Icons.close_view, "Close data chooser", new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				((Swarm)Swarm.getApplicationFrame()).setChooserVisible(false);
+				Swarm.getApplication().setChooserVisible(false);
 				closeButton.getModel().setRollover(false);
 			}
 		});
@@ -399,11 +365,8 @@ public class DataChooser extends JPanel {
 		this.add(toolBar, BorderLayout.NORTH);
 	}
 
-	/**
-	 * @param t
-	 */
 	private void addTimeToBox(String t) {
-		DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) timeBox.getModel();
+		DefaultComboBoxModel model = (DefaultComboBoxModel) timeBox.getModel();
 		for (int i = 0; i < model.getSize(); i++) {
 			if (model.getElementAt(i).equals(t)) {
 				model.removeElementAt(i);
@@ -414,20 +377,14 @@ public class DataChooser extends JPanel {
 		timeBox.setSelectedIndex(1);
 	}
 
-	/**
-	 * @return
-	 */
 	public String[] getUserTimes() {
-		DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) timeBox.getModel();
+		DefaultComboBoxModel model = (DefaultComboBoxModel) timeBox.getModel();
 		String[] result = new String[model.getSize() - 1];
 		for (int i = 1; i < model.getSize(); i++)
 			result[i - 1] = (String) model.getElementAt(i);
 		return result;
 	}
 
-	/**
-	 * @return
-	 */
 	private double getTime() {
 		double j2k = Double.NaN;
 		String t0 = ((JTextField) timeBox.getEditor().getEditorComponent()).getText();
@@ -448,9 +405,6 @@ public class DataChooser extends JPanel {
 		return j2k;
 	}
 
-	/**
-	 * 
-	 */
 	private void createActionBar() {
 		JPanel bottomPanel = new JPanel(new GridLayout(2, 1));
 		JPanel actionPanel = new JPanel(new GridLayout(1, 5));
@@ -607,7 +561,7 @@ public class DataChooser extends JPanel {
 		actionPanel.add(mapButton);
 
 		JPanel timePanel = new JPanel(new BorderLayout());
-		timeBox = new JComboBox<String>(TIME_VALUES);
+		timeBox = new JComboBox(TIME_VALUES);
 		for (String ut : SwarmConfig.getInstance().userTimes) {
 			if (ut.length() > 0)
 				timeBox.addItem(ut);
@@ -660,18 +614,11 @@ public class DataChooser extends JPanel {
 		return servers;
 	}
 
-	/**
-	 * @return
-	 */
 	private List<Pair<ServerNode, String>> getSelections() {
 		TreePath[] paths = dataTree.getSelectionPaths();
 		return getSelectedLeaves(paths);
 	}
 
-	/**
-	 * MakeVisibileTSL
-	 *
-	 */
 	class MakeVisibileTSL implements TreeSelectionListener {
 		public void valueChanged(TreeSelectionEvent e) {
 			if (e.isAddedPath()) {
@@ -681,17 +628,10 @@ public class DataChooser extends JPanel {
 		}
 	}
 
-	/**
-	 * @param tree
-	 */
 	private void collapseTree(JTree tree) {
 		model.reload();
 	}
 
-	/**
-	 * @param node
-	 * @return
-	 */
 	private boolean isOpened(AbstractChooserNode node) {
 		AbstractChooserNode child = (AbstractChooserNode) node.getChildAt(0);
 		if (!(child instanceof MessageNode))
@@ -701,45 +641,24 @@ public class DataChooser extends JPanel {
 		return true;
 	}
 
-	/**
-	 * ExpansionListener
-	 *
-	 */
 	private class ExpansionListener implements TreeExpansionListener {
-				
-		/* (non-Javadoc)
-		 * @see javax.swing.event.TreeExpansionListener#treeExpanded(javax.swing.event.TreeExpansionEvent)
-		 */
 		public void treeExpanded(TreeExpansionEvent event) {
 			TreePath path = event.getPath();
-			int pathCount = path.getPathCount();
-			if ( pathCount == 2) {
+			if (path.getPathCount() == 2) {
 				ServerNode node = (ServerNode) path.getLastPathComponent();
-				if (!isOpened(node)){
+				if (!isOpened(node))
 					dataSourceSelected(node, null);
-				}
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see javax.swing.event.TreeExpansionListener#treeCollapsed(javax.swing.event.TreeExpansionEvent)
-		 */
 		public void treeCollapsed(TreeExpansionEvent event) {
 		}
 	}
 
-	/**
-	 * @param src
-	 * @return
-	 */
 	public boolean isSourceOpened(String src) {
 		return openedSources.contains(src);
 	}
 
-	/**
-	 * @param sds
-	 * @return
-	 */
 	private List<String> openSource(SeismicDataSource sds) {
 		List<String> channels = null;
 		try {
@@ -753,27 +672,16 @@ public class DataChooser extends JPanel {
 		return channels;
 	}
 
-	/**
-	 * DataSourceOpener
-	 *
-	 */
 	private class DataSourceOpener extends SwingWorker {
 		private List<String> channels;
 		private ServerNode source;
 		private ActionListener finishListener;
 
-		/**
-		 * @param src
-		 * @param fl
-		 */
 		public DataSourceOpener(ServerNode src, ActionListener fl) {
 			source = src;
 			finishListener = fl;
 		}
 
-		/**
-		 * 
-		 */
 		private SeismicDataSourceListener listener = new SeismicDataSourceListener() {
 			public void channelsProgress(String id, final double progress) {
 				SwingUtilities.invokeLater(new Runnable() {
@@ -795,22 +703,13 @@ public class DataChooser extends JPanel {
 				});
 			}
 
-			/* (non-Javadoc)
-			 * @see gov.usgs.volcanoes.swarm.data.SeismicDataSourceListener#channelsUpdated()
-			 */
 			public void channelsUpdated() {
 			}
 
-			/* (non-Javadoc)
-			 * @see gov.usgs.volcanoes.swarm.data.SeismicDataSourceListener#helicorderProgress(java.lang.String, double)
-			 */
 			public void helicorderProgress(String channel, double progress) {
 			}
 		};
 
-		/* (non-Javadoc)
-		 * @see gov.usgs.volcanoes.swarm.SwingWorker#construct()
-		 */
 		public Object construct() {
 			SeismicDataSource sds = source.getSource();
 			sds.addListener(listener);
@@ -818,9 +717,6 @@ public class DataChooser extends JPanel {
 			return null;
 		}
 
-		/* (non-Javadoc)
-		 * @see gov.usgs.volcanoes.swarm.SwingWorker#finished()
-		 */
 		public void finished() {
 			int id = OK;
 			if (channels != null) {
@@ -841,18 +737,11 @@ public class DataChooser extends JPanel {
 		}
 	}
 
-	/**
-	 * @param source
-	 * @param listener
-	 */
 	private void dataSourceSelected(final ServerNode source, ActionListener listener) {
 		DataSourceOpener opener = new DataSourceOpener(source, listener);
 		opener.start();
 	}
 
-	/**
-	 * @param node
-	 */
 	public void removeServer(final ServerNode node) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -862,9 +751,6 @@ public class DataChooser extends JPanel {
 		});
 	}
 
-	/**
-	 * @param source
-	 */
 	public void insertServer(final SeismicDataSource source) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -886,9 +772,6 @@ public class DataChooser extends JPanel {
 		});
 	}
 
-	/**
-	 * @param servers
-	 */
 	public void addServers(final Map<String, SeismicDataSource> servers) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -905,9 +788,6 @@ public class DataChooser extends JPanel {
 		});
 	}
 
-	/**
-	 * 
-	 */
 	private void createTree() {
 		rootNode = new RootNode(); // $NON-NLS-1$
 		dataTree = new JTree(rootNode);
@@ -965,9 +845,6 @@ public class DataChooser extends JPanel {
 
 	}
 
-	/**
-	 * @param channel
-	 */
 	public void setNearest(final String channel) {
 		if (channel == null || channel.equals(lastNearest))
 			return;
@@ -980,7 +857,7 @@ public class DataChooser extends JPanel {
 					return;
 				lastNearest = channel;
 				nearestLabel.setText("Distance to " + channel);
-				DefaultListModel<String> model = (DefaultListModel<String>) nearestList.getModel();
+				DefaultListModel model = (DefaultListModel) nearestList.getModel();
 				model.removeAllElements();
 				for (Pair<Double, String> item : nrst)
 					model.addElement(String.format("%s (%.1f km)", item.item2, item.item1 / 1000));
@@ -988,11 +865,8 @@ public class DataChooser extends JPanel {
 		});
 	}
 
-	/**
-	 * 
-	 */
 	private void createNearest() {
-		nearestList = new JList<String>(new DefaultListModel<String>());
+		nearestList = new JList(new DefaultListModel());
 		nearestList.setDragEnabled(true);
 		ToolTipManager.sharedInstance().registerComponent(nearestList);
 
@@ -1006,10 +880,11 @@ public class DataChooser extends JPanel {
 		nearestList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
 				if (!e.getValueIsAdjusting()) {
-					List<String> sels = nearestList.getSelectedValuesList();
-					if (sels.size() > 0)
+					Object[] sels = nearestList.getSelectedValues();
+					if (sels.length > 0)
 						dataTree.clearSelection();
-					for (String ch : sels) {
+					for (Object o : sels) {
+						String ch = (String) o;
 						ch = ch.substring(0, ch.indexOf("(")).trim();
 						TreePath tp = nearestPaths.get(ch);
 						dataTree.addSelectionPath(tp);
@@ -1125,10 +1000,6 @@ public class DataChooser extends JPanel {
 		});
 	}
 
-	/**
-	 * @param gn
-	 * @return
-	 */
 	private Set<String> getGroupChannels(GroupNode gn) {
 		HashSet<String> channels = new HashSet<String>();
 		for (Enumeration<?> e = gn.children(); e.hasMoreElements();) {
@@ -1142,10 +1013,6 @@ public class DataChooser extends JPanel {
 		return channels;
 	}
 
-	/**
-	 * @param paths
-	 * @return
-	 */
 	private List<Pair<ServerNode, String>> getSelectedLeaves(TreePath[] paths) {
 		if (paths == null)
 			return null;
@@ -1179,14 +1046,10 @@ public class DataChooser extends JPanel {
 		return selections;
 	}
 
-	/**
-	 * ListCellRenderer
-	 *
-	 */
 	private class ListCellRenderer extends DefaultListCellRenderer {
 		private static final long serialVersionUID = 1L;
 
-		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
+		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
 				boolean hasFocus) {
 			String ch = (String) value;
 			ch = ch.substring(0, ch.indexOf("(")).trim();
@@ -1213,10 +1076,6 @@ public class DataChooser extends JPanel {
 		}
 	}
 
-	/**
-	 * CellRenderer
-	 *
-	 */
 	private class CellRenderer extends DefaultTreeCellRenderer {
 		private static final long serialVersionUID = 1L;
 
@@ -1254,9 +1113,6 @@ public class DataChooser extends JPanel {
 		}
 	}
 
-	/**
-	 * @param config
-	 */
 	public void updateConfig(SwarmConfig config) {
 		config.nearestDividerLocation = getDividerLocation();
 		config.userTimes = getUserTimes();
