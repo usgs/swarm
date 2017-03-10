@@ -628,14 +628,24 @@ public class DataChooser extends JPanel {
 		add(bottomPanel, BorderLayout.SOUTH);
 	}
 
+	/**
+	 * @return
+	 */
 	public int getDividerLocation() {
 		return split.getDividerLocation();
 	}
 
+	/**
+	 * @param dl
+	 */
 	public void setDividerLocation(int dl) {
 		split.setDividerLocation(dl);
 	}
 
+	/**
+	 * @param svr
+	 * @return
+	 */
 	private ServerNode getServerNode(String svr) {
 		for (int i = 0; i < rootNode.getChildCount(); i++) {
 			ServerNode node = (ServerNode) rootNode.getChildAt(i);
@@ -646,6 +656,9 @@ public class DataChooser extends JPanel {
 		return null;
 	}
 
+	/**
+	 * @return
+	 */
 	private List<ServerNode> getSelectedServers() {
 		TreePath[] paths = dataTree.getSelectionPaths();
 		List<ServerNode> servers = new ArrayList<ServerNode>();
@@ -799,6 +812,7 @@ public class DataChooser extends JPanel {
 			 * @see gov.usgs.volcanoes.swarm.data.SeismicDataSourceListener#channelsUpdated()
 			 */
 			public void channelsUpdated() {
+				
 			}
 
 			/* (non-Javadoc)
