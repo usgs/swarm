@@ -30,7 +30,6 @@ public class Icons {
     public static final ImageIcon minimize = getIcon("images/minimize.png");
     public static final ImageIcon monitor = getIcon("images/monitor.gif");
     public static final ImageIcon open = getIcon("images/wave_folder.gif");
-    public static final ImageIcon refresh = getIcon("images/refresh.gif");
     public static final ImageIcon right = getIcon("images/right.gif");
     public static final ImageIcon save = getIcon("images/save.gif");
     public static final ImageIcon saveall = getIcon("images/saveall.gif");
