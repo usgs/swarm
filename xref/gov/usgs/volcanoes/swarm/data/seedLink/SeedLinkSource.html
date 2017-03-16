@@ -11,7 +11,7 @@
 <a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> gov.usgs.plot.data.HelicorderData;
 <a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> gov.usgs.plot.data.RSAMData;
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> gov.usgs.plot.data.Wave;
-<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> gov.usgs.util.Util;
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.core.time.J2kSec;
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.ChannelUtil;
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.data.CachedDataSource;
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.data.DataSourceType;
@@ -73,8 +73,8 @@
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  		<strong class="jxr_keyword">if</strong> (obj instanceof Wave)
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  		{
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  			Wave wave = (Wave) obj;
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  			<strong class="jxr_keyword">return</strong> <span class="jxr_string">"Wave(s="</span> + Util.j2KToDateString(wave.getStartTime())
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  					+ <span class="jxr_string">", e="</span> + Util.j2KToDateString(wave.getEndTime())
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  			<strong class="jxr_keyword">return</strong> <span class="jxr_string">"Wave(s="</span> + J2kSec.toDateString(wave.getStartTime())
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  					+ <span class="jxr_string">", e="</span> + J2kSec.toDateString(wave.getEndTime())
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  					+ <span class="jxr_string">", sr="</span> + wave.getSamplingRate() + <span class="jxr_string">", n="</span>
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  					+ wave.buffer.length + <span class="jxr_string">")"</span>;
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  		}
@@ -82,8 +82,8 @@
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>  		{
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  			HelicorderData hd = (HelicorderData) obj;
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  			<strong class="jxr_keyword">return</strong> <span class="jxr_string">"HelicorderData(s="</span>
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  					+ Util.j2KToDateString(hd.getStartTime()) + <span class="jxr_string">", e="</span>
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  					+ Util.j2KToDateString(hd.getEndTime()) + <span class="jxr_string">")"</span>;
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  					+ J2kSec.toDateString(hd.getStartTime()) + <span class="jxr_string">", e="</span>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  					+ J2kSec.toDateString(hd.getEndTime()) + <span class="jxr_string">")"</span>;
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  		}
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  		<strong class="jxr_keyword">else</strong>
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  		{
@@ -276,8 +276,8 @@
 <a class="jxr_linenumber" name="L268" href="#L268">268</a> 			logger.log(
 <a class="jxr_linenumber" name="L269" href="#L269">269</a> 					level,
 <a class="jxr_linenumber" name="L270" href="#L270">270</a> 					logPrefixText + <span class="jxr_string">"getHelicorder(scnl="</span> + scnl + <span class="jxr_string">", start="</span>
-<a class="jxr_linenumber" name="L271" href="#L271">271</a> 							+ Util.j2KToDateString(t1) + <span class="jxr_string">", end="</span>
-<a class="jxr_linenumber" name="L272" href="#L272">272</a> 							+ Util.j2KToDateString(t2) + <span class="jxr_string">")\nDATA="</span>
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> 							+ J2kSec.toDateString(t1) + <span class="jxr_string">", end="</span>
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> 							+ J2kSec.toDateString(t2) + <span class="jxr_string">")\nDATA="</span>
 <a class="jxr_linenumber" name="L273" href="#L273">273</a> 							+ (hd == <strong class="jxr_keyword">null</strong> ? <span class="jxr_string">"NONE"</span> : toString(hd)));
 <a class="jxr_linenumber" name="L274" href="#L274">274</a> 		}
 <a class="jxr_linenumber" name="L275" href="#L275">275</a> 		<strong class="jxr_keyword">return</strong> hd;
@@ -312,7 +312,7 @@
 <a class="jxr_linenumber" name="L304" href="#L304">304</a> 		<strong class="jxr_keyword">if</strong> (wave == <strong class="jxr_keyword">null</strong>)
 <a class="jxr_linenumber" name="L305" href="#L305">305</a> 		{
 <a class="jxr_linenumber" name="L306" href="#L306">306</a> 			<em class="jxr_comment">// remove all data in the future to avoid blocking</em>
-<a class="jxr_linenumber" name="L307" href="#L307">307</a> 			<strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong> now = Util.nowJ2K();
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> 			<strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong> now = J2kSec.now();
 <a class="jxr_linenumber" name="L308" href="#L308">308</a> 			<strong class="jxr_keyword">if</strong> (t1 &lt;= now)
 <a class="jxr_linenumber" name="L309" href="#L309">309</a> 			{
 <a class="jxr_linenumber" name="L310" href="#L310">310</a> 				<strong class="jxr_keyword">final</strong> <a href="../../../../../../gov/usgs/volcanoes/swarm/data/seedLink/SeedLinkClient.html">SeedLinkClient</a> client = createClient();
@@ -326,8 +326,8 @@
 <a class="jxr_linenumber" name="L318" href="#L318">318</a> 			logger.log(
 <a class="jxr_linenumber" name="L319" href="#L319">319</a> 					level,
 <a class="jxr_linenumber" name="L320" href="#L320">320</a> 					logPrefixText + <span class="jxr_string">"getWave(scnl="</span> + scnl + <span class="jxr_string">", start="</span>
-<a class="jxr_linenumber" name="L321" href="#L321">321</a> 							+ Util.j2KToDateString(t1) + <span class="jxr_string">", end="</span>
-<a class="jxr_linenumber" name="L322" href="#L322">322</a> 							+ Util.j2KToDateString(t2) + <span class="jxr_string">")\nDATA="</span>
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> 							+ J2kSec.toDateString(t1) + <span class="jxr_string">", end="</span>
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> 							+ J2kSec.toDateString(t2) + <span class="jxr_string">")\nDATA="</span>
 <a class="jxr_linenumber" name="L323" href="#L323">323</a> 							+ (wave == <strong class="jxr_keyword">null</strong> ? <span class="jxr_string">"NONE"</span> : toString(wave)));
 <a class="jxr_linenumber" name="L324" href="#L324">324</a> 		}
 <a class="jxr_linenumber" name="L325" href="#L325">325</a> 		<strong class="jxr_keyword">return</strong> wave;
@@ -391,6 +391,6 @@
 <a class="jxr_linenumber" name="L383" href="#L383">383</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2015. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2017. All rights reserved.</div>
 </body>
 </html>

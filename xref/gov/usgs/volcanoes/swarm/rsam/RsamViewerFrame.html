@@ -8,32 +8,32 @@
 <div id="overview"><a href="../../../../../../apidocs/gov/usgs/volcanoes/swarm/rsam/RsamViewerFrame.html">View Javadoc</a></div><pre>
 <a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> gov.usgs.volcanoes.swarm.rsam;
 <a class="jxr_linenumber" name="L2" href="#L2">2</a>   
-<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> gov.usgs.plot.data.RSAMData;
-<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> gov.usgs.util.CurrentTime;
-<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> gov.usgs.util.Util;
-<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.Icons;
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.SwarmUtil;
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.Throbber;
-<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.chooser.DataChooser;
-<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.data.RsamSource;
-<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>  
-<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">import</strong> java.awt.BorderLayout;
-<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <strong class="jxr_keyword">import</strong> java.awt.event.ActionEvent;
-<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> java.awt.event.ActionListener;
-<a class="jxr_linenumber" name="L18" href="#L18">18</a>  
-<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> javax.swing.BorderFactory;
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> javax.swing.Box;
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> javax.swing.JButton;
-<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> javax.swing.JInternalFrame;
-<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> javax.swing.JPanel;
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> javax.swing.JToolBar;
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> javax.swing.border.Border;
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> javax.swing.border.LineBorder;
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> javax.swing.event.InternalFrameAdapter;
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> javax.swing.event.InternalFrameEvent;
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> java.awt.BorderLayout;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> java.awt.event.ActionEvent;
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> java.awt.event.ActionListener;
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> javax.swing.BorderFactory;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> javax.swing.Box;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> javax.swing.JButton;
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> javax.swing.JInternalFrame;
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> javax.swing.JPanel;
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> javax.swing.JToolBar;
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> javax.swing.border.Border;
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <strong class="jxr_keyword">import</strong> javax.swing.border.LineBorder;
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">import</strong> javax.swing.event.InternalFrameAdapter;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <strong class="jxr_keyword">import</strong> javax.swing.event.InternalFrameEvent;
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">import</strong> gov.usgs.plot.data.RSAMData;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.core.time.J2kSec;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.core.util.UiUtils;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.Icons;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.SwarmUtil;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.Throbber;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.chooser.DataChooser;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.data.RsamSource;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  <em class="jxr_javadoccomment"> * </em>
@@ -98,7 +98,7 @@
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>                              settings.setSpanLength(SPANS_S[spanIndex - 1]);
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>                      }
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>                  });
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>          Util.mapKeyStrokeToButton(<strong class="jxr_keyword">this</strong>, <span class="jxr_string">"alt LEFT"</span>, <span class="jxr_string">"compx"</span>, compXButton);
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>          UiUtils.mapKeyStrokeToButton(<strong class="jxr_keyword">this</strong>, <span class="jxr_string">"alt LEFT"</span>, <span class="jxr_string">"compx"</span>, compXButton);
 <a class="jxr_linenumber" name="L94" href="#L94">94</a>          toolBar.add(compXButton);
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>          JButton expXButton = SwarmUtil.createToolBarButton(Icons.xplus, <span class="jxr_string">"Expand time axis (Alt-right arrow)"</span>,
@@ -108,7 +108,7 @@
 <a class="jxr_linenumber" name="L100" href="#L100">100</a>                             settings.setSpanLength(SPANS_S[spanIndex + 1]);
 <a class="jxr_linenumber" name="L101" href="#L101">101</a>                     }
 <a class="jxr_linenumber" name="L102" href="#L102">102</a>                 });
-<a class="jxr_linenumber" name="L103" href="#L103">103</a>         Util.mapKeyStrokeToButton(<strong class="jxr_keyword">this</strong>, <span class="jxr_string">"alt RIGHT"</span>, <span class="jxr_string">"expx"</span>, expXButton);
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>         UiUtils.mapKeyStrokeToButton(<strong class="jxr_keyword">this</strong>, <span class="jxr_string">"alt RIGHT"</span>, <span class="jxr_string">"expx"</span>, expXButton);
 <a class="jxr_linenumber" name="L104" href="#L104">104</a>         toolBar.add(expXButton);
 <a class="jxr_linenumber" name="L105" href="#L105">105</a> 
 <a class="jxr_linenumber" name="L106" href="#L106">106</a>         toolBar.addSeparator();
@@ -150,7 +150,7 @@
 <a class="jxr_linenumber" name="L142" href="#L142">142</a>         throbber.increment();
 <a class="jxr_linenumber" name="L143" href="#L143">143</a>         
 <a class="jxr_linenumber" name="L144" href="#L144">144</a>         viewPanel.setWorking(<strong class="jxr_keyword">true</strong>);
-<a class="jxr_linenumber" name="L145" href="#L145">145</a>         <strong class="jxr_keyword">double</strong> now = CurrentTime.getInstance().nowJ2K();
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>         <strong class="jxr_keyword">double</strong> now = J2kSec.now();
 <a class="jxr_linenumber" name="L146" href="#L146">146</a>         <strong class="jxr_keyword">double</strong> st = now - settings.getSpanLength();
 <a class="jxr_linenumber" name="L147" href="#L147">147</a> 
 <a class="jxr_linenumber" name="L148" href="#L148">148</a>         <strong class="jxr_keyword">int</strong> period;
@@ -200,6 +200,6 @@
 <a class="jxr_linenumber" name="L192" href="#L192">192</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2015. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2017. All rights reserved.</div>
 </body>
 </html>

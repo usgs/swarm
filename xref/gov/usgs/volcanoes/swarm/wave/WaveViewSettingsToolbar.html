@@ -8,7 +8,7 @@
 <div id="overview"><a href="../../../../../../apidocs/gov/usgs/volcanoes/swarm/wave/WaveViewSettingsToolbar.html">View Javadoc</a></div><pre>
 <a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> gov.usgs.volcanoes.swarm.wave;
 <a class="jxr_linenumber" name="L2" href="#L2">2</a>   
-<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> gov.usgs.util.Util;
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.core.util.UiUtils;
 <a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.Icons;
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.SwarmUtil;
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
@@ -69,7 +69,7 @@
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  						}
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  					}
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  				});
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>  		Util.mapKeyStrokeToButton(keyComp, <span class="jxr_string">"shift SLASH"</span>, <span class="jxr_string">"settings"</span>, waveSet);
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  		UiUtils.mapKeyStrokeToButton(keyComp, <span class="jxr_string">"shift SLASH"</span>, <span class="jxr_string">"settings"</span>, waveSet);
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  		dest.add(waveSet);
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  		
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  		waveToggle = SwarmUtil.createToolBarToggleButton(
@@ -83,8 +83,8 @@
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  							settings.setType(ViewType.WAVE);
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  					}
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  				});
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		Util.mapKeyStrokeToButton(keyComp, <span class="jxr_string">"COMMA"</span>, <span class="jxr_string">"wave1"</span>, waveToggle);
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		Util.mapKeyStrokeToButton(keyComp, <span class="jxr_string">"W"</span>, <span class="jxr_string">"wave2"</span>, waveToggle);
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		UiUtils.mapKeyStrokeToButton(keyComp, <span class="jxr_string">"COMMA"</span>, <span class="jxr_string">"wave1"</span>, waveToggle);
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		UiUtils.mapKeyStrokeToButton(keyComp, <span class="jxr_string">"W"</span>, <span class="jxr_string">"wave2"</span>, waveToggle);
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  		dest.add(waveToggle);
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  		
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  		spectraToggle = SwarmUtil.createToolBarToggleButton(
@@ -98,8 +98,8 @@
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>  							settings.setType(ViewType.SPECTRA);
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  					}
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>  				});
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  		Util.mapKeyStrokeToButton(keyComp, <span class="jxr_string">"PERIOD"</span>, <span class="jxr_string">"spectra1"</span>, spectraToggle);
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  		Util.mapKeyStrokeToButton(keyComp, <span class="jxr_string">"S"</span>, <span class="jxr_string">"spectra2"</span>, spectraToggle);
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  		UiUtils.mapKeyStrokeToButton(keyComp, <span class="jxr_string">"PERIOD"</span>, <span class="jxr_string">"spectra1"</span>, spectraToggle);
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  		UiUtils.mapKeyStrokeToButton(keyComp, <span class="jxr_string">"S"</span>, <span class="jxr_string">"spectra2"</span>, spectraToggle);
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  		dest.add(spectraToggle);
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>  		
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>  		spectrogramToggle = SwarmUtil.createToolBarToggleButton(
@@ -113,8 +113,8 @@
 <a class="jxr_linenumber" name="L105" href="#L105">105</a> 							settings.setType(ViewType.SPECTROGRAM);
 <a class="jxr_linenumber" name="L106" href="#L106">106</a> 					}
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> 				});
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		Util.mapKeyStrokeToButton(keyComp, <span class="jxr_string">"SLASH"</span>, <span class="jxr_string">"spectrogram1"</span>, spectrogramToggle);
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 		Util.mapKeyStrokeToButton(keyComp, <span class="jxr_string">"G"</span>, <span class="jxr_string">"spectrogram2"</span>, spectrogramToggle);
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		UiUtils.mapKeyStrokeToButton(keyComp, <span class="jxr_string">"SLASH"</span>, <span class="jxr_string">"spectrogram1"</span>, spectrogramToggle);
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 		UiUtils.mapKeyStrokeToButton(keyComp, <span class="jxr_string">"G"</span>, <span class="jxr_string">"spectrogram2"</span>, spectrogramToggle);
 <a class="jxr_linenumber" name="L110" href="#L110">110</a> 		dest.add(spectrogramToggle);
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 		
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 		keyComp.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(<span class="jxr_string">"L"</span>), <span class="jxr_string">"cycleLogSettings"</span>);
@@ -240,6 +240,6 @@
 <a class="jxr_linenumber" name="L232" href="#L232">232</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2015. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2017. All rights reserved.</div>
 </body>
 </html>

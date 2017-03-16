@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>WaveViewToolBar xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
+</head>
+<body>
+<div id="overview"><a href="../../../../../../apidocs/gov/usgs/volcanoes/swarm/wave/WaveViewToolBar.html">View Javadoc</a></div><pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> gov.usgs.volcanoes.swarm.wave;
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> java.awt.event.ActionEvent;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> java.awt.event.ActionListener;
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> javax.swing.AbstractAction;
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> javax.swing.ButtonGroup;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> javax.swing.JButton;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> javax.swing.JComponent;
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> javax.swing.JToggleButton;
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> javax.swing.JToolBar;
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> javax.swing.KeyStroke;
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.core.ui.UiUtils;
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.Icons;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.SwarmUtil;
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../gov/usgs/volcanoes/swarm/wave/WaveViewToolBar.html">WaveViewToolBar</a> {
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>    <strong class="jxr_keyword">private</strong> JButton waveSet;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>    <strong class="jxr_keyword">private</strong> JToggleButton waveToggle;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>    <strong class="jxr_keyword">private</strong> JToggleButton spectraToggle;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>    <strong class="jxr_keyword">private</strong> JToggleButton spectrogramToggle;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>    <strong class="jxr_keyword">private</strong> ButtonGroup waveTypes;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>    <strong class="jxr_keyword">private</strong> <a href="../../../../../gov/usgs/volcanoes/swarm/wave/WaveViewToolBarListener.html">WaveViewToolBarListener</a> listener;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>    <strong class="jxr_keyword">public</strong> <a href="../../../../../gov/usgs/volcanoes/swarm/wave/WaveViewToolBar.html">WaveViewToolBar</a>(<a href="../../../../../gov/usgs/volcanoes/swarm/wave/WaveViewSettings.html">WaveViewSettings</a> s, JToolBar dest, <a href="../../../../../gov/usgs/volcanoes/swarm/wave/WaveViewToolBarListener.html">WaveViewToolBarListener</a> listener) {
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>      <strong class="jxr_keyword">this</strong>.listener = listener;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>      createUI(dest);
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>    }
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> createUI(JToolBar dest) {
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>      waveSet = SwarmUtil.createToolBarButton(Icons.wavesettings, <span class="jxr_string">"Wave view settings (?)"</span>,
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>          <strong class="jxr_keyword">new</strong> ActionListener() {
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>            <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> actionPerformed(ActionEvent e) {
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>              listener.displaySettingsDialog();
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>            }
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>          });
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>      listener.mapKeyStroke(<span class="jxr_string">"shift SLASH"</span>, <span class="jxr_string">"settings"</span>, waveSet);
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>      dest.add(waveSet);
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>      waveToggle =
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>          SwarmUtil.createToolBarToggleButton(Icons.wave, <span class="jxr_string">"Wave view (W or ,)"</span>, <strong class="jxr_keyword">new</strong> ActionListener() {
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>            <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> actionPerformed(ActionEvent e) {
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>              listener.setType(ViewType.WAVE);
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>            }
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>          });
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>      listener.mapKeyStroke(<span class="jxr_string">"COMMA"</span>, <span class="jxr_string">"wave1"</span>, waveToggle);
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>      listener.mapKeyStroke(<span class="jxr_string">"W"</span>, <span class="jxr_string">"wave2"</span>, waveToggle);
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>      dest.add(waveToggle);
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>      spectraToggle = SwarmUtil.createToolBarToggleButton(Icons.spectra, <span class="jxr_string">"Spectra view (S or .)"</span>,
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>          <strong class="jxr_keyword">new</strong> ActionListener() {
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>            <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> actionPerformed(ActionEvent e) {
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>              listener.setType(ViewType.SPECTRA);
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>            }
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>          });
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>      listener.mapKeyStroke(<span class="jxr_string">"PERIOD"</span>, <span class="jxr_string">"spectra1"</span>, spectraToggle);
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>      listener.mapKeyStroke(<span class="jxr_string">"S"</span>, <span class="jxr_string">"spectra2"</span>, spectraToggle);
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>      dest.add(spectraToggle);
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>      spectrogramToggle = SwarmUtil.createToolBarToggleButton(Icons.spectrogram,
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>          <span class="jxr_string">"Spectrogram view (G or /)"</span>, <strong class="jxr_keyword">new</strong> ActionListener() {
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>            <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> actionPerformed(ActionEvent e) {
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>              listener.setType(ViewType.SPECTROGRAM);
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>            }
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>          });
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>      listener.mapKeyStroke(<span class="jxr_string">"SLASH"</span>, <span class="jxr_string">"spectrogram1"</span>, spectrogramToggle);
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>      listener.mapKeyStroke(<span class="jxr_string">"G"</span>, <span class="jxr_string">"spectrogram2"</span>, spectrogramToggle);
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>      dest.add(spectrogramToggle);
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>      waveTypes = <strong class="jxr_keyword">new</strong> ButtonGroup();
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>      waveTypes.add(waveToggle);
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>      waveTypes.add(spectraToggle);
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>      waveTypes.add(spectrogramToggle);
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>    }
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setEnabled(<strong class="jxr_keyword">boolean</strong> enable) {
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>      waveSet.setEnabled(enable);
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>      waveToggle.setEnabled(enable);
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>      spectraToggle.setEnabled(enable);
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>      spectrogramToggle.setEnabled(enable);
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>    }
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  }
+</pre>
+<hr/>
+<div id="footer">Copyright &#169; 2017. All rights reserved.</div>
+</body>
+</html>

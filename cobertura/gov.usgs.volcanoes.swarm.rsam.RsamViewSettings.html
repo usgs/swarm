@@ -28,9 +28,9 @@
 <tr>  <td class="numLine">&nbsp;4</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> gov.usgs.math.Butterworth;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;5</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> gov.usgs.util.ConfigFile;</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> gov.usgs.volcanoes.core.configfile.ConfigFile;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;6</td>  <td class="nbHits">&nbsp;</td>
-  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> gov.usgs.util.Util;</pre></td></tr>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> gov.usgs.volcanoes.core.util.StringUtils;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;7</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;8</td>  <td class="nbHits">&nbsp;</td>
@@ -184,24 +184,24 @@
 <tr>  <td class="numLine">&nbsp;109</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;    <span class="keyword">public</span> <span class="keyword">void</span> set(ConfigFile cf) {</pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;110</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        viewType = ViewType.valueOf(cf.getString(<span class="string">"viewType"</span>));</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;111</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        valuesPeriodS = Util.stringToInt(cf.getString(<span class="string">"valuesPeriod"</span>), DEFAULT_RSAM_VIEW_SETTINGS.valuesPeriodS);</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;112</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        countsPeriodS = Util.stringToInt(cf.getString(<span class="string">"countsPeriod"</span>), DEFAULT_RSAM_VIEW_SETTINGS.countsPeriodS);</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;113</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        detrend = Util.stringToBoolean(cf.getString(<span class="string">"detrend"</span>), DEFAULT_RSAM_VIEW_SETTINGS.detrend);</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;114</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        runningMedian = Util.stringToBoolean(cf.getString(<span class="string">"runningMedian"</span>), DEFAULT_RSAM_VIEW_SETTINGS.runningMedian);</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;115</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        runningMedianPeriodS = Util.stringToDouble(cf.getString(<span class="string">"runningMedianPeriod"</span>),</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;111</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        valuesPeriodS = StringUtils.stringToInt(cf.getString(<span class="string">"valuesPeriod"</span>), DEFAULT_RSAM_VIEW_SETTINGS.valuesPeriodS);</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;112</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        countsPeriodS = StringUtils.stringToInt(cf.getString(<span class="string">"countsPeriod"</span>), DEFAULT_RSAM_VIEW_SETTINGS.countsPeriodS);</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;113</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        detrend = StringUtils.stringToBoolean(cf.getString(<span class="string">"detrend"</span>), DEFAULT_RSAM_VIEW_SETTINGS.detrend);</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;114</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        runningMedian = StringUtils.stringToBoolean(cf.getString(<span class="string">"runningMedian"</span>), DEFAULT_RSAM_VIEW_SETTINGS.runningMedian);</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;115</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        runningMedianPeriodS = StringUtils.stringToDouble(cf.getString(<span class="string">"runningMedianPeriod"</span>),</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;116</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                DEFAULT_RSAM_VIEW_SETTINGS.runningMedianPeriodS);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;117</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        runningMean = Util.stringToBoolean(cf.getString(<span class="string">"runningMean"</span>), DEFAULT_RSAM_VIEW_SETTINGS.runningMean);</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;118</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        runningMeanPeriodS = Util.stringToDouble(cf.getString(<span class="string">"runningMeanPeriod"</span>),</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;117</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        runningMean = StringUtils.stringToBoolean(cf.getString(<span class="string">"runningMean"</span>), DEFAULT_RSAM_VIEW_SETTINGS.runningMean);</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;118</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        runningMeanPeriodS = StringUtils.stringToDouble(cf.getString(<span class="string">"runningMeanPeriod"</span>),</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;119</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                DEFAULT_RSAM_VIEW_SETTINGS.runningMeanPeriodS);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;120</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        eventRatio = Util.stringToDouble(cf.getString(<span class="string">"eventRatio"</span>), DEFAULT_RSAM_VIEW_SETTINGS.eventRatio);</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;121</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        eventThreshold = Util.stringToInt(cf.getString(<span class="string">"eventThreshold"</span>), DEFAULT_RSAM_VIEW_SETTINGS.eventThreshold);</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;122</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        eventMaxLengthS = Util.stringToDouble(cf.getString(<span class="string">"eventMaxLength"</span>), DEFAULT_RSAM_VIEW_SETTINGS.eventMaxLengthS);</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;120</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        eventRatio = StringUtils.stringToDouble(cf.getString(<span class="string">"eventRatio"</span>), DEFAULT_RSAM_VIEW_SETTINGS.eventRatio);</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;121</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        eventThreshold = StringUtils.stringToInt(cf.getString(<span class="string">"eventThreshold"</span>), DEFAULT_RSAM_VIEW_SETTINGS.eventThreshold);</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;122</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        eventMaxLengthS = StringUtils.stringToDouble(cf.getString(<span class="string">"eventMaxLength"</span>), DEFAULT_RSAM_VIEW_SETTINGS.eventMaxLengthS);</span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;123</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        binSize = BinSize.fromString(cf.getString(<span class="string">"binSize"</span>));</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;124</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        autoScale = Util.stringToBoolean(cf.getString(<span class="string">"autoScale"</span>), DEFAULT_RSAM_VIEW_SETTINGS.autoScale);</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;125</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        scaleMax = Util.stringToInt(cf.getString(<span class="string">"scaleMax"</span>), DEFAULT_RSAM_VIEW_SETTINGS.scaleMax);</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;126</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        scaleMin = Util.stringToInt(cf.getString(<span class="string">"scaleMin"</span>), DEFAULT_RSAM_VIEW_SETTINGS.scaleMin);</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;124</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        autoScale = StringUtils.stringToBoolean(cf.getString(<span class="string">"autoScale"</span>), DEFAULT_RSAM_VIEW_SETTINGS.autoScale);</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;125</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        scaleMax = StringUtils.stringToInt(cf.getString(<span class="string">"scaleMax"</span>), DEFAULT_RSAM_VIEW_SETTINGS.scaleMax);</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;126</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;        scaleMin = StringUtils.stringToInt(cf.getString(<span class="string">"scaleMin"</span>), DEFAULT_RSAM_VIEW_SETTINGS.scaleMin);</span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;127</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;    }</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;128</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
@@ -299,6 +299,6 @@
   <td class="src"><pre class="src">&nbsp;}</pre></td></tr>
 </table>
 
-<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 10/23/15 10:00 AM.</div>
+<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 3/16/17 3:13 PM.</div>
 </body>
 </html>
