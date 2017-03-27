@@ -1,20 +1,16 @@
 package gov.usgs.volcanoes.swarm.wave;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.AbstractAction;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
-import javax.swing.KeyStroke;
-
-import gov.usgs.volcanoes.core.ui.UiUtils;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
 
 public class WaveViewToolBar {
   private JButton waveSet;
@@ -26,10 +22,14 @@ public class WaveViewToolBar {
 
   public WaveViewToolBar(WaveViewSettings s, JToolBar dest, WaveViewToolBarListener listener) {
     this.listener = listener;
-    createUI(dest);
+    createUi(dest);
   }
 
-  public void createUI(JToolBar dest) {
+  /**
+   * Create wave view tool bar section of user interface.
+   * @param dest  tool bar; destination.
+   */
+  public void createUi(JToolBar dest) {
     waveSet = SwarmUtil.createToolBarButton(Icons.wavesettings, "Wave view settings (?)",
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
@@ -75,6 +75,10 @@ public class WaveViewToolBar {
     waveTypes.add(spectrogramToggle);
   }
 
+  /**
+   * Set enabled flag for the various toggles.
+   * @param enable true if enabled; false otherwise.
+   */
   public void setEnabled(boolean enable) {
     waveSet.setEnabled(enable);
     waveToggle.setEnabled(enable);

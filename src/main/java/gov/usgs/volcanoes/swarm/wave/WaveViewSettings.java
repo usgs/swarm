@@ -9,7 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- *
+ * Wave View Settings.
+ * 
  * @author Dan Cervelli
  */
 
@@ -25,13 +26,20 @@ public class WaveViewSettings {
       code = c;
     }
 
+    /**
+     * Get view type from String.
+     * 
+     * @param c S for Spectra, G for Specgrogram. Returns Wave otherwise.
+     * @return view type enum (e.g. Spectra, Spectrogram, Wave)
+     */
     public static ViewType fromString(String c) {
-      if (c.equals("S"))
+      if (c.equals("S")) {
         return SPECTRA;
-      else if (c.equals("G"))
+      } else if (c.equals("G")) {
         return SPECTROGRAM;
-      else
+      } else {
         return WAVE;
+      }
     }
   }
 
@@ -92,8 +100,9 @@ public class WaveViewSettings {
     candidateNames.add(DEFAULTS_FILENAME);
     candidateNames.add(System.getProperty("user.home") + File.separatorChar + DEFAULTS_FILENAME);
     String defaultsFile = ConfigFile.findConfig(candidateNames);
-    if (defaultsFile == null)
+    if (defaultsFile == null) {
       defaultsFile = DEFAULTS_FILENAME;
+    }
 
     ConfigFile cf = new ConfigFile(defaultsFile);
     if (cf.wasSuccessfullyRead()) {
@@ -105,17 +114,25 @@ public class WaveViewSettings {
     }
   }
 
+  /**
+   * Default Constructor.
+   */
   public WaveViewSettings() {
     filter = new Butterworth();
     view = null;
-    if (DEFAULT_WAVE_VIEW_SETTINGS != null)
+    if (DEFAULT_WAVE_VIEW_SETTINGS != null) {
       copy(DEFAULT_WAVE_VIEW_SETTINGS);
+    }
   }
 
   public WaveViewSettings(WaveViewSettings s) {
     copy(s);
   }
 
+  /**
+   * Deep copy WaveViewSettings.
+   * @param s WaveViewSettings.
+   */
   public void copy(WaveViewSettings s) {
     viewType = s.viewType;
     removeBias = s.removeBias;
@@ -140,6 +157,10 @@ public class WaveViewSettings {
     filterOn = s.filterOn;
   }
 
+  /**
+   * Set configuration.
+   * @param cf Configuration file.
+   */
   public void set(ConfigFile cf) {
     viewType = ViewType.fromString(cf.getString("viewType"));
     filter.set(cf.getSubConfig("filter"));
@@ -181,6 +202,11 @@ public class WaveViewSettings {
     nfft = StringUtils.stringToInt(cf.getString("nfft"), DEFAULT_WAVE_VIEW_SETTINGS.nfft);
   }
 
+  /**
+   * Save configuration file.
+   * @param cf Configuration file.
+   * @param prefix Configuration name prefix.
+   */
   public void save(ConfigFile cf, String prefix) {
     cf.put(prefix + ".viewType", viewType.code);
     filter.save(cf, prefix + ".filter");
@@ -210,6 +236,9 @@ public class WaveViewSettings {
     notifyView();
   }
 
+  /**
+   * Get cycle type based on view type.
+   */
   public void cycleType() {
     switch (viewType) {
       case WAVE:
@@ -221,16 +250,22 @@ public class WaveViewSettings {
       case SPECTROGRAM:
         viewType = ViewType.WAVE;
         break;
+      default:
+        break;
     }
     notifyView();
   }
 
+  /**
+   * Set cycle log settings.
+   */
   public void cycleLogSettings() {
 
-    if (logFreq == logPower)
+    if (logFreq == logPower) {
       logPower = !logPower;
-    else
+    } else {
       logFreq = !logFreq;
+    }
 
     notifyView();
   }
@@ -250,22 +285,36 @@ public class WaveViewSettings {
     notifyView();
   }
 
+  /**
+   * Reset view's auto scale memory setting.
+   */
   public void resetAutoScaleMemory() {
-    if (view != null)
+    if (view != null) {
       view.resetAutoScaleMemory();
+    }
   }
 
+  /**
+   * Adjust view's scale.
+   * @param pct Scale percent.
+   */
   public void adjustScale(double pct) {
-    if (view != null)
+    if (view != null) {
       view.adjustScale(pct);
+    }
   }
 
+  /**
+   * Notify view of settings change.
+   */
   public void notifyView() {
-    if (view != null)
+    if (view != null) {
       view.settingsChanged();
+    }
 
-    if (toolbar != null)
+    if (toolbar != null) {
       toolbar.settingsChanged();
+    }
   }
 
 }
