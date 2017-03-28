@@ -49,7 +49,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 
 /**
- *
+ * MapMiniPanel class.
  * @author Dan Cervelli
  */
 public class MapMiniPanel extends JComponent
@@ -61,7 +61,7 @@ public class MapMiniPanel extends JComponent
   private int labelHeight = 13;
   private int labelFontSize = 10;
   private int timeFontSize = 10;
-  private static final int SIZES[] =
+  private static final int[] SIZES =
       new int[] {200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700};
   private int sizeIndex = 3;
   private Metadata activeMetadata;
@@ -75,9 +75,9 @@ public class MapMiniPanel extends JComponent
 
   private JPopupMenu popup;
 
-  private final static Color NORMAL_BACKGROUND = new Color(255, 255, 255, 128);
-  private final static Color MOUSEOVER_BACKGROUND = new Color(128, 255, 128, 128);
-  private final static Color WAVE_BACKGROUND = new Color(255, 255, 255, 128);
+  private static final Color NORMAL_BACKGROUND = new Color(255, 255, 255, 128);
+  private static final Color MOUSEOVER_BACKGROUND = new Color(128, 255, 128, 128);
+  private static final Color WAVE_BACKGROUND = new Color(255, 255, 255, 128);
   private Color titleBackground = NORMAL_BACKGROUND;
 
   private MapPanel parent;
@@ -91,11 +91,15 @@ public class MapMiniPanel extends JComponent
   // TODO: choose XY or LL positioning
   private Position position = Position.UNSET;
   // private Point2D.Double manualPosition;
-  private Point2D.Double manualPositionXY;
+  private Point2D.Double manualPositionXy;
 
   private double[] pendingRequest;
   private boolean working;
 
+  /**
+   * Constructor.
+   * @param p map panel
+   */
   public MapMiniPanel(MapPanel p) {
     parent = p;
     metadataList = new TreeMap<String, Metadata>();
@@ -107,20 +111,29 @@ public class MapMiniPanel extends JComponent
     setLayout(null);
   }
 
+  /**
+   * Save layout.
+   * @param cf configuration file
+   * @param prefix configuration prefix
+   */
   public void saveLayout(ConfigFile cf, String prefix) {
     cf.put(prefix + ".sizeIndex", Integer.toString(sizeIndex));
     cf.put(prefix + ".activeChannel", activeMetadata.getChannel());
     int x = -1;
     int y = -1;
     if (position == Position.MANUAL_SET) {
-      x = (int) manualPositionXY.x;
-      y = (int) manualPositionXY.y;
+      x = (int) manualPositionXy.x;
+      y = (int) manualPositionXy.y;
     }
     cf.put(prefix + ".x", Integer.toString(x));
     cf.put(prefix + ".y", Integer.toString(y));
     wavePanel.getSettings().save(cf, prefix + ".settings");
   }
 
+  /**
+   * Process layout.
+   * @param cf configuration file
+   */
   public void processLayout(ConfigFile cf) {
     int x = Integer.parseInt(cf.getString("x"));
     int y = Integer.parseInt(cf.getString("y"));
@@ -128,25 +141,32 @@ public class MapMiniPanel extends JComponent
     position = Position.MANUAL_SET;
     sizeIndex = Integer.parseInt(cf.getString("sizeIndex"));
     setLocation(x, y);
-    if (wavePanel == null)
+    if (wavePanel == null) {
       createWaveViewPanel();
+    }
     wavePanel.getSettings().set(cf.getSubConfig("settings"));
     activeMetadata = metadataList.get(cf.getString("activeChannel"));
-    if (!waveVisible)
+    if (!waveVisible) {
       toggleWave();
-    else
+    } else {
       resetWave();
+    }
   }
 
   public Metadata getActiveMetadata() {
     return activeMetadata;
   }
 
+  /**
+   * Add metadata.
+   * @param md metadata
+   */
   public void addMetadata(Metadata md) {
     metadataList.put(md.getChannel(), md);
     // TODO: should be intelligently chosen
-    if (activeMetadata == null)
+    if (activeMetadata == null) {
       activeMetadata = md;
+    }
     if (!activeMetadataChosen) {
       SCNL as = activeMetadata.getSCNL();
       SCNL ms = md.getSCNL();
@@ -155,11 +175,13 @@ public class MapMiniPanel extends JComponent
           if (ms.channel.charAt(0) < as.channel.charAt(0)) {
             activeMetadata = md;
           } else if (ms.channel.charAt(0) == as.channel.charAt(0)) {
-            if (as.location != null && ms.location == null)
+            if (as.location != null && ms.location == null) {
               activeMetadata = md;
+            }
           }
-        } else
+        } else {
           activeMetadata = md;
+        }
       }
     }
     popup = null;
@@ -178,31 +200,42 @@ public class MapMiniPanel extends JComponent
   }
 
   public void setManualPosition(Point2D.Double p) {
-    manualPositionXY = p;
+    manualPositionXy = p;
   }
 
   public Point2D.Double getManualPosition() {
-    return manualPositionXY;
+    return manualPositionXy;
   }
 
   public boolean isWaveVisible() {
     return waveVisible;
   }
 
+  /**
+   * Get wave view panel.
+   * @return wave view panel
+   */
   public WaveViewPanel getWaveViewPanel() {
-    if (wavePanel == null)
+    if (wavePanel == null) {
       createWaveViewPanel();
+    }
 
     return wavePanel;
   }
 
+  /**
+   * Change size.
+   * @param ds size delta
+   */
   public void changeSize(int ds) {
     if (waveVisible) {
       sizeIndex += ds;
-      if (sizeIndex < 0)
+      if (sizeIndex < 0) {
         sizeIndex = 0;
-      if (sizeIndex >= SIZES.length)
+      }
+      if (sizeIndex >= SIZES.length) {
         sizeIndex = SIZES.length - 1;
+      }
       resetWave();
       getParent().repaint();
     }
@@ -239,8 +272,9 @@ public class MapMiniPanel extends JComponent
     close.setSize(16, 16);
     close.addMouseListener(new MouseAdapter() {
       public void mousePressed(MouseEvent e) {
-        if (waveVisible)
+        if (waveVisible) {
           toggleWave();
+        }
       }
 
       public void mouseEntered(MouseEvent e) {
@@ -254,8 +288,9 @@ public class MapMiniPanel extends JComponent
   }
 
   private void resetWave() {
-    if (wavePanel == null)
+    if (wavePanel == null) {
       createWaveViewPanel();
+    }
 
     removeAll();
     int w = SIZES[sizeIndex];
@@ -272,8 +307,9 @@ public class MapMiniPanel extends JComponent
     wavePanel.setLocation(0, labelHeight - 1);
     add(wavePanel);
 
-    if (close == null)
+    if (close == null) {
       createCloseLabel();
+    }
     close.setLocation(SIZES[sizeIndex] - 16, -2);
 
     add(close);
@@ -281,6 +317,10 @@ public class MapMiniPanel extends JComponent
     updateWave(parent.getStartTime(), parent.getEndTime(), true);
   }
 
+  /**
+   * Change channel.
+   * @param md metadata
+   */
   public void changeChannel(Metadata md) {
     activeMetadata = md;
     if (wavePanel != null) {
@@ -298,10 +338,11 @@ public class MapMiniPanel extends JComponent
   }
 
   private synchronized void setPendingRequest(double st, double et) {
-    if (Double.isNaN(st))
+    if (Double.isNaN(st)) {
       pendingRequest = null;
-    else
+    } else {
       pendingRequest = new double[] {st, et};
+    }
   }
 
   private synchronized double[] getPendingRequest() {
@@ -317,21 +358,24 @@ public class MapMiniPanel extends JComponent
   }
 
   /**
-   * @param st
-   * @param et
-   * @param reenter
-   * @return success
+   * Update wave.
+   * @param st start time
+   * @param et end time
+   * @param reenter reenter flag
+   * @return success true if success; false otherwise
    */
   public boolean updateWave(final double st, final double et, boolean reenter,
       final boolean repaint) {
-    if (!waveVisible || activeMetadata.source == null)
+    if (!waveVisible || activeMetadata.source == null) {
       return false;
+    }
 
     if (isWorking() && !reenter) {
       setPendingRequest(st, et);
       return false;
-    } else
+    } else {
       setWorking(true);
+    }
 
     if (reenter) {
       setPendingRequest(Double.NaN, Double.NaN);
@@ -351,22 +395,26 @@ public class MapMiniPanel extends JComponent
           if (cw.getEndTime() < et) {
             Wave w2 = activeMetadata.source.getWave(activeMetadata.getChannel(),
                 cw.getEndTime() - 10, et);
-            if (w2 != null)
+            if (w2 != null) {
               cw = cw.combine(w2);
+            }
           }
           if (cw.getStartTime() > st) {
             Wave w2 = activeMetadata.source.getWave(activeMetadata.getChannel(), st,
                 cw.getStartTime() + 10);
-            if (w2 != null)
+            if (w2 != null) {
               cw = cw.combine(w2);
+            }
           }
           cw = cw.subset(st, Math.min(et, cw.getEndTime()));
           activeMetadata.source.setUseCache(before);
-        } else
+        } else {
           cw = null;
+        }
 
-        if (cw == null)
+        if (cw == null) {
           cw = activeMetadata.source.getWave(activeMetadata.getChannel(), st, et);
+        }
 
         wavePanel.setWave(cw, st, et);
         return null;
@@ -377,12 +425,14 @@ public class MapMiniPanel extends JComponent
         if (pr != null) {
           repaint();
           updateWave(pr[0], pr[1], true, repaint);
-        } else
+        } else {
           setWorking(false);
+        }
         MapFrame.getInstance().getThrobber().decrement();
         wavePanel.setWorking(false);
-        if (repaint)
+        if (repaint) {
           wavePanel.repaint();
+        }
       }
     };
 
@@ -390,6 +440,9 @@ public class MapMiniPanel extends JComponent
     return true;
   }
 
+  /**
+   * Toggle wave visibility on/off.
+   */
   public void toggleWave() {
     waveVisible = !waveVisible;
     if (waveVisible) {
@@ -399,8 +452,9 @@ public class MapMiniPanel extends JComponent
       labelFontSize = 10;
       labelHeight = 13;
       setSize(labelWidth, labelHeight);
-      if (parent.getLabelSetting() == LabelSetting.NONE)
+      if (parent.getLabelSetting() == LabelSetting.NONE) {
         parent.resetImage(false);
+      }
     }
     adjustLine();
     getParent().repaint();
@@ -420,30 +474,41 @@ public class MapMiniPanel extends JComponent
       });
       group.add(rmi);
       popup.add(rmi);
-      if (md == activeMetadata)
+      if (md == activeMetadata) {
         rmi.setSelected(true);
+      }
     }
   }
 
   protected void doPopup(MouseEvent e) {
-    if (popup == null)
+    if (popup == null) {
       createPopup();
+    }
 
     popup.show(e.getComponent(), e.getX(), e.getY());
   }
 
+  /**
+   * Get SCNL label.
+   * @return station label.
+   */
   public String getLabel() {
     String label = null;
     if (waveVisible) {
       label = activeMetadata.getSCNL().toString();
-      if (metadataList.size() > 1)
+      if (metadataList.size() > 1) {
         label += "+";
-    } else
+      }
+    } else {
       label = activeMetadata.getSCNL().station;
+    }
 
     return label;
   }
 
+  /**
+   * @see javax.swing.JComponent#paint(java.awt.Graphics)
+   */
   public void paint(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
     g2.setFont(FONT);
@@ -473,38 +538,53 @@ public class MapMiniPanel extends JComponent
 
   protected void determineSelection(MouseEvent e) {
     if (e.isControlDown()) {
-      if (selected)
+      if (selected) {
         parent.deselectPanel(this);
-      else
+      } else {
         parent.addSelectedPanel(this);
-    } else
+      }
+    } else {
       parent.setSelectedPanel(this);
+    }
   }
 
+  /**
+   * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+   */
   public void mouseClicked(MouseEvent e) {
     determineSelection(e);
     setPosition(Position.MANUAL_SET);
     Point pt = getLocation();
-    manualPositionXY = new Point2D.Double(pt.x, pt.y);
+    manualPositionXy = new Point2D.Double(pt.x, pt.y);
     if (e.getClickCount() == 2) {
       if (activeMetadata.source != null) {
         HelicorderViewerFrame hvf =
             Swarm.openHelicorder(activeMetadata.source, activeMetadata.getChannel(), Double.NaN);
-        if (Swarm.isFullScreenMode())
+        if (Swarm.isFullScreenMode()) {
           hvf.setPinned(true);
+        }
       }
-    } else if (!waveVisible)
+    } else if (!waveVisible) {
       toggleWave();
+    }
   }
 
+  /**
+   * Set title background.
+   * @param b true for mouse over background; false for normal background.
+   */
   public void setSelected(boolean b) {
     selected = b;
-    if (selected)
+    if (selected) {
       setTitleBackground(MOUSEOVER_BACKGROUND);
-    else
+    } else {
       setTitleBackground(NORMAL_BACKGROUND);
+    }
   }
 
+  /**
+   * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
+   */
   public void mouseEntered(MouseEvent e) {
     MapFrame.getInstance().setStatusText(
         activeMetadata.getSCNL().station + ": " + Util.lonLatToString(activeMetadata.getLonLat()));
@@ -522,10 +602,14 @@ public class MapMiniPanel extends JComponent
   private int deltaX;
   private int deltaY;
 
+  /**
+   * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
+   */
   public void mousePressed(MouseEvent e) {
     parent.requestFocusInWindow();
-    if (e.isPopupTrigger())
+    if (e.isPopupTrigger()) {
       doPopup(e);
+    }
     Point p = getLocation();
     startX = p.x;
     startY = p.y;
@@ -533,11 +617,18 @@ public class MapMiniPanel extends JComponent
     deltaY = e.getY();
   }
 
+  /**
+   * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
+   */
   public void mouseReleased(MouseEvent e) {
-    if (e.isPopupTrigger())
+    if (e.isPopupTrigger()) {
       doPopup(e);
+    }
   }
 
+  /**
+   * Adjust line.
+   */
   public void adjustLine() {
     Point p = getLocation();
     Dimension d = getSize();
@@ -563,6 +654,9 @@ public class MapMiniPanel extends JComponent
     line.setLine(shortest);
   }
 
+  /**
+   * @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent)
+   */
   public void mouseDragged(MouseEvent e) {
     setPosition(Position.MANUAL_SET);
     setLocation(startX + e.getX() - deltaX, startY + e.getY() - deltaY);
@@ -570,7 +664,7 @@ public class MapMiniPanel extends JComponent
     startX = p.x;
     startY = p.y;
     // manualPosition = parent.getLonLat(p.x, p.y);
-    manualPositionXY = new Point2D.Double(p.x, p.y);
+    manualPositionXy = new Point2D.Double(p.x, p.y);
     adjustLine();
     getParent().repaint();
   }
@@ -661,7 +755,7 @@ public class MapMiniPanel extends JComponent
     }
 
     private void setMinMaxBoxes(FrameRenderer fr, double min, double max) {
-      AxisRenderer ar = fr.getAxis();
+      //AxisRenderer ar = fr.getAxis();
       TextRenderer ultr = new TextRenderer();
       ultr.color = Color.BLACK;
 
@@ -693,6 +787,7 @@ public class MapMiniPanel extends JComponent
           fr.getGraphY() + fr.getGraphHeight() - timeFontSize - 2, w + 1, timeFontSize + 2);
       llrr.color = Color.BLACK;
       llrr.backgroundColor = LABEL_BACKGROUND_COLOR;
+      AxisRenderer ar = fr.getAxis();
       ar.addPostRenderer(ulrr);
       ar.addPostRenderer(llrr);
       ar.addPostRenderer(ultr);
@@ -703,8 +798,9 @@ public class MapMiniPanel extends JComponent
       createAxis(fr);
       setTimeAxis(fr);
       String label = "Counts";
-      if (activeMetadata.getUnit() != null)
+      if (activeMetadata.getUnit() != null) {
         label = activeMetadata.getUnit();
+      }
       setLeftLabel(fr, label);
       double m = activeMetadata.getMultiplier();
       double b = activeMetadata.getOffset();
@@ -715,10 +811,11 @@ public class MapMiniPanel extends JComponent
       createAxis(fr);
       // setLinearAxis(fr, wavePanel.getSettings().logFreq);
 
-      if (wavePanel.getSettings().logPower)
+      if (wavePanel.getSettings().logPower) {
         setLeftLabel(fr, "log(P)");
-      else
+      } else {
         setLeftLabel(fr, "Power");
+      }
       setMinMaxBoxes(fr, fr.getMinY(), fr.getMaxY());
     }
 
@@ -741,6 +838,8 @@ public class MapMiniPanel extends JComponent
           break;
         case SPECTROGRAM:
           decorateSpectrogram(fr);
+          break;
+        default:
           break;
       }
     }
