@@ -7,6 +7,7 @@ import gov.usgs.plot.data.SliceWave;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.decorate.FrameDecorator;
 import gov.usgs.plot.render.TextRenderer;
+import gov.usgs.plot.render.wave.ParticleMotionRenderer;
 import gov.usgs.plot.render.wave.SliceWaveRenderer;
 import gov.usgs.plot.render.wave.SpectraRenderer;
 import gov.usgs.plot.render.wave.SpectrogramRenderer;
@@ -44,6 +45,7 @@ import javax.swing.event.EventListenerList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public abstract class AbstractWavePanel extends JComponent {
 
@@ -91,7 +93,7 @@ public abstract class AbstractWavePanel extends JComponent {
   protected Color backgroundColor;
   protected Color bottomBorderColor;
   protected JLabel statusLabel;
-  protected boolean allowDragging;
+  protected boolean allowDragging = true; //TODO: Remove references?  Does not appear to ever get set to false.
   protected boolean dragging;
   protected double j2k1;
   protected double j2k2;
@@ -276,6 +278,10 @@ public abstract class AbstractWavePanel extends JComponent {
       public void mousePressed(MouseEvent e) {
         UiTime.touchTime();
 
+        if (SwingUtilities.isRightMouseButton(e)) {
+          processRightMousePress(e);
+        }
+
         double[] t = getTranslation();
         if (t != null) {
           int x = e.getX();
@@ -283,10 +289,6 @@ public abstract class AbstractWavePanel extends JComponent {
           if (timeSeries) {
             System.out.printf("%s UTC: %s j2k: %.3f ew: %d\n", channel, J2kSec.toDateString(j2k),
                 j2k, J2kSec.asEpoch(j2k));
-          }
-
-          if (SwingUtilities.isRightMouseButton(e)) {
-            processRightMousePress(e);
           }
 
           if (timeSeries && j2k >= startTime && j2k <= endTime) {
@@ -740,7 +742,14 @@ public abstract class AbstractWavePanel extends JComponent {
       settings.maxFreq = wave.getNyquist();
     }
 
-    timeSeries = !(settings.viewType == ViewType.SPECTRA);
+    switch (settings.viewType) {
+      case SPECTRA:
+      case PARTICLE_MOTION:
+        timeSeries = false;
+        break;
+      default:
+        timeSeries = true;
+    }
 
     createImage();
   }
@@ -889,11 +898,12 @@ public abstract class AbstractWavePanel extends JComponent {
    */
   private synchronized void constructPlot(Graphics2D g2) {
     Dimension dim = this.getSize();
-
+    
     Plot plot = new Plot();
     plot.setBackgroundColor(backgroundColor);
     plot.setSize(dim);
     Wave renderWave = wave;
+    
     if (settings.filterOn) {
       renderWave = new Wave(wave);
       filter(renderWave);
@@ -901,7 +911,6 @@ public abstract class AbstractWavePanel extends JComponent {
         bias = (int) Math.round(renderWave.mean());
       }
     }
-
     switch (settings.viewType) {
       case WAVE:
         plotWave(plot, renderWave);
@@ -912,6 +921,9 @@ public abstract class AbstractWavePanel extends JComponent {
       case SPECTROGRAM:
         plotSpectrogram(plot, renderWave);
         break;
+      case PARTICLE_MOTION:
+        plotParticleMotion(plot, renderWave);
+        break;
       default:
         break;
     }
@@ -921,6 +933,7 @@ public abstract class AbstractWavePanel extends JComponent {
     } catch (PlotException e) {
       e.printStackTrace();
     }
+    
   }
 
   /**
@@ -1106,6 +1119,78 @@ public abstract class AbstractWavePanel extends JComponent {
     translation = spectrogramRenderer.getDefaultTranslation();
   }
 
+
+  /**
+   * Plot particle motion.
+   */
+  private void plotParticleMotion(Plot plot, Wave wave) {
+    Metadata md = swarmConfig.getMetadata(channel);
+    String s = md.getSCNL().station;
+    String c = md.getSCNL().channel;
+    String n = md.getSCNL().network;
+    String l = md.getSCNL().location == null ? "" : md.getSCNL().location;
+
+    SliceWave swave = new SliceWave(wave);
+    swave.setSlice(startTime, endTime);
+    SliceWave vwave = null;
+    SliceWave nwave = null;
+    SliceWave ewave = null;
+    String vstation = null;
+    String nstation = null;
+    String estation = null;
+    String component = c.substring(2);
+    if (component.equals("Z")) {
+      vwave = swave;
+      vstation = channel;
+    }
+    if (component.equals("N")) {
+      nwave = swave;
+      nstation = channel;
+    }
+    if (component.equals("E")) {
+      ewave = swave;
+      estation = channel;
+    }
+    for (String direction : new String[] {"Z", "N", "E"}) {
+      if (!component.equals(direction)) {
+        String newChannel = c.replaceFirst(".$", direction);
+        String newStation = s + " " + newChannel + " " + n + " " + l;
+        Wave w = source.getWave(newStation, startTime, endTime);
+        SliceWave sw = null;
+        if (w != null) {
+          sw = new SliceWave(w);
+          sw.setSlice(startTime, endTime);
+        }
+        if (direction.equals("Z")) {
+          vwave = sw;
+          vstation = newStation;
+        }
+        if (direction.equals("N")) {
+          nwave = sw;
+          nstation = newStation;
+        }
+        if (direction.equals("E")) {
+          ewave = sw;
+          estation = newStation;
+        }
+      }
+    }
+    
+    ParticleMotionRenderer particleMotionRenderer =
+        new ParticleMotionRenderer(ewave, nwave, vwave, estation, nstation, vstation);
+    particleMotionRenderer.setLocation(xoffset, yoffset, this.getWidth() - rightWidth - xoffset,
+        this.getHeight());
+
+    if (channel != null && displayTitle) {
+      String title = s + " " + c.replaceFirst(".$", "*") + " " + n + " " + l;
+      particleMotionRenderer.setTitle(title);
+    }
+    plot.addRenderer(particleMotionRenderer);
+
+    //translation = particleMotionRenderer.getDefaultTranslation();
+    translation = null;
+  }
+  
   /**
    * Paints the zoom drag box.
    * 

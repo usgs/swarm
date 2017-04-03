@@ -28,6 +28,7 @@ public class WaveViewSettingsToolbar {
   private JToggleButton waveToggle;
   private JToggleButton spectraToggle;
   private JToggleButton spectrogramToggle;
+  private JToggleButton particleMotionToggle;      // particle motion analysis
   private ButtonGroup waveTypes;
 
   private Set<WaveViewSettings> settingsSet;
@@ -103,6 +104,18 @@ public class WaveViewSettingsToolbar {
     UiUtils.mapKeyStrokeToButton(keyComp, "SLASH", "spectrogram1", spectrogramToggle);
     UiUtils.mapKeyStrokeToButton(keyComp, "G", "spectrogram2", spectrogramToggle);
     dest.add(spectrogramToggle);
+    
+    particleMotionToggle = SwarmUtil.createToolBarToggleButton(Icons.particle_motion,
+        "Particle Motion Analysis (P or ')", new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            for (WaveViewSettings settings : settingsSet) {
+              settings.setType(ViewType.PARTICLE_MOTION);
+            }
+          }
+        });
+    UiUtils.mapKeyStrokeToButton(keyComp, "APOSTROPHE", "pma1", particleMotionToggle);
+    UiUtils.mapKeyStrokeToButton(keyComp, "P", "pma2", particleMotionToggle);
+    dest.add(particleMotionToggle);
 
     keyComp.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
         .put(KeyStroke.getKeyStroke("L"), "cycleLogSettings");
@@ -173,6 +186,7 @@ public class WaveViewSettingsToolbar {
     waveTypes.add(waveToggle);
     waveTypes.add(spectraToggle);
     waveTypes.add(spectrogramToggle);
+    waveTypes.add(particleMotionToggle);
   }
 
   public void clearSettingsSet() {
@@ -212,29 +226,43 @@ public class WaveViewSettingsToolbar {
    * Process settings change.
    */
   public void settingsChanged() {
-    boolean w = false;
+
+    boolean p = false;
     boolean s = false;
     boolean sg = false;
+    boolean w = false;
     for (WaveViewSettings set : settingsSet) {
-      if (set.viewType == ViewType.WAVE) {
-        w = true;
-      }
-      if (set.viewType == ViewType.SPECTRA) {
-        s = true;
-      }
-      if (set.viewType == ViewType.SPECTROGRAM) {
-        sg = true;
+      p = false;
+      s = false;
+      sg = false;
+      w = false;
+      switch (set.viewType) {
+        case PARTICLE_MOTION:
+          p = true;
+          break;
+        case SPECTRA:
+          s = true;
+          break;
+        case SPECTROGRAM:
+          sg = true;
+          break;
+        case WAVE:
+          w = true;
+          break;
+        default:
+          break;
       }
     }
 
     // fix for Java 1.5, clearSelection was added in 1.6
-    try {
+/*    try {
       waveTypes.setSelected(waveTypes.getSelection(), false);
     } catch (Throwable e) {
       // what should happen here?
-    }
-    waveToggle.setSelected(w && !s && !sg);
-    spectraToggle.setSelected(!w && s && !sg);
-    spectrogramToggle.setSelected(!w && !s && sg);
+    }*/
+    particleMotionToggle.setSelected(p);
+    spectraToggle.setSelected(s);
+    spectrogramToggle.setSelected(sg);
+    waveToggle.setSelected(w);
   }
 }
