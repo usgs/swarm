@@ -8,7 +8,8 @@ package gov.usgs.volcanoes.swarm.event;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.Throbber;
-import gov.usgs.volcanoes.swarm.wave.WaveViewToolBar;
+//import gov.usgs.volcanoes.swarm.wave.WaveViewToolBar;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -44,7 +45,7 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
   private final JButton forwardButton;
   private final JButton backButton;
   private final Throbber throbber;
-  private final WaveViewToolBar waveViewToolBar;
+  private final WaveViewSettingsToolbar waveViewToolBar;
   private JPopupMenu popup;
   private int waveHeight;
 
@@ -70,7 +71,7 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
     histButton = createHistButton();
     placeButtons();
 
-    waveViewToolBar = new WaveViewToolBar(null, this, listener);
+    waveViewToolBar = new WaveViewSettingsToolbar(null, this, this);
     selectCountChanged(0);
     add(Box.createHorizontalGlue());
     throbber = new Throbber();
@@ -105,7 +106,7 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
     expXButton.setEnabled(enable);
     forwardButton.setEnabled(enable);
     backButton.setEnabled(enable);
-    waveViewToolBar.setEnabled(enable);
+    //waveViewToolBar.setEnabled(enable);
 
     sortButton.setEnabled(count == 1);
   }

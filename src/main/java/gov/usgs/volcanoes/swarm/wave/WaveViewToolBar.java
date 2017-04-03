@@ -12,11 +12,13 @@ import javax.swing.JButton;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
+@Deprecated
 public class WaveViewToolBar {
   private JButton waveSet;
   private JToggleButton waveToggle;
   private JToggleButton spectraToggle;
   private JToggleButton spectrogramToggle;
+  private JToggleButton particleMotionToggle;      
   private ButtonGroup waveTypes;
   private WaveViewToolBarListener listener;
 
@@ -68,11 +70,22 @@ public class WaveViewToolBar {
     listener.mapKeyStroke("SLASH", "spectrogram1", spectrogramToggle);
     listener.mapKeyStroke("G", "spectrogram2", spectrogramToggle);
     dest.add(spectrogramToggle);
+    
+    particleMotionToggle = SwarmUtil.createToolBarToggleButton(Icons.particle_motion,
+        "Particle Motion Analysis view (P or ')", new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            listener.setType(ViewType.PARTICLE_MOTION);
+          }
+        });
+    listener.mapKeyStroke("APOSTROPHE", "spectrogram1", particleMotionToggle);
+    listener.mapKeyStroke("P", "spectrogram2", particleMotionToggle);
+    dest.add(particleMotionToggle);
 
     waveTypes = new ButtonGroup();
     waveTypes.add(waveToggle);
     waveTypes.add(spectraToggle);
     waveTypes.add(spectrogramToggle);
+    waveTypes.add(particleMotionToggle);
   }
 
   /**
@@ -84,6 +97,6 @@ public class WaveViewToolBar {
     waveToggle.setEnabled(enable);
     spectraToggle.setEnabled(enable);
     spectrogramToggle.setEnabled(enable);
-
+    particleMotionToggle.setEnabled(enable);
   }
 }
