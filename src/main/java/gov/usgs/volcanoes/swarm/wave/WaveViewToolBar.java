@@ -12,7 +12,6 @@ import javax.swing.JButton;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
-@Deprecated
 public class WaveViewToolBar {
   private JButton waveSet;
   private JToggleButton waveToggle;
