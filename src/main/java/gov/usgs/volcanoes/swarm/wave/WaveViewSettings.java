@@ -18,7 +18,7 @@ public class WaveViewSettings {
   private static final String DEFAULTS_FILENAME = "WaveDefaults.config";
 
   public enum ViewType {
-    WAVE("W"), SPECTRA("S"), SPECTROGRAM("G"), PARTICLE_MOTION("P");
+    WAVE("W"), SPECTRA("S"), SPECTROGRAM("G"), PARTICLE_MOTION("M");
 
     public String code;
 
@@ -37,7 +37,7 @@ public class WaveViewSettings {
         return SPECTRA;
       } else if (c.equals("G")) {
         return SPECTROGRAM;
-      } else if (c.equals("P")) {
+      } else if (c.equals("M")) {
         return PARTICLE_MOTION;
       } else {
         return WAVE;

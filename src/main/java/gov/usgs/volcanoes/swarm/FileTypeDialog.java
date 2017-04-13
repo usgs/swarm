@@ -39,11 +39,11 @@ public class FileTypeDialog extends SwarmModalDialog {
   }
 
   /**
-   * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#createUI()
+   * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#createUi()
    */
   @Override
-  protected void createUI() {
-    super.createUI();
+  protected void createUi() {
+    super.createUi();
     filename = new JLabel();
     filename.setFont(Font.decode("dialog-BOLD-12"));
     filename.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
@@ -81,7 +81,7 @@ public class FileTypeDialog extends SwarmModalDialog {
     return (FileType) fileTypes.getSelectedValue();
   }
 
-  public void wasOK() {
+  public void wasOk() {
     cancelled = false;
   }
 

@@ -60,7 +60,6 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -90,7 +89,7 @@ public class WaveClipboardFrame extends SwarmFrame {
   private final Set<AbstractWavePanel> selectedSet;
   private JToolBar toolbar;
   private JPanel mainPanel;
-  private JLabel statusLabel;
+  private StatusTextArea statusText;
   private JToggleButton linkButton;
   private JButton sizeButton;
   private JButton syncButton;
@@ -177,9 +176,9 @@ public class WaveClipboardFrame extends SwarmFrame {
     scrollPane.getVerticalScrollBar().setUnitIncrement(40);
     mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-    statusLabel = new JLabel(" ");
-    statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 1));
-    mainPanel.add(statusLabel, BorderLayout.SOUTH);
+    statusText = new StatusTextArea(" ");
+    statusText.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 1));
+    mainPanel.add(statusText, BorderLayout.SOUTH);
 
     mainPanel.setBorder(BorderFactory.createEmptyBorder(0, 2, 1, 2));
     this.setContentPane(mainPanel);
@@ -260,6 +259,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
   // TODO: don't write image on event thread
   // TODO: unify with MapFrame.CaptureActionListener
+  
   class CaptureActionListener implements ActionListener {
     public void actionPerformed(final ActionEvent e) {
       if (waves == null || waves.size() == 0) {
@@ -662,10 +662,7 @@ public class WaveClipboardFrame extends SwarmFrame {
             swarmConfig.lastPath = f.getParent();
             final String fn = f.getPath();
             final SeismicDataFile file = SeismicDataFile.getFile(fn);
-            // String channel = selected.getChannel().replace(' ',
-            // '_');
             final Wave wave = selected.getWave();
-            // file.putWave(channel, wave);
             file.putWave(selected.getChannel(), wave);
             file.write();
           } catch (final FileNotFoundException ex) {
@@ -696,7 +693,6 @@ public class WaveClipboardFrame extends SwarmFrame {
         } else {
           fileType = dialog.getFileType();
         }
-
       }
 
       final JFileChooser chooser = FileChooser.getFileChooser();
@@ -958,7 +954,7 @@ public class WaveClipboardFrame extends SwarmFrame {
   public void setStatusText(final String s) {
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        statusLabel.setText(s);
+        statusText.setText(s);
       }
     });
   }
@@ -976,7 +972,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     p.addListener(selectListener);
     p.setOffsets(54, 8, 21, 19);
     p.setAllowClose(true);
-    p.setStatusLabel(statusLabel);
+    p.setStatusText(statusText);
     p.setAllowDragging(true);
     p.setDisplayTitle(true);
     final int w = scrollPane.getViewport().getSize().width;

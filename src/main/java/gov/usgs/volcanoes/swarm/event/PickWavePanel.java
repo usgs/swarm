@@ -96,13 +96,13 @@ public class PickWavePanel extends AbstractWavePanel
 
       double x = 2 + (j2k - t[1]) / t[0];
       g2.setColor(DARK_GREEN);
-      g2.draw(new Line2D.Double(x, yoffset, x, getHeight() - bottomHeight - 1));
+      g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
 
       double residual = arrival.getTimeResidual();
       if (residual != 0) {
         double residualMark = 2 + (j2k + residual - t[1]) / t[0];
         g2.setColor(RESIDUAL_COLOR);
-        g2.fill(new Rectangle2D.Double(Math.min(x, residualMark), yoffset,
+        g2.fill(new Rectangle2D.Double(Math.min(x, residualMark), yOffset,
             Math.abs(x - residualMark), getHeight() - bottomHeight - 1));
       }
 

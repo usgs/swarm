@@ -19,6 +19,7 @@ import gov.usgs.volcanoes.swarm.options.SwarmOptions;
 import gov.usgs.volcanoes.swarm.options.SwarmOptionsListener;
 import gov.usgs.volcanoes.swarm.time.UiTime;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
+import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
@@ -94,7 +95,6 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 
   private BufferedImage bufferImage;
   private BufferedImage displayImage;
-  private DateFormat dateFormat;
 
   private boolean working;
   private boolean resized;
@@ -119,13 +119,9 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
   public HelicorderViewPanel(HelicorderViewerFrame hvf) {
     swarmConfig = SwarmConfig.getInstance();
 
-    // setBackground(new Color(255, 255, 255, 128));
     parent = hvf;
-    dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-    dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
     plot = new Plot();
     plot.setBackgroundColor(BACKGROUND_COLOR);
-    // plot.setBackgroundColor(null);
     settings = hvf.getHelicorderViewerSettings();
     heliRenderer = new HelicorderRenderer();
     if (swarmConfig.heliColors != null) {
@@ -414,31 +410,14 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
         if (!(x < heliRenderer.getGraphX() || y < heliRenderer.getGraphY()
             || x > heliRenderer.getGraphX() + heliRenderer.getGraphWidth() - 1
             || y > heliRenderer.getGraphY() + heliRenderer.getGraphHeight() - 1)) {
+
           double j2k = getMouseJ2K(x, y);
-          status = dateFormat.format(J2kSec.asDate(j2k));
-          TimeZone tz = swarmConfig.getTimeZone(settings.channel);
-          double tzo = tz.getOffset(J2kSec.asEpoch(j2k));
-          if (tzo != 0) {
-            String tza = tz.getDisplayName(tz.inDaylightTime(J2kSec.asDate(j2k)), TimeZone.SHORT);
-            status = dateFormat.format(J2kSec.asDate(j2k + tzo / 1000)) + " (" + tza + "), "
-                + status + " (UTC)";
-          }
+          status = StatusTextArea.getTimeString(j2k, swarmConfig.getTimeZone(settings.channel));
         }
       }
 
       if (status == null) {
         status = " ";
-      }
-
-      if (!Double.isNaN(startMark) && !Double.isNaN(endMark)) {
-        double dur = Math.abs(startMark - endMark);
-        String pre =
-            String.format("Duration: %.2fs (Md: %.2f)", dur, swarmConfig.getDurationMagnitude(dur));
-        if (status.length() > 2) {
-          status = pre + ", " + status;
-        } else {
-          status = pre;
-        }
       }
 
       if (status != null) {
@@ -526,7 +505,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 
         public void waveTimePressed(AbstractWavePanel src, MouseEvent e, double j2k) {
           if (swarmConfig.durationEnabled && SwingUtilities.isLeftMouseButton(e)) {
-            markTime(j2k);
+            markTime(j2k);   
           }
           insetWavePanel.processMousePosition(e.getX(), e.getY());
         }
@@ -537,7 +516,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
     insetWavePanel.setMarks(startMark, endMark);
     insetWavePanel.setChannel(settings.channel);
     insetWavePanel.setDataSource(parent.getDataSource());
-    insetWavePanel.setStatusLabel(parent.getStatusLabel());
+    insetWavePanel.setStatusText(parent.getStatusText());
 
     Dimension d = getSize();
     insetHeight = getHeight() / 4;

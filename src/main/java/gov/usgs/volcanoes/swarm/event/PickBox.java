@@ -22,6 +22,7 @@ import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
 import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
+import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelListener;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
@@ -83,7 +84,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   private BufferedImage image;
   private double startJ2k;
   private double endJ2k;
-  private final JLabel statusLabel;
+  private final StatusTextArea statusText;
   private WaveViewPanelListener selectListener;
   private final Map<String, SeismicDataSource> seismicSources;
   private int wavePanelHeight;
@@ -93,10 +94,10 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
 
   /**
    * Constructor.
-   * @param statusLabel status label 
+   * @param statusText status text 
    */
-  public PickBox(JLabel statusLabel) {
-    this.statusLabel = statusLabel;
+  public PickBox(StatusTextArea statusText) {
+    this.statusText = statusText;
     panels = new CopyOnWriteArrayList<PickWavePanel>();
 
     seismicSources = new HashMap<String, SeismicDataSource>();
@@ -227,7 +228,6 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
    * @param arrival arrival
    */
   public void addPick(Arrival arrival) {
-    CodeTimer timer = new CodeTimer("arrival");
     this.remove(emptyArrivalLabel);
     Pick pick = arrival.getPick();
     String channel = pick.getChannel();
@@ -235,7 +235,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     PickWavePanel wavePanel = findPanel(channel);
     if (wavePanel == null) {
       wavePanel = new PickWavePanel();
-      wavePanel.setStatusLabel(statusLabel);
+      wavePanel.setStatusText(statusText);
       wavePanel.setChannel(channel);
       SeismicDataSource source = seismicSources.get(channel);
       if (source == null) {
@@ -258,6 +258,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     }
 
     wavePanel.addArrival(arrival);
+    CodeTimer timer = new CodeTimer("arrival");
     timer.stopAndReport();
   }
 
@@ -306,7 +307,6 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   }
 
   public boolean getScrollableTracksViewportHeight() {
-    // TODO Auto-generated method stub
     return false;
   }
 

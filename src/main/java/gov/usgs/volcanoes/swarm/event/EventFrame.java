@@ -6,12 +6,18 @@
 
 package gov.usgs.volcanoes.swarm.event;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import gov.usgs.volcanoes.core.CodeTimer;
+import gov.usgs.volcanoes.core.quakeml.Arrival;
+import gov.usgs.volcanoes.core.quakeml.Event;
+import gov.usgs.volcanoes.core.quakeml.EventObserver;
+import gov.usgs.volcanoes.core.quakeml.Origin;
+import gov.usgs.volcanoes.core.quakeml.Pick;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.SwarmFrame;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -20,7 +26,6 @@ import java.util.TreeSet;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -33,17 +38,12 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import gov.usgs.volcanoes.core.CodeTimer;
-import gov.usgs.volcanoes.core.quakeml.Arrival;
-import gov.usgs.volcanoes.core.quakeml.Event;
-import gov.usgs.volcanoes.core.quakeml.EventObserver;
-import gov.usgs.volcanoes.core.quakeml.Origin;
-import gov.usgs.volcanoes.core.quakeml.Pick;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.SwarmFrame;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  * The picker internal frame. Adapted from the WaveClipboardFrame.
@@ -54,12 +54,11 @@ public class EventFrame extends SwarmFrame implements EventObserver {
   private static final Logger LOGGER = LoggerFactory.getLogger(EventFrame.class);
   private static final String EVENT_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?eventid=";
       
-  /** default */
   public static final long serialVersionUID = -1;
 
   
   private final PickBox pickBox;
-  private final JLabel statusLabel;
+  private final StatusTextArea statusText;
   private final Event event;
   private final JSplitPane mainPanel;
   private final PickToolBar toolbar;
@@ -76,8 +75,8 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     this.event = event;
     event.addObserver(this);
 
-    statusLabel = new JLabel(" ");
-    pickBox = new PickBox(statusLabel);
+    statusText = new StatusTextArea(" ");
+    pickBox = new PickBox(statusText);
     pickBox.setLayout(new BoxLayout(pickBox, BoxLayout.PAGE_AXIS));
     
     toolbar = new PickToolBar(pickBox);
@@ -119,8 +118,8 @@ public class EventFrame extends SwarmFrame implements EventObserver {
 
     JPanel statusPanel = new JPanel();
     statusPanel.setLayout(new BorderLayout());
-    statusLabel.setBorder(BorderFactory.createEtchedBorder());
-    statusPanel.add(statusLabel);
+    statusText.setBorder(BorderFactory.createEtchedBorder());
+    statusPanel.add(statusText);
     statusPanel
         .setMaximumSize(new Dimension(Integer.MAX_VALUE, statusPanel.getPreferredSize().height));
     pickPanel.add(statusPanel);
@@ -169,18 +168,21 @@ public class EventFrame extends SwarmFrame implements EventObserver {
   }
 
  
+  /**
+   * Fetch detailed event.
+   */
   public void fetchDetailedEvent() {
     String neicEvid = event.getEventSource() + event.getEvid();
     Event workingEvent = event;
 
     String url = EVENT_URL + neicEvid;
     DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder dBuilder = null;
+    DocumentBuilder docBuilder = null;
     Document doc = null;
 
     try {
-      dBuilder = dbFactory.newDocumentBuilder();
-      doc = dBuilder.parse(url);
+      docBuilder = dbFactory.newDocumentBuilder();
+      doc = docBuilder.parse(url);
       doc.getDocumentElement().normalize();
 
       NodeList eventElements = doc.getElementsByTagName("event");
@@ -237,10 +239,14 @@ public class EventFrame extends SwarmFrame implements EventObserver {
   @Override
   public void setVisible(final boolean isVisible) {
     super.setVisible(isVisible);
-    if (isVisible)
+    if (isVisible) {
       toFront();
+    }
   }
 
+  /**
+   * @see gov.usgs.volcanoes.core.quakeml.EventObserver#eventUpdated()
+   */
   public void eventUpdated() {
     int loc = mainPanel.getDividerLocation();
     mainPanel.setTopComponent(ParameterPanel.create(event));

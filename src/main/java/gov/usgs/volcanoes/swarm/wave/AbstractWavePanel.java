@@ -12,7 +12,6 @@ import gov.usgs.plot.render.wave.SliceWaveRenderer;
 import gov.usgs.plot.render.wave.SpectraRenderer;
 import gov.usgs.plot.render.wave.SpectrogramRenderer;
 import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
@@ -36,10 +35,8 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
-import java.util.TimeZone;
 
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
@@ -55,11 +52,11 @@ public abstract class AbstractWavePanel extends JComponent {
   /**
    * X pixel location of where the main plot axis should be located on the component.
    */
-  protected int xoffset = 60;
+  protected int xOffset = 60;
   /**
    * Y pixel location of where the main plot axis should be located on the component.
    */
-  protected int yoffset = 20;
+  protected int yOffset = 20;
   /** The amount of padding space on the right side. */
   protected int rightWidth = 20;
   /** The amount of padding space on the bottom. */
@@ -72,7 +69,6 @@ public abstract class AbstractWavePanel extends JComponent {
   protected double startTime;
   protected double endTime;
   protected WaveViewSettings settings;
-  protected int bias;
   protected double minAmp = 1E300;
   protected double maxAmp = -1E300;
   protected double maxSpectraPower = -1E300;
@@ -92,8 +88,8 @@ public abstract class AbstractWavePanel extends JComponent {
   protected boolean displayTitle;
   protected Color backgroundColor;
   protected Color bottomBorderColor;
-  protected JLabel statusLabel;
-  protected boolean allowDragging = true; //TODO: Remove references?  Does not appear to ever get set to false.
+  protected StatusTextArea statusText;
+  protected boolean allowDragging = true; 
   protected boolean dragging;
   protected double j2k1;
   protected double j2k2;
@@ -160,7 +156,6 @@ public abstract class AbstractWavePanel extends JComponent {
     source = p.source;
     startTime = p.startTime;
     endTime = p.endTime;
-    bias = p.bias;
     maxSpectraPower = p.maxSpectraPower;
     maxSpectrogramPower = p.maxSpectrogramPower;
     timeSeries = p.timeSeries;
@@ -190,8 +185,8 @@ public abstract class AbstractWavePanel extends JComponent {
    * @param bh bottom height
    */
   public void setOffsets(int xo, int yo, int rw, int bh) {
-    xoffset = xo;
-    yoffset = yo;
+    xOffset = xo;
+    yOffset = yo;
     rightWidth = rw;
     bottomHeight = bh;
   }
@@ -298,7 +293,7 @@ public abstract class AbstractWavePanel extends JComponent {
           if (timeSeries && allowDragging && SwingUtilities.isLeftMouseButton(e)) {
             Dimension size = getSize();
             int y = e.getY();
-            if (t != null && y > yoffset && y < (size.height - bottomHeight) && x > xoffset
+            if (t != null && y > yOffset && y < (size.height - bottomHeight) && x > xOffset
                 && x < size.width - rightWidth) {
               j2k1 = j2k2 = j2k;
               if (e.isControlDown()) {
@@ -370,7 +365,7 @@ public abstract class AbstractWavePanel extends JComponent {
           int x = e.getX();
           int y = e.getY();
           Dimension size = getSize();
-          if (t != null && y > yoffset && y < (size.height - bottomHeight) && x > xoffset
+          if (t != null && y > yOffset && y < (size.height - bottomHeight) && x > xOffset
               && x < size.width - rightWidth) {
             j2k2 = x * t[0] + t[1];
             highlightX2 = x;
@@ -426,16 +421,16 @@ public abstract class AbstractWavePanel extends JComponent {
     allowDragging = b;
   }
 
-  public void setStatusLabel(JLabel l) {
-    statusLabel = l;
+  public void setStatusText(StatusTextArea text) {
+    statusText = text;
   }
 
   public int getXOffset() {
-    return xoffset;
+    return xOffset;
   }
 
   public int getYOffset() {
-    return yoffset;
+    return yOffset;
   }
 
   public WaveViewSettings getSettings() {
@@ -538,36 +533,24 @@ public abstract class AbstractWavePanel extends JComponent {
    * @param y the mouse y position
    */
   public boolean processMousePosition(int x, int y) {
-    String status = null;
+    String status = "";
     String unit = null;
-    String waveInfo = null;
 
     Dimension size = getSize();
     double[] t = getTranslation();
     time = Double.NaN;
 
-    if (wave != null && t != null && y > yoffset && y < (size.height - bottomHeight) && x > xoffset
+    if (wave != null && t != null && y > yOffset && y < (size.height - bottomHeight) && x > xOffset
         && x < size.width - rightWidth) {
       time = x * t[0] + t[1];
       double yi = y * -t[2] + t[3];
 
-      int[] dataRange = wave.getDataRange();
-      waveInfo = String.format("[%s - %s (UTC), %d samples (%.2f s), %d samples/s, %d, %d]",
-          J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, wave.getStartTime()),
-          J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, wave.getEndTime()), wave.numSamples(),
-          wave.numSamples() / wave.getSamplingRate(), (int) wave.getSamplingRate(), dataRange[0],
-          dataRange[1]);
+      status = StatusTextArea.getWaveInfo(wave);
 
       if (timeSeries) {
-        String utc = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, time);
-        TimeZone tz = swarmConfig.getTimeZone(channel);
-        double tzo = tz.getOffset(J2kSec.asEpoch(time)) / 1000;
-        if (tzo != 0) {
-          String tza = tz.getDisplayName(tz.inDaylightTime(J2kSec.asDate(time)), TimeZone.SHORT);
-          status = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, time + tzo) + " (" + tza + "), "
-              + utc + " (UTC)";
-        } else {
-          status = utc;
+        String timeString = StatusTextArea.getTimeString(time, swarmConfig.getTimeZone(channel));
+        if (timeString != null) {
+          status += "\n" + timeString;
         }
 
         double offset = 0;
@@ -588,10 +571,8 @@ public abstract class AbstractWavePanel extends JComponent {
           }
         }
 
-        // System.out.printf("Multipler: %f, Offset: %f\n", offset,
-        // multiplier);
-        status =
-            String.format("%s, %s: %.3f, %s", status, unit, multiplier * yi + offset, waveInfo);
+        status +=
+            String.format("\n%s: %.3f", unit, multiplier * yi + offset);
       } else {
         double xi = time;
         if (settings.viewType == ViewType.SPECTRA && settings.logFreq) {
@@ -600,36 +581,26 @@ public abstract class AbstractWavePanel extends JComponent {
         if (settings.viewType == ViewType.SPECTRA && settings.logPower) {
           yi = Math.pow(10.0, yi);
         }
-        status = String.format("%s, Frequency (Hz): %.6f, Power: %.3f", waveInfo, xi, yi);
+        status += String.format("\nFrequency (Hz): %.6f, Power: %.3f", xi, yi);
       }
-    } else {
-      status = " ";
-    }
 
+      if (swarmConfig.durationEnabled && !Double.isNaN(mark1) && !Double.isNaN(mark2)) {
+        String durationString = StatusTextArea.getCoda(mark1, mark2);
+        status += "\n" + durationString;
+      }
+    } 
+    
     if (!pauseCursorMark) {
       WaveViewTime.fireTimeChanged(time);
     }
 
-    if (status == null) {
-      status = " ";
-    }
 
-    if (!Double.isNaN(mark1) && !Double.isNaN(mark2)) {
-      double dur = Math.abs(mark1 - mark2);
-      String pre =
-          String.format("Duration: %.2fs (Md: %.2f)", dur, swarmConfig.getDurationMagnitude(dur));
-      if (status.length() > 2) {
-        status = pre + ", " + status;
-      } else {
-        status = pre;
-      }
-    }
 
-    if (status != null && statusLabel != null) {
+    if (status != null && statusText != null) {
       final String st = status;
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          statusLabel.setText(st);
+          statusText.setText(st);
         }
       });
     }
@@ -857,7 +828,7 @@ public abstract class AbstractWavePanel extends JComponent {
   }
 
   public TextRenderer getFilterLabel() {
-    return getFilterLabel(xoffset + 5, 148, TextRenderer.NONE, TextRenderer.NONE);
+    return getFilterLabel(xOffset + 5, 148, TextRenderer.NONE, TextRenderer.NONE);
   }
 
   /**
@@ -907,9 +878,6 @@ public abstract class AbstractWavePanel extends JComponent {
     if (settings.filterOn) {
       renderWave = new Wave(wave);
       filter(renderWave);
-      if (settings.removeBias) {
-        bias = (int) Math.round(renderWave.mean());
-      }
     }
     switch (settings.viewType) {
       case WAVE:
@@ -962,7 +930,7 @@ public abstract class AbstractWavePanel extends JComponent {
     if (settings.removeBias) {
       bias = wv.mean();
     }
-
+    
     double minY = (settings.minAmp - offset) / multiplier;
     double maxY = (settings.maxAmp - offset) / multiplier;
 
@@ -994,8 +962,8 @@ public abstract class AbstractWavePanel extends JComponent {
     }
 
     waveRenderer.setYAxisCoefficients(multiplier, offset);
-    waveRenderer.setLocation(xoffset, yoffset, this.getWidth() - xoffset - rightWidth,
-        this.getHeight() - yoffset - bottomHeight);
+    waveRenderer.setLocation(xOffset, yOffset, this.getWidth() - xOffset - rightWidth,
+        this.getHeight() - yOffset - bottomHeight);
     waveRenderer.setYLimits(minY, maxY);
     waveRenderer.setViewTimes(startTime, endTime, "");
     waveRenderer.setWave(wv);
@@ -1034,8 +1002,8 @@ public abstract class AbstractWavePanel extends JComponent {
       spectraRenderer.setFrameDecorator(decorator);
     }
 
-    spectraRenderer.setLocation(xoffset, yoffset, this.getWidth() - rightWidth - xoffset,
-        this.getHeight() - bottomHeight - yoffset);
+    spectraRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset,
+        this.getHeight() - bottomHeight - yOffset);
     spectraRenderer.setWave(wv);
 
     spectraRenderer.setAutoScale(settings.autoScalePower);
@@ -1079,8 +1047,8 @@ public abstract class AbstractWavePanel extends JComponent {
       spectrogramRenderer.setFrameDecorator(decorator);
     }
 
-    spectrogramRenderer.setLocation(xoffset, yoffset, this.getWidth() - rightWidth - xoffset,
-        this.getHeight() - bottomHeight - yoffset);
+    spectrogramRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset,
+        this.getHeight() - bottomHeight - yOffset);
     spectrogramRenderer.setWave(wv);
 
     spectrogramRenderer.setViewStartTime(startTime);
@@ -1118,10 +1086,11 @@ public abstract class AbstractWavePanel extends JComponent {
     }
     translation = spectrogramRenderer.getDefaultTranslation();
   }
-
-
+  
   /**
    * Plot particle motion.
+   * 
+   * <p>TODO: Option to remove bias
    */
   private void plotParticleMotion(Plot plot, Wave wave) {
     Metadata md = swarmConfig.getMetadata(channel);
@@ -1132,23 +1101,24 @@ public abstract class AbstractWavePanel extends JComponent {
 
     SliceWave swave = new SliceWave(wave);
     swave.setSlice(startTime, endTime);
-    SliceWave vwave = null;
-    SliceWave nwave = null;
-    SliceWave ewave = null;
+    double[] data = swave.getSignal();
+    double[] verticalWaveData = null;
+    double[] northWaveData = null;
+    double[] eastWaveData = null;
     String vstation = null;
     String nstation = null;
     String estation = null;
     String component = c.substring(2);
     if (component.equals("Z")) {
-      vwave = swave;
+      verticalWaveData = data;
       vstation = channel;
     }
     if (component.equals("N")) {
-      nwave = swave;
+      northWaveData = data;
       nstation = channel;
     }
     if (component.equals("E")) {
-      ewave = swave;
+      eastWaveData = data;
       estation = channel;
     }
     for (String direction : new String[] {"Z", "N", "E"}) {
@@ -1156,29 +1126,34 @@ public abstract class AbstractWavePanel extends JComponent {
         String newChannel = c.replaceFirst(".$", direction);
         String newStation = s + " " + newChannel + " " + n + " " + l;
         Wave w = source.getWave(newStation, startTime, endTime);
-        SliceWave sw = null;
+        if (settings.filterOn) {
+          filter(w);
+        }
+        data = new double[0];
         if (w != null) {
-          sw = new SliceWave(w);
+          SliceWave sw = new SliceWave(w);
           sw.setSlice(startTime, endTime);
+          data = sw.getSignal();
         }
         if (direction.equals("Z")) {
-          vwave = sw;
+          verticalWaveData = data;
           vstation = newStation;
         }
         if (direction.equals("N")) {
-          nwave = sw;
+          northWaveData = data;
           nstation = newStation;
         }
         if (direction.equals("E")) {
-          ewave = sw;
+          eastWaveData = data;
           estation = newStation;
         }
       }
     }
     
     ParticleMotionRenderer particleMotionRenderer =
-        new ParticleMotionRenderer(ewave, nwave, vwave, estation, nstation, vstation);
-    particleMotionRenderer.setLocation(xoffset, yoffset, this.getWidth() - rightWidth - xoffset,
+        new ParticleMotionRenderer(eastWaveData, northWaveData, verticalWaveData, 
+            estation, nstation, vstation);
+    particleMotionRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset,
         this.getHeight());
 
     if (channel != null && displayTitle) {
@@ -1186,8 +1161,10 @@ public abstract class AbstractWavePanel extends JComponent {
       particleMotionRenderer.setTitle(title);
     }
     plot.addRenderer(particleMotionRenderer);
-
-    //translation = particleMotionRenderer.getDefaultTranslation();
+    if (useFilterLabel && settings.filterOn) {
+      plot.addRenderer(getFilterLabel(getWidth() - rightWidth, getHeight() - bottomHeight,
+          TextRenderer.RIGHT, TextRenderer.BOTTOM));
+    }
     translation = null;
   }
   
@@ -1202,7 +1179,7 @@ public abstract class AbstractWavePanel extends JComponent {
     int width = x2 - x1 + 1;
     Paint pnt = g2.getPaint();
     g2.setPaint(new Color(255, 255, 0, 128));
-    g2.fillRect(x1, yoffset + 1, width, getSize().height - bottomHeight - yoffset);
+    g2.fillRect(x1, yOffset + 1, width, getSize().height - bottomHeight - yOffset);
     g2.setPaint(pnt);
   }
 
@@ -1222,7 +1199,7 @@ public abstract class AbstractWavePanel extends JComponent {
     }
     double x = (cursorMark - t[1]) / t[0];
     g2.setColor(DARK_RED);
-    g2.draw(new Line2D.Double(x, yoffset + 1, x, getHeight() - bottomHeight - 1));
+    g2.draw(new Line2D.Double(x, yOffset + 1, x, getHeight() - bottomHeight - 1));
   }
 
 

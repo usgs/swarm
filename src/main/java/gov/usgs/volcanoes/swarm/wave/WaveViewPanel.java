@@ -62,12 +62,12 @@ public class WaveViewPanel extends AbstractWavePanel {
 
     double x = (j2k - t[1]) / t[0];
     g2.setColor(DARK_GREEN);
-    g2.draw(new Line2D.Double(x, yoffset, x, getHeight() - bottomHeight - 1));
+    g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
 
     GeneralPath gp = new GeneralPath();
-    gp.moveTo((float) x, yoffset);
-    gp.lineTo((float) x - 5, yoffset - 7);
-    gp.lineTo((float) x + 5, yoffset - 7);
+    gp.moveTo((float) x, yOffset);
+    gp.lineTo((float) x - 5, yOffset - 7);
+    gp.lineTo((float) x + 5, yOffset - 7);
     gp.closePath();
     g2.setPaint(Color.GREEN);
     g2.fill(gp);
