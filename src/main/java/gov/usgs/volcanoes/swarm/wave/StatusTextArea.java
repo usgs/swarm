@@ -33,13 +33,13 @@ public class StatusTextArea extends JTextArea {
   }  
 
   /**
-   * Perform coda duration calculation.
+   * Perform duration calculation.
    * 
-   * @param startMark coda duration start time in j2k
-   * @param endMark coda duration end time in j2k
-   * @return coda string
+   * @param startMark duration start time in j2k
+   * @param endMark duration end time in j2k
+   * @return duration string
    */
-  public static String getCoda(double startMark, double endMark) {
+  public static String getDuration(double startMark, double endMark) {
     if (swarmConfig.durationEnabled) {
       double duration = Math.abs(startMark - endMark);
       double durationMagnitude = swarmConfig.getDurationMagnitude(duration);
@@ -59,7 +59,7 @@ public class StatusTextArea extends JTextArea {
     double tzo = tz.getOffset(J2kSec.asEpoch(time));
     if (tzo != 0) {
       String tza = tz.getDisplayName(tz.inDaylightTime(J2kSec.asDate(time)), TimeZone.SHORT);
-      text = "Time at cursor: " + dateFormat.format(J2kSec.asDate(time + tzo / 1000)) + " (" + tza
+      text = dateFormat.format(J2kSec.asDate(time + tzo / 1000)) + " (" + tza
           + "), " + text + " (UTC)";
     }
     return text;

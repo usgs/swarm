@@ -35,6 +35,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -89,7 +90,7 @@ public abstract class AbstractWavePanel extends JComponent {
   protected Color backgroundColor;
   protected Color bottomBorderColor;
   protected StatusTextArea statusText;
-  protected boolean allowDragging = true; 
+  protected boolean allowDragging=true; 
   protected boolean dragging;
   protected double j2k1;
   protected double j2k2;
@@ -548,6 +549,12 @@ public abstract class AbstractWavePanel extends JComponent {
       status = StatusTextArea.getWaveInfo(wave);
 
       if (timeSeries) {
+
+        if (swarmConfig.durationEnabled && !Double.isNaN(mark1) && !Double.isNaN(mark2)) {
+          String durationString = StatusTextArea.getDuration(mark1, mark2);
+          status += ", " + durationString;
+        }
+        
         String timeString = StatusTextArea.getTimeString(time, swarmConfig.getTimeZone(channel));
         if (timeString != null) {
           status += "\n" + timeString;
@@ -572,7 +579,7 @@ public abstract class AbstractWavePanel extends JComponent {
         }
 
         status +=
-            String.format("\n%s: %.3f", unit, multiplier * yi + offset);
+            String.format(", %s: %.3f", unit, multiplier * yi + offset);
       } else {
         double xi = time;
         if (settings.viewType == ViewType.SPECTRA && settings.logFreq) {
@@ -584,10 +591,6 @@ public abstract class AbstractWavePanel extends JComponent {
         status += String.format("\nFrequency (Hz): %.6f, Power: %.3f", xi, yi);
       }
 
-      if (swarmConfig.durationEnabled && !Double.isNaN(mark1) && !Double.isNaN(mark2)) {
-        String durationString = StatusTextArea.getCoda(mark1, mark2);
-        status += "\n" + durationString;
-      }
     } 
     
     if (!pauseCursorMark) {
@@ -1088,9 +1091,7 @@ public abstract class AbstractWavePanel extends JComponent {
   }
   
   /**
-   * Plot particle motion.
-   * 
-   * <p>TODO: Option to remove bias
+   * Plot particle motion using detrended data.   
    */
   private void plotParticleMotion(Plot plot, Wave wave) {
     Metadata md = swarmConfig.getMetadata(channel);
@@ -1101,58 +1102,33 @@ public abstract class AbstractWavePanel extends JComponent {
 
     SliceWave swave = new SliceWave(wave);
     swave.setSlice(startTime, endTime);
-    double[] data = swave.getSignal();
-    double[] verticalWaveData = null;
-    double[] northWaveData = null;
-    double[] eastWaveData = null;
-    String vstation = null;
-    String nstation = null;
-    String estation = null;
+    HashMap<String, double[]> data = new HashMap<String, double[]>();
+    HashMap<String, String> stations = new HashMap<String, String>();
     String component = c.substring(2);
-    if (component.equals("Z")) {
-      verticalWaveData = data;
-      vstation = channel;
-    }
-    if (component.equals("N")) {
-      northWaveData = data;
-      nstation = channel;
-    }
-    if (component.equals("E")) {
-      eastWaveData = data;
-      estation = channel;
-    }
+    data.put(component, swave.getSignal());
+    stations.put(component, channel);
     for (String direction : new String[] {"Z", "N", "E"}) {
       if (!component.equals(direction)) {
         String newChannel = c.replaceFirst(".$", direction);
         String newStation = s + " " + newChannel + " " + n + " " + l;
+        stations.put(direction,  newStation);
         Wave w = source.getWave(newStation, startTime, endTime);
-        if (settings.filterOn) {
-          filter(w);
-        }
-        data = new double[0];
         if (w != null) {
+          if (settings.filterOn) {
+            filter(w);
+          }
           SliceWave sw = new SliceWave(w);
           sw.setSlice(startTime, endTime);
-          data = sw.getSignal();
-        }
-        if (direction.equals("Z")) {
-          verticalWaveData = data;
-          vstation = newStation;
-        }
-        if (direction.equals("N")) {
-          northWaveData = data;
-          nstation = newStation;
-        }
-        if (direction.equals("E")) {
-          eastWaveData = data;
-          estation = newStation;
+          data.put(direction, sw.getSignal());
+        } else {
+          data.put(direction, new double[0]);
         }
       }
     }
     
     ParticleMotionRenderer particleMotionRenderer =
-        new ParticleMotionRenderer(eastWaveData, northWaveData, verticalWaveData, 
-            estation, nstation, vstation);
+        new ParticleMotionRenderer(data.get("E"), data.get("N"), data.get("Z"), 
+            stations.get("E"), stations.get("N"), stations.get("Z"));
     particleMotionRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset,
         this.getHeight());
 
