@@ -1,5 +1,14 @@
 package gov.usgs.volcanoes.swarm.heli;
 
+import gov.usgs.util.GridBagHelper;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwarmModalDialog;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsDialog;
+
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -25,17 +34,8 @@ import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
-import gov.usgs.util.GridBagHelper;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.SwarmModalDialog;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsDialog;
-
 /**
- * 
+ * Helicorder viewer settings dialog.
  * @author Dan Cervelli
  */
 public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
@@ -46,10 +46,10 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
 
   private JPanel dialogPanel;
 
-  private JComboBox chunkList;
-  private JComboBox spanList;
+  private JComboBox<String> chunkList;
+  private JComboBox<String> spanList;
   private JTextField bottomTime;
-  private JComboBox zoomList;
+  private JComboBox<String> zoomList;
   private JTextField refreshInterval;
   private JTextField scrollSize;
   private DateFormat utcDateFormat;
@@ -72,26 +72,42 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
     utcDateFormat = new SimpleDateFormat("yyyyMMddHHmm");
     utcDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
-    createUI();
+    createUi();
     setSizeAndLocation();
   }
 
+  /**
+   * Get instance of helicorder viewer settins dialog.
+   * @param s helicorder viewer settings
+   * @param s2 wave view settings
+   * @return helicorder viewer settings dialog
+   */
   public static HelicorderViewerSettingsDialog getInstance(HelicorderViewerSettings s,
       WaveViewSettings s2) {
-    if (dialog == null)
+    if (dialog == null) {
       dialog = new HelicorderViewerSettingsDialog();
+    }
 
     dialog.setSettings(s, s2);
     // dialog.setToCurrent();
     return dialog;
   }
 
+  /**
+   * @see java.awt.Dialog#setVisible(boolean)
+   */
   public void setVisible(boolean b) {
-    if (b)
+    if (b) {
       this.getRootPane().setDefaultButton(okButton);
+    }
     super.setVisible(b);
   }
 
+  /**
+   * Set settings.
+   * @param s helicorder viewer settings
+   * @param s2 wave view settings
+   */
   public void setSettings(HelicorderViewerSettings s, WaveViewSettings s2) {
     settings = s;
     waveSettings = s2;
@@ -101,37 +117,40 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
   private void createComponents() {
     int[] values = HelicorderViewerFrame.chunkValues;
     String[] chunks = new String[values.length];
-    for (int i = 0; i < chunks.length; i++)
+    for (int i = 0; i < chunks.length; i++) {
       chunks[i] = Integer.toString(values[i] / 60);
-
-    chunkList = new JComboBox(chunks);
+    }
+    chunkList = new JComboBox<String>(chunks);
 
     values = HelicorderViewerFrame.spanValues;
     String[] spans = new String[values.length];
-    for (int i = 0; i < spans.length; i++)
+    for (int i = 0; i < spans.length; i++) {
       spans[i] = Integer.toString(values[i] / 60);
+    }
 
-    spanList = new JComboBox(spans);
+    spanList = new JComboBox<String>(spans);
   }
 
-  protected void createUI() {
-    super.createUI();
+  protected void createUi() {
+    super.createUi();
     createComponents();
 
     // AXIS PANEL
     int[] values = HelicorderViewerFrame.chunkValues;
     String[] chunks = new String[values.length];
-    for (int i = 0; i < chunks.length; i++)
+    for (int i = 0; i < chunks.length; i++) {
       chunks[i] = Integer.toString(values[i] / 60);
+    }
 
-    chunkList = new JComboBox(chunks);
+    chunkList = new JComboBox<String>(chunks);
 
     values = HelicorderViewerFrame.spanValues;
     String[] spans = new String[values.length];
-    for (int i = 0; i < spans.length; i++)
+    for (int i = 0; i < spans.length; i++) {
       spans[i] = Integer.toString(values[i] / 60);
+    }
 
-    spanList = new JComboBox(spans);
+    spanList = new JComboBox<String>(spans);
 
     JLabel chunkLabel = new JLabel("X, minutes:");
     chunkLabel.setLabelFor(chunkList);
@@ -163,17 +182,17 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
     // ZOOM PANEL
     values = HelicorderViewerFrame.zoomValues;
     String[] zooms = new String[values.length];
-    for (int i = 0; i < zooms.length; i++)
+    for (int i = 0; i < zooms.length; i++) {
       zooms[i] = Integer.toString(values[i]);
+    }
 
-    zoomList = new JComboBox(zooms);
+    zoomList = new JComboBox<String>(zooms);
     JLabel zoomLabel = new JLabel("Zoom, seconds:");
     zoomLabel.setLabelFor(zoomList);
     JButton waveSettingsButton = new JButton("Wave Settings", Icons.wavesettings);
     waveSettingsButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        WaveViewSettingsDialog wvsd = WaveViewSettingsDialog.getInstance(waveSettings);// new
-                                                                                       // WaveViewSettingsDialog(waveSettings);
+        WaveViewSettingsDialog wvsd = WaveViewSettingsDialog.getInstance(waveSettings);
         wvsd.setVisible(true);
       }
     });
@@ -313,9 +332,13 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
     worker.start();
   }
 
+  /**
+   * Set to current.
+   */
   public void setToCurrent() {
-    if (settings == null || waveSettings == null)
+    if (settings == null || waveSettings == null) {
       return;
+    }
 
     String tc = Integer.toString((int) (settings.timeChunk / 60.0));
     chunkList.setSelectedItem(tc);
@@ -327,9 +350,9 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
     zoomList.setSelectedItem(wzo);
 
     double bt = settings.getBottomTime();
-    if (Double.isNaN(bt))
+    if (Double.isNaN(bt)) {
       bottomTime.setText("Now");
-    else {
+    } else {
       double tzo =
           swarmConfig.getTimeZone(settings.channel).getOffset(System.currentTimeMillis()) / 1000;
 
@@ -347,25 +370,26 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
     showClip.setSelected(settings.showClip);
     alertClip.setSelected(settings.alertClip);
 
-    String alertTO = Integer.toString(settings.alertClipTimeout / 60);
-    alertClipTimeout.setText(alertTO);
+    String alertTimeOut = Integer.toString(settings.alertClipTimeout / 60);
+    alertClipTimeout.setText(alertTimeOut);
 
     setAutoScaleEnabled(settings.autoScale);
   }
 
-  protected void wasOK() {
+  protected void wasOk() {
     try {
       settings.timeChunk = Integer.parseInt(chunkList.getSelectedItem().toString()) * 60;
       settings.span = Integer.parseInt(spanList.getSelectedItem().toString()) * 60;
       settings.waveZoomOffset = Integer.parseInt(zoomList.getSelectedItem().toString());
       settings.refreshInterval = Integer.parseInt(refreshInterval.getText());
       settings.scrollSize = Integer.parseInt(scrollSize.getText());;
-      if (bottomTime.getText().toLowerCase().equals("now"))
+      if (bottomTime.getText().toLowerCase().equals("now")) {
         settings.setBottomTime(Double.NaN);
-      else {
+      } else {
         String t = bottomTime.getText();
-        if (t.length() == 8)
+        if (t.length() == 8) {
           t = t + "2359";
+        }
         Date bt = utcDateFormat.parse(t);
         double tzo = swarmConfig.getTimeZone(settings.channel).getOffset(bt.getTime()) / 1000;
 
@@ -389,7 +413,7 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
     }
   }
 
-  protected boolean allowOK() {
+  protected boolean allowOk() {
     String message = null;
     try {
       message = "Invalid time; legal format is 'YYYYMMDD' or 'YYYYMMDDhhmm' or 'Now'.";
@@ -397,23 +421,27 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
       if (!bottomTime.getText().toLowerCase().equals("now")) {
         Date bt = null;
         String t = bottomTime.getText();
-        if (t.length() == 8)
+        if (t.length() == 8) {
           t = t + "2359";
+        }
         bt = utcDateFormat.parse(t);
-        if (bt == null)
+        if (bt == null) {
           throw new ParseException(null, 0);
+        }
       }
 
       // validate
       message = "Invalid refresh interval; legal values are between 0 and 3600, 0 for no refresh.";
       int ri = Integer.parseInt(refreshInterval.getText());
-      if (ri < 0 || ri > 3600)
+      if (ri < 0 || ri > 3600) {
         throw new NumberFormatException();
+      }
 
       message = "Invalid scroll size; legal values are between 1 and 48.";
       int ss = Integer.parseInt(scrollSize.getText());
-      if (ss < 1 || ss > 48)
+      if (ss < 1 || ss > 48) {
         throw new NumberFormatException();
+      }
 
       message = "Invalid clip value.";
       Integer.parseInt(clipValue.getText());
