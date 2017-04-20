@@ -18,6 +18,7 @@ import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanel;
 import gov.usgs.volcanoes.swarm.time.UiTime;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
@@ -1160,7 +1161,7 @@ public abstract class AbstractWavePanel extends JComponent {
     
     // Test adding wave plot to clipboard
     Container parent = this.getParent();
-    if (!(parent instanceof Box)) {
+    if (parent instanceof HelicorderViewPanel) {
       for (final String station : waves.keySet()) {
         for (final int delta : new int[] {0, 10}) {
           final Wave w = source.getWave(station, startTime - delta, endTime + delta);
