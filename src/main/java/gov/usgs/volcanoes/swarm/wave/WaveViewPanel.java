@@ -6,24 +6,19 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 
-import gov.usgs.plot.Plot;
-import gov.usgs.plot.data.SliceWave;
-import gov.usgs.plot.data.Wave;
-import gov.usgs.plot.render.TextRenderer;
-import gov.usgs.plot.render.wave.SliceWaveRenderer;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-
 /**
  * A component that renders a wave in either a standard wave view, a frequency spectra, or
  * spectrogram. Relies heavily on the Valve plotting package.
  * 
- * TODO: move filter method
+ * <p>TODO: move filter method
  * 
  * 
  * @author Dan Cervelli
  */
 public class WaveViewPanel extends AbstractWavePanel {
+
+  private static final long serialVersionUID = 1L;
+
   /**
    * Constructs a WaveViewPanel with default settings.
    */
@@ -56,12 +51,14 @@ public class WaveViewPanel extends AbstractWavePanel {
   }
 
   private void paintMark(Graphics2D g2, double j2k) {
-    if (Double.isNaN(j2k) || j2k < startTime || j2k > endTime)
+    if (Double.isNaN(j2k) || j2k < startTime || j2k > endTime) {
       return;
+    }
 
     double[] t = getTranslation();
-    if (t == null)
+    if (t == null) {
       return;
+    }
 
     double x = (j2k - t[1]) / t[0];
     g2.setColor(DARK_GREEN);
@@ -80,11 +77,13 @@ public class WaveViewPanel extends AbstractWavePanel {
 
   @Override
   protected void annotateImage(Graphics2D g2) {
-    if (!Double.isNaN(mark1))
+    if (!Double.isNaN(mark1)) {
       paintMark(g2, mark1);
+    }
 
-    if (!Double.isNaN(mark2))
+    if (!Double.isNaN(mark2)) {
       paintMark(g2, mark2);
+    }
 
   }
 

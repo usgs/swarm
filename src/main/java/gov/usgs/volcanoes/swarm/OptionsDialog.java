@@ -1,5 +1,12 @@
 package gov.usgs.volcanoes.swarm;
 
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.factories.Borders;
+import com.jgoodies.forms.layout.FormLayout;
+
+import gov.usgs.volcanoes.swarm.map.NationalMapLayer;
+import gov.usgs.volcanoes.swarm.options.SwarmOptions;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,12 +24,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-
-import com.jgoodies.forms.builder.DefaultFormBuilder;
-import com.jgoodies.forms.layout.FormLayout;
-
-import gov.usgs.volcanoes.swarm.map.NationalMapLayer;
-import gov.usgs.volcanoes.swarm.options.SwarmOptions;
 
 /**
  * 
@@ -43,10 +44,10 @@ public class OptionsDialog extends SwarmModalDialog {
   private JCheckBox tzInstrument;
   private JRadioButton tzLocal;
   private JRadioButton tzSpecific;
-  private JComboBox timeZones;
+  private JComboBox<String> timeZones;
   private JComboBox<NationalMapLayer> natMapList;
   private JRadioButton useMapPacks;
-  private JRadioButton useWMS;
+  private JRadioButton useWms;
   private JTextField wmsServer;
   private JTextField wmsLayer;
   private JTextField wmsStyles;
@@ -54,9 +55,12 @@ public class OptionsDialog extends SwarmModalDialog {
   private JLabel wmsLayerLabel;
   private JLabel wmsStylesLabel;
 
+  /**
+   * Constructor.
+   */
   public OptionsDialog() {
     super(applicationFrame, "Options");
-    createUI();
+    createUi();
     setCurrentValues();
     setSizeAndLocation();
   }
@@ -74,30 +78,29 @@ public class OptionsDialog extends SwarmModalDialog {
     tzGroup.add(tzSpecific);
     String[] tzs = TimeZone.getAvailableIDs();
     Arrays.sort(tzs);
-    timeZones = new JComboBox(tzs);
+    timeZones = new JComboBox<String>(tzs);
 
     useMapPacks = new JRadioButton("Use local MapPacks");
-    useWMS = new JRadioButton("Use WMS");
+    useWms = new JRadioButton("Use WMS");
     ButtonGroup mapGroup = new ButtonGroup();
     mapGroup.add(useMapPacks);
-    mapGroup.add(useWMS);
+    mapGroup.add(useWms);
 
-    
+
     natMapList = new JComboBox<NationalMapLayer>(NationalMapLayer.values());
     wmsLayer = new JTextField();
     wmsServer = new JTextField();
     wmsStyles = new JTextField();
   }
 
-  protected void createUI() {
-    super.createUI();
+  protected void createUi() {
+    super.createUi();
     createFields();
 
     FormLayout layout = new FormLayout(
         "right:max(30dlu;pref), 3dlu, 40dlu, 3dlu, right:max(40dlu;pref), 3dlu, 40dlu", "");
 
-    DefaultFormBuilder builder = new DefaultFormBuilder(layout);
-    builder.setDefaultDialogBorder();
+    DefaultFormBuilder builder = new DefaultFormBuilder(layout).border(Borders.DIALOG);
 
     builder.appendSeparator("Time Zone");
 
@@ -126,7 +129,7 @@ public class OptionsDialog extends SwarmModalDialog {
     builder.appendSeparator("Maps");
     builder.append(useMapPacks, 7);
     builder.nextLine();
-    builder.append(useWMS, 7);
+    builder.append(useWms, 7);
     builder.nextLine();
     builder.append("USGS National Map:");
     builder.append(natMapList, 5);
@@ -153,14 +156,14 @@ public class OptionsDialog extends SwarmModalDialog {
       }
     });
 
-    natMapList.addActionListener (new ActionListener () {
+    natMapList.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        NationalMapLayer layer = (NationalMapLayer) ((JComboBox) e.getSource()).getSelectedItem();
+        NationalMapLayer layer = (NationalMapLayer)((JComboBox<?>) e.getSource()).getSelectedItem();
         wmsServer.setText(layer.server);
         wmsLayer.setText(layer.layer);
         wmsStyles.setText(layer.sytels);
       }
-  });
+    });
     builder.appendSeparator("Other");
     builder.append(useLargeCursor, 7);
     builder.nextLine();
@@ -169,6 +172,9 @@ public class OptionsDialog extends SwarmModalDialog {
     mainPanel.add(dialogPanel, BorderLayout.CENTER);
   }
 
+  /**
+   * Set enabled flags.
+   */
   public void doEnables() {
     boolean state = useMapPacks.isSelected();
     wmsServer.setEnabled(!state);
@@ -180,27 +186,34 @@ public class OptionsDialog extends SwarmModalDialog {
     natMapList.setEnabled(!state);
   }
 
+  /**
+   * Set current values.
+   */
   public void setCurrentValues() {
     useLargeCursor.setSelected(swarmConfig.useLargeCursor);
     durationA.setText(Double.toString(swarmConfig.durationA));
     durationB.setText(Double.toString(swarmConfig.durationB));
     durationEnabled.setSelected(swarmConfig.durationEnabled);
     tzInstrument.setSelected(swarmConfig.useInstrumentTimeZone);
-    if (swarmConfig.useLocalTimeZone)
+    if (swarmConfig.useLocalTimeZone) {
       tzLocal.setSelected(true);
-    else
+    } else {
       tzSpecific.setSelected(true);
+    }
     timeZones.setSelectedItem(swarmConfig.specificTimeZone.getID());
 
     useMapPacks.setSelected(!swarmConfig.useWMS);
-    useWMS.setSelected(swarmConfig.useWMS);
+    useWms.setSelected(swarmConfig.useWMS);
     wmsServer.setText(swarmConfig.wmsServer);
     wmsLayer.setText(swarmConfig.wmsLayer);
     wmsStyles.setText(swarmConfig.wmsStyles);
     doEnables();
   }
 
-  public boolean allowOK() {
+  /**
+   * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#allowOk()
+   */
+  public boolean allowOk() {
     String message = null;
     try {
       message = "The duration magnitude constants must be numbers.";
@@ -214,7 +227,10 @@ public class OptionsDialog extends SwarmModalDialog {
     return false;
   }
 
-  public void wasOK() {
+  /**
+   * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#wasOk()
+   */
+  public void wasOk() {
     swarmConfig.useLargeCursor = useLargeCursor.isSelected();
     swarmConfig.durationEnabled = durationEnabled.isSelected();
     swarmConfig.durationA = Double.parseDouble(durationA.getText().trim());
@@ -222,7 +238,7 @@ public class OptionsDialog extends SwarmModalDialog {
     swarmConfig.useInstrumentTimeZone = tzInstrument.isSelected();
     swarmConfig.useLocalTimeZone = tzLocal.isSelected();
     swarmConfig.specificTimeZone = TimeZone.getTimeZone((String) timeZones.getSelectedItem());
-    swarmConfig.useWMS = useWMS.isSelected();
+    swarmConfig.useWMS = useWms.isSelected();
     swarmConfig.wmsServer = wmsServer.getText();
     swarmConfig.wmsLayer = wmsLayer.getText();
     swarmConfig.wmsStyles = wmsStyles.getText();

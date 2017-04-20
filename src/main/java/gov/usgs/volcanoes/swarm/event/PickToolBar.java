@@ -1,13 +1,14 @@
 /**
- * I waive copyright and related rights in the this work worldwide
- * through the CC0 1.0 Universal public domain dedication.
- * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ * I waive copyright and related rights in the this work worldwide through the CC0 1.0 Universal
+ * public domain dedication. https://creativecommons.org/publicdomain/zero/1.0/legalcode
  */
 
 package gov.usgs.volcanoes.swarm.event;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.SwarmUtil;
+import gov.usgs.volcanoes.swarm.Throbber;
+import gov.usgs.volcanoes.swarm.wave.WaveViewToolBar;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,10 +21,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToolBar;
 
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.SwarmUtil;
-import gov.usgs.volcanoes.swarm.Throbber;
-import gov.usgs.volcanoes.swarm.wave.WaveViewToolBar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Toolbar used in event frame.
@@ -33,7 +32,7 @@ import gov.usgs.volcanoes.swarm.wave.WaveViewToolBar;
  */
 public class PickToolBar extends JToolBar implements PickBoxListener {
   private static final long serialVersionUID = 1L;
-  private final static Logger LOGGER = LoggerFactory.getLogger(PickToolBar.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(PickToolBar.class);
 
   private final JButton sizeButton;
   private final JButton sortButton;
@@ -51,6 +50,10 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
 
   private final PickToolBarListener listener;
 
+  /**
+   * Constructor.
+   * @param listener Pick tool bar listener
+   */
   public PickToolBar(PickToolBarListener listener) {
     this.listener = listener;
     setFloatable(false);
@@ -67,13 +70,16 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
     histButton = createHistButton();
     placeButtons();
 
-    waveViewToolBar =  new WaveViewToolBar(null, this, listener);
+    waveViewToolBar = new WaveViewToolBar(null, this, listener);
     selectCountChanged(0);
     add(Box.createHorizontalGlue());
     throbber = new Throbber();
     add(throbber);
   }
 
+  /**
+   * Add buttons to tool bar.
+   */
   public void placeButtons() {
     add(sizeButton);
     add(sortButton);
@@ -88,6 +94,9 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
     addSeparator();
   }
 
+  /** 
+   * @see gov.usgs.volcanoes.swarm.event.PickBoxListener#selectCountChanged(int)
+   */
   public void selectCountChanged(int count) {
     LOGGER.debug("New select count {}", count);
     boolean enable = count > 0;
@@ -120,8 +129,8 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
 
     return captureButton;
   }
-  
-  
+
+
   private JButton createSortButton() {
     JButton sortButton = SwarmUtil.createToolBarButton(Icons.geosort,
         "Sort waves by nearest to selected wave", new ActionListener() {
@@ -129,7 +138,7 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
             listener.sortChannelsByNearest();
           }
         });
-    
+
     return sortButton;
   }
 
@@ -229,12 +238,14 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
               listener.setWaveHeight(size);
             }
           });
-          if (waveHeight == size)
+          if (waveHeight == size) {
             mi.setSelected(true);
+          }
           group.add(mi);
           popup.add(mi);
-        } else
+        } else {
           popup.addSeparator();
+        }
       }
     }
     popup.show(sizeButton.getParent(), sizeButton.getX(), sizeButton.getY());

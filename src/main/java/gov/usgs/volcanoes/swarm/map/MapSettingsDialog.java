@@ -1,5 +1,13 @@
 package gov.usgs.volcanoes.swarm.map;
 
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.factories.Borders;
+import com.jgoodies.forms.layout.FormLayout;
+
+import gov.usgs.volcanoes.swarm.SwarmModalDialog;
+import gov.usgs.volcanoes.swarm.map.MapPanel.LabelSetting;
+import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterSource;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,16 +26,8 @@ import javax.swing.JTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jgoodies.forms.builder.DefaultFormBuilder;
-import com.jgoodies.forms.layout.FormLayout;
-
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.SwarmModalDialog;
-import gov.usgs.volcanoes.swarm.map.MapPanel.LabelSetting;
-import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterSource;
-
 /**
- * 
+ * Map Settings Dialog.
  * @author Dan Cervelli
  */
 public class MapSettingsDialog extends SwarmModalDialog {
@@ -49,14 +49,18 @@ public class MapSettingsDialog extends SwarmModalDialog {
   private JRadioButton noLabels;
   private JButton mapLine;
   private JColorChooser lineChooser;
-  private JComboBox hypocenterSource;
+  private JComboBox<HypocenterSource> hypocenterSource;
 
   private MapFrame mapFrame;
 
+  /**
+   * Constructor.
+   * @param mapFrame map frame
+   */
   public MapSettingsDialog(MapFrame mapFrame) {
     super(applicationFrame, "Map Settings", "mapSettings.md");
     this.mapFrame = mapFrame;
-    createUI();
+    createUi();
     setToCurrent();
     setSizeAndLocation();
   }
@@ -75,7 +79,7 @@ public class MapSettingsDialog extends SwarmModalDialog {
     labelGroup.add(allLabels);
     labelGroup.add(noLabels);
     mapLine = new JButton();
-    hypocenterSource = new JComboBox(HypocenterSource.values());
+    hypocenterSource = new JComboBox<HypocenterSource>(HypocenterSource.values());
     lineChooser = new JColorChooser();
     lineChooser.setPreviewPanel(new MapLinePreview());
 
@@ -95,14 +99,13 @@ public class MapSettingsDialog extends SwarmModalDialog {
 
   }
 
-  protected void createUI() {
-    super.createUI();
+  protected void createUi() {
+    super.createUi();
     createFields();
 
     FormLayout layout = new FormLayout("right:max(30dlu;pref), 3dlu, 50dlu, 3dlu, 30dlu", "");
 
-    DefaultFormBuilder builder = new DefaultFormBuilder(layout);
-    builder.setDefaultDialogBorder();
+    DefaultFormBuilder builder = new DefaultFormBuilder(layout).border(Borders.DIALOG);
 
     builder.appendSeparator("Location");
     builder.append("Longitude:");
@@ -144,17 +147,25 @@ public class MapSettingsDialog extends SwarmModalDialog {
 
   }
 
+  /**
+   * @see java.awt.Dialog#setVisible(boolean)
+   */
   public void setVisible(boolean b) {
-    if (b)
+    if (b) {
       this.getRootPane().setDefaultButton(okButton);
+    }
     super.setVisible(b);
   }
 
+  /**
+   * Set to current.
+   */
   public void setToCurrent() {
     MapPanel panel = mapFrame.getMapPanel();
-    if (panel == null) 
+    if (panel == null) {
       return;
-    
+    }
+
     longitude.setText(String.format("%.4f", panel.getCenter().x));
     latitude.setText(String.format("%.4f", panel.getCenter().y));
     scale.setText(String.format("%.1f", panel.getScale()));
@@ -171,18 +182,21 @@ public class MapSettingsDialog extends SwarmModalDialog {
       case NONE:
         noLabels.setSelected(true);
         break;
+      default:
+        break;
     }
     hypocenterSource.setSelectedItem(swarmConfig.getHypocenterSource());
   }
 
-  protected void wasOK() {
+  protected void wasOk() {
     try {
       MapPanel panel = mapFrame.getMapPanel();
       LabelSetting ls = LabelSetting.ALL;
-      if (someLabels.isSelected())
+      if (someLabels.isSelected()) {
         ls = LabelSetting.SOME;
-      else if (noLabels.isSelected())
+      } else if (noLabels.isSelected()) {
         ls = LabelSetting.NONE;
+      }
       panel.setLabelSetting(ls);
       Point2D.Double center = new Point2D.Double();
       center.x = Double.parseDouble(longitude.getText());
@@ -191,7 +205,7 @@ public class MapSettingsDialog extends SwarmModalDialog {
       panel.setCenterAndScale(center, sc);
       swarmConfig.mapLineWidth = Integer.parseInt(lineWidth.getText());
       mapFrame.setRefreshInterval(Math.round(Double.parseDouble(refreshInterval.getText()) * 1000));
-      
+
       swarmConfig.setHypocenterSource((HypocenterSource) hypocenterSource.getSelectedItem());
     } catch (Exception e) {
       LOGGER.debug("Exception caught while accepting map options.");
@@ -199,34 +213,39 @@ public class MapSettingsDialog extends SwarmModalDialog {
     }
   }
 
-  protected boolean allowOK() {
+  protected boolean allowOk() {
     String message = null;
     try {
       message =
-          "Invalid refresh interval; legal values are between 0 and 3600, 0 to refresh continuously.";
+        "Invalid refresh interval; legal values are between 0 and 3600, 0 to refresh continuously.";
       double ri = Double.parseDouble(refreshInterval.getText());
-      if (ri < 0 || ri > 3600)
+      if (ri < 0 || ri > 3600) {
         throw new NumberFormatException();
+      }
 
       message = "Invalid longitude; legal values are between -180 and 180.";
       double lon = Double.parseDouble(longitude.getText());
-      if (lon < -180 || lon > 180)
+      if (lon < -180 || lon > 180) {
         throw new NumberFormatException();
+      }
 
       message = "Invalid latitude; legal values are between -90 and 90.";
       double lat = Double.parseDouble(latitude.getText());
-      if (lat < -90 || lat > 90)
+      if (lat < -90 || lat > 90) {
         throw new NumberFormatException();
+      }
 
       message = "Invalid scale; legal values are greater than 0.";
       double sc = Double.parseDouble(scale.getText());
-      if (sc <= 0)
+      if (sc <= 0) {
         throw new NumberFormatException();
+      }
 
       message = "Invalid line width; legal values are integers greater than 0.";
       int i = Integer.parseInt(lineWidth.getText());
-      if (i <= 0)
+      if (i <= 0) {
         throw new NumberFormatException();
+      }
 
       return true;
     } catch (Exception e) {

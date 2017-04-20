@@ -3,7 +3,17 @@
  * through the CC0 1.0 Universal public domain dedication.
  * https://creativecommons.org/publicdomain/zero/1.0/legalcode
  */
+
 package gov.usgs.volcanoes.swarm.event;
+
+import gov.usgs.volcanoes.core.quakeml.Arrival;
+import gov.usgs.volcanoes.core.quakeml.EventObserver;
+import gov.usgs.volcanoes.core.quakeml.Pick;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.swarm.time.TimeListener;
+import gov.usgs.volcanoes.swarm.time.WaveViewTime;
+import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -16,15 +26,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Stack;
-
-import gov.usgs.volcanoes.core.quakeml.Arrival;
-import gov.usgs.volcanoes.core.quakeml.EventObserver;
-import gov.usgs.volcanoes.core.quakeml.Pick;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.swarm.time.TimeListener;
-import gov.usgs.volcanoes.swarm.time.WaveViewTime;
-import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
 
 /**
  * A wave panel which adds pick annotations.
@@ -44,6 +45,9 @@ public class PickWavePanel extends AbstractWavePanel
   private final List<Arrival> arrivals;
   private final Stack<double[]> zoomHistory;
 
+  /**
+   * Default constructor.
+   */
   public PickWavePanel() {
     super();
     allowDragging = true;
@@ -84,11 +88,11 @@ public class PickWavePanel extends AbstractWavePanel
     for (Arrival arrival : arrivals) {
       Pick pick = arrival.getPick();
 
-      String tag = arrival.getTag();
       double j2k = J2kSec.fromEpoch(pick.getTime());
       double[] t = getTranslation();
-      if (t == null)
+      if (t == null) {
         continue;
+      }
 
       double x = 2 + (j2k - t[1]) / t[0];
       g2.setColor(DARK_GREEN);
@@ -105,6 +109,7 @@ public class PickWavePanel extends AbstractWavePanel
       g2.setFont(ANNOTATION_FONT);
 
       FontMetrics fm = g2.getFontMetrics();
+      String tag = arrival.getTag();
       int width = fm.stringWidth(tag);
       int height = fm.getAscent();
 
@@ -143,6 +148,10 @@ public class PickWavePanel extends AbstractWavePanel
     return Arrival.distanceComparator().compare(arrivals.get(0), o.arrivals.get(0));
   }
 
+  /**
+   * Create and return distance comparator.
+   * @return comparator of PickWavePanel
+   */
   public static Comparator<PickWavePanel> distanceComparator() {
     return new Comparator<PickWavePanel>() {
       public int compare(final PickWavePanel e1, final PickWavePanel e2) {
@@ -151,6 +160,11 @@ public class PickWavePanel extends AbstractWavePanel
     };
   }
 
+  /**
+   * Create and return station distance comparator.
+   * @param panel pick wave panel
+   * @return comparator of PickWavePanel
+   */
   public static Comparator<PickWavePanel> stationDistanceComparator(final PickWavePanel panel) {
     return new Comparator<PickWavePanel>() {
       public int compare(final PickWavePanel e1, final PickWavePanel e2) {

@@ -1,32 +1,5 @@
 package gov.usgs.volcanoes.swarm.wave;
 
-
-
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Paint;
-import java.awt.Rectangle;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
-import java.awt.geom.Line2D;
-import java.awt.image.BufferedImage;
-import java.util.Arrays;
-import java.util.TimeZone;
-
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
-import javax.swing.event.EventListenerList;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gov.usgs.math.Filter;
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
@@ -34,11 +7,11 @@ import gov.usgs.plot.data.SliceWave;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.decorate.FrameDecorator;
 import gov.usgs.plot.render.TextRenderer;
+import gov.usgs.plot.render.wave.ParticleMotionRenderer;
 import gov.usgs.plot.render.wave.SliceWaveRenderer;
 import gov.usgs.plot.render.wave.SpectraRenderer;
 import gov.usgs.plot.render.wave.SpectrogramRenderer;
 import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
@@ -48,6 +21,29 @@ import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.time.UiTime;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
+
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Paint;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.awt.geom.Line2D;
+import java.awt.image.BufferedImage;
+import java.util.Arrays;
+import java.util.HashMap;
+
+import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
+import javax.swing.event.EventListenerList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public abstract class AbstractWavePanel extends JComponent {
 
@@ -74,7 +70,6 @@ public abstract class AbstractWavePanel extends JComponent {
   protected double startTime;
   protected double endTime;
   protected WaveViewSettings settings;
-  protected int bias;
   protected double minAmp = 1E300;
   protected double maxAmp = -1E300;
   protected double maxSpectraPower = -1E300;
@@ -94,8 +89,8 @@ public abstract class AbstractWavePanel extends JComponent {
   protected boolean displayTitle;
   protected Color backgroundColor;
   protected Color bottomBorderColor;
-  protected JLabel statusLabel;
-  protected boolean allowDragging;
+  protected StatusTextArea statusText;
+  protected boolean allowDragging=true; 
   protected boolean dragging;
   protected double j2k1;
   protected double j2k2;
@@ -125,6 +120,9 @@ public abstract class AbstractWavePanel extends JComponent {
   protected double time;
 
 
+  /**
+   * Default constructor.
+   */
   public AbstractWavePanel() {
     super();
     swarmConfig = SwarmConfig.getInstance();
@@ -136,6 +134,10 @@ public abstract class AbstractWavePanel extends JComponent {
 
   }
 
+  /**
+   * Constructor.
+   * @param s wave settings
+   */
   public AbstractWavePanel(WaveViewSettings s) {
     this();
     settings = s;
@@ -155,7 +157,6 @@ public abstract class AbstractWavePanel extends JComponent {
     source = p.source;
     startTime = p.startTime;
     endTime = p.endTime;
-    bias = p.bias;
     maxSpectraPower = p.maxSpectraPower;
     maxSpectrogramPower = p.maxSpectrogramPower;
     timeSeries = p.timeSeries;
@@ -167,8 +168,9 @@ public abstract class AbstractWavePanel extends JComponent {
     mark2 = p.mark2;
 
     translation = new double[8];
-    if (p.translation != null)
+    if (p.translation != null) {
       System.arraycopy(p.translation, 0, translation, 0, 8);
+    }
 
     settings = new WaveViewSettings(p.settings);
     settings.view = this;
@@ -176,6 +178,13 @@ public abstract class AbstractWavePanel extends JComponent {
     processSettings();
   }
 
+  /**
+   * Set offsets.
+   * @param xo x offset
+   * @param yo y offset
+   * @param rw right width
+   * @param bh bottom height
+   */
   public void setOffsets(int xo, int yo, int rw, int bh) {
     xOffset = xo;
     yOffset = yo;
@@ -191,20 +200,43 @@ public abstract class AbstractWavePanel extends JComponent {
     listeners.remove(WaveViewPanelListener.class, listener);
   }
 
-  public void fireZoomed(MouseEvent e, double oldST, double oldET, double newST, double newET) {
+  /**
+   * Fire zoom on wave.
+   * @param e mouse event
+   * @param oldStartTime old start time
+   * @param oldEndTime old end time
+   * @param newStartTime new start time
+   * @param newEndTime new end time
+   */
+  public void fireZoomed(MouseEvent e, double oldStartTime, double oldEndTime, 
+                                        double newStartTime, double newEndTime) {
     Object[] ls = listeners.getListenerList();
-    for (int i = ls.length - 2; i >= 0; i -= 2)
-      if (ls[i] == WaveViewPanelListener.class)
-        ((WaveViewPanelListener) ls[i + 1]).waveZoomed(this, oldST, oldET, newST, newET);
+    for (int i = ls.length - 2; i >= 0; i -= 2) {
+      if (ls[i] == WaveViewPanelListener.class) {
+        ((WaveViewPanelListener) ls[i + 1]).waveZoomed(
+                  this, oldStartTime, oldEndTime, newStartTime, newEndTime);
+      }
+    }
   }
 
+  /**
+   * Fire time pressed.
+   * @param e mouse event
+   * @param j2k J2000 time
+   */
   public void fireTimePressed(MouseEvent e, double j2k) {
     Object[] ls = listeners.getListenerList();
-    for (int i = ls.length - 2; i >= 0; i -= 2)
-      if (ls[i] == WaveViewPanelListener.class)
+    for (int i = ls.length - 2; i >= 0; i -= 2) {
+      if (ls[i] == WaveViewPanelListener.class) {
         ((WaveViewPanelListener) ls[i + 1]).waveTimePressed(this, e, j2k);
+      }
+    }
   }
 
+  /**
+   * Fire mouse pressed event.
+   * @param e mouse event
+   */
   public void fireMousePressed(MouseEvent e) {
     Object[] ls = listeners.getListenerList();
     for (int i = ls.length - 2; i >= 0; i -= 2) {
@@ -215,20 +247,25 @@ public abstract class AbstractWavePanel extends JComponent {
     }
   }
 
+  /**
+   * Fire wave close event.
+   */
   public void fireClose() {
     Object[] ls = listeners.getListenerList();
-    for (int i = ls.length - 2; i >= 0; i -= 2)
-      if (ls[i] == WaveViewPanelListener.class)
+    for (int i = ls.length - 2; i >= 0; i -= 2) {
+      if (ls[i] == WaveViewPanelListener.class) {
         ((WaveViewPanelListener) ls[i + 1]).waveClosed(this);
+      }
+    }
   }
 
   public void setAllowClose(boolean b) {
     allowClose = b;
   }
 
-  abstract protected void processRightMousePress(MouseEvent e);
+  protected abstract void processRightMousePress(MouseEvent e);
 
-  abstract protected void processRightMouseRelease(MouseEvent e);
+  protected abstract void processRightMouseRelease(MouseEvent e);
 
   protected void setupMouseHandler() {
     Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
@@ -237,20 +274,22 @@ public abstract class AbstractWavePanel extends JComponent {
       public void mousePressed(MouseEvent e) {
         UiTime.touchTime();
 
+        if (SwingUtilities.isRightMouseButton(e)) {
+          processRightMousePress(e);
+        }
+
         double[] t = getTranslation();
         if (t != null) {
           int x = e.getX();
           double j2k = x * t[0] + t[1];
-          if (timeSeries)
+          if (timeSeries) {
             System.out.printf("%s UTC: %s j2k: %.3f ew: %d\n", channel, J2kSec.toDateString(j2k),
                 j2k, J2kSec.asEpoch(j2k));
-
-          if (SwingUtilities.isRightMouseButton(e)) {
-            processRightMousePress(e);
           }
 
-          if (timeSeries && j2k >= startTime && j2k <= endTime)
+          if (timeSeries && j2k >= startTime && j2k <= endTime) {
             fireTimePressed(e, j2k);
+          }
 
           if (timeSeries && allowDragging && SwingUtilities.isLeftMouseButton(e)) {
             Dimension size = getSize();
@@ -338,14 +377,20 @@ public abstract class AbstractWavePanel extends JComponent {
     });
   }
 
+  /**
+   * Wave zoom.
+   * @param st start time
+   * @param et end time
+   */
   public void zoom(final double st, final double et) {
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
         Wave sw = null;
-        if (source instanceof CachedDataSource)
+        if (source instanceof CachedDataSource) {
           sw = ((CachedDataSource) source).getBestWave(channel, st, et);
-        else
+        } else {
           sw = source.getWave(channel, st, et);
+        }
         setWave(sw, st, et);
         return null;
       }
@@ -377,8 +422,8 @@ public abstract class AbstractWavePanel extends JComponent {
     allowDragging = b;
   }
 
-  public void setStatusLabel(JLabel l) {
-    statusLabel = l;
+  public void setStatusText(StatusTextArea text) {
+    statusText = text;
   }
 
   public int getXOffset() {
@@ -489,9 +534,8 @@ public abstract class AbstractWavePanel extends JComponent {
    * @param y the mouse y position
    */
   public boolean processMousePosition(int x, int y) {
-    String status = null;
+    String status = "";
     String unit = null;
-    String waveInfo = null;
 
     Dimension size = getSize();
     double[] t = getTranslation();
@@ -502,30 +546,26 @@ public abstract class AbstractWavePanel extends JComponent {
       time = x * t[0] + t[1];
       double yi = y * -t[2] + t[3];
 
-      int[] dataRange = wave.getDataRange();
-      waveInfo = String.format("[%s - %s (UTC), %d samples (%.2f s), %d samples/s, %d, %d]",
-          J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, wave.getStartTime()),
-          J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, wave.getEndTime()), wave.numSamples(),
-          wave.numSamples() / wave.getSamplingRate(), (int) wave.getSamplingRate(), dataRange[0],
-          dataRange[1]);
+      status = StatusTextArea.getWaveInfo(wave);
 
       if (timeSeries) {
-        String utc = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, time);
-        TimeZone tz = swarmConfig.getTimeZone(channel);
-        double tzo = tz.getOffset(J2kSec.asEpoch(time)) / 1000;
-        if (tzo != 0) {
-          String tza = tz.getDisplayName(tz.inDaylightTime(J2kSec.asDate(time)), TimeZone.SHORT);
-          status = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, time + tzo) + " (" + tza + "), "
-              + utc + " (UTC)";
-        } else
-          status = utc;
+
+        if (swarmConfig.durationEnabled && !Double.isNaN(mark1) && !Double.isNaN(mark2)) {
+          String durationString = StatusTextArea.getDuration(mark1, mark2);
+          status += ", " + durationString;
+        }
+        
+        String timeString = StatusTextArea.getTimeString(time, swarmConfig.getTimeZone(channel));
+        if (timeString != null) {
+          status += "\n" + timeString;
+        }
 
         double offset = 0;
         double multiplier = 1;
 
-        if (settings.viewType == ViewType.SPECTROGRAM)
+        if (settings.viewType == ViewType.SPECTROGRAM) {
           unit = "Frequency (Hz)";
-        else {
+        } else {
           Metadata md = swarmConfig.getMetadata(channel);
           if (md != null) {
             offset = md.getOffset();
@@ -533,50 +573,37 @@ public abstract class AbstractWavePanel extends JComponent {
             unit = md.getUnit();
           }
 
-          if (unit == null)
+          if (unit == null) {
             unit = "Counts";
+          }
         }
 
-        // System.out.printf("Multipler: %f, Offset: %f\n", offset,
-        // multiplier);
-        status =
-            String.format("%s, %s: %.3f, %s", status, unit, multiplier * yi + offset, waveInfo);
-
-      }
-
-      else {
+        status +=
+            String.format(", %s: %.3f", unit, multiplier * yi + offset);
+      } else {
         double xi = time;
-        if (settings.viewType == ViewType.SPECTRA && settings.logFreq)
+        if (settings.viewType == ViewType.SPECTRA && settings.logFreq) {
           xi = Math.pow(10.0, xi);
-        if (settings.viewType == ViewType.SPECTRA && settings.logPower)
+        }
+        if (settings.viewType == ViewType.SPECTRA && settings.logPower) {
           yi = Math.pow(10.0, yi);
-        status = String.format("%s, Frequency (Hz): %.6f, Power: %.3f", waveInfo, xi, yi);
+        }
+        status += String.format("\nFrequency (Hz): %.6f, Power: %.3f", xi, yi);
       }
-    } else {
-      status = " ";
-    }
 
-    if (!pauseCursorMark)
-      WaveViewTime.fireTimeChanged(time);
-
-    if (status == null)
-      status = " ";
-
-    if (!Double.isNaN(mark1) && !Double.isNaN(mark2)) {
-      double dur = Math.abs(mark1 - mark2);
-      String pre =
-          String.format("Duration: %.2fs (Md: %.2f)", dur, swarmConfig.getDurationMagnitude(dur));
-      if (status.length() > 2)
-        status = pre + ", " + status;
-      else
-        status = pre;
-    }
+    } 
     
-    if (status != null && statusLabel != null) {
+    if (!pauseCursorMark) {
+      WaveViewTime.fireTimeChanged(time);
+    }
+
+
+
+    if (status != null && statusText != null) {
       final String st = status;
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          statusLabel.setText(st);
+          statusText.setText(st);
         }
       });
     }
@@ -584,6 +611,12 @@ public abstract class AbstractWavePanel extends JComponent {
     return !status.equals(" ");
   }
 
+  /**
+   * Set wave.
+   * @param sw wave to set to
+   * @param st start time
+   * @param et end time
+   */
   public void setWave(Wave sw, double st, double et) {
     wave = sw;
     startTime = st;
@@ -591,6 +624,9 @@ public abstract class AbstractWavePanel extends JComponent {
     processSettings();
   }
 
+  /**
+   * Reset auto scale memory settings.
+   */
   public void resetAutoScaleMemory() {
     minAmp = 1E300;
     maxAmp = -1E300;
@@ -601,6 +637,10 @@ public abstract class AbstractWavePanel extends JComponent {
     processSettings();
   }
 
+  /**
+   * Adjust scale by percent.
+   * @param pct percent to scale to.
+   */
   public void adjustScale(double pct) {
     double maxa = settings.autoScaleAmp ? maxAmp : settings.maxAmp;
     double mina = settings.autoScaleAmp ? minAmp : settings.minAmp;
@@ -630,6 +670,9 @@ public abstract class AbstractWavePanel extends JComponent {
     return image;
   }
 
+  /**
+   * Create image.
+   */
   public void createImage() {
     final Runnable r = new Runnable() {
       public void run() {
@@ -665,13 +708,22 @@ public abstract class AbstractWavePanel extends JComponent {
    * Does NOT call repaint for efficiency purposes, that is left to the container.
    */
   protected void processSettings() {
-    if (wave == null || wave.buffer == null || wave.buffer.length == 0)
+    if (wave == null || wave.buffer == null || wave.buffer.length == 0) {
       return;
+    }
 
-    if (settings.maxFreq > wave.getNyquist())
+    if (settings.maxFreq > wave.getNyquist()) {
       settings.maxFreq = wave.getNyquist();
+    }
 
-    timeSeries = !(settings.viewType == ViewType.SPECTRA);
+    switch (settings.viewType) {
+      case SPECTRA:
+      case PARTICLE_MOTION:
+        timeSeries = false;
+        break;
+      default:
+        timeSeries = true;
+    }
 
     createImage();
   }
@@ -679,36 +731,40 @@ public abstract class AbstractWavePanel extends JComponent {
   private void filter(Wave w) {
     double mean = w.mean();
 
-    double[] dBuf = new double[w.buffer.length + (int) (w.buffer.length * 0.5)];
-    Arrays.fill(dBuf, mean);
+    double[] buf = new double[w.buffer.length + (int) (w.buffer.length * 0.5)];
+    Arrays.fill(buf, mean);
     int trueStart = (int) (w.buffer.length * 0.25);
     for (int i = 0; i < w.buffer.length; i++) {
-      if (w.buffer[i] != Wave.NO_DATA)
-        dBuf[i + trueStart] = w.buffer[i];
+      if (w.buffer[i] != Wave.NO_DATA) {
+        buf[i + trueStart] = w.buffer[i];
+      }
     }
 
     settings.filter.setSamplingRate(w.getSamplingRate());
     settings.filter.create();
-    Filter.filter(dBuf, settings.filter.getSize(), settings.filter.getXCoeffs(),
+    Filter.filter(buf, settings.filter.getSize(), settings.filter.getXCoeffs(),
         settings.filter.getYCoeffs(), settings.filter.getGain(), 0, 0);
     if (settings.zeroPhaseShift) {
-      double[] dBuf2 = new double[dBuf.length];
-      for (int i = 0, j = dBuf.length - 1; i < dBuf.length; i++, j--)
-        dBuf2[j] = dBuf[i];
+      double[] buf2 = new double[buf.length];
+      for (int i = 0, j = buf.length - 1; i < buf.length; i++, j--) {
+        buf2[j] = buf[i];
+      }
 
-      Filter.filter(dBuf2, settings.filter.getSize(), settings.filter.getXCoeffs(),
+      Filter.filter(buf2, settings.filter.getSize(), settings.filter.getXCoeffs(),
           settings.filter.getYCoeffs(), settings.filter.getGain(), 0, 0);
 
-      for (int i = 0, j = dBuf2.length - 1 - trueStart; i < w.buffer.length; i++, j--)
-        w.buffer[i] = (int) Math.round(dBuf2[j]);
+      for (int i = 0, j = buf2.length - 1 - trueStart; i < w.buffer.length; i++, j--) {
+        w.buffer[i] = (int) Math.round(buf2[j]);
+      }
     } else {
-      for (int i = 0; i < w.buffer.length; i++)
-        w.buffer[i] = (int) Math.round(dBuf[i + trueStart]);
+      for (int i = 0; i < w.buffer.length; i++) {
+        w.buffer[i] = (int) Math.round(buf[i + trueStart]);
+      }
     }
     w.invalidateStatistics();
   }
 
-  abstract protected void annotateImage(Graphics2D g2);
+  protected abstract void annotateImage(Graphics2D g2);
 
   /**
    * Paints the component on the specified graphics context.
@@ -716,42 +772,47 @@ public abstract class AbstractWavePanel extends JComponent {
    * @param g the graphics context
    */
   public void paint(Graphics g) {
-if (getVisibleRect().isEmpty()) {
-  return;
-}
+    if (getVisibleRect().isEmpty()) {
+      return;
+    }
     Graphics2D g2 = (Graphics2D) g;
     Dimension dim = this.getSize();
     if (wave == null) {
       g2.setColor(backgroundColor);
       g2.fillRect(0, 0, dim.width, dim.height);
       g2.setColor(Color.black);
-      if (working)
+      if (working) {
         g2.drawString("Retrieving data...", dim.width / 2 - 50, dim.height / 2);
-      else {
+      } else {
         String error = "No wave data.";
-        if (channel != null)
+        if (channel != null) {
           error = "No wave data for " + channel + ".";
+        }
         int w = g2.getFontMetrics().stringWidth(error);
         g2.drawString(error, dim.width / 2 - w / 2, dim.height / 2);
       }
     } else {
       BufferedImage bi = getImage();
-      if (bi != null)
+      if (bi != null) {
         g2.drawImage(bi, 0, 0, null);
+      }
 
-      if (dragging)
+      if (dragging) {
         paintDragBox(g2);
+      }
 
       annotateImage(g2);
 
 
-      if (!Double.isNaN(cursorMark))
+      if (!Double.isNaN(cursorMark)) {
         paintCursor(g2);
+      }
     }
 
     if (allowClose) {
-      if (closeImg == null)
+      if (closeImg == null) {
         closeImg = Icons.close_view.getImage();
+      }
 
       g2.drawImage(closeImg, dim.width - 17, 3, null);
     }
@@ -773,6 +834,14 @@ if (getVisibleRect().isEmpty()) {
     return getFilterLabel(xOffset + 5, 148, TextRenderer.NONE, TextRenderer.NONE);
   }
 
+  /**
+   * Get filter label.
+   * @param x x text location
+   * @param y y text location
+   * @param horizJustification horizontal justification
+   * @param vertJustification vertical justification
+   * @return text renderer
+   */
   public TextRenderer getFilterLabel(int x, int y, int horizJustification, int vertJustification) {
     String ft = "";
     switch (settings.filter.getType()) {
@@ -785,6 +854,8 @@ if (getVisibleRect().isEmpty()) {
         break;
       case LOWPASS:
         ft = "Low pass [" + settings.filter.getCorner1() + " Hz]";
+        break;
+      default:
         break;
     }
     TextRenderer tr = new TextRenderer(x, y, ft);
@@ -801,18 +872,16 @@ if (getVisibleRect().isEmpty()) {
    */
   private synchronized void constructPlot(Graphics2D g2) {
     Dimension dim = this.getSize();
-
+    
     Plot plot = new Plot();
     plot.setBackgroundColor(backgroundColor);
     plot.setSize(dim);
     Wave renderWave = wave;
+    
     if (settings.filterOn) {
       renderWave = new Wave(wave);
       filter(renderWave);
-      if (settings.removeBias)
-        bias = (int) Math.round(renderWave.mean());
     }
-
     switch (settings.viewType) {
       case WAVE:
         plotWave(plot, renderWave);
@@ -823,6 +892,11 @@ if (getVisibleRect().isEmpty()) {
       case SPECTROGRAM:
         plotSpectrogram(plot, renderWave);
         break;
+      case PARTICLE_MOTION:
+        plotParticleMotion(plot, renderWave);
+        break;
+      default:
+        break;
     }
 
     try {
@@ -830,6 +904,7 @@ if (getVisibleRect().isEmpty()) {
     } catch (PlotException e) {
       e.printStackTrace();
     }
+    
   }
 
   /**
@@ -838,8 +913,9 @@ if (getVisibleRect().isEmpty()) {
    * @param renderWave the wave to plot
    */
   protected void plotWave(Plot plot, Wave renderWave) {
-    if (renderWave == null || renderWave.numSamples() == 0)
+    if (renderWave == null || renderWave.numSamples() == 0) {
       return;
+    }
 
     SliceWave wv = new SliceWave(renderWave);
     wv.setSlice(startTime, endTime);
@@ -854,9 +930,10 @@ if (getVisibleRect().isEmpty()) {
     }
 
     double bias = 0;
-    if (settings.removeBias)
+    if (settings.removeBias) {
       bias = wv.mean();
-
+    }
+    
     double minY = (settings.minAmp - offset) / multiplier;
     double maxY = (settings.maxAmp - offset) / multiplier;
 
@@ -873,16 +950,19 @@ if (getVisibleRect().isEmpty()) {
       }
     }
 
-    if (waveRenderer == null)
+    if (waveRenderer == null) {
       waveRenderer = new SliceWaveRenderer();
+    }
 
-    if (decorator != null)
+    if (decorator != null) {
       waveRenderer.setFrameDecorator(decorator);
+    }
 
-    if (settings.useUnits && md != null && md.getUnit() != null)
+    if (settings.useUnits && md != null && md.getUnit() != null) {
       waveRenderer.setYLabelText(md.getUnit());
-    else
+    } else {
       waveRenderer.setYLabelText("Counts");
+    }
 
     waveRenderer.setYAxisCoefficients(multiplier, offset);
     waveRenderer.setLocation(xOffset, yOffset, this.getWidth() - xOffset - rightWidth,
@@ -891,14 +971,16 @@ if (getVisibleRect().isEmpty()) {
     waveRenderer.setViewTimes(startTime, endTime, "");
     waveRenderer.setWave(wv);
     waveRenderer.setRemoveBias(settings.removeBias);
-    if (channel != null && displayTitle)
+    if (channel != null && displayTitle) {
       waveRenderer.setTitle(channel);
+    }
 
     waveRenderer.update();
     plot.addRenderer(waveRenderer);
-    if (useFilterLabel && settings.filterOn)
+    if (useFilterLabel && settings.filterOn) {
       plot.addRenderer(getFilterLabel(getWidth() - rightWidth, getHeight() - bottomHeight,
           TextRenderer.RIGHT, TextRenderer.BOTTOM));
+    }
     translation = waveRenderer.getDefaultTranslation();
   }
 
@@ -908,17 +990,20 @@ if (getVisibleRect().isEmpty()) {
    * @param renderWave the wave to plot
    */
   private void plotSpectra(Plot plot, Wave renderWave) {
-    if (renderWave == null || renderWave.numSamples() == 0)
+    if (renderWave == null || renderWave.numSamples() == 0) {
       return;
+    }
 
     SliceWave wv = new SliceWave(renderWave);
     wv.setSlice(startTime, endTime);
 
-    if (spectraRenderer == null)
+    if (spectraRenderer == null) {
       spectraRenderer = new SpectraRenderer();
+    }
 
-    if (decorator != null)
+    if (decorator != null) {
       spectraRenderer.setFrameDecorator(decorator);
+    }
 
     spectraRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset,
         this.getHeight() - bottomHeight - yOffset);
@@ -930,13 +1015,15 @@ if (getVisibleRect().isEmpty()) {
     spectraRenderer.setMaxFreq(settings.maxFreq);
     spectraRenderer.setMinFreq(settings.minFreq);
     spectraRenderer.setYUnitText("Power");
-    if (channel != null && displayTitle)
+    if (channel != null && displayTitle) {
       spectraRenderer.setTitle(channel);
+    }
 
     spectraRenderer.update();
-    if (useFilterLabel && settings.filterOn)
+    if (useFilterLabel && settings.filterOn) {
       plot.addRenderer(getFilterLabel(getWidth() - rightWidth, getHeight() - bottomHeight,
           TextRenderer.RIGHT, TextRenderer.BOTTOM));
+    }
 
     translation = spectraRenderer.getDefaultTranslation();
     plot.addRenderer(spectraRenderer);
@@ -948,17 +1035,20 @@ if (getVisibleRect().isEmpty()) {
    * @param renderWave the wave to plot
    */
   private void plotSpectrogram(Plot plot, Wave renderWave) {
-    if (renderWave == null || renderWave.numSamples() == 0)
+    if (renderWave == null || renderWave.numSamples() == 0) {
       return;
+    }
 
     SliceWave wv = new SliceWave(renderWave);
     wv.setSlice(startTime, endTime);
 
-    if (spectrogramRenderer == null)
+    if (spectrogramRenderer == null) {
       spectrogramRenderer = new SpectrogramRenderer();
+    }
 
-    if (decorator != null)
+    if (decorator != null) {
       spectrogramRenderer.setFrameDecorator(decorator);
+    }
 
     spectrogramRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset,
         this.getHeight() - bottomHeight - yOffset);
@@ -979,25 +1069,81 @@ if (getVisibleRect().isEmpty()) {
     spectrogramRenderer.setBinSize((int) Math.pow(2,
         Math.ceil(Math.log(settings.binSize * wave.getSamplingRate()) / Math.log(2))));
 
-    if (channel != null && displayTitle)
+    if (channel != null && displayTitle) {
       spectrogramRenderer.setTitle(channel);
+    }
 
     spectrogramRenderer.setYUnitText("Frequency (Hz)");
 
     spectrogramRenderer.setNfft(settings.nfft);
 
-    double Power[] = spectrogramRenderer.update();
+    double[] power = spectrogramRenderer.update();
 
-    settings.minPower = Power[0];
-    settings.maxPower = Power[1];
+    settings.minPower = power[0];
+    settings.maxPower = power[1];
 
     plot.addRenderer(spectrogramRenderer);
-    if (useFilterLabel && settings.filterOn)
+    if (useFilterLabel && settings.filterOn) {
       plot.addRenderer(getFilterLabel(getWidth() - rightWidth, getHeight() - bottomHeight,
           TextRenderer.RIGHT, TextRenderer.BOTTOM));
+    }
     translation = spectrogramRenderer.getDefaultTranslation();
   }
+  
+  /**
+   * Plot particle motion using detrended data.   
+   */
+  private void plotParticleMotion(Plot plot, Wave wave) {
+    Metadata md = swarmConfig.getMetadata(channel);
+    String s = md.getSCNL().station;
+    String c = md.getSCNL().channel;
+    String n = md.getSCNL().network;
+    String l = md.getSCNL().location == null ? "" : md.getSCNL().location;
 
+    SliceWave swave = new SliceWave(wave);
+    swave.setSlice(startTime, endTime);
+    HashMap<String, double[]> data = new HashMap<String, double[]>();
+    HashMap<String, String> stations = new HashMap<String, String>();
+    String component = c.substring(2);
+    data.put(component, swave.getSignal());
+    stations.put(component, channel);
+    for (String direction : new String[] {"Z", "N", "E"}) {
+      if (!component.equals(direction)) {
+        String newChannel = c.replaceFirst(".$", direction);
+        String newStation = s + " " + newChannel + " " + n + " " + l;
+        stations.put(direction,  newStation);
+        Wave w = source.getWave(newStation, startTime, endTime);
+        if (w != null) {
+          if (settings.filterOn) {
+            filter(w);
+          }
+          SliceWave sw = new SliceWave(w);
+          sw.setSlice(startTime, endTime);
+          data.put(direction, sw.getSignal());
+        } else {
+          data.put(direction, new double[0]);
+        }
+      }
+    }
+    
+    ParticleMotionRenderer particleMotionRenderer =
+        new ParticleMotionRenderer(data.get("E"), data.get("N"), data.get("Z"), 
+            stations.get("E"), stations.get("N"), stations.get("Z"));
+    particleMotionRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset,
+        this.getHeight());
+
+    if (channel != null && displayTitle) {
+      String title = s + " " + c.replaceFirst(".$", "*") + " " + n + " " + l;
+      particleMotionRenderer.setTitle(title);
+    }
+    plot.addRenderer(particleMotionRenderer);
+    if (useFilterLabel && settings.filterOn) {
+      plot.addRenderer(getFilterLabel(getWidth() - rightWidth, getHeight() - bottomHeight,
+          TextRenderer.RIGHT, TextRenderer.BOTTOM));
+    }
+    translation = null;
+  }
+  
   /**
    * Paints the zoom drag box.
    * 
@@ -1019,12 +1165,14 @@ if (getVisibleRect().isEmpty()) {
   }
 
   private void paintCursor(Graphics2D g2) {
-    if (Double.isNaN(cursorMark) || cursorMark < startTime || cursorMark > endTime)
+    if (Double.isNaN(cursorMark) || cursorMark < startTime || cursorMark > endTime) {
       return;
+    }
 
     double[] t = getTranslation();
-    if (t == null)
+    if (t == null) {
       return;
+    }
     double x = (cursorMark - t[1]) / t[0];
     g2.setColor(DARK_RED);
     g2.draw(new Line2D.Double(x, yOffset + 1, x, getHeight() - bottomHeight - 1));
