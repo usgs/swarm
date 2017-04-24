@@ -90,7 +90,7 @@ public abstract class AbstractWavePanel extends JComponent {
   protected Color backgroundColor;
   protected Color bottomBorderColor;
   protected StatusTextArea statusText;
-  protected boolean allowDragging = true;
+  protected boolean allowDragging=true; 
   protected boolean dragging;
   protected double j2k1;
   protected double j2k2;
@@ -271,7 +271,6 @@ public abstract class AbstractWavePanel extends JComponent {
     Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
     this.setCursor(crosshair);
     this.addMouseListener(new MouseAdapter() {
-      @Override
       public void mousePressed(MouseEvent e) {
         UiTime.touchTime();
 
@@ -311,7 +310,6 @@ public abstract class AbstractWavePanel extends JComponent {
         fireMousePressed(e);
       }
 
-      @Override
       public void mouseReleased(MouseEvent e) {
         UiTime.touchTime();
         if (SwingUtilities.isLeftMouseButton(e) && dragging) {
@@ -336,7 +334,6 @@ public abstract class AbstractWavePanel extends JComponent {
         }
       }
 
-      @Override
       public void mouseExited(MouseEvent e) {
         WaveViewTime.fireTimeChanged(Double.NaN);
         pauseCursorMark = false;
@@ -387,7 +384,6 @@ public abstract class AbstractWavePanel extends JComponent {
    */
   public void zoom(final double st, final double et) {
     final SwingWorker worker = new SwingWorker() {
-      @Override
       public Object construct() {
         Wave sw = null;
         if (source instanceof CachedDataSource) {
@@ -399,7 +395,6 @@ public abstract class AbstractWavePanel extends JComponent {
         return null;
       }
 
-      @Override
       public void finished() {
 
         repaint();
@@ -693,13 +688,11 @@ public abstract class AbstractWavePanel extends JComponent {
 
     if (SwingUtilities.isEventDispatchThread()) {
       SwingWorker worker = new SwingWorker() {
-        @Override
         public Object construct() {
           r.run();
           return null;
         }
 
-        @Override
         public void finished() {
           repaint();
         }
@@ -778,7 +771,6 @@ public abstract class AbstractWavePanel extends JComponent {
    * 
    * @param g the graphics context
    */
-  @Override
   public void paint(Graphics g) {
     if (getVisibleRect().isEmpty()) {
       return;
@@ -1101,19 +1093,15 @@ public abstract class AbstractWavePanel extends JComponent {
   /**
    * Plot particle motion using detrended data.   
    */
-  private void plotParticleMotion(Plot plot, final Wave wave) {
-
-    HashMap<String, Wave> waves = new HashMap<String, Wave>();
-    SliceWave swave = new SliceWave(wave);
-    swave.setSlice(startTime, endTime);
-    waves.put(channel, swave.getWave());
-    
+  private void plotParticleMotion(Plot plot, Wave wave) {
     Metadata md = swarmConfig.getMetadata(channel);
     String s = md.getSCNL().station;
     String c = md.getSCNL().channel;
     String n = md.getSCNL().network;
     String l = md.getSCNL().location == null ? "" : md.getSCNL().location;
 
+    SliceWave swave = new SliceWave(wave);
+    swave.setSlice(startTime, endTime);
     HashMap<String, double[]> data = new HashMap<String, double[]>();
     HashMap<String, String> stations = new HashMap<String, String>();
     String component = c.substring(2);
@@ -1131,7 +1119,6 @@ public abstract class AbstractWavePanel extends JComponent {
           }
           SliceWave sw = new SliceWave(w);
           sw.setSlice(startTime, endTime);
-          waves.put(newStation, sw.getWave());
           data.put(direction, sw.getSignal());
         } else {
           data.put(direction, new double[0]);
@@ -1155,7 +1142,6 @@ public abstract class AbstractWavePanel extends JComponent {
           TextRenderer.RIGHT, TextRenderer.BOTTOM));
     }
     translation = null;
-    
   }
   
   /**
@@ -1198,7 +1184,6 @@ public abstract class AbstractWavePanel extends JComponent {
    * 
    * @return the size of the component
    */
-  @Override
   public Dimension getPreferredSize() {
     return getSize();
   }
@@ -1208,7 +1193,6 @@ public abstract class AbstractWavePanel extends JComponent {
    * 
    * @return the size of the component
    */
-  @Override
   public Dimension getMinimumSize() {
     return getSize();
   }
@@ -1218,7 +1202,6 @@ public abstract class AbstractWavePanel extends JComponent {
    * 
    * @return the size of the component
    */
-  @Override
   public Dimension getMaximumSize() {
     return getSize();
   }
