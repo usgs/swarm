@@ -1,3 +1,8 @@
+## Version 2.6.3
+  * Enable refresh of data source
+  * Addition of initial capabilities for particle motion plot
+  * Allow status bar to expand vertically to display entire text
+
 ## Version 2.6.2
   * Write multiplexed Seisan files
   * Use UTC for clipboard "go to time" button
