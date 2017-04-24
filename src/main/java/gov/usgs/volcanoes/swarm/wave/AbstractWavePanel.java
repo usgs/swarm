@@ -18,13 +18,11 @@ import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanel;
 import gov.usgs.volcanoes.swarm.time.UiTime;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
 
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -39,7 +37,6 @@ import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import javax.swing.Box;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
@@ -1159,49 +1156,6 @@ public abstract class AbstractWavePanel extends JComponent {
     }
     translation = null;
     
-    // Test adding wave plot to clipboard
-    Container parent = this.getParent();
-    if (parent instanceof HelicorderViewPanel) {
-      for (final String station : waves.keySet()) {
-        for (final int delta : new int[] {0, 10}) {
-          final Wave w = source.getWave(station, startTime - delta, endTime + delta);
-          final SwingWorker worker = new SwingWorker() {
-            WaveClipboardFrame waveClipboard = WaveClipboardFrame.getInstance();
-            WaveViewPanel wvp = new WaveViewPanel();
-            
-            @Override
-            public Object construct() {
-              waveClipboard.getThrobber().increment();
-              wvp.setWave(w, w.getStartTime(), w.getEndTime());
-              WaveViewSettings wvs = new WaveViewSettings(settings);
-              wvs.setType(ViewType.WAVE);
-              wvp.setSettings(wvs);
-              wvp.setChannel(station);
-              wvp.setDataSource(source);
-              if (delta > 0) {
-                wvp.setMarks(startTime, endTime);
-              }
-              return null;
-            }
-      
-            @Override
-            public void finished() {
-              waveClipboard.getThrobber().decrement();
-              waveClipboard.setVisible(true);
-              waveClipboard.toFront();
-              try {
-                waveClipboard.setSelected(true);
-              } catch (final Exception e) {
-                e.printStackTrace();
-              }
-              waveClipboard.addWave(wvp);
-            }
-          };
-          worker.start();
-        }
-      }
-    }
-    // end test
   }
   
   /**
