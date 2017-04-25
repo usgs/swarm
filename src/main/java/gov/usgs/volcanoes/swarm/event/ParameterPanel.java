@@ -6,8 +6,9 @@
 
 package gov.usgs.volcanoes.swarm.event;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import gov.usgs.volcanoes.core.quakeml.Event;
+import gov.usgs.volcanoes.core.quakeml.Magnitude;
+import gov.usgs.volcanoes.core.quakeml.Origin;
 
 import java.awt.Component;
 import java.awt.Font;
@@ -22,9 +23,8 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
-import gov.usgs.volcanoes.core.quakeml.Event;
-import gov.usgs.volcanoes.core.quakeml.Magnitude;
-import gov.usgs.volcanoes.core.quakeml.Origin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ParameterPanel {
   private static final Logger LOGGER = LoggerFactory.getLogger(ParameterPanel.class);
@@ -33,9 +33,13 @@ public class ParameterPanel {
 
   private ParameterPanel() {}
 
+  /**
+   * Create event component.
+   * @param event seismic event
+   * @return component
+   */
   public static Component create(Event event) {
     Origin origin = event.getPreferredOrigin();
-    Magnitude magnitude = event.getPerferredMagnitude();
 
     JPanel parameterPanel = new JPanel(new GridBagLayout());
     GridBagConstraints c = new GridBagConstraints();
@@ -62,12 +66,14 @@ public class ParameterPanel {
 
     c.gridy++;
     addKey("Description: ", parameterPanel, c);
-
+    
     // wrap description to support multi-line descriptions
     String description = event.getDescription();
-    description = description.replace("\n", "<BR>");
-    description = "<HTML>" + description + "</HTML>";
-    addValue(description, parameterPanel, c);
+    if (description != null && !description.equals("")) {
+      description = description.replace("\n", "<BR>");
+      description = "<HTML>" + description + "</HTML>";
+      addValue(description, parameterPanel, c);
+    }
 
     c.gridy++;
     addKey("Origin date: ", parameterPanel, c);
@@ -123,10 +129,11 @@ public class ParameterPanel {
     if (phaseCount > 0) {
       addValue(Integer.toString(phaseCount), parameterPanel, c);
     }
-
+    
     c.gridy++;
     addKey("Magnitude: ", parameterPanel, c);
 
+    Magnitude magnitude = event.getPerferredMagnitude();
     if (magnitude != null) {
       String mag = String.format("%s %s", magnitude.getMag(), magnitude.getType());
       String uncertaintly = magnitude.getUncertainty();

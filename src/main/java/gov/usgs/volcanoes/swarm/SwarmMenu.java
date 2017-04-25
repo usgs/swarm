@@ -1,6 +1,7 @@
 package gov.usgs.volcanoes.swarm;
 
 import gov.usgs.plot.data.file.FileType;
+import gov.usgs.volcanoes.core.quakeml.EventSet;
 import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
 import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
@@ -16,6 +17,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,11 +37,16 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 /**
  * Swarm Menu.
@@ -143,8 +152,50 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     });
     clearCache.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F12, KeyEvent.CTRL_DOWN_MASK));
     fileMenu.add(clearCache);
+    
     fileMenu.addSeparator();
+    
+    JMenuItem importEvent = new JMenuItem("Import Event...");
+    importEvent.setMnemonic('I');
+    importEvent.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileFilter(new FileNameExtensionFilter("QuakeML (.xml)", "xml"));
+        chooser.setCurrentDirectory(new File(SwarmConfig.getInstance().lastPath));
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        chooser.setMultiSelectionEnabled(true);
+        chooser.setDialogTitle("Open QuakeML Event");
+        int result = chooser.showOpenDialog(Swarm.getApplicationFrame());
+        if (result == JFileChooser.APPROVE_OPTION) {
+          File[] fs = chooser.getSelectedFiles();
+          for (File f : fs) {
+            try {
+              FileInputStream fis = new FileInputStream(f);
+              SwarmConfig.getInstance().lastPath = f.getParent();
+              EventSet events = EventSet.parseQuakeml(fis);
+              MapFrame.getInstance().getHypocenterLayer().add(events);
+            } catch (FileNotFoundException e1) {
+              JOptionPane.showMessageDialog(null, e1.getMessage());
+            } catch (IOException e1) {
+              // TODO Auto-generated catch block
+              e1.printStackTrace();
+            } catch (ParserConfigurationException e1) {
+              // TODO Auto-generated catch block
+              e1.printStackTrace();
+            } catch (SAXException e1) {
+              // TODO Auto-generated catch block
+              e1.printStackTrace();
+            }
+            
+          }
+        }
+      }
+    });
+    importEvent.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.CTRL_DOWN_MASK));
+    fileMenu.add(importEvent);
 
+    fileMenu.addSeparator();
+    
     options = new JMenuItem("Options...");
     options.setMnemonic('O');
     options.addActionListener(new ActionListener() {
@@ -198,8 +249,9 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     saveLastLayout.setEnabled(false);
     saveLastLayout.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if (lastLayoutName != null)
+        if (lastLayoutName != null) {
           Swarm.getApplication().saveLayout(lastLayoutName);
+        }
       }
     });
     saveLastLayout.setAccelerator(
