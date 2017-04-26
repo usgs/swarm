@@ -67,7 +67,7 @@ public class WaveViewSettings {
 
   public int nfft;
 
-  public AbstractWavePanel view;
+  public WaveViewPanel view;
   public WaveViewSettingsToolbar toolbar;
   public ViewType viewType;
   public Butterworth filter;

@@ -4,6 +4,7 @@ import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
 import java.awt.event.ActionEvent;
@@ -115,7 +116,6 @@ public class PickMenu extends JPopupMenu {
     phase.addSeparator();
 
     JCheckBoxMenuItem hidePhaseMenu = new JCheckBoxMenuItem("Hide");
-    hidePhaseMenu.setMnemonic(KeyEvent.VK_H);
     hidePhaseMenu.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         hidePhases = ((JCheckBoxMenuItem)e.getSource()).isSelected();

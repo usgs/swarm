@@ -11,6 +11,7 @@ import gov.usgs.plot.render.wave.ParticleMotionRenderer;
 import gov.usgs.plot.render.wave.SliceWaveRenderer;
 import gov.usgs.plot.render.wave.SpectraRenderer;
 import gov.usgs.plot.render.wave.SpectrogramRenderer;
+import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
@@ -18,6 +19,8 @@ import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.event.PickMenu;
+import gov.usgs.volcanoes.swarm.event.PickWavePanel;
 import gov.usgs.volcanoes.swarm.time.UiTime;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
@@ -25,6 +28,7 @@ import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -44,7 +48,7 @@ import javax.swing.event.EventListenerList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+@Deprecated
 public abstract class AbstractWavePanel extends JComponent {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AbstractWavePanel.class);
@@ -90,7 +94,7 @@ public abstract class AbstractWavePanel extends JComponent {
   protected Color backgroundColor;
   protected Color bottomBorderColor;
   protected StatusTextArea statusText;
-  protected boolean allowDragging=true; 
+  protected boolean allowDragging = true;
   protected boolean dragging;
   protected double j2k1;
   protected double j2k2;
@@ -119,6 +123,8 @@ public abstract class AbstractWavePanel extends JComponent {
   protected boolean pauseCursorMark;
   protected double time;
 
+  // picker
+  private PickMenu pickMenu;
 
   /**
    * Default constructor.
@@ -134,49 +140,6 @@ public abstract class AbstractWavePanel extends JComponent {
 
   }
 
-  /**
-   * Constructor.
-   * @param s wave settings
-   */
-  public AbstractWavePanel(WaveViewSettings s) {
-    this();
-    settings = s;
-    s.view = this;
-  }
-
-  /**
-   * Constructs a WaveViewPanel set up the same as a source WaveViewPanel. Used when copying a
-   * waveform to the clipboard.
-   * 
-   * @param p the source WaveViewPanel
-   */
-  public AbstractWavePanel(AbstractWavePanel p) {
-    this();
-
-    channel = p.channel;
-    source = p.source;
-    startTime = p.startTime;
-    endTime = p.endTime;
-    maxSpectraPower = p.maxSpectraPower;
-    maxSpectrogramPower = p.maxSpectrogramPower;
-    timeSeries = p.timeSeries;
-    allowDragging = p.allowDragging;
-    wave = p.wave;
-    displayTitle = p.displayTitle;
-    backgroundColor = p.backgroundColor;
-    mark1 = p.mark1;
-    mark2 = p.mark2;
-
-    translation = new double[8];
-    if (p.translation != null) {
-      System.arraycopy(p.translation, 0, translation, 0, 8);
-    }
-
-    settings = new WaveViewSettings(p.settings);
-    settings.view = this;
-
-    processSettings();
-  }
 
   /**
    * Set offsets.
@@ -208,56 +171,26 @@ public abstract class AbstractWavePanel extends JComponent {
    * @param newStartTime new start time
    * @param newEndTime new end time
    */
-  public void fireZoomed(MouseEvent e, double oldStartTime, double oldEndTime, 
-                                        double newStartTime, double newEndTime) {
-    Object[] ls = listeners.getListenerList();
-    for (int i = ls.length - 2; i >= 0; i -= 2) {
-      if (ls[i] == WaveViewPanelListener.class) {
-        ((WaveViewPanelListener) ls[i + 1]).waveZoomed(
-                  this, oldStartTime, oldEndTime, newStartTime, newEndTime);
-      }
-    }
-  }
-
+  public abstract void fireZoomed(MouseEvent e, double oldStartTime, double oldEndTime, 
+                                        double newStartTime, double newEndTime);
+  
   /**
    * Fire time pressed.
    * @param e mouse event
    * @param j2k J2000 time
    */
-  public void fireTimePressed(MouseEvent e, double j2k) {
-    Object[] ls = listeners.getListenerList();
-    for (int i = ls.length - 2; i >= 0; i -= 2) {
-      if (ls[i] == WaveViewPanelListener.class) {
-        ((WaveViewPanelListener) ls[i + 1]).waveTimePressed(this, e, j2k);
-      }
-    }
-  }
+  public abstract void fireTimePressed(MouseEvent e, double j2k);
 
   /**
    * Fire mouse pressed event.
    * @param e mouse event
    */
-  public void fireMousePressed(MouseEvent e) {
-    Object[] ls = listeners.getListenerList();
-    for (int i = ls.length - 2; i >= 0; i -= 2) {
-      if (ls[i] == WaveViewPanelListener.class) {
-        LOGGER.debug("Notifying mouse listeners.");
-        ((WaveViewPanelListener) ls[i + 1]).mousePressed(this, e, dragging);
-      }
-    }
-  }
+  public abstract void fireMousePressed(MouseEvent e);
 
   /**
    * Fire wave close event.
    */
-  public void fireClose() {
-    Object[] ls = listeners.getListenerList();
-    for (int i = ls.length - 2; i >= 0; i -= 2) {
-      if (ls[i] == WaveViewPanelListener.class) {
-        ((WaveViewPanelListener) ls[i + 1]).waveClosed(this);
-      }
-    }
-  }
+  public abstract void fireClose();
 
   public void setAllowClose(boolean b) {
     allowClose = b;
@@ -265,7 +198,9 @@ public abstract class AbstractWavePanel extends JComponent {
 
   protected abstract void processRightMousePress(MouseEvent e);
 
-  protected abstract void processRightMouseRelease(MouseEvent e);
+  protected void processRightMouseRelease(MouseEvent e){
+    
+  }
 
   protected void setupMouseHandler() {
     Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
@@ -764,7 +699,32 @@ public abstract class AbstractWavePanel extends JComponent {
     w.invalidateStatistics();
   }
 
-  protected abstract void annotateImage(Graphics2D g2);
+  /**
+   * Annotate image with pick marks.
+   * @param g2 graphics
+   */
+  protected void annotateImage(Graphics2D g2) {
+    if (settings.pickEnabled && pickMenu != null) {
+
+      double[] t = getTranslation();
+      if (t == null) {
+        return;
+      }
+
+      if (!pickMenu.isHidePhases()) {
+        // Draw P marker
+        Pick p = pickMenu.getP();
+        if (p != null) {
+          drawPick(p.getTag(), g2, p.getTime());
+        }
+        // Draw S marker
+        Pick s = pickMenu.getS();
+        if (s != null) {
+          drawPick(s.getTag(), g2, s.getTime());
+        }
+      }
+    }
+  }
 
   /**
    * Paints the component on the specified graphics context.
@@ -826,6 +786,40 @@ public abstract class AbstractWavePanel extends JComponent {
     }
   }
 
+  /**
+   * Draw pick marks.
+   * @param label text to tag pick mark with
+   * @param g2 graphics
+   * @param time time to draw mark at in millis from 1970
+   */
+  private void drawPick(String label, Graphics2D g2, long time) {
+    double[] t = getTranslation();
+    double j2k = J2kSec.fromEpoch(time);
+    double x = 2 + (j2k - t[1]) / t[0];
+    g2.setColor(DARK_GREEN);
+    g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
+    FontMetrics fm = g2.getFontMetrics();
+    int width = fm.stringWidth(label);
+    int height = fm.getAscent();
+
+    int offset = 2;
+    int lw = width + 2 * offset;
+
+    if (label.indexOf('P') != -1) {
+      g2.setColor(PickWavePanel.P_BACKGROUND);
+    } else if (label.indexOf('S') != -1) {
+      g2.setColor(PickWavePanel.S_BACKGROUND);
+    } else {
+      g2.setColor(Color.GRAY);      
+    }
+
+    g2.fillRect((int) x, 3, lw, height + 2 * offset);
+    g2.setColor(Color.BLACK);
+    g2.drawRect((int) x, 3, lw, height + 2 * offset);
+
+    g2.drawString(label, (int) x + offset, 3 + (fm.getAscent() + offset));
+  }
+  
   public void setUseFilterLabel(boolean b) {
     useFilterLabel = b;
   }
