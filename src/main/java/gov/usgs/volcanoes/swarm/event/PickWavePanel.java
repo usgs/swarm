@@ -38,8 +38,8 @@ public class PickWavePanel extends AbstractWavePanel
 
   private static final long serialVersionUID = 1L;
   private static final Font ANNOTATION_FONT = new Font("Monospaced", Font.BOLD, 12);
-  private static final Color P_BACKGROUND = new Color(128, 255, 128, 192);
-  private static final Color S_BACKGROUND = new Color(128, 128, 255, 192);
+  public static final Color P_BACKGROUND = new Color(128, 255, 128, 192);
+  public static final Color S_BACKGROUND = new Color(128, 128, 255, 192);
   private static final Color RESIDUAL_COLOR = new Color(128, 128, 128, 32);
 
   private final List<Arrival> arrivals;

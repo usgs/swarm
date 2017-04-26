@@ -187,6 +187,7 @@ public class WaveViewSettingsToolbar {
     waveTypes.add(spectraToggle);
     waveTypes.add(spectrogramToggle);
     waveTypes.add(particleMotionToggle);
+ 
   }
 
   public void clearSettingsSet() {
@@ -254,15 +255,13 @@ public class WaveViewSettingsToolbar {
       }
     }
 
-    // fix for Java 1.5, clearSelection was added in 1.6
-/*    try {
-      waveTypes.setSelected(waveTypes.getSelection(), false);
-    } catch (Throwable e) {
-      // what should happen here?
-    }*/
     particleMotionToggle.setSelected(p);
     spectraToggle.setSelected(s);
     spectrogramToggle.setSelected(sg);
     waveToggle.setSelected(w);
   }
+
+/*  public boolean isPickEnabled() {
+    return pickEnabled;
+  }*/
 }

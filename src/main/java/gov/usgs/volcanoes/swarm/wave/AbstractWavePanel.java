@@ -1095,6 +1095,9 @@ public abstract class AbstractWavePanel extends JComponent {
    */
   private void plotParticleMotion(Plot plot, Wave wave) {
     Metadata md = swarmConfig.getMetadata(channel);
+    if (md == null) {
+      return;
+    }
     String s = md.getSCNL().station;
     String c = md.getSCNL().channel;
     String n = md.getSCNL().network;

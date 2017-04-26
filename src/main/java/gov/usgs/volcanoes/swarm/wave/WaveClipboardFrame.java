@@ -115,6 +115,8 @@ public class WaveClipboardFrame extends SwarmFrame {
   private JButton backButton;
   private JButton gotoButton;
 
+  private JToggleButton pickButton;
+  
   private JPopupMenu popup;
 
   private final Map<AbstractWavePanel, Stack<double[]>> histories;
@@ -255,6 +257,22 @@ public class WaveClipboardFrame extends SwarmFrame {
         new CaptureActionListener());
     UiUtils.mapKeyStrokeToButton(this, "P", "capture", captureButton);
     toolbar.add(captureButton);
+    
+
+    toolbar.addSeparator();
+    pickButton = SwarmUtil.createToolBarToggleButton(Icons.pick,
+        "Pick Mode", new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            for (AbstractWavePanel awp : waves) {
+              if (awp instanceof WaveViewPanel) {
+                WaveViewPanel wvp = (WaveViewPanel) awp;
+                wvp.getSettings().pickEnabled = pickButton.isSelected();
+              }
+            }
+          }
+        });
+    pickButton.setEnabled(true);
+    toolbar.add(pickButton);
   }
 
   // TODO: don't write image on event thread
@@ -979,6 +997,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     p.setSize(w, calculateWaveHeight());
     p.setBottomBorderColor(Color.GRAY);
     p.createImage();
+    p.getSettings().pickEnabled = pickButton.isSelected();
     waveBox.add(p);
     waves.add(p);
     doButtonEnables();

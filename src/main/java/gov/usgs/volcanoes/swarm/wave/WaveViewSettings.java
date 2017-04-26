@@ -71,6 +71,8 @@ public class WaveViewSettings {
   public WaveViewSettingsToolbar toolbar;
   public ViewType viewType;
   public Butterworth filter;
+  
+  public boolean pickEnabled = false;
 
   private static WaveViewSettings DEFAULT_WAVE_VIEW_SETTINGS;
 
