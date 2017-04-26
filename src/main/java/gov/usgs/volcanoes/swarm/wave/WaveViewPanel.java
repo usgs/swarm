@@ -36,6 +36,7 @@ import java.awt.Paint;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -270,7 +271,7 @@ public class WaveViewPanel extends JComponent {
     allowClose = b;
   }
 
-  protected void processRightMousePress(MouseEvent e){
+  protected void processRightMousePress(MouseEvent e) {
 
     if (settings.pickEnabled && settings.viewType.equals(ViewType.WAVE)) {
       double[] t = getTranslation();
@@ -289,7 +290,7 @@ public class WaveViewPanel extends JComponent {
     }
   }
 
-  protected void processRightMouseRelease(MouseEvent e){
+  protected void processRightMouseRelease(MouseEvent e) {
     
   }
 
@@ -560,7 +561,7 @@ public class WaveViewPanel extends JComponent {
    * @param y the mouse y position
    */
   public boolean processMousePosition(int x, int y) {
-    String status = "";
+    StringBuffer status = new StringBuffer();
     String unit = null;
 
     Dimension size = getSize();
@@ -572,18 +573,20 @@ public class WaveViewPanel extends JComponent {
       time = x * t[0] + t[1];
       double yi = y * -t[2] + t[3];
 
-      status = StatusTextArea.getWaveInfo(wave);
+      status.append(StatusTextArea.getWaveInfo(wave));
 
       if (timeSeries) {
 
         if (swarmConfig.durationEnabled && !Double.isNaN(mark1) && !Double.isNaN(mark2)) {
           String durationString = StatusTextArea.getDuration(mark1, mark2);
-          status += ", " + durationString;
+          status.append(",");
+          status.append(durationString);
         }
         
         String timeString = StatusTextArea.getTimeString(time, swarmConfig.getTimeZone(channel));
         if (timeString != null) {
-          status += "\n" + timeString;
+          status.append("\n");
+          status.append(timeString);
         }
 
         double offset = 0;
@@ -604,8 +607,7 @@ public class WaveViewPanel extends JComponent {
           }
         }
 
-        status +=
-            String.format(", %s: %.3f", unit, multiplier * yi + offset);
+        status.append(String.format(", %s: %.3f", unit, multiplier * yi + offset));
       } else {
         double xi = time;
         if (settings.viewType == ViewType.SPECTRA && settings.logFreq) {
@@ -614,19 +616,37 @@ public class WaveViewPanel extends JComponent {
         if (settings.viewType == ViewType.SPECTRA && settings.logPower) {
           yi = Math.pow(10.0, yi);
         }
-        status += String.format("\nFrequency (Hz): %.6f, Power: %.3f", xi, yi);
+        status.append(String.format("\nFrequency (Hz): %.6f, Power: %.3f", xi, yi));
       }
 
+      if (settings.pickEnabled && pickMenu != null) {
+        String pickStatus = "";
+        Pick p = pickMenu.getP();
+        Pick s = pickMenu.getS();
+        if (p != null && s != null) {
+          pickStatus = StatusTextArea.getSpString(p.getTime(), s.getTime());
+        }
+        Pick c1 = pickMenu.getCoda1();
+        Pick c2 = pickMenu.getCoda2();
+        if (c1 != null && c2 != null) {
+          if (!pickStatus.equals("")) {
+            pickStatus += ", ";
+          }
+          pickStatus += StatusTextArea.getCodaDuration(c1.getTime(), c2.getTime());
+        }
+        if (!pickStatus.equals("")) {
+          status.append("\n");
+          status.append(pickStatus);
+        }
+      }
     } 
     
     if (!pauseCursorMark) {
       WaveViewTime.fireTimeChanged(time);
     }
 
-
-
     if (status != null && statusText != null) {
-      final String st = status;
+      final String st = status.toString();
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           statusText.setText(st);
@@ -802,23 +822,17 @@ public class WaveViewPanel extends JComponent {
       paintMark(g2, mark2);
     }
     if (settings.pickEnabled && pickMenu != null) {
-
       double[] t = getTranslation();
       if (t == null) {
         return;
       }
-
       if (!pickMenu.isHidePhases()) {
-        // Draw P marker
-        Pick p = pickMenu.getP();
-        if (p != null) {
-          drawPick(p.getTag(), g2, p.getTime());
-        }
-        // Draw S marker
-        Pick s = pickMenu.getS();
-        if (s != null) {
-          drawPick(s.getTag(), g2, s.getTime());
-        }
+        drawPick(pickMenu.getP(), g2);
+        drawPick(pickMenu.getS(), g2);
+      }
+      if (!pickMenu.isHideCoda()) {
+        drawPick(pickMenu.getCoda1(), g2);
+        drawPick(pickMenu.getCoda2(), g2);
       }
     }
   }
@@ -884,28 +898,64 @@ public class WaveViewPanel extends JComponent {
   }
 
   /**
-   * Draw pick marks.
-   * @param label text to tag pick mark with
+   * Draw duration markers.
    * @param g2 graphics
-   * @param time time to draw mark at in millis from 1970
+   * @param j2k time in j2k
    */
-  private void drawPick(String label, Graphics2D g2, long time) {
+  private void paintMark(Graphics2D g2, double j2k) {
+    if (Double.isNaN(j2k) || j2k < startTime || j2k > endTime) {
+      return;
+    }
+
+    double[] t = getTranslation();
+    if (t == null) {
+      return;
+    }
+
+    double x = (j2k - t[1]) / t[0];
+    g2.setColor(DARK_GREEN);
+    g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
+
+    GeneralPath gp = new GeneralPath();
+    gp.moveTo((float) x, yOffset);
+    gp.lineTo((float) x - 5, yOffset - 7);
+    gp.lineTo((float) x + 5, yOffset - 7);
+    gp.closePath();
+    g2.setPaint(Color.GREEN);
+    g2.fill(gp);
+    g2.setColor(DARK_GREEN);
+    g2.draw(gp);
+  }
+  
+  /**
+   * Draw pick marks.
+   * @param pick pick to draw
+   * @param g2 graphics
+   */
+  private void drawPick(Pick pick, Graphics2D g2) {
+    if (pick == null) {
+      return;
+    }
+    String tag = pick.getTag();
+    long time = pick.getTime();
     double[] t = getTranslation();
     double j2k = J2kSec.fromEpoch(time);
     double x = 2 + (j2k - t[1]) / t[0];
     g2.setColor(DARK_GREEN);
     g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
     FontMetrics fm = g2.getFontMetrics();
-    int width = fm.stringWidth(label);
+    int width = fm.stringWidth(tag);
     int height = fm.getAscent();
 
     int offset = 2;
     int lw = width + 2 * offset;
 
-    if (label.indexOf('P') != -1) {
+    if (tag.indexOf('P') != -1) {
       g2.setColor(PickWavePanel.P_BACKGROUND);
-    } else if (label.indexOf('S') != -1) {
+    } else if (tag.indexOf('S') != -1) {
       g2.setColor(PickWavePanel.S_BACKGROUND);
+    } else if (tag.indexOf('C') != -1) {
+      g2.setColor(Color.YELLOW);
     } else {
       g2.setColor(Color.GRAY);      
     }
@@ -913,8 +963,8 @@ public class WaveViewPanel extends JComponent {
     g2.fillRect((int) x, 3, lw, height + 2 * offset);
     g2.setColor(Color.BLACK);
     g2.drawRect((int) x, 3, lw, height + 2 * offset);
-
-    g2.drawString(label, (int) x + offset, 3 + (fm.getAscent() + offset));
+    
+    g2.drawString(tag, (int) x + offset, 3 + (fm.getAscent() + offset));
   }
   
   public void setUseFilterLabel(boolean b) {

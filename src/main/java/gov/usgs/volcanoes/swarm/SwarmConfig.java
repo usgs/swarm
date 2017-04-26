@@ -62,6 +62,8 @@ public class SwarmConfig {
   public boolean durationEnabled;
   public double durationA;
   public double durationB;
+  
+  public double pVelocity;
 
   public int span;
   public int timeChunk;
@@ -349,6 +351,8 @@ public class SwarmConfig {
     durationA = StringUtils.stringToDouble(config.getString("durationA"), 1.86);
     durationB = StringUtils.stringToDouble(config.getString("durationB"), -0.85);
 
+    pVelocity = StringUtils.stringToDouble(config.getString("pVelocity"), 6.0);
+
     showClip = StringUtils.stringToBoolean(config.getString("showClip"), true);
     alertClip = StringUtils.stringToBoolean(config.getString("alertClip"), false);
     alertClipTimeout = StringUtils.stringToInt(config.getString("alertClipTimeout"), 5);
@@ -464,7 +468,7 @@ public class SwarmConfig {
   }
 
   /**
-   * Get time zone
+   * Get time zone.
    * @param channel waveform id
    * @return time zone
    */
@@ -523,6 +527,8 @@ public class SwarmConfig {
     config.put("durationEnabled", Boolean.toString(durationEnabled));
     config.put("durationA", Double.toString(durationA));
     config.put("durationB", Double.toString(durationB));
+    
+    config.put("pVelocity", Double.toString(pVelocity));
 
     config.put("showClip", Boolean.toString(showClip));
     config.put("alertClip", Boolean.toString(alertClip));

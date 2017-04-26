@@ -3,13 +3,10 @@ package gov.usgs.volcanoes.swarm.event;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -32,6 +29,10 @@ public class PickMenu extends JPopupMenu {
   private Pick s;
   private boolean hidePhases = false;
 
+  private Pick coda1;
+  private Pick coda2;
+  private boolean hideCoda = false;
+  
   /**
    * Constructor.
    */
@@ -46,10 +47,60 @@ public class PickMenu extends JPopupMenu {
    */
   private void createMenu() {
     createPhaseMenu();
-    //TODO: duration
-    //TODO: coda menu
+    createCodaMenu();
   }
   
+  private void createCodaMenu() {
+
+    JMenu coda = new JMenu("Coda");
+
+    JMenuItem c1MenuItem = new JMenuItem("Coda 1");
+    c1MenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        Pick pick = createPick("C1", null);
+        coda1 = pick;
+        wvp.repaint();
+      }
+    });
+    coda.add(c1MenuItem);
+    
+    JMenuItem c2MenuItem = new JMenuItem("Coda 2");
+    c2MenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        Pick pick = createPick("C2", null);
+        coda2 = pick;
+        wvp.repaint();
+      }
+    });
+    coda.add(c2MenuItem);
+    
+    coda.addSeparator();
+
+    JCheckBoxMenuItem clearCodaMenu = new JCheckBoxMenuItem("Clear Coda");
+    clearCodaMenu.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        coda1 = null;
+        coda2 = null;
+        wvp.repaint();
+      }
+    });
+    coda.add(clearCodaMenu);
+
+    JCheckBoxMenuItem hideCodaMenu = new JCheckBoxMenuItem("Hide Coda");
+    hideCodaMenu.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        hideCoda = ((JCheckBoxMenuItem)e.getSource()).isSelected();
+        wvp.repaint();
+      }
+    });
+    coda.add(hideCodaMenu);
+    
+    this.add(coda);
+  }
+  
+  /**
+   * Create submen under Phase menu.
+   */
   private void createPhaseMenu() {
     JMenu phase = new JMenu("Phase");
 
@@ -115,7 +166,7 @@ public class PickMenu extends JPopupMenu {
 
     phase.addSeparator();
 
-    JCheckBoxMenuItem hidePhaseMenu = new JCheckBoxMenuItem("Hide");
+    JCheckBoxMenuItem hidePhaseMenu = new JCheckBoxMenuItem("Hide Phases");
     hidePhaseMenu.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         hidePhases = ((JCheckBoxMenuItem)e.getSource()).isSelected();
@@ -134,10 +185,9 @@ public class PickMenu extends JPopupMenu {
    * @return pick object
    */
   private Pick createPick(String phase, Pick.Onset onset) {
-    String publicId = SwarmConfig.getInstance().getQuakemlResourceId() + "/Pick/somerandom#";
     long time = J2kSec.asDate(j2k).getTime();
     String channel = wvp.getChannel();
-    Pick pick = new Pick(publicId, time, channel);
+    Pick pick = new Pick("", time, channel); // assign public id later if saving to quakeml file
     pick.setPhaseHint(phase);
     pick.setOnset(onset);
     Wave wave = wvp.getWave();
@@ -153,33 +203,69 @@ public class PickMenu extends JPopupMenu {
     }
     return pick;
   }
-
+  
+  /**
+   * Get currently set time as J2K.
+   * @return j2k time
+   */
   public double getJ2k() {
     return j2k;
   }
 
+  /**
+   * Set currently selected time as J2K.
+   * @param j2k time
+   */
   public void setJ2k(double j2k) {
     this.j2k = j2k;
   }
 
+  /**
+   * Get P pick.
+   * @return pick
+   */
   public Pick getP() {
     return p;
   }
 
-  public void setP(Pick p) {
-    this.p = p;
-  }
-
+  /**
+   * Get S pick. 
+   * @return pick
+   */
   public Pick getS() {
     return s;
   }
 
-  public void setS(Pick s) {
-    this.s = s;
-  }
-
+  /**
+   * Get enabled/disabled option for hiding phases.
+   * @return true if hide phases option is enabled
+   */
   public boolean isHidePhases() {
     return hidePhases;
+  }
+
+  /**
+   * Get one side of coda window as pick.
+   * @return pick
+   */
+  public Pick getCoda1() {
+    return coda1;
+  }
+
+  /**
+   * Get other side of coda window as pick.
+   * @return pick
+   */
+  public Pick getCoda2() {
+    return coda2;
+  }
+
+  /**
+   * Get enabled/disabled option for hiding coda.
+   * @return true if hide coda option is enabled
+   */
+  public boolean isHideCoda() {
+    return hideCoda;
   }
 
 }
