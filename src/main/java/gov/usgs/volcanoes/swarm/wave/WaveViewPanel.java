@@ -795,6 +795,12 @@ public class WaveViewPanel extends JComponent {
    * @param g2 graphics
    */
   protected void annotateImage(Graphics2D g2) {
+    if (!Double.isNaN(mark1)) {
+      paintMark(g2, mark1);
+    }
+    if (!Double.isNaN(mark2)) {
+      paintMark(g2, mark2);
+    }
     if (settings.pickEnabled && pickMenu != null) {
 
       double[] t = getTranslation();
