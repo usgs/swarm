@@ -1,16 +1,16 @@
 package gov.usgs.volcanoes.swarm.chooser;
 
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.factories.Borders;
+import com.jgoodies.forms.layout.FormLayout;
+
+import gov.usgs.volcanoes.swarm.data.DataSourceType;
+import gov.usgs.volcanoes.swarm.data.seedLink.SeedLinkSource;
+
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-
-import com.jgoodies.forms.builder.DefaultFormBuilder;
-import com.jgoodies.forms.layout.FormLayout;
-
-import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.data.DataSourceType;
-import gov.usgs.volcanoes.swarm.data.seedLink.SeedLinkSource;
 
 /**
  * The SeedLink panel is a data source panel for a SeedLink Server.
@@ -28,7 +28,7 @@ public class SeedLinkPanel extends DataSourcePanel {
   private static final String defaultPort = "18000";
 
   /** The SeedLink host. */
-  private JComboBox slsHost;
+  private JComboBox<String> slsHost;
 
   /** The SeedLink port. */
   private JTextField slsPort;
@@ -45,25 +45,29 @@ public class SeedLinkPanel extends DataSourcePanel {
    * 
    * @return true if allowed, false otherwise.
    */
-  public boolean allowOK(boolean edit) {
+  public boolean allowOk(boolean edit) {
     String host = getHost();
     String message = null;
 
-    if (host == null || host.length() == 0 || host.indexOf(';') != -1 || host.indexOf(':') != -1)
+    if (host == null || host.length() == 0 || host.indexOf(';') != -1 || host.indexOf(':') != -1) {
       message = "There is an error with the " + getName() + " IP address or host name.";
+    }
     int ip = -1;
     try {
       ip = Integer.parseInt(slsPort.getText());
     } catch (Exception e) {
+      //
     }
-    if (ip < 0 || ip > 65535)
+    if (ip < 0 || ip > 65535) {
       message = "There is an error with the " + getName() + " port.";
+    }
 
     if (message != null) {
       JOptionPane.showMessageDialog(applicationFrame, message, "Error", JOptionPane.ERROR_MESSAGE);
       return false;
-    } else
+    } else {
       return true;
+    }
   }
 
   /**
@@ -71,12 +75,15 @@ public class SeedLinkPanel extends DataSourcePanel {
    */
   protected void createFields() {
     final String[] hosts = {"geofon.gfz-potsdam.de", "rtserve.iris.washington.edu"};
-    slsHost = new JComboBox(hosts);
+    slsHost = new JComboBox<String>(hosts);
     slsHost.setEditable(true);
     slsPort = new JTextField();
     resetSource(source);
   }
 
+  /**
+   * @see gov.usgs.volcanoes.swarm.chooser.DataSourcePanel#resetSource(java.lang.String)
+   */
   public void resetSource(String source) {
     this.source = source;
     String h = defaultHost;
@@ -100,8 +107,7 @@ public class SeedLinkPanel extends DataSourcePanel {
     createFields();
     FormLayout layout = new FormLayout("right:max(20dlu;pref), 3dlu, 40dlu, 0dlu, 126dlu", "");
 
-    DefaultFormBuilder builder = new DefaultFormBuilder(layout);
-    builder.setDefaultDialogBorder();
+    DefaultFormBuilder builder = new DefaultFormBuilder(layout).border(Borders.DIALOG);
     builder.append(new JLabel("Use this data source to connect to a SeedLink Server."), 5);
     builder.nextLine();
     builder.appendSeparator();
@@ -138,7 +144,7 @@ public class SeedLinkPanel extends DataSourcePanel {
   /**
    * Process the OK.
    */
-  public String wasOK() {
+  public String wasOk() {
     String result = String.format(getCode() + ":%s:%s", getHost(), slsPort.getText());
     return result;
   }
