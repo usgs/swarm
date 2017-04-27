@@ -39,6 +39,7 @@ public class OptionsDialog extends SwarmModalDialog {
   private JCheckBox durationEnabled;
   private JTextField durationA;
   private JTextField durationB;
+  private JTextField pVelocity;
   private JCheckBox useLargeCursor;
 
   private JCheckBox tzInstrument;
@@ -69,6 +70,7 @@ public class OptionsDialog extends SwarmModalDialog {
     durationEnabled = new JCheckBox("Enabled");
     durationA = new JTextField();
     durationB = new JTextField();
+    pVelocity = new JTextField();
     useLargeCursor = new JCheckBox("Large Helicorder Cursor");
     tzInstrument = new JCheckBox("Use instrument time zone if available");
     tzLocal = new JRadioButton("Use local machine time zone:");
@@ -126,6 +128,10 @@ public class OptionsDialog extends SwarmModalDialog {
     builder.append("Md=", durationA);
     builder.append("* Log(t) +", durationB);
 
+    builder.appendSeparator("SP Distance");
+    builder.append("P-velocity (km/s)=", pVelocity);
+    builder.nextLine();
+    
     builder.appendSeparator("Maps");
     builder.append(useMapPacks, 7);
     builder.nextLine();
@@ -194,6 +200,7 @@ public class OptionsDialog extends SwarmModalDialog {
     durationA.setText(Double.toString(swarmConfig.durationA));
     durationB.setText(Double.toString(swarmConfig.durationB));
     durationEnabled.setSelected(swarmConfig.durationEnabled);
+    pVelocity.setText(Double.toString(swarmConfig.pVelocity));
     tzInstrument.setSelected(swarmConfig.useInstrumentTimeZone);
     if (swarmConfig.useLocalTimeZone) {
       tzLocal.setSelected(true);
@@ -214,17 +221,23 @@ public class OptionsDialog extends SwarmModalDialog {
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#allowOk()
    */
   public boolean allowOk() {
-    String message = null;
+    boolean ok = true;
     try {
-      message = "The duration magnitude constants must be numbers.";
       Double.parseDouble(durationA.getText().trim());
       Double.parseDouble(durationB.getText().trim());
-
-      return true;
     } catch (Exception e) {
+      String message = "The duration magnitude constants must be numbers.";
       JOptionPane.showMessageDialog(this, message, "Options Error", JOptionPane.ERROR_MESSAGE);
+      ok = false;
     }
-    return false;
+    try {
+      Double.parseDouble(pVelocity.getText().trim());
+    } catch (Exception e) {
+      String message = "The P-velocity must be a number.";
+      JOptionPane.showMessageDialog(this, message, "Options Error", JOptionPane.ERROR_MESSAGE);
+      ok = false;
+    }
+    return ok;
   }
 
   /**
@@ -235,6 +248,7 @@ public class OptionsDialog extends SwarmModalDialog {
     swarmConfig.durationEnabled = durationEnabled.isSelected();
     swarmConfig.durationA = Double.parseDouble(durationA.getText().trim());
     swarmConfig.durationB = Double.parseDouble(durationB.getText().trim());
+    swarmConfig.pVelocity = Double.parseDouble(pVelocity.getText().trim());
     swarmConfig.useInstrumentTimeZone = tzInstrument.isSelected();
     swarmConfig.useLocalTimeZone = tzLocal.isSelected();
     swarmConfig.specificTimeZone = TimeZone.getTimeZone((String) timeZones.getSelectedItem());

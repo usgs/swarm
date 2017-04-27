@@ -12,7 +12,7 @@ import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
-import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
 
 import java.awt.Color;
@@ -33,13 +33,13 @@ import java.util.Stack;
  * @author Tom Parker
  *
  */
-public class PickWavePanel extends AbstractWavePanel
+public class PickWavePanel extends WaveViewPanel
     implements EventObserver, Comparable<PickWavePanel> {
 
   private static final long serialVersionUID = 1L;
   private static final Font ANNOTATION_FONT = new Font("Monospaced", Font.BOLD, 12);
-  private static final Color P_BACKGROUND = new Color(128, 255, 128, 192);
-  private static final Color S_BACKGROUND = new Color(128, 128, 255, 192);
+  public static final Color P_BACKGROUND = new Color(128, 255, 128, 192);
+  public static final Color S_BACKGROUND = new Color(128, 128, 255, 192);
   private static final Color RESIDUAL_COLOR = new Color(128, 128, 128, 32);
 
   private final List<Arrival> arrivals;
@@ -70,7 +70,7 @@ public class PickWavePanel extends AbstractWavePanel
 
     this.addListener(new WaveViewPanelAdapter() {
       @Override
-      public void waveZoomed(final AbstractWavePanel src, final double st, final double et,
+      public void waveZoomed(final WaveViewPanel src, final double st, final double et,
           final double nst, final double net) {
         final double[] t = new double[] {st, et};
         zoomHistory.push(t);

@@ -1,5 +1,15 @@
 package gov.usgs.volcanoes.swarm.wave;
 
+import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.UiUtils;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.SwarmUtil;
+import gov.usgs.volcanoes.swarm.Throbber;
+import gov.usgs.volcanoes.swarm.chooser.DataChooser;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,25 +26,15 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
-import gov.usgs.plot.data.Wave;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.util.UiUtils;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.SwarmUtil;
-import gov.usgs.volcanoes.swarm.Throbber;
-import gov.usgs.volcanoes.swarm.chooser.DataChooser;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
-
 /**
- *
+ * Wave Viewer Frame.
  * @author Dan Cervelli
  */
 public class WaveViewerFrame extends JInternalFrame implements Runnable {
   public static final long serialVersionUID = -1;
 
   private final long interval = 2000;
-  private final static int[] SPANS = new int[] {15, 30, 60, 120, 180, 240, 300};
+  private static final int[] SPANS = new int[] {15, 30, 60, 120, 180, 240, 300};
   private int spanIndex;
   private final SeismicDataSource dataSource;
   private final String channel;
@@ -50,6 +50,11 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
 
   private Throbber throbber;
 
+  /**
+   * Constructor.
+   * @param sds seismic data source
+   * @param ch channel
+   */
   public WaveViewerFrame(final SeismicDataSource sds, final String ch) {
     super(ch + ", [" + sds + "]", true, true, false, true);
     dataSource = sds;
@@ -58,10 +63,13 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
     spanIndex = 3;
     kill = false;
     updateThread = new Thread(this, "WaveViewerFrame-" + sds + "-" + ch);
-    createUI();
+    createUi();
   }
 
-  public void createUI() {
+  /**
+   * Create UI.
+   */
+  public void createUi() {
     this.setFrameIcon(Icons.wave);
     mainPanel = new JPanel(new BorderLayout());
     waveViewPanel = new WaveViewPanel(settings);
@@ -78,8 +86,9 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
     final JButton compXButton = SwarmUtil.createToolBarButton(Icons.xminus,
         "Shrink time axis (Alt-left arrow)", new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
-            if (spanIndex != 0)
+            if (spanIndex != 0) {
               spanIndex--;
+            }
           }
         });
     UiUtils.mapKeyStrokeToButton(this, "alt LEFT", "compx", compXButton);
@@ -88,8 +97,9 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
     final JButton expXButton = SwarmUtil.createToolBarButton(Icons.xplus,
         "Expand time axis (Alt-right arrow)", new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
-            if (spanIndex < SPANS.length - 1)
+            if (spanIndex < SPANS.length - 1) {
               spanIndex++;
+            }
           }
         });
     UiUtils.mapKeyStrokeToButton(this, "alt RIGHT", "expx", expXButton);
@@ -125,8 +135,9 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
     this.addInternalFrameListener(new InternalFrameAdapter() {
       @Override
       public void internalFrameActivated(final InternalFrameEvent e) {
-        if (channel != null)
+        if (channel != null) {
           DataChooser.getInstance().setNearest(channel);
+        }
       }
 
       @Override
@@ -146,6 +157,9 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
     updateThread.start();
   }
 
+  /**
+   * Get wave.
+   */
   public void getWave() {
     throbber.increment();
     final double now = J2kSec.now();
@@ -165,12 +179,16 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
     updateThread.interrupt();
   }
 
+  /**
+   * @see java.lang.Runnable#run()
+   */
   public void run() {
     while (!kill) {
       try {
         getWave();
         Thread.sleep(interval);
       } catch (final InterruptedException e) {
+        //
       }
     }
     dataSource.close();
