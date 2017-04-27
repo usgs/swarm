@@ -1,7 +1,14 @@
 package gov.usgs.volcanoes.swarm.chooser;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.FormLayout;
+
+import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServiceStationXmlClient;
+import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServiceUtils;
+import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -19,12 +26,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
-import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServiceStationXmlClient;
-import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServiceUtils;
-import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
-
 /**
  * The Web Services panel is a data source panel for Web Services.
  * 
@@ -32,10 +33,6 @@ import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
  */
 public class WebServicesPanel extends DataSourcePanel {
   private static final String WS_NETWORK_FILE = "IRIS_networks.txt";
-  // private static final String codeText = ";"
-  // + WebServicesSource.typeString + ":";
-  // private boolean showUrlFieldsFlag = false;
-  // private JComboBox network;
   private static final String codeText = ";" + WebServicesSource.typeString + ":";
   private JComboBox<String> network;
 
@@ -47,7 +44,7 @@ public class WebServicesPanel extends DataSourcePanel {
   private JTextField wsDataselectUrlField;
   private JTextField wsStationUrlField;
   private JButton updateNetworkList;
-  private String currentStationURL = "";
+  private String currentStationUrl = "";
 
   /**
    * Create the Web Services server panel.
@@ -61,29 +58,34 @@ public class WebServicesPanel extends DataSourcePanel {
    * 
    * @return true if allowed, false otherwise.
    */
-  public boolean allowOK(boolean edit) {
+  public boolean allowOk(boolean edit) {
     String message = null;
     double gs = -1;
     try {
       gs = Double.parseDouble(gulperSize.getText());
     } catch (Exception e) {
+      //
     }
-    if (gs <= 0)
+    if (gs <= 0) {
       message = "The gulper size must be greater than 0 minutes.";
+    }
 
     double gd = -1;
     try {
       gd = Double.parseDouble(gulperDelay.getText());
     } catch (Exception e) {
+      //
     }
-    if (gd < 0)
+    if (gd < 0) {
       message = "The gulper delay must be greater than or equal to 0 seconds.";
+    }
 
     if (message != null) {
       JOptionPane.showMessageDialog(applicationFrame, message, "Error", JOptionPane.ERROR_MESSAGE);
       return false;
-    } else
+    } else {
       return true;
+    }
   }
 
   /**
@@ -105,21 +107,21 @@ public class WebServicesPanel extends DataSourcePanel {
     wsStationUrlField.getDocument().addDocumentListener(new DocumentListener() {
       public void changedUpdate(DocumentEvent e) {
         String s = getText(wsStationUrlField);
-        if (currentStationURL.compareTo(s) != 0) {
+        if (currentStationUrl.compareTo(s) != 0) {
           showNeedUpdate();
         }
       }
 
       public void removeUpdate(DocumentEvent e) {
         String s = getText(wsStationUrlField);
-        if (currentStationURL.compareTo(s) != 0) {
+        if (currentStationUrl.compareTo(s) != 0) {
           showNeedUpdate();
         }
       }
 
       public void insertUpdate(DocumentEvent e) {
         String s = getText(wsStationUrlField);
-        if (currentStationURL.compareTo(s) != 0) {
+        if (currentStationUrl.compareTo(s) != 0) {
           showNeedUpdate();
         }
       }
@@ -221,14 +223,16 @@ public class WebServicesPanel extends DataSourcePanel {
           msg.append(error.toString());
         }
         if (e != null && !e.toString().isEmpty()) {
-          if (msg.length() > 0)
+          if (msg.length() > 0) {
             msg.append("\n");
+          }
           msg.append(e.toString());
         }
-        if (msg.length() == 0)
+        if (msg.length() == 0) {
           msg.append("Error getting network list.");
+        }
 
-        JOptionPane.showMessageDialog(Swarm.getApplication(), msg.toString(), "Error",
+        JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), msg.toString(), "Error",
             JOptionPane.ERROR_MESSAGE);
         return null;
       }
@@ -246,11 +250,9 @@ public class WebServicesPanel extends DataSourcePanel {
         // "right:max(20dlu;pref), 3dlu, 40dlu, 0dlu, 45dlu, 3dlu, right:max(20dlu;pref), 3dlu,
         // 40dlu, 0dlu, 45dlu",
         "right:max(10dlu;pref), 3dlu, right:max(20dlu;pref), 3dlu, 80dlu, 0dlu, 5dlu, 3dlu, right:max(20dlu;pref), 3dlu, 40dlu, 0dlu, 40dlu",
+        "");
 
-    "");
-
-    DefaultFormBuilder builder = new DefaultFormBuilder(layout);
-    builder.setDefaultDialogBorder();
+    DefaultFormBuilder builder = new DefaultFormBuilder(layout).border(Borders.DIALOG);
     builder.append(
         new JLabel("Use this data source to connect to " + WebServicesSource.DESCRIPTION + "."),
         11);
@@ -342,17 +344,16 @@ public class WebServicesPanel extends DataSourcePanel {
    */
   private String getDefaultText(Component component) {
     String s;
-    if (component == wsDataselectUrlField)
+    if (component == wsDataselectUrlField) {
       // s = DataSelectReader.DEFAULT_WS_URL;
       s = SwarmConfig.getInstance().fdsnDataselectURL;
-
-    else
-      if (component == wsStationUrlField)
+    } else
+      if (component == wsStationUrlField) {
         // s = WebServiceStationTextClient.DEFAULT_WS_URL;
         s = SwarmConfig.getInstance().fdsnStationURL;
-
-    else
-      s = "";
+      } else {
+        s = "";
+      }
     return s;
   }
 
@@ -376,7 +377,7 @@ public class WebServicesPanel extends DataSourcePanel {
     Object value;
     String s;
     if (component instanceof JComboBox) {
-      value = ((JComboBox<String>) component).getSelectedItem();
+      value = ((JComboBox<?>) component).getSelectedItem();
     } else if (component instanceof JTextComponent) {
       value = ((JTextComponent) component).getText();
     } else {
@@ -435,8 +436,8 @@ public class WebServicesPanel extends DataSourcePanel {
     // }
     network.removeAllItems();
     network.addItem("---Updating List---");
-    currentStationURL = getText(wsStationUrlField);
-    WSNetworkClient wsc = new WSNetworkClient(currentStationURL);
+    currentStationUrl = getText(wsStationUrlField);
+    WSNetworkClient wsc = new WSNetworkClient(currentStationUrl);
     List<String> nets = wsc.getNetworkList();
     if (nets != null) {
       network.removeAllItems();
@@ -450,8 +451,9 @@ public class WebServicesPanel extends DataSourcePanel {
   protected void showNeedUpdate() {
     if (network.getItemCount() > 0 && network.getSelectedItem() != null) {
       String value = network.getSelectedItem().toString();
-      if (value.compareTo("---Need Update---") == 0)
+      if (value.compareTo("---Need Update---") == 0) {
         return;
+      }
     }
     network.removeAllItems();
     network.addItem("---Need Update---");
@@ -487,7 +489,7 @@ public class WebServicesPanel extends DataSourcePanel {
   /**
    * Process the OK.
    */
-  public String wasOK() {
+  public String wasOk() {
     int gs = (int) (Double.parseDouble(gulperSize.getText()) * 60);
     int gd = (int) (Double.parseDouble(gulperDelay.getText()) * 1000);
     String result = String.format(getCode() + ":" + WebServicesSource.PARAM_FMT_TEXT,

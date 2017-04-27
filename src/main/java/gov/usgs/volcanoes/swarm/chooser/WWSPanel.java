@@ -1,17 +1,18 @@
 package gov.usgs.volcanoes.swarm.chooser;
 
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.factories.Borders;
+import com.jgoodies.forms.layout.FormLayout;
+
+import gov.usgs.volcanoes.core.util.StringUtils;
+
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
-import com.jgoodies.forms.builder.DefaultFormBuilder;
-import com.jgoodies.forms.layout.FormLayout;
-
-import gov.usgs.volcanoes.core.util.StringUtils;
-
 /**
- *
+ * Winston Wave Server Panel.
  * @author Dan Cervelli
  */
 public class WWSPanel extends DataSourcePanel {
@@ -32,6 +33,9 @@ public class WWSPanel extends DataSourcePanel {
     resetSource(source);
   }
 
+  /**
+   * @see gov.usgs.volcanoes.swarm.chooser.DataSourcePanel#resetSource(java.lang.String)
+   */
   public void resetSource(String source) {
     this.source = source;
     String h = "";
@@ -50,13 +54,13 @@ public class WWSPanel extends DataSourcePanel {
     wwsTimeout.setText(t);
     wwsCompress.setSelected(wscomp);
   }
+  
   @Override
   protected void createPanel() {
     createFields();
     FormLayout layout = new FormLayout("right:max(20dlu;pref), 3dlu, 40dlu, 0dlu, 126dlu", "");
 
-    DefaultFormBuilder builder = new DefaultFormBuilder(layout);
-    builder.setDefaultDialogBorder();
+    DefaultFormBuilder builder = new DefaultFormBuilder(layout).border(Borders.DIALOG);
     builder.append(new JLabel("Use this data source to connect to a Winston Wave Server (WWS)."),
         5);
     builder.nextLine();
@@ -82,30 +86,34 @@ public class WWSPanel extends DataSourcePanel {
   }
 
   @Override
-  public boolean allowOK(boolean edit) {
+  public boolean allowOk(boolean edit) {
     String host = wwsHost.getText();
     String message = null;
 
-    if (host == null || host.length() == 0 || host.indexOf(';') != -1 || host.indexOf(':') != -1)
+    if (host == null || host.length() == 0 || host.indexOf(';') != -1 || host.indexOf(':') != -1) {
       message = "There is an error with the WWS IP address or host name.";
+    }
     
     int ip = StringUtils.stringToInt(wwsPort.getText(), -1);
-    if (ip < 0 || ip > 65535)
+    if (ip < 0 || ip > 65535) {
       message = "There is an error with the WWS port.";
+    }
 
     double to = StringUtils.stringToDouble(wwsTimeout.getText(), -1);
-    if (to <= 0)
+    if (to <= 0) {
       message = "There is an error with the WWS time out (must be > 0).";
+    }
     
     if (message != null) {
       JOptionPane.showMessageDialog(applicationFrame, message, "Error", JOptionPane.ERROR_MESSAGE);
       return false;
-    } else
+    } else {
       return true;
+    }
   }
 
   @Override
-  public String wasOK() {
+  public String wasOk() {
     int timeout = (int) (Double.parseDouble(wwsTimeout.getText()) * 1000);
     String result = String.format("wws:%s:%s:%d:%s", wwsHost.getText(), wwsPort.getText(), timeout,
         (wwsCompress.isSelected() ? "1" : "0"));
