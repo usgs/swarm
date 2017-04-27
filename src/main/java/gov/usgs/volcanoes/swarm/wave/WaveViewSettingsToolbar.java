@@ -261,7 +261,4 @@ public class WaveViewSettingsToolbar {
     waveToggle.setSelected(w);
   }
 
-/*  public boolean isPickEnabled() {
-    return pickEnabled;
-  }*/
 }

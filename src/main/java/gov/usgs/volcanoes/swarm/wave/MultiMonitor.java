@@ -731,7 +731,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
    * Sets the start time of the monitor if it's paused. Set to Double.NaN
    * to resume.
    *
-   * @param start
+   * @param start start time
    */
   public void setPauseStartTime(final double start) {
     pauseStartTime = start;
