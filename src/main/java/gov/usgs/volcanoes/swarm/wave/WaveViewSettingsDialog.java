@@ -10,8 +10,6 @@ import gov.usgs.volcanoes.swarm.SwarmModalDialog;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Point;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;

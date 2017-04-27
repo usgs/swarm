@@ -35,18 +35,48 @@ public class StatusTextArea extends JTextArea {
   /**
    * Perform duration calculation.
    * 
-   * @param startMark duration start time in j2k
-   * @param endMark duration end time in j2k
+   * @param startTime duration start time in j2k
+   * @param endTime duration end time in j2k
    * @return duration string
    */
-  public static String getDuration(double startMark, double endMark) {
+  public static String getDuration(double startTime, double endTime) {
     if (swarmConfig.durationEnabled) {
-      double duration = Math.abs(startMark - endMark);
+      double duration = Math.abs(startTime - endTime);
       double durationMagnitude = swarmConfig.getDurationMagnitude(duration);
       return String.format("Duration: %.2fs (Md: %.2f)", duration, durationMagnitude);
     } else {
       return null;
     }
+  }
+  
+  /**
+   * Perform coda duration calculation. More or less the same calculation as getDuration.
+   * 
+   * @param startTime duration start time in milliseconds since 1970
+   * @param endTime duration end time in milliseconds since 1970
+   * @return duration string
+   */
+  public static String getCodaDuration(long startTime, long endTime) {
+    if (swarmConfig.durationEnabled) {
+      double duration = Math.abs(startTime - endTime) / 1000.0;
+      double durationMagnitude = swarmConfig.getDurationMagnitude(duration);
+      return String.format("Coda: %.2fs (Mc: %.2f)", duration, durationMagnitude);
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Return S-P duration and distance text for display.
+   * 
+   * @param pTime P phase pick time in milliseconds since 1970
+   * @param sTime S phase pick time in milliseconds since 1970
+   * @return S-P text
+   */
+  public static String getSpString(long pTime, long sTime) {
+    double duration = (sTime - pTime) / 1000.0;
+    double distance = SwarmConfig.getInstance().pVelocity * duration;
+    return String.format("S-P: %.2fs (%.2fkm)", duration, distance);
   }
   
   /**
@@ -85,4 +115,5 @@ public class StatusTextArea extends JTextArea {
     }
     return waveInfo;
   }
+  
 }

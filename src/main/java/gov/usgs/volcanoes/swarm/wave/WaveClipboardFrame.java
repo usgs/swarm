@@ -5,6 +5,7 @@ import gov.usgs.plot.data.file.FileType;
 import gov.usgs.plot.data.file.SeismicDataFile;
 import gov.usgs.volcanoes.core.contrib.PngEncoder;
 import gov.usgs.volcanoes.core.contrib.PngEncoderB;
+import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
 import gov.usgs.volcanoes.core.util.UiUtils;
@@ -85,8 +86,8 @@ public class WaveClipboardFrame extends SwarmFrame {
 
   private JScrollPane scrollPane;
   private Box waveBox;
-  private final List<AbstractWavePanel> waves;
-  private final Set<AbstractWavePanel> selectedSet;
+  private final List<WaveViewPanel> waves;
+  private final Set<WaveViewPanel> selectedSet;
   private JToolBar toolbar;
   private JPanel mainPanel;
   private StatusTextArea statusText;
@@ -115,9 +116,11 @@ public class WaveClipboardFrame extends SwarmFrame {
   private JButton backButton;
   private JButton gotoButton;
 
+  private JToggleButton pickButton;
+  
   private JPopupMenu popup;
 
-  private final Map<AbstractWavePanel, Stack<double[]>> histories;
+  private final Map<WaveViewPanel, Stack<double[]>> histories;
 
   private final HelicorderViewPanelListener linkListener;
 
@@ -132,11 +135,11 @@ public class WaveClipboardFrame extends SwarmFrame {
   private WaveClipboardFrame() {
     super("Wave Clipboard", true, true, true, false);
     this.setFocusable(true);
-    selectedSet = new HashSet<AbstractWavePanel>();
+    selectedSet = new HashSet<WaveViewPanel>();
     saveAllDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
     saveAllDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-    waves = new ArrayList<AbstractWavePanel>();
-    histories = new HashMap<AbstractWavePanel, Stack<double[]>>();
+    waves = new ArrayList<WaveViewPanel>();
+    histories = new HashMap<WaveViewPanel, Stack<double[]>>();
     createUi();
     linkListener = new HelicorderViewPanelListener() {
       public void insetCreated(final double st, final double et) {
@@ -255,6 +258,22 @@ public class WaveClipboardFrame extends SwarmFrame {
         new CaptureActionListener());
     UiUtils.mapKeyStrokeToButton(this, "P", "capture", captureButton);
     toolbar.add(captureButton);
+    
+
+    toolbar.addSeparator();
+    pickButton = SwarmUtil.createToolBarToggleButton(Icons.pick,
+        "Pick Mode", new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            for (WaveViewPanel awp : waves) {
+              if (awp instanceof WaveViewPanel) {
+                WaveViewPanel wvp = (WaveViewPanel) awp;
+                wvp.getSettings().pickEnabled = pickButton.isSelected();
+              }
+            }
+          }
+        });
+    pickButton.setEnabled(true);
+    toolbar.add(pickButton);
   }
 
   // TODO: don't write image on event thread
@@ -291,13 +310,13 @@ public class WaveClipboardFrame extends SwarmFrame {
 
       int height = 0;
       final int width = waves.get(0).getWidth();
-      for (final AbstractWavePanel panel : waves) {
+      for (final WaveViewPanel panel : waves) {
         height += panel.getHeight();
       }
       
       final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
       final Graphics g = image.getGraphics();
-      for (final AbstractWavePanel panel : waves) {
+      for (final WaveViewPanel panel : waves) {
         panel.paint(g);
         g.translate(0, panel.getHeight());
       }
@@ -435,7 +454,7 @@ public class WaveClipboardFrame extends SwarmFrame {
       private static final long serialVersionUID = 1L;
 
       public void actionPerformed(final ActionEvent e) {
-        for (final AbstractWavePanel wave : waves) {
+        for (final WaveViewPanel wave : waves) {
           select(wave);
         }
       }
@@ -470,7 +489,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     WaveViewTime.addTimeListener(new TimeListener() {
       public void timeChanged(final double j2k) {
-        for (final AbstractWavePanel panel : waves) {
+        for (final WaveViewPanel panel : waves) {
           if (panel != null) {
             panel.setCursorMark(j2k);
           }
@@ -480,7 +499,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     selectListener = new WaveViewPanelAdapter() {
       @Override
-      public void mousePressed(final AbstractWavePanel src, final MouseEvent e,
+      public void mousePressed(final WaveViewPanel src, final MouseEvent e,
           final boolean dragging) {
         requestFocusInWindow();
         final int thisIndex = getWaveIndex(src);
@@ -510,11 +529,11 @@ public class WaveClipboardFrame extends SwarmFrame {
       }
 
       @Override
-      public void waveZoomed(final AbstractWavePanel src, final double st, final double et,
+      public void waveZoomed(final WaveViewPanel src, final double st, final double et,
           final double nst, final double net) {
         final double[] t = new double[] {st, et};
         addHistory(src, t);
-        for (final AbstractWavePanel wvp : selectedSet) {
+        for (final WaveViewPanel wvp : selectedSet) {
           if (wvp != src) {
             addHistory(wvp, t);
             wvp.zoom(nst, net);
@@ -523,7 +542,7 @@ public class WaveClipboardFrame extends SwarmFrame {
       }
 
       @Override
-      public void waveClosed(final AbstractWavePanel src) {
+      public void waveClosed(final WaveViewPanel src) {
         remove(src);
       }
     };
@@ -613,7 +632,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
   private class SaveActionListener implements ActionListener {
     public void actionPerformed(final ActionEvent e) {
-      final AbstractWavePanel selected = getSingleSelected();
+      final WaveViewPanel selected = getSingleSelected();
       if (selected == null) {
         return;
       }
@@ -731,7 +750,7 @@ public class WaveClipboardFrame extends SwarmFrame {
           if (fileType.equals(FileType.SEISAN)) {
             final SeismicDataFile file =
                 SeismicDataFile.getFile(f.getAbsolutePath(), FileType.SEISAN);
-            for (final AbstractWavePanel wvp : waves) {
+            for (final WaveViewPanel wvp : waves) {
               Wave sw = wvp.getWave();
               if (sw != null) {
                 sw = sw.subset(wvp.getStartTime(), wvp.getEndTime());
@@ -746,7 +765,7 @@ public class WaveClipboardFrame extends SwarmFrame {
             if (!f.exists()) {
               f.mkdir();
             }
-            for (final AbstractWavePanel wvp : waves) {
+            for (final WaveViewPanel wvp : waves) {
               Wave sw = wvp.getWave();
 
               if (sw != null) {
@@ -858,13 +877,13 @@ public class WaveClipboardFrame extends SwarmFrame {
    * Sort wave panels in clipboard.
    */
   public synchronized void sortChannelsByNearest() {
-    final AbstractWavePanel p = getSingleSelected();
+    final WaveViewPanel p = getSingleSelected();
     if (p == null) {
       return;
     }
 
-    final ArrayList<AbstractWavePanel> sorted = new ArrayList<AbstractWavePanel>(waves.size());
-    for (final AbstractWavePanel wave : waves) {
+    final ArrayList<WaveViewPanel> sorted = new ArrayList<WaveViewPanel>(waves.size());
+    for (final WaveViewPanel wave : waves) {
       sorted.add(wave);
     }
     
@@ -873,8 +892,8 @@ public class WaveClipboardFrame extends SwarmFrame {
       return;
     }
 
-    Collections.sort(sorted, new Comparator<AbstractWavePanel>() {
-      public int compare(final AbstractWavePanel wvp1, final AbstractWavePanel wvp2) {
+    Collections.sort(sorted, new Comparator<WaveViewPanel>() {
+      public int compare(final WaveViewPanel wvp1, final WaveViewPanel wvp2) {
         Metadata md = swarmConfig.getMetadata(wvp1.getChannel());
         final double d1 = smd.distanceTo(md);
         md = swarmConfig.getMetadata(wvp2.getChannel());
@@ -884,7 +903,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     });
 
     removeWaves();
-    for (final AbstractWavePanel wave : sorted) {
+    for (final WaveViewPanel wave : sorted) {
       addWave(wave);
     }
     select(p);
@@ -894,13 +913,13 @@ public class WaveClipboardFrame extends SwarmFrame {
    * Get selected wave panel.
    * @return wave panel
    */
-  public synchronized AbstractWavePanel getSingleSelected() {
+  public synchronized WaveViewPanel getSingleSelected() {
     if (selectedSet.size() != 1) {
       return null;
     }
 
-    AbstractWavePanel p = null;
-    for (final AbstractWavePanel panel : selectedSet) {
+    WaveViewPanel p = null;
+    for (final WaveViewPanel panel : selectedSet) {
       p = panel;
     }
     
@@ -911,7 +930,7 @@ public class WaveClipboardFrame extends SwarmFrame {
    * Synchronize start and end times of wave panels to selected wave panel.
    */
   public synchronized void syncChannels() {
-    final AbstractWavePanel p = getSingleSelected();
+    final WaveViewPanel p = getSingleSelected();
     if (p == null) {
       return;
     }
@@ -923,11 +942,11 @@ public class WaveClipboardFrame extends SwarmFrame {
     final SwingWorker worker = new SwingWorker() {
       @Override
       public Object construct() {
-        List<AbstractWavePanel> copy = null;
+        List<WaveViewPanel> copy = null;
         synchronized (WaveClipboardFrame.this) {
-          copy = new ArrayList<AbstractWavePanel>(waves);
+          copy = new ArrayList<WaveViewPanel>(waves);
         }
-        for (final AbstractWavePanel wvp : copy) {
+        for (final WaveViewPanel wvp : copy) {
           if (wvp != p) {
             if (wvp.getDataSource() != null) {
               addHistory(wvp, new double[] {wvp.getStartTime(), wvp.getEndTime()});
@@ -968,7 +987,7 @@ public class WaveClipboardFrame extends SwarmFrame {
    * Add wave panel to clipboard.
    * @param p wave panel
    */
-  public synchronized void addWave(final AbstractWavePanel p) {
+  public synchronized void addWave(final WaveViewPanel p) {
     p.addListener(selectListener);
     p.setOffsets(54, 8, 21, 19);
     p.setAllowClose(true);
@@ -979,13 +998,14 @@ public class WaveClipboardFrame extends SwarmFrame {
     p.setSize(w, calculateWaveHeight());
     p.setBottomBorderColor(Color.GRAY);
     p.createImage();
+    p.getSettings().pickEnabled = pickButton.isSelected();
     waveBox.add(p);
     waves.add(p);
     doButtonEnables();
     waveBox.validate();
   }
 
-  private synchronized void deselect(final AbstractWavePanel p) {
+  private synchronized void deselect(final WaveViewPanel p) {
     selectedSet.remove(p);
     waveToolbar.removeSettings(p.getSettings());
     p.setBackgroundColor(BACKGROUND_COLOR);
@@ -1000,7 +1020,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     }
   }
 
-  private synchronized void select(final AbstractWavePanel p) {
+  private synchronized void select(final WaveViewPanel p) {
     if (p == null || selectedSet.contains(p)) {
       return;
     }
@@ -1013,7 +1033,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     waveToolbar.addSettings(p.getSettings());
   }
 
-  private synchronized void remove(final AbstractWavePanel p) {
+  private synchronized void remove(final WaveViewPanel p) {
     int i = 0;
     for (i = 0; i < waveBox.getComponentCount(); i++) {
       if (p == waveBox.getComponent(i)) {
@@ -1045,7 +1065,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     }
   }
 
-  protected int getWaveIndex(final AbstractWavePanel p) {
+  protected int getWaveIndex(final WaveViewPanel p) {
     int i = 0;
     for (i = 0; i < waveBox.getComponentCount(); i++) {
       if (p == waveBox.getComponent(i)) {
@@ -1059,7 +1079,7 @@ public class WaveClipboardFrame extends SwarmFrame {
    * Move selected wave panel down one.
    */
   public synchronized void moveDown() {
-    final AbstractWavePanel p = getSingleSelected();
+    final WaveViewPanel p = getSingleSelected();
     if (p == null) {
       return;
     }
@@ -1102,7 +1122,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     }
 
     for (int idx : panelIdx) {
-      AbstractWavePanel p = waves.get(idx);
+      WaveViewPanel p = waves.get(idx);
       waves.remove(idx);
       waves.add(idx + i, p);
       waveBox.remove(p);
@@ -1121,7 +1141,7 @@ public class WaveClipboardFrame extends SwarmFrame {
       @Override
       public Object construct() {
         final int w = scrollPane.getViewport().getSize().width;
-        for (final AbstractWavePanel wave : waves) {
+        for (final WaveViewPanel wave : waves) {
           wave.setSize(w, calculateWaveHeight());
           wave.createImage();
         }
@@ -1152,7 +1172,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     repaint();
   }
 
-  private void addHistory(final AbstractWavePanel wvp, final double[] t) {
+  private void addHistory(final WaveViewPanel wvp, final double[] t) {
     Stack<double[]> history = histories.get(wvp);
     if (history == null) {
       history = new Stack<double[]>();
@@ -1161,7 +1181,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     history.push(t);
   }
 
-  private void gotoTime(final AbstractWavePanel wvp, double j2k) {
+  private void gotoTime(final WaveViewPanel wvp, double j2k) {
     double dt = 60;
     if (wvp.getWave() != null) {
       final double st = wvp.getStartTime();
@@ -1188,7 +1208,7 @@ public class WaveClipboardFrame extends SwarmFrame {
         throw new ParseException(t, 0);
       }
 
-      for (final AbstractWavePanel p : selectedSet) {
+      for (final WaveViewPanel p : selectedSet) {
         gotoTime(p, j2k);
       }
     } catch (final ParseException e) {
@@ -1197,7 +1217,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     }
   }
 
-  private void scaleTime(final AbstractWavePanel wvp, final double pct) {
+  private void scaleTime(final WaveViewPanel wvp, final double pct) {
     final double st = wvp.getStartTime();
     final double et = wvp.getEndTime();
     final double[] t = new double[] {st, et};
@@ -1214,7 +1234,7 @@ public class WaveClipboardFrame extends SwarmFrame {
    * @param pct percent to scale by
    */
   public void scaleTime(final double pct) {
-    for (final AbstractWavePanel p : selectedSet) {
+    for (final WaveViewPanel p : selectedSet) {
       scaleTime(p, pct);
     }
   }
@@ -1223,7 +1243,7 @@ public class WaveClipboardFrame extends SwarmFrame {
    * Revert wave panel time to previous time window.
    * @param wvp wave view panel
    */
-  public void back(final AbstractWavePanel wvp) {
+  public void back(final WaveViewPanel wvp) {
     final Stack<double[]> history = histories.get(wvp);
     if (history == null || history.empty()) {
       return;
@@ -1237,12 +1257,12 @@ public class WaveClipboardFrame extends SwarmFrame {
    * Revert selected wave panels' times to previous time window.
    */
   public void back() {
-    for (final AbstractWavePanel p : selectedSet) {
+    for (final WaveViewPanel p : selectedSet) {
       back(p);
     }
   }
 
-  private void shiftTime(final AbstractWavePanel wvp, final double pct) {
+  private void shiftTime(final WaveViewPanel wvp, final double pct) {
     final double st = wvp.getStartTime();
     final double et = wvp.getEndTime();
     final double[] t = new double[] {st, et};
@@ -1258,7 +1278,7 @@ public class WaveClipboardFrame extends SwarmFrame {
    * @param pct percent to shift time by.
    */
   public void shiftTime(final double pct) {
-    for (final AbstractWavePanel p : selectedSet) {
+    for (final WaveViewPanel p : selectedSet) {
       shiftTime(p, pct);
     }
   }
@@ -1269,7 +1289,7 @@ public class WaveClipboardFrame extends SwarmFrame {
    * @param et end time
    */
   public void repositionWaves(final double st, final double et) {
-    for (final AbstractWavePanel wave : waves) {
+    for (final WaveViewPanel wave : waves) {
       fetchNewWave(wave, st, et);
     }
   }
@@ -1279,7 +1299,7 @@ public class WaveClipboardFrame extends SwarmFrame {
   }
 
   // TODO: This isn't right, this should be a method of waveviewpanel
-  private void fetchNewWave(final AbstractWavePanel wvp, final double nst, final double net) {
+  private void fetchNewWave(final WaveViewPanel wvp, final double nst, final double net) {
     System.err.println(
         "Fetching new wave " + J2kSec.toDateString(nst) + " -> " + J2kSec.toDateString(net));
     final SwingWorker worker = new SwingWorker() {
@@ -1337,5 +1357,28 @@ public class WaveClipboardFrame extends SwarmFrame {
 
   private static class WaveClipboardFrameHolder {
     public static WaveClipboardFrame waveClipiboardFrame = new WaveClipboardFrame();
+  }
+  
+
+  /**
+   * Propagate P or S pick to wave view panel of same station.
+   * 
+   * @param phase P or S
+   * @param pick pick object
+   */
+  public void propagatePick(String phase, Pick pick, WaveViewPanel pickWave) {
+    for (WaveViewPanel wvp : waves) {
+      if (pickWave.channel.equals(wvp.channel)) {
+        continue;
+      }
+      if (pickWave.isSameStation(wvp)) {
+        if (phase.equals("P")) {
+          wvp.getPickMenu().setP(pick);
+        }
+        if (phase.equals("S")) {
+          wvp.getPickMenu().setS(pick);
+        }
+      }
+    }
   }
 }
