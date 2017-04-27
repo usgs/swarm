@@ -271,9 +271,13 @@ public class WaveViewPanel extends JComponent {
     allowClose = b;
   }
 
+  /**
+   * Process right mouse press.
+   * @param e mouse event
+   */
   protected void processRightMousePress(MouseEvent e) {
-
-    if (settings.pickEnabled && settings.viewType.equals(ViewType.WAVE)) {
+    if (settings.pickEnabled && (settings.viewType.equals(ViewType.WAVE) 
+        || settings.viewType.equals(ViewType.SPECTROGRAM))) {
       double[] t = getTranslation();
       if (t != null) {
         double j2k = e.getX() * t[0] + t[1];
@@ -1395,8 +1399,12 @@ public class WaveViewPanel extends JComponent {
     return true;
   }
 
+  /**
+   * Get pick menu.
+   * @return pick menu
+   */
   public PickMenu getPickMenu() {
-    if(pickMenu==null){
+    if (pickMenu == null) {
       pickMenu = new PickMenu(this);
     }
     return pickMenu;
