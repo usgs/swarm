@@ -1241,12 +1241,22 @@ public class WaveViewPanel extends JComponent {
   private void plotParticleMotion(Plot plot, Wave wave) {
     Metadata md = swarmConfig.getMetadata(channel);
     if (md == null) {
+      String message = "Unable to plot due to invalid metadata.";
+      TextRenderer renderer = new TextRenderer(30, 30, message);
+      plot.addRenderer(renderer);
       return;
     }
     String s = md.getSCNL().station;
     String c = md.getSCNL().channel;
     String n = md.getSCNL().network;
     String l = md.getSCNL().location == null ? "" : md.getSCNL().location;
+    
+    if (s == null || c == null || n == null) {
+      String message = "Unable to plot due to missing SCNL information.";
+      TextRenderer renderer = new TextRenderer(30, 30, message);
+      plot.addRenderer(renderer);
+      return;
+    }
 
     SliceWave swave = new SliceWave(wave);
     swave.setSlice(startTime, endTime);

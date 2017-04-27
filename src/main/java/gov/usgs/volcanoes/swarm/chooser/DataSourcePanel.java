@@ -7,11 +7,11 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 /**
- * $Log: not supported by cvs2svn $
+ * Data Source Panel.
  * 
  * @author Dan Cervelli
  */
-abstract public class DataSourcePanel {
+public abstract class DataSourcePanel {
   protected JPanel panel;
   protected String code;
   protected String name;
@@ -28,7 +28,7 @@ abstract public class DataSourcePanel {
     source = s;
   }
 
-  abstract public void resetSource(String s);
+  public abstract void resetSource(String s);
 
   public String getCode() {
     return code;
@@ -38,9 +38,14 @@ abstract public class DataSourcePanel {
     return name;
   }
 
+  /**
+   * Get panel.
+   * @return panel
+   */
   public JPanel getPanel() {
-    if (panel == null)
+    if (panel == null) {
       createPanel();
+    }
     return panel;
   }
 
@@ -55,9 +60,9 @@ abstract public class DataSourcePanel {
     return ResourceReader.getResourceReader(getClass(), name);
   }
 
-  abstract protected void createPanel();
+  protected abstract void createPanel();
 
-  abstract public boolean allowOK(boolean edit);
+  public abstract boolean allowOk(boolean edit);
 
-  abstract public String wasOK();
+  public abstract String wasOk();
 }
