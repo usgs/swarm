@@ -1,3 +1,7 @@
+## Version 2.6.4
+  * Add ability to import QuakeML files
+  * Add pick mode to Wave Clipboard
+
 ## Version 2.6.3
   * Enable refresh of data source
   * Addition of initial capabilities for particle motion plot
