@@ -5,6 +5,7 @@ import gov.usgs.plot.data.file.FileType;
 import gov.usgs.plot.data.file.SeismicDataFile;
 import gov.usgs.volcanoes.core.contrib.PngEncoder;
 import gov.usgs.volcanoes.core.contrib.PngEncoderB;
+import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
 import gov.usgs.volcanoes.core.util.UiUtils;
@@ -1356,5 +1357,28 @@ public class WaveClipboardFrame extends SwarmFrame {
 
   private static class WaveClipboardFrameHolder {
     public static WaveClipboardFrame waveClipiboardFrame = new WaveClipboardFrame();
+  }
+  
+
+  /**
+   * Propagate P or S pick to wave view panel of same station.
+   * 
+   * @param phase P or S
+   * @param pick pick object
+   */
+  public void propagatePick(String phase, Pick pick, WaveViewPanel pickWave) {
+    for (WaveViewPanel wvp : waves) {
+      if (pickWave.channel.equals(wvp.channel)) {
+        continue;
+      }
+      if (pickWave.isSameStation(wvp)) {
+        if (phase.equals("P")) {
+          wvp.getPickMenu().setP(pick);
+        }
+        if (phase.equals("S")) {
+          wvp.getPickMenu().setS(pick);
+        }
+      }
+    }
   }
 }

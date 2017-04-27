@@ -3,6 +3,7 @@ package gov.usgs.volcanoes.swarm.event;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
 import java.awt.event.ActionEvent;
@@ -22,11 +23,14 @@ public class PickMenu extends JPopupMenu {
 
   private static final long serialVersionUID = 8681764007165352268L;
 
+  private WaveClipboardFrame clipboard = WaveClipboardFrame.getInstance();
   private WaveViewPanel wvp;
   private double j2k;
 
   private Pick p;
+  private boolean pickComponentP = false;
   private Pick s;
+  private boolean pickComponentS = false;
   private boolean hidePhases = false;
 
   private Pick coda1;
@@ -48,8 +52,30 @@ public class PickMenu extends JPopupMenu {
   private void createMenu() {
     createPhaseMenu();
     createCodaMenu();
+    createMarkMenu();
   }
   
+  /**
+   * Create mark submenu.
+   */
+  private void createMarkMenu() {
+    JMenu markMenu = new JMenu("Marks");
+
+    JMenuItem c1MenuItem = new JMenuItem("Clear");
+    c1MenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        wvp.setMarks(Double.NaN, Double.NaN);
+        wvp.repaint();
+      }
+    });
+    markMenu.add(c1MenuItem);
+    
+    this.add(markMenu);
+  }
+  
+  /**
+   * Create coda submenu.
+   */
   private void createCodaMenu() {
 
     JMenu coda = new JMenu("Coda");
@@ -99,7 +125,7 @@ public class PickMenu extends JPopupMenu {
   }
   
   /**
-   * Create submen under Phase menu.
+   * Create phase submenu.
    */
   private void createPhaseMenu() {
     JMenu phase = new JMenu("Phase");
@@ -107,9 +133,10 @@ public class PickMenu extends JPopupMenu {
     JMenuItem phasePe = new JMenuItem("P (Emergent)");
     phasePe.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        Pick pick = createPick("P", Pick.Onset.EMERGENT);
-        p = pick;
+        p = createPick("P", Pick.Onset.EMERGENT);
+        pickComponentP = true;
         wvp.repaint();
+        clipboard.propagatePick("P", p, wvp);
       }
     });
     phase.add(phasePe);
@@ -117,9 +144,10 @@ public class PickMenu extends JPopupMenu {
     JMenuItem phasePi = new JMenuItem("P (Impulsive)");
     phasePi.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        Pick pick = createPick("P", Pick.Onset.IMPULSIVE);
-        p = pick;
+        p = createPick("P", Pick.Onset.IMPULSIVE);
+        pickComponentP = true;
         wvp.repaint();
+        clipboard.propagatePick("P", p, wvp);
       }
     });
     phase.add(phasePi);
@@ -128,7 +156,9 @@ public class PickMenu extends JPopupMenu {
     clearP.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         p = null;
+        pickComponentP = false;
         wvp.repaint();
+        clipboard.propagatePick("P", p, wvp);
       }
     });
     phase.add(clearP);
@@ -138,9 +168,10 @@ public class PickMenu extends JPopupMenu {
     JMenuItem phaseSe = new JMenuItem("S (Emergent)");
     phaseSe.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        Pick pick = createPick("S", Pick.Onset.EMERGENT);
-        s = pick;
+        s = createPick("S", Pick.Onset.EMERGENT);
+        pickComponentS = true;
         wvp.repaint();
+        clipboard.propagatePick("S", s, wvp);
       }
     });
     phase.add(phaseSe);
@@ -148,9 +179,10 @@ public class PickMenu extends JPopupMenu {
     JMenuItem phaseSi = new JMenuItem("S (Impulsive)");
     phaseSi.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        Pick pick = createPick("S", Pick.Onset.IMPULSIVE);
-        s = pick;
+        s = createPick("S", Pick.Onset.IMPULSIVE);
+        pickComponentS = true;
         wvp.repaint();
+        clipboard.propagatePick("S", s, wvp);
       }
     });
     phase.add(phaseSi);
@@ -159,7 +191,9 @@ public class PickMenu extends JPopupMenu {
     clearS.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         s = null;
+        pickComponentS = false;
         wvp.repaint();
+        clipboard.propagatePick("S", s, wvp);
       }
     });
     phase.add(clearS);
@@ -177,6 +211,7 @@ public class PickMenu extends JPopupMenu {
     this.add(phase);
   }
 
+  
   /**
    * Create pick object.
    * 
@@ -237,6 +272,24 @@ public class PickMenu extends JPopupMenu {
   }
 
   /**
+   * Set P pick.
+   * @param p pick
+   */
+  public void setP(Pick p) {
+    this.p = p;
+    pickComponentP = false;
+  }
+
+  /**
+   * Set S pick.
+   * @param s pick
+   */
+  public void setS(Pick s) {
+    this.s = s;
+    pickComponentS = false;
+  }
+  
+  /**
    * Get enabled/disabled option for hiding phases.
    * @return true if hide phases option is enabled
    */
@@ -266,6 +319,22 @@ public class PickMenu extends JPopupMenu {
    */
   public boolean isHideCoda() {
     return hideCoda;
+  }
+
+  /**
+   * Determine if this is the component where P pick was selected.
+   * @return true if this component is where user selected the P
+   */
+  public boolean isPickComponentP() {
+    return pickComponentP;
+  }
+
+  /**
+   * Determine if this is the component where S pick was selected.
+   * @return true if this component is where user selected the S
+   */
+  public boolean isPickComponentS() {
+    return pickComponentS;
   }
 
 }

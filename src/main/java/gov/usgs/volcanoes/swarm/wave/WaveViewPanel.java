@@ -1354,5 +1354,52 @@ public class WaveViewPanel extends JComponent {
     mark1 = m1;
     mark2 = m2;
   }
+  
+  /**
+   * Determines if the other wave view panel represents a wave from the
+   * same station. This means it has the same station, network, and location.
+   * @param wvp another wave view panel
+   * @return true if same station
+   */
+  public boolean isSameStation(WaveViewPanel wvp) {
+    Metadata thisMd = swarmConfig.getMetadata(channel);
+    if (thisMd == null) {
+      return false;
+    }
+    String thatChannel = wvp.channel;
+    Metadata thatMd = swarmConfig.getMetadata(thatChannel);
+    if (thatMd == null) {
+      return false;
+    }
+    
+    // get this station info
+    String thisS = thisMd.getSCNL().station;
+    String thisN = thisMd.getSCNL().network;
+    String thisL = thisMd.getSCNL().location == null ? "" : thisMd.getSCNL().location;
+
+    // get that station info
+    String thatS = thatMd.getSCNL().station;
+    String thatN = thatMd.getSCNL().network;
+    String thatL = thatMd.getSCNL().location == null ? "" : thatMd.getSCNL().location;
+
+    // compare
+    if (!thisS.equals(thatS)) {
+      return false;
+    }
+    if (!thisN.equals(thatN)) {
+      return false;
+    }
+    if (!thisL.equals(thatL)) {
+      return false;
+    }
+    return true;
+  }
+
+  public PickMenu getPickMenu() {
+    if(pickMenu==null){
+      pickMenu = new PickMenu(this);
+    }
+    return pickMenu;
+  }
 
 }
