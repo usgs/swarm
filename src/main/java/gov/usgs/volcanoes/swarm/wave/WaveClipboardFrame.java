@@ -999,6 +999,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     p.setBottomBorderColor(Color.GRAY);
     p.createImage();
     p.getSettings().pickEnabled = pickButton.isSelected();
+    p.getPickMenu().marksToCoda();
     waveBox.add(p);
     waves.add(p);
     doButtonEnables();
@@ -1359,26 +1360,11 @@ public class WaveClipboardFrame extends SwarmFrame {
     public static WaveClipboardFrame waveClipiboardFrame = new WaveClipboardFrame();
   }
   
-
   /**
-   * Propagate P or S pick to wave view panel of same station.
-   * 
-   * @param phase P or S
-   * @param pick pick object
+   * Get wave view panels on clipboard.
+   * @return list of wave view panel
    */
-  public void propagatePick(String phase, Pick pick, WaveViewPanel pickWave) {
-    for (WaveViewPanel wvp : waves) {
-      if (pickWave.channel.equals(wvp.channel)) {
-        continue;
-      }
-      if (pickWave.isSameStation(wvp)) {
-        if (phase.equals("P")) {
-          wvp.getPickMenu().setP(pick);
-        }
-        if (phase.equals("S")) {
-          wvp.getPickMenu().setS(pick);
-        }
-      }
-    }
+  public List<WaveViewPanel> getWaves() {
+    return waves;
   }
 }

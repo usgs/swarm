@@ -831,12 +831,20 @@ public class WaveViewPanel extends JComponent {
         return;
       }
       if (!pickMenu.isHidePhases()) {
-        drawPick(pickMenu.getP(), g2);
-        drawPick(pickMenu.getS(), g2);
+        if (pickMenu.isPickChannelP()) {
+          drawPick(pickMenu.getP(), g2, false);
+        } else {
+          drawPick(pickMenu.getP(), g2, true);
+        }
+        if (pickMenu.isPickChannelS()) {
+          drawPick(pickMenu.getS(), g2, false);
+        } else {
+          drawPick(pickMenu.getS(), g2, true);
+        }
       }
       if (!pickMenu.isHideCoda()) {
-        drawPick(pickMenu.getCoda1(), g2);
-        drawPick(pickMenu.getCoda2(), g2);
+        drawPick(pickMenu.getCoda1(), g2, false);
+        drawPick(pickMenu.getCoda2(), g2, false);
       }
     }
   }
@@ -935,35 +943,40 @@ public class WaveViewPanel extends JComponent {
    * Draw pick marks.
    * @param pick pick to draw
    * @param g2 graphics
+   * @param transparent true if tags should have transparent background
    */
-  private void drawPick(Pick pick, Graphics2D g2) {
+  private void drawPick(Pick pick, Graphics2D g2, boolean transparent) {
     if (pick == null) {
       return;
     }
-    String tag = pick.getTag();
+
     long time = pick.getTime();
     double[] t = getTranslation();
     double j2k = J2kSec.fromEpoch(time);
     double x = 2 + (j2k - t[1]) / t[0];
-    g2.setColor(DARK_GREEN);
+    g2.setColor(PickWavePanel.DARK_GREEN);
     g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
+
+    String tag = pick.getTag();
+    Color color = Color.GRAY;
+    if (tag.indexOf('P') != -1) {
+      color = PickWavePanel.P_BACKGROUND;
+    } else if (tag.indexOf('S') != -1) {
+      color = PickWavePanel.S_BACKGROUND;
+    } else if (tag.indexOf('C') != -1) {
+      color = Color.YELLOW;
+    } 
+    g2.setColor(color);
+
     FontMetrics fm = g2.getFontMetrics();
     int width = fm.stringWidth(tag);
     int height = fm.getAscent();
-
     int offset = 2;
     int lw = width + 2 * offset;
 
-    if (tag.indexOf('P') != -1) {
-      g2.setColor(PickWavePanel.P_BACKGROUND);
-    } else if (tag.indexOf('S') != -1) {
-      g2.setColor(PickWavePanel.S_BACKGROUND);
-    } else if (tag.indexOf('C') != -1) {
-      g2.setColor(Color.YELLOW);
-    } else {
-      g2.setColor(Color.GRAY);      
+    if (transparent) {
+      g2.setColor(Color.WHITE);
     }
-
     g2.fillRect((int) x, 3, lw, height + 2 * offset);
     g2.setColor(Color.BLACK);
     g2.drawRect((int) x, 3, lw, height + 2 * offset);
@@ -1420,4 +1433,12 @@ public class WaveViewPanel extends JComponent {
     return pickMenu;
   }
 
+  public Double getMark1() {
+    return mark1;
+  }
+
+  public Double getMark2() {
+    return mark2;
+  }
+  
 }

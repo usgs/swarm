@@ -28,9 +28,9 @@ public class PickMenu extends JPopupMenu {
   private double j2k;
 
   private Pick p;
-  private boolean pickComponentP = false;
+  private boolean pickChannelP = false;
   private Pick s;
-  private boolean pickComponentS = false;
+  private boolean pickChannelS = false;
   private boolean hidePhases = false;
 
   private Pick coda1;
@@ -52,7 +52,7 @@ public class PickMenu extends JPopupMenu {
   private void createMenu() {
     createPhaseMenu();
     createCodaMenu();
-    createMarkMenu();
+    //createMarkMenu();
   }
   
   /**
@@ -134,9 +134,9 @@ public class PickMenu extends JPopupMenu {
     phasePe.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         p = createPick("P", Pick.Onset.EMERGENT);
-        pickComponentP = true;
+        pickChannelP = true;
         wvp.repaint();
-        clipboard.propagatePick("P", p, wvp);
+        propagatePick("P", p, wvp);
       }
     });
     phase.add(phasePe);
@@ -145,9 +145,9 @@ public class PickMenu extends JPopupMenu {
     phasePi.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         p = createPick("P", Pick.Onset.IMPULSIVE);
-        pickComponentP = true;
+        pickChannelP = true;
         wvp.repaint();
-        clipboard.propagatePick("P", p, wvp);
+        propagatePick("P", p, wvp);
       }
     });
     phase.add(phasePi);
@@ -156,9 +156,9 @@ public class PickMenu extends JPopupMenu {
     clearP.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         p = null;
-        pickComponentP = false;
+        pickChannelP = false;
         wvp.repaint();
-        clipboard.propagatePick("P", p, wvp);
+        propagatePick("P", p, wvp);
       }
     });
     phase.add(clearP);
@@ -169,9 +169,9 @@ public class PickMenu extends JPopupMenu {
     phaseSe.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         s = createPick("S", Pick.Onset.EMERGENT);
-        pickComponentS = true;
+        pickChannelS = true;
         wvp.repaint();
-        clipboard.propagatePick("S", s, wvp);
+        propagatePick("S", s, wvp);
       }
     });
     phase.add(phaseSe);
@@ -180,9 +180,9 @@ public class PickMenu extends JPopupMenu {
     phaseSi.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         s = createPick("S", Pick.Onset.IMPULSIVE);
-        pickComponentS = true;
+        pickChannelS = true;
         wvp.repaint();
-        clipboard.propagatePick("S", s, wvp);
+        propagatePick("S", s, wvp);
       }
     });
     phase.add(phaseSi);
@@ -191,9 +191,9 @@ public class PickMenu extends JPopupMenu {
     clearS.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         s = null;
-        pickComponentS = false;
+        pickChannelS = false;
         wvp.repaint();
-        clipboard.propagatePick("S", s, wvp);
+        propagatePick("S", s, wvp);
       }
     });
     phase.add(clearS);
@@ -277,7 +277,7 @@ public class PickMenu extends JPopupMenu {
    */
   public void setP(Pick p) {
     this.p = p;
-    pickComponentP = false;
+    pickChannelP = false;
   }
 
   /**
@@ -286,7 +286,7 @@ public class PickMenu extends JPopupMenu {
    */
   public void setS(Pick s) {
     this.s = s;
-    pickComponentS = false;
+    pickChannelS = false;
   }
   
   /**
@@ -322,19 +322,58 @@ public class PickMenu extends JPopupMenu {
   }
 
   /**
-   * Determine if this is the component where P pick was selected.
-   * @return true if this component is where user selected the P
+   * Determine if this is the channel where P pick was selected.
+   * @return true if this channel is where user selected the P
    */
-  public boolean isPickComponentP() {
-    return pickComponentP;
+  public boolean isPickChannelP() {
+    return pickChannelP;
   }
 
   /**
-   * Determine if this is the component where S pick was selected.
-   * @return true if this component is where user selected the S
+   * Determine if this is the channel where S pick was selected.
+   * @return true if this channel is where user selected the S
    */
-  public boolean isPickComponentS() {
-    return pickComponentS;
+  public boolean isPickChannelS() {
+    return pickChannelS;
   }
 
+  /**
+   * Propagate P or S pick to wave view panel of same station.
+   * 
+   * @param phase P or S
+   * @param pick pick object
+   */
+  public void propagatePick(String phase, Pick pick, WaveViewPanel pickWave) {
+    for (WaveViewPanel otherWvp : clipboard.getWaves()) {
+      if (wvp.getChannel().equals(otherWvp.getChannel())) {
+        continue;
+      }
+      if (pickWave.isSameStation(otherWvp)) {
+        if (phase.equals("P")) {
+          otherWvp.getPickMenu().setP(pick);
+        }
+        if (phase.equals("S")) {
+          otherWvp.getPickMenu().setS(pick);
+        }
+      }
+    }
+  }
+  
+  /**
+   * Change duration markers selected in helicorder view wave panel 
+   * to coda duration markers in clipboard.
+   */
+  public void marksToCoda() {
+    if (!Double.isNaN(wvp.getMark1())) {
+      j2k = wvp.getMark1();
+      Pick pick = createPick("C1", null);
+      coda1 = pick;
+    }
+    if (!Double.isNaN(wvp.getMark2())) {
+      j2k = wvp.getMark2();
+      Pick pick = createPick("C2", null);
+      coda2 = pick;
+      wvp.setMarks(Double.NaN, Double.NaN);
+    }
+  }
 }

@@ -1,6 +1,7 @@
 package gov.usgs.volcanoes.swarm.wave;
 
 import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
@@ -60,12 +61,35 @@ public class StatusTextArea extends JTextArea {
     if (swarmConfig.durationEnabled) {
       double duration = Math.abs(startTime - endTime) / 1000.0;
       double durationMagnitude = swarmConfig.getDurationMagnitude(duration);
-      return String.format("Coda: %.2fs (Mc: %.2f)", duration, durationMagnitude);
+      String coda = String.format("Coda: %.2fs (Mc: %.2f)", duration, durationMagnitude);
+      
+      // get clipboard average
+      WaveClipboardFrame cb = WaveClipboardFrame.getInstance();
+      int count = 0;
+      double sumDuration = 0;
+      for (WaveViewPanel p : cb.getWaves()) {
+        Pick c1 = p.getPickMenu().getCoda1();
+        Pick c2 = p.getPickMenu().getCoda2();
+        if (c1 != null && c2 != null) {
+          sumDuration += Math.abs(c1.getTime() - c2.getTime()) / 1000.0;
+          count++;
+        }
+      }
+      if (count == 1) {
+        return coda;
+      }
+      double avgDuration = sumDuration / count;
+      double avgDurationMagnitude = swarmConfig.getDurationMagnitude(avgDuration);
+      String avgCoda =
+          String.format("Avg Coda: %.2fs (Mc: %.2f)", avgDuration, avgDurationMagnitude);
+
+      // return final coda string
+      return coda + ", " + avgCoda;
     } else {
       return null;
     }
   }
-
+  
   /**
    * Return S-P duration and distance text for display.
    * 
