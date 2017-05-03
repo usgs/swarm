@@ -52,27 +52,8 @@ public class PickMenu extends JPopupMenu {
   private void createMenu() {
     createPhaseMenu();
     createCodaMenu();
-    //createMarkMenu();
   }
-  
-  /**
-   * Create mark submenu.
-   */
-  private void createMarkMenu() {
-    JMenu markMenu = new JMenu("Marks");
-
-    JMenuItem c1MenuItem = new JMenuItem("Clear");
-    c1MenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        wvp.setMarks(Double.NaN, Double.NaN);
-        wvp.repaint();
-      }
-    });
-    markMenu.add(c1MenuItem);
-    
-    this.add(markMenu);
-  }
-  
+ 
   /**
    * Create coda submenu.
    */
