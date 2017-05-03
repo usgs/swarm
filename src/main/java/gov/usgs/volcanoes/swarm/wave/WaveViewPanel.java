@@ -1252,6 +1252,12 @@ public class WaveViewPanel extends JComponent {
    * Plot particle motion using detrended data.   
    */
   private void plotParticleMotion(Plot plot, Wave wave) {
+    if (source == null) {
+      String message = "Not supported.";
+      TextRenderer renderer = new TextRenderer(30, 30, message);
+      plot.addRenderer(renderer);
+      return;
+    }
     Metadata md = swarmConfig.getMetadata(channel);
     if (md == null) {
       String message = "Unable to plot due to invalid metadata.";
