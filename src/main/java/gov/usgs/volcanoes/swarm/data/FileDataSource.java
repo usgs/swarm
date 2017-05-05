@@ -1,7 +1,15 @@
 package gov.usgs.volcanoes.swarm.data;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import gov.usgs.plot.data.HelicorderData;
+import gov.usgs.plot.data.Wave;
+import gov.usgs.plot.data.file.FileType;
+import gov.usgs.plot.data.file.SeismicDataFile;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.swarm.FileTypeDialog;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.map.MapFrame;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,16 +21,8 @@ import java.util.Set;
 
 import javax.swing.JOptionPane;
 
-import gov.usgs.plot.data.HelicorderData;
-import gov.usgs.plot.data.Wave;
-import gov.usgs.plot.data.file.FileType;
-import gov.usgs.plot.data.file.SeismicDataFile;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.swarm.FileTypeDialog;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.map.MapFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO: remove reference to application frame. Non-GUI apps want to use the class too.
@@ -57,9 +57,11 @@ public class FileDataSource extends AbstractCachingDataSource {
   @Override
   public void flush() {
     final List<String> channels = getChannels();
-    if (channels != null)
-      for (final String ch : channels)
+    if (channels != null) {
+      for (final String ch : channels) {
         swarmConfig.removeMetadata(ch);
+      }
+    }
     super.flush();
     openFiles.clear();
     channelTimes.clear();
@@ -76,28 +78,35 @@ public class FileDataSource extends AbstractCachingDataSource {
     ct[1] = Math.max(ct[1], t2);
   }
 
+  /**
+   * Open files.
+   * @param fs files
+   */
   public void openFiles(final File[] fs) {
     FileTypeDialog dialog = null;
     for (int i = 0; i < fs.length; i++) {
       final String fileName = fs[i].getPath();
-      if (openFiles.contains(fileName))
+      if (openFiles.contains(fileName)) {
         continue;
+      }
 
       SeismicDataFile file = SeismicDataFile.getFile(fileName);
 
       if (file == null) {
-        if (dialog == null)
+        if (dialog == null) {
           dialog = new FileTypeDialog();
+        }
         if (!dialog.isOpen() || (dialog.isOpen() && !dialog.isAssumeSame())) {
           dialog.setFilename(fs[i].getName());
           dialog.setVisible(true);
         }
 
         FileType fileType;
-        if (dialog.isCancelled())
+        if (dialog.isCancelled()) {
           fileType = FileType.UNKNOWN;
-        else
+        } else {
           fileType = dialog.getFileType();
+        }
 
         LOGGER.warn("user input file type: {} -> {}", fs[i].getPath(), fileType);
         file = SeismicDataFile.getFile(fileName, fileType);
@@ -172,8 +181,9 @@ public class FileDataSource extends AbstractCachingDataSource {
       final GulperListener gl) {
     channel = channel.replace(' ', '$');
     final double[] ct = channelTimes.get(channel);
-    if (ct == null)
+    if (ct == null) {
       return null;
+    }
 
     final double dt = t2 - t1;
     final double now = J2kSec.now();
@@ -188,9 +198,9 @@ public class FileDataSource extends AbstractCachingDataSource {
   public Wave getWave(final String station, final double t1, final double t2) {
     Wave wave;
     final List<CachedWave> waves = waveCache.get(station.replace(' ', '$'));
-    if (waves == null)
+    if (waves == null) {
       return null;
-    else {
+    } else {
       final List<Wave> parts = new ArrayList<Wave>();
       double minT = 1E300;
       double maxT = -1E300;
@@ -202,12 +212,14 @@ public class FileDataSource extends AbstractCachingDataSource {
         }
       }
 
-      if (parts.size() == 1)
+      if (parts.size() == 1) {
         return parts.get(0);
+      }
 
       wave = Wave.join(parts, minT, maxT);
-      if (wave != null)
+      if (wave != null) {
         wave = wave.subset(t1, t2);
+      }
     }
     return wave;
   }
