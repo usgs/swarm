@@ -106,7 +106,7 @@ public class WaveViewSettingsToolbar {
     dest.add(spectrogramToggle);
     
     particleMotionToggle = SwarmUtil.createToolBarToggleButton(Icons.particle_motion,
-        "Particle Motion Analysis (M or ')", new ActionListener() {
+        "Particle Motion Analysis (R or ')", new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             for (WaveViewSettings settings : settingsSet) {
               settings.setType(ViewType.PARTICLE_MOTION);
@@ -114,7 +114,7 @@ public class WaveViewSettingsToolbar {
           }
         });
     UiUtils.mapKeyStrokeToButton(keyComp, "APOSTROPHE", "pma1", particleMotionToggle);
-    UiUtils.mapKeyStrokeToButton(keyComp, "M", "pma2", particleMotionToggle);
+    UiUtils.mapKeyStrokeToButton(keyComp, "R", "pma2", particleMotionToggle);
     dest.add(particleMotionToggle);
 
     keyComp.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)

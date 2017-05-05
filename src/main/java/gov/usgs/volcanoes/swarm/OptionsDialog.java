@@ -128,7 +128,7 @@ public class OptionsDialog extends SwarmModalDialog {
     builder.append("Md=", durationA);
     builder.append("* Log(t) +", durationB);
 
-    builder.appendSeparator("SP Distance");
+    builder.appendSeparator("S-P Distance");
     builder.append("P-velocity (km/s)=", pVelocity);
     builder.nextLine();
     
