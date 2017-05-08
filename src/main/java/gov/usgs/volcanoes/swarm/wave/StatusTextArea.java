@@ -6,7 +6,6 @@ import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 
-import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
 import javax.swing.JTextArea;
@@ -21,7 +20,6 @@ public class StatusTextArea extends JTextArea {
 
   private static final long serialVersionUID = -4045063168343152079L;
   private static SwarmConfig swarmConfig;
-  public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
   
   /**
    * Default Constructor.
