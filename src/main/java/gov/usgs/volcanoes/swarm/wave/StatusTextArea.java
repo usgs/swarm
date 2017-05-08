@@ -109,15 +109,18 @@ public class StatusTextArea extends JTextArea {
    * @return formatted string of time in local and GMT
    */
   public static String getTimeString(double time, TimeZone tz) {
-    String text = dateFormat.format(J2kSec.asDate(time));
-    double tzo = tz.getOffset(J2kSec.asEpoch(time));
+    String utc = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, time);
+    double tzo = tz.getOffset(J2kSec.asEpoch(time)) / 1000;
     if (tzo != 0) {
       String tza = tz.getDisplayName(tz.inDaylightTime(J2kSec.asDate(time)), TimeZone.SHORT);
-      text = dateFormat.format(J2kSec.asDate(time + tzo / 1000)) + " (" + tza
-          + "), " + text + " (UTC)";
+      String status = J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, time + tzo) + " (" + tza + "), "
+          + utc + " (UTC)";
+      return status;
+    } else {
+      return utc;
     }
-    return text;
   }
+
   
   /**
    * Get wave information text for display.
