@@ -739,10 +739,12 @@ public class MapPanel extends JPanel {
           if (cmp.getPosition() == Position.UNSET || cmp.getPosition() == Position.MANUAL_UNSET) {
             if (labelSetting == LabelSetting.NONE
                 && !layouts.containsKey(md.getLocationHashCode())) {
-              if (cmp.getPosition() == Position.UNSET)
+              if (cmp.getPosition() == Position.UNSET) {
                 continue;
-              if (cmp.getPosition() == Position.MANUAL_UNSET && !cmp.isWaveVisible())
+              }
+              if (cmp.getPosition() == Position.MANUAL_UNSET && !cmp.isWaveVisible()) {
                 continue;
+              }
             }
 
             final int w = (int) Math
@@ -757,19 +759,22 @@ public class MapPanel extends JPanel {
               locY = (int) xy2.y;
               cmp.setPosition(Position.MANUAL_SET);
               pt = new Point(locX, locY);
-            } else
+            } else {
               pt = getLabelPosition(boxes, locX, locY, w, 13);
+            }
 
-            if (pt == null && labelSetting == LabelSetting.ALL)
+            if (pt == null && labelSetting == LabelSetting.ALL) {
               pt = new Point(locX, locY);
+            }
 
             if (pt != null) {
               locX = pt.x;
               locY = pt.y;
               boxes.append(new Rectangle(locX, locY, w, 13), false);
               cmp.setLocation(locX, locY);
-              if (cmp.getPosition() == Position.UNSET)
+              if (cmp.getPosition() == Position.UNSET) {
                 cmp.setPosition(Position.AUTOMATIC);
+              }
 
               final Line2D.Double line = new Line2D.Double(locX, locY, iconX + 8, iconY + 8);
               cmp.setLine(line);
@@ -797,8 +802,9 @@ public class MapPanel extends JPanel {
     // if there's any problem with the container holding the panel, just
     // forget it.
     if (!MapFrame.getInstance().isVisible() || mapImagePanel.getHeight() == 0
-        || mapImagePanel.getWidth() == 0)
+        || mapImagePanel.getWidth() == 0) {
       return;
+    }
 
     // first, get the map renderer up and running.
     // this occurs in the construct() method below which does NOT occur
@@ -836,8 +842,9 @@ public class MapPanel extends JPanel {
         // thread has queued then don't bother finishing, the next
         // thread
         // will
-        if (tempMapImage != null)
+        if (tempMapImage != null) {
           mapImage = tempMapImage;
+        }
 
         if (((Boolean) this.get()).booleanValue() && !lock.hasQueuedThreads()) {
           // ideally you'd call updateMiniPanels in construct()
@@ -849,25 +856,27 @@ public class MapPanel extends JPanel {
           compsToAdd = p.item1;
           linesToAdd = p.item2;
 
-          if (lines != null)
+          if (lines != null) {
             lines.clear();
+          }
           pane.removeAll();
           pane.add(mapImagePanel, new Integer(10));
           // /
           visiblePanels.clear();
-          for (final MapMiniPanel mp : miniPanels.values())
+          for (final MapMiniPanel mp : miniPanels.values()) {
             visiblePanels.add(mp);
+          }
 
           pane.removeAll();
           pane.add(mapImagePanel, new Integer(10));
 
           if (compsToAdd != null) {
             for (final JComponent comp : compsToAdd) {
-              if (comp instanceof JLabel)
+              if (comp instanceof JLabel) {
                 pane.add(comp, new Integer(15));
-
-              else
+              } else {
                 pane.add(comp, new Integer(20));
+              }
             }
           }
           lines = linesToAdd;
@@ -905,10 +914,11 @@ public class MapPanel extends JPanel {
         final double a = thisXY.x - lastXY.x;
         final double b = thisXY.y - lastXY.y;
         final double dist = Math.sqrt(a * a + b * b);
-        if (dist > 100)
+        if (dist > 100) {
           gp.moveTo(thisXY.x - 2, thisXY.y - 1);
-        else
+        } else {
           gp.lineTo(thisXY.x - 2, thisXY.y - 1);
+        }
         lastXY = thisXY;
       }
       g2.setColor(Color.YELLOW);
@@ -936,10 +946,11 @@ public class MapPanel extends JPanel {
         final double a = thisXY.x - lastXY.x;
         final double b = thisXY.y - lastXY.y;
         final double dist = Math.sqrt(a * a + b * b);
-        if (dist > 100)
+        if (dist > 100) {
           gp.moveTo(thisXY.x - 2, thisXY.y - 1);
-        else
+        } else {
           gp.lineTo(thisXY.x - 2, thisXY.y - 1);
+        }
         lastXY = thisXY;
 
         origin = p0;
@@ -1071,8 +1082,9 @@ public class MapPanel extends JPanel {
         center = getLonLat(e.getX(), e.getY());
         resetImage();
       } else {
-        if (dragMode == DragMode.DRAG_MAP)
+        if (dragMode == DragMode.DRAG_MAP) {
           setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+        }
         mouseDown = e.getPoint();
         dragRectangle = new Rectangle();
         dragRectangle.setFrameFromDiagonal(mouseDown, mouseDown);
@@ -1119,8 +1131,9 @@ public class MapPanel extends JPanel {
 
     public void mouseMoved(final MouseEvent e) {
       final Point2D.Double latLon = getLonLat(e.getX(), e.getY());
-      if (latLon != null)
+      if (latLon != null) {
         MapFrame.getInstance().setStatusText(Util.lonLatToString(latLon));
+      }
       
       if (layers != null) {
         boolean handled = false;
@@ -1149,8 +1162,9 @@ public class MapPanel extends JPanel {
           repaint();
         }
       } else if (dragMode == DragMode.BOX) {
-        if (lonLat != null)
+        if (lonLat != null) {
           MapFrame.getInstance().setStatusText(Util.lonLatToString(lonLat));
+        }
       } else if (dragMode == DragMode.RULER) {
         final Point2D.Double origin = getLonLat(mouseDown.x, mouseDown.y);
         double d = Projection.distanceBetween(origin, lonLat);

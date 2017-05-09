@@ -1,5 +1,12 @@
 package gov.usgs.volcanoes.swarm;
 
+import gov.usgs.plot.map.WMSGeoImageSet;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.swarm.data.DataSourceType;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterSource;
+
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
@@ -16,18 +23,10 @@ import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.usgs.plot.map.WMSGeoImageSet;
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.util.StringUtils;
-import gov.usgs.volcanoes.swarm.data.DataSourceType;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterLayer;
-import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterSource;
-
 /**
  * Swarm configuration class. 
  * 
- * TODO: This is getting our of hand. Extract configs for individual components. e.g. map
+ * <p>TODO: This is getting our of hand. Extract configs for individual components. e.g. map
  * 
  * @author Dan Cervelli
  */
@@ -41,7 +40,7 @@ public class SwarmConfig {
       new String[] {"AVO Winston;wws:pubavo1.wr.usgs.gov:16022:10000:1"
       // "IRIS DMC - New
       // Zealand;dhi:edu/iris/dmc:IRIS_NetworkDC:edu/iris/dmc:IRIS_BudDataCenter:NZ:3600:1000"
-  };
+      };
 
   private static String DEFAULT_CONFIG_FILE = "Swarm.config";
   private static String DEFAULT_DATA_SOURCES_FILE = "DataSources.config";
@@ -63,6 +62,8 @@ public class SwarmConfig {
   public boolean durationEnabled;
   public double durationA;
   public double durationB;
+  
+  public double pVelocity;
 
   public int span;
   public int timeChunk;
@@ -120,6 +121,9 @@ public class SwarmConfig {
 
   public String fdsnDataselectURL;
   public String fdsnStationURL;
+  
+  public String user;
+  public String quakemlResourceId="quakeml:Swarm";
 
   private SwarmConfig() {
     listeners = new ArrayList<ConfigListener>();
@@ -134,6 +138,7 @@ public class SwarmConfig {
       listener.settingsChanged();
     }  
   }
+  
   public static SwarmConfig getInstance() {
     return SwarmConfigHolder.swarmConfig;
   }
@@ -147,15 +152,19 @@ public class SwarmConfig {
     return hypocenterSource;
   }
 
+  /**
+   * Create Swarm configurations.
+   * @param args arguments
+   */
   public void createConfig(final String[] args) {
     LOGGER.info("current directory: " + System.getProperty("user.dir"));
     LOGGER.info("user.home: " + System.getProperty("user.home"));
     String configFile;
 
     final int n = args.length - 1;
-    if (n >= 0 && !args[n].startsWith("-"))
+    if (n >= 0 && !args[n].startsWith("-")) {
       configFile = args[n];
-    else {
+    } else {
       final List<String> candidateNames = new LinkedList<String>();
       candidateNames.add(DEFAULT_CONFIG_FILE);
       candidateNames
@@ -164,8 +173,9 @@ public class SwarmConfig {
       configFile = ConfigFile.findConfig(candidateNames);
     }
 
-    if (configFile == null)
+    if (configFile == null) {
       configFile = DEFAULT_CONFIG_FILE;
+    }
 
     LOGGER.info("Using configuration file: " + configFile);
 
@@ -188,10 +198,11 @@ public class SwarmConfig {
         System.getProperty("user.home") + File.separatorChar + Metadata.DEFAULT_METADATA_FILENAME);
 
     String metadataConfigFile = ConfigFile.findConfig(candidateNames);
-    if (metadataConfigFile == null)
+    if (metadataConfigFile == null) {
       metadataConfigFile = Metadata.DEFAULT_METADATA_FILENAME;
-    else
+    } else {
       LOGGER.info("Using metadata configuration file: " + metadataConfigFile);
+    }
 
     defaultMetadata = Metadata.loadMetadata(metadataConfigFile);
     metadata = Collections.synchronizedMap(new HashMap<String, Metadata>());
@@ -229,8 +240,9 @@ public class SwarmConfig {
     layouts = new TreeMap<String, SwarmLayout>();
 
     final File[] files = new File("layouts").listFiles();
-    if (files == null)
+    if (files == null) {
       return;
+    }
 
     for (final File f : files) {
       if (!f.isDirectory()) {
@@ -263,21 +275,31 @@ public class SwarmConfig {
     return getMetadata(channel, false);
   }
 
+  /**
+   * Get metadata.
+   * @param channel waveform identifier
+   * @param create true if creating new metadata
+   * @return metadata
+   */
   public Metadata getMetadata(final String channel, final boolean create) {
     Metadata md = metadata.get(channel);
-
-    if (md == null)
+    if (md == null) {
       md = defaultMetadata.get(channel);
-
-    if (md == null && create)
+    }
+    if (md == null && create) {
       md = new Metadata(channel);
-
-    if (md != null)
+    }
+    if (md != null) {
       metadata.put(channel, md);
-
+    }
     return md;
   }
 
+  /**
+   * Assign metadata source.
+   * @param channels waveform identifier
+   * @param source seismic data source
+   */
   public void assignMetadataSource(final Collection<String> channels,
       final SeismicDataSource source) {
     for (final String ch : channels) {
@@ -329,6 +351,8 @@ public class SwarmConfig {
     durationA = StringUtils.stringToDouble(config.getString("durationA"), 1.86);
     durationB = StringUtils.stringToDouble(config.getString("durationB"), -0.85);
 
+    pVelocity = StringUtils.stringToDouble(config.getString("pVelocity"), 6.0);
+
     showClip = StringUtils.stringToBoolean(config.getString("showClip"), true);
     alertClip = StringUtils.stringToBoolean(config.getString("alertClip"), false);
     alertClipTimeout = StringUtils.stringToInt(config.getString("alertClipTimeout"), 5);
@@ -367,7 +391,8 @@ public class SwarmConfig {
     wmsStyles =
         StringUtils.stringToString(config.getString("wmsStyles"), WMSGeoImageSet.DEFAULT_STYLE);
     
-    hypocenterSource = HypocenterSource.valueOf(StringUtils.stringToString(config.getString("hypocenterSource"), "NONE"));
+    hypocenterSource = HypocenterSource.valueOf(
+        StringUtils.stringToString(config.getString("hypocenterSource"), "NONE"));
 
     fdsnDataselectURL = StringUtils.stringToString(config.getString("fdsnDataselectURL"),
         "http://service.iris.edu/fdsnws/dataselect/1/query");
@@ -413,10 +438,9 @@ public class SwarmConfig {
             } catch (final RuntimeException e) {
               heliColors[i] = Color.magenta;
             }
-          } else
-            heliColors[i] = Color.magenta; // If the color is
-                                           // illegal, make it
-                                           // magenta
+          } else {
+            heliColors[i] = Color.magenta; // If the color is illegal, make it magenta
+          }
         }
       }
 
@@ -443,23 +467,34 @@ public class SwarmConfig {
     return durationA * (Math.log(t) / Math.log(10)) + durationB;
   }
 
+  /**
+   * Get time zone.
+   * @param channel waveform id
+   * @return time zone
+   */
   public TimeZone getTimeZone(final String channel) {
     if (useInstrumentTimeZone && channel != null) {
       final Metadata md = getMetadata(channel, false);
-      if (md != null && md.getTimeZone() != null)
+      if (md != null && md.getTimeZone() != null) {
         return md.getTimeZone();
+      }
     }
 
-    if (useLocalTimeZone)
+    if (useLocalTimeZone) {
       return TimeZone.getDefault();
-    else
+    } else {
       return specificTimeZone;
+    }
   }
 
   public boolean isKiosk() {
     return !kiosk.toLowerCase().equals("false");
   }
 
+  /**
+   * Create ConfigFile object.
+   * @return config file
+   */
   public ConfigFile toConfigFile() {
     final ConfigFile config = new ConfigFile();
     config.put("configFile", configFilename);
@@ -492,6 +527,8 @@ public class SwarmConfig {
     config.put("durationEnabled", Boolean.toString(durationEnabled));
     config.put("durationA", Double.toString(durationA));
     config.put("durationB", Double.toString(durationB));
+    
+    config.put("pVelocity", Double.toString(pVelocity));
 
     config.put("showClip", Boolean.toString(showClip));
     config.put("alertClip", Boolean.toString(alertClip));
@@ -529,8 +566,9 @@ public class SwarmConfig {
 
     final List<String> servers = new ArrayList<String>();
     for (final SeismicDataSource sds : sources.values()) {
-      if (sds.isStoreInUserConfig())
+      if (sds.isStoreInUserConfig()) {
         servers.add(sds.toConfigString());
+      }
     }
 
     config.putList("server", servers);
@@ -540,13 +578,16 @@ public class SwarmConfig {
       utsb.append(userTimes[i]);
       utsb.append(",");
     }
-    if (userTimes.length > 0)
+    if (userTimes.length > 0) {
       utsb.append(userTimes[userTimes.length - 1]);
+    }
     config.put("userTimes", utsb.toString());
 
-    if (heliColorsString != null)
-      if (heliColorsString.length() > 3)
+    if (heliColorsString != null) {
+      if (heliColorsString.length() > 3) {
         config.put("heliColors", heliColorsString);
+      }
+    }
     return config;
   }
 
@@ -557,5 +598,24 @@ public class SwarmConfig {
 
   private static class SwarmConfigHolder {
     public static SwarmConfig swarmConfig = new SwarmConfig();
+  }
+
+  /**
+   * Get Swarm user.
+   * @return username
+   */
+  public String getUser() {
+    if (user == null) {
+      user = System.getProperty("user");
+    }
+    return user;
+  }
+
+  /**
+   * Get QuakeML resource id.
+   * @return quakeml resource id
+   */
+  public String getQuakemlResourceId() {
+    return quakemlResourceId + "/" + getUser();
   }
 }

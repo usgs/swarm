@@ -106,7 +106,7 @@ public class WaveViewSettingsToolbar {
     dest.add(spectrogramToggle);
     
     particleMotionToggle = SwarmUtil.createToolBarToggleButton(Icons.particle_motion,
-        "Particle Motion Analysis (M or ')", new ActionListener() {
+        "Particle Motion Analysis (R or ')", new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             for (WaveViewSettings settings : settingsSet) {
               settings.setType(ViewType.PARTICLE_MOTION);
@@ -114,7 +114,7 @@ public class WaveViewSettingsToolbar {
           }
         });
     UiUtils.mapKeyStrokeToButton(keyComp, "APOSTROPHE", "pma1", particleMotionToggle);
-    UiUtils.mapKeyStrokeToButton(keyComp, "M", "pma2", particleMotionToggle);
+    UiUtils.mapKeyStrokeToButton(keyComp, "R", "pma2", particleMotionToggle);
     dest.add(particleMotionToggle);
 
     keyComp.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -187,6 +187,7 @@ public class WaveViewSettingsToolbar {
     waveTypes.add(spectraToggle);
     waveTypes.add(spectrogramToggle);
     waveTypes.add(particleMotionToggle);
+ 
   }
 
   public void clearSettingsSet() {
@@ -254,15 +255,10 @@ public class WaveViewSettingsToolbar {
       }
     }
 
-    // fix for Java 1.5, clearSelection was added in 1.6
-/*    try {
-      waveTypes.setSelected(waveTypes.getSelection(), false);
-    } catch (Throwable e) {
-      // what should happen here?
-    }*/
     particleMotionToggle.setSelected(p);
     spectraToggle.setSelected(s);
     spectrogramToggle.setSelected(sg);
     waveToggle.setSelected(w);
   }
+
 }

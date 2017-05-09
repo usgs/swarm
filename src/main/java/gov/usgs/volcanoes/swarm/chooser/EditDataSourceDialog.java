@@ -137,7 +137,7 @@ public class EditDataSourceDialog extends SwarmModalDialog {
     }
 
     DataSourcePanel p = panels.get(tabPane.getSelectedIndex());
-    return p.allowOK(edit);
+    return p.allowOk(edit);
   }
 
   /**
@@ -155,7 +155,7 @@ public class EditDataSourceDialog extends SwarmModalDialog {
 
   protected void wasOk() {
     DataSourcePanel p = panels.get(tabPane.getSelectedIndex());
-    result = name.getText() + ";" + p.wasOK();
+    result = name.getText() + ";" + p.wasOk();
   }
 
   public String getResult() {
