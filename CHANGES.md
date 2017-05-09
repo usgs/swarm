@@ -1,6 +1,10 @@
 ## Version 2.6.4
   * Add ability to import QuakeML files
   * Add pick mode to Wave Clipboard
+  * Fix error saving config on exit
+  * Fix error reading/writing channels in Seisan files
+  * Fix incorrect time in status bar
+  * Add general/debug info to particle motion plot for user 
 
 ## Version 2.6.3
   * Enable refresh of data source
