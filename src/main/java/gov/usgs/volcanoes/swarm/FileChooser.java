@@ -2,7 +2,9 @@ package gov.usgs.volcanoes.swarm;
 
 import javax.swing.JFileChooser;
 
+@Deprecated // just instantiate new JFileChooser
 public final class FileChooser {
+  private static final FileChooser INSTANCE = new FileChooser(); // Keep to instantiate
   private static JFileChooser fileChooser;
 
   private FileChooser() {

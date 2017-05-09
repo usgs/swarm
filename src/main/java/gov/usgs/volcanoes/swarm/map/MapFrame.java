@@ -476,7 +476,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
   class CaptureActionListener implements ActionListener {
     public void actionPerformed(final ActionEvent e) {
-      final JFileChooser chooser = FileChooser.getFileChooser();
+      final JFileChooser chooser = new JFileChooser();
       final File lastPath = new File(swarmConfig.lastPath);
       chooser.setCurrentDirectory(lastPath);
       chooser.setSelectedFile(new File("map.png"));

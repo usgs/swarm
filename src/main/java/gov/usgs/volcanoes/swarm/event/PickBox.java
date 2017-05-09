@@ -324,7 +324,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
       return;
     }
 
-    final JFileChooser chooser = FileChooser.getFileChooser();
+    final JFileChooser chooser = new JFileChooser();
     final File lastPath = new File(swarmConfig.lastPath);
     chooser.setCurrentDirectory(lastPath);
     chooser.setSelectedFile(new File("clipboard.png"));

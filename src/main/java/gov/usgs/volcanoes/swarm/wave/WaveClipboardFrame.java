@@ -285,7 +285,7 @@ public class WaveClipboardFrame extends SwarmFrame {
         return;
       }
 
-      final JFileChooser chooser = FileChooser.getFileChooser();
+      final JFileChooser chooser = new JFileChooser();
       final File lastPath = new File(swarmConfig.lastPath);
       chooser.setCurrentDirectory(lastPath);
       chooser.setSelectedFile(new File("clipboard.png"));
@@ -595,7 +595,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
   private class OpenActionListener implements ActionListener {
     public void actionPerformed(final ActionEvent e) {
-      final JFileChooser chooser = FileChooser.getFileChooser();
+      final JFileChooser chooser = new JFileChooser();
       chooser.resetChoosableFileFilters();
       for (final FileType ft : FileType.getKnownTypes()) {
         final ExtensionFileFilter f = new ExtensionFileFilter(ft.extension, ft.description);
@@ -637,7 +637,7 @@ public class WaveClipboardFrame extends SwarmFrame {
         return;
       }
 
-      final JFileChooser chooser = FileChooser.getFileChooser();
+      final JFileChooser chooser = new JFileChooser();
       chooser.resetChoosableFileFilters();
       chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
       chooser.setMultiSelectionEnabled(false);
@@ -714,7 +714,7 @@ public class WaveClipboardFrame extends SwarmFrame {
         }
       }
 
-      final JFileChooser chooser = FileChooser.getFileChooser();
+      final JFileChooser chooser = new JFileChooser();
       chooser.resetChoosableFileFilters();
       chooser.setMultiSelectionEnabled(false);
       chooser.setDialogTitle("Save All Files");

@@ -800,7 +800,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
         if (success) {
           if (hd != null && hd.getEndTime() < before && !dataSource.isActiveSource()) {
             // this would get executed if the data source
-            // forcably returned a different time than asked
+            // forcibly returned a different time than asked
             // for -- like in the case of a miniSEED.
             final double dt = end - before;
             before = hd.getEndTime() - dt / 2;
@@ -897,7 +897,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
   // TODO: refactor out some functions
   private class CaptureActionListener implements ActionListener {
     public void actionPerformed(final ActionEvent e) {
-      chooser = FileChooser.getFileChooser();
+      chooser = new JFileChooser();
       chooser.setDialogTitle("Save Helicorder Screen Capture");
       chooser.setSelectedFile(new File("heli.png"));
       final File lastPath = new File(swarmConfig.lastPath);
