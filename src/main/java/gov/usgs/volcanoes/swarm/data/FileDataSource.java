@@ -140,7 +140,7 @@ public class FileDataSource extends AbstractCachingDataSource {
           final int channelCount = file.getChannels().size();
           final double progressInc = (1 - .2) / channelCount;
           for (final String channel : file.getChannels()) {
-            final Metadata md = swarmConfig.getMetadata(channel, true);
+            final Metadata md = swarmConfig.getMetadata(channel.replaceAll("\\$", " "), true);
             md.addGroup(file.getGroup());
 
             final Wave wave = file.getWave(channel);
@@ -158,7 +158,7 @@ public class FileDataSource extends AbstractCachingDataSource {
         } catch (final Throwable t) {
           t.printStackTrace();
           result = t;
-        }
+        } 
         fireChannelsProgress(fileName, 1);
         fireChannelsUpdated();
         MapFrame.getInstance().reset(false);
