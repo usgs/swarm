@@ -1272,11 +1272,11 @@ public class WaveViewPanel extends JComponent {
     }
     String s = md.getSCNL().station;
     String c = md.getSCNL().channel;
-    String n = md.getSCNL().network;
+    String n = md.getSCNL().network == null ? "" : md.getSCNL().network;
     String l = md.getSCNL().location == null ? "" : md.getSCNL().location;
     
-    if (s == null || c == null || n == null) {
-      String message = "Unable to plot due to missing SCNL information.";
+    if (s == null || c == null) {
+      String message = "Unable to plot due to missing Station or Channel information.";
       TextRenderer renderer = new TextRenderer(30, 30, message);
       plot.addRenderer(renderer);
       return;
@@ -1293,8 +1293,8 @@ public class WaveViewPanel extends JComponent {
       if (!component.equals(direction)) {
         String newChannel = c.replaceFirst(".$", direction);
         String newStation = s + " " + newChannel + " " + n;
-        if(!l.equals("")){
-          newStation += " " + l;  
+        if (!l.equals("")) {
+          newStation += " " + l;
         }
         stations.put(direction,  newStation);
         Wave w = source.getWave(newStation, startTime, endTime);
@@ -1318,11 +1318,8 @@ public class WaveViewPanel extends JComponent {
         this.getHeight());
 
     if (channel != null && displayTitle) {
-      String title = s + " " + c.replaceFirst(".$", "*") + " " + n;
-      if(!l.equals("")){
-        title += " " + l;
-      }
-      particleMotionRenderer.setTitle(title);
+      String title = s + " " + c.replaceFirst(".$", "*") + " " + n + " " + l;
+      particleMotionRenderer.setTitle(title.trim());
     }
     plot.addRenderer(particleMotionRenderer);
     if (useFilterLabel && settings.filterOn) {
