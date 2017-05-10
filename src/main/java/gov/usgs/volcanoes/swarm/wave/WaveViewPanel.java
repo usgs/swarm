@@ -819,11 +819,13 @@ public class WaveViewPanel extends JComponent {
    * @param g2 graphics
    */
   protected void annotateImage(Graphics2D g2) {
-    if (!Double.isNaN(mark1)) {
-      paintMark(g2, mark1);
-    }
-    if (!Double.isNaN(mark2)) {
-      paintMark(g2, mark2);
+    if (timeSeries) {
+      if (!Double.isNaN(mark1)) {
+        paintMark(g2, mark1);
+      }
+      if (!Double.isNaN(mark2)) {
+        paintMark(g2, mark2);
+      }
     }
     if (settings.pickEnabled && pickMenu != null) {
       double[] t = getTranslation();
@@ -1260,18 +1262,21 @@ public class WaveViewPanel extends JComponent {
     }
     Metadata md = swarmConfig.getMetadata(channel);
     if (md == null) {
-      String message = "Unable to plot due to invalid metadata.";
+      String message = "Unable to plot due to invalid or missing metadata.";
       TextRenderer renderer = new TextRenderer(30, 30, message);
+      plot.addRenderer(renderer);
+      message = "Channel: " + channel;
+      renderer = new TextRenderer(30, 60, message);
       plot.addRenderer(renderer);
       return;
     }
     String s = md.getSCNL().station;
     String c = md.getSCNL().channel;
-    String n = md.getSCNL().network;
+    String n = md.getSCNL().network == null ? "" : md.getSCNL().network;
     String l = md.getSCNL().location == null ? "" : md.getSCNL().location;
     
-    if (s == null || c == null || n == null) {
-      String message = "Unable to plot due to missing SCNL information.";
+    if (s == null || c == null) {
+      String message = "Unable to plot due to missing Station or Channel information.";
       TextRenderer renderer = new TextRenderer(30, 30, message);
       plot.addRenderer(renderer);
       return;
@@ -1287,7 +1292,10 @@ public class WaveViewPanel extends JComponent {
     for (String direction : new String[] {"Z", "N", "E"}) {
       if (!component.equals(direction)) {
         String newChannel = c.replaceFirst(".$", direction);
-        String newStation = s + " " + newChannel + " " + n + " " + l;
+        String newStation = s + " " + newChannel + " " + n;
+        if (!l.equals("")) {
+          newStation += " " + l;
+        }
         stations.put(direction,  newStation);
         Wave w = source.getWave(newStation, startTime, endTime);
         if (w != null) {
@@ -1311,7 +1319,7 @@ public class WaveViewPanel extends JComponent {
 
     if (channel != null && displayTitle) {
       String title = s + " " + c.replaceFirst(".$", "*") + " " + n + " " + l;
-      particleMotionRenderer.setTitle(title);
+      particleMotionRenderer.setTitle(title.trim());
     }
     plot.addRenderer(particleMotionRenderer);
     if (useFilterLabel && settings.filterOn) {

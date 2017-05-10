@@ -108,7 +108,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     openFile.setMnemonic('O');
     openFile.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        JFileChooser chooser = FileChooser.getFileChooser();
+        JFileChooser chooser = new JFileChooser();
         chooser.resetChoosableFileFilters();
         for (FileType ft : FileType.getKnownTypes()) {
           ExtensionFileFilter f = new ExtensionFileFilter(ft.extension, ft.description);
