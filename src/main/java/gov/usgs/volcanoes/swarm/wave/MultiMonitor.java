@@ -1,5 +1,26 @@
 package gov.usgs.volcanoes.swarm.wave;
 
+import gov.usgs.plot.data.Wave;
+import gov.usgs.plot.decorate.FrameDecorator;
+import gov.usgs.plot.decorate.SmartTick;
+import gov.usgs.plot.render.AxisRenderer;
+import gov.usgs.plot.render.FrameRenderer;
+import gov.usgs.plot.render.RectangleRenderer;
+import gov.usgs.plot.render.TextRenderer;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.UiUtils;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Kioskable;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwarmFrame;
+import gov.usgs.volcanoes.swarm.SwarmUtil;
+import gov.usgs.volcanoes.swarm.Throbber;
+import gov.usgs.volcanoes.swarm.chooser.DataChooser;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -40,44 +61,17 @@ import javax.swing.border.Border;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
-import gov.usgs.plot.data.Wave;
-import gov.usgs.plot.decorate.FrameDecorator;
-import gov.usgs.plot.decorate.SmartTick;
-import gov.usgs.plot.render.AxisRenderer;
-import gov.usgs.plot.render.FrameRenderer;
-import gov.usgs.plot.render.RectangleRenderer;
-import gov.usgs.plot.render.TextRenderer;
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.util.UiUtils;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Kioskable;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.SwarmFrame;
-import gov.usgs.volcanoes.swarm.SwarmUtil;
-import gov.usgs.volcanoes.swarm.Throbber;
-import gov.usgs.volcanoes.swarm.chooser.DataChooser;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
-
 /**
  * MultiMonitor is a window that is used to display multiple seismic
  * channels in real-time.
- *
- * TODO: save monitor size
- * TODO: clipboard
- * TODO: up/down arrows
- *
  *
  * @author Dan Cervelli
  */
 public class MultiMonitor extends SwarmFrame implements Kioskable {
   public static final long serialVersionUID = -1;
 
-  public final static int[] SPANS = new int[] {15, 30, 60, 120, 180, 240, 300, 600, 15 * 60,
+  public static final int[] SPANS = new int[] {15, 30, 60, 120, 180, 240, 300, 600, 15 * 60,
       20 * 60, 30 * 60, 60 * 60, 2 * 60 * 60};
-  // private int spanIndex = 1;
   private int span = 15;
   private final List<WaveViewPanel> panels;
   private SeismicDataSource dataSource;
@@ -123,7 +117,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     dataSource = sds;
     dataSource.setUseCache(false);
     panels = new ArrayList<WaveViewPanel>();
-    createUI();
+    createUi();
     timer = new Timer("Monitor Timer [" + sds.getName() + "]");
     setIntervals();
   }
@@ -163,22 +157,29 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     }
   }
 
+  public int getSpan() {
+    return span;
+  }
+  
   private int getSpan(final String inSpan, final String inSpanIndex) {
     int span;
 
-    if (inSpan != null)
+    if (inSpan != null) {
       span = Integer.parseInt(inSpan);
-    else
+    } else {
       span = SPANS[Integer.parseInt(inSpanIndex)];
+    }
 
     return span;
   }
 
   private void setIntervals() {
-    if (slideTask != null)
+    if (slideTask != null) {
       slideTask.cancel();
-    if (refreshTask != null)
+    }
+    if (refreshTask != null) {
       refreshTask.cancel();
+    }
     timer.purge();
     slideTask = new SlideTask();
     refreshTask = new RefreshTask();
@@ -202,10 +203,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     return refreshInterval;
   }
 
-  public int getSpan() {
-    return span;
-  }
-
   public void setRefreshInterval(final long ms) {
     refreshInterval = ms;
     setIntervals();
@@ -221,22 +218,25 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
   }
 
   private int previousSpan() {
-    for (int i = SPANS.length; i > 0; i--)
-      if (SPANS[i - 1] < span)
+    for (int i = SPANS.length; i > 0; i--) {
+      if (SPANS[i - 1] < span) {
         return SPANS[i - 1];
+      }
+    }
 
     return SPANS[0];
   }
 
   private int nextSpan() {
-    for (int i = 0; i < SPANS.length; i++)
-      if (SPANS[i] > span)
+    for (int i = 0; i < SPANS.length; i++) {
+      if (SPANS[i] > span) {
         return SPANS[i];
-
+      }
+    }
     return SPANS[SPANS.length - 1];
   }
 
-  protected void createUI() {
+  protected void createUi() {
     this.setSize(600, 700);
     this.setLocation(100, 0);
     mainPanel = new JPanel(new BorderLayout());
@@ -280,10 +280,11 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
         new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
             requestFocus();
-            if (!pauseButton.isSelected())
+            if (!pauseButton.isSelected()) {
               setPauseStartTime(Double.NaN);
-            else
+            } else {
               setPauseStartTime(getTimeWindow()[0]);
+            }
           }
         });
     UiUtils.mapKeyStrokeToButton(this, "P", "pause", pauseButton);
@@ -332,12 +333,14 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
             requestFocus();
             if (selectedIndex >= 0) {
               removeWaveAtIndex(selectedIndex);
-              if (panels.size() == 0)
+              if (panels.size() == 0) {
                 selectedIndex = -1;
-              else if (panels.size() == selectedIndex)
+              } else if (panels.size() == selectedIndex) {
                 selectedIndex--;
-              if (selectedIndex != -1)
+              }
+              if (selectedIndex != -1) {
                 select(panels.get(selectedIndex));
+              }
             }
           }
         });
@@ -408,14 +411,16 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     }
 
     private synchronized void createImage() {
-      if (getWidth() > 0 && getHeight() > 0)
+      if (getWidth() > 0 && getHeight() > 0) {
         image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+      }
     }
 
     @Override
     public void paint(final Graphics g) {
-      if (getWidth() <= 0 || getHeight() <= 0)
+      if (getWidth() <= 0 || getHeight() <= 0) {
         return;
+      }
 
       if (image == null || panels.size() == 0) {
         super.paint(g);
@@ -490,8 +495,9 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
       @Override
       public void keyPressed(final KeyEvent e) {
         if (e.isShiftDown() && e.getKeyCode() == KeyEvent.VK_R) {
-          for (final WaveViewPanel panel : panels)
+          for (final WaveViewPanel panel : panels) {
             panel.resetAutoScaleMemory();
+          }
         }
       }
     });
@@ -528,26 +534,28 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
 
       final int hTicks = fr.getGraphWidth() / 108;
       final Object[] stt = SmartTick.autoTimeTick(fr.getMinXAxis(), fr.getMaxXAxis(), hTicks);
-      if (stt != null)
+      if (stt != null) {
         ar.createVerticalGridLines((double[]) stt[0]);
+      }
 
       if (panel.getSettings().viewType == ViewType.WAVE && panel.getHeight() > 36) {
         double m = 1;
         double b = 0;
-        String Units = "Counts";
+        String units = "Counts";
         if (panel.getSettings().useUnits) {
           final Metadata md = SwarmConfig.getInstance().getMetadata(panel.getChannel(), true);
           m = md.getMultiplier();
           b = md.getOffset();
-          Units = md.getUnit();
+          units = md.getUnit();
         }
 
-        if (Units == null)
-          Units = "Counts";
+        if (units == null) {
+          units = "Counts";
+        }
 
         final double min = fr.getMinY() * m + b;
         final double max = fr.getMaxY() * m + b;
-        final String range = String.format("%.0f / %.0f %s", min, max, Units);
+        final String range = String.format("%.0f / %.0f %s", min, max, units);
         final TextRenderer tr =
             new TextRenderer(fr.getGraphX() + 2, fr.getGraphY() + fr.getGraphHeight() - 2, range);
         final int fs = Math.min(10, labelFontSize);
@@ -573,7 +581,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     wavePanel.add(panel);
     panel.addListener(new WaveViewPanelAdapter() {
       @Override
-      public void mousePressed(final AbstractWavePanel src, final MouseEvent e,
+      public void mousePressed(final WaveViewPanel src, final MouseEvent e,
           final boolean dragging) {
         requestFocusInWindow();
         select(panel);
@@ -592,7 +600,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     }
   }
 
-  public void select(final AbstractWavePanel p) {
+  public void select(final WaveViewPanel p) {
     deselect();
     for (int i = 0; i < panels.size(); i++) {
       final WaveViewPanel panel = panels.get(i);
@@ -624,10 +632,11 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
   }
 
   private void setBackgroundColor(final WaveViewPanel wvp, final int i) {
-    if (i % 2 != 0)
+    if (i % 2 != 0) {
       wvp.setBackgroundColor(Color.WHITE);
-    else
+    } else {
       wvp.setBackgroundColor(new Color(230, 230, 230));
+    }
   }
 
   private void resizeWaves() {
@@ -670,10 +679,11 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     while (!done) {
       font = Font.decode("dialog-BOLD-" + labelFontSize);
       final Rectangle2D r = font.getStringBounds("XXXX XX XXX", frc);
-      if ((r.getWidth() / ww < 0.25) || labelFontSize <= 8)
+      if ((r.getWidth() / ww < 0.25) || labelFontSize <= 8) {
         done = true;
-      else
+      } else {
         labelFontSize--;
+      }
     }
     repaint();
   }
@@ -693,8 +703,9 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
   private boolean sliding = false;
 
   private synchronized void slide() {
-    if (sliding)
+    if (sliding) {
       return;
+    }
 
     final Runnable r = new Runnable() {
       public void run() {
@@ -720,7 +731,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
    * Sets the start time of the monitor if it's paused. Set to Double.NaN
    * to resume.
    *
-   * @param start
+   * @param start start time
    */
   public void setPauseStartTime(final double start) {
     pauseStartTime = start;
@@ -732,8 +743,9 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
   }
 
   private void refresh() {
-    if (throbber.getCount() >= 1)
+    if (throbber.getCount() >= 1) {
       return;
+    }
 
     final Runnable r = new Runnable() {
       public void run() {
@@ -750,26 +762,29 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
           try {
             Wave sw = waveMap.get(channel);
             if (sw != null) {
-              if (sw.overlaps(start, now)) // runaway monitor bug fix
-              {
+              if (sw.overlaps(start, now)) { // runaway monitor bug fix
                 if (sw.getEndTime() < now) {
                   final Wave w2 = dataSource.getWave(channel, sw.getEndTime() - 10, now);
-                  if (w2 != null && (sw.overlaps(w2) || sw.adjacent(w2)))
+                  if (w2 != null && (sw.overlaps(w2) || sw.adjacent(w2))) {
                     sw = sw.combine(w2);
+                  }
                 }
                 if (sw.getStartTime() > start) {
                   final Wave w2 = dataSource.getWave(channel, start, sw.getStartTime() + 10);
-                  if (w2 != null && (sw.overlaps(w2) || sw.adjacent(w2)))
+                  if (w2 != null && (sw.overlaps(w2) || sw.adjacent(w2))) {
                     sw = sw.combine(w2);
+                  }
                 }
                 sw = sw.subset(start, sw.getEndTime());
-              } else
+              } else {
                 sw = null;
+              }
             }
 
             // something bad happened above, just get the whole wave
-            if (sw == null)
+            if (sw == null) {
               sw = dataSource.getWave(channel, start, now);
+            }
             if (sw != null) {
               waveMap.put(channel, sw);
             }
@@ -801,16 +816,18 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
   private class SlideTask extends TimerTask {
     @Override
     public void run() {
-      if (panels.size() > 0)
+      if (panels.size() > 0) {
         slide();
+      }
     }
   }
 
   private class RefreshTask extends TimerTask {
     @Override
     public void run() {
-      if (panels.size() > 0)
+      if (panels.size() > 0) {
         refresh();
+      }
     }
   }
 }

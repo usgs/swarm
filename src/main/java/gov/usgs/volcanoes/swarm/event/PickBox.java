@@ -21,7 +21,7 @@ import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
-import gov.usgs.volcanoes.swarm.wave.AbstractWavePanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelListener;
@@ -77,7 +77,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   private static final JFrame APPLICATION_FRAME = Swarm.getApplicationFrame();
   private static final SwarmConfig SWARM_CONFIG = SwarmConfig.getInstance();
 
-  private final Map<AbstractWavePanel, Stack<double[]>> histories;
+  private final Map<WaveViewPanel, Stack<double[]>> histories;
   private final Set<PickWavePanel> selectedSet;
   private final List<PickWavePanel> panels;
 
@@ -101,7 +101,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     panels = new CopyOnWriteArrayList<PickWavePanel>();
 
     seismicSources = new HashMap<String, SeismicDataSource>();
-    histories = new HashMap<AbstractWavePanel, Stack<double[]>>();
+    histories = new HashMap<WaveViewPanel, Stack<double[]>>();
     listeners = new HashSet<PickBoxListener>();
     selectedSet = new ConcurrentSkipListSet<PickWavePanel>();
     wavePanelHeight = DEFAULT_WAVE_PANEL_HEIGHT;
@@ -122,7 +122,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     });
 
     selectListener = new WaveViewPanelAdapter() {
-      public void mousePressed(final AbstractWavePanel src, final MouseEvent e,
+      public void mousePressed(final WaveViewPanel src, final MouseEvent e,
           final boolean dragging) {
         PickWavePanel panel = (PickWavePanel) src;
         requestFocusInWindow();
@@ -157,11 +157,11 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
       }
 
       @Override
-      public void waveZoomed(final AbstractWavePanel src, final double st, final double et,
+      public void waveZoomed(final WaveViewPanel src, final double st, final double et,
           final double nst, final double net) {
         final double[] t = new double[] {st, et};
         addHistory(src, t);
-        for (final AbstractWavePanel wvp : selectedSet) {
+        for (final WaveViewPanel wvp : selectedSet) {
           if (wvp != src) {
             addHistory(wvp, t);
             wvp.zoom(nst, net);
@@ -171,7 +171,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
       }
 
       @Override
-      public void waveClosed(final AbstractWavePanel src) {
+      public void waveClosed(final WaveViewPanel src) {
         LOGGER.debug("Removing wave: {}", src.getChannel());
         remove(src);
       }
@@ -182,7 +182,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     listeners.add(listener);
   }
 
-  protected int getWaveIndex(AbstractWavePanel src) {
+  protected int getWaveIndex(WaveViewPanel src) {
 
     int panelIdx = -1;
     int searchIdx = 0;
@@ -324,7 +324,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
       return;
     }
 
-    final JFileChooser chooser = FileChooser.getFileChooser();
+    final JFileChooser chooser = new JFileChooser();
     final File lastPath = new File(swarmConfig.lastPath);
     chooser.setCurrentDirectory(lastPath);
     chooser.setSelectedFile(new File("clipboard.png"));
@@ -350,13 +350,13 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     int height = 0;
 
     final int width = panels.get(0).getWidth();
-    for (final AbstractWavePanel panel : panels) {
+    for (final WaveViewPanel panel : panels) {
       height += panel.getHeight();
     }
 
     final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
     final Graphics g = image.getGraphics();
-    for (final AbstractWavePanel panel : panels) {
+    for (final WaveViewPanel panel : panels) {
       panel.paint(g);
       g.translate(0, panel.getHeight());
     }
@@ -372,7 +372,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   }
 
 
-  private void deselect(final AbstractWavePanel p) {
+  private void deselect(final WaveViewPanel p) {
     selectedSet.remove(p);
     p.setBackgroundColor(BACKGROUND_COLOR);
     p.createImage();
@@ -380,8 +380,8 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   }
 
   private void deselectAll() {
-    final AbstractWavePanel[] panels = selectedSet.toArray(new AbstractWavePanel[0]);
-    for (final AbstractWavePanel p : panels) {
+    final WaveViewPanel[] panels = selectedSet.toArray(new WaveViewPanel[0]);
+    for (final WaveViewPanel p : panels) {
       deselect(p);
     }
     notifyListeners();
@@ -426,7 +426,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     return panelIdx;
   }
 
-  private void addHistory(final AbstractWavePanel wvp, final double[] t) {
+  private void addHistory(final WaveViewPanel wvp, final double[] t) {
     Stack<double[]> history = histories.get(wvp);
     if (history == null) {
       history = new Stack<double[]>();
@@ -440,7 +440,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
    * @param wvp wave panel
    * @param pct percent to scale by
    */
-  public void scaleTime(final AbstractWavePanel wvp, final double pct) {
+  public void scaleTime(final WaveViewPanel wvp, final double pct) {
     final double st = wvp.getStartTime();
     final double et = wvp.getEndTime();
     final double[] t = new double[] {st, et};
@@ -456,7 +456,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
    * @see gov.usgs.volcanoes.swarm.event.PickToolBarListener#scaleTime(double)
    */
   public void scaleTime(final double pct) {
-    for (final AbstractWavePanel p : selectedSet) {
+    for (final WaveViewPanel p : selectedSet) {
       scaleTime(p, pct);
     }
   }
@@ -465,7 +465,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
    * Go back to previous selected time in wave panel.
    * @param wvp wave panel
    */
-  public void back(final AbstractWavePanel wvp) {
+  public void back(final WaveViewPanel wvp) {
     final Stack<double[]> history = histories.get(wvp);
     if (history == null || history.empty()) {
       return;
@@ -479,12 +479,12 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
    * @see gov.usgs.volcanoes.swarm.event.PickToolBarListener#back()
    */
   public void back() {
-    for (final AbstractWavePanel p : selectedSet) {
+    for (final WaveViewPanel p : selectedSet) {
       back(p);
     }
   }
 
-  private void shiftTime(final AbstractWavePanel wvp, final double pct) {
+  private void shiftTime(final WaveViewPanel wvp, final double pct) {
     LOGGER.debug("shifting time {}", pct);
     final double st = wvp.getStartTime();
     final double et = wvp.getEndTime();
@@ -500,13 +500,13 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
    * @see gov.usgs.volcanoes.swarm.event.PickToolBarListener#shiftTime(double)
    */
   public void shiftTime(final double pct) {
-    for (final AbstractWavePanel p : selectedSet) {
+    for (final WaveViewPanel p : selectedSet) {
       shiftTime(p, pct);
     }
   }
 
   // TODO: This isn't right, this should be a method of waveviewpanel
-  private void fetchNewWave(final AbstractWavePanel wvp, final double nst, final double net) {
+  private void fetchNewWave(final WaveViewPanel wvp, final double nst, final double net) {
     final SwingWorker worker = new SwingWorker() {
       @Override
       public Object construct() {
@@ -556,7 +556,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
    *                (gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType)
    */
   public void setType(ViewType viewType) {
-    for (AbstractWavePanel panel : selectedSet) {
+    for (WaveViewPanel panel : selectedSet) {
       panel.getSettings().setType(viewType);
       panel.createImage();
     }
@@ -568,7 +568,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
    * @param wvp wave panel
    * @param t time specified time
    */
-  public void gotoTime(final AbstractWavePanel wvp, String t) {
+  public void gotoTime(final WaveViewPanel wvp, String t) {
     double j2k = Double.NaN;
     try {
       if (t.length() == 12) {
@@ -607,7 +607,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
    * @param t specified time
    */
   public void gotoTime(final String t) {
-    for (final AbstractWavePanel p : selectedSet) {
+    for (final WaveViewPanel p : selectedSet) {
       gotoTime(p, t);
     }
   }
