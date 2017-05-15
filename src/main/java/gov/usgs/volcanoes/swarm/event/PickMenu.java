@@ -217,10 +217,10 @@ public class PickMenu extends JPopupMenu {
       if (i == 0) { 
         mi.setSelected(true);
         if (phase.equals("P")) {
-          pWeight0=mi;
+          pWeight0 = mi;
         }
         if (phase.equals("S")) {
-          sWeight0=mi;
+          sWeight0 = mi;
         }
       }
       String key = phase + " " + i;
@@ -304,8 +304,8 @@ public class PickMenu extends JPopupMenu {
     if (!Double.isNaN(wvp.getMark2())) {
       Pick pick = createPick("C2", null, wvp.getMark2());
       coda2 = pick;
-      wvp.setMarks(Double.NaN, Double.NaN);
     }
+    wvp.setMarks(Double.NaN, Double.NaN);
     wvp.repaint();
   }
 
@@ -322,7 +322,7 @@ public class PickMenu extends JPopupMenu {
   }
   
   /**
-   * Get S-P distance.
+   * Get S-P distance based on pick times.
    * 
    * @return distance in km
    */
@@ -330,9 +330,51 @@ public class PickMenu extends JPopupMenu {
     if (p == null || s == null) {
       return Double.NaN;
     }
-    double duration = (s.getTime() - p.getTime()) / 1000.0;
+    return getDistance(p.getTime(), s.getTime());  
+  }
+  
+  /**
+   * Get minimum S-P distance based on pick times and uncertainty.
+   * 
+   * @return distance in km
+   */
+  public double getSpMinDistance() {
+    if (p == null || s == null) {
+      return Double.NaN;
+    }
+    double stime = s.getTime() - (s.getTimeQuantity().getUncertainty() / 1000);
+    double ptime = p.getTime() + (p.getTimeQuantity().getUncertainty() / 1000);
+    return getDistance(ptime, stime);
+  }
+
+  /**
+   * Get maxiumum S-P distance based on pick times and uncertainty.
+   * 
+   * @return distance in km
+   */
+  public double getSpMaxDistance() {
+    if (p == null || s == null) {
+      return Double.NaN;
+    }
+    double stime = s.getTime() + (s.getTimeQuantity().getUncertainty() / 1000);
+    double ptime = p.getTime() - (p.getTimeQuantity().getUncertainty() / 1000);
+    return getDistance(ptime, stime);
+  }
+
+  /**
+   * Get S-P distance.
+   * 
+   * @param ptime P pick time in milliseconds
+   * @param stime S pick time in milliseconds
+   * @return distance in km
+   */
+  private double getDistance(double ptime, double stime) {
+    if (ptime > stime) {
+      return Double.NaN;
+    }
+    double duration = (stime - ptime) / 1000.0;
     double distance = SwarmConfig.getInstance().pVelocity * duration;
-    return distance;  
+    return distance;
   }
   
   /**

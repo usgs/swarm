@@ -6,13 +6,16 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmModalDialog;
+import gov.usgs.volcanoes.swarm.event.PickSettings.WeightUnit;
 
 import java.awt.BorderLayout;
 import java.io.IOException;
 
+import javax.swing.ButtonGroup;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
@@ -28,6 +31,9 @@ public class PickSettingsDialog extends SwarmModalDialog {
   private PickSettings settings = new PickSettings();
   private JTextField[] weight;
   private static final String weightMessage = "Value must be a non-negative integer.";
+
+  private JRadioButton sampleButton;
+  private JRadioButton millisButton;
 
 
   /**
@@ -57,14 +63,28 @@ public class PickSettingsDialog extends SwarmModalDialog {
     super.createUi();
     settings = new PickSettings();
     
-    FormLayout layout = new FormLayout("center:40dlu, 10dlu, 50dlu");
+    FormLayout layout = new FormLayout("center:70dlu, 10dlu, 70dlu");
     DefaultFormBuilder builder = new DefaultFormBuilder(layout).border(Borders.DIALOG);
     
     // Uncertainty weights
     builder.appendSeparator("Uncertainty");
     builder.nextLine();
+    ButtonGroup weightUnitGroup = new ButtonGroup();
+    sampleButton = new JRadioButton("# Samples");
+    weightUnitGroup.add(sampleButton);
+    builder.append(sampleButton);
+    millisButton = new JRadioButton("# Milliseconds");
+    weightUnitGroup.add(millisButton);
+    builder.append(millisButton);
+    WeightUnit unit = settings.getWeightUnit();
+    if (unit.equals(WeightUnit.SAMPLES)) {
+      sampleButton.setSelected(true);
+    } else {
+      millisButton.setSelected(true);
+    }
+    builder.nextLine();
     builder.append("Weight");
-    builder.append("# of Samples");
+    builder.append("Value");
     builder.nextLine();
     weight = new JTextField[settings.getNumWeight()];
     for (int i = 0; i < settings.getNumWeight(); i++) {
@@ -125,6 +145,12 @@ public class PickSettingsDialog extends SwarmModalDialog {
    */
   private void saveSettings() {
     // set weight settings
+    if (sampleButton.isSelected()) {
+      settings.setProperty(PickSettings.WEIGHT_UNIT, PickSettings.WeightUnit.SAMPLES.toString());
+    } else {
+      settings.setProperty(PickSettings.WEIGHT_UNIT,
+          PickSettings.WeightUnit.MILLISECONDS.toString());
+    }
     for (int i = 0; i < settings.getNumWeight(); i++) {
       settings.setProperty(PickSettings.WEIGHT + "." + i, weight[i].getText());
     }
@@ -146,7 +172,12 @@ public class PickSettingsDialog extends SwarmModalDialog {
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#wasCancelled()
    */
   protected void wasCancelled() {
-    // revert weight settings
+    // revert uncertainty settings
+    if (settings.getProperty(PickSettings.WEIGHT_UNIT).equals(PickSettings.WeightUnit.SAMPLES)) {
+      sampleButton.setSelected(true);
+    } else {
+      millisButton.setSelected(true);
+    }
     for (int i = 0; i < settings.getNumWeight(); i++) {
       String text = settings.getProperty(PickSettings.WEIGHT + "." + i);
       weight[i].setText(text);

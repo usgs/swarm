@@ -35,12 +35,12 @@ public class PickSettings extends Properties {
    * Read pick settings file.
    */
   private void readSettings() {
+    loadDefaultProperties(); 
     try {
       load(new FileReader(SETTINGS_FILENAME));
     } catch (FileNotFoundException e) {
       JOptionPane.showMessageDialog(null, e.getMessage(), "Error loading pick settings.",
           JOptionPane.ERROR_MESSAGE);
-      loadDefaultProperties();
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -60,15 +60,20 @@ public class PickSettings extends Properties {
     this.setProperty(WEIGHT + ".4", "20");
   }
   
+  /**
+   * Save pick settings properties to file.
+   * @throws IOException IOException
+   */
   protected void save() throws IOException {
     FileWriter writer = new FileWriter(SETTINGS_FILENAME);
     store(writer, COMMENTS);
   }
- 
+   
   /**
-   * Convert weight to time.
-   * @param weight 0-3
-   * @param sampleRate sample rate to use in converting weight to time
+   * Convert weight to time. In case where unit is in samples, 
+   * the sample rate is required.
+   * @param weight weight
+   * @param sampleRate sample rate to use if weights are in samples
    * @return milliseconds
    */
   public long getWeightToTime(int weight, double sampleRate) {
@@ -77,12 +82,28 @@ public class PickSettings extends Properties {
       throw new IllegalArgumentException(message);
     }
     String prop = getProperty(WEIGHT + "." + weight);
-    int numSample = Integer.valueOf(prop);
-    long millis =  (long) (1000 * numSample / sampleRate);
-    return millis;
+    long value = Long.valueOf(prop);
+    if (getWeightUnit().equals(WeightUnit.SAMPLES)) {
+      long millis = (long) (1000 * value / sampleRate);
+      return millis;
+    } else {
+      return value; // already in millis
+    }
   }
 
+  /**
+   * Number of weights used.
+   * @return number of weights
+   */
   public int getNumWeight() {
     return numWeight;
+  }
+  
+  /**
+   * Type of unit mapped to weight.
+   * @return WeightUnit
+   */
+  public WeightUnit getWeightUnit() {
+    return WeightUnit.valueOf(getProperty(WEIGHT_UNIT));
   }
 }
