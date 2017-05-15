@@ -5,11 +5,9 @@ import gov.usgs.plot.data.file.FileType;
 import gov.usgs.plot.data.file.SeismicDataFile;
 import gov.usgs.volcanoes.core.contrib.PngEncoder;
 import gov.usgs.volcanoes.core.contrib.PngEncoderB;
-import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
 import gov.usgs.volcanoes.core.util.UiUtils;
-import gov.usgs.volcanoes.swarm.FileChooser;
 import gov.usgs.volcanoes.swarm.FileTypeDialog;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
@@ -999,7 +997,9 @@ public class WaveClipboardFrame extends SwarmFrame {
     p.setBottomBorderColor(Color.GRAY);
     p.createImage();
     p.getSettings().pickEnabled = pickButton.isSelected();
-    p.getPickMenu().marksToCoda();
+    if (p.wave != null) {
+      p.getPickMenu().marksToCoda();
+    }
     waveBox.add(p);
     waves.add(p);
     doButtonEnables();

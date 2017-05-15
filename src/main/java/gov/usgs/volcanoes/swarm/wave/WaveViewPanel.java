@@ -955,10 +955,12 @@ public class WaveViewPanel extends JComponent {
     long time = pick.getTime();
     double[] t = getTranslation();
     double j2k = J2kSec.fromEpoch(time);
-    double x = 2 + (j2k - t[1]) / t[0];
+    double x = (j2k - t[1]) / t[0];
+    // draw line
     g2.setColor(PickWavePanel.DARK_GREEN);
     g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
 
+    // draw tag/label box
     String tag = pick.getTag();
     Color color = Color.GRAY;
     if (tag.indexOf('P') != -1) {
@@ -980,10 +982,31 @@ public class WaveViewPanel extends JComponent {
       g2.setColor(Color.WHITE);
     }
     g2.fillRect((int) x, 3, lw, height + 2 * offset);
+    
+    // draw uncertainty
+    color = new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() / 2);
+    // color = color.brighter();
+    g2.setColor(color);
+    double uncertainty = pick.getTimeQuantity().getUncertainty();
+    if (!Double.isNaN(uncertainty)) {
+      // lowerUncertainty
+      long lowTime = (long) (pick.getTime() - 1000.0 * uncertainty);
+      double luJ2k = J2kSec.fromEpoch(lowTime);
+      double luX = (luJ2k - t[1]) / t[0];
+      g2.fillRect((int)luX, yOffset + 1, (int)(x - luX), getHeight() - bottomHeight - yOffset - 1);
+      // upperUncertainty
+      long highTime = (long) (pick.getTime() + 1000.0 * uncertainty);
+      double uuJ2k = J2kSec.fromEpoch(highTime);
+      double uuX = (uuJ2k - t[1]) / t[0];
+      g2.fillRect((int)x, yOffset + 1, (int)(uuX - x), getHeight() - bottomHeight - yOffset - 1);
+    }
+
+    // draw text in tag/label box
     g2.setColor(Color.BLACK);
     g2.drawRect((int) x, 3, lw, height + 2 * offset);
     
     g2.drawString(tag, (int) x + offset, 3 + (fm.getAscent() + offset));
+    
   }
   
   public void setUseFilterLabel(boolean b) {
