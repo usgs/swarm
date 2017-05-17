@@ -98,12 +98,6 @@ public class PickSettingsDialog extends SwarmModalDialog {
 
     mainPanel.add(builder.getPanel(), BorderLayout.CENTER);
   }
-  
-  public static void main(String[] args) {
-    PickSettingsDialog psd = PickSettingsDialog.getInstance();
-    psd.setVisible(true);
-  }
-
 
   /**
    * Validate input values.

@@ -44,7 +44,7 @@ public class SpLayer implements MapLayer {
   /**
    * Update list of S-P circles to draw.
    */
-  private void updateSpList() {
+  private synchronized void updateSpList() {
     spList.clear();
     List<WaveViewPanel> waves = WaveClipboardFrame.getInstance().getWaves();
     for (WaveViewPanel wvp : waves) {

@@ -14,6 +14,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
@@ -65,11 +66,43 @@ public class PickMenu extends JPopupMenu {
     createCodaMenu();
     this.addSeparator();
     createSettingsMenu();
-    
+    createExportMenu();
   }
  
   /**
-   * Create settings menu.
+   * Create export menu item.
+   */
+  private void createExportMenu() {
+    JMenuItem settingsMenu = new JMenuItem("Export to QuakeML...");
+    settingsMenu.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        export();
+      }
+    });
+    this.add(settingsMenu);
+  }
+  
+  /**
+   * Open event dialog for export to file.
+   */
+  public void export() {
+    if (clipboard.getWaves().isEmpty()) {
+      String message = "Nothing to save!";
+      JOptionPane.showMessageDialog(clipboard, message);
+      return;
+    }
+    String message = "Every pick in the clipboard will be saved. Continue?";
+    int result = JOptionPane.showConfirmDialog(clipboard, message, "Export",
+        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+    if (result != JOptionPane.YES_OPTION) {
+      return;
+    }
+    EventDialog event = EventDialog.getInstance();
+    event.setVisible(true);    
+  }
+  
+  /**
+   * Create settings menu item.
    */
   private void createSettingsMenu() {
     JMenuItem settingsMenu = new JMenuItem("Settings");
@@ -242,7 +275,8 @@ public class PickMenu extends JPopupMenu {
   private Pick createPick(String phase, Pick.Onset onset, double j2kTime) {
     long time = J2kSec.asDate(j2kTime).getTime();
     String channel = wvp.getChannel();
-    Pick pick = new Pick(phase, time, channel); // assign public id later if saving to quakeml file
+    String publicId = EventDialog.QUAKEML_RESOURCE_ID + "/Pick/" + System.currentTimeMillis();
+    Pick pick = new Pick(publicId, time, channel); 
     pick.setPhaseHint(phase);
     pick.setOnset(onset);
     // use default weight of 0 to set uncertainty
@@ -317,7 +351,7 @@ public class PickMenu extends JPopupMenu {
     if (p == null || s == null) {
       return Double.NaN;
     }
-    double duration = (s.getTime() - p.getTime()) / 1000.0;
+    double duration = 1000d * (s.getTime() - p.getTime());
     return duration;
   }
   
@@ -330,7 +364,7 @@ public class PickMenu extends JPopupMenu {
     if (p == null || s == null) {
       return Double.NaN;
     }
-    return getDistance(p.getTime(), s.getTime());  
+    return getDistance(p.getTime(), s.getTime()); 
   }
   
   /**
@@ -342,13 +376,13 @@ public class PickMenu extends JPopupMenu {
     if (p == null || s == null) {
       return Double.NaN;
     }
-    double stime = s.getTime() - (s.getTimeQuantity().getUncertainty() / 1000);
-    double ptime = p.getTime() + (p.getTimeQuantity().getUncertainty() / 1000);
+    double stime = s.getTime() - 1000d * s.getTimeQuantity().getUncertainty();
+    double ptime = p.getTime() + 1000d * p.getTimeQuantity().getUncertainty();
     return getDistance(ptime, stime);
   }
 
   /**
-   * Get maxiumum S-P distance based on pick times and uncertainty.
+   * Get maximum S-P distance based on pick times and uncertainty.
    * 
    * @return distance in km
    */
@@ -356,8 +390,8 @@ public class PickMenu extends JPopupMenu {
     if (p == null || s == null) {
       return Double.NaN;
     }
-    double stime = s.getTime() + (s.getTimeQuantity().getUncertainty() / 1000);
-    double ptime = p.getTime() - (p.getTimeQuantity().getUncertainty() / 1000);
+    double stime = s.getTime() + 1000d * s.getTimeQuantity().getUncertainty();
+    double ptime = p.getTime() - 1000d * p.getTimeQuantity().getUncertainty();
     return getDistance(ptime, stime);
   }
 
@@ -372,7 +406,7 @@ public class PickMenu extends JPopupMenu {
     if (ptime > stime) {
       return Double.NaN;
     }
-    double duration = (stime - ptime) / 1000.0;
+    double duration = (stime - ptime) / 1000d;
     double distance = SwarmConfig.getInstance().pVelocity * duration;
     return distance;
   }

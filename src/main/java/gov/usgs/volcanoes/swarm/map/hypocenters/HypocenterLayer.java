@@ -131,7 +131,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 
       g2.translate(res.x, res.y);
 
-      double mag = event.getPerferredMagnitude().getMag();
+      double mag = event.getPreferredMagnitude().getMag();
       float diameter;
 
       diameter = getMarkerSize(mag);
@@ -227,7 +227,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
   private List<String> generatePopupText(Origin origin) {
     List<String> text = new ArrayList<String>(3);
 
-    Magnitude magElement = hoverEvent.getPerferredMagnitude();
+    Magnitude magElement = hoverEvent.getPreferredMagnitude();
     String mag = String.format("%.2f %s at %.2f km depth", magElement.getMag(),
         magElement.getType(), (origin.getDepth() / 1000));
     text.add(mag);
@@ -322,7 +322,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
         continue;
       }
 
-      int markerDiameter = getMarkerSize(event.getPerferredMagnitude().getMag());
+      int markerDiameter = getMarkerSize(event.getPreferredMagnitude().getMag());
       final Rectangle r = new Rectangle(0, 0, markerDiameter, markerDiameter);
 
       final Point2D.Double xy =

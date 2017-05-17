@@ -87,7 +87,7 @@ public class ParameterPanel {
     addKey("Type: ", parameterPanel, c);
 
     if (origin != null) {
-      addValue(event.getTypeDescription(), parameterPanel, c);
+      addValue(event.getType().toString(), parameterPanel, c);
     }
 
     c.gridy++;
@@ -133,7 +133,7 @@ public class ParameterPanel {
     c.gridy++;
     addKey("Magnitude: ", parameterPanel, c);
 
-    Magnitude magnitude = event.getPerferredMagnitude();
+    Magnitude magnitude = event.getPreferredMagnitude();
     if (magnitude != null) {
       String mag = String.format("%s %s", magnitude.getMag(), magnitude.getType());
       String uncertaintly = magnitude.getUncertainty();
