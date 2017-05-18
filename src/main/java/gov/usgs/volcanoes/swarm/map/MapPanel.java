@@ -378,11 +378,10 @@ public class MapPanel extends JPanel {
         if (panel.isWaveVisible()) {
           cnt++;
           final WaveViewPanel p = new WaveViewPanel(panel.getWaveViewPanel());
-          final SeismicDataSource src = panel.getWaveViewPanel().getDataSource();
-          if (src != null) {
-            p.setDataSource(src.getCopy());
-          }
-
+//          final SeismicDataSource src = panel.getWaveViewPanel().getDataSource();
+//          if (src != null) {
+//            p.setDataSource(src);
+//          }
           cb.addWave(p);
         }
       }
