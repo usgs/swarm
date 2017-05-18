@@ -19,6 +19,7 @@ import gov.usgs.volcanoes.swarm.Throbber;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.event.PickMenuBar;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanelListener;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
@@ -59,6 +60,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -262,6 +264,11 @@ public class WaveClipboardFrame extends SwarmFrame {
     pickButton = SwarmUtil.createToolBarToggleButton(Icons.pick,
         "Pick Mode", new ActionListener() {
           public void actionPerformed(ActionEvent e) {
+            if (pickButton.isSelected()) {
+              PickMenuBar.getInstance().setVisible(true);
+            } else {
+              PickMenuBar.getInstance().setVisible(false);
+            }
             for (WaveViewPanel awp : waves) {
               if (awp instanceof WaveViewPanel) {
                 WaveViewPanel wvp = (WaveViewPanel) awp;
@@ -272,6 +279,8 @@ public class WaveClipboardFrame extends SwarmFrame {
         });
     pickButton.setEnabled(true);
     toolbar.add(pickButton);
+    toolbar.add(PickMenuBar.getInstance());
+    PickMenuBar.getInstance().setVisible(false);
   }
 
   // TODO: don't write image on event thread

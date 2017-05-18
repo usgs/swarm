@@ -14,10 +14,8 @@ import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.KeyStroke;
 
 /**
  * Right click menu for picks.
@@ -53,7 +51,9 @@ public class PickMenu extends JPopupMenu {
   public PickMenu(WaveViewPanel wvp) {
     super("Pick Menu");
     this.wvp = wvp;
-    sampleRate = wvp.getWave().getSamplingRate();
+    if (wvp.getWave() != null) {
+      sampleRate = wvp.getWave().getSamplingRate();
+    }
     settings = PickSettingsDialog.getInstance().getSettings();
     createMenu();
   }
@@ -64,54 +64,6 @@ public class PickMenu extends JPopupMenu {
   private void createMenu() {
     createPhaseMenu();
     createCodaMenu();
-    this.addSeparator();
-    createSettingsMenu();
-    createExportMenu();
-  }
- 
-  /**
-   * Create export menu item.
-   */
-  private void createExportMenu() {
-    JMenuItem settingsMenu = new JMenuItem("Export to QuakeML...");
-    settingsMenu.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        export();
-      }
-    });
-    this.add(settingsMenu);
-  }
-  
-  /**
-   * Open event dialog for export to file.
-   */
-  public void export() {
-    if (clipboard.getWaves().isEmpty()) {
-      String message = "Nothing to save!";
-      JOptionPane.showMessageDialog(clipboard, message);
-      return;
-    }
-    String message = "Every pick in the clipboard will be saved. Continue?";
-    int result = JOptionPane.showConfirmDialog(clipboard, message, "Export",
-        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-    if (result != JOptionPane.YES_OPTION) {
-      return;
-    }
-    EventDialog event = EventDialog.getInstance();
-    event.setVisible(true);    
-  }
-  
-  /**
-   * Create settings menu item.
-   */
-  private void createSettingsMenu() {
-    JMenuItem settingsMenu = new JMenuItem("Settings");
-    settingsMenu.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        PickSettingsDialog.getInstance().setVisible(true);
-      }
-    });
-    this.add(settingsMenu);
   }
   
   /**
@@ -120,6 +72,7 @@ public class PickMenu extends JPopupMenu {
   private void createCodaMenu() {
 
     JMenu coda = new JMenu("Coda");
+    coda.setMnemonic(Character.CONTROL);
 
     JMenuItem c1MenuItem = new JMenuItem("Coda 1");
     c1MenuItem.addActionListener(new ActionListener() {
@@ -143,7 +96,7 @@ public class PickMenu extends JPopupMenu {
     
     coda.addSeparator();
 
-    JCheckBoxMenuItem clearCodaMenu = new JCheckBoxMenuItem("Clear Coda");
+    JCheckBoxMenuItem clearCodaMenu = new JCheckBoxMenuItem("Clear");
     clearCodaMenu.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         coda1 = null;
@@ -153,7 +106,7 @@ public class PickMenu extends JPopupMenu {
     });
     coda.add(clearCodaMenu);
 
-    JCheckBoxMenuItem hideCodaMenu = new JCheckBoxMenuItem("Hide Coda");
+    JCheckBoxMenuItem hideCodaMenu = new JCheckBoxMenuItem("Hide");
     hideCodaMenu.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         hideCoda = ((JCheckBoxMenuItem)e.getSource()).isSelected();
@@ -169,20 +122,17 @@ public class PickMenu extends JPopupMenu {
    * Create phase submenu.
    */
   private void createPhaseMenu() {
-    JMenu phase = new JMenu("Phase");
+    JMenu phaseP = new JMenu("P");
 
-    JMenuItem phasePe = new JMenuItem("P (Emergent)");
+    JMenuItem phasePe = new JMenuItem("Emergent");
     phasePe.addActionListener(new PickActionListener("P", Pick.Onset.EMERGENT));
-    phase.add(phasePe);
+    phaseP.add(phasePe);
 
-    JMenuItem phasePi = new JMenuItem("P (Impulsive)");
+    JMenuItem phasePi = new JMenuItem("Impulsive");
     phasePi.addActionListener(new PickActionListener("P", Pick.Onset.IMPULSIVE));
-    phase.add(phasePi);
+    phaseP.add(phasePi);
 
-    // add P uncertainty menus
-    phase.add(createUncertaintyMenu("P"));
-
-    JMenuItem clearP = new JMenuItem("Clear P");
+    JMenuItem clearP = new JMenuItem("Clear");
     clearP.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         p = null;
@@ -192,24 +142,25 @@ public class PickMenu extends JPopupMenu {
         pWeight0.setSelected(true); // reset weight to 0
       }
     });
-    phase.add(clearP);
+    phaseP.add(clearP);
 
-    phase.addSeparator();
+    this.add(phaseP);
+    // add P uncertainty menus
+    this.add(createUncertaintyMenu("P"));
 
     // S 
-    JMenuItem phaseSe = new JMenuItem("S (Emergent)");
+    JMenu phaseS = new JMenu("S");
+    JMenuItem phaseSe = new JMenuItem("Emergent");
     phaseSe.addActionListener(new PickActionListener("S", Pick.Onset.EMERGENT));
-    phase.add(phaseSe);
+    phaseS.add(phaseSe);
 
-    JMenuItem phaseSi = new JMenuItem("S (Impulsive)");
+    JMenuItem phaseSi = new JMenuItem("Impulsive");
     phaseSi.addActionListener(new PickActionListener("S", Pick.Onset.IMPULSIVE));
-    phase.add(phaseSi);
+    phaseS.add(phaseSi);
 
-    // add S uncertainty menus
-    phase.add(createUncertaintyMenu("S"));
     
     // clear S
-    JMenuItem clearS = new JMenuItem("Clear S");
+    JMenuItem clearS = new JMenuItem("Clear");
     clearS.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         s = null;
@@ -219,20 +170,21 @@ public class PickMenu extends JPopupMenu {
         sWeight0.setSelected(true); // reset weight to 0
       }
     });
-    phase.add(clearS);
-
-    phase.addSeparator();
+    phaseS.add(clearS);
+    this.add(phaseS);
+    // add S uncertainty menus
+    this.add(createUncertaintyMenu("S"));
 
     // hide P & S
-    JCheckBoxMenuItem hidePhaseMenu = new JCheckBoxMenuItem("Hide Phases");
+    JCheckBoxMenuItem hidePhaseMenu = new JCheckBoxMenuItem("Hide P & S");
     hidePhaseMenu.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         hidePhases = ((JCheckBoxMenuItem)e.getSource()).isSelected();
         wvp.repaint();
       }
     });
-    phase.add(hidePhaseMenu);
-    this.add(phase);
+    this.add(hidePhaseMenu);
+    this.addSeparator();
   }
 
   /**
@@ -242,8 +194,7 @@ public class PickMenu extends JPopupMenu {
    * @return menu
    */
   private JMenu createUncertaintyMenu(String phase) {
-    String menuText = phase + " Uncertainty";
-    JMenu menu = new JMenu(menuText);
+    JMenu menu = new JMenu(phase + " Uncertainty");
     ButtonGroup bg = new ButtonGroup();
     for (int i = 0; i < settings.getNumWeight(); i++) {
       JRadioButtonMenuItem mi = new JRadioButtonMenuItem(Integer.toString(i));
@@ -256,8 +207,6 @@ public class PickMenu extends JPopupMenu {
           sWeight0 = mi;
         }
       }
-      String key = phase + " " + i;
-      mi.setAccelerator(KeyStroke.getKeyStroke(key));
       bg.add(mi);
       mi.addActionListener(new UncertaintyActionListener(phase, i));
       menu.add(mi);

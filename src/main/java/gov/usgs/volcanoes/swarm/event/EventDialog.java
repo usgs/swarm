@@ -57,7 +57,7 @@ public class EventDialog extends SwarmModalDialog {
   private JComboBox<EventType> eventType;
   private JComboBox<EventTypeCertainty> eventTypeCertainty;
   private JTextField description;
-  private JTextField exportFile;
+  private JTextField exportDirectory;
   private String user;
 
   /**
@@ -87,7 +87,7 @@ public class EventDialog extends SwarmModalDialog {
     
     super.createUi();
     
-    FormLayout layout = new FormLayout("right:50dlu, 10dlu, 120dlu, 10dlu, 20dlu");
+    FormLayout layout = new FormLayout("right:65dlu, 5dlu, 120dlu, 3dlu, 10dlu");
     DefaultFormBuilder builder = new DefaultFormBuilder(layout).border(Borders.DIALOG);
         
     eventType = new JComboBox<EventType>(EventType.values());
@@ -104,12 +104,12 @@ public class EventDialog extends SwarmModalDialog {
     builder.append("Description", description);
     builder.nextLine();
     
-    exportFile = new JTextField(SwarmConfig.getInstance().lastPath);
-    builder.append("Save Directory", exportFile);
+    exportDirectory = new JTextField(SwarmConfig.getInstance().lastPath);
+    builder.append("Save Directory", exportDirectory);
     JButton browseButton = new JButton("...");
     browseButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        openFileChooser();
+        openExportDirectoryChooser();
       }      
     });
     builder.append(browseButton);
@@ -121,9 +121,8 @@ public class EventDialog extends SwarmModalDialog {
   /**
    * Open file chooser dialog for export directory selection.
    */
-  private void openFileChooser() {
+  private void openExportDirectoryChooser() {
     JFileChooser chooser = new JFileChooser();
-    //chooser.setFileFilter(new FileNameExtensionFilter("QuakeML (.xml)", "xml"));
     chooser.setCurrentDirectory(new File(SwarmConfig.getInstance().lastPath));
     chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     chooser.setMultiSelectionEnabled(false);
@@ -131,7 +130,7 @@ public class EventDialog extends SwarmModalDialog {
     int result = chooser.showOpenDialog(Swarm.getApplicationFrame());
     if (result == JFileChooser.APPROVE_OPTION) {
       File file = chooser.getSelectedFile();
-      exportFile.setText(file.getAbsolutePath());
+      exportDirectory.setText(file.getAbsolutePath());
     }
   }
   
@@ -204,9 +203,9 @@ public class EventDialog extends SwarmModalDialog {
           .appendChild(doc.createTextNode(QuakeMlUtils.formatDate(System.currentTimeMillis())));
       creationInfo.appendChild(creationTime);
 
-      // write to file     
-      String filename = exportFile.getText() + "/Swarm" + Version.POM_VERSION + "_QuakeML_" + user
-          + "_" + System.currentTimeMillis() + ".xml";
+      // write to file
+      String filename = exportDirectory.getText() + "/Swarm" + Version.POM_VERSION + "_QuakeML_"
+          + user + "_" + System.currentTimeMillis() + ".xml";
       FileOutputStream fos = new FileOutputStream(filename);
       
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -242,6 +241,28 @@ public class EventDialog extends SwarmModalDialog {
   protected void wasCancelled() {
 
   }
+  
+  /**
+   * Set description.
+   * @param description event description
+   */
+  public void setDescription(String description) {
+    this.description.setText(description);
+  }
 
- 
+  /**
+   * Set event type.
+   * @param eventType event type
+   */
+  public void setEventType(EventType eventType) {
+    this.eventType.setSelectedItem(eventType);
+  }
+  
+  /**
+   * Set event type certainty.
+   * @param eventTypeCertainty event type certainty
+   */
+  public void setEventTypeCertainty(EventTypeCertainty eventTypeCertainty) {
+    this.eventTypeCertainty.setSelectedItem(eventTypeCertainty);
+  }
 }
