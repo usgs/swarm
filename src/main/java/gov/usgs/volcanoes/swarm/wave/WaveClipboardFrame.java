@@ -1052,7 +1052,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     }
 
     p.removeListener(selectListener);
-    p.getDataSource().close();
+    //p.getDataSource().close();
     setStatusText(" ");
     waveBox.remove(i);
     waves.remove(p);
