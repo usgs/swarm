@@ -445,6 +445,10 @@ public class SwarmConfig {
 
     }
   }
+  
+  public Map<String, SeismicDataSource> getSources(){
+    return sources;
+  }
 
   public SeismicDataSource getSource(final String key) {
     return sources.get(key);
