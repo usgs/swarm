@@ -9,6 +9,7 @@ import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.Stroke;
@@ -67,9 +68,10 @@ public class SpLayer implements MapLayer {
    * @see gov.usgs.volcanoes.swarm.map.MapLayer#draw(java.awt.Graphics2D)
    */
   public void draw(Graphics2D g2) {
-    //Color color = g2.getColor();
+    Color color = g2.getColor();
     Stroke stroke = g2.getStroke();
     Shape clip = g2.getClip();
+    g2.setColor(new Color(SwarmConfig.getInstance().mapLineColor));
     
     // First get updated list of S-P
     updateSpList();
@@ -116,7 +118,7 @@ public class SpLayer implements MapLayer {
       }
     }
     
-    //g2.setColor(color);
+    g2.setColor(color);
     g2.setStroke(stroke);
     g2.setClip(clip);
   }
