@@ -515,4 +515,12 @@ public class PickMenu extends JPopupMenu {
     return pickChannelS;
   }
 
+  public void setPickChannelP(boolean pickChannelP) {
+    this.pickChannelP = pickChannelP;
+  }
+
+  public void setPickChannelS(boolean pickChannelS) {
+    this.pickChannelS = pickChannelS;
+  }
+
 }

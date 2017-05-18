@@ -188,8 +188,8 @@ public class PickMenuBar extends JMenuBar {
       firstPick = Math.min(pick.getTime(), firstPick);
       lastPick = Math.max(pick.getTime(), lastPick);
     }
-    double waveStart = J2kSec.fromEpoch(firstPick) - 1;
-    double waveEnd = J2kSec.fromEpoch(lastPick) + 1;
+    double waveStart = J2kSec.fromEpoch(firstPick) - 2;
+    double waveEnd = J2kSec.fromEpoch(lastPick) + 2;
 
     // create wave view panels 
     HashMap<String, WaveViewPanel> panels = new HashMap<String, WaveViewPanel>();
@@ -225,11 +225,14 @@ public class PickMenuBar extends JMenuBar {
         }
       }
       String phaseHint = pick.getPhaseHint();
+      PickMenu pickMenu = wvp.getPickMenu();
       if (phaseHint.equals("P")) {
-        wvp.getPickMenu().setP(pick);
+        pickMenu.setP(pick);
+        pickMenu.setPickChannelP(true);
       }
       if (phaseHint.equals("S")) {
-        wvp.getPickMenu().setS(pick);
+        pickMenu.setS(pick);
+        pickMenu.setPickChannelS(true);
       }
     }
 
