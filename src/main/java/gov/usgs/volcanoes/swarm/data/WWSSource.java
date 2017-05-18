@@ -47,6 +47,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
    * Constructor requiring WWS source.
    * @param wws Winston Wave Server Source
    */
+  @Deprecated
   public WWSSource(WWSSource wws) {
     this.name = wws.name;
     parse(wws.params);
@@ -72,6 +73,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
   /**
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getCopy()
    */
+  @Deprecated
   public SeismicDataSource getCopy() {
     return new WWSSource(this);
   }
