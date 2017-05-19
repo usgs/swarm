@@ -378,7 +378,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
   public void insetToClipboard() {
     if (insetWavePanel != null) {
       WaveViewPanel p = new WaveViewPanel(insetWavePanel);
-      p.setDataSource(insetWavePanel.getDataSource().getCopy());
+      p.setDataSource(insetWavePanel.getDataSource());
       WaveClipboardFrame cb = WaveClipboardFrame.getInstance();
       cb.setVisible(true);
       cb.addWave(p);

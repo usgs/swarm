@@ -1,3 +1,11 @@
+## Version 2.7.1
+  * Pick Mode enhancements:
+  	- Add ability to select pick uncertainty
+	- Plot S-P in map 
+	- QuakeML import/export
+	- Add key stroke shortcut
+  * Fix bug in map line color selection
+
 ## Version 2.7.0
   * Add pick mode to Wave Clipboard
   * Add ability to import QuakeML files

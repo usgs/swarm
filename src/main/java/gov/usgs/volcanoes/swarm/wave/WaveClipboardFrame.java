@@ -5,11 +5,9 @@ import gov.usgs.plot.data.file.FileType;
 import gov.usgs.plot.data.file.SeismicDataFile;
 import gov.usgs.volcanoes.core.contrib.PngEncoder;
 import gov.usgs.volcanoes.core.contrib.PngEncoderB;
-import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
 import gov.usgs.volcanoes.core.util.UiUtils;
-import gov.usgs.volcanoes.swarm.FileChooser;
 import gov.usgs.volcanoes.swarm.FileTypeDialog;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
@@ -21,6 +19,8 @@ import gov.usgs.volcanoes.swarm.Throbber;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.event.PickMenuBar;
+import gov.usgs.volcanoes.swarm.event.PickSettings;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanelListener;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
@@ -188,8 +188,9 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     createListeners();
     doButtonEnables();
+    setupPickMenuKeyStrokeHandler();
   }
-
+  
   private void createMainButtons() {
     openButton =
         SwarmUtil.createToolBarButton(Icons.open, "Open a saved wave", new OpenActionListener());
@@ -264,6 +265,11 @@ public class WaveClipboardFrame extends SwarmFrame {
     pickButton = SwarmUtil.createToolBarToggleButton(Icons.pick,
         "Pick Mode", new ActionListener() {
           public void actionPerformed(ActionEvent e) {
+            if (pickButton.isSelected()) {
+              PickMenuBar.getInstance().setVisible(true);
+            } else {
+              PickMenuBar.getInstance().setVisible(false);
+            }
             for (WaveViewPanel awp : waves) {
               if (awp instanceof WaveViewPanel) {
                 WaveViewPanel wvp = (WaveViewPanel) awp;
@@ -274,6 +280,8 @@ public class WaveClipboardFrame extends SwarmFrame {
         });
     pickButton.setEnabled(true);
     toolbar.add(pickButton);
+    toolbar.add(PickMenuBar.getInstance());
+    PickMenuBar.getInstance().setVisible(false);
   }
 
   // TODO: don't write image on event thread
@@ -461,6 +469,136 @@ public class WaveClipboardFrame extends SwarmFrame {
     });
   }
 
+
+  /**
+   * Set up key stroke shortcuts for picking.
+   */
+  private void setupPickMenuKeyStrokeHandler() {
+    // P short cuts
+    UiUtils.mapKeyStrokeToAction(this, "shift E", "Emergent P", new AbstractAction() {
+      private static final long serialVersionUID = 458715695444946061L;
+      public void actionPerformed(ActionEvent e) {
+        for (WaveViewPanel wvp : selectedSet) {
+          wvp.setPickTime();
+          wvp.getPickMenu().createEmergentP();
+        }
+      }
+    });
+    
+    UiUtils.mapKeyStrokeToAction(this, "shift I", "Impulsive P", new AbstractAction() {
+      private static final long serialVersionUID = 458715695444946061L;
+      public void actionPerformed(ActionEvent e) {
+        for (WaveViewPanel wvp : selectedSet) {
+          wvp.setPickTime();
+          wvp.getPickMenu().createImpulsiveP();
+        }
+      }
+    });
+    
+    UiUtils.mapKeyStrokeToAction(this, "shift X", "Clear P", new AbstractAction() {
+      private static final long serialVersionUID = 458715695444946061L;
+      public void actionPerformed(ActionEvent e) {
+        for (WaveViewPanel wvp : selectedSet) {
+          wvp.getPickMenu().clearP();
+        }
+      }
+    });
+    
+    for (int i = 0; i < PickSettings.numWeight; i++) {
+      final int weight = i;
+      String keyStroke = "shift " + weight;
+      String name = "P weight " + weight;
+      UiUtils.mapKeyStrokeToAction(this, keyStroke, name, new AbstractAction() {
+        private static final long serialVersionUID = 458715695444946061L;
+
+        public void actionPerformed(ActionEvent e) {
+          for (WaveViewPanel wvp : selectedSet) {
+            wvp.getPickMenu().setUncertainty("P", weight);
+          }
+        }
+      });
+    }
+    
+    // S short cuts
+    UiUtils.mapKeyStrokeToAction(this, "alt E", "Emergent S", new AbstractAction() {
+      private static final long serialVersionUID = 458715695444946061L;
+      public void actionPerformed(ActionEvent e) {
+        for (WaveViewPanel wvp : selectedSet) {
+          wvp.setPickTime();
+          wvp.getPickMenu().createEmergentS();
+        }
+      }
+    });
+    
+    UiUtils.mapKeyStrokeToAction(this, "alt I", "Impulsive S", new AbstractAction() {
+      private static final long serialVersionUID = 458715695444946061L;
+      public void actionPerformed(ActionEvent e) {
+        for (WaveViewPanel wvp : selectedSet) {
+          wvp.setPickTime();
+          wvp.getPickMenu().createImpulsiveS();
+        }
+      }
+    });
+    
+    UiUtils.mapKeyStrokeToAction(this, "alt X", "Clear S", new AbstractAction() {
+      private static final long serialVersionUID = 458715695444946061L;
+      public void actionPerformed(ActionEvent e) {
+        for (WaveViewPanel wvp : selectedSet) {
+          wvp.getPickMenu().clearS();
+        }
+      }
+    });
+    
+    for (int i = 0; i < PickSettings.numWeight; i++) {
+      final int weight = i;
+      String keyStroke = "alt " + weight;
+      String name = "S weight " + weight;
+      UiUtils.mapKeyStrokeToAction(this, keyStroke, name, new AbstractAction() {
+        private static final long serialVersionUID = 458715695444946061L;
+
+        public void actionPerformed(ActionEvent e) {
+          for (WaveViewPanel wvp : selectedSet) {
+            wvp.getPickMenu().setUncertainty("S", weight);
+          }
+        }
+      });
+    }
+    
+    // coda short cuts
+    UiUtils.mapKeyStrokeToAction(this, "control 1", "coda 1", new AbstractAction() {
+      private static final long serialVersionUID = 458715695444946061L;
+
+      public void actionPerformed(ActionEvent e) {
+        for (WaveViewPanel wvp : selectedSet) {
+          wvp.setPickTime();
+          wvp.getPickMenu().createCoda1();
+        }
+      }
+    });
+
+    UiUtils.mapKeyStrokeToAction(this, "control 2", "coda 2", new AbstractAction() {
+      private static final long serialVersionUID = 458715695444946061L;
+
+      public void actionPerformed(ActionEvent e) {
+        for (WaveViewPanel wvp : selectedSet) {
+          wvp.setPickTime();
+          wvp.getPickMenu().createCoda2();
+        }
+      }
+    });
+
+    UiUtils.mapKeyStrokeToAction(this, "control X", "coda clear", new AbstractAction() {
+      private static final long serialVersionUID = 458715695444946061L;
+
+      public void actionPerformed(ActionEvent e) {
+        for (WaveViewPanel wvp : selectedSet) {
+          wvp.setPickTime();
+          wvp.getPickMenu().clearCoda();
+        }
+      }
+    });
+  }
+  
   private void createListeners() {
     this.addInternalFrameListener(new InternalFrameAdapter() {
       @Override
@@ -999,7 +1137,9 @@ public class WaveClipboardFrame extends SwarmFrame {
     p.setBottomBorderColor(Color.GRAY);
     p.createImage();
     p.getSettings().pickEnabled = pickButton.isSelected();
-    p.getPickMenu().marksToCoda();
+    if (p.wave != null) {
+      p.getPickMenu().marksToCoda();
+    }
     waveBox.add(p);
     waves.add(p);
     doButtonEnables();
@@ -1043,7 +1183,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     }
 
     p.removeListener(selectListener);
-    p.getDataSource().close();
+    //p.getDataSource().close();
     setStatusText(" ");
     waveBox.remove(i);
     waves.remove(p);

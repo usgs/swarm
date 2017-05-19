@@ -2,8 +2,26 @@ package gov.usgs.volcanoes.swarm;
 
 import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.quakeml.Event;
+import gov.usgs.volcanoes.core.time.CurrentTime;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.ui.GlobalKeyManager;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.swarm.chooser.DataChooser;
+import gov.usgs.volcanoes.swarm.data.CachedDataSource;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.event.EventFrame;
+import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
+import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.map.MapFrame;
+import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
+import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewerFrame;
 
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -29,26 +47,8 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import gov.usgs.plot.data.Wave;
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.quakeml.Event;
-import gov.usgs.volcanoes.core.time.CurrentTime;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.ui.GlobalKeyManager;
-import gov.usgs.volcanoes.core.util.StringUtils;
-import gov.usgs.volcanoes.swarm.chooser.DataChooser;
-import gov.usgs.volcanoes.swarm.data.CachedDataSource;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.event.EventFrame;
-import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
-import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
-import gov.usgs.volcanoes.swarm.map.MapFrame;
-import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
-import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-import gov.usgs.volcanoes.swarm.wave.WaveViewerFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The main UI and application class for Swarm. Only functions directly pertaining to the UI and
@@ -111,9 +111,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
     final String version = System.getProperty("java.version");
     LOGGER.info("java.version: " + version);
     if (version.startsWith("1.1") || version.startsWith("1.2") || version.startsWith("1.3")
-        || version.startsWith("1.4")) {
+        || version.startsWith("1.4") || version.startsWith("1.5")) {
       JOptionPane.showMessageDialog(this, String
-          .format("%s %s requires at least Java version 1.5 or above.", TITLE, Version.POM_VERSION),
+          .format("%s %s requires at least Java version 1.6 or above.", TITLE, Version.POM_VERSION),
           "Error", JOptionPane.ERROR_MESSAGE);
       System.exit(-1);
     }
@@ -142,8 +142,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
       private static final long serialVersionUID = -1;
 
       public void actionPerformed(final ActionEvent e) {
-        if (cache != null)
+        if (cache != null) {
           cache.output();
+        }
       }
     });
 
@@ -162,8 +163,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
       public void actionPerformed(final ActionEvent e) {
         final String ll = swarmMenu.getLastLayoutName();
-        if (ll != null)
+        if (ll != null) {
           saveLayout(ll);
+        }
       }
     });
 
@@ -295,8 +297,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
               break;
             }
           }
-          if (jf == null)
+          if (jf == null) {
             jf = SwarmInternalFrames.getFrames().get(0);
+          }
           jf.requestFocus();
         }
       }
@@ -318,8 +321,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
      */
     this.setSize(config.windowWidth, config.windowHeight);
     this.setLocation(config.windowX, config.windowY);
-    if (config.windowMaximized)
+    if (config.windowMaximized) {
       this.setExtendedState(Frame.MAXIMIZED_BOTH);
+    }
 
     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -337,6 +341,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
       try {
         waveClipboard.setMaximum(true);
       } catch (final Exception e) {
+        //
       }
     }
 
@@ -347,6 +352,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
       try {
         mapFrame.setMaximum(true);
       } catch (final Exception e) {
+        //
       }
     }
 
@@ -355,17 +361,19 @@ public class Swarm extends JFrame implements InternalFrameListener {
     swarmMenu = new SwarmMenu();
     this.setJMenuBar(swarmMenu);
 
-    for (final SwarmLayout sl : config.layouts.values())
+    for (final SwarmLayout sl : config.layouts.values()) {
       swarmMenu.addLayout(sl);
+    }
 
     this.setVisible(true);
 
     final long offset = CurrentTime.getInstance().getOffset();
-    if (Math.abs(offset) > 10 * 60 * 1000)
+    if (Math.abs(offset) > 10 * 60 * 1000) {
       JOptionPane.showMessageDialog(this,
           "You're system clock is off by more than 10 minutes.\n"
               + "This is just for your information, Swarm will not be affected by this.",
           "System Clock", JOptionPane.INFORMATION_MESSAGE);
+    }
   }
 
   public void setChooserVisible(final boolean vis) {
@@ -374,12 +382,14 @@ public class Swarm extends JFrame implements InternalFrameListener {
       split.setDividerLocation(config.chooserDividerLocation);
       setContentPane(split);
     } else {
-      if (isChooserVisible())
+      if (isChooserVisible()) {
         config.chooserDividerLocation = split.getDividerLocation();
+      }
       setContentPane(desktop);
     }
-    if (SwingUtilities.isEventDispatchThread())
+    if (SwingUtilities.isEventDispatchThread()) {
       validate();
+    }
   }
 
   public boolean isChooserVisible() {
@@ -395,8 +405,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
   }
 
   public void setFullScreenMode(final boolean full) {
-    if (fullScreen == full)
+    if (fullScreen == full) {
       return;
+    }
 
     requestFocus();
     fullScreen = full;
@@ -451,9 +462,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
   public void closeApp() {
     final Point p = this.getLocation();
 
-    if (this.getExtendedState() == Frame.MAXIMIZED_BOTH)
+    if (this.getExtendedState() == Frame.MAXIMIZED_BOTH) {
       config.windowMaximized = true;
-    else {
+    } else {
       final Dimension d = this.getSize();
       config.windowX = p.x;
       config.windowY = p.y;
@@ -463,9 +474,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
     }
 
     final WaveClipboardFrame waveClipboard = WaveClipboardFrame.getInstance();
-    if (waveClipboard.isMaximum())
+    if (waveClipboard.isMaximum()) {
       config.clipboardMaximized = true;
-    else {
+    } else {
       config.clipboardX = waveClipboard.getX();
       config.clipboardY = waveClipboard.getY();
       config.clipboardWidth = waveClipboard.getWidth();
@@ -475,9 +486,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
     config.clipboardVisible = WaveClipboardFrame.getInstance().isVisible();
 
     final MapFrame mapFrame = MapFrame.getInstance();
-    if (mapFrame.isMaximum())
+    if (mapFrame.isMaximum()) {
       config.mapMaximized = true;
-    else {
+    } else {
       config.mapX = mapFrame.getX();
       config.mapY = mapFrame.getY();
       config.mapWidth = mapFrame.getWidth();
@@ -502,10 +513,12 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
     waveClipboard.removeWaves();
     try {
-      for (final JInternalFrame frame : SwarmInternalFrames.getFrames())
+      for (final JInternalFrame frame : SwarmInternalFrames.getFrames()) {
         frame.setClosed(true);
+      }
     } catch (final Exception e) {
-    } // doesn't matter at this point
+      // doesn't matter at this point
+    } 
     System.exit(0);
   }
 
@@ -547,6 +560,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
         try {
           waveClipboard.setSelected(true);
         } catch (final Exception e) {
+          //
         }
         waveClipboard.addWave(wvp);
       }
@@ -614,8 +628,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
                 "A layout by that name already exists.  Overwrite?", "Warning",
                 JOptionPane.YES_NO_OPTION);
             overwrite = (opt == JOptionPane.YES_OPTION);
-          } else
+          } else {
             overwrite = true;
+          }
 
           if (overwrite) {
             if (fixedName) {
@@ -635,8 +650,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
           done = true;
           lastLayout = name;
         }
-      } else
+      } else {
         done = true; // cancelled
+      }
     }
   }
 
@@ -662,8 +678,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
     }
 
     final MapFrame mapFrame = MapFrame.getInstance();
-    if (mapFrame.isVisible())
+    if (mapFrame.isVisible()) {
       mapFrame.saveLayout(cf, "map");
+    }
 
     return sl;
   }
@@ -678,12 +695,15 @@ public class Swarm extends JFrame implements InternalFrameListener {
     final WaveClipboardFrame waveClipboard = WaveClipboardFrame.getInstance();
     if (waveClipboard.isSelected()) {
       bingo = waveClipboard;
-    } else
-      for (final JInternalFrame frame : SwarmInternalFrames.getFrames())
-        if (frame.isSelected())
+    } else {
+      for (final JInternalFrame frame : SwarmInternalFrames.getFrames()) {
+        if (frame.isSelected()) {
           bingo = frame;
+        }
+      }
+    }
 
-    if (bingo != null)
+    if (bingo != null) {
       switch (position) {
         case LEFT:
           bingo.setSize(ds.width / 2, ds.height);
@@ -724,7 +744,10 @@ public class Swarm extends JFrame implements InternalFrameListener {
           bingo.setSize(ds.width / 2, ds.height / 2);
           bingo.setLocation(ds.width / 2, 0);
           break;
+        default:
+          break;
       }
+    }
   }
 
   public void flushLeft() {
@@ -764,23 +787,26 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
     final ArrayList<JInternalFrame> ks = new ArrayList<JInternalFrame>();
     for (final JInternalFrame frame : SwarmInternalFrames.getFrames()) {
-      if (frame.isVisible() && frame instanceof Kioskable)
+      if (frame.isVisible() && frame instanceof Kioskable) {
         ks.add(frame);
+      }
     }
 
-    if (ks.size() == 0)
+    if (ks.size() == 0) {
       return;
+    }
 
     int mapCount = 0;
     int heliCount = 0;
     int monitorCount = 0;
     for (final JInternalFrame frame : ks) {
-      if (frame instanceof MapFrame)
+      if (frame instanceof MapFrame) {
         mapCount++;
-      else if (frame instanceof HelicorderViewerFrame)
+      } else if (frame instanceof HelicorderViewerFrame) {
         heliCount++;
-      else if (frame instanceof MultiMonitor)
+      } else if (frame instanceof MultiMonitor) {
         monitorCount++;
+      }
     }
 
     if (ks.size() == 4) {
@@ -822,6 +848,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
           hvf.setIcon(false);
           hvf.setMaximum(false);
         } catch (final Exception e) {
+          //
         }
         hvf.setSize(w, ds.height);
         hvf.setLocation(cx, 0);
@@ -835,12 +862,14 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
     final ArrayList<HelicorderViewerFrame> hcs = new ArrayList<HelicorderViewerFrame>(10);
     for (final JInternalFrame frame : SwarmInternalFrames.getFrames()) {
-      if (frame instanceof HelicorderViewerFrame)
+      if (frame instanceof HelicorderViewerFrame) {
         hcs.add((HelicorderViewerFrame) frame);
+      }
     }
 
-    if (hcs.size() == 0)
+    if (hcs.size() == 0) {
       return;
+    }
 
     if (hcs.size() == 4) {
       final int w = ds.width / 2;
@@ -866,6 +895,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
           hvf.setIcon(false);
           hvf.setMaximum(false);
         } catch (final Exception e) {
+          //
         }
         hvf.setSize(w, ds.height);
         hvf.setLocation(cx, 0);
@@ -879,12 +909,14 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
     int wc = 0;
     for (final JInternalFrame frame : SwarmInternalFrames.getFrames()) {
-      if (frame instanceof WaveViewerFrame)
+      if (frame instanceof WaveViewerFrame) {
         wc++;
+      }
     }
 
-    if (wc == 0)
+    if (wc == 0) {
       return;
+    }
 
     final int h = ds.height / wc;
     int cy = 0;
@@ -895,6 +927,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
           wvf.setIcon(false);
           wvf.setMaximum(false);
         } catch (final Exception e) {
+          //
         }
         wvf.setSize(ds.width, h);
         wvf.setLocation(0, cy);
@@ -915,25 +948,29 @@ public class Swarm extends JFrame implements InternalFrameListener {
       if (sl != null) {
         lastLayout = layout;
         sl.process();
-      } else
+      } else {
         LOGGER.warn("could not start with layout: " + layout);
+      }
     }
     boolean set = false;
     for (int i = 0; i < kiosks.length; i++) {
       final String[] ch = kiosks[i].split(";");
       final SeismicDataSource sds = config.getSource(ch[0]);
-      if (sds == null)
+      if (sds == null) {
         continue;
+      }
       openHelicorder(sds, ch[1], Double.NaN);
       set = true;
     }
-    if (config.kiosk.equals("true"))
+    if (config.kiosk.equals("true")) {
       set = true;
+    }
 
-    if (set)
+    if (set) {
       toggleFullScreenMode();
-    else
+    } else {
       LOGGER.warn("no helicorders, skipping kiosk mode.");
+    }
   }
 
   public void internalFrameAdded(final JInternalFrame f) {
@@ -944,6 +981,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
         try {
           f.setSelected(true);
         } catch (final Exception e) {
+          //
         }
       }
     });
@@ -958,12 +996,14 @@ public class Swarm extends JFrame implements InternalFrameListener {
       UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
       UIManager.put("InternalFrame.border", SwarmUtil.getInternalFrameBorder());
     } catch (final Exception e) {
+      //
     }
 
     final Swarm swarm = new Swarm(args);
 
-    if (Swarm.config.isKiosk())
+    if (Swarm.config.isKiosk()) {
       swarm.parseKiosk();
+    }
   }
 
   public static EventFrame openEvent(final Event event) {

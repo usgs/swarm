@@ -151,8 +151,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     super("<layout>", true, true, true, true);
     UiTime.touchTime();
     final String channel = cf.getString("channel");
-    final SeismicDataSource sds = swarmConfig.getSource(cf.getString("source"));
-    dataSource = sds.getCopy();
+    dataSource = swarmConfig.getSource(cf.getString("source"));
     setTitle(channel + ", [" + dataSource + "]");
     settings = new HelicorderViewerSettings(channel);
     settings.set(cf);
@@ -180,7 +179,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     settings = new HelicorderViewerSettings(ch);
     settings.setBottomTime(bt);
     waveViewSettings = new WaveViewSettings();
-    dataSource = sds.getCopy();
+    dataSource = sds;
 
     createUi();
     setVisible(true);

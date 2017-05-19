@@ -5,9 +5,17 @@
 
 package gov.usgs.volcanoes.swarm.event;
 
+import gov.usgs.volcanoes.core.Version;
+import gov.usgs.volcanoes.core.quakeml.Event;
+
+import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,16 +26,18 @@ import org.slf4j.LoggerFactory;
  * @author Tom Parker
  *
  */
+@Deprecated
 public class QuakeMlUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(QuakeMlUtils.class);
   private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
   /**
    * Format date for QuakeML
+   * 
    * @param millis milliseconds since 1/1/1970 00:00:00 GMT
    * @return time string in yyyy-MM-dd'T'HH:mm:ss.SSSX format
    */
-  public static String formatDate(long millis){
+  public static String formatDate(long millis) {
     SimpleDateFormat dateF = new SimpleDateFormat(DATE_FORMAT);
     Date date = new Date(millis);
     return dateF.format(date);
@@ -54,4 +64,5 @@ public class QuakeMlUtils {
     }
     return time;
   }
+  
 }

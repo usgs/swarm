@@ -138,8 +138,8 @@ public class WaveViewPanel extends JComponent {
     settings = new WaveViewSettings();
 
     setupMouseHandler();
-
   }
+  
 
   /**
    * Constructor.
@@ -270,7 +270,11 @@ public class WaveViewPanel extends JComponent {
   public void setAllowClose(boolean b) {
     allowClose = b;
   }
-
+  
+  protected void setPickTime() {
+    getPickMenu().setJ2k(j2k2);
+  }
+  
   /**
    * Process right mouse press.
    * @param e mouse event
@@ -282,11 +286,8 @@ public class WaveViewPanel extends JComponent {
       if (t != null) {
         double j2k = e.getX() * t[0] + t[1];
         if (j2k >= startTime && j2k <= endTime) {
-          if (pickMenu == null) {
-            pickMenu = new PickMenu(this);
-          }
-          pickMenu.setJ2k(j2k);
-          pickMenu.show(this, e.getX(), e.getY());
+          getPickMenu().setJ2k(j2k);
+          getPickMenu().show(this, e.getX(), e.getY());
         }
       }
     } else {
@@ -955,10 +956,12 @@ public class WaveViewPanel extends JComponent {
     long time = pick.getTime();
     double[] t = getTranslation();
     double j2k = J2kSec.fromEpoch(time);
-    double x = 2 + (j2k - t[1]) / t[0];
+    double x = (j2k - t[1]) / t[0];
+    // draw line
     g2.setColor(PickWavePanel.DARK_GREEN);
     g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
 
+    // get color
     String tag = pick.getTag();
     Color color = Color.GRAY;
     if (tag.indexOf('P') != -1) {
@@ -970,20 +973,43 @@ public class WaveViewPanel extends JComponent {
     } 
     g2.setColor(color);
 
+    // draw uncertainty
+    Color uncertaintyShade =
+        new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() / 2);
+    g2.setColor(uncertaintyShade);
+    double uncertainty = pick.getTimeQuantity().getUncertainty();
+    if (!Double.isNaN(uncertainty)) {
+      // lowerUncertainty
+      long lowTime = (long) (pick.getTime() - 1000.0 * uncertainty);
+      double luJ2k = J2kSec.fromEpoch(lowTime);
+      double luX = (luJ2k - t[1]) / t[0];
+      g2.fillRect((int)luX, yOffset + 1, (int)(x - luX), getHeight() - bottomHeight - yOffset - 1);
+      // upperUncertainty
+      long highTime = (long) (pick.getTime() + 1000.0 * uncertainty);
+      double uuJ2k = J2kSec.fromEpoch(highTime);
+      double uuX = (uuJ2k - t[1]) / t[0];
+      g2.fillRect((int)x, yOffset + 1, (int)(uuX - x), getHeight() - bottomHeight - yOffset - 1);
+    }
+
+    // draw tag/label box
+    if (transparent) {
+      g2.setColor(Color.WHITE);
+    } else {
+      g2.setColor(color);
+    }
     FontMetrics fm = g2.getFontMetrics();
     int width = fm.stringWidth(tag);
     int height = fm.getAscent();
     int offset = 2;
     int lw = width + 2 * offset;
-
-    if (transparent) {
-      g2.setColor(Color.WHITE);
-    }
     g2.fillRect((int) x, 3, lw, height + 2 * offset);
+    
+    // draw text in tag/label box
     g2.setColor(Color.BLACK);
     g2.drawRect((int) x, 3, lw, height + 2 * offset);
     
     g2.drawString(tag, (int) x + offset, 3 + (fm.getAscent() + offset));
+    
   }
   
   public void setUseFilterLabel(boolean b) {
