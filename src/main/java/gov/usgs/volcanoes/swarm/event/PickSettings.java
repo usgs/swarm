@@ -38,12 +38,8 @@ public class PickSettings extends Properties {
     loadDefaultProperties(); 
     try {
       load(new FileReader(SETTINGS_FILENAME));
-    } catch (FileNotFoundException e) {
-      JOptionPane.showMessageDialog(null, e.getMessage(), "Error loading pick settings.",
-          JOptionPane.ERROR_MESSAGE);
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      // just use default settings
     }
 
   }

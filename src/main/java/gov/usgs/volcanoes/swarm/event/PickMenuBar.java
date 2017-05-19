@@ -118,6 +118,7 @@ public class PickMenuBar extends JMenuBar {
     if (result == JFileChooser.APPROVE_OPTION) {
       File f = chooser.getSelectedFile();
       importFile(f);
+      SwarmConfig.getInstance().lastPath = f.getParent();
     }
   }
   
