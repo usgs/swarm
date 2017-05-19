@@ -100,7 +100,7 @@ public class EventDialog extends SwarmModalDialog {
     builder.append("Event Type Certainty", eventTypeCertainty);
     builder.nextLine();
     
-    description = new JTextField("TEST TEST");
+    description = new JTextField("");
     builder.append("Description", description);
     builder.nextLine();
     
@@ -131,6 +131,7 @@ public class EventDialog extends SwarmModalDialog {
     if (result == JFileChooser.APPROVE_OPTION) {
       File file = chooser.getSelectedFile();
       exportDirectory.setText(file.getAbsolutePath());
+      SwarmConfig.getInstance().lastPath = file.getAbsolutePath();
     }
   }
   
