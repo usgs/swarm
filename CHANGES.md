@@ -2,8 +2,8 @@
   * Pick Mode enhancements:
   	- Add ability to select pick uncertainty
 	- Plot S-P in map 
-	- Export to QuakeML
-	- Add accelerator (shortcut) keys
+	- QuakeML import/export
+	- Add key stroke shortcut
   * Fix bug in map line color selection
 
 ## Version 2.7.0

@@ -2,6 +2,7 @@ package gov.usgs.volcanoes.swarm.event;
 
 import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.core.quakeml.Pick;
+import gov.usgs.volcanoes.core.quakeml.Pick.Onset;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
@@ -31,17 +32,17 @@ public class PickMenu extends JPopupMenu {
   private double sampleRate;
   private double j2k;
 
-  private Pick p;
+  private Pick pickP;
   private JRadioButtonMenuItem pWeight0;
   private boolean pickChannelP = false;
-  private Pick s;
+  private Pick pickS;
   private JRadioButtonMenuItem sWeight0;
   private boolean pickChannelS = false;
   private boolean hidePhases = false;
 
   private Pick coda1;
   private Pick coda2;
-  private boolean hideCoda = false;
+  private JCheckBoxMenuItem hideCodaMenu;
   
   private PickSettings settings;
   
@@ -67,55 +68,68 @@ public class PickMenu extends JPopupMenu {
   }
   
   /**
-   * Create coda submenu.
+   * Create emergent P pick.
    */
-  private void createCodaMenu() {
-
-    JMenu coda = new JMenu("Coda");
-    coda.setMnemonic(Character.CONTROL);
-
-    JMenuItem c1MenuItem = new JMenuItem("Coda 1");
-    c1MenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        Pick pick = createPick("C1", null, j2k);
-        coda1 = pick;
-        wvp.repaint();
-      }
-    });
-    coda.add(c1MenuItem);
+  public void createEmergentP() {
+    pickP = createPick("P", Onset.EMERGENT, j2k);
+    pickChannelP = true;
+    propagatePick("P", pickP, wvp);
+    wvp.repaint();
     
-    JMenuItem c2MenuItem = new JMenuItem("Coda 2");
-    c2MenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        Pick pick = createPick("C2", null, j2k);
-        coda2 = pick;
-        wvp.repaint();
-      }
-    });
-    coda.add(c2MenuItem);
+  }
+  
+  /**
+   * Create impulsive P pick.
+   */
+  public void createImpulsiveP() {
+    pickP = createPick("P", Onset.IMPULSIVE, j2k);
+    pickChannelP = true;
+    propagatePick("P", pickP, wvp);
+    wvp.repaint();
     
-    coda.addSeparator();
-
-    JCheckBoxMenuItem clearCodaMenu = new JCheckBoxMenuItem("Clear");
-    clearCodaMenu.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        coda1 = null;
-        coda2 = null;
-        wvp.repaint();
-      }
-    });
-    coda.add(clearCodaMenu);
-
-    JCheckBoxMenuItem hideCodaMenu = new JCheckBoxMenuItem("Hide");
-    hideCodaMenu.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        hideCoda = ((JCheckBoxMenuItem)e.getSource()).isSelected();
-        wvp.repaint();
-      }
-    });
-    coda.add(hideCodaMenu);
+  }
+  
+  /**
+   * Create emergent S pick.
+   */
+  public void createEmergentS() {
+    pickS = createPick("S", Onset.EMERGENT, j2k);  
+    pickChannelS = true; 
+    propagatePick("S", pickS, wvp);
+    wvp.repaint();
     
-    this.add(coda);
+  }
+
+  /**
+   * Create impulsive S pick.
+   */
+  public void createImpulsiveS() {
+    pickS = createPick("S", Onset.IMPULSIVE, j2k); 
+    pickChannelS = true; 
+    propagatePick("S", pickS, wvp);
+    wvp.repaint();   
+  }
+  
+  /**
+   * Clear P pick.
+   */
+  public void clearP() {
+    pickP = null;
+    pickChannelP = false;
+    propagatePick("P", pickP, wvp);
+    pWeight0.setSelected(true); // reset weight to 0
+    wvp.repaint();
+  }
+  
+  /**
+   * Clear S pick.
+   */
+  public void clearS() {
+    pickS = null;
+    pickChannelS = false;
+    wvp.repaint();
+    propagatePick("S", pickS, wvp);
+    sWeight0.setSelected(true); // reset weight to 0
   }
   
   /**
@@ -125,21 +139,25 @@ public class PickMenu extends JPopupMenu {
     JMenu phaseP = new JMenu("P");
 
     JMenuItem phasePe = new JMenuItem("Emergent");
-    phasePe.addActionListener(new PickActionListener("P", Pick.Onset.EMERGENT));
+    phasePe.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        createEmergentP();
+      }     
+    });
     phaseP.add(phasePe);
 
     JMenuItem phasePi = new JMenuItem("Impulsive");
-    phasePi.addActionListener(new PickActionListener("P", Pick.Onset.IMPULSIVE));
+    phasePi.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        createImpulsiveP();
+      }     
+    });
     phaseP.add(phasePi);
 
     JMenuItem clearP = new JMenuItem("Clear");
     clearP.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        p = null;
-        pickChannelP = false;
-        wvp.repaint();
-        propagatePick("P", p, wvp);
-        pWeight0.setSelected(true); // reset weight to 0
+        clearP();
       }
     });
     phaseP.add(clearP);
@@ -151,11 +169,19 @@ public class PickMenu extends JPopupMenu {
     // S 
     JMenu phaseS = new JMenu("S");
     JMenuItem phaseSe = new JMenuItem("Emergent");
-    phaseSe.addActionListener(new PickActionListener("S", Pick.Onset.EMERGENT));
+    phaseSe.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        createEmergentS();
+      }      
+    });
     phaseS.add(phaseSe);
 
     JMenuItem phaseSi = new JMenuItem("Impulsive");
-    phaseSi.addActionListener(new PickActionListener("S", Pick.Onset.IMPULSIVE));
+    phaseSi.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        createImpulsiveS();
+      }      
+    });
     phaseS.add(phaseSi);
 
     
@@ -163,11 +189,7 @@ public class PickMenu extends JPopupMenu {
     JMenuItem clearS = new JMenuItem("Clear");
     clearS.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        s = null;
-        pickChannelS = false;
-        wvp.repaint();
-        propagatePick("S", s, wvp);
-        sWeight0.setSelected(true); // reset weight to 0
+        clearS();
       }
     });
     phaseS.add(clearS);
@@ -193,10 +215,11 @@ public class PickMenu extends JPopupMenu {
    * @param upper true if creating upper uncertainty menu
    * @return menu
    */
-  private JMenu createUncertaintyMenu(String phase) {
+  private JMenu createUncertaintyMenu(final String phase) {
     JMenu menu = new JMenu(phase + " Uncertainty");
     ButtonGroup bg = new ButtonGroup();
-    for (int i = 0; i < settings.getNumWeight(); i++) {
+    for (int i = 0; i < PickSettings.numWeight; i++) {
+      final int weight = i;
       JRadioButtonMenuItem mi = new JRadioButtonMenuItem(Integer.toString(i));
       if (i == 0) { 
         mi.setSelected(true);
@@ -208,10 +231,87 @@ public class PickMenu extends JPopupMenu {
         }
       }
       bg.add(mi);
-      mi.addActionListener(new UncertaintyActionListener(phase, i));
+      //mi.addActionListener(new UncertaintyActionListener(phase, i));
+      mi.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          setUncertainty(phase, weight);
+        }      
+      });
       menu.add(mi);
     }   
     return menu;
+  }
+
+  /**
+   * Create one coda pick.
+   */
+  public void createCoda1() {
+    Pick pick = createPick("C1", null, j2k);
+    coda1 = pick;
+    wvp.repaint();   
+  }
+  
+  /**
+   * Create another coda pick.
+   */
+  public void createCoda2() {
+    Pick pick = createPick("C2", null, j2k);
+    coda2 = pick;
+    wvp.repaint();   
+  }
+  
+  /**
+   * Clear coda picks.
+   */
+  public void clearCoda() {
+    coda1 = null;
+    coda2 = null;
+    wvp.repaint();    
+  }
+  
+  /**
+   * Create coda submenu.
+   */
+  private void createCodaMenu() {
+
+    JMenu coda = new JMenu("Coda");
+    coda.setMnemonic(Character.CONTROL);
+
+    JMenuItem c1MenuItem = new JMenuItem("Coda 1");
+    c1MenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        createCoda1();
+      }
+    });
+    coda.add(c1MenuItem);
+    
+    JMenuItem c2MenuItem = new JMenuItem("Coda 2");
+    c2MenuItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        createCoda2();
+      }
+    });
+    coda.add(c2MenuItem);
+    
+    coda.addSeparator();
+
+    JCheckBoxMenuItem clearCodaMenu = new JCheckBoxMenuItem("Clear");
+    clearCodaMenu.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        clearCoda();
+      }
+    });
+    coda.add(clearCodaMenu);
+
+    hideCodaMenu = new JCheckBoxMenuItem("Hide");
+    hideCodaMenu.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        wvp.repaint();
+      }
+    });
+    coda.add(hideCodaMenu);
+    
+    this.add(coda);
   }
   
   /**
@@ -271,6 +371,7 @@ public class PickMenu extends JPopupMenu {
         if (phase.equals("S")) {
           otherWvp.getPickMenu().setS(pick);
         }
+        otherWvp.repaint();
       }
     }
   }
@@ -297,10 +398,10 @@ public class PickMenu extends JPopupMenu {
    * @return duration in seconds
    */
   public double getSpDuration() {
-    if (p == null || s == null) {
+    if (pickP == null || pickS == null) {
       return Double.NaN;
     }
-    double duration = 1000d * (s.getTime() - p.getTime());
+    double duration = 1000d * (pickS.getTime() - pickP.getTime());
     return duration;
   }
   
@@ -310,10 +411,10 @@ public class PickMenu extends JPopupMenu {
    * @return distance in km
    */
   public double getSpDistance() {
-    if (p == null || s == null) {
+    if (pickP == null || pickS == null) {
       return Double.NaN;
     }
-    return getDistance(p.getTime(), s.getTime()); 
+    return getDistance(pickP.getTime(), pickS.getTime()); 
   }
   
   /**
@@ -322,11 +423,11 @@ public class PickMenu extends JPopupMenu {
    * @return distance in km
    */
   public double getSpMinDistance() {
-    if (p == null || s == null) {
+    if (pickP == null || pickS == null) {
       return Double.NaN;
     }
-    double stime = s.getTime() - 1000d * s.getTimeQuantity().getUncertainty();
-    double ptime = p.getTime() + 1000d * p.getTimeQuantity().getUncertainty();
+    double stime = pickS.getTime() - 1000d * pickS.getTimeQuantity().getUncertainty();
+    double ptime = pickP.getTime() + 1000d * pickP.getTimeQuantity().getUncertainty();
     return getDistance(ptime, stime);
   }
 
@@ -336,11 +437,11 @@ public class PickMenu extends JPopupMenu {
    * @return distance in km
    */
   public double getSpMaxDistance() {
-    if (p == null || s == null) {
+    if (pickP == null || pickS == null) {
       return Double.NaN;
     }
-    double stime = s.getTime() + 1000d * s.getTimeQuantity().getUncertainty();
-    double ptime = p.getTime() - 1000d * p.getTimeQuantity().getUncertainty();
+    double stime = pickS.getTime() + 1000d * pickS.getTimeQuantity().getUncertainty();
+    double ptime = pickP.getTime() - 1000d * pickP.getTimeQuantity().getUncertainty();
     return getDistance(ptime, stime);
   }
 
@@ -361,60 +462,19 @@ public class PickMenu extends JPopupMenu {
   }
   
   /**
-   * Pick action listener.
-   * @author Diana Norgaard
+   * Set phase pick uncertainty.
+   * @param phase P or S
+   * @param weight 0 to 4
    */
-  class PickActionListener implements ActionListener {
-    private String phase;
-    private Pick.Onset onset;
-    
-    private PickActionListener(String phase, Pick.Onset onset) {
-      this.phase = phase;
-      this.onset = onset;
+  public void setUncertainty(String phase, int weight) {
+    double uncertainty = settings.getWeightToTime(weight, sampleRate) / 1000.0;
+    if (phase.equals("P") && pickP != null) {
+      pickP.getTimeQuantity().setUncertainty(uncertainty);
     }
-
-    public void actionPerformed(ActionEvent e) {
-      Pick pick = createPick(phase, onset, j2k);
-      if (phase.equals("P")) {
-        p = pick;
-        pickChannelP = true;
-        pWeight0.setSelected(true);
-      }
-      if (phase.equals("S")) {
-        s = pick;
-        pickChannelS = true;
-        sWeight0.setSelected(true);
-      }
-      propagatePick(phase, pick, wvp);
-      
-      wvp.repaint();
+    if (phase.equals("S") && pickS != null) {
+      pickS.getTimeQuantity().setUncertainty(uncertainty);
     }
-  }
-  
-  /**
-   * Uncertainty action listener.
-   * @author Diana Norgaard
-   */
-  class UncertaintyActionListener implements ActionListener {
-    private String phase;
-    private int weight;
-
-    private UncertaintyActionListener(String phase, int weight) {
-      this.phase = phase;
-      this.weight = weight;
-    }
-
-    public void actionPerformed(ActionEvent e) {
-      double uncertainty = settings.getWeightToTime(weight, sampleRate) / 1000.0;
-      if (phase.equals("P") && p != null) {
-        p.getTimeQuantity().setUncertainty(uncertainty);
-      }
-      if (phase.equals("S") && s != null) {
-        s.getTimeQuantity().setUncertainty(uncertainty);
-      }
-      
-      wvp.repaint();
-    }
+    wvp.repaint();   
   }
   
   /**
@@ -438,7 +498,7 @@ public class PickMenu extends JPopupMenu {
    * @return pick
    */
   public Pick getP() {
-    return p;
+    return pickP;
   }
 
   /**
@@ -446,7 +506,7 @@ public class PickMenu extends JPopupMenu {
    * @return pick
    */
   public Pick getS() {
-    return s;
+    return pickS;
   }
 
   /**
@@ -454,7 +514,7 @@ public class PickMenu extends JPopupMenu {
    * @param p pick
    */
   public void setP(Pick p) {
-    this.p = p;
+    this.pickP = p;
     pickChannelP = false;
   }
 
@@ -463,7 +523,7 @@ public class PickMenu extends JPopupMenu {
    * @param s pick
    */
   public void setS(Pick s) {
-    this.s = s;
+    this.pickS = s;
     pickChannelS = false;
   }
   
@@ -496,7 +556,7 @@ public class PickMenu extends JPopupMenu {
    * @return true if hide coda option is enabled
    */
   public boolean isHideCoda() {
-    return hideCoda;
+    return hideCodaMenu.isSelected();
   }
 
   /**

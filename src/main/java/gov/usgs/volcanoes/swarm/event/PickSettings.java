@@ -18,7 +18,7 @@ public class PickSettings extends Properties {
   private static final String SETTINGS_FILENAME = "PickSettings.config";
   public static final String WEIGHT = "weight";
   public static final String WEIGHT_UNIT = "weight_unit";
-  private final int numWeight = 5;
+  public static final int numWeight = 5;
   private static final String COMMENTS = "Swarm Pick Settings Configuration";
   
   public enum WeightUnit { SAMPLES, MILLISECONDS }
@@ -91,14 +91,6 @@ public class PickSettings extends Properties {
     }
   }
 
-  /**
-   * Number of weights used.
-   * @return number of weights
-   */
-  public int getNumWeight() {
-    return numWeight;
-  }
-  
   /**
    * Type of unit mapped to weight.
    * @return WeightUnit

@@ -86,8 +86,8 @@ public class PickSettingsDialog extends SwarmModalDialog {
     builder.append("Weight");
     builder.append("Value");
     builder.nextLine();
-    weight = new JTextField[settings.getNumWeight()];
-    for (int i = 0; i < settings.getNumWeight(); i++) {
+    weight = new JTextField[PickSettings.numWeight];
+    for (int i = 0; i < PickSettings.numWeight; i++) {
       String uncertaintyValue = settings.getProperty(PickSettings.WEIGHT + "." + i);
       weight[i] = new JTextField(uncertaintyValue);
       weight[i].setInputVerifier(new WeightInputVerifier());
@@ -106,7 +106,7 @@ public class PickSettingsDialog extends SwarmModalDialog {
   protected boolean allowOk() {
     boolean ok = true;
     // verify weight input values
-    for (int i = 0; i < settings.getNumWeight(); i++) {
+    for (int i = 0; i < PickSettings.numWeight; i++) {
       try {
         int value = Integer.valueOf(weight[i].getText()); // check to see if non-negative number
         if (value < 0) {
@@ -145,7 +145,7 @@ public class PickSettingsDialog extends SwarmModalDialog {
       settings.setProperty(PickSettings.WEIGHT_UNIT,
           PickSettings.WeightUnit.MILLISECONDS.toString());
     }
-    for (int i = 0; i < settings.getNumWeight(); i++) {
+    for (int i = 0; i < PickSettings.numWeight; i++) {
       settings.setProperty(PickSettings.WEIGHT + "." + i, weight[i].getText());
     }
     // save settings to file
@@ -172,7 +172,7 @@ public class PickSettingsDialog extends SwarmModalDialog {
     } else {
       millisButton.setSelected(true);
     }
-    for (int i = 0; i < settings.getNumWeight(); i++) {
+    for (int i = 0; i < PickSettings.numWeight; i++) {
       String text = settings.getProperty(PickSettings.WEIGHT + "." + i);
       weight[i].setText(text);
     }
