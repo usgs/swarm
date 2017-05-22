@@ -67,8 +67,6 @@ public class EventDialog extends SwarmModalDialog {
     super(Swarm.getApplicationFrame(), "Save Event");
     setSizeAndLocation();
     user = SwarmConfig.getInstance().getUser();
-    QUAKEML_RESOURCE_ID = "quakeml:volcanoes.usgs.gov/Swarm/v"
-        + Version.POM_VERSION + "/" + SwarmConfig.getInstance().getUser();
   }
 
   /**
