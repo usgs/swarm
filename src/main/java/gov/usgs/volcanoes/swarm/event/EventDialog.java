@@ -4,7 +4,6 @@ import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.FormLayout;
 
-import gov.usgs.volcanoes.core.Version;
 import gov.usgs.volcanoes.core.quakeml.Event;
 import gov.usgs.volcanoes.core.quakeml.EventType;
 import gov.usgs.volcanoes.core.quakeml.EventTypeCertainty;
@@ -13,6 +12,7 @@ import gov.usgs.volcanoes.core.quakeml.QuakeMlUtils;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwarmModalDialog;
+import gov.usgs.volcanoes.swarm.Version;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
@@ -52,7 +52,7 @@ public class EventDialog extends SwarmModalDialog {
   private static final long serialVersionUID = 4870724789310886277L;
   private static EventDialog dialog;
 
-  public static final String QUAKEML_RESOURCE_ID = "quakeml:volcanoes.usgs.gov/Swarm/v"
+  public static String QUAKEML_RESOURCE_ID = "quakeml:volcanoes.usgs.gov/Swarm/v"
       + Version.POM_VERSION + "/" + SwarmConfig.getInstance().getUser();
   private JComboBox<EventType> eventType;
   private JComboBox<EventTypeCertainty> eventTypeCertainty;
@@ -67,6 +67,8 @@ public class EventDialog extends SwarmModalDialog {
     super(Swarm.getApplicationFrame(), "Save Event");
     setSizeAndLocation();
     user = SwarmConfig.getInstance().getUser();
+    QUAKEML_RESOURCE_ID = "quakeml:volcanoes.usgs.gov/Swarm/v"
+        + Version.POM_VERSION + "/" + SwarmConfig.getInstance().getUser();
   }
 
   /**
