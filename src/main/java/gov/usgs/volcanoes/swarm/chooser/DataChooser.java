@@ -1047,104 +1047,107 @@ public class DataChooser extends JPanel {
       return;
     }
 
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        TreeMap<String, GroupNode> rootMap = new TreeMap<String, GroupNode>();
-        HashMap<String, GroupNode> groupMap = new HashMap<String, GroupNode>();
-        HashSet<GroupNode> openGroups = new HashSet<GroupNode>();
+    // DLN: Removed in 2.7.2 as it does not appear to be thread safe and will
+    // throw an Exception when many files are opened simultaneously.
+    //
+    // SwingUtilities.invokeLater(new Runnable() {
+    // public void run() {
+    TreeMap<String, GroupNode> rootMap = new TreeMap<String, GroupNode>();
+    HashMap<String, GroupNode> groupMap = new HashMap<String, GroupNode>();
+    HashSet<GroupNode> openGroups = new HashSet<GroupNode>();
 
-        GroupNode allNode = new GroupNode(Messages.getString("DataChooser.allGroup")); //$NON-NLS-1$
-        AbstractChooserNode rootNode = node;
-        if (!saveProgress) {
-          rootNode.removeAllChildren();
-        } else {
-          for (int i = 0; i < rootNode.getChildCount(); i++) {
-            if (!(rootNode.getChildAt(i) instanceof ProgressNode)) {
-              rootNode.remove(i);
-              i--;
-            }
-          }
+    GroupNode allNode = new GroupNode(Messages.getString("DataChooser.allGroup")); //$NON-NLS-1$
+    AbstractChooserNode rootNode = node;
+    if (!saveProgress) {
+      rootNode.removeAllChildren();
+    } else {
+      for (int i = 0; i < rootNode.getChildCount(); i++) {
+        if (!(rootNode.getChildAt(i) instanceof ProgressNode)) {
+          rootNode.remove(i);
+          i--;
         }
-        rootNode.add(allNode);
-        for (String channel : channels) {
-          ChannelNode newNode = new ChannelNode(channel);
-          allNode.add(newNode);
-
-          Metadata md = SwarmConfig.getInstance().getMetadata(channel);
-          if (md != null && md.getGroups() != null) {
-            Set<String> groups = md.getGroups();
-            for (String g : groups) {
-              boolean forceOpen = false;
-              String[] ss = g.split("\\^");
-              if (ss[0].endsWith("!")) {
-                ss[0] = ss[0].substring(0, ss[0].length() - 1);
-                forceOpen = true;
-              }
-              GroupNode gn = rootMap.get(ss[0]);
-              if (gn == null) {
-                gn = new GroupNode(ss[0]);
-                rootMap.put(ss[0], gn);
-              }
-              if (forceOpen) {
-                openGroups.add(gn);
-              }
-              GroupNode cn = gn;
-              String cs = ss[0];
-              for (int i = 1; i < ss.length; i++) {
-                boolean fo = false;
-                if (ss[i].endsWith("!")) {
-                  ss[i] = ss[i].substring(0, ss[i].length() - 1);
-                  fo = true;
-                }
-                cs += "^" + ss[i];
-                GroupNode nn = groupMap.get(cs);
-                if (nn == null) {
-                  nn = new GroupNode(ss[i]);
-                  groupMap.put(cs, nn);
-                  int j = 0;
-                  for (j = 0; j < cn.getChildCount(); j++) {
-                    if (cn.getChildAt(j) instanceof GroupNode) {
-                      GroupNode ogn = (GroupNode) cn.getChildAt(j);
-                      if (nn.getName().compareToIgnoreCase(ogn.getName()) <= 0) {
-                        break;
-                      }
-                    }
-                  }
-                  if (j >= cn.getChildCount()) {
-                    cn.add(nn);
-                  } else {
-                    cn.insert(nn, j);
-                  }
-                }
-                if (fo) {
-                  openGroups.add(nn);
-                }
-
-                cn = nn;
-              }
-              ChannelNode ln = new ChannelNode(channel);
-              cn.add(ln);
-            }
-          }
-          nearestPaths.put(channel, new TreePath(newNode.getPath()));
-        }
-
-        for (String key : rootMap.keySet()) {
-          GroupNode n = rootMap.get(key);
-          rootNode.add(n);
-        }
-
-        model.reload(rootNode);
-
-        for (GroupNode gn : openGroups) {
-          dataTree.expandPath(new TreePath(gn.getPath()));
-        }
-        if (expandAll) {
-          dataTree.expandPath(new TreePath(allNode.getPath()));
-        }
-        nearestList.repaint();
       }
-    });
+    }
+    rootNode.add(allNode);
+    for (String channel : channels) {
+      ChannelNode newNode = new ChannelNode(channel);
+      allNode.add(newNode);
+
+      Metadata md = SwarmConfig.getInstance().getMetadata(channel);
+      if (md != null && md.getGroups() != null) {
+        Set<String> groups = md.getGroups();
+        for (String g : groups) {
+          boolean forceOpen = false;
+          String[] ss = g.split("\\^");
+          if (ss[0].endsWith("!")) {
+            ss[0] = ss[0].substring(0, ss[0].length() - 1);
+            forceOpen = true;
+          }
+          GroupNode gn = rootMap.get(ss[0]);
+          if (gn == null) {
+            gn = new GroupNode(ss[0]);
+            rootMap.put(ss[0], gn);
+          }
+          if (forceOpen) {
+            openGroups.add(gn);
+          }
+          GroupNode cn = gn;
+          String cs = ss[0];
+          for (int i = 1; i < ss.length; i++) {
+            boolean fo = false;
+            if (ss[i].endsWith("!")) {
+              ss[i] = ss[i].substring(0, ss[i].length() - 1);
+              fo = true;
+            }
+            cs += "^" + ss[i];
+            GroupNode nn = groupMap.get(cs);
+            if (nn == null) {
+              nn = new GroupNode(ss[i]);
+              groupMap.put(cs, nn);
+              int j = 0;
+              for (j = 0; j < cn.getChildCount(); j++) {
+                if (cn.getChildAt(j) instanceof GroupNode) {
+                  GroupNode ogn = (GroupNode) cn.getChildAt(j);
+                  if (nn.getName().compareToIgnoreCase(ogn.getName()) <= 0) {
+                    break;
+                  }
+                }
+              }
+              if (j >= cn.getChildCount()) {
+                cn.add(nn);
+              } else {
+                cn.insert(nn, j);
+              }
+            }
+            if (fo) {
+              openGroups.add(nn);
+            }
+
+            cn = nn;
+          }
+          ChannelNode ln = new ChannelNode(channel);
+          cn.add(ln);
+        }
+      }
+      nearestPaths.put(channel, new TreePath(newNode.getPath()));
+    }
+
+    for (String key : rootMap.keySet()) {
+      GroupNode n = rootMap.get(key);
+      rootNode.add(n);
+    }
+
+    model.reload(rootNode);
+
+    for (GroupNode gn : openGroups) {
+      dataTree.expandPath(new TreePath(gn.getPath()));
+    }
+    if (expandAll) {
+      dataTree.expandPath(new TreePath(allNode.getPath()));
+    }
+    nearestList.repaint();
+    // }
+    // });
   }
 
   private Set<String> getGroupChannels(GroupNode gn) {

@@ -3,6 +3,7 @@ package gov.usgs.volcanoes.swarm.wave;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.data.file.FileType;
 import gov.usgs.plot.data.file.SeismicDataFile;
+import gov.usgs.plot.data.file.WinDataFile;
 import gov.usgs.volcanoes.core.contrib.PngEncoder;
 import gov.usgs.volcanoes.core.contrib.PngEncoderB;
 import gov.usgs.volcanoes.core.time.J2kSec;
@@ -18,6 +19,7 @@ import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.Throbber;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
+import gov.usgs.volcanoes.swarm.data.FileDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.event.PickMenuBar;
 import gov.usgs.volcanoes.swarm.event.PickSettings;
@@ -748,7 +750,6 @@ public class WaveClipboardFrame extends SwarmFrame {
       final int result = chooser.showOpenDialog(applicationFrame);
       if (result == JFileChooser.APPROVE_OPTION) {
         final File[] fs = chooser.getSelectedFiles();
-
         for (int i = 0; i < fs.length; i++) {
           if (fs[i].isDirectory()) {
             final File[] dfs = fs[i].listFiles();
@@ -758,11 +759,10 @@ public class WaveClipboardFrame extends SwarmFrame {
             for (int j = 0; j < dfs.length; j++) {
               openFile(dfs[j]);
             }
-            swarmConfig.lastPath = fs[i].getParent();
           } else {
             openFile(fs[i]);
-            swarmConfig.lastPath = fs[i].getParent();
           }
+          swarmConfig.lastPath = fs[i].getParent();
         }
       }
     }
@@ -840,7 +840,7 @@ public class WaveClipboardFrame extends SwarmFrame {
         return;
       }
 
-      final FileTypeDialog dialog = new FileTypeDialog();
+      final FileTypeDialog dialog = new FileTypeDialog(true);
       FileType fileType = FileType.UNKNOWN;
       if (!dialog.isOpen() || (dialog.isOpen() && !dialog.isAssumeSame())) {
         dialog.setVisible(true);
@@ -941,17 +941,24 @@ public class WaveClipboardFrame extends SwarmFrame {
   public void openFile(final File f) {
     SeismicDataFile file = SeismicDataFile.getFile(f);
     if (file == null) {
-      final FileTypeDialog dialog = new FileTypeDialog();
+      final FileTypeDialog dialog = new FileTypeDialog(false);
       FileType fileType = FileType.UNKNOWN;
       if (!dialog.isOpen() || (dialog.isOpen() && !dialog.isAssumeSame())) {
         dialog.setVisible(true);
 
-        if (dialog.isCancelled()) {
+        if (dialog.isCancelled() || dialog.getFileType() == null) {
           fileType = FileType.UNKNOWN;
         } else {
           fileType = dialog.getFileType();
         }
-
+        if (fileType == FileType.WIN) { // Open WIN config file
+          FileDataSource.openWinConfigFileDialog();
+          if (WinDataFile.configFile == null) {
+            JOptionPane.showMessageDialog(applicationFrame, "No WIN configuration file set.", "WIN",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+          }
+        }
       }
       file = SeismicDataFile.getFile(f, fileType);
     }
