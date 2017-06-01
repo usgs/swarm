@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -29,15 +30,30 @@ public class FileTypeDialog extends SwarmModalDialog {
   private boolean cancelled = true;
   private boolean opened = false;
 
-  public FileTypeDialog() {
+  /**
+   * Constructor.
+   * @param saveMode true is selecting file type to save to
+   */
+  public FileTypeDialog(boolean saveMode) {
     super(applicationFrame, "Select File Type");
     setSizeAndLocation();
+    if (saveMode) {
+      updateUi();
+    }
   }
 
   public void setFilename(String fn) {
     filename.setText(fn);
   }
-
+  
+  /**
+   * Update UI to remove file types not supported for saving.
+   */
+  private void updateUi() {
+    DefaultListModel<FileType> model = (DefaultListModel<FileType>) fileTypes.getModel();
+    model.removeElement(FileType.WIN);
+  }
+  
   /**
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#createUi()
    */
@@ -48,7 +64,11 @@ public class FileTypeDialog extends SwarmModalDialog {
     filename.setFont(Font.decode("dialog-BOLD-12"));
     filename.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
 
-    fileTypes = new JList<FileType>(FileType.getKnownTypes());
+    DefaultListModel<FileType> model = new DefaultListModel<FileType>();
+    for (FileType ft : FileType.getKnownTypes()) {
+      model.addElement(ft);
+    }
+    fileTypes = new JList<FileType>(model);
     fileTypes.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 2) {

@@ -1,3 +1,6 @@
+## Version 2.7.2
+  * Read WIN files
+
 ## Version 2.7.1
   * Pick Mode enhancements:
   	- Add ability to select pick uncertainty

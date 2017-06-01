@@ -1,12 +1,9 @@
 package gov.usgs.volcanoes.swarm.event;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
-
-import javax.swing.JOptionPane;
 
 /**
  * Pick Settings.
