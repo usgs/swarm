@@ -39,6 +39,7 @@ public class PickMenu extends JPopupMenu {
   private JRadioButtonMenuItem sWeight0;
   private boolean pickChannelS = false;
   private boolean hidePhases = false;
+  private JCheckBoxMenuItem plotMenu;
 
   private Pick coda1;
   private Pick coda2;
@@ -206,6 +207,18 @@ public class PickMenu extends JPopupMenu {
       }
     });
     this.add(hidePhaseMenu);
+    
+    // S-P plot
+    plotMenu = new JCheckBoxMenuItem("Plot");
+    plotMenu.setSelected(true);
+    plotMenu.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        boolean plot = ((JCheckBoxMenuItem)e.getSource()).isSelected();
+        propagatePick(plot, wvp);
+      }
+    });
+    this.add(plotMenu);
+    
     this.addSeparator();
   }
 
@@ -371,6 +384,23 @@ public class PickMenu extends JPopupMenu {
         if (phase.equals("S")) {
           otherWvp.getPickMenu().setS(pick);
         }
+        otherWvp.repaint();
+      }
+    }
+  }
+  
+  /**
+   * Propagate plot setting to others pick menu of same station.
+   * @param plot true to plot S-P for station
+   * @param thisWave this wave view panel
+   */
+  public void propagatePick(boolean plot, WaveViewPanel thisWave) {
+    for (WaveViewPanel otherWvp : clipboard.getWaves()) {
+      if (wvp.getChannel().equals(otherWvp.getChannel())) {
+        continue;
+      }
+      if (thisWave.isSameStation(otherWvp)) {
+        otherWvp.getPickMenu().setPlot(plot);
         otherWvp.repaint();
       }
     }
@@ -582,5 +612,20 @@ public class PickMenu extends JPopupMenu {
   public void setPickChannelS(boolean pickChannelS) {
     this.pickChannelS = pickChannelS;
   }
+  
+  /**
+   * Is plot flag enabled or not.
+   * @return true if plot flag enabled
+   */
+  public boolean isPlot() {
+    return plotMenu.isSelected();
+  }
 
+  /**
+   * Set plot flag.
+   * @param plot true if enable plot
+   */
+  public void setPlot(boolean plot) {
+    plotMenu.setSelected(plot);
+  }
 }
