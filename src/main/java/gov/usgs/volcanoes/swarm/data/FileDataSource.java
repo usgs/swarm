@@ -41,7 +41,7 @@ public class FileDataSource extends AbstractCachingDataSource {
   private final Map<String, double[]> channelTimes;
   private final Set<String> openFiles;
   private static SwarmConfig swarmConfig;
-  private boolean useWinBatch = false;
+  public static boolean useWinBatch = false;
 
   private FileDataSource() {
     super();
@@ -133,7 +133,6 @@ public class FileDataSource extends AbstractCachingDataSource {
 
       if (file != null) {
         readFile(file);
-        swarmConfig.lastPath = fs[i].getParent();
       } else {
         LOGGER.error("Could not open file: {} ", fs[i].getPath());
         JOptionPane.showMessageDialog(applicationFrame, "Could not open file: " + fileName, "Error",
@@ -203,7 +202,7 @@ public class FileDataSource extends AbstractCachingDataSource {
   public static void openWinConfigFileDialog() {
     JFileChooser chooser = new JFileChooser();
     chooser.setFileFilter(new FileNameExtensionFilter("WIN Config (.config)", "config"));
-    chooser.setCurrentDirectory(new File(SwarmConfig.getInstance().lastPath));
+    chooser.setCurrentDirectory(new File(swarmConfig.lastPath));
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     chooser.setMultiSelectionEnabled(false);
     chooser.setDialogTitle("Select WIN configuration file...");

@@ -1041,7 +1041,7 @@ public class DataChooser extends JPanel {
 
   }
 
-  private void populateServer(final ServerNode node, final List<String> channels,
+  private synchronized void populateServer(final ServerNode node, final List<String> channels,
       final boolean expandAll, final boolean saveProgress) {
     if (channels == null) {
       return;

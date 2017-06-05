@@ -749,7 +749,10 @@ public class WaveClipboardFrame extends SwarmFrame {
       chooser.setMultiSelectionEnabled(true);
       final int result = chooser.showOpenDialog(applicationFrame);
       if (result == JFileChooser.APPROVE_OPTION) {
+        FileDataSource.useWinBatch = false;
+        FileTypeDialog dialog = new FileTypeDialog(false);
         final File[] fs = chooser.getSelectedFiles();
+        swarmConfig.lastPath = fs[0].getParent();
         for (int i = 0; i < fs.length; i++) {
           if (fs[i].isDirectory()) {
             final File[] dfs = fs[i].listFiles();
@@ -757,12 +760,11 @@ public class WaveClipboardFrame extends SwarmFrame {
               continue;
             }
             for (int j = 0; j < dfs.length; j++) {
-              openFile(dfs[j]);
+              openFile(dfs[j], dialog);
             }
           } else {
-            openFile(fs[i]);
+            openFile(fs[i], dialog);
           }
-          swarmConfig.lastPath = fs[i].getParent();
         }
       }
     }
@@ -938,11 +940,10 @@ public class WaveClipboardFrame extends SwarmFrame {
    * Open seismic data file.
    * @param f file object
    */
-  public void openFile(final File f) {
+  public void openFile(final File f, FileTypeDialog dialog) {
     SeismicDataFile file = SeismicDataFile.getFile(f);
     if (file == null) {
-      final FileTypeDialog dialog = new FileTypeDialog(false);
-      FileType fileType = FileType.UNKNOWN;
+      FileType fileType = dialog.getFileType();
       if (!dialog.isOpen() || (dialog.isOpen() && !dialog.isAssumeSame())) {
         dialog.setVisible(true);
 
@@ -952,7 +953,10 @@ public class WaveClipboardFrame extends SwarmFrame {
           fileType = dialog.getFileType();
         }
         if (fileType == FileType.WIN) { // Open WIN config file
-          FileDataSource.openWinConfigFileDialog();
+          if (!FileDataSource.useWinBatch) {
+            FileDataSource.openWinConfigFileDialog();
+          }
+          FileDataSource.useWinBatch = dialog.isAssumeSame();
           if (WinDataFile.configFile == null) {
             JOptionPane.showMessageDialog(applicationFrame, "No WIN configuration file set.", "WIN",
                 JOptionPane.ERROR_MESSAGE);
@@ -980,7 +984,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     for (final String channel : file.getChannels()) {
       final WaveViewPanel wvp = new WaveViewPanel();
-      wvp.setChannel(channel);
+      wvp.setChannel(channel.replaceAll("\\$", " "));
       final CachedDataSource cache = CachedDataSource.getInstance();
 
       final Wave wave = file.getWave(channel);
