@@ -124,6 +124,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
         int result = chooser.showOpenDialog(Swarm.getApplicationFrame());
         if (result == JFileChooser.APPROVE_OPTION) {
           File[] fs = chooser.getSelectedFiles();
+          SwarmConfig.getInstance().lastPath = fs[0].getParent();
           FileDataSource.getInstance().openFiles(fs);
         }
       }
