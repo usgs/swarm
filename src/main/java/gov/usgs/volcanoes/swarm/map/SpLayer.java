@@ -51,7 +51,7 @@ public class SpLayer implements MapLayer {
     for (WaveViewPanel wvp : waves) {
       if (wvp.getSettings().pickEnabled) {
         PickMenu pickMenu = wvp.getPickMenu();
-        if (pickMenu.getP() != null && pickMenu.isPickChannelP()) {
+        if (pickMenu.isPlot() && pickMenu.getP() != null && pickMenu.isPickChannelP()) {
           String channel = wvp.getChannel();
           double distance = pickMenu.getSpDistance();
           if (!Double.isNaN(distance)) {
