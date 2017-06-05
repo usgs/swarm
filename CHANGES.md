@@ -1,5 +1,6 @@
 ## Version 2.7.2
   * Read WIN files
+  * Add option to turn off S-P plot for a station
 
 ## Version 2.7.1
   * Pick Mode enhancements:
