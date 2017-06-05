@@ -14,15 +14,14 @@ import gov.usgs.volcanoes.core.quakeml.Arrival;
 import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.UiUtils;
-import gov.usgs.volcanoes.swarm.FileChooser;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelListener;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
@@ -236,7 +235,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     if (wavePanel == null) {
       wavePanel = new PickWavePanel();
       wavePanel.setStatusText(statusText);
-      wavePanel.setChannel(channel);
+      wavePanel.setChannel(channel.replaceAll("\\$", " "));
       SeismicDataSource source = seismicSources.get(channel);
       if (source == null) {
         source = new WebServicesSource();
