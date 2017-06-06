@@ -945,6 +945,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     if (file == null) {
       FileType fileType = dialog.getFileType();
       if (!dialog.isOpen() || (dialog.isOpen() && !dialog.isAssumeSame())) {
+        dialog.setFilename(f.getName());
         dialog.setVisible(true);
 
         if (dialog.isCancelled() || dialog.getFileType() == null) {
