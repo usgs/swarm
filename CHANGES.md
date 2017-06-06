@@ -1,6 +1,8 @@
 ## Version 2.7.2
   * Read WIN files
   * Add option to turn off S-P plot for a station
+  * Fix channel name display in pick wave panels
+  * Fix problem with file type option when opening files from clipboard
 
 ## Version 2.7.1
   * Pick Mode enhancements:
