@@ -72,6 +72,8 @@ public class WaveViewSettings {
   public ViewType viewType;
   public Butterworth filter;
   
+  public boolean useAlternateOrientationCode = false;
+  public String alternateOrientationCode = "Z12";
   public boolean pickEnabled = false;
 
   private static WaveViewSettings DEFAULT_WAVE_VIEW_SETTINGS;
@@ -99,6 +101,8 @@ public class WaveViewSettings {
     DEFAULT_WAVE_VIEW_SETTINGS.filter = new Butterworth();
     DEFAULT_WAVE_VIEW_SETTINGS.filterOn = false;
     DEFAULT_WAVE_VIEW_SETTINGS.zeroPhaseShift = true;
+    DEFAULT_WAVE_VIEW_SETTINGS.useAlternateOrientationCode = false;
+    DEFAULT_WAVE_VIEW_SETTINGS.alternateOrientationCode = "Z12";
 
     List<String> candidateNames = new LinkedList<String>();
     candidateNames.add(DEFAULTS_FILENAME);
@@ -159,6 +163,9 @@ public class WaveViewSettings {
     logFreq = s.logFreq;
     zeroPhaseShift = s.zeroPhaseShift;
     filterOn = s.filterOn;
+    useAlternateOrientationCode = s.useAlternateOrientationCode;
+    alternateOrientationCode = s.alternateOrientationCode;
+    pickEnabled = s.pickEnabled;
   }
 
   /**
@@ -204,6 +211,11 @@ public class WaveViewSettings {
     binSize =
         StringUtils.stringToDouble(cf.getString("binSize"), DEFAULT_WAVE_VIEW_SETTINGS.binSize);
     nfft = StringUtils.stringToInt(cf.getString("nfft"), DEFAULT_WAVE_VIEW_SETTINGS.nfft);
+    useAlternateOrientationCode =
+        StringUtils.stringToBoolean(cf.getString("useAlternateOrientationCode"),
+            DEFAULT_WAVE_VIEW_SETTINGS.useAlternateOrientationCode);
+    alternateOrientationCode = StringUtils.stringToString(cf.getString("alternateOrientationCode"),
+        DEFAULT_WAVE_VIEW_SETTINGS.alternateOrientationCode);
   }
 
   /**
@@ -233,6 +245,8 @@ public class WaveViewSettings {
     cf.put(prefix + ".logPower", Boolean.toString(logPower));
     cf.put(prefix + ".binSize", Double.toString(binSize));
     cf.put(prefix + ".nfft", Integer.toString(nfft));
+    cf.put(prefix + ".useAlternateOrientationCode", Boolean.toString(useAlternateOrientationCode));
+    cf.put(prefix + ".alternateOrientationCode", alternateOrientationCode);
   }
 
   public void setType(ViewType t) {
