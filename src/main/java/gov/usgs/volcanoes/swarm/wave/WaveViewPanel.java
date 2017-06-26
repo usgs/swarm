@@ -1310,12 +1310,29 @@ public class WaveViewPanel extends JComponent {
 
     SliceWave swave = new SliceWave(wave);
     swave.setSlice(startTime, endTime);
+    String component = c.substring(2);
+    String[] orientationType = new String[] {"Z", "N", "E"};
+    if (component.matches("[ABC]")) {
+      orientationType = new String[] {"A", "B", "C"};
+    }
+    if (component.matches("[123]")) {
+      orientationType = new String[] {"1", "2", "3"};
+    }
+    if (component.matches("[UVW]")) {
+      orientationType = new String[] {"U", "V", "W"};
+    }
+    if (settings.useAlternateOrientationCode
+        && component.matches("[" + settings.alternateOrientationCode + "]")) {
+      String zOrientation = settings.alternateOrientationCode.substring(0, 1);
+      String nOrientation = settings.alternateOrientationCode.substring(1, 2);
+      String eOrientation = settings.alternateOrientationCode.substring(2);
+      orientationType = new String[]{ zOrientation, nOrientation, eOrientation};
+    }
     HashMap<String, double[]> data = new HashMap<String, double[]>();
     HashMap<String, String> stations = new HashMap<String, String>();
-    String component = c.substring(2);
     data.put(component, swave.getSignal());
     stations.put(component, channel);
-    for (String direction : new String[] {"Z", "N", "E"}) {
+    for (String direction : orientationType) {
       if (!component.equals(direction)) {
         String newChannel = c.replaceFirst(".$", direction);
         String newStation = s + " " + newChannel + " " + n;
@@ -1338,8 +1355,9 @@ public class WaveViewPanel extends JComponent {
     }
     
     ParticleMotionRenderer particleMotionRenderer =
-        new ParticleMotionRenderer(data.get("E"), data.get("N"), data.get("Z"), 
-            stations.get("E"), stations.get("N"), stations.get("Z"));
+        new ParticleMotionRenderer(data.get(orientationType[2]), data.get(orientationType[1]),
+            data.get(orientationType[0]), stations.get(orientationType[2]),
+            stations.get(orientationType[1]), stations.get(orientationType[0]));
     particleMotionRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset,
         this.getHeight());
 
