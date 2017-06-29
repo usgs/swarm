@@ -1,5 +1,10 @@
 package gov.usgs.volcanoes.swarm.data.fdsnWs;
 
+import gov.usgs.volcanoes.swarm.ChannelGroupInfo;
+import gov.usgs.volcanoes.swarm.ChannelInfo;
+import gov.usgs.volcanoes.swarm.GroupsType;
+import gov.usgs.volcanoes.swarm.StationInfo;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,24 +17,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import gov.usgs.volcanoes.swarm.ChannelGroupInfo;
-import gov.usgs.volcanoes.swarm.ChannelInfo;
-import gov.usgs.volcanoes.swarm.GroupsType;
-import gov.usgs.volcanoes.swarm.StationInfo;
-
 public abstract class AbstractWebServiceStationClient {
   /** The station service output level. */
   public enum OutputLevel {
     NETWORK("network"), STATION("station"), CHANNEL("channel"), RESPONSE("response");
 
-    private final String s;
+    private final String level;
 
     OutputLevel(String s) {
-      this.s = s;
+      this.level = s;
     }
 
     public String toString() {
-      return s;
+      return level;
     }
   }
 
@@ -37,11 +37,8 @@ public abstract class AbstractWebServiceStationClient {
   // public static final String DEFAULT_WS_URL = "http://www.iris.edu/ws/station/query";
   public static final String DEFAULT_WS_URL = "http://service.iris.edu/fdsnws/station/1/query";
 
-  /** Separator text. */
   private static final String separatorText = "&";
-  /** Equals text */
   private static final String equalsText = "=";
-  /** */
   private static final String startTimeText = "starttime";
 
   /**
@@ -91,8 +88,9 @@ public abstract class AbstractWebServiceStationClient {
    * @return the argument or the default value if none.
    */
   protected static String getArg(String[] args, int index, String def) {
-    if (args.length > index)
+    if (args.length > index) {
       return args[index];
+    }
     return def;
   }
 
@@ -168,6 +166,10 @@ public abstract class AbstractWebServiceStationClient {
     groupsType = GroupsType.NETWORK;
   }
 
+  /**
+   * Constructor.
+   * @param baseUrlText base URL 
+   */
   public AbstractWebServiceStationClient(String baseUrlText) {
     this.baseUrlText = baseUrlText;
     this.net = null;
@@ -226,6 +228,7 @@ public abstract class AbstractWebServiceStationClient {
       try {
         reader.close();
       } catch (Exception ex) {
+        //
       }
       reader = null;
     }
@@ -287,12 +290,11 @@ public abstract class AbstractWebServiceStationClient {
    * @throws Exception if an error occurs.
    */
   protected void fetch() throws Exception {
-    final URL url = getURL();
+    final URL url = getUrl();
     final URLConnection urlConn = url.openConnection();
     if (urlConn instanceof HttpURLConnection) {
       conn = (HttpURLConnection) urlConn;
-      if (conn.getResponseCode() != 200) // if response not OK
-      {
+      if (conn.getResponseCode() != 200) { // if response not OK
         /*
          * final BufferedReader errorReader =
          * new BufferedReader(new InputStreamReader(conn.getErrorStream()));
@@ -457,7 +459,7 @@ public abstract class AbstractWebServiceStationClient {
    * @return the URL.
    * @throws MalformedURLException if the URL text is invalid.
    */
-  protected URL getURL() throws MalformedURLException {
+  protected URL getUrl() throws MalformedURLException {
     return new URL(getUrlTextWithTime());
   }
 
@@ -516,10 +518,11 @@ public abstract class AbstractWebServiceStationClient {
    * @param ch the channel information.
    */
   public void processChannel(ChannelInfo ch) {
-    if (channelList == null)
+    if (channelList == null) {
       System.out.println(ch);
-    else
+    } else {
       channelList.add(ch.toString());
+    }
   }
 
   /**
@@ -528,10 +531,11 @@ public abstract class AbstractWebServiceStationClient {
    * @param si the station information.
    */
   public void processStation(StationInfo si) {
-    if (stationList == null)
+    if (stationList == null) {
       System.out.println(si);
-    else
+    } else {
       stationList.add(si);
+    }
   }
 
   /**
@@ -544,6 +548,7 @@ public abstract class AbstractWebServiceStationClient {
     try {
       return reader.readLine();
     } catch (IOException ex) {
+      //
     }
     return null;
   }

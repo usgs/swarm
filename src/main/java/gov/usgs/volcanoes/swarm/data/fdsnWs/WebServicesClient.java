@@ -1,5 +1,10 @@
 package gov.usgs.volcanoes.swarm.data.fdsnWs;
 
+import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.swarm.ChannelInfo;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -8,10 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.sc.seis.seisFile.mseed.DataRecord;
-import gov.usgs.plot.data.Wave;
-import gov.usgs.volcanoes.swarm.ChannelInfo;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 
 public class WebServicesClient extends AbstractDataRecordClient {
   private static final Logger LOGGER = LoggerFactory.getLogger(WebServicesClient.class);
@@ -48,10 +49,10 @@ public class WebServicesClient extends AbstractDataRecordClient {
   /** The web services data select URL text. */
   private final String wsDataSelectUrl;
 
-  private String last_sta = "";
-  private int num_stations = 0;
-  private int station_cnt = 0;
-  private final String progress_id = "channels";
+  private String lastStation = "";
+  private int numStations = 0;
+  private int stationCount = 0;
+  private final String progressId = "channels";
 
   /**
    * Creates the web services client.
@@ -87,12 +88,13 @@ public class WebServicesClient extends AbstractDataRecordClient {
       stationClient = new WebServiceStationXmlClient(wsStationUrl, net, sta, loc, chan, date) {
         public void processChannel(ChannelInfo ch) {
           WebServiceUtils.addChannel(channelList, ch, source);
-          if (last_sta.compareTo(ch.getStation()) != 0) {
-            last_sta = ch.getStation();
-            if (num_stations > 0)
-              getSource().fireChannelsProgress(progress_id,
-                  (double) station_cnt / (double) num_stations);
-            station_cnt++;
+          if (lastStation.compareTo(ch.getStation()) != 0) {
+            lastStation = ch.getStation();
+            if (numStations > 0) {
+              getSource().fireChannelsProgress(progressId,
+                  (double) stationCount / (double) numStations);
+            }
+            stationCount++;
           }
 
         }
@@ -101,12 +103,13 @@ public class WebServicesClient extends AbstractDataRecordClient {
       stationClient = new WebServiceStationTextClient(wsStationUrl, net, sta, loc, chan, date) {
         public void processChannel(ChannelInfo ch) {
           WebServiceUtils.addChannel(channelList, ch, source);
-          if (last_sta.compareTo(ch.getStation()) != 0) {
-            last_sta = ch.getStation();
-            if (num_stations > 0)
-              getSource().fireChannelsProgress(progress_id,
-                  (double) station_cnt / (double) num_stations);
-            station_cnt++;
+          if (lastStation.compareTo(ch.getStation()) != 0) {
+            lastStation = ch.getStation();
+            if (numStations > 0) {
+              getSource().fireChannelsProgress(progressId,
+                  (double) stationCount / (double) numStations);
+            }
+            stationCount++;
           }
 
         }
@@ -134,19 +137,18 @@ public class WebServicesClient extends AbstractDataRecordClient {
         // error = stationClient.fetchChannels();
         error = stationClient.fetchStations();
         if (error == null) {
-          getSource().fireChannelsProgress(progress_id, 0.);
-          num_stations = stationClient.getStationList().size();
+          getSource().fireChannelsProgress(progressId, 0.);
+          numStations = stationClient.getStationList().size();
           error = stationClient.fetchChannels();
         }
 
       } else {
         // final String id = "channels";
-        getSource().fireChannelsProgress(progress_id, 0.);
+        getSource().fireChannelsProgress(progressId, 0.);
         // getSource().fireChannelsProgress(id, 0.);
         error = stationClient.fetchStations();
-        num_stations = stationClient.getStationList().size();
+        numStations = stationClient.getStationList().size();
         if (error == null) {
-          int cnt = 0;
           /*
            * final List<StationInfo> stationList = stationClient.getStationList();
            * final int ns = stationList.size();
@@ -165,7 +167,7 @@ public class WebServicesClient extends AbstractDataRecordClient {
 
         }
         // getSource().fireChannelsProgress(id, 1.);
-        getSource().fireChannelsProgress(progress_id, 1.);
+        getSource().fireChannelsProgress(progressId, 1.);
       }
       long end = System.currentTimeMillis();
       if (WebServiceUtils.isDebug()) {
@@ -227,9 +229,9 @@ public class WebServicesClient extends AbstractDataRecordClient {
   /**
    * Retrieve a single waveform without providing full SDS functions.
    * 
-   * TODO: integrate with getRawData(). should all SDSs have a static wave retrieval method?
+   * <p>TODO: integrate with getRawData(). should all SDSs have a static wave retrieval method?
    * 
-   * @param channelInfo the channel information.
+   * @param code the channel information.
    * @param t1 the start time.
    * @param t2 the end time.
    * @return the raw data.
@@ -258,7 +260,8 @@ public class WebServicesClient extends AbstractDataRecordClient {
         };
     try {
       String[] comps = code.split("\\$"); 
-      final String query = reader.createQuery(comps[2], comps[0], (comps.length > 3 ? comps[3] : "--"), comps[1], begin, end);
+      final String query = reader.createQuery(comps[2], comps[0],
+          (comps.length > 3 ? comps[3] : "--"), comps[1], begin, end);
       reader.read(query, (List<DataRecord>) null);
     } catch (Exception ex) {
       LOGGER.warn("could not get web service raw data ({}): {}", code, ex.getMessage());
@@ -269,6 +272,10 @@ public class WebServicesClient extends AbstractDataRecordClient {
           getDateText(wave.getEndTime()) + ")");
     }
     return wave;
+  }
+
+  public AbstractWebServiceStationClient getStationClient() {
+    return stationClient;
   }
 
 }
