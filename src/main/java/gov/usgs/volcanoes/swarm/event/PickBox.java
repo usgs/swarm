@@ -14,6 +14,7 @@ import gov.usgs.volcanoes.core.quakeml.Arrival;
 import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.UiUtils;
+import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwingWorker;
@@ -38,6 +39,9 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -71,8 +75,6 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   private static final int DEFAULT_WAVE_PANEL_HEIGHT = 150;
   private static final Color SELECT_COLOR = new Color(200, 220, 241);
   private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
-  private static final String DATASELECT_URL = "http://service.iris.edu/fdsnws/dataselect/1/query";
-  private static final String STATION_URL = "http://service.iris.edu/fdsnws/station/1/query";
   private static final JFrame APPLICATION_FRAME = Swarm.getApplicationFrame();
   private static final SwarmConfig SWARM_CONFIG = SwarmConfig.getInstance();
 
@@ -235,11 +237,10 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     if (wavePanel == null) {
       wavePanel = new PickWavePanel();
       wavePanel.setStatusText(statusText);
-      wavePanel.setChannel(channel.replaceAll("\\$", " "));
+      wavePanel.setChannel(channel.replaceAll("\\$", " ").trim());
       SeismicDataSource source = seismicSources.get(channel);
       if (source == null) {
-        source = new WebServicesSource();
-        source.parse(buildParams(channel));
+        source = new WebServicesSource(channel);
       }
       wavePanel.setDataSource(source);
       Wave wave = source.getWave(channel, startJ2k, endJ2k);
@@ -256,31 +257,26 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
       }
     }
 
+    // set P and S picks in menu
+    String phase = arrival.getPhase();
+    PickMenu pickMenu = wavePanel.getPickMenu();
+    if (phase.indexOf('P') != -1) {
+      pick.setPhaseHint("P");
+      pickMenu.setP(pick);
+      pickMenu.setPickChannelP(true);
+    }
+    if (phase.indexOf('S') != -1) {
+      pick.setPhaseHint("S");
+      pickMenu.setS(pick);
+      pickMenu.setPickChannelS(true);
+    }
+    
     wavePanel.addArrival(arrival);
     CodeTimer timer = new CodeTimer("arrival");
     timer.stopAndReport();
   }
 
-  private String buildParams(String channel) {
-    String[] comps = channel.split("\\$");
-    LOGGER.debug("SPLIT {}", channel);
-    StringBuilder sb = new StringBuilder();
-    sb.append(comps[2]).append("|");
-    sb.append(comps[0]).append("|");
 
-    if (comps.length > 3) {
-      sb.append(comps[3]).append("|");
-    } else {
-      sb.append("--|");
-    }
-    sb.append(comps[1]).append("|");
-    sb.append(3600).append("|");
-    sb.append(1000).append("|");
-    sb.append(DATASELECT_URL).append("|");
-    sb.append(STATION_URL);
-
-    return sb.toString();
-  }
 
   private void resizeWaves() {
     for (PickWavePanel panel : panels) {
@@ -611,8 +607,57 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     }
   }
 
+  /**
+   * @see gov.usgs.volcanoes.swarm.event.PickToolBarListener#sortChannelsByNearest()
+   */
   public void sortChannelsByNearest() {
-    // TODO Auto-generated method stub
+
+    if (selectedSet.size() == 0) {
+      return;
+    }
+    final PickWavePanel p = selectedSet.iterator().next();
+
+    final Metadata smd = SWARM_CONFIG.getMetadata(p.getChannel(), true);
+    if (smd == null || Double.isNaN(smd.getLongitude()) || Double.isNaN(smd.getLatitude())) {
+      return;
+    }
+
+    final ArrayList<PickWavePanel> sorted = new ArrayList<PickWavePanel>(panels.size());
+    for (final PickWavePanel wave : panels) {
+      sorted.add(wave);
+    }
     
+    Collections.sort(sorted, new Comparator<PickWavePanel>() {
+      public int compare(final PickWavePanel wvp1, final PickWavePanel wvp2) {
+        Metadata md1 = SWARM_CONFIG.getMetadata(wvp1.getChannel());
+        final double d1 = smd.distanceTo(md1);
+        Metadata md2 = SWARM_CONFIG.getMetadata(wvp2.getChannel());
+        final double d2 = smd.distanceTo(md2);
+        return Double.compare(d1, d2);
+      }
+    });
+
+    
+    histories.clear();
+    selectedSet.clear();
+    for (PickWavePanel wave : panels) {
+      remove(wave);
+    }
+    panels.clear();
+    for (final PickWavePanel wave : sorted) {
+      panels.add(wave);
+      add(wave);
+    }
+    selectedSet.add(p);
+    validate();
+    repaint();
+  }
+
+  /**
+   * Get pick wave panels.
+   * @return list of pick wave panels
+   */
+  public List<PickWavePanel> getPanels() {
+    return panels;
   }
 }
