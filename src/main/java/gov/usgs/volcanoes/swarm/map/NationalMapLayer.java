@@ -1,7 +1,6 @@
 package gov.usgs.volcanoes.swarm.map;
 
 /**
- * 
  * http://basemap.nationalmap.gov/arc
  * 
  * @author Tom Parker
@@ -9,10 +8,10 @@ package gov.usgs.volcanoes.swarm.map;
  */
 public enum NationalMapLayer {
 
-  TOPO("Topo", "http://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer?"), 
-  SHADED_RELIEF("Shaded Relief",  "http://basemap.nationalmap.gov/arcgis/services/USGSShadedReliefOnly/MapServer/WMSServer?"), 
-  IMAGERY_ONLY( "Imagery Only", "http://basemap.nationalmap.gov/arcgis/services/USGSImageryOnly/MapServer/WMSServer?"),
-  IMAGERY_TOPO("Imagery Topo", "http://basemap.nationalmap.gov/arcgis/services/USGSTopo/USGSImageryTopo/WMSServer?"),
+  TOPO("Topo", "https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WMSServer?"), 
+  SHADED_RELIEF("Shaded Relief",  "https://basemap.nationalmap.gov/arcgis/services/USGSShadedReliefOnly/MapServer/WMSServer?"), 
+  IMAGERY_ONLY("Imagery Only", "https://basemap.nationalmap.gov/arcgis/services/USGSImageryOnly/MapServer/WMSServer?"),
+  IMAGERY_TOPO("Imagery Topo", "https://basemap.nationalmap.gov/arcgis/services/USGSTopo/USGSImageryTopo/WMSServer?"),
   ;
 
   public final String server;
