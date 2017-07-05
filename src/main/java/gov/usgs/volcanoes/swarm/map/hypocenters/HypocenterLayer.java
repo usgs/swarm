@@ -357,8 +357,21 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
   public void add(EventSet eventSet) {
     importedEvents.putAll(eventSet);
     events.putAll(eventSet);
-    if (MapFrame.getInstance() != null) {
-      MapFrame.getInstance().repaint();
+    GeoRange gr = new GeoRange();
+    for (Event event : eventSet.values()) {
+      Origin origin = event.getPreferredOrigin();
+      if (origin != null) {
+        Point2D.Double point = new Point2D.Double(origin.getLongitude(), origin.getLatitude());
+        gr.includePoint(point, 0.0001);
+        MapFrame.getInstance().getMapPanel().setCenterAndScale(gr);
+      }
+    }
+    gr.padPercent(.5, .5);
+    MapFrame mapFrame = MapFrame.getInstance();
+    if (mapFrame != null) {
+      mapFrame.setView(gr);
+      mapFrame.setVisible(true);
+      mapFrame.repaint();
     }
   }
 
