@@ -113,9 +113,10 @@ public class PickMenu extends JPopupMenu {
           mi[i].addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
               Pick pick = createPick(phase, onset, j2k, weight);
+              propagatePick(phase, pick);
+              setWeightButton(phase, onset, weight);
               pickChannels.put(phase, true);
               wvp.repaint();
-              propagatePick(phase, pick);
               propagateUncertainty(phase, onset, weight);
             }
           });
@@ -308,8 +309,7 @@ public class PickMenu extends JPopupMenu {
         continue;
       }
       if (wvp.isSameStation(otherWvp)) {
-        String key = phase + onset.toString().substring(0, 1);
-        otherWvp.getPickMenu().getWeightButtons().get(key)[weight].setSelected(true);
+        otherWvp.getPickMenu().setWeightButton(phase, onset, weight);
         otherWvp.repaint();
       }
     }
@@ -504,11 +504,32 @@ public class PickMenu extends JPopupMenu {
     if (pickType.equals(P) || pickType.equals(S)) {
       propagatePick(pickType, null);
       // reset weights to 0
-      weightButtons.get(pickType + "E")[0].setSelected(true);
-      weightButtons.get(pickType + "I")[0].setSelected(true); 
+      setWeightButton(pickType, Pick.Onset.EMERGENT, 0); // I done automatically
       propagateUncertainty(pickType, Pick.Onset.EMERGENT, 0);
       propagateUncertainty(pickType, Pick.Onset.IMPULSIVE, 0);
+      repaint();
     }       
+  }
+  
+  /**
+   * Toggle weight for a given phase/onset combination.
+   * @param phase P or S
+   * @param onset Emergent or Impulsive 
+   * @param weight 0 to 4
+   */
+  private void setWeightButton(String phase, Pick.Onset onset, int weight) {
+    for (Pick.Onset o : Pick.Onset.values()) {
+      if (o == Pick.Onset.QUESTIONABLE) {
+        continue;
+      }
+      if (o == onset) {
+        String key = phase + onset.toString().substring(0, 1);
+        weightButtons.get(key)[weight].setSelected(true);
+      } else {
+        String key = phase + o.toString().substring(0, 1);
+        weightButtons.get(key)[0].setSelected(true);
+      }
+    }
   }
   
   /**
@@ -567,10 +588,6 @@ public class PickMenu extends JPopupMenu {
    */
   public void setPlot(boolean plot) {
     plotMenu.setSelected(plot);
-  }
-
-  public HashMap<String, JRadioButtonMenuItem[]> getWeightButtons() {
-    return weightButtons;
   }
   
 }
