@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
- * Right click menu for picks.
+ * Pick menu bar on clipboard toolbar.
  * 
  * @author Diana Norgaard
  */
@@ -59,17 +59,6 @@ public class PickMenuBar extends JMenuBar {
     this.createMenu();
   }
   
-  /**
-   * Get instance of PickModeMenu.
-   * @return pick mode menu
-   */
-/*  public static PickMenuBar getInstance() {
-    if (menuBar == null) {
-      menuBar = new PickMenuBar();
-    }
-    return menuBar;
-  }*/
-
   /**
    * Create right click menu for pick.
    */
@@ -223,9 +212,15 @@ public class PickMenuBar extends JMenuBar {
     clearMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK));
     clearMenu.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        for (WaveViewPanel wvp : clipboard.getWaves()) {
-          wvp.getPickMenu().clearAllPicks();
-          wvp.repaint();
+        String message = "Are you sure you want to remove all picks from clipboard?";
+        message += "\nThis cannot be undone.";
+        int result = JOptionPane.showConfirmDialog(Swarm.getApplicationFrame(), message,
+            "Remove Picks", JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+          for (WaveViewPanel wvp : clipboard.getWaves()) {
+            wvp.getPickMenu().clearAllPicks();
+            wvp.repaint();
+          }
         }
       }
     });
