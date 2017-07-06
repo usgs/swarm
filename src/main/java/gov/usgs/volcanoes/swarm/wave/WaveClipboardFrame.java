@@ -123,7 +123,9 @@ public class WaveClipboardFrame extends SwarmFrame {
   private JButton backButton;
   private JButton gotoButton;
 
+  private PickMenuBar pickMenuBar;
   private JToggleButton pickButton;
+  private Event event;
   
   private JPopupMenu popup;
 
@@ -268,13 +270,14 @@ public class WaveClipboardFrame extends SwarmFrame {
     
 
     toolbar.addSeparator();
+    pickMenuBar = new PickMenuBar(this);
     pickButton = SwarmUtil.createToolBarToggleButton(Icons.pick,
         "Pick Mode", new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             if (pickButton.isSelected()) {
-              PickMenuBar.getInstance().setVisible(true);
+              pickMenuBar.setVisible(true);
             } else {
-              PickMenuBar.getInstance().setVisible(false);
+              pickMenuBar.setVisible(false);
             }
             for (WaveViewPanel awp : waves) {
               if (awp instanceof WaveViewPanel) {
@@ -287,8 +290,8 @@ public class WaveClipboardFrame extends SwarmFrame {
         });
     pickButton.setEnabled(true);
     toolbar.add(pickButton);
-    toolbar.add(PickMenuBar.getInstance());
-    PickMenuBar.getInstance().setVisible(false);
+    toolbar.add(pickMenuBar);
+    pickMenuBar.setVisible(false);
   }
 
   // TODO: don't write image on event thread
@@ -1396,89 +1399,113 @@ public class WaveClipboardFrame extends SwarmFrame {
   }
     
   /**
-   * Import event into clipboard.
-   * @param event event
+   * Import event into clipboard. Event must be set first.
    */
-  public void importEvent(Event event) {
-    //TODO: throbber
-    
-    // update event dialog 
-    EventDialog.getInstance().setEventDetails(event);
-    
-    // get wave start and end times
-    long firstPick = Long.MAX_VALUE;
-    long lastPick = Long.MIN_VALUE;
+  public void importEvent() {
+    final SwingWorker worker = new SwingWorker() {
+      @Override
+      public Object construct() {
+        throbber.increment();
 
-    for (Pick pick : event.getPicks().values()) {
-      firstPick = Math.min(pick.getTime(), firstPick);
-      lastPick = Math.max(pick.getTime(), lastPick);
-    }
-    double waveStart = J2kSec.fromEpoch(firstPick) - 2;
-    double waveEnd = J2kSec.fromEpoch(lastPick) + 2;
+        // update event dialog 
+        EventDialog.getInstance().setEventDetails(event);
+        
+        // get wave start and end times
+        long firstPick = Long.MAX_VALUE;
+        long lastPick = Long.MIN_VALUE;
 
-    // create wave view panels 
-    HashMap<String, WaveViewPanel> panels = new HashMap<String, WaveViewPanel>();
-    for (Pick pick : event.getPicks().values()) {
-      String channel = pick.getChannel().replaceAll("\\$", " ").trim();
-      WaveViewPanel wvp = panels.get(channel);
-      if (wvp == null) {
-        wvp = new WaveViewPanel();
-        wvp.setChannel(channel);
-        wvp.setStartTime(waveStart);
-        wvp.setEndTime(waveEnd);
-        boolean foundSource = false;
-        for (SeismicDataSource source : SwarmConfig.getInstance().getSources().values()) {
-          for (String ch : source.getChannels()) {
-            if (ch.equals(channel)) {
+        for (Pick pick : event.getPicks().values()) {
+          firstPick = Math.min(pick.getTime(), firstPick);
+          lastPick = Math.max(pick.getTime(), lastPick);
+        }
+        double waveStart = J2kSec.fromEpoch(firstPick) - 2;
+        double waveEnd = J2kSec.fromEpoch(lastPick) + 2;
+
+        // create wave view panels 
+        HashMap<String, WaveViewPanel> panels = new HashMap<String, WaveViewPanel>();
+        for (Pick pick : event.getPicks().values()) {
+          String channel = pick.getChannel().replaceAll("\\$", " ").trim();
+          WaveViewPanel wvp = panels.get(channel);
+          if (wvp == null) {
+            wvp = new WaveViewPanel();
+            wvp.setChannel(channel);
+            wvp.setStartTime(waveStart);
+            wvp.setEndTime(waveEnd);
+            boolean foundSource = false;
+            for (SeismicDataSource source : SwarmConfig.getInstance().getSources().values()) {
+              for (String ch : source.getChannels()) {
+                if (ch.equals(channel)) {
+                  wvp.setDataSource(source);
+                  Wave wave = source.getWave(channel, waveStart, waveEnd);
+                  if (wave != null) {
+                    wvp.setWave(wave, waveStart, waveEnd);
+                    foundSource = true;
+                    break;
+                  }
+                }
+              }
+              if (foundSource) {
+                break;
+              }
+            }
+            // If no data source already available go to IRIS
+            if (wvp.getDataSource() == null) {
+              WebServicesSource source = new WebServicesSource(pick.getChannel());
               wvp.setDataSource(source);
               Wave wave = source.getWave(channel, waveStart, waveEnd);
               if (wave != null) {
                 wvp.setWave(wave, waveStart, waveEnd);
-                foundSource = true;
-                break;
               }
             }
+            panels.put(channel, wvp);
           }
-          if (foundSource) {
-            break;
+          String phaseHint = pick.getPhaseHint();
+          PickMenu pickMenu = wvp.getPickMenu();
+          pickMenu.setPick(phaseHint, pick, true);
+          
+        }
+        
+        // add wave view panels to clipboard
+        for (WaveViewPanel wvp : panels.values()) {
+          addWave(wvp);
+        }
+        
+        // propagate picks
+        for (WaveViewPanel wvp : waves) {
+          PickMenu pickMenu = wvp.getPickMenu();
+          for (String phase : new String[] {PickMenu.P, PickMenu.S}) {
+            Pick pick = pickMenu.getPick(phase);
+            if (pick != null && pickMenu.isPickChannel(phase)) {
+              pickMenu.propagatePick(phase, pick);
+            }
           }
         }
-        // If no data source already available go to IRIS
-        if (wvp.getDataSource() == null) {
-          WebServicesSource source = new WebServicesSource(pick.getChannel());
-          wvp.setDataSource(source);
-          Wave wave = source.getWave(channel, waveStart, waveEnd);
-          if (wave != null) {
-            wvp.setWave(wave, waveStart, waveEnd);
-          }
-        }
-        panels.put(channel, wvp);
+        return null;
       }
-      String phaseHint = pick.getPhaseHint();
-      PickMenu pickMenu = wvp.getPickMenu();
-      pickMenu.setPick(phaseHint, pick, true);
-      
-    }
-    
-    // add wave view panels to clipboard
-    for (WaveViewPanel wvp : panels.values()) {
-      addWave(wvp);
-    }
-    
-    // propagate picks
-    for (WaveViewPanel wvp : waves) {
-      PickMenu pickMenu = wvp.getPickMenu();
-      for (String phase : new String[] {PickMenu.P, PickMenu.S}) {
-        Pick pick = pickMenu.getPick(phase);
-        if (pick != null && pickMenu.isPickChannel(phase)) {
-          pickMenu.propagatePick(phase, pick);
-        }
+
+      @Override
+      public void finished() {
+        throbber.decrement();
+        repaint();
       }
-    }
+    };
+    worker.start();
     
   }
 
   public JToggleButton getPickButton() {
     return pickButton;
+  }
+
+  public Event getEvent() {
+    return event;
+  }
+
+  public void setEvent(Event event) {
+    this.event = event;
+  }
+
+  public PickMenuBar getPickMenuBar() {
+    return pickMenuBar;
   }
 }

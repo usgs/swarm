@@ -178,7 +178,7 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
             }
             
             clipboard.getPickButton().setSelected(true);
-            PickMenuBar.getInstance().setVisible(true);
+            clipboard.getPickMenuBar().setVisible(true);
             clipboard.setVisible(true);
           }
         });

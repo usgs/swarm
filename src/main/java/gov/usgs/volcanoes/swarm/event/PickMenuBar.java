@@ -40,34 +40,35 @@ public class PickMenuBar extends JMenuBar {
   private static final Logger LOGGER = LoggerFactory.getLogger(PickMenuBar.class);
   private static final long serialVersionUID = 8681764007165352268L;
 
+  private WaveClipboardFrame clipboard;
   private PickSettingsDialog settingsDialog;
   private EventDialog eventDialog;
-  private static PickMenuBar menuBar;
   private JMenu menu;
   
   /**
    * Constructor.
    */
-  private PickMenuBar() {
+  public PickMenuBar(WaveClipboardFrame clipboard) {
     super();
-    menu = new JMenu("Pick Menu");
+    this.menu = new JMenu("Pick Menu");
     this.add(menu);
     this.setLayout(new GridLayout(1, 1));
-    settingsDialog = PickSettingsDialog.getInstance();
-    eventDialog = EventDialog.getInstance();
-    createMenu();
+    this.clipboard = clipboard;
+    this.settingsDialog = PickSettingsDialog.getInstance();
+    this.eventDialog = EventDialog.getInstance();
+    this.createMenu();
   }
   
   /**
    * Get instance of PickModeMenu.
    * @return pick mode menu
    */
-  public static PickMenuBar getInstance() {
+/*  public static PickMenuBar getInstance() {
     if (menuBar == null) {
       menuBar = new PickMenuBar();
     }
     return menuBar;
-  }
+  }*/
 
   /**
    * Create right click menu for pick.
@@ -145,7 +146,7 @@ public class PickMenuBar extends JMenuBar {
     try {
       EventSet eventSet = EventSet.parseQuakeml(new FileInputStream(f));
       if (eventSet.size() == 0) {
-        JOptionPane.showMessageDialog(WaveClipboardFrame.getInstance(), "No events found in file.");
+        JOptionPane.showMessageDialog(clipboard, "No events found in file.");
         return;
       }
       Event event;
@@ -162,7 +163,8 @@ public class PickMenuBar extends JMenuBar {
       } else {
         event = eventSet.values().iterator().next();
       }
-      WaveClipboardFrame.getInstance().importEvent(event);
+      clipboard.setEvent(event);
+      clipboard.importEvent();
     } catch (FileNotFoundException e) {
       LOGGER.warn(e.getMessage());
     } catch (IOException e) {
@@ -180,7 +182,7 @@ public class PickMenuBar extends JMenuBar {
    * @return user selected event
    */
   private Event openEventChooser(HashMap<String, Event> eventMap) {
-    String s = (String) JOptionPane.showInputDialog(WaveClipboardFrame.getInstance(),
+    String s = (String) JOptionPane.showInputDialog(clipboard,
         "Select event to import", "Import Event", JOptionPane.PLAIN_MESSAGE, null,
         eventMap.keySet().toArray(), eventMap.keySet().iterator().next());
     return eventMap.get(s);
@@ -190,13 +192,13 @@ public class PickMenuBar extends JMenuBar {
    * Open event dialog for export to file.
    */
   private void openEventDialog() {
-    if (WaveClipboardFrame.getInstance().getWaves().isEmpty()) {
+    if (clipboard.getWaves().isEmpty()) {
       String message = "Nothing to export!";
-      JOptionPane.showMessageDialog(WaveClipboardFrame.getInstance(), message);
+      JOptionPane.showMessageDialog(clipboard, message);
       return;
     }
     String message = "Every pick in the clipboard will be saved. Continue?";
-    int result = JOptionPane.showConfirmDialog(WaveClipboardFrame.getInstance(), message, "Export",
+    int result = JOptionPane.showConfirmDialog(clipboard, message, "Export",
         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
     if (result != JOptionPane.YES_OPTION) {
       return;
@@ -221,7 +223,6 @@ public class PickMenuBar extends JMenuBar {
     clearMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK));
     clearMenu.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        WaveClipboardFrame clipboard = WaveClipboardFrame.getInstance();
         for (WaveViewPanel wvp : clipboard.getWaves()) {
           wvp.getPickMenu().clearAllPicks();
           wvp.repaint();
