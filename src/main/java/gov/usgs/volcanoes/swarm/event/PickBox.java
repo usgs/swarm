@@ -616,7 +616,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     final Metadata smd = SWARM_CONFIG.getMetadata(p.getChannel(), true);
     if (smd == null || Double.isNaN(smd.getLongitude()) || Double.isNaN(smd.getLatitude())) {
       String message = "Unable to sort on " + p.getChannel() + " due to missing location metadata.";
-      LOGGER.warn(message);
+      JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message);
       return;
     }
 
