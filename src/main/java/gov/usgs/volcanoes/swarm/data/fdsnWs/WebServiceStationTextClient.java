@@ -1,22 +1,19 @@
 package gov.usgs.volcanoes.swarm.data.fdsnWs;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import gov.usgs.volcanoes.swarm.StationInfo;
 
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
 
-import gov.usgs.volcanoes.swarm.StationInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebServiceStationTextClient extends AbstractWebServiceStationClient {
   private static final Logger LOGGER = LoggerFactory.getLogger(WebServiceStationTextClient.class);
   
   /**
    * Create the web service station client.
-   * 
-   * @param baseUrlText
-   *          the base URL text.
    */
   public static WebServiceStationTextClient createClient(String[] args) {
     String baseUrlText = getArg(args, 0, DEFAULT_WS_URL);

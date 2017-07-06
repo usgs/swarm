@@ -1,13 +1,9 @@
 package gov.usgs.volcanoes.swarm.event;
 
-import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.core.quakeml.Event;
 import gov.usgs.volcanoes.core.quakeml.EventSet;
-import gov.usgs.volcanoes.core.quakeml.Pick;
-import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
@@ -44,40 +40,42 @@ public class PickMenuBar extends JMenuBar {
   private static final Logger LOGGER = LoggerFactory.getLogger(PickMenuBar.class);
   private static final long serialVersionUID = 8681764007165352268L;
 
+  private WaveClipboardFrame clipboard;
   private PickSettingsDialog settingsDialog;
   private EventDialog eventDialog;
-  private static PickMenuBar menuBar;
   private JMenu menu;
   
   /**
    * Constructor.
    */
-  private PickMenuBar() {
+  public PickMenuBar(WaveClipboardFrame clipboard) {
     super();
-    menu = new JMenu("Pick Menu");
+    this.menu = new JMenu("Pick Menu");
     this.add(menu);
     this.setLayout(new GridLayout(1, 1));
-    settingsDialog = PickSettingsDialog.getInstance();
-    eventDialog = EventDialog.getInstance();
-    createMenu();
+    this.clipboard = clipboard;
+    this.settingsDialog = PickSettingsDialog.getInstance();
+    this.eventDialog = EventDialog.getInstance();
+    this.createMenu();
   }
   
   /**
    * Get instance of PickModeMenu.
    * @return pick mode menu
    */
-  public static PickMenuBar getInstance() {
+/*  public static PickMenuBar getInstance() {
     if (menuBar == null) {
       menuBar = new PickMenuBar();
     }
     return menuBar;
-  }
+  }*/
 
   /**
    * Create right click menu for pick.
    */
   private void createMenu() {
     createSettingsMenu();
+    menu.addSeparator();
     createEventMenu();
   }
  
@@ -85,7 +83,7 @@ public class PickMenuBar extends JMenuBar {
    * Create import/export event menu items.
    */
   private void createEventMenu() {
-    JMenuItem importMenu = new JMenuItem("Import...");
+    JMenuItem importMenu = new JMenuItem("Import QuakeML...");
     importMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, ActionEvent.CTRL_MASK));
     importMenu.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -94,7 +92,9 @@ public class PickMenuBar extends JMenuBar {
     });
     menu.add(importMenu);
     
-    JMenuItem exportMenu = new JMenuItem("Export...");
+    menu.addSeparator();
+    
+    JMenuItem exportMenu = new JMenuItem("Export QuakeML...");
     exportMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK));
     exportMenu.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -102,8 +102,24 @@ public class PickMenuBar extends JMenuBar {
       }
     });
     menu.add(exportMenu);
+    
+/*    JMenuItem hypo71Menu = new JMenuItem("Export Hypo71 Input File...");
+    hypo71Menu.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        exportHypo71();
+      }
+    });
+    menu.add(hypo71Menu);
+    
+    JMenuItem hypoinverseMenu = new JMenuItem("Export Hypoinverse Input Files...");
+    hypoinverseMenu.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        exportHypoinverse();
+      }
+    });
+    menu.add(hypoinverseMenu);*/
   }
-  
+    
   /**
    * Open import file dialog.
    */
@@ -130,7 +146,7 @@ public class PickMenuBar extends JMenuBar {
     try {
       EventSet eventSet = EventSet.parseQuakeml(new FileInputStream(f));
       if (eventSet.size() == 0) {
-        JOptionPane.showMessageDialog(WaveClipboardFrame.getInstance(), "No events found in file.");
+        JOptionPane.showMessageDialog(clipboard, "No events found in file.");
         return;
       }
       Event event;
@@ -147,7 +163,8 @@ public class PickMenuBar extends JMenuBar {
       } else {
         event = eventSet.values().iterator().next();
       }
-      importEvent(event);
+      clipboard.setEvent(event);
+      clipboard.importEvent();
     } catch (FileNotFoundException e) {
       LOGGER.warn(e.getMessage());
     } catch (IOException e) {
@@ -165,95 +182,23 @@ public class PickMenuBar extends JMenuBar {
    * @return user selected event
    */
   private Event openEventChooser(HashMap<String, Event> eventMap) {
-    String s = (String) JOptionPane.showInputDialog(WaveClipboardFrame.getInstance(),
+    String s = (String) JOptionPane.showInputDialog(clipboard,
         "Select event to import", "Import Event", JOptionPane.PLAIN_MESSAGE, null,
         eventMap.keySet().toArray(), eventMap.keySet().iterator().next());
     return eventMap.get(s);
   }
   
   /**
-   * Import event into clipboard.
-   * @param event event
-   */
-  private void importEvent(Event event) {
-    // update event dialog 
-    eventDialog.setDescription(event.getDescription());
-    eventDialog.setEventType(event.getType());
-    eventDialog.setEventTypeCertainty(event.getTypeCertainty());
-    
-    // get wave start and end times
-    long firstPick = Long.MAX_VALUE;
-    long lastPick = Long.MIN_VALUE;
-
-    for (Pick pick : event.getPicks().values()) {
-      firstPick = Math.min(pick.getTime(), firstPick);
-      lastPick = Math.max(pick.getTime(), lastPick);
-    }
-    double waveStart = J2kSec.fromEpoch(firstPick) - 2;
-    double waveEnd = J2kSec.fromEpoch(lastPick) + 2;
-
-    // create wave view panels 
-    HashMap<String, WaveViewPanel> panels = new HashMap<String, WaveViewPanel>();
-    for (Pick pick : event.getPicks().values()) {
-      String channel = pick.getChannel().replaceAll("\\$", " ").trim();
-      WaveViewPanel wvp = panels.get(channel);
-      if (wvp == null) {
-        wvp = new WaveViewPanel();
-        wvp.setChannel(channel);
-        wvp.setStartTime(waveStart);
-        wvp.setEndTime(waveEnd);
-        boolean foundSource = false;
-        for (SeismicDataSource source : SwarmConfig.getInstance().getSources().values()) {
-          for (String ch : source.getChannels()) {
-            if (ch.equals(channel)) {
-              wvp.setDataSource(source);
-              Wave wave = source.getWave(channel, waveStart, waveEnd);
-              if (wave != null) {
-                wvp.setWave(wave, waveStart, waveEnd);
-                foundSource = true;
-                break;
-              }
-            }
-          }
-          if (foundSource) {
-            break;
-          }
-        }
-        panels.put(channel, wvp);
-        if (!foundSource) {
-          JOptionPane.showMessageDialog(WaveClipboardFrame.getInstance(),
-              "No data source found for channel: " + channel);
-        }
-      }
-      String phaseHint = pick.getPhaseHint();
-      PickMenu pickMenu = wvp.getPickMenu();
-      if (phaseHint.equals("P")) {
-        pickMenu.setP(pick);
-        pickMenu.setPickChannelP(true);
-      }
-      if (phaseHint.equals("S")) {
-        pickMenu.setS(pick);
-        pickMenu.setPickChannelS(true);
-      }
-    }
-
-    // add wave view panels to clipboard
-    for (WaveViewPanel wvp : panels.values()) {
-      WaveClipboardFrame.getInstance().addWave(wvp);
-    }
-  }
-  
-  /**
    * Open event dialog for export to file.
    */
   private void openEventDialog() {
-    if (WaveClipboardFrame.getInstance().getWaves().isEmpty()) {
+    if (clipboard.getWaves().isEmpty()) {
       String message = "Nothing to export!";
-      JOptionPane.showMessageDialog(WaveClipboardFrame.getInstance(), message);
+      JOptionPane.showMessageDialog(clipboard, message);
       return;
     }
     String message = "Every pick in the clipboard will be saved. Continue?";
-    int result = JOptionPane.showConfirmDialog(WaveClipboardFrame.getInstance(), message, "Export",
+    int result = JOptionPane.showConfirmDialog(clipboard, message, "Export",
         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
     if (result != JOptionPane.YES_OPTION) {
       return;
@@ -273,6 +218,18 @@ public class PickMenuBar extends JMenuBar {
       }
     });
     menu.add(settingsMenu);
+    
+    JMenuItem clearMenu = new JMenuItem("Clear All Picks");
+    clearMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK));
+    clearMenu.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        for (WaveViewPanel wvp : clipboard.getWaves()) {
+          wvp.getPickMenu().clearAllPicks();
+          wvp.repaint();
+        }
+      }
+    });
+    menu.add(clearMenu);
   }
   
 }

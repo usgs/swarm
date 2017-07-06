@@ -626,19 +626,44 @@ public class WaveViewPanel extends JComponent {
 
       if (settings.pickEnabled && pickMenu != null) {
         String pickStatus = "";
-        Pick p = pickMenu.getP();
-        Pick s = pickMenu.getS();
-        if (p != null && s != null) {
-          pickStatus = StatusTextArea.getSpString(p.getTime(), s.getTime());
+        // S-P
+        double spDuration = pickMenu.getSpDuration();
+        if (!Double.isNaN(spDuration)) {
+          double spDistance = SwarmConfig.getInstance().pVelocity * spDuration;
+          pickStatus = String.format("S-P: %.2fs (%.2fkm)", spDuration, spDistance);
         }
-        Pick c1 = pickMenu.getCoda1();
-        Pick c2 = pickMenu.getCoda2();
-        if (c1 != null && c2 != null) {
+        // Coda 
+        if (swarmConfig.durationEnabled && !Double.isNaN(pickMenu.getCodaDuration())) {
           if (!pickStatus.equals("")) {
-            pickStatus += ", ";
+            pickStatus += "; ";
           }
-          pickStatus += StatusTextArea.getCodaDuration(c1.getTime(), c2.getTime());
-        }
+          double duration = pickMenu.getCodaDuration();
+          double durationMagnitude = swarmConfig.getDurationMagnitude(duration);
+          String coda = String.format("Coda: %.2fs (Mc: %.2f)", duration, durationMagnitude);
+          
+          // get clipboard average
+          WaveClipboardFrame cb = WaveClipboardFrame.getInstance();
+          int count = 0;
+          double sumDuration = 0;
+          for (WaveViewPanel wvp : cb.getWaves()) {
+            double codaDuration = wvp.getPickMenu().getCodaDuration();
+            if (!Double.isNaN(codaDuration)) {
+              sumDuration += codaDuration;
+              count++;
+            }
+          }
+          if (count == 1) {
+            pickStatus += coda;
+          } else {
+            double avgDuration = sumDuration / count;
+            double avgDurationMagnitude = swarmConfig.getDurationMagnitude(avgDuration);
+            String avgCoda =
+                String.format("Avg Coda: %.2fs (Mc: %.2f)", avgDuration, avgDurationMagnitude);
+  
+            // add final coda string
+            pickStatus += coda + ", " + avgCoda;
+          }
+        } 
         if (!pickStatus.equals("")) {
           status.append("\n");
           status.append(pickStatus);
@@ -834,20 +859,14 @@ public class WaveViewPanel extends JComponent {
         return;
       }
       if (!pickMenu.isHidePhases()) {
-        if (pickMenu.isPickChannelP()) {
-          drawPick(pickMenu.getP(), g2, false);
-        } else {
-          drawPick(pickMenu.getP(), g2, true);
-        }
-        if (pickMenu.isPickChannelS()) {
-          drawPick(pickMenu.getS(), g2, false);
-        } else {
-          drawPick(pickMenu.getS(), g2, true);
+        for (String phase : new String[] {PickMenu.P, PickMenu.S}) {
+          drawPick(pickMenu.getPick(phase), g2, !pickMenu.isPickChannel(phase));
         }
       }
       if (!pickMenu.isHideCoda()) {
-        drawPick(pickMenu.getCoda1(), g2, false);
-        drawPick(pickMenu.getCoda2(), g2, false);
+        for (String coda : new String[] {PickMenu.CODA1, PickMenu.CODA2}) {
+          drawPick(pickMenu.getPick(coda), g2, false);
+        }
       }
     }
   }
@@ -974,11 +993,11 @@ public class WaveViewPanel extends JComponent {
     g2.setColor(color);
 
     // draw uncertainty
-    Color uncertaintyShade =
-        new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() / 2);
-    g2.setColor(uncertaintyShade);
     double uncertainty = pick.getTimeQuantity().getUncertainty();
     if (!Double.isNaN(uncertainty)) {
+      Color uncertaintyShade =
+          new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() / 2);
+      g2.setColor(uncertaintyShade);
       // lowerUncertainty
       long lowTime = (long) (pick.getTime() - 1000.0 * uncertainty);
       double luJ2k = J2kSec.fromEpoch(lowTime);
