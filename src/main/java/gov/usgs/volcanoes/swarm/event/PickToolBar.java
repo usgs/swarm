@@ -6,6 +6,7 @@
 package gov.usgs.volcanoes.swarm.event;
 
 import gov.usgs.volcanoes.core.quakeml.Event;
+import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
@@ -165,6 +166,20 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
               clipboard.addWave(new WaveViewPanel(wvp));
             }
 
+            for (WaveViewPanel wvp : clipboard.getWaves()) {
+              wvp.getSettings().pickEnabled = true;
+              PickMenu pickMenu = wvp.getPickMenu();
+              for (String phase : new String[] {PickMenu.P, PickMenu.S}) {
+                Pick pick = pickMenu.getPick(phase);
+                if (pick != null && pickMenu.isPickChannel(phase)) {
+                  pickMenu.propagatePick(phase, pick);
+                }
+              }
+            }
+            
+            clipboard.getPickButton().setSelected(true);
+            PickMenuBar.getInstance().setVisible(true);
+            clipboard.setVisible(true);
           }
         });
     return clipboardButton;

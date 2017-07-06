@@ -71,7 +71,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
    * @param event Event to display
    */
   public EventFrame(Event event) {
-    super("Event - " + event.getEventSource() + event.getEvid(), true, true, true, false);
+    super("Event - " + event.getEventSource() + event.getEventId(), true, true, true, false);
     this.event = event;
     event.addObserver(this);
 
@@ -79,7 +79,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     pickBox = new PickBox(statusText);
     pickBox.setLayout(new BoxLayout(pickBox, BoxLayout.PAGE_AXIS));
     
-    toolbar = new PickToolBar(pickBox);
+    toolbar = new PickToolBar(pickBox, event);
 
     mainPanel =
         new JSplitPane(JSplitPane.VERTICAL_SPLIT, ParameterPanel.create(event), createPickPanel());
@@ -172,7 +172,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
    * Fetch detailed event.
    */
   public void fetchDetailedEvent() {
-    String neicEvid = event.getEventSource() + event.getEvid();
+    String neicEvid = event.getEventSource() + event.getEventId();
     Event workingEvent = event;
 
     String url = EVENT_URL + neicEvid;
@@ -194,7 +194,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
         eventElement.removeChild(descriptionNodes.item(idx));
       }
       
-      workingEvent.updateEvent(eventElement);
+      workingEvent.parseEvent(eventElement);
     } catch (SAXException e) {
       LOGGER.warn("Unable to redtieve detailed event description. ({})", e.getLocalizedMessage());
     } catch (IOException e) {
@@ -211,6 +211,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
 
     long firstPick = Long.MAX_VALUE;
     long lastPick = Long.MIN_VALUE;
+
     for (Arrival arrival : origin.getArrivals()) {
       Pick pick = arrival.getPick();
       firstPick = Math.min(pick.getTime(), firstPick);

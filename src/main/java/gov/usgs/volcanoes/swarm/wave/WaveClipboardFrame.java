@@ -6,6 +6,8 @@ import gov.usgs.plot.data.file.SeismicDataFile;
 import gov.usgs.plot.data.file.WinDataFile;
 import gov.usgs.volcanoes.core.contrib.PngEncoder;
 import gov.usgs.volcanoes.core.contrib.PngEncoderB;
+import gov.usgs.volcanoes.core.quakeml.Event;
+import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
 import gov.usgs.volcanoes.core.util.UiUtils;
@@ -13,6 +15,7 @@ import gov.usgs.volcanoes.swarm.FileTypeDialog;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwarmFrame;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.SwingWorker;
@@ -21,8 +24,10 @@ import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.FileDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
+import gov.usgs.volcanoes.swarm.event.EventDialog;
+import gov.usgs.volcanoes.swarm.event.PickMenu;
 import gov.usgs.volcanoes.swarm.event.PickMenuBar;
-import gov.usgs.volcanoes.swarm.event.PickSettings;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanelListener;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
@@ -190,7 +195,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     createListeners();
     doButtonEnables();
-    setupPickMenuKeyStrokeHandler();
   }
   
   private void createMainButtons() {
@@ -278,6 +282,7 @@ public class WaveClipboardFrame extends SwarmFrame {
                 wvp.getSettings().pickEnabled = pickButton.isSelected();
               }
             }
+            repaint();
           }
         });
     pickButton.setEnabled(true);
@@ -466,136 +471,6 @@ public class WaveClipboardFrame extends SwarmFrame {
       public void actionPerformed(final ActionEvent e) {
         for (final WaveViewPanel wave : waves) {
           select(wave);
-        }
-      }
-    });
-  }
-
-
-  /**
-   * Set up key stroke shortcuts for picking.
-   */
-  private void setupPickMenuKeyStrokeHandler() {
-    // P short cuts
-    UiUtils.mapKeyStrokeToAction(this, "shift E", "Emergent P", new AbstractAction() {
-      private static final long serialVersionUID = 458715695444946061L;
-      public void actionPerformed(ActionEvent e) {
-        for (WaveViewPanel wvp : selectedSet) {
-          wvp.setPickTime();
-          wvp.getPickMenu().createEmergentP();
-        }
-      }
-    });
-    
-    UiUtils.mapKeyStrokeToAction(this, "shift I", "Impulsive P", new AbstractAction() {
-      private static final long serialVersionUID = 458715695444946061L;
-      public void actionPerformed(ActionEvent e) {
-        for (WaveViewPanel wvp : selectedSet) {
-          wvp.setPickTime();
-          wvp.getPickMenu().createImpulsiveP();
-        }
-      }
-    });
-    
-    UiUtils.mapKeyStrokeToAction(this, "shift X", "Clear P", new AbstractAction() {
-      private static final long serialVersionUID = 458715695444946061L;
-      public void actionPerformed(ActionEvent e) {
-        for (WaveViewPanel wvp : selectedSet) {
-          wvp.getPickMenu().clearP();
-        }
-      }
-    });
-    
-    for (int i = 0; i < PickSettings.numWeight; i++) {
-      final int weight = i;
-      String keyStroke = "shift " + weight;
-      String name = "P weight " + weight;
-      UiUtils.mapKeyStrokeToAction(this, keyStroke, name, new AbstractAction() {
-        private static final long serialVersionUID = 458715695444946061L;
-
-        public void actionPerformed(ActionEvent e) {
-          for (WaveViewPanel wvp : selectedSet) {
-            wvp.getPickMenu().setUncertainty("P", weight);
-          }
-        }
-      });
-    }
-    
-    // S short cuts
-    UiUtils.mapKeyStrokeToAction(this, "alt E", "Emergent S", new AbstractAction() {
-      private static final long serialVersionUID = 458715695444946061L;
-      public void actionPerformed(ActionEvent e) {
-        for (WaveViewPanel wvp : selectedSet) {
-          wvp.setPickTime();
-          wvp.getPickMenu().createEmergentS();
-        }
-      }
-    });
-    
-    UiUtils.mapKeyStrokeToAction(this, "alt I", "Impulsive S", new AbstractAction() {
-      private static final long serialVersionUID = 458715695444946061L;
-      public void actionPerformed(ActionEvent e) {
-        for (WaveViewPanel wvp : selectedSet) {
-          wvp.setPickTime();
-          wvp.getPickMenu().createImpulsiveS();
-        }
-      }
-    });
-    
-    UiUtils.mapKeyStrokeToAction(this, "alt X", "Clear S", new AbstractAction() {
-      private static final long serialVersionUID = 458715695444946061L;
-      public void actionPerformed(ActionEvent e) {
-        for (WaveViewPanel wvp : selectedSet) {
-          wvp.getPickMenu().clearS();
-        }
-      }
-    });
-    
-    for (int i = 0; i < PickSettings.numWeight; i++) {
-      final int weight = i;
-      String keyStroke = "alt " + weight;
-      String name = "S weight " + weight;
-      UiUtils.mapKeyStrokeToAction(this, keyStroke, name, new AbstractAction() {
-        private static final long serialVersionUID = 458715695444946061L;
-
-        public void actionPerformed(ActionEvent e) {
-          for (WaveViewPanel wvp : selectedSet) {
-            wvp.getPickMenu().setUncertainty("S", weight);
-          }
-        }
-      });
-    }
-    
-    // coda short cuts
-    UiUtils.mapKeyStrokeToAction(this, "control 1", "coda 1", new AbstractAction() {
-      private static final long serialVersionUID = 458715695444946061L;
-
-      public void actionPerformed(ActionEvent e) {
-        for (WaveViewPanel wvp : selectedSet) {
-          wvp.setPickTime();
-          wvp.getPickMenu().createCoda1();
-        }
-      }
-    });
-
-    UiUtils.mapKeyStrokeToAction(this, "control 2", "coda 2", new AbstractAction() {
-      private static final long serialVersionUID = 458715695444946061L;
-
-      public void actionPerformed(ActionEvent e) {
-        for (WaveViewPanel wvp : selectedSet) {
-          wvp.setPickTime();
-          wvp.getPickMenu().createCoda2();
-        }
-      }
-    });
-
-    UiUtils.mapKeyStrokeToAction(this, "control X", "coda clear", new AbstractAction() {
-      private static final long serialVersionUID = 458715695444946061L;
-
-      public void actionPerformed(ActionEvent e) {
-        for (WaveViewPanel wvp : selectedSet) {
-          wvp.setPickTime();
-          wvp.getPickMenu().clearCoda();
         }
       }
     });
@@ -1518,5 +1393,92 @@ public class WaveClipboardFrame extends SwarmFrame {
    */
   public List<WaveViewPanel> getWaves() {
     return waves;
+  }
+    
+  /**
+   * Import event into clipboard.
+   * @param event event
+   */
+  public void importEvent(Event event) {
+    //TODO: throbber
+    
+    // update event dialog 
+    EventDialog.getInstance().setEventDetails(event);
+    
+    // get wave start and end times
+    long firstPick = Long.MAX_VALUE;
+    long lastPick = Long.MIN_VALUE;
+
+    for (Pick pick : event.getPicks().values()) {
+      firstPick = Math.min(pick.getTime(), firstPick);
+      lastPick = Math.max(pick.getTime(), lastPick);
+    }
+    double waveStart = J2kSec.fromEpoch(firstPick) - 2;
+    double waveEnd = J2kSec.fromEpoch(lastPick) + 2;
+
+    // create wave view panels 
+    HashMap<String, WaveViewPanel> panels = new HashMap<String, WaveViewPanel>();
+    for (Pick pick : event.getPicks().values()) {
+      String channel = pick.getChannel().replaceAll("\\$", " ").trim();
+      WaveViewPanel wvp = panels.get(channel);
+      if (wvp == null) {
+        wvp = new WaveViewPanel();
+        wvp.setChannel(channel);
+        wvp.setStartTime(waveStart);
+        wvp.setEndTime(waveEnd);
+        boolean foundSource = false;
+        for (SeismicDataSource source : SwarmConfig.getInstance().getSources().values()) {
+          for (String ch : source.getChannels()) {
+            if (ch.equals(channel)) {
+              wvp.setDataSource(source);
+              Wave wave = source.getWave(channel, waveStart, waveEnd);
+              if (wave != null) {
+                wvp.setWave(wave, waveStart, waveEnd);
+                foundSource = true;
+                break;
+              }
+            }
+          }
+          if (foundSource) {
+            break;
+          }
+        }
+        // If no data source already available go to IRIS
+        if (wvp.getDataSource() == null) {
+          WebServicesSource source = new WebServicesSource(pick.getChannel());
+          wvp.setDataSource(source);
+          Wave wave = source.getWave(channel, waveStart, waveEnd);
+          if (wave != null) {
+            wvp.setWave(wave, waveStart, waveEnd);
+          }
+        }
+        panels.put(channel, wvp);
+      }
+      String phaseHint = pick.getPhaseHint();
+      PickMenu pickMenu = wvp.getPickMenu();
+      pickMenu.setPick(phaseHint, pick, true);
+      
+    }
+    
+    // add wave view panels to clipboard
+    for (WaveViewPanel wvp : panels.values()) {
+      addWave(wvp);
+    }
+    
+    // propagate picks
+    for (WaveViewPanel wvp : waves) {
+      PickMenu pickMenu = wvp.getPickMenu();
+      for (String phase : new String[] {PickMenu.P, PickMenu.S}) {
+        Pick pick = pickMenu.getPick(phase);
+        if (pick != null && pickMenu.isPickChannel(phase)) {
+          pickMenu.propagatePick(phase, pick);
+        }
+      }
+    }
+    
+  }
+
+  public JToggleButton getPickButton() {
+    return pickButton;
   }
 }

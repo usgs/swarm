@@ -22,11 +22,14 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -57,6 +60,7 @@ public class EventDialog extends SwarmModalDialog {
   private JComboBox<EventType> eventType;
   private JComboBox<EventTypeCertainty> eventTypeCertainty;
   private JTextField description;
+  private JTextArea comment;
   private JTextField exportDirectory;
   private String user;
 
@@ -64,7 +68,7 @@ public class EventDialog extends SwarmModalDialog {
    * Default constructor.
    */
   private EventDialog() {
-    super(Swarm.getApplicationFrame(), "Save Event");
+    super(Swarm.getApplicationFrame(), "Save event to QuakeML");
     setSizeAndLocation();
     user = SwarmConfig.getInstance().getUser();
   }
@@ -102,6 +106,11 @@ public class EventDialog extends SwarmModalDialog {
     
     description = new JTextField("");
     builder.append("Description", description);
+    builder.nextLine();
+    
+    comment = new JTextArea(4,1);
+    JScrollPane scrollPane = new JScrollPane(comment);
+    builder.append("Comment", scrollPane);
     builder.nextLine();
     
     exportDirectory = new JTextField(SwarmConfig.getInstance().lastPath);
@@ -148,18 +157,17 @@ public class EventDialog extends SwarmModalDialog {
     event.setType((EventType) eventType.getSelectedItem());
     event.setTypeCertainty((EventTypeCertainty) eventTypeCertainty.getSelectedItem());
     event.setDescription(description.getText());
-
+    event.setComment(comment.getText());
+ 
     HashMap<String, Pick> picks = new HashMap<String, Pick>();
     WaveClipboardFrame clipboard = WaveClipboardFrame.getInstance();
     for (WaveViewPanel wvp : clipboard.getWaves()) {
       PickMenu pickMenu = wvp.getPickMenu();
-      if (pickMenu.getP() != null && pickMenu.isPickChannelP()) {
-        Pick p = pickMenu.getP();
-        picks.put(p.publicId, p);
-      }
-      if (pickMenu.getS() != null && pickMenu.isPickChannelS()) {
-        Pick s = pickMenu.getS();
-        picks.put(s.publicId, s);
+      for (String phase : new String[] {PickMenu.P, PickMenu.S}) {
+        if (pickMenu.getPick(phase) != null && pickMenu.isPickChannel(phase)) {
+          Pick pick = pickMenu.getPick(phase);
+          picks.put(pick.publicId, pick);
+        }
       }
     }
     event.setPicks(picks);
@@ -218,6 +226,7 @@ public class EventDialog extends SwarmModalDialog {
       StreamResult result = new StreamResult(fos);
       transformer.transform(source, result);
       
+      fos.close();
     } catch (ParserConfigurationException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -228,6 +237,9 @@ public class EventDialog extends SwarmModalDialog {
       // TODO Auto-generated catch block
       e.printStackTrace();
     } catch (TransformerException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }  
@@ -241,6 +253,28 @@ public class EventDialog extends SwarmModalDialog {
    */
   protected void wasCancelled() {
 
+  }
+  
+  /**
+   * Set event details from existing event.
+   * @param event existing event
+   */
+  public void setEventDetails(Event event) {
+    if (event == null) {
+      return;
+    }
+    setComment(event.getComment());
+    setDescription(event.getDescription());
+    setEventType(event.getType());
+    setEventTypeCertainty(event.getTypeCertainty());
+  }
+  
+  /**
+   * Set comment.
+   * @param comment comment text
+   */
+  public void setComment(String comment) {
+    this.comment.setText(comment);
   }
   
   /**

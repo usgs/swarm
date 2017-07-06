@@ -704,26 +704,7 @@ public abstract class AbstractWavePanel extends JComponent {
    * @param g2 graphics
    */
   protected void annotateImage(Graphics2D g2) {
-    if (settings.pickEnabled && pickMenu != null) {
 
-      double[] t = getTranslation();
-      if (t == null) {
-        return;
-      }
-
-      if (!pickMenu.isHidePhases()) {
-        // Draw P marker
-        Pick p = pickMenu.getP();
-        if (p != null) {
-          drawPick(p.getTag(), g2, p.getTime());
-        }
-        // Draw S marker
-        Pick s = pickMenu.getS();
-        if (s != null) {
-          drawPick(s.getTag(), g2, s.getTime());
-        }
-      }
-    }
   }
 
   /**

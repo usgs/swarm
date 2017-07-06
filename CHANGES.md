@@ -1,3 +1,14 @@
+## Version 2.7.3
+  * Fix pick time zone on export to QuakeML
+  * Add 'Clear All Picks' to pick menu bar
+  * Stream line pick menu (right-click)
+  * Add ability to use P pick for coda calculations
+  * Add optional comment field for event export
+  * Add clipboard button to event viewer
+  * Fix sort button on event viewer
+  * Update basemap URLs to https
+  * Center map on imported events
+
 ## Version 2.7.2
   * Read WIN files
   * Add option to turn off S-P plot for a station

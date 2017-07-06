@@ -6,6 +6,8 @@
 
 package gov.usgs.volcanoes.swarm.event;
 
+import gov.usgs.volcanoes.core.quakeml.EvaluationMode;
+import gov.usgs.volcanoes.core.quakeml.EvaluationStatus;
 import gov.usgs.volcanoes.core.quakeml.Event;
 import gov.usgs.volcanoes.core.quakeml.Magnitude;
 import gov.usgs.volcanoes.core.quakeml.Origin;
@@ -147,12 +149,12 @@ public class ParameterPanel {
     addKey("Evalutation: ", parameterPanel, c);
 
     String evaluationTag = "";
-    Origin.EvaluationMode evaluationMode = origin.getEvaluationMode();
+    EvaluationMode evaluationMode = origin.getEvaluationMode();
     if (evaluationMode != null) {
       evaluationTag += evaluationMode.toString().toLowerCase();
     }
 
-    Origin.EvaluationStatus evaluationStatus = origin.getEvaluationStatus();
+    EvaluationStatus evaluationStatus = origin.getEvaluationStatus();
     if (evaluationStatus != null) {
       if (evaluationTag.length() > 0) {
         evaluationTag += " / ";
@@ -164,7 +166,7 @@ public class ParameterPanel {
 
     c.gridy++;
     addKey("Event id: ", parameterPanel, c);
-    addValue(event.getEvid(), parameterPanel, c);
+    addValue(event.getEventId(), parameterPanel, c);
 
     c.weighty = 1;
     c.weightx = 1;
