@@ -634,9 +634,12 @@ public class WaveViewPanel extends JComponent {
         }
         // Coda 
         if (swarmConfig.durationEnabled && !Double.isNaN(pickMenu.getCodaDuration())) {
+          if (!pickStatus.equals("")) {
+            pickStatus += "; ";
+          }
           double duration = pickMenu.getCodaDuration();
           double durationMagnitude = swarmConfig.getDurationMagnitude(duration);
-          String coda = String.format("; Coda: %.2fs (Mc: %.2f)", duration, durationMagnitude);
+          String coda = String.format("Coda: %.2fs (Mc: %.2f)", duration, durationMagnitude);
           
           // get clipboard average
           WaveClipboardFrame cb = WaveClipboardFrame.getInstance();
