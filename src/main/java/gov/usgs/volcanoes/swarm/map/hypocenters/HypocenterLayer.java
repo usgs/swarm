@@ -133,7 +133,11 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 
       g2.translate(res.x, res.y);
 
-      double mag = event.getPreferredMagnitude().getMag();
+      Magnitude magnitude = event.getPreferredMagnitude();
+      if(magnitude == null){
+        continue;
+      }
+      double mag = magnitude.getMag();
       float diameter = getMarkerSize(mag);
       renderer.shape = new Ellipse2D.Float(0f, 0f, diameter, diameter);
 
