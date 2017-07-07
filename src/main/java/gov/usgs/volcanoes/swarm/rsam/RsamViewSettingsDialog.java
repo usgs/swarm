@@ -8,6 +8,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import gov.usgs.math.BinSize;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmModalDialog;
+import gov.usgs.volcanoes.swarm.event.PickSettingsDialog.WeightInputVerifier;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
 
 import java.awt.BorderLayout;
@@ -17,8 +18,10 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import javax.swing.ButtonGroup;
+import javax.swing.InputVerifier;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -43,6 +46,8 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
   private JRadioButton countsButton;
 
   private JCheckBox detrend;
+  private JCheckBox despike;
+  private JTextField despikePeriod;
   private JComboBox<ValuesPeriods> valuesPeriod;
   private JComboBox<CountsPeriods> countsPeriod;
 
@@ -99,6 +104,8 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     }
 
     detrend.setSelected(settings.detrend);
+    despike.setSelected(settings.despike);
+    despikePeriod.setText(Integer.toString(settings.despikePeriod));
 
     valuesPeriod.setSelectedItem(ValuesPeriods.fromS(settings.valuesPeriodS));
     countsPeriod.setSelectedItem(CountsPeriods.fromS(settings.countsPeriodS));
@@ -130,6 +137,9 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     countsPeriod = new JComboBox<CountsPeriods>(CountsPeriods.values());
 
     detrend = new JCheckBox("Detrend (linear)");
+    despike = new JCheckBox("Despike (mean)");
+    despikePeriod = new JTextField(3);
+    despikePeriod.setInputVerifier(new IntegerInputVerifier(true));
 
     runningMedianButton = new JCheckBox("Running median");
     runningMedianPeriod = new JTextField(4);
@@ -155,7 +165,9 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     });
 
     scaleMax = new JTextField(4);
+    scaleMax.setInputVerifier(new IntegerInputVerifier());
     scaleMin = new JTextField(4);
+    scaleMin.setInputVerifier(new IntegerInputVerifier());
 
     eventThreshold = new JTextField(4);
     eventRatio = new JTextField(4);
@@ -167,7 +179,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     super.createUi();
     createComponents();
     FormLayout layout = new FormLayout(
-        "left:65dlu, 1dlu, left:60dlu, 3dlu, left:30dlu, 3dlu, left:30dlu, 3dlu, left:30dlu", "");
+        "left:65dlu, 1dlu, left:30dlu, 3dlu, left:60dlu, 3dlu, left:30dlu, 3dlu, left:30dlu", "");
 
     DefaultFormBuilder builder = new DefaultFormBuilder(layout).border(Borders.DIALOG);
 
@@ -176,29 +188,39 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     builder.appendSeparator("View");
     builder.nextLine();
     builder.append(valuesButton);
+    builder.nextColumn(2);
     builder.append(countsButton);
     builder.nextLine();
 
     builder.appendSeparator("RSAM Options");
+    
     builder.nextLine();
     builder.append(detrend);
     builder.nextColumn(2);
-    builder.add(new JLabel("Period:"),
+    builder.add(new JLabel("RSAM Period:"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.add(valuesPeriod, cc.xyw(builder.getColumn(), builder.getRow(), 3));
 
     builder.nextLine();
+    builder.append(despike);
+    builder.nextColumn(2);
+    builder.add(new JLabel("Despike Period:"),
+        cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+    builder.nextColumn(2);
+    builder.add(despikePeriod, cc.xyw(builder.getColumn(), builder.getRow(), 1));
+    
+    builder.nextLine();
     builder.append(autoScale);
     builder.nextColumn(2);
-    builder.add(new JLabel("Min:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+    builder.add(new JLabel("Scale Min:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.add(scaleMin, cc.xyw(builder.getColumn(), builder.getRow(), 1));
 
     builder.nextLine();
     builder.appendRow("center:18dlu");
     builder.nextColumn(4);
-    builder.add(new JLabel("Max:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+    builder.add(new JLabel("Scale Max:"), cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.add(scaleMax, cc.xyw(builder.getColumn(), builder.getRow(), 1));
 
@@ -281,6 +303,8 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
       settings.valuesPeriodS = ((ValuesPeriods) valuesPeriod.getSelectedItem()).getPeriodS();
       settings.countsPeriodS = ((CountsPeriods) countsPeriod.getSelectedItem()).getPeriodS();
       settings.detrend = detrend.isSelected();
+      settings.despike = despike.isSelected();
+      settings.despikePeriod = Integer.valueOf(despikePeriod.getText());
 
       settings.runningMean = runningMeanButton.isSelected();
       settings.runningMeanPeriodS = Double.parseDouble(runningMeanPeriod.getText());
@@ -307,6 +331,39 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
       e.printStackTrace();
       JOptionPane.showMessageDialog(this, "Illegal values.", "Options Error",
           JOptionPane.ERROR_MESSAGE);
+    }
+  }
+  
+  /**
+   * Integer input verifier.
+   */
+  public class IntegerInputVerifier extends InputVerifier {
+
+    private boolean positiveOnly = false;
+
+    IntegerInputVerifier() {
+
+    }
+
+    IntegerInputVerifier(boolean positiveOnly) {
+      this.positiveOnly = positiveOnly;
+    }
+
+    /**
+     * @see javax.swing.InputVerifier#verify(javax.swing.JComponent)
+     */
+    public boolean verify(JComponent input) {
+      String text = ((JTextField) input).getText();
+      try {
+        int value = Integer.valueOf(text);
+        if (positiveOnly && value < 0) {
+          return false;
+        } else {
+          return true;
+        }
+      } catch (NumberFormatException e) {
+        return false;
+      }
     }
   }
 

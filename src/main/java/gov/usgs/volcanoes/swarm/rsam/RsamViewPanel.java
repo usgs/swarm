@@ -312,6 +312,10 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
     if (settings.detrend) {
       gdm.detrend(1);
     }
+    
+    if (settings.despike) {
+      gdm.despike(1, settings.despikePeriod);
+    }
 
     if (settings.runningMedian) {
       gdm.set2median(1, settings.runningMedianPeriodS);

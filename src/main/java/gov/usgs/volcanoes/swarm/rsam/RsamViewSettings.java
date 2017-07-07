@@ -25,6 +25,8 @@ public class RsamViewSettings {
   public int valuesPeriodS;
   public int countsPeriodS;
   public boolean detrend;
+  public boolean despike;
+  public int despikePeriod;
   public boolean runningMedian;
   public double runningMedianPeriodS;
   public boolean runningMean;
@@ -50,6 +52,8 @@ public class RsamViewSettings {
     DEFAULT_RSAM_VIEW_SETTINGS.valuesPeriodS = 600;
     DEFAULT_RSAM_VIEW_SETTINGS.countsPeriodS = 10;
     DEFAULT_RSAM_VIEW_SETTINGS.detrend = false;
+    DEFAULT_RSAM_VIEW_SETTINGS.despike = false;
+    DEFAULT_RSAM_VIEW_SETTINGS.despikePeriod = 0;
     DEFAULT_RSAM_VIEW_SETTINGS.runningMedian = false;
     DEFAULT_RSAM_VIEW_SETTINGS.runningMedianPeriodS = 300;
     DEFAULT_RSAM_VIEW_SETTINGS.runningMean = false;
@@ -101,6 +105,8 @@ public class RsamViewSettings {
     valuesPeriodS = s.valuesPeriodS;
     countsPeriodS = s.countsPeriodS;
     detrend = s.detrend;
+    despike = s.despike;
+    despikePeriod = s.despikePeriod;
     runningMedian = s.runningMedian;
     runningMedianPeriodS = s.runningMedianPeriodS;
     runningMean = s.runningMean;
@@ -126,6 +132,10 @@ public class RsamViewSettings {
         DEFAULT_RSAM_VIEW_SETTINGS.countsPeriodS);
     detrend =
         StringUtils.stringToBoolean(cf.getString("detrend"), DEFAULT_RSAM_VIEW_SETTINGS.detrend);
+    despike =
+        StringUtils.stringToBoolean(cf.getString("despike"), DEFAULT_RSAM_VIEW_SETTINGS.despike);
+    despikePeriod = StringUtils.stringToInt(cf.getString("despikePeriod"),
+        DEFAULT_RSAM_VIEW_SETTINGS.despikePeriod);
     runningMedian = StringUtils.stringToBoolean(cf.getString("runningMedian"),
         DEFAULT_RSAM_VIEW_SETTINGS.runningMedian);
     runningMedianPeriodS = StringUtils.stringToDouble(cf.getString("runningMedianPeriod"),
@@ -159,6 +169,8 @@ public class RsamViewSettings {
     cf.put(prefix + ".countsPeriod", Integer.toString(countsPeriodS));
     cf.put(prefix + ".viewType", viewType.toString());
     cf.put(prefix + ".detrend", Boolean.toString(detrend));
+    cf.put(prefix + ".despike", Boolean.toString(despike));
+    cf.put(prefix + ".despikePeriod", Integer.toString(despikePeriod));
     cf.put(prefix + ".runningMedian", Boolean.toString(runningMedian));
     cf.put(prefix + ".runningMedianPeriod", Double.toString(runningMedianPeriodS));
     cf.put(prefix + ".runningMean", Boolean.toString(runningMean));
