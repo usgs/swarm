@@ -5,18 +5,25 @@
 
 package gov.usgs.volcanoes.swarm.event;
 
+import gov.usgs.volcanoes.core.quakeml.Event;
+import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.Throbber;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewToolBar;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToolBar;
@@ -37,6 +44,7 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
   private final JButton sizeButton;
   private final JButton sortButton;
   private final JButton captureButton;
+  private final JButton clipboardButton;
   private final JButton histButton;
 
   private final JButton compXButton;
@@ -47,6 +55,7 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
   private final WaveViewToolBar waveViewToolBar;
   private JPopupMenu popup;
   private int waveHeight;
+  private Event event;
 
   private final PickToolBarListener listener;
 
@@ -54,8 +63,9 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
    * Constructor.
    * @param listener Pick tool bar listener
    */
-  public PickToolBar(PickToolBarListener listener) {
+  public PickToolBar(PickToolBarListener listener, Event event) {
     this.listener = listener;
+    this.event = event;
     setFloatable(false);
     setRollover(true);
     setBorder(BorderFactory.createEmptyBorder(1, 0, 0, 0));
@@ -63,6 +73,7 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
     sizeButton = createSizeButton();
     sortButton = createSortButton();
     captureButton = createCaptureButton();
+    clipboardButton = createClipboardButton();
     backButton = createBackButton();
     compXButton = createCompXButton();
     expXButton = createExpXButton();
@@ -84,6 +95,7 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
     add(sizeButton);
     add(sortButton);
     addSeparator();
+    add(clipboardButton);
     add(captureButton);
     addSeparator();
     add(backButton);
@@ -121,7 +133,6 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
     return sizeButton;
   }
 
-
   private JButton createCaptureButton() {
     JButton captureButton = SwarmUtil.createToolBarButton(Icons.camera, "Save pick image (P)",
         new CaptureActionListener());
@@ -130,6 +141,49 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
     return captureButton;
   }
 
+  private JButton createClipboardButton() {
+    JButton clipboardButton = SwarmUtil.createToolBarButton(Icons.clipboard,
+        "Send picks to clipboard", new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            //WaveClipboardFrame.getInstance().importEvent(event);
+            
+            // ask if user wants to clear clipboard first
+            WaveClipboardFrame clipboard = WaveClipboardFrame.getInstance();
+            int result = JOptionPane.showConfirmDialog(Swarm.getApplicationFrame(),
+                "Clear clipboard first?", "Clear clipboard", JOptionPane.YES_NO_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+              clipboard.removeWaves();
+            }
+            
+            // update event dialog 
+            EventDialog.getInstance().setEventDetails(event);
+            
+            // Add panels to clipbard
+            
+            PickBox pickBox = (PickBox)listener;
+            List<PickWavePanel> panels = pickBox.getPanels();
+            for (WaveViewPanel wvp : panels) {
+              clipboard.addWave(new WaveViewPanel(wvp));
+            }
+
+            for (WaveViewPanel wvp : clipboard.getWaves()) {
+              wvp.getSettings().pickEnabled = true;
+              PickMenu pickMenu = wvp.getPickMenu();
+              for (String phase : new String[] {PickMenu.P, PickMenu.S}) {
+                Pick pick = pickMenu.getPick(phase);
+                if (pick != null && pickMenu.isPickChannel(phase)) {
+                  pickMenu.propagatePick(phase, pick);
+                }
+              }
+            }
+            
+            clipboard.getPickButton().setSelected(true);
+            clipboard.getPickMenuBar().setVisible(true);
+            clipboard.setVisible(true);
+          }
+        });
+    return clipboardButton;
+  }
 
   private JButton createSortButton() {
     JButton sortButton = SwarmUtil.createToolBarButton(Icons.geosort,

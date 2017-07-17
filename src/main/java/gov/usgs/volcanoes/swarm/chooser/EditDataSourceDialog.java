@@ -121,7 +121,7 @@ public class EditDataSourceDialog extends SwarmModalDialog {
   }
 
   protected boolean allowOk() {
-    String n = name.getText();
+    String n = name.getText().trim();
     String message = null;
     if (n == null || n.length() <= 0) {
       message = "You must specify a name for this data source.";
@@ -155,7 +155,7 @@ public class EditDataSourceDialog extends SwarmModalDialog {
 
   protected void wasOk() {
     DataSourcePanel p = panels.get(tabPane.getSelectedIndex());
-    result = name.getText() + ";" + p.wasOk();
+    result = name.getText().trim() + ";" + p.wasOk();
   }
 
   public String getResult() {

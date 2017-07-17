@@ -4,6 +4,7 @@ import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.data.file.FileType;
 import gov.usgs.plot.data.file.SeismicDataFile;
+import gov.usgs.plot.data.file.WinDataFile;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.FileTypeDialog;
 import gov.usgs.volcanoes.swarm.Metadata;
@@ -19,7 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +41,7 @@ public class FileDataSource extends AbstractCachingDataSource {
   private final Map<String, double[]> channelTimes;
   private final Set<String> openFiles;
   private static SwarmConfig swarmConfig;
+  public static boolean useWinBatch = false;
 
   private FileDataSource() {
     super();
@@ -83,6 +87,7 @@ public class FileDataSource extends AbstractCachingDataSource {
    * @param fs files
    */
   public void openFiles(final File[] fs) {
+    useWinBatch = false;
     FileTypeDialog dialog = null;
     for (int i = 0; i < fs.length; i++) {
       final String fileName = fs[i].getPath();
@@ -94,28 +99,42 @@ public class FileDataSource extends AbstractCachingDataSource {
 
       if (file == null) {
         if (dialog == null) {
-          dialog = new FileTypeDialog();
+          dialog = new FileTypeDialog(false);
         }
+          
         if (!dialog.isOpen() || (dialog.isOpen() && !dialog.isAssumeSame())) {
           dialog.setFilename(fs[i].getName());
           dialog.setVisible(true);
         }
 
         FileType fileType;
-        if (dialog.isCancelled()) {
+        if (dialog.isCancelled() || dialog.getFileType() == null) {
           fileType = FileType.UNKNOWN;
         } else {
           fileType = dialog.getFileType();
         }
+        
+        if (fileType == FileType.WIN) { // Open WIN config file
+          if (!useWinBatch) {
+            openWinConfigFileDialog();
+          }
+          useWinBatch = dialog.isAssumeSame();
+          if (WinDataFile.configFile == null) {
+            JOptionPane.showMessageDialog(applicationFrame, "No WIN configuration file set.", "WIN",
+                JOptionPane.ERROR_MESSAGE);
+            LOGGER.error("Unable to open: {} -> {}", fs[i].getPath(), fileType);
+            return;
+          }
+        }
 
-        LOGGER.warn("user input file type: {} -> {}", fs[i].getPath(), fileType);
+        LOGGER.info("user input file type: {} -> {}", fs[i].getPath(), fileType);
         file = SeismicDataFile.getFile(fileName, fileType);
       }
 
       if (file != null) {
         readFile(file);
-        swarmConfig.lastPath = fs[i].getParent();
       } else {
+        LOGGER.error("Could not open file: {} ", fs[i].getPath());
         JOptionPane.showMessageDialog(applicationFrame, "Could not open file: " + fileName, "Error",
             JOptionPane.ERROR_MESSAGE);
       }
@@ -175,7 +194,30 @@ public class FileDataSource extends AbstractCachingDataSource {
     };
     worker.start();
   }
+  
 
+  /**
+   * File open dialog for WIN configuration file.
+   */
+  public static void openWinConfigFileDialog() {
+    JFileChooser chooser = new JFileChooser();
+    chooser.setFileFilter(new FileNameExtensionFilter("WIN Config (.config)", "config"));
+    chooser.addChoosableFileFilter(new FileNameExtensionFilter("Text File (.txt)", "txt"));
+    chooser.setCurrentDirectory(new File(swarmConfig.lastPath));
+    chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    chooser.setMultiSelectionEnabled(false);
+    chooser.setDialogTitle("Select WIN configuration file...");
+    if (WinDataFile.configFile != null) {
+      chooser.setSelectedFile(WinDataFile.configFile);
+    }
+    int result = chooser.showOpenDialog(applicationFrame);
+    if (result == JFileChooser.APPROVE_OPTION) {
+      File f = chooser.getSelectedFile();
+      SwarmConfig.getInstance().lastPath = f.getParent();
+      WinDataFile.configFile = f;
+    }
+  }
+  
   @Override
   public HelicorderData getHelicorder(String channel, double t1, double t2,
       final GulperListener gl) {

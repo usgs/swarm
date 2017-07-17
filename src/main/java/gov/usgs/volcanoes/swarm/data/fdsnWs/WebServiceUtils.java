@@ -1,7 +1,8 @@
 package gov.usgs.volcanoes.swarm.data.fdsnWs;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import gov.usgs.volcanoes.swarm.ChannelInfo;
+import gov.usgs.volcanoes.swarm.ChannelUtil;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -10,9 +11,8 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Level;
 
-import gov.usgs.volcanoes.swarm.ChannelInfo;
-import gov.usgs.volcanoes.swarm.ChannelUtil;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Web service utility methods.
@@ -23,16 +23,16 @@ public class WebServiceUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(WebServiceUtils.class);
   
   /** Swarm web services property key prefix. */
-  public final static String SWARM_WS_PROP_KEY_PREFIX = "SWARM_WS_";
+  public static final String SWARM_WS_PROP_KEY_PREFIX = "SWARM_WS_";
 
   /** Empty location code. */
-  public final static String EMPTY_LOC_CODE = "--";
+  public static final String EMPTY_LOC_CODE = "--";
 
   /** Default debug level. */
-  private final static Level defaultDebugLevel = Level.FINEST;
+  private static final Level defaultDebugLevel = Level.FINEST;
 
   /** Date format. */
-  private final static DateFormat dateFormat;
+  private static final DateFormat dateFormat;
 
   /** Debug level. */
   private static Level debugLevel;
@@ -49,6 +49,7 @@ public class WebServiceUtils {
         }
       }
     } catch (final Exception ex) {
+      //
     }
   }
 
@@ -133,12 +134,14 @@ public class WebServiceUtils {
         s = System.getenv(key);
       }
     } catch (final Exception ex) {
+      //
     }
     if (s == null) {
       s = def;
     }
     return s;
   }
+  
   /**
    * Determines if debug logging is enabled.
    * 
@@ -157,6 +160,7 @@ public class WebServiceUtils {
   public static boolean isDebug(final Level level) {
     return debugLevel != null && level.intValue() >= debugLevel.intValue();
   }
+  
   /**
    * Get the date for the text.
    * 
@@ -180,6 +184,7 @@ public class WebServiceUtils {
         try {
           return dateFormat.parse(s);
         } catch (final Exception ex) {
+          //
         }
       }
     }

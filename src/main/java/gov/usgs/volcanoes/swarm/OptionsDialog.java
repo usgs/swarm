@@ -211,6 +211,12 @@ public class OptionsDialog extends SwarmModalDialog {
 
     useMapPacks.setSelected(!swarmConfig.useWMS);
     useWms.setSelected(swarmConfig.useWMS);
+    NationalMapLayer basemap = NationalMapLayer.getFromServer(swarmConfig.wmsServer);
+    if (basemap != null) {
+      natMapList.setSelectedItem(basemap);
+    } else {
+      natMapList.setSelectedItem(NationalMapLayer.OTHER);
+    }
     wmsServer.setText(swarmConfig.wmsServer);
     wmsLayer.setText(swarmConfig.wmsLayer);
     wmsStyles.setText(swarmConfig.wmsStyles);

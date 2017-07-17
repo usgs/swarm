@@ -3,24 +3,31 @@ package gov.usgs.volcanoes.swarm.wave;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.data.file.FileType;
 import gov.usgs.plot.data.file.SeismicDataFile;
+import gov.usgs.plot.data.file.WinDataFile;
 import gov.usgs.volcanoes.core.contrib.PngEncoder;
 import gov.usgs.volcanoes.core.contrib.PngEncoderB;
+import gov.usgs.volcanoes.core.quakeml.Event;
 import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
 import gov.usgs.volcanoes.core.util.UiUtils;
-import gov.usgs.volcanoes.swarm.FileChooser;
 import gov.usgs.volcanoes.swarm.FileTypeDialog;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwarmFrame;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.Throbber;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
+import gov.usgs.volcanoes.swarm.data.FileDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
+import gov.usgs.volcanoes.swarm.event.EventDialog;
+import gov.usgs.volcanoes.swarm.event.PickMenu;
+import gov.usgs.volcanoes.swarm.event.PickMenuBar;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanelListener;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
@@ -116,7 +123,9 @@ public class WaveClipboardFrame extends SwarmFrame {
   private JButton backButton;
   private JButton gotoButton;
 
+  private PickMenuBar pickMenuBar;
   private JToggleButton pickButton;
+  private Event event;
   
   private JPopupMenu popup;
 
@@ -189,7 +198,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     createListeners();
     doButtonEnables();
   }
-
+  
   private void createMainButtons() {
     openButton =
         SwarmUtil.createToolBarButton(Icons.open, "Open a saved wave", new OpenActionListener());
@@ -261,19 +270,28 @@ public class WaveClipboardFrame extends SwarmFrame {
     
 
     toolbar.addSeparator();
+    pickMenuBar = new PickMenuBar(this);
     pickButton = SwarmUtil.createToolBarToggleButton(Icons.pick,
         "Pick Mode", new ActionListener() {
           public void actionPerformed(ActionEvent e) {
+            if (pickButton.isSelected()) {
+              pickMenuBar.setVisible(true);
+            } else {
+              pickMenuBar.setVisible(false);
+            }
             for (WaveViewPanel awp : waves) {
               if (awp instanceof WaveViewPanel) {
                 WaveViewPanel wvp = (WaveViewPanel) awp;
                 wvp.getSettings().pickEnabled = pickButton.isSelected();
               }
             }
+            repaint();
           }
         });
     pickButton.setEnabled(true);
     toolbar.add(pickButton);
+    toolbar.add(pickMenuBar);
+    pickMenuBar.setVisible(false);
   }
 
   // TODO: don't write image on event thread
@@ -460,7 +478,7 @@ public class WaveClipboardFrame extends SwarmFrame {
       }
     });
   }
-
+  
   private void createListeners() {
     this.addInternalFrameListener(new InternalFrameAdapter() {
       @Override
@@ -609,8 +627,10 @@ public class WaveClipboardFrame extends SwarmFrame {
       chooser.setMultiSelectionEnabled(true);
       final int result = chooser.showOpenDialog(applicationFrame);
       if (result == JFileChooser.APPROVE_OPTION) {
+        FileDataSource.useWinBatch = false;
+        FileTypeDialog dialog = new FileTypeDialog(false);
         final File[] fs = chooser.getSelectedFiles();
-
+        swarmConfig.lastPath = fs[0].getParent();
         for (int i = 0; i < fs.length; i++) {
           if (fs[i].isDirectory()) {
             final File[] dfs = fs[i].listFiles();
@@ -618,12 +638,10 @@ public class WaveClipboardFrame extends SwarmFrame {
               continue;
             }
             for (int j = 0; j < dfs.length; j++) {
-              openFile(dfs[j]);
+              openFile(dfs[j], dialog);
             }
-            swarmConfig.lastPath = fs[i].getParent();
           } else {
-            openFile(fs[i]);
-            swarmConfig.lastPath = fs[i].getParent();
+            openFile(fs[i], dialog);
           }
         }
       }
@@ -702,7 +720,7 @@ public class WaveClipboardFrame extends SwarmFrame {
         return;
       }
 
-      final FileTypeDialog dialog = new FileTypeDialog();
+      final FileTypeDialog dialog = new FileTypeDialog(true);
       FileType fileType = FileType.UNKNOWN;
       if (!dialog.isOpen() || (dialog.isOpen() && !dialog.isAssumeSame())) {
         dialog.setVisible(true);
@@ -800,20 +818,30 @@ public class WaveClipboardFrame extends SwarmFrame {
    * Open seismic data file.
    * @param f file object
    */
-  public void openFile(final File f) {
+  public void openFile(final File f, FileTypeDialog dialog) {
     SeismicDataFile file = SeismicDataFile.getFile(f);
     if (file == null) {
-      final FileTypeDialog dialog = new FileTypeDialog();
-      FileType fileType = FileType.UNKNOWN;
+      FileType fileType = dialog.getFileType();
       if (!dialog.isOpen() || (dialog.isOpen() && !dialog.isAssumeSame())) {
+        dialog.setFilename(f.getName());
         dialog.setVisible(true);
 
-        if (dialog.isCancelled()) {
+        if (dialog.isCancelled() || dialog.getFileType() == null) {
           fileType = FileType.UNKNOWN;
         } else {
           fileType = dialog.getFileType();
         }
-
+        if (fileType == FileType.WIN) { // Open WIN config file
+          if (!FileDataSource.useWinBatch) {
+            FileDataSource.openWinConfigFileDialog();
+          }
+          FileDataSource.useWinBatch = dialog.isAssumeSame();
+          if (WinDataFile.configFile == null) {
+            JOptionPane.showMessageDialog(applicationFrame, "No WIN configuration file set.", "WIN",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+          }
+        }
       }
       file = SeismicDataFile.getFile(f, fileType);
     }
@@ -835,7 +863,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     for (final String channel : file.getChannels()) {
       final WaveViewPanel wvp = new WaveViewPanel();
-      wvp.setChannel(channel);
+      wvp.setChannel(channel.replaceAll("\\$", " "));
       final CachedDataSource cache = CachedDataSource.getInstance();
 
       final Wave wave = file.getWave(channel);
@@ -999,7 +1027,9 @@ public class WaveClipboardFrame extends SwarmFrame {
     p.setBottomBorderColor(Color.GRAY);
     p.createImage();
     p.getSettings().pickEnabled = pickButton.isSelected();
-    p.getPickMenu().marksToCoda();
+    if (p.wave != null) {
+      p.getPickMenu().marksToCoda();
+    }
     waveBox.add(p);
     waves.add(p);
     doButtonEnables();
@@ -1043,7 +1073,7 @@ public class WaveClipboardFrame extends SwarmFrame {
     }
 
     p.removeListener(selectListener);
-    p.getDataSource().close();
+    //p.getDataSource().close();
     setStatusText(" ");
     waveBox.remove(i);
     waves.remove(p);
@@ -1366,5 +1396,116 @@ public class WaveClipboardFrame extends SwarmFrame {
    */
   public List<WaveViewPanel> getWaves() {
     return waves;
+  }
+    
+  /**
+   * Import event into clipboard. Event must be set first.
+   */
+  public void importEvent() {
+    final SwingWorker worker = new SwingWorker() {
+      @Override
+      public Object construct() {
+        throbber.increment();
+
+        // update event dialog 
+        EventDialog.getInstance().setEventDetails(event);
+        
+        // get wave start and end times
+        long firstPick = Long.MAX_VALUE;
+        long lastPick = Long.MIN_VALUE;
+
+        for (Pick pick : event.getPicks().values()) {
+          firstPick = Math.min(pick.getTime(), firstPick);
+          lastPick = Math.max(pick.getTime(), lastPick);
+        }
+        double waveStart = J2kSec.fromEpoch(firstPick) - 2;
+        double waveEnd = J2kSec.fromEpoch(lastPick) + 2;
+
+        // create wave view panels 
+        HashMap<String, WaveViewPanel> panels = new HashMap<String, WaveViewPanel>();
+        for (Pick pick : event.getPicks().values()) {
+          String channel = pick.getChannel().replaceAll("\\$", " ").trim();
+          WaveViewPanel wvp = panels.get(channel);
+          if (wvp == null) {
+            wvp = new WaveViewPanel();
+            wvp.setChannel(channel);
+            wvp.setStartTime(waveStart);
+            wvp.setEndTime(waveEnd);
+            boolean foundSource = false;
+            for (SeismicDataSource source : SwarmConfig.getInstance().getSources().values()) {
+              for (String ch : source.getChannels()) {
+                if (ch.equals(channel)) {
+                  wvp.setDataSource(source);
+                  Wave wave = source.getWave(channel, waveStart, waveEnd);
+                  if (wave != null) {
+                    wvp.setWave(wave, waveStart, waveEnd);
+                    foundSource = true;
+                    break;
+                  }
+                }
+              }
+              if (foundSource) {
+                break;
+              }
+            }
+            // If no data source already available go to IRIS
+            if (wvp.getDataSource() == null) {
+              WebServicesSource source = new WebServicesSource(pick.getChannel());
+              wvp.setDataSource(source);
+              Wave wave = source.getWave(channel, waveStart, waveEnd);
+              if (wave != null) {
+                wvp.setWave(wave, waveStart, waveEnd);
+              }
+            }
+            panels.put(channel, wvp);
+          }
+          String phaseHint = pick.getPhaseHint();
+          PickMenu pickMenu = wvp.getPickMenu();
+          pickMenu.setPick(phaseHint, pick, true);
+          
+        }
+        
+        // add wave view panels to clipboard
+        for (WaveViewPanel wvp : panels.values()) {
+          addWave(wvp);
+        }
+        
+        // propagate picks
+        for (WaveViewPanel wvp : waves) {
+          PickMenu pickMenu = wvp.getPickMenu();
+          for (String phase : new String[] {PickMenu.P, PickMenu.S}) {
+            Pick pick = pickMenu.getPick(phase);
+            if (pick != null && pickMenu.isPickChannel(phase)) {
+              pickMenu.propagatePick(phase, pick);
+            }
+          }
+        }
+        return null;
+      }
+
+      @Override
+      public void finished() {
+        throbber.decrement();
+        repaint();
+      }
+    };
+    worker.start();
+    
+  }
+
+  public JToggleButton getPickButton() {
+    return pickButton;
+  }
+
+  public Event getEvent() {
+    return event;
+  }
+
+  public void setEvent(Event event) {
+    this.event = event;
+  }
+
+  public PickMenuBar getPickMenuBar() {
+    return pickMenuBar;
   }
 }

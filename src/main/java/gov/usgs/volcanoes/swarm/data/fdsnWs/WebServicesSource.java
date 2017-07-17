@@ -1,11 +1,5 @@
 package gov.usgs.volcanoes.swarm.data.fdsnWs;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
-import java.util.List;
-
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.core.time.J2kSec;
@@ -17,22 +11,30 @@ import gov.usgs.volcanoes.swarm.data.GulperList;
 import gov.usgs.volcanoes.swarm.data.GulperListener;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class WebServicesSource extends SeismicDataSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(WebServicesSource.class);
+  private static final String DATASELECT_URL = "http://service.iris.edu/fdsnws/dataselect/1/query";
+  private static final String STATION_URL = "http://service.iris.edu/fdsnws/station/1/query";
 
   /** Web services source tab title. */
   public static final String TAB_TITLE = "FDSN WS";
   /** Web services source description. */
   public static final String DESCRIPTION = "an FDSN Web Services server";
-  /** Web-Services client code */
+  /** Web-Services client code. */
   public static final String typeString;
   /** Parameter split text. */
   public static final String PARAM_SPLIT_TEXT = "\\|";
   /** Parameter format text. */
   public static final String PARAM_FMT_TEXT = "%s|%s|%s|%s|%d|%d|%s|%s";
-  /** instance counter */
+  /** instance counter. */
   private static int counter = 0;
-  /** instance count */
+  /** instance count. */
   private final int count = ++counter;
   /** Web Services Client. */
   private WebServicesClient client;
@@ -61,8 +63,47 @@ public class WebServicesSource extends SeismicDataSource {
     typeString = DataSourceType.getShortName(WebServicesSource.class);
   }
 
+  /**
+   * Default constructor.
+   */
   public WebServicesSource() {}
+  
+  /**
+   * Get web services source for channel.
+   * @param channel channel name
+   */
+  public WebServicesSource(String channel) {
+    setChannel(channel);
+  }
 
+
+  /**
+   * Build params for channel using IRIS web service and parse.
+   * @param channel channel name
+   */
+  private void setChannel(String channel) {
+    String[] comps = channel.split("\\$");
+    LOGGER.debug("SPLIT {}", channel);
+    StringBuilder sb = new StringBuilder();
+    sb.append(comps[2]).append("|");
+    sb.append(comps[0]).append("|");
+
+    if (comps.length > 3) {
+      sb.append(comps[3]).append("|");
+    } else {
+      sb.append("--|");
+    }
+    sb.append(comps[1]).append("|");
+    sb.append(3600).append("|");
+    sb.append(1000).append("|");
+    sb.append(DATASELECT_URL).append("|");
+    sb.append(STATION_URL);
+    parse(sb.toString());
+  }
+  
+  /**
+   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#parse(java.lang.String)
+   */
   public void parse(String params) {
     this.params = params;
     String[] ss = params.split(PARAM_SPLIT_TEXT);
@@ -78,6 +119,12 @@ public class WebServicesSource extends SeismicDataSource {
     configString = String.format("%s;%s:" + PARAM_FMT_TEXT, name, typeString, net, sta, loc, chan,
         gulpSize, gulpDelay, wsDataSelectUrl, wsStationUrl);
     client = new WebServicesClient(this, net, sta, loc, chan, wsDataSelectUrl, wsStationUrl);
+    try {
+      client.getStationClient().fetch();
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
     LOGGER.debug("web service started {}", count);
   }
 
@@ -153,13 +200,15 @@ public class WebServicesSource extends SeismicDataSource {
 
     HelicorderData hd = cache.getHelicorder(station, t1, t2, (GulperListener) null);
 
-    if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10))
+    if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10)) {
       GulperList.INSTANCE.requestGulper(getGulperKey(station), gl, this, station, t1, t2, gulpSize,
           gulpDelay);
+    }
 
     // this gets the tail end, replacing commented out section above
-    if (hd != null && hd.getEndTime() < now)
+    if (hd != null && hd.getEndTime() < now) {
       getWave(station, hd.getEndTime(), now);
+    }
 
     return hd;
   }
@@ -177,13 +226,15 @@ public class WebServicesSource extends SeismicDataSource {
     CachedDataSource cache = CachedDataSource.getInstance();
 
     Wave sw = null;
-    if (useCache)
+    if (useCache) {
       sw = cache.getWave(station, t1, t2);
+    }
     if (sw == null) {
       ChannelInfo channelInfo = new ChannelGroupInfo(station);
       sw = client.getRawData(channelInfo, t1, t2);
-      if (sw == null)
+      if (sw == null) {
         return null;
+      }
       if (useCache) {
         cache.cacheWaveAsHelicorder(station, sw);
         cache.putWave(station, sw);
@@ -215,4 +266,5 @@ public class WebServicesSource extends SeismicDataSource {
   public String toConfigString() {
     return configString;
   }
+  
 }

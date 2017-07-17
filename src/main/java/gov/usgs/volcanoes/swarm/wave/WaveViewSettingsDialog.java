@@ -74,6 +74,9 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
   private JSlider order;
   private int settingsCount;
 
+  private JCheckBox useAlternateOrientationCode;
+  private JTextField alternateOrientationCode;
+
   private WaveViewSettingsDialog() {
     super(applicationFrame, "Wave Settings");
     createUi();
@@ -167,6 +170,9 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     logPower.setSelected(settings.logPower);
     spectrogramOverlap.setText(String.format("%3.0f", settings.spectrogramOverlap * 100));
 
+    useAlternateOrientationCode.setSelected(settings.useAlternateOrientationCode);
+    alternateOrientationCode.setText(settings.alternateOrientationCode);
+    
     filterEnabled.setSelected(settings.filterOn);
 
     switch (settings.filter.getType()) {
@@ -245,6 +251,9 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     order.setSnapToTicks(true);
     order.createStandardLabels(2);
     order.setPaintLabels(true);
+    
+    useAlternateOrientationCode = new JCheckBox("Use alternate orientation code");
+    alternateOrientationCode = new JTextField("Z12");
   }
 
   protected void createUi() {
@@ -328,6 +337,13 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.append(powerRange);
+    builder.nextLine();
+    
+    builder.appendSeparator("Particle Motion Options");
+    builder.nextLine();
+    builder.append(useAlternateOrientationCode, 3);
+    builder.append(new JLabel("ZNE alternative:"));
+    builder.append(alternateOrientationCode);
     builder.nextLine();
 
     builder.appendSeparator("Butterworth Filter");
@@ -470,6 +486,9 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
         settings.spectrogramOverlap = 0;
       }
       settings.notifyView();
+      
+      settings.useAlternateOrientationCode = useAlternateOrientationCode.isSelected();
+      settings.alternateOrientationCode = alternateOrientationCode.getText();
 
       settings.filterOn = filterEnabled.isSelected();
       settings.zeroPhaseShift = zeroPhaseShift.isSelected();

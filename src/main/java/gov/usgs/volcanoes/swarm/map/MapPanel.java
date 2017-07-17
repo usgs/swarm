@@ -1,12 +1,33 @@
 package gov.usgs.volcanoes.swarm.map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import gov.usgs.plot.Plot;
+import gov.usgs.plot.map.GeoImageSet;
+import gov.usgs.plot.map.GeoLabelSet;
+import gov.usgs.plot.map.MapRenderer;
+import gov.usgs.plot.map.WMSGeoImageSet;
+import gov.usgs.plot.render.TextRenderer;
+import gov.usgs.proj.GeoRange;
+import gov.usgs.proj.Mercator;
+import gov.usgs.proj.Projection;
+import gov.usgs.proj.TransverseMercator;
+import gov.usgs.util.Pair;
+import gov.usgs.util.Util;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.map.MapMiniPanel.Position;
+import gov.usgs.volcanoes.swarm.time.TimeListener;
+import gov.usgs.volcanoes.swarm.time.WaveViewTime;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -52,33 +73,11 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import gov.usgs.plot.Plot;
-import gov.usgs.plot.map.GeoImageSet;
-import gov.usgs.plot.map.GeoLabelSet;
-import gov.usgs.plot.map.MapRenderer;
-import gov.usgs.plot.map.WMSGeoImageSet;
-import gov.usgs.plot.render.TextRenderer;
-import gov.usgs.proj.GeoRange;
-import gov.usgs.proj.Mercator;
-import gov.usgs.proj.Projection;
-import gov.usgs.proj.TransverseMercator;
-import gov.usgs.util.Pair;
-import gov.usgs.util.Util;
-import gov.usgs.volcanoes.core.CodeTimer;
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.util.StringUtils;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.map.MapMiniPanel.Position;
-import gov.usgs.volcanoes.swarm.time.TimeListener;
-import gov.usgs.volcanoes.swarm.time.WaveViewTime;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * Map panel.
  * @author Dan Cervelli
  */
 public class MapPanel extends JPanel {
@@ -102,6 +101,10 @@ public class MapPanel extends JPanel {
       image = i;
     }
 
+    /**
+     * Get next station label setting.
+     * @return label setting
+     */
     public LabelSetting next() {
       switch (this) {
         case SOME:
@@ -118,18 +121,25 @@ public class MapPanel extends JPanel {
       return image;
     }
 
+    /**
+     * Get label setting from string.
+     * @param s string
+     * @return label setting
+     */
     public static LabelSetting fromString(final String s) {
-      if (s == null)
+      if (s == null) {
         return SOME;
+      }
 
-      if (s.equals("N"))
+      if (s.equals("N")) {
         return NONE;
-      else if (s.equals("A"))
+      } else if (s.equals("A")) {
         return ALL;
-      else if (s.equals("S"))
+      } else if (s.equals("S")) {
         return SOME;
-      else
+      } else {
         return SOME;
+      }
     }
 
   }
@@ -170,18 +180,21 @@ public class MapPanel extends JPanel {
   private int missing;
 
   private final Set<MapMiniPanel> selectedPanels;
-  private final boolean allowMultiSelection = false;
+  //private final boolean allowMultiSelection = false;
 
   private double startTime;
   private double endTime;
 
-  private int dragDX = Integer.MAX_VALUE;
-  private int dragDY = Integer.MAX_VALUE;
+  private int dragDx = Integer.MAX_VALUE;
+  private int dragDy = Integer.MAX_VALUE;
 
   private LabelSetting labelSetting = LabelSetting.SOME;
 
   private List<MapLayer> layers;
 
+  /**
+   * Constructor.
+   */
   public MapPanel() {
     swarmConfig = SwarmConfig.getInstance();
     mapHistory = new Stack<double[]>();
@@ -195,16 +208,21 @@ public class MapPanel extends JPanel {
 
     final Cursor crosshair = new Cursor(Cursor.CROSSHAIR_CURSOR);
     this.setCursor(crosshair);
-    createUI();
-    
-    
+    createUi();
+
+
   }
 
   public void addLayer(MapLayer layer) {
     LOGGER.debug("Layer added");
     layers.add(layer);
   }
-  
+
+  /**
+   * Save layout.
+   * @param cf config file.
+   * @param prefix config file prefix
+   */
   public void saveLayout(final ConfigFile cf, final String prefix) {
     cf.put(prefix + ".longitude", Double.toString(center.x));
     cf.put(prefix + ".latitude", Double.toString(center.y));
@@ -223,6 +241,10 @@ public class MapPanel extends JPanel {
     }
   }
 
+  /**
+   * Process layout.
+   * @param cf config file
+   */
   public void processLayout(final ConfigFile cf) {
     final int waves = Integer.parseInt(cf.getString("waves"));
     for (int i = 0; i < waves; i++) {
@@ -240,6 +262,10 @@ public class MapPanel extends JPanel {
     setCenterAndScale(c, sc);
   }
 
+  /**
+   * Load maps.
+   * @param redraw true to redraw
+   */
   public void loadMaps(final boolean redraw) {
     Pair<GeoImageSet, GeoLabelSet> pair;
     if (swarmConfig.useWMS) {
@@ -265,11 +291,12 @@ public class MapPanel extends JPanel {
     final int mp = (int) Math.round(Runtime.getRuntime().maxMemory() / 1024.0 / 1024.0 / 8.0);
     images.setMaxLoadedImagesSize(mp);
 
-    if (redraw)
+    if (redraw) {
       resetImage(true);
+    }
   }
 
-  private void createUI() {
+  private void createUi() {
     loadMaps(false);
 
     center = new Point2D.Double(swarmConfig.mapLongitude, swarmConfig.mapLatitude);
@@ -282,8 +309,9 @@ public class MapPanel extends JPanel {
       public void mouseWheelMoved(final MouseWheelEvent e) {
         if (e.isControlDown()) {
           final int cnt = -e.getWheelRotation();
-          for (final MapMiniPanel panel : miniPanels.values())
+          for (final MapMiniPanel panel : miniPanels.values()) {
             panel.changeSize(cnt);
+          }
         }
       }
     });
@@ -305,23 +333,25 @@ public class MapPanel extends JPanel {
     WaveViewTime.addTimeListener(new TimeListener() {
       public void timeChanged(final double j2k) {
         for (final MapMiniPanel panel : miniPanels.values()) {
-          if (panel != null && panel.getWaveViewPanel() != null)
+          if (panel != null && panel.getWaveViewPanel() != null) {
             panel.getWaveViewPanel().setCursorMark(j2k);
+          }
         }
       }
     });
 
     addKeyListener(new KeyListener() {
       public void keyPressed(final KeyEvent e) {
-        if (allowMultiSelection && e.isControlDown() && e.getKeyCode() == KeyEvent.VK_A) {
+        /*        if (allowMultiSelection && e.isControlDown() && e.getKeyCode() == KeyEvent.VK_A) {
           deselectAllPanels();
           synchronized (visiblePanels) {
             for (final MapMiniPanel panel : visiblePanels) {
-              if (panel.isWaveVisible())
+              if (panel.isWaveVisible()) {
                 addSelectedPanel(panel);
+              }
             }
           }
-        }
+        }*/
         if (e.isShiftDown() && e.getKeyCode() == KeyEvent.VK_R) {
           resetAllAutoScaleMemory();
         }
@@ -337,6 +367,9 @@ public class MapPanel extends JPanel {
 
   }
 
+  /**
+   * Add waves to clipboard.
+   */
   public void wavesToClipboard() {
     synchronized (visiblePanels) {
       final WaveClipboardFrame cb = WaveClipboardFrame.getInstance();
@@ -345,10 +378,10 @@ public class MapPanel extends JPanel {
         if (panel.isWaveVisible()) {
           cnt++;
           final WaveViewPanel p = new WaveViewPanel(panel.getWaveViewPanel());
-          final SeismicDataSource src = panel.getWaveViewPanel().getDataSource();
-          if (src != null)
-            p.setDataSource(src.getCopy());
-
+//          final SeismicDataSource src = panel.getWaveViewPanel().getDataSource();
+//          if (src != null) {
+//            p.setDataSource(src);
+//          }
           cb.addWave(p);
         }
       }
@@ -359,12 +392,20 @@ public class MapPanel extends JPanel {
     }
   }
 
+  /**
+   * Deselect all panels.
+   */
   public synchronized void deselectAllPanels() {
-    for (final MapMiniPanel panel : selectedPanels)
+    for (final MapMiniPanel panel : selectedPanels) {
       panel.setSelected(false);
+    }
     selectedPanels.clear();
   }
 
+  /**
+   * Deselect selected panel.
+   * @param p map mini panel
+   */
   public synchronized void deselectPanel(final MapMiniPanel p) {
     if (selectedPanels.contains(p)) {
       p.setSelected(false);
@@ -372,14 +413,22 @@ public class MapPanel extends JPanel {
     }
   }
 
+  /**
+   * Add selected panel.
+   * @param p map mini panel
+   */
   public synchronized void addSelectedPanel(final MapMiniPanel p) {
-    if (allowMultiSelection) {
+    /*    if (allowMultiSelection) {
       p.setSelected(true);
       selectedPanels.add(p);
-    } else
-      setSelectedPanel(p);
+    } else*/
+    setSelectedPanel(p);
   }
 
+  /**
+   * Set selected panel.
+   * @param p map mini panel
+   */
   public synchronized void setSelectedPanel(final MapMiniPanel p) {
     deselectAllPanels();
     p.setSelected(true);
@@ -400,11 +449,19 @@ public class MapPanel extends JPanel {
     resetImage(false);
   }
 
+  /**
+   * Add current map center and scale to map history.
+   */
   public void mapPush() {
-    if (center != null)
+    if (center != null) {
       mapHistory.push(new double[] {center.x, center.y, scale});
+    }
   }
 
+  /**
+   * Remove last map view and reset map.
+   * @return true if successful
+   */
   public boolean mapPop() {
     if (!mapHistory.isEmpty()) {
       final double[] last = mapHistory.pop();
@@ -412,23 +469,33 @@ public class MapPanel extends JPanel {
       scale = last[2];
       resetImage();
       return true;
-    } else
+    } else {
       return false;
+    }
   }
 
   public void timePush() {
     timeHistory.push(new double[] {startTime, endTime});
   }
 
+  /**
+   * Remove last time view and reset time.
+   * @return true if successful
+   */
   public boolean timePop() {
     if (!timeHistory.isEmpty()) {
       final double[] t = timeHistory.pop();
       setTimes(t[0], t[1]);
       return true;
-    } else
+    } else {
       return false;
+    }
   }
 
+  /**
+   * Zoom into map.
+   * @param f fraction to change scale by
+   */
   public void zoom(final double f) {
     mapPush();
     scale *= f;
@@ -443,6 +510,10 @@ public class MapPanel extends JPanel {
     return endTime;
   }
 
+  /**
+   * Scale time by percent.
+   * @param pct percent
+   */
   public void scaleTime(final double pct) {
     timePush();
     final double dt = (endTime - startTime) * (1 - pct);
@@ -452,6 +523,10 @@ public class MapPanel extends JPanel {
     setTimes(startTime, endTime, true);
   }
 
+  /**
+   * Shift time by percent.
+   * @param pct percent
+   */
   public void shiftTime(final double pct) {
     timePush();
     final double dt = (endTime - startTime) * pct;
@@ -460,6 +535,10 @@ public class MapPanel extends JPanel {
     setTimes(startTime, endTime, true);
   }
 
+  /**
+   * Go to time.
+   * @param j2k J2K time
+   */
   public void gotoTime(final double j2k) {
     timePush();
     final double dt = (endTime - startTime);
@@ -468,9 +547,16 @@ public class MapPanel extends JPanel {
     setTimes(startTime, endTime, true);
   }
 
-  public Point2D.Double getXY(final double lon, final double lat) {
-    if (range == null || projection == null || image == null || renderer == null)
+  /**
+   * Get XY location on map.
+   * @param lon longitude in DD
+   * @param lat latitude in DD
+   * @return 2D point with xy coordinate
+   */
+  public Point2D.Double getXy(final double lon, final double lat) {
+    if (range == null || projection == null || image == null || renderer == null) {
       return null;
+    }
     final Point2D.Double xy = projection.forward(new Point2D.Double(lon, lat));
     final double[] ext = range.getProjectedExtents(projection);
     final double dx = (ext[1] - ext[0]);
@@ -481,9 +567,16 @@ public class MapPanel extends JPanel {
     return res;
   }
 
+  /**
+   * Get longitude and latitude from point.
+   * @param x x value of point
+   * @param y y value of point
+   * @return 2D point with longitude and latitude coordinates
+   */
   public Point2D.Double getLonLat(final int x, final int y) {
-    if (range == null || projection == null || renderer == null)
+    if (range == null || projection == null || renderer == null) {
       return null;
+    }
 
     final int tx = x - INSET;
     final int ty = y - INSET;
@@ -495,10 +588,12 @@ public class MapPanel extends JPanel {
 
     final Point2D.Double pt = projection.inverse(new Point2D.Double(px, py));
     pt.x = pt.x % 360;
-    if (pt.x > 180)
+    if (pt.x > 180) {
       pt.x -= 360;
-    if (pt.x < -180)
+    }
+    if (pt.x < -180) {
       pt.x += 360;
+    }
     return pt;
   }
 
@@ -506,6 +601,12 @@ public class MapPanel extends JPanel {
     setTimes(st, et, false);
   }
 
+  /**
+   * Set wave times in all panels.
+   * @param st start time
+   * @param et end time
+   * @param repaint true to repaint
+   */
   public void setTimes(final double st, final double et, final boolean repaint) {
     startTime = st;
     endTime = et;
@@ -517,8 +618,9 @@ public class MapPanel extends JPanel {
           panel.updateWave(startTime, endTime, false, repaint);
         }
       }
-      if (updated)
+      if (updated) {
         repaint();
+      }
     }
   }
 
@@ -530,12 +632,21 @@ public class MapPanel extends JPanel {
     return scale;
   }
 
+  /**
+   * Set map center and scale.
+   * @param c 2D point
+   * @param s scale
+   */
   public void setCenterAndScale(final Point2D.Double c, final double s) {
     center = c;
     scale = s;
     resetImage();
   }
 
+  /**
+   * Set map center and scale.
+   * @param gr geo range
+   */
   public void setCenterAndScale(final GeoRange gr) {
     mapPush();
     final int width = mapImagePanel.getWidth() - (INSET * 2);
@@ -552,6 +663,11 @@ public class MapPanel extends JPanel {
     resetImage();
   }
 
+  /**
+   * Pick map parameters.
+   * @param width map panel width 
+   * @param height map panel height
+   */
   public void pickMapParameters(final int width, final int height) {
     double xm = scale * width;
     double ym = scale * height;
@@ -581,11 +697,13 @@ public class MapPanel extends JPanel {
     for (int i = 0; i < dxy.length / 2; i++) {
       final int px = dxy[i * 2];
       final int py = dxy[i * 2 + 1];
-      if (px < 0 || py < 0)
+      if (px < 0 || py < 0) {
         continue;
+      }
       final Rectangle rect = new Rectangle(px, py, w, h);
-      if (!boxes.intersects(rect))
+      if (!boxes.intersects(rect)) {
         return new Point(px, py);
+      }
     }
 
     return null;
@@ -599,18 +717,20 @@ public class MapPanel extends JPanel {
     return mapImage != null;
   }
 
+  /**
+   * Reset all auto-scale memory.
+   */
   public void resetAllAutoScaleMemory() {
-    for (final MapMiniPanel panel : visiblePanels)
+    for (final MapMiniPanel panel : visiblePanels) {
       panel.getWaveViewPanel().resetAutoScaleMemory();
+    }
   }
 
-  public void resetImage() {
-    resetImage(true);
-  }
 
   private void checkLayouts() {
-    if (layouts.size() == 0)
+    if (layouts.size() == 0) {
       return;
+    }
 
     final Set<Double> ks = layouts.keySet();
     final Set<Double> toRemove = new HashSet<Double>();
@@ -621,8 +741,9 @@ public class MapPanel extends JPanel {
         toRemove.add(hash);
       }
     }
-    for (final double hash : toRemove)
+    for (final double hash : toRemove) {
       layouts.remove(hash);
+    }
   }
 
   // thoughts:
@@ -659,10 +780,13 @@ public class MapPanel extends JPanel {
       // Lines directory
       if (linedir != null) {
         final File[] files = linedir.listFiles();
-        if (files != null)
-          for (final File f : files)
-            if (f.isFile())
+        if (files != null) {
+          for (final File f : files) {
+            if (f.isFile()) {
               mr.createLine(f.toString());
+            }
+          }
+        }
       }
 
       mr.createScaleRenderer(1 / projection.getScale(center), INSET, 14);
@@ -678,8 +802,8 @@ public class MapPanel extends JPanel {
       plot.setSize(mapImagePanel.getWidth(), mapImagePanel.getHeight());
       plot.addRenderer(renderer);
       mi = plot.getAsBufferedImage(false);
-      dragDX = Integer.MAX_VALUE;
-      dragDY = Integer.MAX_VALUE;
+      dragDx = Integer.MAX_VALUE;
+      dragDy = Integer.MAX_VALUE;
     } catch (final Exception e) {
       LOGGER.error("Exception during map creation. {}", e);
     } finally {
@@ -690,11 +814,10 @@ public class MapPanel extends JPanel {
 
   @Override
   public void setVisible(boolean isVisible) {
-      for (MapLayer layer : layers) {
-      	layer.setVisible(isVisible);
-      }
+    for (MapLayer layer : layers) {
+      layer.setVisible(isVisible);
+    }
   }
-
 
   private Pair<List<JComponent>, List<Line2D.Double>> updateMiniPanels() {
     final List<JComponent> compsToAdd = new ArrayList<JComponent>();
@@ -708,10 +831,11 @@ public class MapPanel extends JPanel {
     final Map<String, Metadata> allMetadata = swarmConfig.getMetadata();
     synchronized (allMetadata) {
       for (final MapMiniPanel panel : miniPanels.values()) {
-        if (panel.getPosition() == MapMiniPanel.Position.MANUAL_SET)
+        if (panel.getPosition() == MapMiniPanel.Position.MANUAL_SET) {
           panel.setPosition(Position.MANUAL_UNSET);
-        else
+        } else {
           panel.setPosition(Position.UNSET);
+        }
       }
       for (final Metadata md : allMetadata.values()) {
         if (!range.contains(new Point2D.Double(md.getLongitude(), md.getLatitude()))) {
@@ -722,9 +846,10 @@ public class MapPanel extends JPanel {
           }
         } else {
           MapMiniPanel cmp = miniPanels.get(md.getLocationHashCode());
-          final Point2D.Double xy = getXY(md.getLongitude(), md.getLatitude());
-          if (xy == null)
+          final Point2D.Double xy = getXy(md.getLongitude(), md.getLatitude());
+          if (xy == null) {
             continue;
+          }
           final int iconX = (int) xy.x - 8;
           final int iconY = (int) xy.y - 8;
           if (cmp == null || cmp.getPosition() == Position.UNSET
@@ -732,8 +857,9 @@ public class MapPanel extends JPanel {
             final JLabel icon = new JLabel(Icons.bullet);
             icon.setBounds(iconX, iconY, 16, 16);
             compsToAdd.add(icon);
-            if (cmp == null)
+            if (cmp == null) {
               cmp = new MapMiniPanel(MapPanel.this);
+            }
           }
 
           if (cmp.getPosition() == Position.UNSET || cmp.getPosition() == Position.MANUAL_UNSET) {
@@ -797,7 +923,15 @@ public class MapPanel extends JPanel {
 
   private final Semaphore lock = new Semaphore(1);
 
+  public void resetImage() {
+    resetImage(true);
+  }
+  
   // this function should not allow reentrancy
+  /**
+   * Reset map image.
+   * @param doMap true to redraw map.
+   */
   public void resetImage(final boolean doMap) {
     // if there's any problem with the container holding the panel, just
     // forget it.
@@ -834,7 +968,7 @@ public class MapPanel extends JPanel {
 
         return new Boolean(true);
       }
-      
+
 
       @Override
       public void finished() {
@@ -897,29 +1031,29 @@ public class MapPanel extends JPanel {
     private void paintRadius(final Graphics2D g2) {
       final Point2D.Double lonLat = getLonLat(mouseNow.x, mouseNow.y);
       final Point2D.Double origin = getLonLat(mouseDown.x, mouseDown.y);
-      final double d = Projection.distanceBetween(origin, lonLat);
+      final double d = Projection.distanceBetweenM(origin, lonLat);
       final int n = 720;
       final Point2D.Double[] pts = Projection.getPointsFrom(origin, d, n);
       final GeneralPath gp = new GeneralPath();
-      Point2D.Double xy = getXY(pts[0].x, pts[0].y);
-      Point lastXY = new Point();
-      lastXY.x = (int) Math.round(xy.x);
-      lastXY.y = (int) Math.round(xy.y);
-      gp.moveTo(lastXY.x - 2, lastXY.y - 1);
+      Point2D.Double xy = getXy(pts[0].x, pts[0].y);
+      Point lastXy = new Point();
+      lastXy.x = (int) Math.round(xy.x);
+      lastXy.y = (int) Math.round(xy.y);
+      gp.moveTo(lastXy.x - 2, lastXy.y - 1);
       for (int i = 1; i <= pts.length; i++) {
-        xy = getXY(pts[i % n].x, pts[i % n].y);
-        final Point thisXY = new Point();
-        thisXY.x = (int) Math.round(xy.x);
-        thisXY.y = (int) Math.round(xy.y);
-        final double a = thisXY.x - lastXY.x;
-        final double b = thisXY.y - lastXY.y;
+        xy = getXy(pts[i % n].x, pts[i % n].y);
+        final Point thisXy = new Point();
+        thisXy.x = (int) Math.round(xy.x);
+        thisXy.y = (int) Math.round(xy.y);
+        final double a = thisXy.x - lastXy.x;
+        final double b = thisXy.y - lastXy.y;
         final double dist = Math.sqrt(a * a + b * b);
         if (dist > 100) {
-          gp.moveTo(thisXY.x - 2, thisXY.y - 1);
+          gp.moveTo(thisXy.x - 2, thisXy.y - 1);
         } else {
-          gp.lineTo(thisXY.x - 2, thisXY.y - 1);
+          gp.lineTo(thisXy.x - 2, thisXy.y - 1);
         }
-        lastXY = thisXY;
+        lastXy = thisXy;
       }
       g2.setColor(Color.YELLOW);
       g2.draw(gp);
@@ -929,32 +1063,32 @@ public class MapPanel extends JPanel {
       final Point2D.Double lonLat = getLonLat(mouseNow.x, mouseNow.y);
       Point2D.Double origin = getLonLat(mouseDown.x, mouseDown.y);
       final GeneralPath gp = new GeneralPath();
-      Point2D.Double xy = getXY(origin.x, origin.y);
-      Point lastXY = new Point();
-      lastXY.x = (int) Math.round(xy.x);
-      lastXY.y = (int) Math.round(xy.y);
-      gp.moveTo(lastXY.x - 2, lastXY.y - 1);
-      double d = Projection.distanceBetween(origin, lonLat);
+      Point2D.Double xy = getXy(origin.x, origin.y);
+      Point lastXy = new Point();
+      lastXy.x = (int) Math.round(xy.x);
+      lastXy.y = (int) Math.round(xy.y);
+      gp.moveTo(lastXy.x - 2, lastXy.y - 1);
+      double d = Projection.distanceBetweenM(origin, lonLat);
       while (d > 20 * 1000) {
         final double az = Projection.azimuthTo(origin, lonLat);
         final Point2D.Double p0 = Projection.getPointFrom(origin, 20 * 1000, az);
 
-        xy = getXY(p0.x, p0.y);
-        final Point thisXY = new Point();
-        thisXY.x = (int) Math.round(xy.x);
-        thisXY.y = (int) Math.round(xy.y);
-        final double a = thisXY.x - lastXY.x;
-        final double b = thisXY.y - lastXY.y;
+        xy = getXy(p0.x, p0.y);
+        final Point thisXy = new Point();
+        thisXy.x = (int) Math.round(xy.x);
+        thisXy.y = (int) Math.round(xy.y);
+        final double a = thisXy.x - lastXy.x;
+        final double b = thisXy.y - lastXy.y;
         final double dist = Math.sqrt(a * a + b * b);
         if (dist > 100) {
-          gp.moveTo(thisXY.x - 2, thisXY.y - 1);
+          gp.moveTo(thisXy.x - 2, thisXy.y - 1);
         } else {
-          gp.lineTo(thisXY.x - 2, thisXY.y - 1);
+          gp.lineTo(thisXy.x - 2, thisXy.y - 1);
         }
-        lastXY = thisXY;
+        lastXy = thisXy;
 
         origin = p0;
-        d = Projection.distanceBetween(origin, lonLat);
+        d = Projection.distanceBetweenM(origin, lonLat);
       }
       g2.setColor(Color.GREEN);
       g2.draw(gp);
@@ -974,8 +1108,8 @@ public class MapPanel extends JPanel {
           dx = mouseDown.x - mouseNow.x;
           dy = mouseDown.y - mouseNow.y;
           g2.drawImage(mapImage, -dx, -dy, null);
-        } else if (dragDX != Integer.MAX_VALUE && dragDY != Integer.MAX_VALUE) {
-          g2.drawImage(mapImage, -dragDX, -dragDY, null);
+        } else if (dragDx != Integer.MAX_VALUE && dragDy != Integer.MAX_VALUE) {
+          g2.drawImage(mapImage, -dragDx, -dragDy, null);
         } else {
           g2.drawImage(mapImage, 0, 0, null);
         }
@@ -1021,7 +1155,7 @@ public class MapPanel extends JPanel {
           layer.draw(g2);
         }
         g2.translate(dx, dy);
-        
+
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldaa);
         g2.setTransform(at);
       }
@@ -1035,7 +1169,11 @@ public class MapPanel extends JPanel {
   public Projection getProjection() {
     return projection;
   }
-  
+
+  /**
+   * Get graph width.
+   * @return width
+   */
   public int getGraphWidth() {
     int width = 0;
     if (renderer != null) {
@@ -1043,7 +1181,11 @@ public class MapPanel extends JPanel {
     }
     return width;
   }
-  
+
+  /**
+   * Get graph height.
+   * @return height
+   */
   public int getGraphHeight() {
     int height = 0;
     if (renderer != null) {
@@ -1051,11 +1193,11 @@ public class MapPanel extends JPanel {
     }
     return height;
   }
-  
+
   public int getInset() {
     return INSET;
   }
-  
+
   public class MapMouseAdapter extends MouseAdapter {
     @Override
     public void mouseExited(final MouseEvent e) {
@@ -1073,7 +1215,7 @@ public class MapPanel extends JPanel {
         }
       }
     }
-    
+
     @Override
     public void mousePressed(final MouseEvent e) {
       requestFocusInWindow();
@@ -1096,9 +1238,9 @@ public class MapPanel extends JPanel {
       setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
       if (dragMode == DragMode.DRAG_MAP && mouseDown != null && mouseNow != null) {
         mapPush();
-        dragDX = mouseDown.x - mouseNow.x;
-        dragDY = mouseDown.y - mouseNow.y;
-        center = getLonLat(getWidth() / 2 + dragDX, getHeight() / 2 + dragDY);
+        dragDx = mouseDown.x - mouseNow.x;
+        dragDy = mouseDown.y - mouseNow.y;
+        center = getLonLat(getWidth() / 2 + dragDx, getHeight() / 2 + dragDy);
         resetImage();
       }
       if (dragMode == DragMode.BOX && dragRectangle != null) {
@@ -1129,12 +1271,15 @@ public class MapPanel extends JPanel {
 
   public class MapMouseMotionListener implements MouseMotionListener {
 
+    /**
+     * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
+     */
     public void mouseMoved(final MouseEvent e) {
       final Point2D.Double latLon = getLonLat(e.getX(), e.getY());
       if (latLon != null) {
         MapFrame.getInstance().setStatusText(Util.lonLatToString(latLon));
       }
-      
+
       if (layers != null) {
         boolean handled = false;
         Iterator<MapLayer> it = layers.iterator();
@@ -1148,8 +1293,11 @@ public class MapPanel extends JPanel {
       }
 
     }
-    
 
+
+    /**
+     * @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent)
+     */
     public void mouseDragged(final MouseEvent e) {
       mouseNow = e.getPoint();
       final Point2D.Double lonLat = getLonLat(e.getX(), e.getY());
@@ -1167,7 +1315,7 @@ public class MapPanel extends JPanel {
         }
       } else if (dragMode == DragMode.RULER) {
         final Point2D.Double origin = getLonLat(mouseDown.x, mouseDown.y);
-        double d = Projection.distanceBetween(origin, lonLat);
+        double d = Projection.distanceBetweenM(origin, lonLat);
         final double az = Projection.azimuthTo(origin, lonLat);
         String label = "m";
         if (d > 10000) {

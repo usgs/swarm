@@ -9,7 +9,6 @@ import gov.usgs.util.GridBagHelper;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.UiUtils;
-import gov.usgs.volcanoes.swarm.FileChooser;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Kioskable;
 import gov.usgs.volcanoes.swarm.Swarm;
@@ -151,8 +150,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     super("<layout>", true, true, true, true);
     UiTime.touchTime();
     final String channel = cf.getString("channel");
-    final SeismicDataSource sds = swarmConfig.getSource(cf.getString("source"));
-    dataSource = sds.getCopy();
+    dataSource = swarmConfig.getSource(cf.getString("source"));
     setTitle(channel + ", [" + dataSource + "]");
     settings = new HelicorderViewerSettings(channel);
     settings.set(cf);
@@ -180,7 +178,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     settings = new HelicorderViewerSettings(ch);
     settings.setBottomTime(bt);
     waveViewSettings = new WaveViewSettings();
-    dataSource = sds.getCopy();
+    dataSource = sds;
 
     createUi();
     setVisible(true);

@@ -138,8 +138,8 @@ public class WaveViewPanel extends JComponent {
     settings = new WaveViewSettings();
 
     setupMouseHandler();
-
   }
+  
 
   /**
    * Constructor.
@@ -270,7 +270,11 @@ public class WaveViewPanel extends JComponent {
   public void setAllowClose(boolean b) {
     allowClose = b;
   }
-
+  
+  protected void setPickTime() {
+    getPickMenu().setJ2k(j2k2);
+  }
+  
   /**
    * Process right mouse press.
    * @param e mouse event
@@ -282,11 +286,8 @@ public class WaveViewPanel extends JComponent {
       if (t != null) {
         double j2k = e.getX() * t[0] + t[1];
         if (j2k >= startTime && j2k <= endTime) {
-          if (pickMenu == null) {
-            pickMenu = new PickMenu(this);
-          }
-          pickMenu.setJ2k(j2k);
-          pickMenu.show(this, e.getX(), e.getY());
+          getPickMenu().setJ2k(j2k);
+          getPickMenu().show(this, e.getX(), e.getY());
         }
       }
     } else {
@@ -625,19 +626,44 @@ public class WaveViewPanel extends JComponent {
 
       if (settings.pickEnabled && pickMenu != null) {
         String pickStatus = "";
-        Pick p = pickMenu.getP();
-        Pick s = pickMenu.getS();
-        if (p != null && s != null) {
-          pickStatus = StatusTextArea.getSpString(p.getTime(), s.getTime());
+        // S-P
+        double spDuration = pickMenu.getSpDuration();
+        if (!Double.isNaN(spDuration)) {
+          double spDistance = SwarmConfig.getInstance().pVelocity * spDuration;
+          pickStatus = String.format("S-P: %.2fs (%.2fkm)", spDuration, spDistance);
         }
-        Pick c1 = pickMenu.getCoda1();
-        Pick c2 = pickMenu.getCoda2();
-        if (c1 != null && c2 != null) {
+        // Coda 
+        if (swarmConfig.durationEnabled && !Double.isNaN(pickMenu.getCodaDuration())) {
           if (!pickStatus.equals("")) {
-            pickStatus += ", ";
+            pickStatus += "; ";
           }
-          pickStatus += StatusTextArea.getCodaDuration(c1.getTime(), c2.getTime());
-        }
+          double duration = pickMenu.getCodaDuration();
+          double durationMagnitude = swarmConfig.getDurationMagnitude(duration);
+          String coda = String.format("Coda: %.2fs (Mc: %.2f)", duration, durationMagnitude);
+          
+          // get clipboard average
+          WaveClipboardFrame cb = WaveClipboardFrame.getInstance();
+          int count = 0;
+          double sumDuration = 0;
+          for (WaveViewPanel wvp : cb.getWaves()) {
+            double codaDuration = wvp.getPickMenu().getCodaDuration();
+            if (!Double.isNaN(codaDuration)) {
+              sumDuration += codaDuration;
+              count++;
+            }
+          }
+          if (count == 1) {
+            pickStatus += coda;
+          } else {
+            double avgDuration = sumDuration / count;
+            double avgDurationMagnitude = swarmConfig.getDurationMagnitude(avgDuration);
+            String avgCoda =
+                String.format("Avg Coda: %.2fs (Mc: %.2f)", avgDuration, avgDurationMagnitude);
+  
+            // add final coda string
+            pickStatus += coda + ", " + avgCoda;
+          }
+        } 
         if (!pickStatus.equals("")) {
           status.append("\n");
           status.append(pickStatus);
@@ -833,20 +859,14 @@ public class WaveViewPanel extends JComponent {
         return;
       }
       if (!pickMenu.isHidePhases()) {
-        if (pickMenu.isPickChannelP()) {
-          drawPick(pickMenu.getP(), g2, false);
-        } else {
-          drawPick(pickMenu.getP(), g2, true);
-        }
-        if (pickMenu.isPickChannelS()) {
-          drawPick(pickMenu.getS(), g2, false);
-        } else {
-          drawPick(pickMenu.getS(), g2, true);
+        for (String phase : new String[] {PickMenu.P, PickMenu.S}) {
+          drawPick(pickMenu.getPick(phase), g2, !pickMenu.isPickChannel(phase));
         }
       }
       if (!pickMenu.isHideCoda()) {
-        drawPick(pickMenu.getCoda1(), g2, false);
-        drawPick(pickMenu.getCoda2(), g2, false);
+        for (String coda : new String[] {PickMenu.CODA1, PickMenu.CODA2}) {
+          drawPick(pickMenu.getPick(coda), g2, false);
+        }
       }
     }
   }
@@ -955,10 +975,12 @@ public class WaveViewPanel extends JComponent {
     long time = pick.getTime();
     double[] t = getTranslation();
     double j2k = J2kSec.fromEpoch(time);
-    double x = 2 + (j2k - t[1]) / t[0];
+    double x = (j2k - t[1]) / t[0];
+    // draw line
     g2.setColor(PickWavePanel.DARK_GREEN);
     g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
 
+    // get color
     String tag = pick.getTag();
     Color color = Color.GRAY;
     if (tag.indexOf('P') != -1) {
@@ -970,20 +992,43 @@ public class WaveViewPanel extends JComponent {
     } 
     g2.setColor(color);
 
+    // draw uncertainty
+    double uncertainty = pick.getTimeQuantity().getUncertainty();
+    if (!Double.isNaN(uncertainty)) {
+      Color uncertaintyShade =
+          new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() / 2);
+      g2.setColor(uncertaintyShade);
+      // lowerUncertainty
+      long lowTime = (long) (pick.getTime() - 1000.0 * uncertainty);
+      double luJ2k = J2kSec.fromEpoch(lowTime);
+      double luX = (luJ2k - t[1]) / t[0];
+      g2.fillRect((int)luX, yOffset + 1, (int)(x - luX), getHeight() - bottomHeight - yOffset - 1);
+      // upperUncertainty
+      long highTime = (long) (pick.getTime() + 1000.0 * uncertainty);
+      double uuJ2k = J2kSec.fromEpoch(highTime);
+      double uuX = (uuJ2k - t[1]) / t[0];
+      g2.fillRect((int)x, yOffset + 1, (int)(uuX - x), getHeight() - bottomHeight - yOffset - 1);
+    }
+
+    // draw tag/label box
+    if (transparent) {
+      g2.setColor(Color.WHITE);
+    } else {
+      g2.setColor(color);
+    }
     FontMetrics fm = g2.getFontMetrics();
     int width = fm.stringWidth(tag);
     int height = fm.getAscent();
     int offset = 2;
     int lw = width + 2 * offset;
-
-    if (transparent) {
-      g2.setColor(Color.WHITE);
-    }
     g2.fillRect((int) x, 3, lw, height + 2 * offset);
+    
+    // draw text in tag/label box
     g2.setColor(Color.BLACK);
     g2.drawRect((int) x, 3, lw, height + 2 * offset);
     
     g2.drawString(tag, (int) x + offset, 3 + (fm.getAscent() + offset));
+    
   }
   
   public void setUseFilterLabel(boolean b) {
@@ -1284,12 +1329,29 @@ public class WaveViewPanel extends JComponent {
 
     SliceWave swave = new SliceWave(wave);
     swave.setSlice(startTime, endTime);
+    String component = c.substring(2);
+    String[] orientationType = new String[] {"Z", "N", "E"};
+    if (component.matches("[ABC]")) {
+      orientationType = new String[] {"A", "B", "C"};
+    }
+    if (component.matches("[123]")) {
+      orientationType = new String[] {"1", "2", "3"};
+    }
+    if (component.matches("[UVW]")) {
+      orientationType = new String[] {"U", "V", "W"};
+    }
+    if (settings.useAlternateOrientationCode
+        && component.matches("[" + settings.alternateOrientationCode + "]")) {
+      String zOrientation = settings.alternateOrientationCode.substring(0, 1);
+      String nOrientation = settings.alternateOrientationCode.substring(1, 2);
+      String eOrientation = settings.alternateOrientationCode.substring(2);
+      orientationType = new String[]{ zOrientation, nOrientation, eOrientation};
+    }
     HashMap<String, double[]> data = new HashMap<String, double[]>();
     HashMap<String, String> stations = new HashMap<String, String>();
-    String component = c.substring(2);
     data.put(component, swave.getSignal());
     stations.put(component, channel);
-    for (String direction : new String[] {"Z", "N", "E"}) {
+    for (String direction : orientationType) {
       if (!component.equals(direction)) {
         String newChannel = c.replaceFirst(".$", direction);
         String newStation = s + " " + newChannel + " " + n;
@@ -1312,8 +1374,9 @@ public class WaveViewPanel extends JComponent {
     }
     
     ParticleMotionRenderer particleMotionRenderer =
-        new ParticleMotionRenderer(data.get("E"), data.get("N"), data.get("Z"), 
-            stations.get("E"), stations.get("N"), stations.get("Z"));
+        new ParticleMotionRenderer(data.get(orientationType[2]), data.get(orientationType[1]),
+            data.get(orientationType[0]), stations.get(orientationType[2]),
+            stations.get(orientationType[1]), stations.get(orientationType[0]));
     particleMotionRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset,
         this.getHeight());
 

@@ -1,3 +1,28 @@
+## Version 2.7.3
+  * Fix pick time zone on export to QuakeML
+  * Add 'Clear All Picks' to pick menu bar
+  * Stream line pick menu (right-click)
+  * Add ability to use P pick for coda calculations
+  * Add optional comment field for event export
+  * Add clipboard button to event viewer
+  * Fix sort button on event viewer
+  * Update basemap URLs to https
+  * Center map on imported events
+
+## Version 2.7.2
+  * Read WIN files
+  * Add option to turn off S-P plot for a station
+  * Remove $ from channel name display in pick wave panels
+  * Fix problem with file type option when opening files from clipboard
+
+## Version 2.7.1
+  * Pick Mode enhancements:
+  	- Add ability to select pick uncertainty
+	- Plot S-P in map 
+	- QuakeML import/export
+	- Add key stroke shortcut
+  * Fix bug in map line color selection
+
 ## Version 2.7.0
   * Add pick mode to Wave Clipboard
   * Add ability to import QuakeML files

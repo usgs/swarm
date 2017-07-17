@@ -123,7 +123,6 @@ public class SwarmConfig {
   public String fdsnStationURL;
   
   public String user;
-  public String quakemlResourceId="quakeml:Swarm";
 
   private SwarmConfig() {
     listeners = new ArrayList<ConfigListener>();
@@ -446,6 +445,10 @@ public class SwarmConfig {
 
     }
   }
+  
+  public Map<String, SeismicDataSource> getSources(){
+    return sources;
+  }
 
   public SeismicDataSource getSource(final String key) {
     return sources.get(key);
@@ -606,16 +609,9 @@ public class SwarmConfig {
    */
   public String getUser() {
     if (user == null) {
-      user = System.getProperty("user");
+      user = System.getProperty("user.name");
     }
     return user;
   }
 
-  /**
-   * Get QuakeML resource id.
-   * @return quakeml resource id
-   */
-  public String getQuakemlResourceId() {
-    return quakemlResourceId + "/" + getUser();
-  }
 }

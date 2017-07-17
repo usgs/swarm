@@ -6,7 +6,6 @@ import gov.usgs.volcanoes.core.contrib.PngEncoder;
 import gov.usgs.volcanoes.core.contrib.PngEncoderB;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.UiUtils;
-import gov.usgs.volcanoes.swarm.FileChooser;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Kioskable;
 import gov.usgs.volcanoes.swarm.SwarmFrame;
@@ -118,14 +117,15 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
     mapSettingsDialog = new MapSettingsDialog(this);
 
     createUi();
-    addLayers();
+    addHypocenterLayer();
+    addSpLayer();
 
     updateThread = new Thread(this, "Map Update");
     updateThread.start();
     SwarmOptions.addOptionsListener(this);
   }
 
-  private void addLayers() {
+  private void addHypocenterLayer() {
     try {
       hypocenterLayer = new HypocenterLayer();
       hypocenterLayer.setMapPanel(mapPanel);
@@ -133,6 +133,12 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
     } catch (MalformedURLException ex) {
       LOGGER.error("Unable to load layer. {}", ex);
     }
+  }
+  
+  private void addSpLayer() {
+    SpLayer layer = new SpLayer();
+    layer.setMapPanel(mapPanel);
+    addLayer(layer);
   }
 
   public static MapFrame getInstance() {

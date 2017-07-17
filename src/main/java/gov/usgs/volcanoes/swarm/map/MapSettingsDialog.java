@@ -9,6 +9,7 @@ import gov.usgs.volcanoes.swarm.map.MapPanel.LabelSetting;
 import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterSource;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
@@ -69,26 +70,21 @@ public class MapSettingsDialog extends SwarmModalDialog {
     latitude = new JTextField();
     longitude = new JTextField();
     scale = new JTextField();
-    lineWidth = new JTextField();
-    refreshInterval = new JTextField();
-    labelGroup = new ButtonGroup();
-    someLabels = new JRadioButton("Some");
-    allLabels = new JRadioButton("All");
-    noLabels = new JRadioButton("None");
-    labelGroup.add(someLabels);
-    labelGroup.add(allLabels);
-    labelGroup.add(noLabels);
+
+    lineWidth = new JTextField();  
     mapLine = new JButton();
-    hypocenterSource = new JComboBox<HypocenterSource>(HypocenterSource.values());
+    mapLine.setBorderPainted(false);
+    mapLine.setBackground(new Color(swarmConfig.mapLineColor));
+    mapLine.setForeground(new Color(swarmConfig.mapLineColor));
     lineChooser = new JColorChooser();
     lineChooser.setPreviewPanel(new MapLinePreview());
-
     final ActionListener okActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent actionEvent) {
-        // swarmConfig.mapLineColor = lineChooser.getC
+        mapLine.setBackground(lineChooser.getColor());
+        mapLine.setForeground(lineChooser.getColor());
+        swarmConfig.mapLineColor = lineChooser.getColor().getRGB();
       }
     };
-
     mapLine.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         JDialog dialog = JColorChooser.createDialog(applicationFrame, "Map Line Settings", true,
@@ -97,6 +93,17 @@ public class MapSettingsDialog extends SwarmModalDialog {
       }
     });
 
+    refreshInterval = new JTextField();
+    
+    labelGroup = new ButtonGroup();
+    someLabels = new JRadioButton("Some");
+    allLabels = new JRadioButton("All");
+    noLabels = new JRadioButton("None");
+    labelGroup.add(someLabels);
+    labelGroup.add(allLabels);
+    labelGroup.add(noLabels);
+    
+    hypocenterSource = new JComboBox<HypocenterSource>(HypocenterSource.values());
   }
 
   protected void createUi() {
