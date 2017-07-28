@@ -877,9 +877,6 @@ public class WaveViewPanel extends JComponent {
    * @param g the graphics context
    */
   public void paint(Graphics g) {
-    if (getVisibleRect().isEmpty()) {
-      return;
-    }
     Graphics2D g2 = (Graphics2D) g;
     Dimension dim = this.getSize();
     if (wave == null) {
