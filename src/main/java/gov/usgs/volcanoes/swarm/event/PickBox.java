@@ -348,8 +348,10 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
     final Graphics g = image.getGraphics();
     for (final WaveViewPanel panel : panels) {
-      panel.paint(g);
-      g.translate(0, panel.getHeight());
+      if (!panel.getVisibleRect().isEmpty()) {
+        panel.paint(g);
+        g.translate(0, panel.getHeight());
+      }
     }
     try {
       final PngEncoderB png = new PngEncoderB(image, false, PngEncoder.FILTER_NONE, 7);

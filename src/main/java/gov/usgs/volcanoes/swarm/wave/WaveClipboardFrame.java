@@ -296,7 +296,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
   // TODO: don't write image on event thread
   // TODO: unify with MapFrame.CaptureActionListener
-  
   class CaptureActionListener implements ActionListener {
     public void actionPerformed(final ActionEvent e) {
       if (waves == null || waves.size() == 0) {
