@@ -156,7 +156,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     
     fileMenu.addSeparator();
     
-    JMenuItem importEvent = new JMenuItem("Import Event...");
+    JMenuItem importEvent = new JMenuItem("Import Events...");
     importEvent.setMnemonic('I');
     importEvent.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
