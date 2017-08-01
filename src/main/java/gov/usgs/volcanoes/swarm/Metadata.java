@@ -42,6 +42,10 @@ public class Metadata implements Comparable<Metadata> {
   private double height = Double.NaN;
   private double minTime = Double.NaN;
   private double maxTime = Double.NaN;
+  
+  private double delay = Double.NaN;
+  private double xmagCorrection = Double.NaN;
+  private double fmagCorrection = Double.NaN;
 
   public SeismicDataSource source;
 
@@ -266,6 +270,12 @@ public class Metadata implements Comparable<Metadata> {
       longitude = Double.parseDouble(kv[1]);
     } else if (kv[0].equals("Latitude")) {
       latitude = Double.parseDouble(kv[1]);
+    } else if (kv[0].equals("Delay")) {
+      delay = Double.parseDouble(kv[1]);
+    } else if (kv[0].equals("FMAG Correction")) {
+      fmagCorrection = Double.parseDouble(kv[1]);
+    } else if (kv[0].equals("XMAG Correction")) {
+      xmagCorrection = Double.parseDouble(kv[1]);
     } else if (kv[0].equals("Height")) {
       height = Double.parseDouble(kv[1]);
     } else if (kv[0].equals("TimeZone")) {
@@ -420,5 +430,21 @@ public class Metadata implements Comparable<Metadata> {
 
   public Point2D.Double getLonLat() {
     return new Point2D.Double(longitude, latitude);
+  }
+
+  public double getDelay() {
+    return delay;
+  }
+
+  public double getXmagCorrection() {
+    return xmagCorrection;
+  }
+
+  public double getFmagCorrection() {
+    return fmagCorrection;
+  }
+
+  public double getHeight() {
+    return height;
   }
 }
