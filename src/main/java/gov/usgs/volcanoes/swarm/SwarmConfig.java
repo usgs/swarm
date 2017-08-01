@@ -158,8 +158,11 @@ public class SwarmConfig {
   public void createConfig(final String[] args) {
     LOGGER.info("current directory: " + System.getProperty("user.dir"));
     LOGGER.info("user.home: " + System.getProperty("user.home"));
-    String configFile;
 
+    metadata = Collections.synchronizedMap(new HashMap<String, Metadata>());
+    
+    // Identify configuration file to use
+    String configFile;
     final int n = args.length - 1;
     if (n >= 0 && !args[n].startsWith("-")) {
       configFile = args[n];
@@ -178,19 +181,7 @@ public class SwarmConfig {
 
     LOGGER.info("Using configuration file: " + configFile);
 
-    final ConfigFile cf = new ConfigFile(configFile);
-    cf.put("configFile", configFile, false);
-
-    for (int i = 0; i <= n; i++) {
-      if (args[i].startsWith("--")) {
-        final String key = args[i].substring(2, args[i].indexOf('='));
-        final String val = args[i].substring(args[i].indexOf('=') + 1);
-        LOGGER.info("command line: " + key + " = " + val);
-        cf.put(key, val, false);
-      }
-    }
-    parseConfig(cf);
-
+    // Load default metadata
     final List<String> candidateNames = new LinkedList<String>();
     candidateNames.add(Metadata.DEFAULT_METADATA_FILENAME);
     candidateNames.add(
@@ -204,7 +195,20 @@ public class SwarmConfig {
     }
 
     defaultMetadata = Metadata.loadMetadata(metadataConfigFile);
-    metadata = Collections.synchronizedMap(new HashMap<String, Metadata>());
+    
+    // Parse configuration file
+    final ConfigFile cf = new ConfigFile(configFile);
+    cf.put("configFile", configFile, false);
+
+    for (int i = 0; i <= n; i++) {
+      if (args[i].startsWith("--")) {
+        final String key = args[i].substring(2, args[i].indexOf('='));
+        final String val = args[i].substring(args[i].indexOf('=') + 1);
+        LOGGER.info("command line: " + key + " = " + val);
+        cf.put(key, val, false);
+      }
+    }
+    parseConfig(cf);
 
     loadDataSources();
     loadLayouts();
