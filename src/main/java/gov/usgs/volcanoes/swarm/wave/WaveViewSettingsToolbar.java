@@ -114,7 +114,7 @@ public class WaveViewSettingsToolbar {
           }
         });
     UiUtils.mapKeyStrokeToButton(keyComp, "APOSTROPHE", "pma1", particleMotionToggle);
-    UiUtils.mapKeyStrokeToButton(keyComp, "R", "pma2", particleMotionToggle);
+    UiUtils.mapKeyStrokeToButton(keyComp, "O", "pma2", particleMotionToggle);
     dest.add(particleMotionToggle);
 
     keyComp.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
