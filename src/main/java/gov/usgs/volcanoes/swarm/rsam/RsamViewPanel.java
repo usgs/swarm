@@ -1,5 +1,7 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
+import cern.colt.matrix.DoubleMatrix2D;
+
 import gov.usgs.plot.Plot;
 import gov.usgs.plot.PlotException;
 import gov.usgs.plot.data.GenericDataMatrix;
@@ -9,6 +11,7 @@ import gov.usgs.plot.render.AxisRenderer;
 import gov.usgs.plot.render.HistogramRenderer;
 import gov.usgs.plot.render.MatrixRenderer;
 import gov.usgs.plot.render.ShapeRenderer;
+import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
@@ -27,8 +30,6 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
-
-import cern.colt.matrix.DoubleMatrix2D;
 
 /**
  * A component that renders a RSAM plot.
@@ -324,6 +325,10 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
     if (settings.runningMean) {
       gdm.set2mean(1, settings.runningMeanPeriodS);
     }
+    
+    if (settings.filterOn) {
+      gdm.filter(settings.filter, 1, settings.zeroPhaseShift);
+    }
 
     MatrixRenderer mr = new MatrixRenderer(gdm.getData(), false);
     double max;
@@ -346,13 +351,17 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
 
     mr.createDefaultLineRenderers(Color.blue);
     plot.addRenderer(mr);
+
+    if (settings.filterOn) {
+      plot.addRenderer(getFilterLabel(getWidth() - RIGHT_WIDTH, getHeight() - BOTTOM_HEIGHT,
+          TextRenderer.RIGHT, TextRenderer.BOTTOM));
+    }
   }
 
   /**
    * Plots RSAM counts.
    * 
-   * @param data
-   *          the RSAM values to plot
+   * @param data the RSAM values to plot
    */
   private void plotCounts(Plot plot, RSAMData data) {
 
@@ -423,5 +432,36 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
    */
   public Dimension getMinimumSize() {
     return getSize();
+  }
+  
+  /**
+   * Get filter label.
+   * @param x x text location
+   * @param y y text location
+   * @param horizJustification horizontal justification
+   * @param vertJustification vertical justification
+   * @return text renderer
+   */
+  public TextRenderer getFilterLabel(int x, int y, int horizJustification, int vertJustification) {
+    String ft = "";
+    switch (settings.filter.getType()) {
+      case BANDPASS:
+        ft = "Band pass [" + settings.filter.getCorner1() + "-" + settings.filter.getCorner2()
+            + " Hz]";
+        break;
+      case HIGHPASS:
+        ft = "High pass [" + settings.filter.getCorner1() + " Hz]";
+        break;
+      case LOWPASS:
+        ft = "Low pass [" + settings.filter.getCorner1() + " Hz]";
+        break;
+      default:
+        break;
+    }
+    TextRenderer tr = new TextRenderer(x, y, ft);
+    tr.horizJustification = horizJustification;
+    tr.vertJustification = vertJustification;
+    tr.color = Color.red;
+    return tr;
   }
 }

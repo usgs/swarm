@@ -1,6 +1,7 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
 import gov.usgs.math.BinSize;
+import gov.usgs.math.Butterworth;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.util.StringUtils;
 
@@ -39,6 +40,10 @@ public class RsamViewSettings {
   private boolean autoScale;
   public int scaleMax;
   public int scaleMin;
+  
+  public boolean filterOn;
+  public Butterworth filter;
+  public boolean zeroPhaseShift;
 
   private int spanLengthS;
   private ViewType viewType;
@@ -66,6 +71,9 @@ public class RsamViewSettings {
     DEFAULT_RSAM_VIEW_SETTINGS.autoScale = true;
     DEFAULT_RSAM_VIEW_SETTINGS.scaleMax = 100;
     DEFAULT_RSAM_VIEW_SETTINGS.scaleMin = 0;
+    DEFAULT_RSAM_VIEW_SETTINGS.filter = new Butterworth();
+    DEFAULT_RSAM_VIEW_SETTINGS.filterOn = false;
+    DEFAULT_RSAM_VIEW_SETTINGS.zeroPhaseShift = true;
 
     List<String> candidateNames = new LinkedList<String>();
     candidateNames.add(DEFAULTS_FILENAME);
@@ -118,6 +126,9 @@ public class RsamViewSettings {
     autoScale = s.autoScale;
     scaleMax = s.scaleMax;
     scaleMin = s.scaleMin;
+    filterOn = s.filterOn;
+    filter = new Butterworth(s.filter);
+    zeroPhaseShift = s.zeroPhaseShift;
   }
 
   /**
@@ -157,6 +168,14 @@ public class RsamViewSettings {
         StringUtils.stringToInt(cf.getString("scaleMax"), DEFAULT_RSAM_VIEW_SETTINGS.scaleMax);
     scaleMin =
         StringUtils.stringToInt(cf.getString("scaleMin"), DEFAULT_RSAM_VIEW_SETTINGS.scaleMin);
+    
+
+    //filter.set(cf.getSubConfig("filter"));
+    //filterOn =
+    //    StringUtils.stringToBoolean(cf.getString("filterOn"), DEFAULT_RSAM_VIEW_SETTINGS.filterOn);
+    //zeroPhaseShift = StringUtils.stringToBoolean(cf.getString("zeroPhaseShift"),
+    //    DEFAULT_RSAM_VIEW_SETTINGS.zeroPhaseShift);
+    
   }
 
   /**
@@ -182,6 +201,9 @@ public class RsamViewSettings {
     cf.put(prefix + ".autoScale", Boolean.toString(autoScale));
     cf.put(prefix + ".scaleMax", Double.toString(scaleMax));
     cf.put(prefix + ".scaleMin", Double.toString(scaleMin));
+    //filter.save(cf, prefix + ".filter");
+    //cf.put(prefix + ".filterOn", Boolean.toString(filterOn));
+    //cf.put(prefix + ".zeroPhaseShift", Boolean.toString(zeroPhaseShift));
   }
 
   public void setSpanLength(int spanLengthS) {
