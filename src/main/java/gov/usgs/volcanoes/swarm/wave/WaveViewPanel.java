@@ -136,6 +136,7 @@ public class WaveViewPanel extends JComponent {
     pauseCursorMark = false;
     backgroundColor = new Color(0xf7, 0xf7, 0xf7);
     settings = new WaveViewSettings();
+    settings.view = this;
 
     setupMouseHandler();
   }
