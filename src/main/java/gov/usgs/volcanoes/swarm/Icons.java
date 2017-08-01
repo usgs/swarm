@@ -14,7 +14,6 @@ public class Icons {
   public static final ImageIcon geoback = getIcon("images/geoback.gif");
   public static final ImageIcon timeback = getIcon("images/timeback.gif");
   public static final ImageIcon clipboard = getIcon("images/clipboard.gif");
-  public static final ImageIcon picker = getIcon("images/clipboard.gif");
   public static final ImageIcon down = getIcon("images/down.gif");
   public static final ImageIcon clock = getIcon("images/date.gif");
   public static final ImageIcon close = getIcon("images/close.png");
