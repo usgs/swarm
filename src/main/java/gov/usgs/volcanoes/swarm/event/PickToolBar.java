@@ -11,6 +11,8 @@ import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.Throbber;
+import gov.usgs.volcanoes.swarm.map.MapFrame;
+import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterLayer;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewToolBar;
@@ -51,6 +53,7 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
   private final JButton expXButton;
   private final JButton forwardButton;
   private final JButton backButton;
+  private final JButton deleteButton;
   private final Throbber throbber;
   private final WaveViewToolBar waveViewToolBar;
   private JPopupMenu popup;
@@ -79,6 +82,7 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
     expXButton = createExpXButton();
     forwardButton = createForwardButton();
     histButton = createHistButton();
+    deleteButton = createDeleteButton();
     placeButtons();
 
     waveViewToolBar = new WaveViewToolBar(null, this, listener);
@@ -104,6 +108,7 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
     add(expXButton);
     add(histButton);
     addSeparator();
+    add(deleteButton);
   }
 
   /** 
@@ -159,7 +164,6 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
             EventDialog.getInstance().setEventDetails(event);
             
             // Add panels to clipbard
-            
             PickBox pickBox = (PickBox)listener;
             List<PickWavePanel> panels = pickBox.getPanels();
             for (WaveViewPanel wvp : panels) {
@@ -257,6 +261,26 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
     listener.mapKeyStroke("BACK_SPACE", "back", histButton);
 
     return histButton;
+  }
+  
+  private JButton createDeleteButton() {
+    JButton deleteButton = SwarmUtil.createToolBarButton(Icons.delete,
+        "Remove event from map", new ActionListener() {
+          public void actionPerformed(final ActionEvent e) {
+            String message =
+                "Are you sure you want to delete this event from the map?";
+            message += " It cannot be undone.";
+            message += "\n\nNote: NEIC events may get reimported automatically.";
+            int result = JOptionPane.showConfirmDialog(Swarm.getApplicationFrame(), message,
+                "Remove event", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (result == JOptionPane.YES_OPTION) {
+              HypocenterLayer layer = MapFrame.getInstance().getHypocenterLayer();
+              layer.remove(event.publicId);
+            }
+          }
+        });
+
+    return deleteButton;
   }
 
   public void scaleTime(final double pct) {

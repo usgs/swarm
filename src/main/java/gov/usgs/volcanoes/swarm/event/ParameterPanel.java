@@ -102,7 +102,7 @@ public class ParameterPanel {
     c.gridy++;
     addKey("Error (RMS): ", parameterPanel, c);
 
-    double error = origin.getStandardError();
+    double error = origin.getQuality().getStandardError();
     if (!Double.isNaN(error)) {
       addValue(Double.toString(error), parameterPanel, c);
     }
@@ -110,7 +110,7 @@ public class ParameterPanel {
     c.gridy++;
     addKey("Azimuthal gap: ", parameterPanel, c);
 
-    double gap = origin.getAzimuthalGap();
+    double gap = origin.getQuality().getAzimuthalGap();
     if (!Double.isNaN(gap)) {
       addValue(gap + "\u00B0", parameterPanel, c);
     }
@@ -118,7 +118,7 @@ public class ParameterPanel {
     c.gridy++;
     addKey("Nearest station: ", parameterPanel, c);
 
-    double distance = origin.getMinimumDistance();
+    double distance = origin.getQuality().getMinimumDistance();
     if (!Double.isNaN(distance)) {
       String tag = distance + "\u00B0" + " \u2248" + String.format("%.2f", Math.toRadians(distance * 6371)) + " km";
       addValue(tag, parameterPanel, c);
@@ -127,7 +127,7 @@ public class ParameterPanel {
     c.gridy++;
     addKey("Phase count: ", parameterPanel, c);
 
-    int phaseCount = origin.getPhaseCount();
+    int phaseCount = origin.getQuality().getUsedPhaseCount();
     if (phaseCount > 0) {
       addValue(Integer.toString(phaseCount), parameterPanel, c);
     }
@@ -137,8 +137,8 @@ public class ParameterPanel {
 
     Magnitude magnitude = event.getPreferredMagnitude();
     if (magnitude != null) {
-      String mag = String.format("%s %s", magnitude.getMag(), magnitude.getType());
-      String uncertaintly = magnitude.getUncertainty();
+      String mag = String.format("%s %s", magnitude.getMagnitude().getValue(), magnitude.getType());
+      String uncertaintly = String.format("%.1f", magnitude.getMagnitude().getUncertainty());
       if (uncertaintly != null) {
         mag += " (" + uncertaintly + ")";
       }

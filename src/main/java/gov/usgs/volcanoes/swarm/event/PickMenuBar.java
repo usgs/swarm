@@ -83,14 +83,14 @@ public class PickMenuBar extends JMenuBar {
     
     menu.addSeparator();
     
-    JMenuItem exportMenu = new JMenuItem("Export QuakeML...");
-    exportMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK));
-    exportMenu.addActionListener(new ActionListener() {
+    JMenuItem createEventMenu = new JMenuItem("Create Event...");
+    createEventMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK));
+    createEventMenu.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         openEventDialog();
       }
     });
-    menu.add(exportMenu);
+    menu.add(createEventMenu);
     
 /*    JMenuItem hypo71Menu = new JMenuItem("Export Hypo71 Input File...");
     hypo71Menu.addActionListener(new ActionListener() {
@@ -181,17 +181,29 @@ public class PickMenuBar extends JMenuBar {
    * Open event dialog for export to file.
    */
   private void openEventDialog() {
-    if (clipboard.getWaves().isEmpty()) {
-      String message = "Nothing to export!";
-      JOptionPane.showMessageDialog(clipboard, message);
-      return;
+    /*
+     * String message = "Every pick in the clipboard will be saved. Continue?"; int result =
+     * JOptionPane.showConfirmDialog(clipboard, message, "Export", JOptionPane.YES_NO_OPTION,
+     * JOptionPane.QUESTION_MESSAGE); if (result != JOptionPane.YES_OPTION) { return; }
+     */
+    boolean hasPicks = false;
+    for (WaveViewPanel wvp : clipboard.getWaves()) {
+      if (wvp.getPickMenu().getPickCount() > 0) {
+        hasPicks = true;
+        break;
+      }
     }
-    String message = "Every pick in the clipboard will be saved. Continue?";
-    int result = JOptionPane.showConfirmDialog(clipboard, message, "Export",
-        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-    if (result != JOptionPane.YES_OPTION) {
-      return;
+    if (hasPicks) {
+      eventDialog.usePicks.setEnabled(true);
+      eventDialog.crustalModelFile.setEnabled(true);
+      eventDialog.usePicks.setSelected(true);
+    } else {
+      eventDialog.usePicks.setEnabled(false);
+      eventDialog.crustalModelFile.setEnabled(false); 
+      eventDialog.useInputFile.setSelected(true);     
     }
+    eventDialog.setState(java.awt.Frame.NORMAL);
+    eventDialog.setSizeAndLocation();
     eventDialog.setVisible(true);    
   }
   

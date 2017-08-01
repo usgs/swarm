@@ -590,4 +590,11 @@ public class PickMenu extends JPopupMenu {
     plotMenu.setSelected(plot);
   }
   
+  /**
+   * Get number of picks for channel.
+   * @return number of picks made
+   */
+  public int getPickCount() {
+    return picks.size();
+  }
 }
