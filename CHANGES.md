@@ -1,3 +1,7 @@
+## Version 2.7.4
+  * Fix clipboard image issue
+  * Fix filter (f) and rescale (r) hot keys
+
 ## Version 2.7.3
   * Fix pick time zone on export to QuakeML
   * Add 'Clear All Picks' to pick menu bar
