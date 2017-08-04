@@ -29,7 +29,7 @@ public class Hypo71Manager {
   protected Queue<Station> stationsList = new LinkedList<Station>();
   protected Queue<CrustalModel> crustalModelList = new LinkedList<CrustalModel>();
   protected Queue<PhaseRecord> phaseRecordsList = new LinkedList<PhaseRecord>();
-  protected ControlCard controlCard = new ControlCard(0, 5.0, 50.0, 100.0, 1.78, 2, 1, 18, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0);;
+  protected ControlCard controlCard = new ControlCard(0, 5.0, 50.0, 100.0, 1.78, 4, 0, 0, 0, 3, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0);;
   protected Hypo71 hypo71 = new Hypo71();
   private char prevIns = ' ';
   private char prevIew = ' ';
@@ -70,6 +70,7 @@ public class Hypo71Manager {
   
   /**
    * Add station to station list.
+   * 
    * @param name station name
    * @param latitude station latitude in DD
    * @param longitude station longitude in DD
@@ -77,18 +78,16 @@ public class Hypo71Manager {
    * @param delay station delay
    * @param fmag station correction for coda magnitude (FMAG)
    * @param xmag station correction for local magnitude (XMAG)
-   * @param sysNum system number assigned to station so that the frequency response curve 
-   *               of the seismometer and preamp is specified for the amplitude magnitude calculation.
-   *               (E.g. use 0 for Wood-Anderson)
+   * @param sysNum system number assigned to station so that the frequency response curve of the
+   *        seismometer and preamp is specified for the amplitude magnitude calculation. (E.g. use 0
+   *        for Wood-Anderson)
    */
-  public void addStation(String name, double latitude, double longitude, double elevation, double delay, double fmag,
-      double xmag, int sysNum) throws IllegalArgumentException {
+  public void addStation(String name, double latitude, double longitude, double elevation,
+      double delay, double fmag, double xmag, int sysNum) throws IllegalArgumentException {
     // stationsList.add(new Station(' ', "SR01", 38, 42.55f, ' ', 122, 59.17f,
     // ' ', 0, -0.15f, 0.4f, 0.25f, 8, 0.0f, 0.0f, 0, 0, 0));
     //SR013842.55 12259.17      -0.15     0.40   0.25 8
 
-    //Formatter formatter = new Formatter(new StringBuilder(), Locale.US);
-    //String nsta = formatter.format("%1$4s", name).toString();
     char ins = 'N';
     if (latitude < 0) {
       ins = 'S';
@@ -112,12 +111,11 @@ public class Hypo71Manager {
       prevIns = ins;
       prevIew = iew;
     }
+
+    Station station = new Station(' ', name, (int) lat1, lat2, ins, (int) lon1, lon2, iew,
+        (int) elevation, delay, fmag, xmag, sysNum, 0f, 0f, 0, 0, 0);
     
-    Station station = new Station(' ', name, (int) lat1, lat2, ins, (int) lon1, lon2, iew, (int)elevation, delay,
-        fmag, xmag, sysNum, 0f, 0f, 0, 0, 0);
     stationsList.add(station);
-    //formatter.close();
-    
   }
   
   /**
@@ -152,7 +150,7 @@ public class Hypo71Manager {
     float sSec = 0.0f;
     String sRemark = "";
     if (sPick != null) {
-      sSec = (float) (Double.parseDouble(pSec) + (sPick.getTime() - sPick.getTime()) / 1000);
+      sSec = (float) (Double.parseDouble(pSec) + (sPick.getTime() - pPick.getTime()) / 1000);
       // SRMK
       String sOnset = sPick.getOnset().toString().substring(0, 1).toUpperCase();
       String sMotion = getMotion(sPick.getPolarity());
@@ -227,7 +225,6 @@ public class Hypo71Manager {
       BufferedReader bufReader = new BufferedReader(fileReader);
       while (bufReader.ready()) {
         String line = bufReader.readLine();
-        System.out.println(line);
         String[] data = line.trim().split("\\s+");
         double velocity = Double.valueOf(data[0]);
         double depth = Double.valueOf(data[1]);

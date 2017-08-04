@@ -125,7 +125,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
   private PickMenuBar pickMenuBar;
   private JToggleButton pickButton;
-  private Event event;
   
   private JPopupMenu popup;
 
@@ -1390,7 +1389,7 @@ public class WaveClipboardFrame extends SwarmFrame {
   /**
    * Import event into clipboard. Event must be set first.
    */
-  public void importEvent() {
+  public void importEvent(final Event event) {
     final SwingWorker worker = new SwingWorker() {
       @Override
       public Object construct() {
@@ -1476,6 +1475,7 @@ public class WaveClipboardFrame extends SwarmFrame {
       public void finished() {
         throbber.decrement();
         repaint();
+        EventDialog.getInstance().checkForPicks();
       }
     };
     worker.start();
@@ -1484,14 +1484,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
   public JToggleButton getPickButton() {
     return pickButton;
-  }
-
-  public Event getEvent() {
-    return event;
-  }
-
-  public void setEvent(Event event) {
-    this.event = event;
   }
 
   public PickMenuBar getPickMenuBar() {

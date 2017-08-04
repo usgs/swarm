@@ -34,6 +34,7 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -56,6 +57,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -67,8 +70,11 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 /**
  * Event information dialog.
@@ -77,6 +83,7 @@ import org.w3c.dom.Element;
  */
 public class EventDialog extends JFrame {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(EventDialog.class);
   private static final long serialVersionUID = 4870724789310886277L;
   private static EventDialog dialog;
   private JPanel mainPanel;
@@ -98,8 +105,6 @@ public class EventDialog extends JFrame {
   protected JTextField hypo71InputFile;
   protected JTextArea hypo71Output;
   
-  // export directory
-  private JTextField quakeMlFile;
   private String user;
 
   /**
@@ -169,10 +174,10 @@ public class EventDialog extends JFrame {
     builder.append("Comment", scrollPane);
     builder.nextLine();
     
-    builder.appendSeparator("Hypo71");
+    builder.appendSeparator("Hypo71 Input");
     hypo71Mgr = new Hypo71Manager();
  
-    usePicks = new JRadioButton("Use Picks");
+    usePicks = new JRadioButton("Use Clipboard Picks");
     usePicks.setSelected(true);
     usePicks.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -187,7 +192,7 @@ public class EventDialog extends JFrame {
     JButton openCrustalModelButton = new JButton("...");
     openCrustalModelButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        String filename = openFileChooser(JFileChooser.FILES_ONLY, null);
+        String filename = openFileChooser(JFileChooser.FILES_ONLY, null, null);
         if (filename != null) {
           crustalModelFile.setText(filename);
         }
@@ -214,7 +219,8 @@ public class EventDialog extends JFrame {
     JButton openInputFileButton = new JButton("...");
     openInputFileButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        String filename = openFileChooser(JFileChooser.FILES_ONLY, null);
+        FileFilter filter = new FileNameExtensionFilter("Hypo71 Input (.INP)", "INP");
+        String filename = openFileChooser(JFileChooser.FILES_ONLY, null, filter);
         if (filename != null) {
           hypo71InputFile.setText(filename);
           hypo71Output.setText("");
@@ -248,7 +254,8 @@ public class EventDialog extends JFrame {
     JPanel buttonPanel = bbBuilder.getPanel();
     buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 10));
     builder.append(buttonPanel, 5);
-    builder.nextLine();
+    
+    builder.appendSeparator("Hypo71 Output");
     
     hypo71Output = new JTextArea(5,1);
     hypo71Output.setEditable(false);
@@ -287,36 +294,33 @@ public class EventDialog extends JFrame {
     buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 10));
     builder.append(buttonPanel, 5);
     
-    builder.appendSeparator("Export QuakeML");
+    builder.appendSeparator("QuakeML");
+
+    final FileFilter xmlFilter = new FileNameExtensionFilter("QuakeML (.xml)", "XML");
+    JButton importQuakemlButton = new JButton("Import");
+    importQuakemlButton.setToolTipText("Import event from QuakeML file.");
+    importQuakemlButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        String filename = openFileChooser(JFileChooser.FILES_ONLY, null, xmlFilter);
+        importFile(filename);
+        checkForPicks();
+      }   
+    }); 
     
-    quakeMlFile = new JTextField();
-    builder.append("Export File Name", quakeMlFile);
-    JButton browseButton = new JButton("...");
-    browseButton.addActionListener(new ActionListener() {
+    JButton exportQuakemlButton = new JButton("Export");
+    exportQuakemlButton.setToolTipText("Export event to QuakeML file.");
+    exportQuakemlButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         String filename = SwarmConfig.getInstance().lastPath + "/Swarm" + Version.POM_VERSION
             + "_QuakeML_" + user + "_" + System.currentTimeMillis() + ".xml";
-        filename = openFileChooser(JFileChooser.FILES_ONLY, filename);
-        if (filename != null) {
-          quakeMlFile.setText(filename);
-        }
-      }
-    });
-    builder.append(browseButton);
-    builder.nextLine();
-    
-    JButton saveQuakemlButton = new JButton("Save");
-    saveQuakemlButton.setToolTipText("Save event to QuakeML file.");
-    saveQuakemlButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        String filename = quakeMlFile.getText();
+        filename = openFileChooser(JFileChooser.FILES_ONLY, filename, xmlFilter);
         saveQuakeMl(filename);
       }   
     });
     
     bbBuilder = new ButtonBarBuilder();
     bbBuilder.addGlue();
-    bbBuilder.addButton(saveQuakemlButton);
+    bbBuilder.addButton(importQuakemlButton, exportQuakemlButton);
     buttonPanel = bbBuilder.getPanel();
     buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 10));
     builder.append(buttonPanel, 5);
@@ -358,7 +362,10 @@ public class EventDialog extends JFrame {
   private void saveHypo71Output() {
     String outputFile = SwarmConfig.getInstance().lastPath + "/Swarm" + Version.POM_VERSION
         + "_Hypo71_" + user + "_" + System.currentTimeMillis() + ".OUT";
-    outputFile = openFileChooser(JFileChooser.FILES_ONLY, outputFile);
+    outputFile = openFileChooser(JFileChooser.FILES_ONLY, outputFile, null);
+    if (outputFile == null) {
+      return;
+    }
 
     try {
       FileWriter fileWriter = new FileWriter(outputFile);
@@ -379,11 +386,14 @@ public class EventDialog extends JFrame {
    * @param selectionMode file or directory
    * @return filename
    */
-  private String openFileChooser(int selectionMode, String filename) {
+  private String openFileChooser(int selectionMode, String filename, FileFilter filter) {
     JFileChooser chooser = new JFileChooser();
     chooser.setCurrentDirectory(new File(SwarmConfig.getInstance().lastPath));
     if (filename != null) {
       chooser.setSelectedFile(new File(filename));
+    }
+    if (filter != null) {
+      chooser.setFileFilter(filter);
     }
     chooser.setFileSelectionMode(selectionMode);
     chooser.setMultiSelectionEnabled(false);
@@ -421,6 +431,11 @@ public class EventDialog extends JFrame {
       hypo71Mgr.description = description.getText();
       for (WaveViewPanel wvp : WaveClipboardFrame.getInstance().getWaves()) {
         PickMenu pickMenu = wvp.getPickMenu();
+        Pick p = pickMenu.getPick(PickMenu.P);
+        Pick s = pickMenu.getPick(PickMenu.S);
+        if (p == null || !pickMenu.isPickChannel(PickMenu.P)) {
+          continue;
+        }
         
         // add station
         String channel = wvp.getChannel();
@@ -440,13 +455,11 @@ public class EventDialog extends JFrame {
         }
         
         // add phase record
-        Pick p = pickMenu.getPick(PickMenu.P);
-        Pick s = pickMenu.getPick(PickMenu.S);
         hypo71Mgr.addPhaseRecord(station, p, s);
       }
       success = hypo71Mgr.calculate(null);
     }
-    if(success){
+    if (success) {
       String output = hypo71Mgr.hypo71.getResults().getOutput();;
       hypo71Output.setText(output);
       hypo71Output.setToolTipText("<html><pre>" + output + "</pre></html>");
@@ -673,34 +686,70 @@ public class EventDialog extends JFrame {
     Date d = df.parse(ds);
     return d;
   }
-/*  private SimpleDateFormat df = new SimpleDateFormat("yyMMddHHmmss");
+
+  /**
+   * Import event from file.
+   * @param f file
+   */
+  private void importFile(String filename) {
+    try {
+      if (filename == null) {
+        return;
+      }
+      WaveClipboardFrame clipboard = WaveClipboardFrame.getInstance();
+      EventSet eventSet = EventSet.parseQuakeml(new FileInputStream(new File(filename)));
+      if (eventSet.size() == 0) {
+        JOptionPane.showMessageDialog(clipboard, "No events found in file.");
+        return;
+      }
+      Event event;
+      if (eventSet.size() > 1) { // Get user to decide which event to import
+        HashMap<String, Event> eventMap = new HashMap<String, Event>();
+        for (Event e : eventSet.values()) {
+          String description = e.getDescription();
+          if (description == null || description.equals("")) {
+            description = e.publicId;
+          }
+          eventMap.put(description, e);
+        }
+        event = openEventChooser(eventMap);
+      } else {
+        event = eventSet.values().iterator().next();
+      }
+      //clipboard.setEvent(event);
+      clipboard.importEvent(event);
+    } catch (FileNotFoundException e) {
+      LOGGER.warn(e.getMessage());
+    } catch (IOException e) {
+      LOGGER.warn(e.getMessage());
+    } catch (ParserConfigurationException e) {
+      LOGGER.warn(e.getMessage());
+    } catch (SAXException e) {
+      LOGGER.warn(e.getMessage());
+    }
+  }
   
-  *//**
-   * Get date object from phase record date format.
-   * 
-   * @param jdate year, month, day, and month (YYMMDDHH)
-   * @param jmin minute
-   * @param sec seconds
-   * @return date
-   * @throws ParseException parse exception
-   *//*
-  private Date getDate(int jtime, int jmin, int sec) throws ParseException {
-    String date = String.format("%08d", jtime);
-    String min = String.format("%02d", jmin);
-    String seconds = String.format("%02d", sec);
-    Date d = df.parse(date + min + seconds);
-    return d;
-  }*/
+  /**
+   * Open chooser with list of event descriptions.
+   * @param eventMap map of description to event
+   * @return user selected event
+   */
+  private Event openEventChooser(HashMap<String, Event> eventMap) {
+    String s = (String) JOptionPane.showInputDialog(WaveClipboardFrame.getInstance(),
+        "Select event to import", "Import Event", JOptionPane.PLAIN_MESSAGE, null,
+        eventMap.keySet().toArray(), eventMap.keySet().iterator().next());
+    return eventMap.get(s);
+  }
   
   /**
    * Save event to QuakeML file.
    */
   public void saveQuakeMl(String filename) {
+    if (filename == null) {
+      return;
+    }
     try {
-
-      if (event == null) {
-        createEvent();
-      }
+      createEvent();
       
       // build XML document
       DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -760,6 +809,29 @@ public class EventDialog extends JFrame {
   }
   
   /**
+   * Check to see if there are picks on clipboard.  If so, enable
+   * 'Use Picks' option. Otherwise, disable.
+   */
+  public void checkForPicks() {
+    boolean hasPicks = false;
+    for (WaveViewPanel wvp : WaveClipboardFrame.getInstance().getWaves()) {
+      if (wvp.getPickMenu().getPickCount() > 0) {
+        hasPicks = true;
+        break;
+      }
+    }
+    if (hasPicks) {
+      usePicks.setEnabled(true);
+      crustalModelFile.setEnabled(true);
+      usePicks.setSelected(true);
+    } else {
+      usePicks.setEnabled(false);
+      crustalModelFile.setEnabled(false); 
+      useInputFile.setSelected(true);     
+    }
+  }
+  
+  /**
    * Validate input values.
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#allowOk()
    */
@@ -775,8 +847,6 @@ public class EventDialog extends JFrame {
    
   }
 
-
-  
   /**
    * Revert settings.
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#wasCancelled()
