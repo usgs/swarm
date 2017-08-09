@@ -6,8 +6,9 @@ import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.FormLayout;
 
 import gov.usgs.volcanoes.core.contrib.hypo71.Hypo71;
-import gov.usgs.volcanoes.core.contrib.hypo71.Hypo71.Results;
 import gov.usgs.volcanoes.core.contrib.hypo71.Hypocenter;
+import gov.usgs.volcanoes.core.contrib.hypo71.PhaseRecord;
+import gov.usgs.volcanoes.core.contrib.hypo71.Station;
 import gov.usgs.volcanoes.core.quakeml.Arrival;
 import gov.usgs.volcanoes.core.quakeml.EvaluationMode;
 import gov.usgs.volcanoes.core.quakeml.Event;
@@ -19,6 +20,7 @@ import gov.usgs.volcanoes.core.quakeml.Origin;
 import gov.usgs.volcanoes.core.quakeml.OriginQuality;
 import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.quakeml.QuakeMlUtils;
+import gov.usgs.volcanoes.core.quakeml.StationMagnitude;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.Swarm;
@@ -89,7 +91,6 @@ public class EventDialog extends JFrame {
   private JPanel mainPanel;
 
   // event details
-  private Event event;
   public static String QUAKEML_RESOURCE_ID = "quakeml:volcanoes.usgs.gov/Swarm/v"
       + Version.POM_VERSION + "/" + SwarmConfig.getInstance().getUser();
   private JComboBox<EventType> eventType;
@@ -99,6 +100,7 @@ public class EventDialog extends JFrame {
   
   // hypo71 info
   private Hypo71Manager hypo71Mgr; 
+  private Hypo71.Results hypoResult;
   protected JRadioButton usePicks;
   protected JTextField crustalModelFile;
   protected JRadioButton useInputFile;
@@ -150,7 +152,7 @@ public class EventDialog extends JFrame {
     this.add(mainPanel);
     //super.createUi();
     
-    FormLayout layout = new FormLayout("left:65dlu, 5dlu, 120dlu, 3dlu, 10dlu");
+    FormLayout layout = new FormLayout("left:75dlu, 5dlu, 130dlu, 3dlu, 10dlu");
     DefaultFormBuilder builder = new DefaultFormBuilder(layout).border(Borders.DIALOG);
     
     builder.appendSeparator("Event Details");
@@ -224,7 +226,7 @@ public class EventDialog extends JFrame {
         if (filename != null) {
           hypo71InputFile.setText(filename);
           hypo71Output.setText("");
-          hypo71Output.setToolTipText("");
+          //hypo71Output.setToolTipText("");
         }
       }
     });
@@ -247,7 +249,6 @@ public class EventDialog extends JFrame {
       }   
     });
 
-
     ButtonBarBuilder bbBuilder = new ButtonBarBuilder();
     bbBuilder.addGlue();
     bbBuilder.addButton(locateButton);
@@ -263,6 +264,19 @@ public class EventDialog extends JFrame {
     builder.append(hypo71OutScroll, 5);
     builder.nextLine();
 
+    JButton viewHypo71Button = new JButton("View");
+    viewHypo71Button.setToolTipText("View Hypo71 output.");
+    viewHypo71Button.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        JTextArea textArea = new JTextArea(40,50);
+        textArea.setEditable(false);
+        textArea.setLineWrap(false);
+        textArea.setText(hypo71Output.getText());
+        JScrollPane scroll = new JScrollPane(textArea);
+        JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), scroll);
+      }   
+    });
+    
     JButton plotHypo71Button = new JButton("Plot");
     plotHypo71Button.setToolTipText("Plot located hypocenters on map.");
     plotHypo71Button.addActionListener(new ActionListener() {
@@ -289,7 +303,7 @@ public class EventDialog extends JFrame {
 
     bbBuilder = new ButtonBarBuilder();
     bbBuilder.addGlue();
-    bbBuilder.addButton(plotHypo71Button, saveHypo71Button, clearHypo71Button);
+    bbBuilder.addButton(viewHypo71Button, plotHypo71Button, saveHypo71Button, clearHypo71Button);
     buttonPanel = bbBuilder.getPanel();
     buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 10));
     builder.append(buttonPanel, 5);
@@ -302,7 +316,7 @@ public class EventDialog extends JFrame {
     importQuakemlButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         String filename = openFileChooser(JFileChooser.FILES_ONLY, null, xmlFilter);
-        importFile(filename);
+        importQuakeMl(filename);
         checkForPicks();
       }   
     }); 
@@ -332,23 +346,20 @@ public class EventDialog extends JFrame {
    * Clear event information and hypo71 run data.
    */
   private void clearHypo71() {
-    event = null;
-    hypo71Mgr.clear();
     hypo71Output.setText("");
-    hypo71Output.setToolTipText("");
+    hypoResult = null;
   }
   
   /**
    * Plot Hypo71 output on map.
    */
   private void plotHypo71Output() {
-    if (event == null) {
-      String message = "You must first run Hypo71 to plot an event.";
-      JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message);
-    } else if (event.getPreferredOrigin() == null) {
+    Event event = createEvent();
+    if (event.getPreferredOrigin() == null) {
       String message = "No origin associated with event.";
       JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message);
     } else {
+      this.setVisible(false);
       EventSet eventSet = new EventSet();
       eventSet.put(event.publicId, event);
       MapFrame.getInstance().getHypocenterLayer().add(eventSet);
@@ -369,7 +380,7 @@ public class EventDialog extends JFrame {
 
     try {
       FileWriter fileWriter = new FileWriter(outputFile);
-      String output = hypo71Mgr.hypo71.getResults().getOutput();
+      String output = hypoResult.getOutput();
       fileWriter.write(output);
       fileWriter.close();
     } catch (IOException e) {
@@ -417,6 +428,7 @@ public class EventDialog extends JFrame {
    * @throws IOException IO exception
    */
   private void runHypo71() throws IOException, ParseException {
+    hypoResult = null;
     hypo71Mgr.clear();
     boolean success;
     if (useInputFile.isSelected()) {
@@ -430,13 +442,6 @@ public class EventDialog extends JFrame {
       hypo71Mgr.loadCrustalModelFromFile();
       hypo71Mgr.description = description.getText();
       for (WaveViewPanel wvp : WaveClipboardFrame.getInstance().getWaves()) {
-        PickMenu pickMenu = wvp.getPickMenu();
-        Pick p = pickMenu.getPick(PickMenu.P);
-        Pick s = pickMenu.getPick(PickMenu.S);
-        if (p == null || !pickMenu.isPickChannel(PickMenu.P)) {
-          continue;
-        }
-        
         // add station
         String channel = wvp.getChannel();
         Metadata md = SwarmConfig.getInstance().getMetadata(channel);
@@ -455,25 +460,54 @@ public class EventDialog extends JFrame {
         }
         
         // add phase record
-        hypo71Mgr.addPhaseRecord(station, p, s);
+        PickData pickData = wvp.getPickData();
+        Pick p = pickData.getPick(PickMenu.P);
+        if (p == null || !pickData.isPickChannel(PickMenu.P)) {
+          continue;
+        }
+        Pick coda1 = pickData.getPick(PickMenu.CODA1);
+        Pick coda2 = pickData.getPick(PickMenu.CODA2);
+        if (coda1 == null && coda2 == null) {
+          continue;
+        }
+        long endCoda = 0;
+        if (coda1 == null) {
+          endCoda = coda2.getTime();
+        } else if (coda2 == null) {
+          endCoda = coda1.getTime();
+        } else {
+          endCoda = Math.max(coda1.getTime(), coda2.getTime());
+        }
+        double fmp = (endCoda - p.getTime()) / 1000.0;
+        Pick s = pickData.getPick(PickMenu.S);      
+        hypo71Mgr.addPhaseRecord(station, p, s, fmp);
       }
+      String message = "Number of phase records: " + hypo71Mgr.phaseRecordsList.size();
+      message += "\n\nNote: Origin may not be determined if there is insufficient information.\n"
+                   + "If locating an origin is unsuccessful ensure that you have selected end\n"
+                   + "codas to go with your P picks so that earthquake duration can be \n"
+                   + "determined for a station.";
+      JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message);
+      PhaseRecord endRecord = new PhaseRecord();
+      endRecord.setMSTA("    ");
+      hypo71Mgr.phaseRecordsList.add(endRecord);
       success = hypo71Mgr.calculate(null);
     }
     if (success) {
-      String output = hypo71Mgr.hypo71.getResults().getOutput();;
+      hypoResult = hypo71Mgr.hypo71.getResults();
+      String output = hypoResult.getOutput();
       hypo71Output.setText(output);
-      hypo71Output.setToolTipText("<html><pre>" + output + "</pre></html>");
-      createEvent();
+      hypo71Mgr.clear();
     }
   }
   
   /**
    * Create event.
    */
-  private void createEvent() {
+  private Event createEvent() {
     String eventId = Long.toString(System.currentTimeMillis());
     String publicId = QUAKEML_RESOURCE_ID + "/Event/" + eventId;
-    event = new Event(publicId);
+    Event event = new Event(publicId);
     event.setEventId(eventId);
     event.setEventSource(QUAKEML_RESOURCE_ID);
     event.setType((EventType) eventType.getSelectedItem());
@@ -481,187 +515,159 @@ public class EventDialog extends JFrame {
     event.setDescription(description.getText());
     event.setComment(comment.getText());
 
-    // get origins and magnitudes from hypo71 output
-    Hypo71 hypo71 = hypo71Mgr.hypo71;
-    Results result =  hypo71.getResults();
-    char ins = hypo71.getINS();
-    char iew = hypo71.getIEW();
-    List<Hypocenter> hypocenters = result.getHypocenterOutput();
-    HashMap<String, Origin> origins = new HashMap<String, Origin>();
-    HashMap<String, Magnitude> magnitudes = new HashMap<String, Magnitude>();
-    int magCount = 0;
-    int originCount = 0;
-    for (Hypocenter hypocenter : hypocenters) {
-      // Magnitude
-      double mag = Double.parseDouble(hypocenter.getMAGOUT());
-      int no = hypocenter.getNO();
-      publicId = QUAKEML_RESOURCE_ID + "/Magnitude/" + magCount;
-      Magnitude magnitude = new Magnitude(publicId, mag);
-      magnitude.setStationCount(no);
-      magnitudes.put(publicId, magnitude);
-      magCount++;
-/*      double avxm = hypocenter.getAVXM(); // average of XMAG of available stations
-      double sdxm = hypocenter.getSDXM(); // std dev of XMAG of available stations
-      if (avxm > 0.00 || sdxm > 0.00) {
-        int nm = hypocenter.getNM();        // number of station readings for xmag
-        publicId = QUAKEML_RESOURCE_ID + "/Magnitude/" + magCount;
-        Magnitude xmag = new Magnitude(publicId, avxm);
-        xmag.getMagnitude().setUncertainty(sdxm);
-        xmag.setStationCount(nm);
-        xmag.setType("Mx");
-        magnitudes.put(publicId, xmag);
-        System.out.println(xmag);
-        magCount++;
-      }
-      
-      double avfm = hypocenter.getAVFM(); // average of FMAG of available stations
-      double sdfm = hypocenter.getSDFM(); // std dev of FMAG of available stations
-      if (avfm > 0.00 && sdfm > 0.00) {
-        int nf = hypocenter.getNF();        // number of station readings for fmag
-        publicId = QUAKEML_RESOURCE_ID + "/Magnitude/" + magCount;
-        Magnitude fmag = new Magnitude(publicId, avfm);
-        fmag.getMagnitude().setUncertainty(sdfm);
-        fmag.setStationCount(nf);
-        fmag.setType("Md");
-        magnitudes.put(publicId, fmag);
-        System.out.println(fmag);
-        event.setPreferredMagnitude(fmag);
-        magCount++;
-      }
-      if (avxm == 0.00 && avfm == 0.00) {
-        continue;
-      }*/
-      
-      try {
-        // Origin
-        // time
-        int kdate = hypocenter.getKDATE();
-        int khr = hypocenter.getKHR();
-        int kmin = hypocenter.getKMIN();
-        int sec = (int) hypocenter.getSEC();
-        long time;
-        time = getDate(kdate, khr, kmin, sec).getTime();
-        
-        // hypocenter
-        double latitude = hypocenter.getLatitude();
-        if (ins == 'S') {
-          latitude *= -1;
-        }
-        double longitude = hypocenter.getLongitude();
-        if (iew != 'E') {
-          longitude *= -1;
-        }
-        double depth = hypocenter.getZ() * 1000;
-
-        publicId = QUAKEML_RESOURCE_ID + "/Origin/" + originCount;
-        Origin origin = new Origin(publicId, time, longitude, latitude);
-        origin.setDepth(depth);
-        
-        // quality
-        OriginQuality quality = new OriginQuality();
-        int gap = hypocenter.getIGAP();
-        quality.setAzimuthalGap(gap);
-        double rms = hypocenter.getRMS();
-        quality.setStandardError(rms);
-        double dm = hypocenter.getDMIN();
-        dm = Math.toDegrees(dm / 6371); // convert km to degrees
-        quality.setMinimumDistance(dm);
-        int nr = hypocenter.getNR();
-        quality.setAssociatedStationCount(nr);
-        origin.setQuality(quality);
-        
-        origin.setEvaluationMode(EvaluationMode.AUTOMATIC);       
-        origins.put(publicId, origin);
-        event.setPreferredOrigin(origin);
-        System.out.println(origin);
-        originCount++;
-      } catch (ParseException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    }
-    if (magnitudes.size() > 0) {
-      event.setMagnitudes(magnitudes);
-    }
-    if (origins.size() > 0) {
-      event.setOrigins(origins);
-    }
-    
     // add picks
     HashMap<String, Pick> picks = new HashMap<String, Pick>();
     if (usePicks.isSelected()) {
       for (WaveViewPanel wvp : WaveClipboardFrame.getInstance().getWaves()) {
-        PickMenu pickMenu = wvp.getPickMenu();
+        PickData pickData = wvp.getPickData();
         for (String phase : new String[] {PickMenu.P, PickMenu.S}) {
-          if (pickMenu.getPick(phase) != null && pickMenu.isPickChannel(phase)) {
-            Pick pick = pickMenu.getPick(phase);
+          if (pickData.getPick(phase) != null && pickData.isPickChannel(phase)) {
+            Pick pick = pickData.getPick(phase);
+            picks.put(pick.publicId, pick);
+          }
+        }
+        for (String phase : new String[] {PickMenu.CODA1, PickMenu.CODA2}) {
+          Pick pick = pickData.getPick(phase);
+          if (pick != null) {
             picks.put(pick.publicId, pick);
           }
         }
       }
-    } /*else {
-      // Create basic pick object from hypo71 phase record found in 
-      int pickNum = 1;
-      for (PhaseRecord phaseRecord : //TODO: Where to get phase data from in Hypo71 code?) {
-        publicId = QUAKEML_RESOURCE_ID + "/Pick/" + pickNum;
-        String channel = phaseRecord.getMSTA();
-        int jtime = phaseRecord.getJTIME();
-        int jmin = phaseRecord.getJMIN();
-        float psec = phaseRecord.getP();
-        float ssec = phaseRecord.getS();
-        try {
-          long pTime = getDate(jtime, jmin, (int)psec).getTime();
-          long sTime = (long) (pTime - ((int)psec)*1000) + ssec*1000);
-          for (String remark : new String[] {phaseRecord.getPRMK(), phaseRecord.getSRMK()}) {
-            if (remark != null && !remark.equals("")) {
-              String phase = remark.substring(1, 2);
-              long time = 0;
-              if (phase.equals(PickMenu.P)) {
-                time = pTime;
-              }
-              if (phase.equals(PickMenu.S)) {
-                time = sTime;
-              }
-              Pick pick = new Pick(publicId, time, channel);
-              pick.setPhaseHint(phase);
-              String onset = remark.substring(0, 1);
-              if (onset.equals("I")) {
-                pick.setOnset(Onset.IMPULSIVE);
-              }
-              if (onset.equals("E")) {
-                pick.setOnset(Onset.EMERGENT);
-              }
-              String motion = remark.substring(2, 3);
-              if (motion.equals("U") || motion.equals("+")) {
-                pick.setPolarity(Polarity.POSITIVE);
-              }
-              if (motion.equals("D") || motion.equals("-")) {
-                pick.setPolarity(Polarity.NEGATIVE);
-              }
-
-              picks.put(publicId, pick);
-            }
-          }
-        } catch (ParseException e) {
-          e.printStackTrace();
-        }      
-      }
-    }*/
+    } 
     event.setPicks(picks);
     
-    // add arrivals
-    Origin origin = event.getPreferredOrigin();
-    if (origin != null) {
-      HashMap<String, Arrival> arrivalMap = new HashMap<String, Arrival>();
-      int arrivalNum = 1;
-      for (Pick pick : picks.values()) {
-        publicId = QUAKEML_RESOURCE_ID + "/Arrival/" + arrivalNum;
-        Arrival arrival = new Arrival(publicId, pick, pick.getPhaseHint());
-        arrivalMap.put(publicId, arrival);
-        arrivalNum++;
+    // If hypo71 was run
+    if (hypoResult != null) {
+      // get origins and magnitudes from hypo71 output
+      char ins = hypoResult.getStationsResultList().get(0).getINS();
+      char iew = hypoResult.getStationsResultList().get(0).getIEW();
+      String mtype = hypo71Mgr.getMagOutType();
+      List<Hypocenter> hypocenters = hypoResult.getHypocenterOutput();
+      HashMap<String, Origin> origins = new HashMap<String, Origin>();
+      HashMap<String, Magnitude> magnitudes = new HashMap<String, Magnitude>();
+      int magCount = 0;
+      int originCount = 0;
+      for (Hypocenter hypocenter : hypocenters) {
+        // Magnitude
+        if (!hypocenter.getMAGOUT().trim().isEmpty()) {
+          double mag = Double.parseDouble(hypocenter.getMAGOUT());
+          int no = hypocenter.getNO();
+          publicId = QUAKEML_RESOURCE_ID + "/Magnitude/" + magCount;
+          Magnitude magnitude = new Magnitude(publicId, mag);
+          magnitude.setStationCount(no);
+          magnitudes.put(publicId, magnitude);
+          magnitude.setType(mtype);
+          magCount++;
+          event.setPreferredMagnitude(magnitude);
+        }
+        
+        try {
+          // Origin
+          // time
+          int kdate = hypocenter.getKDATE();
+          int khr = hypocenter.getKHR();
+          int kmin = hypocenter.getKMIN();
+          int sec = (int) hypocenter.getSEC();
+          long time;
+          time = getDate(kdate, khr, kmin, sec).getTime();
+          
+          // hypocenter
+          double latitude = hypocenter.getLatitude();
+          if (ins == 'S') {
+            latitude *= -1;
+          }
+          double longitude = hypocenter.getLongitude();
+          if (iew != 'E') {
+            longitude *= -1;
+          }
+          double depth = hypocenter.getZ() * 1000;
+  
+          publicId = QUAKEML_RESOURCE_ID + "/Origin/" + originCount;
+          Origin origin = new Origin(publicId, time, longitude, latitude);
+          origin.setDepth(depth);
+          
+          // quality
+          OriginQuality quality = new OriginQuality();
+          int gap = hypocenter.getIGAP();
+          quality.setAzimuthalGap(gap);
+          double rms = hypocenter.getRMS();
+          quality.setStandardError(rms);
+          double dm = hypocenter.getDMIN();
+          dm = Math.toDegrees(dm / 6371); // convert km to degrees
+          quality.setMinimumDistance(dm);
+          int nr = hypocenter.getNR();
+          quality.setAssociatedStationCount(nr);
+          origin.setQuality(quality);
+          
+          origin.setEvaluationMode(EvaluationMode.AUTOMATIC);       
+          origins.put(publicId, origin);
+          event.setPreferredOrigin(origin);
+          originCount++;
+        } catch (ParseException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
       }
-      origin.setArrivals(arrivalMap);
+      if (magnitudes.size() > 0) {
+        event.setMagnitudes(magnitudes);
+      }
+      if (origins.size() > 0) {
+        event.setOrigins(origins);
+      }
+      
+      // get station results and create station magnitudes
+      HashMap<String, StationMagnitude> stationMags = new HashMap<String, StationMagnitude>();
+      HashMap<String, Station> stations = new HashMap<String, Station>();
+      int magNum = 1;
+      for (Station station : hypoResult.getStationsResultList()) {
+        stations.put(station.getNSTA(), station);
+        if (station.getFMAG() > 0.0) {
+          publicId = QUAKEML_RESOURCE_ID + "/StationMagnitude/" + magNum;
+          StationMagnitude stationMag = new StationMagnitude(publicId,
+              event.getPreferredOrigin().publicId, station.getFMAG());
+          stationMag.setType("Md");
+          stationMags.put(publicId, stationMag);
+          magNum++;
+        }
+      }
+          
+      // add arrivals
+      Origin origin = event.getPreferredOrigin();
+      if (origin != null) {
+        HashMap<String, Arrival> arrivalMap = new HashMap<String, Arrival>();
+        int arrivalNum = 1;
+        for (Pick pick : picks.values()) {
+          if (!pick.getPhaseHint().equals(PickMenu.P) && !pick.getPhaseHint().equals(PickMenu.S)) {
+            continue;
+          }
+          publicId = QUAKEML_RESOURCE_ID + "/Arrival/" + arrivalNum;
+          Arrival arrival = new Arrival(publicId, pick, pick.getPhaseHint());
+          String stationName = pick.getChannel().split("\\$")[0];
+          Station station = stations.get(stationName);
+          if (station == null) {
+            continue;
+          }
+          double distanceKm = station.getDIST();
+          double distanceDeg = distanceKm / 111.32;
+          arrival.setDistance(distanceDeg);
+          arrival.setAzimuth(station.getAZI());
+          arrival.setTakeoffAngle(station.getAIN());
+          if (pick.getPhaseHint().equals(PickMenu.P)) {
+            arrival.setTimeResidual(station.getPRES());
+            arrival.setTimeWeight(station.getPWT());
+          }
+          if (pick.getPhaseHint().equals(PickMenu.S)) {
+            arrival.setTimeResidual(station.getSRES());
+            arrival.setTimeWeight(station.getSWT());
+          }
+          arrivalMap.put(publicId, arrival);
+          arrivalNum++;
+        }
+        origin.setArrivals(arrivalMap);
+      }
     }
+    
+    return event;
   }
   
     
@@ -691,7 +697,7 @@ public class EventDialog extends JFrame {
    * Import event from file.
    * @param f file
    */
-  private void importFile(String filename) {
+  private void importQuakeMl(String filename) {
     try {
       if (filename == null) {
         return;
@@ -716,7 +722,6 @@ public class EventDialog extends JFrame {
       } else {
         event = eventSet.values().iterator().next();
       }
-      //clipboard.setEvent(event);
       clipboard.importEvent(event);
     } catch (FileNotFoundException e) {
       LOGGER.warn(e.getMessage());
@@ -749,8 +754,6 @@ public class EventDialog extends JFrame {
       return;
     }
     try {
-      createEvent();
-      
       // build XML document
       DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
       DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -762,6 +765,7 @@ public class EventDialog extends JFrame {
       
       Element eventParameters = doc.createElement("eventParameters");
       eventParameters.setAttribute("publicID", QUAKEML_RESOURCE_ID);
+      Event event = createEvent();
       eventParameters.appendChild(event.toElement(doc));
       quakeml.appendChild(eventParameters);
       
@@ -815,7 +819,7 @@ public class EventDialog extends JFrame {
   public void checkForPicks() {
     boolean hasPicks = false;
     for (WaveViewPanel wvp : WaveClipboardFrame.getInstance().getWaves()) {
-      if (wvp.getPickMenu().getPickCount() > 0) {
+      if (wvp.getPickData().getPickCount() > 0) {
         hasPicks = true;
         break;
       }

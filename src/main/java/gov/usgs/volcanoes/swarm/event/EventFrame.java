@@ -153,7 +153,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
       public Object construct() {
         toolbar.incrementThrobber();
         CodeTimer timer = new CodeTimer("Detailed event");
-        fetchDetailedEvent();
+        //fetchDetailedEvent();
         timer.stopAndReport();
         populatePicks();
         return null;
@@ -197,10 +197,13 @@ public class EventFrame extends SwarmFrame implements EventObserver {
       workingEvent.parseEvent(eventElement);
     } catch (SAXException e) {
       LOGGER.warn("Unable to retrieve detailed event description. ({})", e.getLocalizedMessage());
+      e.printStackTrace();
     } catch (IOException e) {
       LOGGER.warn("Unable to retrieve detailed event description. ({})", e.getLocalizedMessage());
+      e.printStackTrace();
     } catch (ParserConfigurationException e) {
       LOGGER.warn("Unable to retrieve detailed event description. ({})", e.getLocalizedMessage());
+      e.printStackTrace();
     }
   }
 

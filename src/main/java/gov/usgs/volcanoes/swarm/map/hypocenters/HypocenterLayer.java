@@ -350,7 +350,6 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
         handled = true;
       } else if (event == hoverEvent) {
         LOGGER.debug("unset hover event {}", event.publicId);
-
         hoverEvent = null;
         handled = true;
       }
@@ -372,12 +371,12 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
       if (origin != null) {
         Point2D.Double point = new Point2D.Double(origin.getLongitude(), origin.getLatitude());
         gr.includePoint(point, 0.0001);
-        MapFrame.getInstance().getMapPanel().setCenterAndScale(gr);
       }
     }
     gr.padPercent(.5, .5);
     MapFrame mapFrame = MapFrame.getInstance();
     if (mapFrame != null) {
+      mapFrame.getMapPanel().setCenterAndScale(gr);
       mapFrame.setView(gr);
       mapFrame.setVisible(true);
       mapFrame.repaint();

@@ -29,7 +29,7 @@ public class Hypo71Manager {
   protected Queue<Station> stationsList = new LinkedList<Station>();
   protected Queue<CrustalModel> crustalModelList = new LinkedList<CrustalModel>();
   protected Queue<PhaseRecord> phaseRecordsList = new LinkedList<PhaseRecord>();
-  protected ControlCard controlCard = new ControlCard(0, 5.0, 50.0, 100.0, 1.78, 4, 0, 0, 0, 3, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0);;
+  protected ControlCard controlCard = new ControlCard(0, 5.0, 50.0, 100.0, 1.78, 4, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0);;
   protected Hypo71 hypo71 = new Hypo71();
   private char prevIns = ' ';
   private char prevIew = ' ';
@@ -94,14 +94,14 @@ public class Hypo71Manager {
       latitude *= -1;
     }
     double lat1 = Math.floor(latitude);
-    double lat2 = latitude - lat1;
+    double lat2 = 60.0 * (latitude - lat1);
     char iew = 'E';
     if (longitude < 0) {
       iew = 'W';
       longitude *= -1;
     }
     double lon1 = Math.floor(longitude);
-    double lon2 = longitude - lon1;
+    double lon2 = 60.0 * (longitude - lon1);
 
     if ((prevIns != ' ' && ins != prevIns) || (prevIew != ' ' && iew != prevIew)) {
       String message = "All stations must be located in the same hemisphere.\n";
@@ -124,8 +124,9 @@ public class Hypo71Manager {
    * @param station station name
    * @param pPick P pick
    * @param sPick S pick
+   * @param fmp coda duration in seconds
    */
-  public void addPhaseRecord(String station, Pick pPick, Pick sPick) {
+  public void addPhaseRecord(String station, Pick pPick, Pick sPick, double fmp) {
 
     if (pPick == null) {
       throw new IllegalArgumentException("P pick is required for phase record.");
@@ -141,7 +142,7 @@ public class Hypo71Manager {
     String pRemark = pOnset + pMotion + "P" + pWeight;
 
     // P-arrival time
-    SimpleDateFormat df = new SimpleDateFormat("yyMMddHHmmss.ss");
+    SimpleDateFormat df = new SimpleDateFormat("yyMMddHHmmss.SS");
     String pTime = df.format(pPick.getTimeQuantity().getValue());
     String pHour = pTime.substring(0, 8);
     String pMin = pTime.substring(8, 10);
@@ -167,7 +168,7 @@ public class Hypo71Manager {
     PhaseRecord phaseRecord = new PhaseRecord(station, pRemark, 0.0f, 
         Integer.parseInt(pHour), Integer.parseInt(pMin),
         Float.parseFloat(pSec), sSec, sRemark, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, "", 0.0f,
-        0.0f, "", pMotion.charAt(0), "", icard, ' ', pRemark);
+        fmp, "", pMotion.charAt(0), "", icard, ' ', pRemark);
     phaseRecordsList.add(phaseRecord);    
   }
   
@@ -259,4 +260,16 @@ public class Hypo71Manager {
     }
   }
 
+  /**
+   * Get type of magnitude to use.
+   * 
+   * @return magnitude type
+   */
+  public String getMagOutType() {
+    switch (controlCard.getIMAG()) {
+      case 0: return "Mx";
+      case 1: return "Md";
+      default: return "M";
+    }
+  }
 }

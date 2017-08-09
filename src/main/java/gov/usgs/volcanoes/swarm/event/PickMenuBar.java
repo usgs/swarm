@@ -99,7 +99,7 @@ public class PickMenuBar extends JMenuBar {
             "Remove Picks", JOptionPane.YES_NO_OPTION);
         if (result == JOptionPane.YES_OPTION) {
           for (WaveViewPanel wvp : clipboard.getWaves()) {
-            wvp.getPickMenu().clearAllPicks();
+            wvp.getPickData().clearAllPicks(wvp);
             wvp.repaint();
           }
         }
