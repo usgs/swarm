@@ -138,9 +138,9 @@ public class ParameterPanel {
     Magnitude magnitude = event.getPreferredMagnitude();
     if (magnitude != null) {
       String mag = String.format("%s %s", magnitude.getMagnitude().getValue(), magnitude.getType());
-      String uncertaintly = String.format("%.1f", magnitude.getMagnitude().getUncertainty());
-      if (uncertaintly != null) {
-        mag += " (" + uncertaintly + ")";
+      double magUncertainty = magnitude.getMagnitude().getUncertainty();
+      if (!Double.isNaN(magUncertainty)) {
+        mag += " (" + String.format("%.1f", magUncertainty) + ")";
       }
       addValue(mag, parameterPanel, c);
     }
