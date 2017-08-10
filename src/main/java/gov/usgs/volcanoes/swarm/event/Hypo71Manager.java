@@ -29,7 +29,8 @@ public class Hypo71Manager {
   protected Queue<Station> stationsList = new LinkedList<Station>();
   protected Queue<CrustalModel> crustalModelList = new LinkedList<CrustalModel>();
   protected Queue<PhaseRecord> phaseRecordsList = new LinkedList<PhaseRecord>();
-  protected ControlCard controlCard = new ControlCard(0, 5.0, 50.0, 100.0, 1.78, 4, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0);;
+  protected ControlCard controlCard =
+      new ControlCard(0, 5.0, 50.0, 100.0, 1.78, 4, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0);
   protected Hypo71 hypo71 = new Hypo71();
   private char prevIns = ' ';
   private char prevIew = ' ';

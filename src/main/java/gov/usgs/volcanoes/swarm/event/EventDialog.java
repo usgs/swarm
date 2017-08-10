@@ -32,6 +32,7 @@ import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -226,7 +227,6 @@ public class EventDialog extends JFrame {
         if (filename != null) {
           hypo71InputFile.setText(filename);
           hypo71Output.setText("");
-          //hypo71Output.setToolTipText("");
         }
       }
     });
@@ -260,6 +260,7 @@ public class EventDialog extends JFrame {
     
     hypo71Output = new JTextArea(5,1);
     hypo71Output.setEditable(false);
+    hypo71Output.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
     JScrollPane hypo71OutScroll = new JScrollPane(hypo71Output);
     builder.append(hypo71OutScroll, 5);
     builder.nextLine();
@@ -268,9 +269,9 @@ public class EventDialog extends JFrame {
     viewHypo71Button.setToolTipText("View Hypo71 output.");
     viewHypo71Button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        JTextArea textArea = new JTextArea(40,50);
+        JTextArea textArea = new JTextArea(40,100);
         textArea.setEditable(false);
-        textArea.setLineWrap(false);
+        textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         textArea.setText(hypo71Output.getText());
         JScrollPane scroll = new JScrollPane(textArea);
         JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), scroll);
@@ -630,6 +631,7 @@ public class EventDialog extends JFrame {
           magNum++;
         }
       }
+      event.setStationMagnitudes(stationMags);
           
       // add arrivals
       Origin origin = event.getPreferredOrigin();
