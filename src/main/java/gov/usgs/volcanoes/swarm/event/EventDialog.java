@@ -468,27 +468,33 @@ public class EventDialog extends JFrame {
         }
         Pick coda1 = pickData.getPick(PickMenu.CODA1);
         Pick coda2 = pickData.getPick(PickMenu.CODA2);
-        if (coda1 == null && coda2 == null) {
-          continue;
+        double fmp = 0;
+        if (coda1 != null || coda2 != null) {
+          long endCoda = 0;
+          if (coda1 == null) {
+            endCoda = coda2.getTime();
+          } else if (coda2 == null) {
+            endCoda = coda1.getTime();
+          } else {
+            endCoda = Math.max(coda1.getTime(), coda2.getTime());
+          }
+          fmp = (endCoda - p.getTime()) / 1000.0;
         }
-        long endCoda = 0;
-        if (coda1 == null) {
-          endCoda = coda2.getTime();
-        } else if (coda2 == null) {
-          endCoda = coda1.getTime();
-        } else {
-          endCoda = Math.max(coda1.getTime(), coda2.getTime());
-        }
-        double fmp = (endCoda - p.getTime()) / 1000.0;
         Pick s = pickData.getPick(PickMenu.S);      
         hypo71Mgr.addPhaseRecord(station, p, s, fmp);
       }
-      String message = "Number of phase records: " + hypo71Mgr.phaseRecordsList.size();
-      message += "\n\nNote: Origin may not be determined if there is insufficient information.\n"
-                   + "If locating an origin is unsuccessful ensure that you have selected end\n"
-                   + "codas to go with your P picks so that earthquake duration can be \n"
-                   + "determined for a station.";
-      JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message);
+      int numPhaseRecords = hypo71Mgr.phaseRecordsList.size();
+      String message = "Number of stations: " + numPhaseRecords;
+      String title = "Hypo71";
+      if (numPhaseRecords < 3) {
+        message += "\n\nA minimum of 3 stations is required for a solution.";
+        JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message, title,
+            JOptionPane.ERROR_MESSAGE);
+        return;
+      } else {
+        JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message, title,
+            JOptionPane.INFORMATION_MESSAGE);
+      }
       PhaseRecord endRecord = new PhaseRecord();
       endRecord.setMSTA("    ");
       hypo71Mgr.phaseRecordsList.add(endRecord);
@@ -552,10 +558,8 @@ public class EventDialog extends JFrame {
         // Magnitude
         if (!hypocenter.getMAGOUT().trim().isEmpty()) {
           double mag = Double.parseDouble(hypocenter.getMAGOUT());
-          int no = hypocenter.getNO();
           publicId = QUAKEML_RESOURCE_ID + "/Magnitude/" + magCount;
           Magnitude magnitude = new Magnitude(publicId, mag);
-          magnitude.setStationCount(no);
           magnitudes.put(publicId, magnitude);
           magnitude.setType(mtype);
           magCount++;
@@ -589,18 +593,16 @@ public class EventDialog extends JFrame {
           
           // quality
           OriginQuality quality = new OriginQuality();
-          int gap = hypocenter.getIGAP();
-          quality.setAzimuthalGap(gap);
-          double rms = hypocenter.getRMS();
-          quality.setStandardError(rms);
+          quality.setAzimuthalGap(hypocenter.getIGAP());
+          quality.setStandardError(hypocenter.getRMS());
+          quality.setAssociatedStationCount(hypocenter.getNR());
+          quality.setUsedPhaseCount(hypocenter.getNO());
           double dm = hypocenter.getDMIN();
           dm = Math.toDegrees(dm / 6371); // convert km to degrees
           quality.setMinimumDistance(dm);
-          int nr = hypocenter.getNR();
-          quality.setAssociatedStationCount(nr);
           origin.setQuality(quality);
           
-          origin.setEvaluationMode(EvaluationMode.AUTOMATIC);       
+          origin.setEvaluationMode(EvaluationMode.MANUAL); 
           origins.put(publicId, origin);
           event.setPreferredOrigin(origin);
           originCount++;
@@ -622,7 +624,8 @@ public class EventDialog extends JFrame {
       int magNum = 1;
       for (Station station : hypoResult.getStationsResultList()) {
         stations.put(station.getNSTA(), station);
-        if (station.getFMAG() > 0.0) {
+        double fmag = station.getFMAG();
+        if (fmag > 0.0 && fmag < 99) {
           publicId = QUAKEML_RESOURCE_ID + "/StationMagnitude/" + magNum;
           StationMagnitude stationMag = new StationMagnitude(publicId,
               event.getPreferredOrigin().publicId, station.getFMAG());
@@ -725,6 +728,7 @@ public class EventDialog extends JFrame {
         event = eventSet.values().iterator().next();
       }
       clipboard.importEvent(event);
+      hypo71Output.setText("");
     } catch (FileNotFoundException e) {
       LOGGER.warn(e.getMessage());
     } catch (IOException e) {
