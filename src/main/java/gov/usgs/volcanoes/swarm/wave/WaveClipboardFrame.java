@@ -1402,6 +1402,12 @@ public class WaveClipboardFrame extends SwarmFrame {
       public Object construct() {
         throbber.increment();
 
+        // See if user wants to clear clipboard first
+        int result = JOptionPane.showConfirmDialog(Swarm.getApplicationFrame(),
+            "Clear clipboard first?", "Import Event", JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+          removeWaves();
+        }
         // update event dialog 
         EventDialog.getInstance().setEventDetails(event);
         
