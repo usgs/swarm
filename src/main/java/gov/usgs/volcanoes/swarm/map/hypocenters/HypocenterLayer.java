@@ -370,7 +370,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
       Origin origin = event.getPreferredOrigin();
       if (origin != null) {
         Point2D.Double point = new Point2D.Double(origin.getLongitude(), origin.getLatitude());
-        gr.includePoint(point, 0.0001);
+        gr.includePoint(point, 0.1);
       }
     }
     gr.padPercent(.5, .5);
