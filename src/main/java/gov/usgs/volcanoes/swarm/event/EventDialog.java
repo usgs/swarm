@@ -114,7 +114,7 @@ public class EventDialog extends JFrame {
    * Default constructor.
    */
   private EventDialog() {
-    super("Create Event");
+    super("Event Dialog");
     setIconImage(Icons.pick.getImage());
     setResizable(false);
     createUi();
