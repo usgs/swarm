@@ -421,7 +421,8 @@ public class Metadata implements Comparable<Metadata> {
 
   public String toString() {
     return channel + "," + alias + "," + unit + "," + multiplier + "," + offset + "," + longitude
-        + "," + latitude + "," + height + "," + timeZone;
+        + "," + latitude + "," + height + "," + timeZone + ", " + delay + ", "
+        + xmagCorrection + ", " + fmagCorrection;
   }
 
   public int compareTo(Metadata o) {

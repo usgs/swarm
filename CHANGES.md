@@ -1,3 +1,8 @@
+## Version 2.8.0
+  * Hypo71 support
+  * RSAM filtering option
+  * Fix NullPointerException bug on Swarm config load
+
 ## Version 2.7.4
   * Fix clipboard image issue
   * Fix filter (f) and rescale (r) hot keys
