@@ -443,6 +443,12 @@ public class EventDialog extends JFrame {
       hypo71Mgr.loadCrustalModelFromFile();
       hypo71Mgr.description = description.getText();
       for (WaveViewPanel wvp : WaveClipboardFrame.getInstance().getWaves()) {
+        PickData pickData = wvp.getPickData();
+        Pick p = pickData.getPick(PickMenu.P);
+        if (p == null || !pickData.isPickChannel(PickMenu.P)) {
+          continue;
+        }
+        
         // add station
         String channel = wvp.getChannel();
         Metadata md = SwarmConfig.getInstance().getMetadata(channel);
@@ -461,11 +467,6 @@ public class EventDialog extends JFrame {
         }
         
         // add phase record
-        PickData pickData = wvp.getPickData();
-        Pick p = pickData.getPick(PickMenu.P);
-        if (p == null || !pickData.isPickChannel(PickMenu.P)) {
-          continue;
-        }
         Pick coda1 = pickData.getPick(PickMenu.CODA1);
         Pick coda2 = pickData.getPick(PickMenu.CODA2);
         double fmp = 0;
