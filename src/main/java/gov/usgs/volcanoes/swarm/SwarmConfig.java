@@ -5,6 +5,7 @@ import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.swarm.data.DataSourceType;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.map.NationalMapLayer;
 import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterSource;
 
 import java.awt.Color;
@@ -388,11 +389,11 @@ public class SwarmConfig {
 
     useWMS = StringUtils.stringToBoolean(config.getString("useWMS"));
     wmsServer =
-        StringUtils.stringToString(config.getString("wmsServer"), WMSGeoImageSet.DEFAULT_SERVER);
+        StringUtils.stringToString(config.getString("wmsServer"), NationalMapLayer.TOPO.server);
     wmsLayer =
-        StringUtils.stringToString(config.getString("wmsLayer"), WMSGeoImageSet.DEFAULT_LAYER);
+        StringUtils.stringToString(config.getString("wmsLayer"), NationalMapLayer.TOPO.layer);
     wmsStyles =
-        StringUtils.stringToString(config.getString("wmsStyles"), WMSGeoImageSet.DEFAULT_STYLE);
+        StringUtils.stringToString(config.getString("wmsStyles"), NationalMapLayer.TOPO.style);
     
     hypocenterSource = HypocenterSource.valueOf(
         StringUtils.stringToString(config.getString("hypocenterSource"), "NONE"));
