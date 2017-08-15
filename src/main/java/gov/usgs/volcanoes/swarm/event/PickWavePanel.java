@@ -23,7 +23,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Stack;
 
@@ -34,7 +33,7 @@ import java.util.Stack;
  *
  */
 public class PickWavePanel extends WaveViewPanel
-    implements EventObserver, Comparable<PickWavePanel> {
+    implements EventObserver {
 
   private static final long serialVersionUID = 1L;
   private static final Font ANNOTATION_FONT = new Font("Monospaced", Font.BOLD, 12);
@@ -142,35 +141,6 @@ public class PickWavePanel extends WaveViewPanel
   @Override
   protected void processRightMousePress(MouseEvent e) {
     settings.cycleType();
-  }
-
-  public int compareTo(PickWavePanel o) {
-    return Arrival.distanceComparator().compare(arrivals.get(0), o.arrivals.get(0));
-  }
-
-  /**
-   * Create and return distance comparator.
-   * @return comparator of PickWavePanel
-   */
-  public static Comparator<PickWavePanel> distanceComparator() {
-    return new Comparator<PickWavePanel>() {
-      public int compare(final PickWavePanel e1, final PickWavePanel e2) {
-        return Arrival.distanceComparator().compare(e1.arrivals.get(0), e2.arrivals.get(0));
-      }
-    };
-  }
-
-  /**
-   * Create and return station distance comparator.
-   * @param panel pick wave panel
-   * @return comparator of PickWavePanel
-   */
-  public static Comparator<PickWavePanel> stationDistanceComparator(final PickWavePanel panel) {
-    return new Comparator<PickWavePanel>() {
-      public int compare(final PickWavePanel e1, final PickWavePanel e2) {
-        return Arrival.distanceComparator().compare(e1.arrivals.get(0), e2.arrivals.get(0));
-      }
-    };
   }
 
 }
