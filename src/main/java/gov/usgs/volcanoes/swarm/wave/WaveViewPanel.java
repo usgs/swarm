@@ -19,6 +19,7 @@ import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.event.PickData;
 import gov.usgs.volcanoes.swarm.event.PickMenu;
 import gov.usgs.volcanoes.swarm.event.PickWavePanel;
 import gov.usgs.volcanoes.swarm.time.UiTime;
@@ -124,8 +125,8 @@ public class WaveViewPanel extends JComponent {
   protected boolean pauseCursorMark;
   protected double time;
 
-  // picker
-  private PickMenu pickMenu;
+  // pick data
+  private PickData pickData;
 
   /**
    * Default constructor.
@@ -137,7 +138,7 @@ public class WaveViewPanel extends JComponent {
     backgroundColor = new Color(0xf7, 0xf7, 0xf7);
     settings = new WaveViewSettings();
     settings.view = this;
-
+    pickData = new PickData();
     setupMouseHandler();
   }
   
@@ -174,7 +175,7 @@ public class WaveViewPanel extends JComponent {
     backgroundColor = p.backgroundColor;
     mark1 = p.mark1;
     mark2 = p.mark2;
-    pickMenu = p.pickMenu;
+    pickData = p.pickData;
 
     translation = new double[8];
     if (p.translation != null) {
@@ -271,11 +272,7 @@ public class WaveViewPanel extends JComponent {
   public void setAllowClose(boolean b) {
     allowClose = b;
   }
-  
-  protected void setPickTime() {
-    getPickMenu().setJ2k(j2k2);
-  }
-  
+    
   /**
    * Process right mouse press.
    * @param e mouse event
@@ -283,12 +280,13 @@ public class WaveViewPanel extends JComponent {
   protected void processRightMousePress(MouseEvent e) {
     if (settings.pickEnabled && (settings.viewType.equals(ViewType.WAVE) 
         || settings.viewType.equals(ViewType.SPECTROGRAM))) {
+      PickMenu pickMenu = new PickMenu(pickData, this);
       double[] t = getTranslation();
       if (t != null) {
         double j2k = e.getX() * t[0] + t[1];
         if (j2k >= startTime && j2k <= endTime) {
-          getPickMenu().setJ2k(j2k);
-          getPickMenu().show(this, e.getX(), e.getY());
+          pickMenu.setJ2k(j2k);
+          pickMenu.show(this, e.getX(), e.getY());
         }
       }
     } else {
@@ -625,20 +623,20 @@ public class WaveViewPanel extends JComponent {
         status.append(String.format("\nFrequency (Hz): %.6f, Power: %.3f", xi, yi));
       }
 
-      if (settings.pickEnabled && pickMenu != null) {
+      if (settings.pickEnabled && pickData != null) {
         String pickStatus = "";
         // S-P
-        double spDuration = pickMenu.getSpDuration();
+        double spDuration = pickData.getSpDuration();
         if (!Double.isNaN(spDuration)) {
           double spDistance = SwarmConfig.getInstance().pVelocity * spDuration;
           pickStatus = String.format("S-P: %.2fs (%.2fkm)", spDuration, spDistance);
         }
         // Coda 
-        if (swarmConfig.durationEnabled && !Double.isNaN(pickMenu.getCodaDuration())) {
+        if (swarmConfig.durationEnabled && !Double.isNaN(pickData.getCodaDuration())) {
           if (!pickStatus.equals("")) {
             pickStatus += "; ";
           }
-          double duration = pickMenu.getCodaDuration();
+          double duration = pickData.getCodaDuration();
           double durationMagnitude = swarmConfig.getDurationMagnitude(duration);
           String coda = String.format("Coda: %.2fs (Mc: %.2f)", duration, durationMagnitude);
           
@@ -647,7 +645,7 @@ public class WaveViewPanel extends JComponent {
           int count = 0;
           double sumDuration = 0;
           for (WaveViewPanel wvp : cb.getWaves()) {
-            double codaDuration = wvp.getPickMenu().getCodaDuration();
+            double codaDuration = wvp.pickData.getCodaDuration();
             if (!Double.isNaN(codaDuration)) {
               sumDuration += codaDuration;
               count++;
@@ -854,19 +852,19 @@ public class WaveViewPanel extends JComponent {
         paintMark(g2, mark2);
       }
     }
-    if (settings.pickEnabled && pickMenu != null) {
+    if (settings.pickEnabled && pickData != null) {
       double[] t = getTranslation();
       if (t == null) {
         return;
       }
-      if (!pickMenu.isHidePhases()) {
+      if (!pickData.isHidePhases()) {
         for (String phase : new String[] {PickMenu.P, PickMenu.S}) {
-          drawPick(pickMenu.getPick(phase), g2, !pickMenu.isPickChannel(phase));
+          drawPick(pickData.getPick(phase), g2, !pickData.isPickChannel(phase));
         }
       }
-      if (!pickMenu.isHideCoda()) {
+      if (!pickData.isHideCoda()) {
         for (String coda : new String[] {PickMenu.CODA1, PickMenu.CODA2}) {
-          drawPick(pickMenu.getPick(coda), g2, false);
+          drawPick(pickData.getPick(coda), g2, false);
         }
       }
     }
@@ -1498,14 +1496,14 @@ public class WaveViewPanel extends JComponent {
   }
 
   /**
-   * Get pick menu.
-   * @return pick menu
+   * Get pick data.
+   * @return pick data
    */
-  public PickMenu getPickMenu() {
-    if (pickMenu == null) {
-      pickMenu = new PickMenu(this);
+  public PickData getPickData() {
+    if (pickData == null) {
+      pickData = new PickData();
     }
-    return pickMenu;
+    return pickData;
   }
 
   public Double getMark1() {

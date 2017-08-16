@@ -134,11 +134,10 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
       g2.translate(res.x, res.y);
 
       Magnitude magnitude = event.getPreferredMagnitude();
-      if(magnitude == null){
-        continue;
+      float diameter = 5;
+      if (magnitude != null) {
+        diameter = getMarkerSize(magnitude.getMagnitude().getValue());
       }
-      double mag = magnitude.getMag();
-      float diameter = getMarkerSize(mag);
       renderer.shape = new Ellipse2D.Float(0f, 0f, diameter, diameter);
 
       long age = J2kSec.asEpoch(J2kSec.now()) - origin.getTime();
@@ -232,9 +231,11 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
     List<String> text = new ArrayList<String>(3);
 
     Magnitude magElement = hoverEvent.getPreferredMagnitude();
-    String mag = String.format("%.2f %s at %.2f km depth", magElement.getMag(),
-        magElement.getType(), (origin.getDepth() / 1000));
-    text.add(mag);
+    if (magElement != null) {
+      String mag = String.format("%.2f %s at %.2f km depth", magElement.getMagnitude().getValue(),
+          magElement.getType(), (origin.getDepth() / 1000));
+      text.add(mag);
+    }
 
     String date = Time.format(Time.STANDARD_TIME_FORMAT, new Date(origin.getTime()));
     text.add(date + " UTC");
@@ -326,7 +327,11 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
         continue;
       }
 
-      int markerDiameter = getMarkerSize(event.getPreferredMagnitude().getMag());
+      Magnitude magnitude = event.getPreferredMagnitude();
+      int markerDiameter = 5;
+      if (magnitude != null) {
+        markerDiameter = getMarkerSize(event.getPreferredMagnitude().getMagnitude().getValue());
+      }
       final Rectangle r = new Rectangle(0, 0, markerDiameter, markerDiameter);
 
       final Point2D.Double xy =
@@ -345,7 +350,6 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
         handled = true;
       } else if (event == hoverEvent) {
         LOGGER.debug("unset hover event {}", event.publicId);
-
         hoverEvent = null;
         handled = true;
       }
@@ -366,13 +370,13 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
       Origin origin = event.getPreferredOrigin();
       if (origin != null) {
         Point2D.Double point = new Point2D.Double(origin.getLongitude(), origin.getLatitude());
-        gr.includePoint(point, 0.0001);
-        MapFrame.getInstance().getMapPanel().setCenterAndScale(gr);
+        gr.includePoint(point, 0.1);
       }
     }
     gr.padPercent(.5, .5);
     MapFrame mapFrame = MapFrame.getInstance();
     if (mapFrame != null) {
+      mapFrame.getMapPanel().setCenterAndScale(gr);
       mapFrame.setView(gr);
       mapFrame.setVisible(true);
       mapFrame.repaint();
@@ -400,6 +404,21 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
     if (quakemlSource != null) {
       quakemlSource.doUpdate(isVisible);
     }
+  }
+  
+  /**
+   * Remove event from layer.
+   * 
+   * @param publicId public id of event
+   */
+  public void remove(String publicId) {
+    if (importedEvents.containsKey(publicId)) {
+      events.remove(publicId);
+    }
+    if (events.containsKey(publicId)) {
+      events.remove(publicId);
+    }
+    
   }
 
 }

@@ -1,5 +1,22 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
+import cern.colt.matrix.DoubleMatrix2D;
+
+import gov.usgs.plot.Plot;
+import gov.usgs.plot.PlotException;
+import gov.usgs.plot.data.GenericDataMatrix;
+import gov.usgs.plot.data.RSAMData;
+import gov.usgs.plot.decorate.SmartTick;
+import gov.usgs.plot.render.AxisRenderer;
+import gov.usgs.plot.render.HistogramRenderer;
+import gov.usgs.plot.render.MatrixRenderer;
+import gov.usgs.plot.render.ShapeRenderer;
+import gov.usgs.plot.render.TextRenderer;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
+import gov.usgs.volcanoes.swarm.time.UiTime;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -13,21 +30,6 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
-
-import cern.colt.matrix.DoubleMatrix2D;
-import gov.usgs.plot.Plot;
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.data.GenericDataMatrix;
-import gov.usgs.plot.data.RSAMData;
-import gov.usgs.plot.decorate.SmartTick;
-import gov.usgs.plot.render.AxisRenderer;
-import gov.usgs.plot.render.HistogramRenderer;
-import gov.usgs.plot.render.MatrixRenderer;
-import gov.usgs.plot.render.ShapeRenderer;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
-import gov.usgs.volcanoes.swarm.time.UiTime;
 
 /**
  * A component that renders a RSAM plot.
@@ -146,6 +148,12 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
   }
 
 
+  /**
+   * Set RSAM data.
+   * @param data RSAM data
+   * @param st start time
+   * @param et end time
+   */
   public void setData(RSAMData data, double st, double et) {
     this.data = data;
     startTime = st;
@@ -186,8 +194,9 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
         }
       };
       worker.start();
-    } else
+    } else {
       r.run();
+    }
   }
 
   /**
@@ -195,8 +204,9 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
    * container.
    */
   private void processSettings() {
-    if (data == null || data.getData() == null || data.getData().rows() == 0)
+    if (data == null || data.getData() == null || data.getData().rows() == 0) {
       return;
+    }
 
     createImage();
   }
@@ -217,25 +227,28 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
       g2.setColor(BACKGROUND_COLOR);
       g2.fillRect(0, 0, dim.width, dim.height);
       g2.setColor(Color.black);
-      if (working)
+      if (working) {
         g2.drawString("Retrieving data...", dim.width / 2 - 50, dim.height / 2);
-      else {
+      } else {
         String error = "No RSAM data.";
-        if (channel != null)
+        if (channel != null) {
           error = "No RSAM data for " + channel + ".";
+        }
         int w = g2.getFontMetrics().stringWidth(error);
         g2.drawString(error, dim.width / 2 - w / 2, dim.height / 2);
       }
     } else {
       BufferedImage bi = getImage();
-      if (bi != null)
+      if (bi != null) {
         g2.drawImage(bi, 0, 0, null);
+      }
 
     }
 
     if (allowClose) {
-      if (closeImg == null)
+      if (closeImg == null) {
         closeImg = Icons.close_view.getImage();
+      }
 
       g2.drawImage(closeImg, dim.width - 17, 3, null);
     }
@@ -271,6 +284,8 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
       case COUNTS:
         plotCounts(plot, data);
         break;
+      default:
+        break;
     }
 
     try {
@@ -287,21 +302,33 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
    *          the RSAM values to plot
    */
   private void plotValues(Plot plot, RSAMData data) {
-    if (data == null || data.getData() == null || data.getData().rows() == 0)
+    if (data == null || data.getData() == null || data.getData().rows() == 0) {
       return;
+    }
 
     GenericDataMatrix gdm = new GenericDataMatrix(data.getData().copy());
 
     gdm.despike(1, settings.valuesPeriodS);
 
-    if (settings.detrend)
+    if (settings.detrend) {
       gdm.detrend(1);
+    }
+    
+    if (settings.despike) {
+      gdm.despike(1, settings.despikePeriod);
+    }
 
-    if (settings.runningMedian)
+    if (settings.runningMedian) {
       gdm.set2median(1, settings.runningMedianPeriodS);
+    }
 
-    if (settings.runningMean)
+    if (settings.runningMean) {
       gdm.set2mean(1, settings.runningMeanPeriodS);
+    }
+    
+    if (settings.filterOn) {
+      gdm.filter(settings.filter, 1, settings.zeroPhaseShift);
+    }
 
     MatrixRenderer mr = new MatrixRenderer(gdm.getData(), false);
     double max;
@@ -324,19 +351,24 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
 
     mr.createDefaultLineRenderers(Color.blue);
     plot.addRenderer(mr);
+
+    if (settings.filterOn) {
+      plot.addRenderer(getFilterLabel(getWidth() - RIGHT_WIDTH, getHeight() - BOTTOM_HEIGHT,
+          TextRenderer.RIGHT, TextRenderer.BOTTOM));
+    }
   }
 
   /**
    * Plots RSAM counts.
    * 
-   * @param data
-   *          the RSAM values to plot
+   * @param data the RSAM values to plot
    */
   private void plotCounts(Plot plot, RSAMData data) {
 
     if (data == null || data.getData() == null || data.getData().rows() == 0
-        || data.getPeriod() != settings.countsPeriodS)
+        || data.getPeriod() != settings.countsPeriodS) {
       return;
+    }
 
     // get the relevant information for this channel
     data.countEvents(settings.eventThreshold, settings.eventRatio, settings.eventMaxLengthS);
@@ -400,5 +432,36 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
    */
   public Dimension getMinimumSize() {
     return getSize();
+  }
+  
+  /**
+   * Get filter label.
+   * @param x x text location
+   * @param y y text location
+   * @param horizJustification horizontal justification
+   * @param vertJustification vertical justification
+   * @return text renderer
+   */
+  public TextRenderer getFilterLabel(int x, int y, int horizJustification, int vertJustification) {
+    String ft = "";
+    switch (settings.filter.getType()) {
+      case BANDPASS:
+        ft = "Band pass [" + settings.filter.getCorner1() + "-" + settings.filter.getCorner2()
+            + " Hz]";
+        break;
+      case HIGHPASS:
+        ft = "High pass [" + settings.filter.getCorner1() + " Hz]";
+        break;
+      case LOWPASS:
+        ft = "Low pass [" + settings.filter.getCorner1() + " Hz]";
+        break;
+      default:
+        break;
+    }
+    TextRenderer tr = new TextRenderer(x, y, ft);
+    tr.horizJustification = horizJustification;
+    tr.vertJustification = vertJustification;
+    tr.color = Color.red;
+    return tr;
   }
 }

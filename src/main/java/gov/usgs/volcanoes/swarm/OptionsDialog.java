@@ -167,7 +167,7 @@ public class OptionsDialog extends SwarmModalDialog {
         NationalMapLayer layer = (NationalMapLayer)((JComboBox<?>) e.getSource()).getSelectedItem();
         wmsServer.setText(layer.server);
         wmsLayer.setText(layer.layer);
-        wmsStyles.setText(layer.sytels);
+        wmsStyles.setText(layer.style);
       }
     });
     builder.appendSeparator("Other");

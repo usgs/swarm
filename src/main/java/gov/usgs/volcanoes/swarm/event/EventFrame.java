@@ -196,11 +196,11 @@ public class EventFrame extends SwarmFrame implements EventObserver {
       
       workingEvent.parseEvent(eventElement);
     } catch (SAXException e) {
-      LOGGER.warn("Unable to redtieve detailed event description. ({})", e.getLocalizedMessage());
+      LOGGER.warn("Unable to retrieve detailed event description. ({})", e.getLocalizedMessage());
     } catch (IOException e) {
-      LOGGER.warn("Unable to redtieve detailed event description. ({})", e.getLocalizedMessage());
+      LOGGER.warn("Unable to retrieve detailed event description. ({})", e.getLocalizedMessage());
     } catch (ParserConfigurationException e) {
-      LOGGER.warn("Unable to redtieve detailed event description. ({})", e.getLocalizedMessage());
+      LOGGER.warn("Unable to retrieve detailed event description. ({})", e.getLocalizedMessage());
     }
   }
 

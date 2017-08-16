@@ -1,5 +1,10 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
+import gov.usgs.volcanoes.core.util.UiUtils;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.SwarmUtil;
+import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -9,13 +14,8 @@ import javax.swing.JComponent;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
-import gov.usgs.volcanoes.core.util.UiUtils;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.SwarmUtil;
-import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
-
 /**
- *
+ * RSAM view settings toolbar.
  *
  * @author Dan Cervelli
  */
@@ -27,14 +27,20 @@ public class RsamViewSettingsToolbar implements SettingsListener {
 
   private final RsamViewSettings settings;
 
+  /**
+   * Default constructor.
+   * @param s RSAM view settings
+   * @param dest tool bar destination
+   * @param keyComp component
+   */
   public RsamViewSettingsToolbar(final RsamViewSettings s, final JToolBar dest,
       final JComponent keyComp) {
     settings = s;
-    createUI(dest, keyComp);
+    createUi(dest, keyComp);
     settings.addListener(this);
   }
 
-  public void createUI(final JToolBar dest, final JComponent keyComp) {
+  private void createUi(final JToolBar dest, final JComponent keyComp) {
     waveSet = SwarmUtil.createToolBarButton(Icons.wavesettings, "RSAM view settings (?)",
         new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
@@ -71,10 +77,11 @@ public class RsamViewSettingsToolbar implements SettingsListener {
   }
 
   public void settingsChanged() {
-    if (settings.getType() == ViewType.VALUES)
+    if (settings.getType() == ViewType.VALUES) {
       rsamTypes.setSelected(valuesToggle.getModel(), true);
-    else
+    } else {
       rsamTypes.setSelected(countsToggle.getModel(), true);
+    }
 
   }
 }

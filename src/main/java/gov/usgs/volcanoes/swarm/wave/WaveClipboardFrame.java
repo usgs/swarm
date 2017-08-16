@@ -26,6 +26,7 @@ import gov.usgs.volcanoes.swarm.data.FileDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
 import gov.usgs.volcanoes.swarm.event.EventDialog;
+import gov.usgs.volcanoes.swarm.event.PickData;
 import gov.usgs.volcanoes.swarm.event.PickMenu;
 import gov.usgs.volcanoes.swarm.event.PickMenuBar;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanelListener;
@@ -125,7 +126,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
   private PickMenuBar pickMenuBar;
   private JToggleButton pickButton;
-  private Event event;
   
   private JPopupMenu popup;
 
@@ -420,13 +420,8 @@ public class WaveClipboardFrame extends SwarmFrame {
     copyButton = SwarmUtil.createToolBarButton(Icons.clipboard,
         "Place another copy of wave on clipboard (C or Ctrl-C)", new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
-            // TODO: implement
-            // if (selected != null)
-            // {
-            // WaveViewPanel wvp = new WaveViewPanel(selected);
-            // wvp.setBackgroundColor(BACKGROUND_COLOR);
-            // addWave(wvp);
-            // }
+            WaveViewPanel wvp = new WaveViewPanel(getSingleSelected());
+            addWave(wvp);
           }
         });
     UiUtils.mapKeyStrokeToButton(this, "C", "clipboard1", copyButton);
@@ -1005,11 +1000,6 @@ public class WaveClipboardFrame extends SwarmFrame {
     });
   }
 
-  public WaveViewPanel getSelected() {
-    return null;
-    // return selected;
-  }
-
   /**
    * Add wave panel to clipboard.
    * @param p wave panel
@@ -1026,8 +1016,14 @@ public class WaveClipboardFrame extends SwarmFrame {
     p.setBottomBorderColor(Color.GRAY);
     p.createImage();
     p.getSettings().pickEnabled = pickButton.isSelected();
-    if (p.wave != null) {
-      p.getPickMenu().marksToCoda();
+    if (p.wave != null) {   // change marks to coda
+      if (!Double.isNaN(p.getMark1())) {
+        p.getPickData().createPick(PickMenu.CODA1, null, p.getMark1(), p, 0);
+      }
+      if (!Double.isNaN(p.getMark2())) {
+        p.getPickData().createPick(PickMenu.CODA2, null, p.getMark2(), p, 0);
+      }
+      p.setMarks(Double.NaN, Double.NaN);
     }
     waveBox.add(p);
     waves.add(p);
@@ -1400,12 +1396,18 @@ public class WaveClipboardFrame extends SwarmFrame {
   /**
    * Import event into clipboard. Event must be set first.
    */
-  public void importEvent() {
+  public void importEvent(final Event event) {
     final SwingWorker worker = new SwingWorker() {
       @Override
       public Object construct() {
         throbber.increment();
 
+        // See if user wants to clear clipboard first
+        int result = JOptionPane.showConfirmDialog(Swarm.getApplicationFrame(),
+            "Clear clipboard first?", "Import Event", JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+          removeWaves();
+        }
         // update event dialog 
         EventDialog.getInstance().setEventDetails(event);
         
@@ -1459,8 +1461,8 @@ public class WaveClipboardFrame extends SwarmFrame {
             panels.put(channel, wvp);
           }
           String phaseHint = pick.getPhaseHint();
-          PickMenu pickMenu = wvp.getPickMenu();
-          pickMenu.setPick(phaseHint, pick, true);
+          PickData pickData = wvp.getPickData();
+          pickData.setPick(phaseHint, pick, true);
           
         }
         
@@ -1471,11 +1473,11 @@ public class WaveClipboardFrame extends SwarmFrame {
         
         // propagate picks
         for (WaveViewPanel wvp : waves) {
-          PickMenu pickMenu = wvp.getPickMenu();
+          PickData pickData = wvp.getPickData();
           for (String phase : new String[] {PickMenu.P, PickMenu.S}) {
-            Pick pick = pickMenu.getPick(phase);
-            if (pick != null && pickMenu.isPickChannel(phase)) {
-              pickMenu.propagatePick(phase, pick);
+            Pick pick = pickData.getPick(phase);
+            if (pick != null && pickData.isPickChannel(phase)) {
+              pickData.propagatePick(phase, pick, wvp);
             }
           }
         }
@@ -1486,6 +1488,7 @@ public class WaveClipboardFrame extends SwarmFrame {
       public void finished() {
         throbber.decrement();
         repaint();
+        EventDialog.getInstance().checkForPicks();
       }
     };
     worker.start();
@@ -1494,14 +1497,6 @@ public class WaveClipboardFrame extends SwarmFrame {
 
   public JToggleButton getPickButton() {
     return pickButton;
-  }
-
-  public Event getEvent() {
-    return event;
-  }
-
-  public void setEvent(Event event) {
-    this.event = event;
   }
 
   public PickMenuBar getPickMenuBar() {

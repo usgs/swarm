@@ -17,7 +17,7 @@ public enum NationalMapLayer {
 
   public final String server;
   public final String layer = "0";
-  public final String sytels = "";
+  public final String style = "";
 
   private final String title;
 

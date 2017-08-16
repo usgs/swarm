@@ -5,6 +5,7 @@ import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.swarm.data.DataSourceType;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.map.NationalMapLayer;
 import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterSource;
 
 import java.awt.Color;
@@ -158,8 +159,11 @@ public class SwarmConfig {
   public void createConfig(final String[] args) {
     LOGGER.info("current directory: " + System.getProperty("user.dir"));
     LOGGER.info("user.home: " + System.getProperty("user.home"));
-    String configFile;
 
+    metadata = Collections.synchronizedMap(new HashMap<String, Metadata>());
+    
+    // Identify configuration file to use
+    String configFile;
     final int n = args.length - 1;
     if (n >= 0 && !args[n].startsWith("-")) {
       configFile = args[n];
@@ -178,19 +182,7 @@ public class SwarmConfig {
 
     LOGGER.info("Using configuration file: " + configFile);
 
-    final ConfigFile cf = new ConfigFile(configFile);
-    cf.put("configFile", configFile, false);
-
-    for (int i = 0; i <= n; i++) {
-      if (args[i].startsWith("--")) {
-        final String key = args[i].substring(2, args[i].indexOf('='));
-        final String val = args[i].substring(args[i].indexOf('=') + 1);
-        LOGGER.info("command line: " + key + " = " + val);
-        cf.put(key, val, false);
-      }
-    }
-    parseConfig(cf);
-
+    // Load default metadata
     final List<String> candidateNames = new LinkedList<String>();
     candidateNames.add(Metadata.DEFAULT_METADATA_FILENAME);
     candidateNames.add(
@@ -204,7 +196,20 @@ public class SwarmConfig {
     }
 
     defaultMetadata = Metadata.loadMetadata(metadataConfigFile);
-    metadata = Collections.synchronizedMap(new HashMap<String, Metadata>());
+    
+    // Parse configuration file
+    final ConfigFile cf = new ConfigFile(configFile);
+    cf.put("configFile", configFile, false);
+
+    for (int i = 0; i <= n; i++) {
+      if (args[i].startsWith("--")) {
+        final String key = args[i].substring(2, args[i].indexOf('='));
+        final String val = args[i].substring(args[i].indexOf('=') + 1);
+        LOGGER.info("command line: " + key + " = " + val);
+        cf.put(key, val, false);
+      }
+    }
+    parseConfig(cf);
 
     loadDataSources();
     loadLayouts();
@@ -384,11 +389,11 @@ public class SwarmConfig {
 
     useWMS = StringUtils.stringToBoolean(config.getString("useWMS"));
     wmsServer =
-        StringUtils.stringToString(config.getString("wmsServer"), WMSGeoImageSet.DEFAULT_SERVER);
+        StringUtils.stringToString(config.getString("wmsServer"), NationalMapLayer.TOPO.server);
     wmsLayer =
-        StringUtils.stringToString(config.getString("wmsLayer"), WMSGeoImageSet.DEFAULT_LAYER);
+        StringUtils.stringToString(config.getString("wmsLayer"), NationalMapLayer.TOPO.layer);
     wmsStyles =
-        StringUtils.stringToString(config.getString("wmsStyles"), WMSGeoImageSet.DEFAULT_STYLE);
+        StringUtils.stringToString(config.getString("wmsStyles"), NationalMapLayer.TOPO.style);
     
     hypocenterSource = HypocenterSource.valueOf(
         StringUtils.stringToString(config.getString("hypocenterSource"), "NONE"));

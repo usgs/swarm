@@ -4,6 +4,7 @@ import gov.usgs.proj.GeoRange;
 import gov.usgs.proj.Projection;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.event.PickData;
 import gov.usgs.volcanoes.swarm.event.PickMenu;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
@@ -31,9 +32,6 @@ public class SpLayer implements MapLayer {
       new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
   private static final BasicStroke solid =
       new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
-  
-  private Vector<Sp> spList = new Vector<Sp>();
-  private MapPanel panel;
 
   /**
    * Constructor.
@@ -45,24 +43,24 @@ public class SpLayer implements MapLayer {
   /**
    * Update list of S-P circles to draw.
    */
-  private synchronized void updateSpList() {
-    spList.clear();
+  private synchronized Vector<Sp> updateSpList() {
+    Vector<Sp> spList = new Vector<Sp>();
     List<WaveViewPanel> waves = WaveClipboardFrame.getInstance().getWaves();
     for (WaveViewPanel wvp : waves) {
       if (wvp.getSettings().pickEnabled) {
-        PickMenu pickMenu = wvp.getPickMenu();
-        if (pickMenu.isPlot() && pickMenu.getPick(PickMenu.P) != null
-            && pickMenu.isPickChannel(PickMenu.P)) {
+        PickData pickData = wvp.getPickData();
+        if (pickData.isPlot() && pickData.getPick(PickMenu.P) != null
+            && pickData.isPickChannel(PickMenu.P)) {
           String channel = wvp.getChannel();
-          double distance = pickMenu.getSpDistance();
+          double distance = pickData.getSpDistance();
           if (!Double.isNaN(distance)) {
-            spList.add(new Sp(channel, distance, pickMenu.getSpMinDistance(),
-                pickMenu.getSpMaxDistance()));
+            spList.add(new Sp(channel, distance, pickData.getSpMinDistance(),
+                pickData.getSpMaxDistance()));
           }
         }
       }
     }
-    
+    return spList;
   }
   
   /**
@@ -75,13 +73,13 @@ public class SpLayer implements MapLayer {
     g2.setColor(new Color(SwarmConfig.getInstance().mapLineColor));
     
     // First get updated list of S-P
-    updateSpList();
+    Vector<Sp> spList = updateSpList();
     if (spList.size() == 0) {
       return;
     }
-    if (panel == null) {
-      panel = MapFrame.getInstance().getMapPanel();
-    }
+
+    MapPanel  panel = MapFrame.getInstance().getMapPanel();
+    
     // set clip
     int widthPx = panel.getGraphWidth();
     int heightPx = panel.getGraphHeight();
@@ -146,10 +144,6 @@ public class SpLayer implements MapLayer {
     return false;
   }
 
-  public void setMapPanel(MapPanel mapPanel) {
-    this.panel = mapPanel;
-  }
-
   public void setVisible(boolean isVisible) {
     
   }
@@ -157,6 +151,11 @@ public class SpLayer implements MapLayer {
   public boolean mouseMoved(MouseEvent e) {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  public void setMapPanel(MapPanel mapPanel) {
+    // TODO Auto-generated method stub
+    
   }
 
 }

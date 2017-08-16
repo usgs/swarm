@@ -57,7 +57,10 @@ public class SwarmModalDialog extends JDialog {
     this(parent, title, null);
   }
 
-  protected void setSizeAndLocation() {
+  /**
+   * Set size and location of dialog window.
+   */
+  public void setSizeAndLocation() {
     Dimension d = mainPanel.getPreferredSize();
     setSize(d.width + 10, d.height + 30);
     Dimension parentSize = parent.getSize();
@@ -129,7 +132,10 @@ public class SwarmModalDialog extends JDialog {
     this.setContentPane(mainPanel);
   }
 
-
+  public void setVisible(boolean visible) {
+    this.setSizeAndLocation();
+    super.setVisible(visible);
+  }
 
   protected boolean allowOk() {
     return true;

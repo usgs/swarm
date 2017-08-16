@@ -526,7 +526,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
     final WaveViewPanel wvp = new WaveViewPanel();
     wvp.setChannel(channel);
     wvp.setDataSource(source);
-    final WaveViewPanel cwvp = WaveClipboardFrame.getInstance().getSelected();
+    final WaveViewPanel cwvp = WaveClipboardFrame.getInstance().getSingleSelected();
     double st = 0;
     double et = 0;
     if (cwvp == null) {
@@ -545,7 +545,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
       @Override
       public Object construct() {
-        // double now = CurrentTime.nowJ2K();
         waveClipboard.getThrobber().increment();
         final Wave sw = source.getWave(channel, fst, fet);
         wvp.setWave(sw, fst, fet);
