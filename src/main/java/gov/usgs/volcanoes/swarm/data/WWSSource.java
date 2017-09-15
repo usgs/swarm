@@ -1,5 +1,10 @@
 package gov.usgs.volcanoes.swarm.data;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
+
 import gov.usgs.earthworm.Menu;
 import gov.usgs.earthworm.MenuItem;
 import gov.usgs.net.ReadListener;
@@ -7,16 +12,12 @@ import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.time.TimeSpan;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.winston.Channel;
 import gov.usgs.volcanoes.winston.Instrument;
 import gov.usgs.volcanoes.winston.legacyServer.WWSClient;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.StringTokenizer;
 
 /**
  * An implementation of <code>SeismicDataSource</code> that communicates with a WinstonWaveServer.
@@ -272,11 +273,11 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
       List<Channel> channels = winstonClient.getChannels();
       List<String> result = new ArrayList<String>(channels.size());
       for (Channel ch : channels) {
-        String code = ch.getCode().replace('$', ' ');
+        String code = ch.scnl.toString(" ");
         Metadata md = swarmConfig.getMetadata(code, true);
-        Instrument ins = ch.getInstrument();
-        md.updateLongitude(ins.getLongitude());
-        md.updateLatitude(ins.getLatitude());
+        Instrument ins = ch.instrument;
+        md.updateLongitude(ins.longitude);
+        md.updateLatitude(ins.latitude);
         md.source = this;
         result.add(code);
       }
@@ -285,26 +286,27 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
       List<Channel> channels = winstonClient.getChannels(true);
       List<String> result = new ArrayList<String>(channels.size());
       for (Channel ch : channels) {
-        String code = ch.getCode().replace('$', ' ');
+        String code = ch.scnl.toString(" ");
         Metadata md = swarmConfig.getMetadata(code, true);
-        Instrument ins = ch.getInstrument();
-        md.updateLongitude(ins.getLongitude());
-        md.updateLatitude(ins.getLatitude());
-        md.updateMinTime(ch.getMinTime());
-        md.updateMaxTime(ch.getMaxTime());
+        Instrument ins = ch.instrument;
+        md.updateLongitude(ins.longitude);
+        md.updateLatitude(ins.latitude);
+        TimeSpan timeSpan = ch.timeSpan;
+        md.updateMinTime(J2kSec.fromEpoch(timeSpan.startTime));
+        md.updateMaxTime(J2kSec.fromEpoch(timeSpan.endTime));
         if (md.getGroups() != null) { // in case of data source refresh
           md.getGroups().clear();
         }
-        List<String> groups = ch.getGroups();
+        List<String> groups = ch.groups;
         if (groups != null) {
           for (String g : groups) {
             md.addGroup(g);
           }
         }
-        md.updateLinearCoefficients(ch.getLinearA(), ch.getLinearB());
-        md.updateAlias(ch.getAlias());
-        md.updateUnits(ch.getUnit());
-        md.updateTimeZone(ch.getInstrument().getTimeZone());
+        md.updateLinearCoefficients(ch.linearA, ch.linearB);
+        md.updateAlias(ch.alias);
+        md.updateUnits(ch.unit);
+        md.updateTimeZone(ch.instrument.timeZone);
         md.source = this;
         result.add(code);
       }
