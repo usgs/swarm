@@ -7,6 +7,7 @@ import java.util.StringTokenizer;
 
 import gov.usgs.earthworm.Menu;
 import gov.usgs.earthworm.MenuItem;
+import gov.usgs.earthworm.SCNL;
 import gov.usgs.net.ReadListener;
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.RSAMData;
@@ -71,9 +72,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
     timeout = Integer.parseInt(ss[2]);
     compress = ss[3].equals("1");
 
-    winstonClient = new WWSClient(server, port);
-
-    setTimeout(timeout);
+    winstonClient = new WWSClient(server, port, timeout);
   }
 
   /**
@@ -101,16 +100,6 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
     String typeString = DataSourceType.getShortName(this.getClass());
     return String.format("%s;" + typeString + ":%s:%d:%d:%s", name, server, port, timeout,
         compress ? "1" : "0");
-  }
-
-  /**
-   * Set Winston Client time out.
-   * 
-   * @param to
-   *            time out in milliseconds
-   */
-  public synchronized void setTimeout(int to) {
-    winstonClient.setTimeout(to);
   }
 
   /**
@@ -235,17 +224,23 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
     HelicorderData hd = cache.getHelicorder(station, t1, t2, this);
     if (hd == null) {
       String delimiter = station.indexOf("$") == -1 ? " " : "$";
-      Scnl scnl = Scnl.parse(station, delimiter);
-      fireHelicorderProgress(station, -1);
-      winstonClient.setReadListener(new ReadListener() {
-        public void readProgress(double p) {
-          fireHelicorderProgress(station, p);
-        }
-      });
+     
+      Scnl scnl;
+      try {
+        scnl = Scnl.parse(station, delimiter);
+        fireHelicorderProgress(station, -1);
+//      winstonClient.setReadListener(new ReadListener() {
+//        public void readProgress(double p) {
+//          fireHelicorderProgress(station, p);
+//        }
+//      });
       TimeSpan timeSpan = TimeSpan.fromJ2kSec(t1, t2);
       hd = winstonClient.getHelicorder(scnl, timeSpan, compress);
-      winstonClient.setReadListener(null);
+//      winstonClient.setReadListener(null);
       fireHelicorderProgress(station, 1.0);
+      } catch (UtilException e) {
+       System.err.println("WWSSource.getHelicorder: Cannot parse SCNL '" + station + "'.");
+      }
 
       if (hd != null && hd.rows() != 0) {
         HelicorderData noLatest = hd.subset(hd.getStartTime(), J2kSec.now() - 30);
