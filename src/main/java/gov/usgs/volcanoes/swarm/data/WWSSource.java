@@ -3,12 +3,8 @@ package gov.usgs.volcanoes.swarm.data;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
 
-import gov.usgs.earthworm.Menu;
 import gov.usgs.earthworm.MenuItem;
-import gov.usgs.earthworm.SCNL;
-import gov.usgs.net.ReadListener;
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
@@ -19,7 +15,6 @@ import gov.usgs.volcanoes.core.util.UtilException;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.winston.Channel;
-import gov.usgs.volcanoes.winston.Instrument;
 import gov.usgs.volcanoes.wwsclient.WWSClient;
 
 /**
@@ -270,7 +265,6 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
       md.update(chan);
       md.source = this;
     }
-    System.err.println("returning " +channelNames);
 
     return channelNames;
   }
