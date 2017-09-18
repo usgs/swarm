@@ -294,6 +294,7 @@
 									<include>gov.usgs.volcanoes:volcano-core</include>
 									<include>gov.usgs.volcanoes:winston</include>
 									<include>gov.usgs.volcanoes:swarm</include>
+									<include>gov.usgs.volcanoes:wwsclient</include>
 									<include>org.freemarker:freemarker</include>
 									<include>com.jgoodies:*</include>
 									<include>com.martiansoftware:jsap</include>
