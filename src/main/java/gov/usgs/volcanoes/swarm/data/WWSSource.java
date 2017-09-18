@@ -3,26 +3,25 @@ package gov.usgs.volcanoes.swarm.data;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
 
-import gov.usgs.earthworm.Menu;
 import gov.usgs.earthworm.MenuItem;
-import gov.usgs.net.ReadListener;
 import gov.usgs.plot.data.HelicorderData;
 import gov.usgs.plot.data.RSAMData;
 import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.core.data.Scnl;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.TimeSpan;
+import gov.usgs.volcanoes.core.util.UtilException;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.winston.Channel;
-import gov.usgs.volcanoes.winston.Instrument;
-import gov.usgs.volcanoes.winston.legacyServer.WWSClient;
+import gov.usgs.volcanoes.wwsclient.WWSClient;
 
 /**
- * An implementation of <code>SeismicDataSource</code> that communicates with a WinstonWaveServer.
- * This is essentially just a copy of WaveServerSource with different helicorder functions. It
- * should probably be made a descendant of WaveServerSource.
+ * An implementation of <code>SeismicDataSource</code> that communicates with a
+ * WinstonWaveServer. This is essentially just a copy of WaveServerSource with
+ * different helicorder functions. It should probably be made a descendant of
+ * WaveServerSource.
  * 
  * 
  * @author Dan Cervelli
@@ -46,7 +45,9 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
 
   /**
    * Constructor requiring WWS source.
-   * @param wws Winston Wave Server Source
+   * 
+   * @param wws
+   *            Winston Wave Server Source
    */
   @Deprecated
   public WWSSource(WWSSource wws) {
@@ -66,9 +67,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
     timeout = Integer.parseInt(ss[2]);
     compress = ss[3].equals("1");
 
-    winstonClient = new WWSClient(server, port);
-
-    setTimeout(timeout);
+    winstonClient = new WWSClient(server, port, timeout);
   }
 
   /**
@@ -99,14 +98,6 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
   }
 
   /**
-   * Set Winston Client time out.
-   * @param to time out in milliseconds
-   */
-  public synchronized void setTimeout(int to) {
-    winstonClient.setTimeout(to);
-  }
-
-  /**
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#close()
    */
   public void close() {
@@ -117,7 +108,9 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
 
   /**
    * Get formatted SCNL.
-   * @param mi menu item
+   * 
+   * @param mi
+   *            menu item
    * @return SCNL string space delimited
    */
   public String getFormattedScnl(MenuItem mi) {
@@ -126,7 +119,9 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
 
   /**
    * Get menu list.
-   * @param items list of menu items
+   * 
+   * @param items
+   *            list of menu items
    * @return list of SCNL string
    */
   public List<String> getMenuList(List<MenuItem> items) {
@@ -139,27 +134,8 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
   }
 
   /**
-   * Parse SCNL.
-   * @param channel channel string
-   * @return array of SCNL info
-   */
-  public String[] parseScnl(String channel) {
-    String[] result = new String[4];
-    String token = channel.indexOf("$") != -1 ? "$" : " ";
-    StringTokenizer st = new StringTokenizer(channel, token);
-    result[0] = st.nextToken();
-    result[1] = st.nextToken();
-    result[2] = st.nextToken();
-    if (st.hasMoreTokens()) {
-      result[3] = st.nextToken();
-    } else {
-      result[3] = "--";
-    }
-    return result;
-  }
-
-  /**
-   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getWave(java.lang.String, double, double)
+   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getWave(java.lang.String,
+   *      double, double)
    */
   public synchronized Wave getWave(String station, double t1, double t2) {
     Wave wave = null;
@@ -169,15 +145,14 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
     }
 
     if (wave == null) {
-      String[] scnl = parseScnl(station);
-      if (protocolVersion == 1) {
-        wave = winstonClient.getRawData(scnl[0], scnl[1], scnl[2], scnl[3], J2kSec.asEpoch(t1),
-            J2kSec.asEpoch(t2));
-        if (wave != null) {
-          wave.convertToJ2K();
-        }
-      } else {
-        wave = winstonClient.getWave(scnl[0], scnl[1], scnl[2], scnl[3], t1, t2, compress);
+      String delimiter = station.indexOf("$") == -1 ? " " : "$";
+      Scnl scnl;
+      try {
+        scnl = Scnl.parse(station, delimiter);
+        TimeSpan timeSpan = TimeSpan.fromJ2kSec(t1, t2);
+        wave = winstonClient.getWave(scnl, timeSpan, compress);
+      } catch (UtilException e) {
+        System.err.println("WWSSource.getWave: Cannot parse station " + station);
       }
 
       if (wave == null) {
@@ -196,7 +171,8 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
   }
 
   /**
-   * @see gov.usgs.volcanoes.swarm.data.RsamSource#getRsam(java.lang.String, double, double, int)
+   * @see gov.usgs.volcanoes.swarm.data.RsamSource#getRsam(java.lang.String,
+   *      double, double, int)
    */
   public synchronized RSAMData getRsam(String station, double t1, double t2, int period) {
     RSAMData rsamData = null;
@@ -209,9 +185,15 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
     }
 
     if (rsamData == null) {
-      String[] scnl = parseScnl(station);
-      rsamData =
-          winstonClient.getRSAMData(scnl[0], scnl[1], scnl[2], scnl[3], t1, t2, period, compress);
+      String delimiter = station.indexOf("$") == -1 ? " " : "$";
+      try {
+        Scnl scnl = Scnl.parse(station, delimiter);
+        TimeSpan timeSpan = TimeSpan.fromJ2kSec(t1, t2);
+        rsamData =
+            winstonClient.getRSAMData(scnl, timeSpan, period, compress);
+      } catch (UtilException e) {
+        System.err.println("WWSSource.getRsam: Cannot parse station " + station);
+      }
       if (rsamData == null) {
         return null;
       }
@@ -227,8 +209,8 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
   }
 
   /**
-   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getHelicorder(java.lang.String, double,
-   * double, gov.usgs.volcanoes.swarm.data.GulperListener)
+   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getHelicorder(java.lang.String,
+   *      double, double, gov.usgs.volcanoes.swarm.data.GulperListener)
    */
   public synchronized HelicorderData getHelicorder(final String station, double t1, double t2,
       GulperListener gl) {
@@ -236,16 +218,24 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
 
     HelicorderData hd = cache.getHelicorder(station, t1, t2, this);
     if (hd == null) {
-      String[] scnl = parseScnl(station);
-      fireHelicorderProgress(station, -1);
-      winstonClient.setReadListener(new ReadListener() {
-        public void readProgress(double p) {
-          fireHelicorderProgress(station, p);
-        }
-      });
-      hd = winstonClient.getHelicorder(scnl[0], scnl[1], scnl[2], scnl[3], t1, t2, compress);
-      winstonClient.setReadListener(null);
+      String delimiter = station.indexOf("$") == -1 ? " " : "$";
+     
+      Scnl scnl;
+      try {
+        scnl = Scnl.parse(station, delimiter);
+        fireHelicorderProgress(station, -1);
+//      winstonClient.setReadListener(new ReadListener() {
+//        public void readProgress(double p) {
+//          fireHelicorderProgress(station, p);
+//        }
+//      });
+      TimeSpan timeSpan = TimeSpan.fromJ2kSec(t1, t2);
+      hd = winstonClient.getHelicorder(scnl, timeSpan, compress);
+//      winstonClient.setReadListener(null);
       fireHelicorderProgress(station, 1.0);
+      } catch (UtilException e) {
+       System.err.println("WWSSource.getHelicorder: Cannot parse SCNL '" + station + "'.");
+      }
 
       if (hd != null && hd.rows() != 0) {
         HelicorderData noLatest = hd.subset(hd.getStartTime(), J2kSec.now() - 30);
@@ -263,57 +253,20 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getChannels()
    */
   public synchronized List<String> getChannels() {
+    System.err.println("Getting channels\n");
+    List<Channel> channels = winstonClient.getChannels();
+    List<String> channelNames = new ArrayList<String>(channels.size());
     SwarmConfig swarmConfig = SwarmConfig.getInstance();
-    if (protocolVersion == 1) {
-      Menu menu = winstonClient.getMenuSCNL();
-      List<String> channels = getMenuList(menu.getSortedItems());
-      swarmConfig.assignMetadataSource(channels, this);
-      return channels;
-    } else if (protocolVersion == 2) {
-      List<Channel> channels = winstonClient.getChannels();
-      List<String> result = new ArrayList<String>(channels.size());
-      for (Channel ch : channels) {
-        String code = ch.scnl.toString(" ");
-        Metadata md = swarmConfig.getMetadata(code, true);
-        Instrument ins = ch.instrument;
-        md.updateLongitude(ins.longitude);
-        md.updateLatitude(ins.latitude);
-        md.source = this;
-        result.add(code);
-      }
-      return result;
-    } else if (protocolVersion == 3) {
-      List<Channel> channels = winstonClient.getChannels(true);
-      List<String> result = new ArrayList<String>(channels.size());
-      for (Channel ch : channels) {
-        String code = ch.scnl.toString(" ");
-        Metadata md = swarmConfig.getMetadata(code, true);
-        Instrument ins = ch.instrument;
-        md.updateLongitude(ins.longitude);
-        md.updateLatitude(ins.latitude);
-        TimeSpan timeSpan = ch.timeSpan;
-        md.updateMinTime(J2kSec.fromEpoch(timeSpan.startTime));
-        md.updateMaxTime(J2kSec.fromEpoch(timeSpan.endTime));
-        if (md.getGroups() != null) { // in case of data source refresh
-          md.getGroups().clear();
-        }
-        List<String> groups = ch.groups;
-        if (groups != null) {
-          for (String g : groups) {
-            md.addGroup(g);
-          }
-        }
-        md.updateLinearCoefficients(ch.linearA, ch.linearB);
-        md.updateAlias(ch.alias);
-        md.updateUnits(ch.unit);
-        md.updateTimeZone(ch.instrument.timeZone);
-        md.source = this;
-        result.add(code);
-      }
-      return result;
-    } else {
-      return null;
+
+    for (Channel chan : channels) {
+      String chanName = chan.scnl.toString(" ");
+      channelNames.add(chanName);
+      Metadata md = swarmConfig.getMetadata(chanName, true);
+      md.update(chan);
+      md.source = this;
     }
+
+    return channelNames;
   }
 
   /**
