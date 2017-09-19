@@ -59,7 +59,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
   /**
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#parse(java.lang.String)
    */
-  public void parse(String params) {
+  public synchronized void parse(String params) {
     this.params = params;
     String[] ss = params.split(":");
     server = ss[0];
@@ -253,7 +253,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getChannels()
    */
   public synchronized List<String> getChannels() {
-    List<Channel> channels = winstonClient.getChannels();
+    List<Channel> channels = winstonClient.getChannels(true);
     List<String> channelNames = new ArrayList<String>(channels.size());
     SwarmConfig swarmConfig = SwarmConfig.getInstance();
 
