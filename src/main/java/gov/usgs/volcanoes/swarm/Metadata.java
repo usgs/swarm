@@ -333,15 +333,12 @@ public class Metadata implements Comparable<Metadata> {
    * @param chan source channel
    */
   public void update(Channel chan) {
-    
     Instrument ins = chan.instrument;
     updateLongitude(ins.longitude);
     updateLatitude(ins.latitude);
-    
     TimeSpan timeSpan = chan.timeSpan;
     updateMinTime(J2kSec.fromEpoch(timeSpan.startTime));
     updateMaxTime(J2kSec.fromEpoch(timeSpan.endTime));
-    
     if (getGroups() != null) {
       getGroups().clear();
     }
