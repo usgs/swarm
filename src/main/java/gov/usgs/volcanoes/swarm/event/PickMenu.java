@@ -23,11 +23,6 @@ public class PickMenu extends JPopupMenu {
 
   private static final long serialVersionUID = 8681764007165352268L;
 
-  public static String P = "P";
-  public static String S = "S";
-  public static String CODA1 = "C1";
-  public static String CODA2 = "C2";
-  
   private final WaveViewPanel wvp;
   private double j2k;
 
@@ -78,7 +73,7 @@ public class PickMenu extends JPopupMenu {
     JMenu pickMenu = new JMenu("Pick");
     this.add(pickMenu);
 
-    for (final String phase : new String[] {P, S}) {
+    for (final String phase : new String[] {PickData.P, PickData.S}) {
       JMenu phaseMenu = new JMenu(phase);
       pickMenu.add(phaseMenu);
       Pick pick = pickData.getPick(phase);
@@ -92,40 +87,62 @@ public class PickMenu extends JPopupMenu {
         }
         JMenu onsetMenu = new JMenu(onset.toString());
         phaseMenu.add(onsetMenu);
-        // create weight menu
-        ButtonGroup bg = new ButtonGroup();
-        JRadioButtonMenuItem[] mi = new JRadioButtonMenuItem[PickSettings.numWeight];
-        for (int i = 0; i < mi.length; i++) {
-          final int weight = i;
-          mi[i] = new JRadioButtonMenuItem(Integer.toString(i));
-          bg.add(mi[i]);
-          if (pick != null && onset.equals(pick.getOnset()) && i == pickWeight.intValue()) {
-            mi[i].setSelected(true);
-          } else {
-            mi[i].setSelected(false);
+        
+        for (final Pick.Polarity polarity : Pick.Polarity.values()) {
+          String label = "";
+          switch (polarity) {
+            case POSITIVE:
+              label = "+";
+              break;
+            case NEGATIVE:
+              label = "-";
+              break;
+            case UNDECIDABLE:
+              label = "?";
+              break;
+            default:
+              break;                
           }
-          mi[i].addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              Pick pick = pickData.createPick(phase, onset, j2k, wvp, weight);
-              pickData.propagatePick(phase, pick, wvp);
-              pickData.setWeight(phase, weight);
-              pickData.pickChannels.put(phase, true);
-              pickData.propagateUncertainty(phase, weight, wvp);
-              wvp.repaint();
+          JMenu polarityMenu = new JMenu(label);
+          onsetMenu.add(polarityMenu);
+         
+          // create weight menu
+          ButtonGroup bg = new ButtonGroup();
+          JRadioButtonMenuItem[] mi = new JRadioButtonMenuItem[PickSettings.numWeight];
+          for (int i = 0; i < mi.length; i++) {
+            final int weight = i;
+            mi[i] = new JRadioButtonMenuItem(Integer.toString(i));
+            bg.add(mi[i]);
+            if (pick != null && onset.equals(pick.getOnset()) && polarity.equals(pick.getPolarity())
+                && i == pickWeight.intValue()) {
+              mi[i].setSelected(true);
+            } else {
+              mi[i].setSelected(false);
             }
-          });
-          onsetMenu.add(mi[i]);
+            mi[i].addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+                Pick pick = pickData.createPick(phase, onset, polarity, j2k, wvp, weight);
+                pickData.propagatePick(phase, pick, wvp);
+                pickData.setWeight(phase, weight);
+                pickData.pickChannels.put(phase, true);
+                pickData.propagateUncertainty(phase, weight, wvp);
+                wvp.repaint();
+              }
+            });
+            polarityMenu.add(mi[i]);
+          }
+
+          String key = phase + onset.toString().substring(0,1) + polarity.toString().substring(0,1);
+          weightButtons.put(key, mi);
         }
-        String key = phase + onset.toString().substring(0,1);
-        weightButtons.put(key, mi);
       }
 
     }
-    for (final String coda : new String[] {CODA1, CODA2}) {
+    for (final String coda : new String[] {PickData.CODA1, PickData.CODA2}) {
       JMenuItem codaMenuItem = new JMenuItem(coda);
       codaMenuItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          pickData.createPick(coda,null, j2k, wvp, 0);
+          pickData.createPick(coda, null, null, j2k, wvp, 0);
           wvp.repaint();
         }
       });
@@ -139,8 +156,9 @@ public class PickMenu extends JPopupMenu {
   private void createClearMenu() {
     JMenu clearMenu = new JMenu("Clear");
     this.add(clearMenu);
-    
-    for (final String pickType : new String[] {P, S, CODA1, CODA2}) {
+
+    for (final String pickType : new String[] {PickData.P, PickData.S, PickData.CODA1,
+        PickData.CODA2}) {
       JMenuItem clearPick = new JMenuItem(pickType);
       clearPick.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -154,7 +172,8 @@ public class PickMenu extends JPopupMenu {
     JMenuItem clearAll = new JMenuItem("All");
     clearAll.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        for (final String pickType : new String[] {P, S, CODA1, CODA2}) {
+        for (final String pickType : new String[] {PickData.P, PickData.S, PickData.CODA1,
+            PickData.CODA2}) {
           pickData.clearPick(pickType, wvp);
           wvp.repaint();
         }
@@ -195,8 +214,8 @@ public class PickMenu extends JPopupMenu {
    * Clear coda picks.
    */
   public void clearCoda() {
-    pickData.picks.remove(CODA1);
-    pickData.picks.remove(CODA2);
+    pickData.picks.remove(PickData.CODA1);
+    pickData.picks.remove(PickData.CODA2);
     wvp.repaint();    
   }
 
