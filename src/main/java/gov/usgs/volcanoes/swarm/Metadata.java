@@ -28,7 +28,7 @@ import java.util.TimeZone;
 public class Metadata implements Comparable<Metadata> {
   public static final String DEFAULT_METADATA_FILENAME = "SwarmMetadata.config";
 
-  //private static final Logger LOGGER = LoggerFactory.getLogger(Metadata.class);
+  // private static final Logger LOGGER = LoggerFactory.getLogger(Metadata.class);
 
   private SCNL scnl;
 
@@ -46,7 +46,7 @@ public class Metadata implements Comparable<Metadata> {
   private double height = Double.NaN;
   private double minTime = Double.NaN;
   private double maxTime = Double.NaN;
-  
+
   private double delay = Double.NaN;
   private double xmagCorrection = Double.NaN;
   private double fmagCorrection = Double.NaN;
@@ -327,22 +327,25 @@ public class Metadata implements Comparable<Metadata> {
     return data;
   }
 
-  
+
   /**
    * Update metadata given a Channel.
    * @param chan source channel
    */
   public void update(Channel chan) {
+
     Instrument ins = chan.instrument;
     updateLongitude(ins.longitude);
     updateLatitude(ins.latitude);
+
     TimeSpan timeSpan = chan.timeSpan;
     updateMinTime(J2kSec.fromEpoch(timeSpan.startTime));
     updateMaxTime(J2kSec.fromEpoch(timeSpan.endTime));
+
     if (getGroups() != null) {
       getGroups().clear();
     }
-    
+
     List<String> groups = chan.groups;
     if (groups != null) {
       for (String g : groups) {
@@ -356,8 +359,8 @@ public class Metadata implements Comparable<Metadata> {
     updateTimeZone(ins.timeZone);
 
   }
-  
-  
+
+
   /**
    * Get distance to another point.
    * @param pt the point
