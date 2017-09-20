@@ -3,7 +3,11 @@ package gov.usgs.volcanoes.swarm;
 import gov.usgs.proj.Projection;
 import gov.usgs.util.Pair;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.time.TimeSpan;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.winston.Channel;
+import gov.usgs.volcanoes.winston.Instrument;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -323,6 +327,40 @@ public class Metadata implements Comparable<Metadata> {
     return data;
   }
 
+  
+  /**
+   * Update metadata given a Channel.
+   * @param chan source channel
+   */
+  public void update(Channel chan) {
+    
+    Instrument ins = chan.instrument;
+    updateLongitude(ins.longitude);
+    updateLatitude(ins.latitude);
+    
+    TimeSpan timeSpan = chan.timeSpan;
+    updateMinTime(J2kSec.fromEpoch(timeSpan.startTime));
+    updateMaxTime(J2kSec.fromEpoch(timeSpan.endTime));
+    
+    if (getGroups() != null) {
+      getGroups().clear();
+    }
+    
+    List<String> groups = chan.groups;
+    if (groups != null) {
+      for (String g : groups) {
+        addGroup(g);
+      }
+    }
+
+    updateLinearCoefficients(chan.linearA, chan.linearB);
+    updateAlias(chan.alias);
+    updateUnits(chan.unit);
+    updateTimeZone(ins.timeZone);
+
+  }
+  
+  
   /**
    * Get distance to another point.
    * @param pt the point
