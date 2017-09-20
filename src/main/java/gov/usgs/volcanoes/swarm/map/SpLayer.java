@@ -5,7 +5,6 @@ import gov.usgs.proj.Projection;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.event.PickData;
-import gov.usgs.volcanoes.swarm.event.PickMenu;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
@@ -49,8 +48,8 @@ public class SpLayer implements MapLayer {
     for (WaveViewPanel wvp : waves) {
       if (wvp.getSettings().pickEnabled) {
         PickData pickData = wvp.getPickData();
-        if (pickData.isPlot() && pickData.getPick(PickMenu.P) != null
-            && pickData.isPickChannel(PickMenu.P)) {
+        if (pickData.isPlot() && pickData.getPick(PickData.P) != null
+            && pickData.isPickChannel(PickData.P)) {
           String channel = wvp.getChannel();
           double distance = pickData.getSpDistance();
           if (!Double.isNaN(distance)) {

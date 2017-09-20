@@ -260,7 +260,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     // set P and S picks in menu
     String phase = arrival.getPhase();
     PickData pickData = wavePanel.getPickData();
-    for (String phaseHint : new String[] {PickMenu.P, PickMenu.S}) {
+    for (String phaseHint : new String[] {PickData.P, PickData.S}) {
       if (phase.indexOf(phaseHint) != -1) {
         pick.setPhaseHint(phaseHint);
         pickData.setPick(phaseHint, pick, true);
