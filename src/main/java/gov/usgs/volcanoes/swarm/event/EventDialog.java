@@ -189,7 +189,7 @@ public class EventDialog extends JFrame {
     builder.appendSeparator("Hypo71 Input");
     hypo71Mgr = new Hypo71Manager();
 
-    JButton testButton = new JButton("Edit Test Variables");
+    JButton testButton = new JButton("Settings");
     testButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         Hypo71SettingsDialog.getInstance().setVisible(true);
@@ -277,34 +277,34 @@ public class EventDialog extends JFrame {
     builder.appendSeparator("Hypo71 Output");
 
     location = new JTextField();
-    location.setBorder(null);
+    //location.setBorder(null);
     location.setEditable(false);
-    builder.append("Location: ", location);
+    builder.append("Location", location);
     builder.nextLine();
     magnitude = new JTextField();
-    magnitude.setBorder(null);
+    //magnitude.setBorder(null);
     magnitude.setEditable(false);
-    builder.append("Magnitude: ", magnitude);
+    builder.append("Magnitude", magnitude);
     builder.nextLine();
     rms = new JTextField();
-    rms.setBorder(null);
+    //rms.setBorder(null);
     rms.setEditable(false);
-    builder.append("RMS: ", rms);
+    builder.append("RMS", rms);
     builder.nextLine();
     gap = new JTextField();
-    gap.setBorder(null);
+    //gap.setBorder(null);
     gap.setEditable(false);
-    builder.append("GAP: ", gap);
+    builder.append("GAP", gap);
     builder.nextLine();
     erh = new JTextField();
-    erh.setBorder(null);
+    //erh.setBorder(null);
     erh.setEditable(false);
-    builder.append("ERH: ", erh);
+    builder.append("ERH", erh);
     builder.nextLine();
     erz = new JTextField();
-    erz.setBorder(null);
+    //erz.setBorder(null);
     erz.setEditable(false);
-    builder.append("ERZ: ", erz);
+    builder.append("ERZ", erz);
     builder.nextLine();
 
     JButton viewHypo71Button = new JButton("View");
