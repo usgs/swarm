@@ -27,7 +27,6 @@ import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
 import gov.usgs.volcanoes.swarm.event.EventDialog;
 import gov.usgs.volcanoes.swarm.event.PickData;
-import gov.usgs.volcanoes.swarm.event.PickMenu;
 import gov.usgs.volcanoes.swarm.event.PickMenuBar;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanelListener;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
@@ -1018,10 +1017,10 @@ public class WaveClipboardFrame extends SwarmFrame {
     p.getSettings().pickEnabled = pickButton.isSelected();
     if (p.wave != null) {   // change marks to coda
       if (!Double.isNaN(p.getMark1())) {
-        p.getPickData().createPick(PickMenu.CODA1, null, p.getMark1(), p, 0);
+        p.getPickData().createPick(PickData.CODA1, null, null, p.getMark1(), p, 0);
       }
       if (!Double.isNaN(p.getMark2())) {
-        p.getPickData().createPick(PickMenu.CODA2, null, p.getMark2(), p, 0);
+        p.getPickData().createPick(PickData.CODA2, null, null, p.getMark2(), p, 0);
       }
       p.setMarks(Double.NaN, Double.NaN);
     }
@@ -1474,7 +1473,7 @@ public class WaveClipboardFrame extends SwarmFrame {
         // propagate picks
         for (WaveViewPanel wvp : waves) {
           PickData pickData = wvp.getPickData();
-          for (String phase : new String[] {PickMenu.P, PickMenu.S}) {
+          for (String phase : new String[] {PickData.P, PickData.S}) {
             Pick pick = pickData.getPick(phase);
             if (pick != null && pickData.isPickChannel(phase)) {
               pickData.propagatePick(phase, pick, wvp);
