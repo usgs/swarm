@@ -37,6 +37,8 @@ import javax.swing.SwingUtilities;
  * 
  * @author Tom Parker
  */
+@edu.umd.cs.findbugs.annotations.SuppressFBWarnings(value = "SE_BAD_FIELD",
+    justification = "Class not serializable")
 public class RsamViewPanel extends JComponent implements SettingsListener {
   public static final long serialVersionUID = -1;
 
@@ -68,11 +70,6 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
 
   private String channel;
 
-  // private Color bottomBorderColor;
-
-  private static Image closeImg;
-  private boolean allowClose;
-
   /**
    * A flag that indicates whether data are being loaded for this panel.
    */
@@ -83,8 +80,6 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
    * change for repaint efficiency.
    */
   private BufferedImage image;
-
-  // private Color borderColor;
 
   /**
    * Constructs a WaveViewPanel with default settings.
@@ -218,12 +213,14 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
    *          the graphics context
    */
   public void paint(Graphics g) {
+    if (!(g instanceof Graphics2D)) {
+      throw new RuntimeException("Fatal error in RsamViewPanel.paint()");
+    }
+
     Graphics2D g2 = (Graphics2D) g;
     Dimension dim = this.getSize();
-    // TODO: fix this
-    if (data == null
-        || (settings.getType() == ViewType.VALUES && data.getPeriod() != settings.valuesPeriodS)
-        || (settings.getType() == ViewType.COUNTS && data.getPeriod() != settings.countsPeriodS)) {
+
+    if (data == null) {
       g2.setColor(BACKGROUND_COLOR);
       g2.fillRect(0, 0, dim.width, dim.height);
       g2.setColor(Color.black);
@@ -244,22 +241,6 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
       }
 
     }
-
-    if (allowClose) {
-      if (closeImg == null) {
-        closeImg = Icons.close_view.getImage();
-      }
-
-      g2.drawImage(closeImg, dim.width - 17, 3, null);
-    }
-    // if (bottomBorderColor != null) {
-    // g2.setColor(bottomBorderColor);
-    // g2.drawLine(0, dim.height - 1, dim.width, dim.height - 1);
-    // }
-    // if (borderColor != null) {
-    // g2.setColor(borderColor);
-    // g2.drawRect(0, 0, dim.width - 1, dim.height - 2);
-    // }
   }
 
 
@@ -313,7 +294,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
     if (settings.detrend) {
       gdm.detrend(1);
     }
-    
+
     if (settings.despike) {
       gdm.despike(1, settings.despikePeriod);
     }
@@ -325,7 +306,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
     if (settings.runningMean) {
       gdm.set2mean(1, settings.runningMeanPeriodS);
     }
-    
+
     if (settings.filterOn) {
       gdm.filter(settings.filter, 1, settings.zeroPhaseShift);
     }
@@ -364,9 +345,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
    * @param data the RSAM values to plot
    */
   private void plotCounts(Plot plot, RSAMData data) {
-
-    if (data == null || data.getData() == null || data.getData().rows() == 0
-        || data.getPeriod() != settings.countsPeriodS) {
+    if (data == null || data.getData() == null || data.getData().rows() == 0) {
       return;
     }
 
@@ -433,7 +412,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
   public Dimension getMinimumSize() {
     return getSize();
   }
-  
+
   /**
    * Get filter label.
    * @param x x text location
