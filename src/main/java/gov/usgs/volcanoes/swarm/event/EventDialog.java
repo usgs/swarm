@@ -144,9 +144,9 @@ public class EventDialog extends JFrame {
   }
 
   /**
-   * Get instance of pick settings dialog.
+   * Get instance of event dialog.
    * 
-   * @return pick settings dialog
+   * @return event dialog
    */
   public static EventDialog getInstance() {
     if (dialog == null) {
@@ -194,7 +194,9 @@ public class EventDialog extends JFrame {
     JButton testButton = new JButton("Settings");
     testButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        setAlwaysOnTop(false);
         Hypo71SettingsDialog.getInstance().setVisible(true);
+        setAlwaysOnTop(true);
       }
     });
     builder.append(testButton);
