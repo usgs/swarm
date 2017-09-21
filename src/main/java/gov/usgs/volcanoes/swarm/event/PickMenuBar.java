@@ -73,7 +73,8 @@ public class PickMenuBar extends JMenuBar {
     eventDialog.checkForPicks();
     eventDialog.setState(java.awt.Frame.NORMAL);
     eventDialog.setSizeAndLocation();
-    eventDialog.setVisible(true);    
+    eventDialog.setVisible(true);   
+    eventDialog.toFront();
   }
   
   /**

@@ -1395,16 +1395,13 @@ public class WaveClipboardFrame extends SwarmFrame {
   /**
    * Import event into clipboard. Event must be set first.
    */
-  public void importEvent(final Event event) {
+  public void importEvent(final Event event, final boolean removeWaves) {
     final SwingWorker worker = new SwingWorker() {
       @Override
       public Object construct() {
         throbber.increment();
 
-        // See if user wants to clear clipboard first
-        int result = JOptionPane.showConfirmDialog(Swarm.getApplicationFrame(),
-            "Clear clipboard first?", "Import Event", JOptionPane.YES_NO_OPTION);
-        if (result == JOptionPane.YES_OPTION) {
+        if (removeWaves) {
           removeWaves();
         }
         // update event dialog 
