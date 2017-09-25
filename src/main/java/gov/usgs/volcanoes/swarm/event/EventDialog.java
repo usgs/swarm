@@ -317,6 +317,7 @@ public class EventDialog extends JFrame {
     viewHypo71Button.setToolTipText("View Hypo71 output.");
     viewHypo71Button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        setAlwaysOnTop(false);
         JTextArea textArea = new JTextArea(40, 100);
         textArea.setEditable(false);
         textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
@@ -324,6 +325,7 @@ public class EventDialog extends JFrame {
         JScrollPane scroll = new JScrollPane(textArea);
         JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), scroll);
         requestFocus();
+        setAlwaysOnTop(true);
       }
     });
 
