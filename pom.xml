@@ -531,7 +531,7 @@
 		<dependency>
 			<groupId>net.alomax</groupId>
 			<artifactId>seedlink_lite</artifactId>
-			<version>1.2.1</version>
+			<version>1.2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.jtransforms</groupId>
