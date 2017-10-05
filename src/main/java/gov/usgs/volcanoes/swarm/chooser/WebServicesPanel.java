@@ -445,6 +445,10 @@ public class WebServicesPanel extends DataSourcePanel {
       while (iterator.hasNext()) {
         network.addItem(iterator.next());
       }
+    } else {
+      String message = "No network found. Please ensure you have the correct fdsnws-station URL.";
+      JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message,
+          "Station query", JOptionPane.ERROR_MESSAGE);
     }
   }
 
