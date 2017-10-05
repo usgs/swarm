@@ -286,7 +286,7 @@ public class WaveViewPanel extends JComponent {
         double j2k = e.getX() * t[0] + t[1];
         if (j2k >= startTime && j2k <= endTime) {
           pickMenu.setJ2k(j2k);
-          pickMenu.show(this, e.getX(), e.getY());
+          pickMenu.show(this, e.getX() + 30, e.getY());
         }
       }
     } else {
@@ -858,12 +858,12 @@ public class WaveViewPanel extends JComponent {
         return;
       }
       if (!pickData.isHidePhases()) {
-        for (String phase : new String[] {PickMenu.P, PickMenu.S}) {
+        for (String phase : new String[] {PickData.P, PickData.S}) {
           drawPick(pickData.getPick(phase), g2, !pickData.isPickChannel(phase));
         }
       }
       if (!pickData.isHideCoda()) {
-        for (String coda : new String[] {PickMenu.CODA1, PickMenu.CODA2}) {
+        for (String coda : new String[] {PickData.CODA1, PickData.CODA2}) {
           drawPick(pickData.getPick(coda), g2, false);
         }
       }

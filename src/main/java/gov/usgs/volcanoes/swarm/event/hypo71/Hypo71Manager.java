@@ -1,4 +1,4 @@
-package gov.usgs.volcanoes.swarm.event;
+package gov.usgs.volcanoes.swarm.event.hypo71;
 
 import gov.usgs.volcanoes.core.contrib.hypo71.ControlCard;
 import gov.usgs.volcanoes.core.contrib.hypo71.CrustalModel;
@@ -23,15 +23,15 @@ import javax.swing.JOptionPane;
 public class Hypo71Manager {
 
   public static double[] WEIGHT_THRESHOLD_SECONDS = new double[] { 0.01, 0.02, 0.1, 0.2 };
-  protected String defaultCrustalModel = "3.30 0.0\n5.00 1.0\n5.70 4.0\n6.70 15.0\n8.00 25.0";
-  protected String crustalModelFileName = "DefaultVelocityModel.txt";
-  protected String description = "";
+  private String defaultCrustalModel = "3.30 0.0\n5.00 1.0\n5.70 4.0\n6.70 15.0\n8.00 25.0";
+  public String crustalModelFileName = "DefaultVelocityModel.txt";
+  public String description = "";
   protected Queue<Station> stationsList = new LinkedList<Station>();
   protected Queue<CrustalModel> crustalModelList = new LinkedList<CrustalModel>();
-  protected Queue<PhaseRecord> phaseRecordsList = new LinkedList<PhaseRecord>();
+  public Queue<PhaseRecord> phaseRecordsList = new LinkedList<PhaseRecord>();
   protected ControlCard controlCard =
       new ControlCard(0, 5.0, 50.0, 100.0, 1.78, 4, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0);
-  protected Hypo71 hypo71 = new Hypo71();
+  public Hypo71 hypo71 = new Hypo71();
   private char prevIns = ' ';
   private char prevIew = ' ';
 
@@ -58,8 +58,9 @@ public class Hypo71Manager {
    */
   public boolean calculate(String inputFile) throws IOException, ParseException {
     try {
-      hypo71.calculateHypo71(description, null, stationsList, crustalModelList, controlCard,
-          phaseRecordsList, inputFile);
+      Hypo71Settings settings = Hypo71SettingsDialog.getInstance().getSettings();
+      hypo71.calculateHypo71(description, settings.getTestValues(), stationsList,
+          crustalModelList, controlCard, phaseRecordsList, inputFile);
     } catch (Exception e) {
       e.printStackTrace();
       String message = "Error running Hypo71:\n" + e.getMessage();
@@ -140,6 +141,9 @@ public class Hypo71Manager {
     String pOnset = pPick.getOnset().toString().substring(0, 1).toUpperCase();
     String pMotion = getMotion(pPick.getPolarity());
     String pWeight = getWeightFromUncertainty(pPick.getTimeQuantity().getUncertainty())+".00";
+    if(sPick != null){
+      pWeight = "9.00";
+    }
     String pRemark = pOnset + pMotion + "P" + pWeight;
 
     // P-arrival time
