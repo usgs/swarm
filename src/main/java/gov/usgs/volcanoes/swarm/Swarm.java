@@ -355,8 +355,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
         //
       }
     }
-
-    mapFrame.toFront();
+    if (applicationFrame.isVisible()) {
+      mapFrame.toFront();
+    }
 
     swarmMenu = new SwarmMenu();
     this.setJMenuBar(swarmMenu);
@@ -518,7 +519,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
       }
     } catch (final Exception e) {
       // doesn't matter at this point
-    } 
+    }
     System.exit(0);
   }
 
@@ -589,24 +590,24 @@ public class Swarm extends JFrame implements InternalFrameListener {
     return frame;
   }
 
-//  public static PickerFrame openPicker(final WaveViewPanel insetWavePanel) {
-//    PickerWavePanel p = new PickerWavePanel(insetWavePanel);
-//    p.setDataSource(insetWavePanel.getDataSource().getCopy());
-//    PickerFrame pickerFrame = new PickerFrame();
-//    pickerFrame.setVisible(true);
-//    pickerFrame.requestFocus();
-//    SwarmInternalFrames.add(pickerFrame);
-//    pickerFrame.setBaseWave(p);
-//    return pickerFrame;
-//  }
+  // public static PickerFrame openPicker(final WaveViewPanel insetWavePanel) {
+  // PickerWavePanel p = new PickerWavePanel(insetWavePanel);
+  // p.setDataSource(insetWavePanel.getDataSource().getCopy());
+  // PickerFrame pickerFrame = new PickerFrame();
+  // pickerFrame.setVisible(true);
+  // pickerFrame.requestFocus();
+  // SwarmInternalFrames.add(pickerFrame);
+  // pickerFrame.setBaseWave(p);
+  // return pickerFrame;
+  // }
 
-//  public static PickerFrame openPicker(Event event) {
-//    PickerFrame pickerFrame = new PickerFrame(event);
-//    pickerFrame.setVisible(true);
-//    pickerFrame.requestFocus();
-//    SwarmInternalFrames.add(pickerFrame);
-//    return pickerFrame;
-//  }
+  // public static PickerFrame openPicker(Event event) {
+  // PickerFrame pickerFrame = new PickerFrame(event);
+  // pickerFrame.setVisible(true);
+  // pickerFrame.requestFocus();
+  // SwarmInternalFrames.add(pickerFrame);
+  // return pickerFrame;
+  // }
 
 
   public void saveLayout(String name) {
