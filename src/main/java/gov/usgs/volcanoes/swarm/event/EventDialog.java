@@ -220,6 +220,7 @@ public class EventDialog extends JFrame {
         String filename = openFileChooser(JFileChooser.FILES_ONLY, null, null);
         if (filename != null) {
           crustalModelFile.setText(filename);
+          hypo71Mgr.crustalModelFileName=filename;
         }
         requestFocus();
       }
