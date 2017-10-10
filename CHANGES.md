@@ -1,6 +1,7 @@
 ## Version 2.8.1
   * Upgraded seedlink library
   * Corrected reliability of wave display of gappy data
+  * Fix loading of crustal model file
   
 ## Version 2.8.0
   * Hypo71 support
