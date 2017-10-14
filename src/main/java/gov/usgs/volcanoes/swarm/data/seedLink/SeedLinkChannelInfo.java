@@ -1,23 +1,17 @@
 package gov.usgs.volcanoes.swarm.data.seedLink;
 
-import gov.usgs.util.xml.SimpleXMLParser;
-import gov.usgs.util.xml.XMLDocHandler;
-import gov.usgs.volcanoes.swarm.AbstractChannelInfo;
-import gov.usgs.volcanoes.swarm.GroupsType;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import gov.usgs.util.xml.SimpleXMLParser;
+import gov.usgs.util.xml.XMLDocHandler;
+import gov.usgs.volcanoes.swarm.AbstractChannelInfo;
+import gov.usgs.volcanoes.swarm.ChannelUtil;
+import gov.usgs.volcanoes.swarm.GroupsType;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 
 /**
  * SeedLink channel information.
@@ -96,7 +90,7 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo {
         }
         if (station != null && network != null && channel != null
             && location != null && DATA_TYPE.equals(type)) {
-          addChannel(channels, SeedLinkChannelInfo.this, getSource());
+          ChannelUtil.addChannel(channels, SeedLinkChannelInfo.this, getSource());
         }
       }
     }
@@ -159,7 +153,7 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo {
    * @return the list of groups.
    */
   public List<String> getGroups() {
-    return getGroups(this, GroupsType.NETWORK_AND_SITE);
+    return ChannelUtil.getGroups(this, GroupsType.NETWORK_AND_SITE);
   }
 
   /**

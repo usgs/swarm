@@ -13,7 +13,7 @@ import java.util.Map;
  * 
  * @author Kevin Frechette (ISTI)
  */
-public class ChannelUtil {
+public abstract class ChannelUtil {
   /** Groups map has channel information as key and groups as value. */
   private static final Map<AbstractChannelInfo, List<String>> groupsMap =
       new HashMap<AbstractChannelInfo, List<String>>();

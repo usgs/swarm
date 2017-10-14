@@ -7,7 +7,7 @@ import java.util.List;
  * 
  * @author Kevin Frechette (ISTI)
  */
-public abstract class AbstractChannelInfo extends ChannelUtil {
+public abstract class AbstractChannelInfo {
 
   /**
    * Get the channel name.
@@ -83,7 +83,7 @@ public abstract class AbstractChannelInfo extends ChannelUtil {
    * @return the formatted SCNL.
    */
   public String getFormattedSCNL() {
-    return getFormattedSCNL(getStation(), getChannel(), getNetwork(),
+    return ChannelUtil.getFormattedSCNL(getStation(), getChannel(), getNetwork(),
         getLocation());
   }
 
