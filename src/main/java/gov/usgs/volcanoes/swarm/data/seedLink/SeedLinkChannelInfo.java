@@ -24,329 +24,214 @@ import java.util.Map;
  * 
  * @author Kevin Frechette (ISTI)
  */
-public class SeedLinkChannelInfo extends AbstractChannelInfo
-{
-	/**
-	 * SeedLink XML document handler.
-	 */
-	protected class SeedLinkStationXMLDocHandler implements XMLDocHandler
-	{
-		private void clearChannel()
-		{
-			channel = null;
-			location = null;
-			type = null;
-		}
+public class SeedLinkChannelInfo extends AbstractChannelInfo {
+  /**
+   * SeedLink XML document handler.
+   */
+  protected class SeedLinkStationXMLDocHandler implements XMLDocHandler {
+    private void clearChannel() {
+      channel = null;
+      location = null;
+      type = null;
+    }
 
-		private void clearStation()
-		{
-			station = null;
-			network = null;
-			clearChannel();
-		}
+    private void clearStation() {
+      station = null;
+      network = null;
+      clearChannel();
+    }
 
-		/**
-		 * Document ended
-		 * 
-		 * @throws Exception
-		 */
-		public void endDocument() throws Exception
-		{
-		}
+    /**
+     * Document ended
+     * 
+     * @throws Exception
+     */
+    public void endDocument() throws Exception {}
 
-		/**
-		 * Element ended
-		 * 
-		 * @param tag Tag name
-		 * @throws Exception
-		 */
-		public void endElement(String tag) throws Exception
-		{
-		}
+    /**
+     * Element ended
+     * 
+     * @param tag Tag name
+     * @throws Exception
+     */
+    public void endElement(String tag) throws Exception {}
 
-		/**
-		 * Document started
-		 * 
-		 * @throws Exception
-		 */
-		public void startDocument() throws Exception
-		{
-		}
+    /**
+     * Document started
+     * 
+     * @throws Exception
+     */
+    public void startDocument() throws Exception {}
 
-		/**
-		 * Element started
-		 * 
-		 * @param tag Tag name
-		 * @param h map of tag attributes and values
-		 * @throws Exception
-		 */
-		public void startElement(String tag, Map<String, String> h)
-				throws Exception
-		{
-			if (stationTag.equals(tag))
-			{
-				clearStation();
-				for (String key : h.keySet())
-				{
-					String val = h.get(key);
-					if (stationNameTag.equals(key))
-					{
-						station = val;
-					}
-					else if (networkTag.equals(key))
-					{
-						network = val;
-					}
-				}
-			}
-			else if (streamTag.equals(tag))
-			{
-				clearChannel();
-				for (String key : h.keySet())
-				{
-					String val = h.get(key);
-					if (channelTag.equals(key))
-					{
-						channel = val;
-					}
-					else if (locTag.equals(key))
-					{
-						location = val;
-					}
-					else if (typeTag.equals(key))
-					{
-						type = val;
-					}
-				}
-				if (station != null && network != null && channel != null
-						&& location != null && DATA_TYPE.equals(type))
-				{
-					addChannel(channels, SeedLinkChannelInfo.this, getSource());
-				}
-			}
-		}
+    /**
+     * Element started
+     * 
+     * @param tag Tag name
+     * @param h map of tag attributes and values
+     * @throws Exception
+     */
+    public void startElement(String tag, Map<String, String> h)
+        throws Exception {
+      if ("station".equals(tag)) {
+        clearStation();
+        for (String key : h.keySet()) {
+          String val = h.get(key);
+          if ("name".equals(key)) {
+            station = val;
+          } else if ("network".equals(key)) {
+            network = val;
+          }
+        }
+      } else if ("stream".equals(tag)) {
+        clearChannel();
+        for (String key : h.keySet()) {
+          String val = h.get(key);
+          if ("seedname".equals(key)) {
+            channel = val;
+          } else if ("location".equals(key)) {
+            location = val;
+          } else if ("type".equals(key)) {
+            type = val;
+          }
+        }
+        if (station != null && network != null && channel != null
+            && location != null && DATA_TYPE.equals(type)) {
+          addChannel(channels, SeedLinkChannelInfo.this, getSource());
+        }
+      }
+    }
 
-		/**
-		 * Text or CDATA found
-		 * 
-		 * @param str
-		 * @throws Exception
-		 */
-		public void text(String str) throws Exception
-		{
-		}
-	}
+    /**
+     * Text or CDATA found
+     * 
+     * @param str
+     * @throws Exception
+     */
+    public void text(String str) throws Exception {}
+  }
 
-	/** Data type. */
-	public static final String DATA_TYPE = "D";
+  /** Data type. */
+  public static final String DATA_TYPE = "D";
 
-	public static String readFile(File f) throws IOException
-	{
-		final FileInputStream stream = new FileInputStream(f);
-		try
-		{
-			FileChannel fc = stream.getChannel();
-			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0,
-					fc.size());
-			return Charset.defaultCharset().decode(bb).toString();
-		}
-		finally
-		{
-			stream.close();
-		}
-	}
+  private final List<String> channels = new ArrayList<String>();
 
-	/**
-	 * Write the string to a file.
-	 * 
-	 * @param f the file.
-	 * @param s the string.
-	 * @throws IOException if an I/O exception occurs.
-	 */
-	public static void writeString(File f, String s) throws IOException
-	{
-		final FileWriter writer = new FileWriter(f);
-		try
-		{
-			writer.write(s);
-		}
-		finally
-		{
-			writer.close();
-		}
-	}
+  /** The data source. */
+  private final SeedLinkSource dataSource;
 
-	private String channel;
 
-	private final List<String> channels = new ArrayList<String>();
+  private double latitude = Double.NaN;
+  private double longitude = Double.NaN;
 
-	private final String channelTag = "seedname";
+  private String location;
+  private String network;
+  private String channel;
+  private String station;
+  private String type;
 
-	/** The data source. */
-	private final SeedLinkSource dataSource;
 
-	/** Groups type. */
-	private final GroupsType groupsType = GroupsType.NETWORK_AND_SITE;
+  public SeedLinkChannelInfo(SeedLinkSource dataSource, String infoStr) throws Exception {
+    this.dataSource = dataSource;
+    Reader reader = new StringReader(infoStr);
+    SimpleXMLParser.parse(new SeedLinkStationXMLDocHandler(), reader);
+  }
 
-	private double latitude = Double.NaN, longitude = Double.NaN;
+  /**
+   * Get the channel name.
+   * 
+   * @return the channel name.
+   */
+  public String getChannel() {
+    return channel;
+  }
 
-	private String location;
+  /**
+   * Get the channels.
+   * 
+   * @return the list of channels.
+   */
+  public List<String> getChannels() {
+    return channels;
+  }
 
-	private final String locTag = "location";
+  /**
+   * Get the groups.
+   * 
+   * @return the list of groups.
+   */
+  public List<String> getGroups() {
+    return getGroups(this, GroupsType.NETWORK_AND_SITE);
+  }
 
-	private String network;
+  /**
+   * Get the latitude.
+   * 
+   * @return the latitude.
+   */
+  public double getLatitude() {
+    return latitude;
+  }
 
-	private final String networkTag = "network";
+  /**
+   * Get the location.
+   * 
+   * @return the location.
+   */
+  public String getLocation() {
+    return location;
+  }
 
-//	private String siteName;
+  /**
+   * Get the longitude.
+   * 
+   * @return the longitude.
+   */
+  public double getLongitude() {
+    return longitude;
+  }
 
-	private String station;
+  /**
+   * Get the network name.
+   * 
+   * @return the network name.
+   */
+  public String getNetwork() {
+    return network;
+  }
 
-	private final String stationNameTag = "name";
+  /**
+   * Get the site name.
+   * A noop since siteName is not set.
+   * 
+   * @return the site name.
+   */
+  public String getSiteName() {
+    return null;
+  }
 
-	private final String stationTag = "station";
+  /**
+   * Get the seismic data source.
+   * 
+   * @return the seismic data source.
+   */
+  public SeismicDataSource getSource() {
+    return dataSource;
+  }
 
-	private final String streamTag = "stream";
+  /**
+   * Get the station name.
+   * 
+   * @return the station name.
+   */
+  public String getStation() {
+    return station;
+  }
 
-	private String type;
-
-	private final String typeTag = "type";
-
-	public SeedLinkChannelInfo(SeedLinkSource dataSource)
-	{
-		this.dataSource = dataSource;
-	}
-
-	/**
-	 * Get the channel name.
-	 * 
-	 * @return the channel name.
-	 */
-	public String getChannel()
-	{
-		return channel;
-	}
-
-	/**
-	 * Get the channels.
-	 * 
-	 * @return the list of channels.
-	 */
-	public List<String> getChannels()
-	{
-		return channels;
-	}
-
-	/**
-	 * Get the groups.
-	 * 
-	 * @return the list of groups.
-	 */
-	public List<String> getGroups()
-	{
-		return getGroups(this, groupsType);
-	}
-
-	/**
-	 * Get the latitude.
-	 * 
-	 * @return the latitude.
-	 */
-	public double getLatitude()
-	{
-		return latitude;
-	}
-
-	/**
-	 * Get the location.
-	 * 
-	 * @return the location.
-	 */
-	public String getLocation()
-	{
-		return location;
-	}
-
-	/**
-	 * Get the longitude.
-	 * 
-	 * @return the longitude.
-	 */
-	public double getLongitude()
-	{
-		return longitude;
-	}
-
-	/**
-	 * Get the network name.
-	 * 
-	 * @return the network name.
-	 */
-	public String getNetwork()
-	{
-		return network;
-	}
-
-	/**
-	 * Get the site name.
-	 * A noop since siteName is not set.
-	 * 
-	 * @return the site name.
-	 */
-	public String getSiteName()
-	{
-		return null;
-	}
-
-	/**
-	 * Get the seismic data source.
-	 * 
-	 * @return the seismic data source.
-	 */
-	public SeismicDataSource getSource()
-	{
-		return dataSource;
-	}
-
-	/**
-	 * Get the station name.
-	 * 
-	 * @return the station name.
-	 */
-	public String getStation()
-	{
-		return station;
-	}
-
-	/**
-	 * Get the type.
-	 * 
-	 * @return the type.
-	 */
-	public String getType()
-	{
-		return type;
-	}
-
-	/**
-	 * Parse the SeedLink XML.
-	 * 
-	 * @param reader the reader for the SeedLink XML.
-	 * @throws Exception if error.
-	 */
-	public void parse(Reader reader) throws Exception
-	{
-		SimpleXMLParser.parse(new SeedLinkStationXMLDocHandler(), reader);
-	}
-
-	/**
-	 * Parse the SeedLink information string.
-	 * 
-	 * @param infoStr the SeedLink information string.
-	 * @throws Exception if error.
-	 */
-	public void parse(String infoStr) throws Exception
-	{
-		parse(new StringReader(infoStr));
-	}
+  /**
+   * Get the type.
+   * 
+   * @return the type.
+   */
+  public String getType() {
+    return type;
+  }
 }

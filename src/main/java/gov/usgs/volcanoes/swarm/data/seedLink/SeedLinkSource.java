@@ -1,7 +1,12 @@
 package gov.usgs.volcanoes.swarm.data.seedLink;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -119,15 +124,14 @@ public class SeedLinkSource extends SeismicDataSource {
 
     List<String> channels = Collections.emptyList();
     if (!(infoString == null || infoString.isEmpty())) {
-      SeedLinkChannelInfo seedLinkChannelInfo = new SeedLinkChannelInfo(this);
       try {
-        seedLinkChannelInfo.parse(infoString);
+        SeedLinkChannelInfo seedLinkChannelInfo = new SeedLinkChannelInfo(this, infoString);
         channels = seedLinkChannelInfo.getChannels();
       } catch (Exception ex) {
         LOGGER.error("Cannot parse station list", ex);
       }
     }
-    
+
     ChannelUtil.assignChannels(channels, this);
     return Collections.unmodifiableList(channels);
   }
@@ -135,12 +139,26 @@ public class SeedLinkSource extends SeismicDataSource {
 
   private String readChannelCache() {
     String infoString = null;
+
     if (infoStringFile != null && infoStringFile.canRead()) {
+      FileInputStream stream = null;
       try {
-        return SeedLinkChannelInfo.readFile(infoStringFile);
+        stream = new FileInputStream(infoStringFile);
+        FileChannel fc = stream.getChannel();
+        MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0,
+            fc.size());
+
+        return Charset.defaultCharset().decode(bb).toString();
       } catch (IOException e) {
         LOGGER.error("Cannot read seedlink channel cache. ({})", infoStringFile);
+      } finally {
+        try {
+          stream.close();
+        } catch (IOException ignore) {
+          //ignore
+        }
       }
+
     }
 
     return infoString;
@@ -148,10 +166,18 @@ public class SeedLinkSource extends SeismicDataSource {
 
 
   private void writeChannelCache(String infoString) {
+    FileWriter writer = null;
     try {
-      SeedLinkChannelInfo.writeString(infoStringFile, infoString);
+      writer = new FileWriter(infoStringFile);
+      writer.write(infoString);
     } catch (IOException e) {
       LOGGER.error("Cannot write seedlink channel cache. ({})", infoStringFile);
+    } finally {
+      try {
+        writer.close();
+      } catch (IOException ignore) {
+        //ignore
+      }
     }
   }
 
@@ -289,7 +315,7 @@ public class SeedLinkSource extends SeismicDataSource {
 
   /**
    * Get the configuration string.
-   * 
+   *    
    * @return the configuration string.
    */
   public String toConfigString() {

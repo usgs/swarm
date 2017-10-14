@@ -14,9 +14,6 @@ import java.util.Map;
  * @author Kevin Frechette (ISTI)
  */
 public class ChannelUtil {
-  /** Empty string. */
-  public static final String EMPTY = "";
-
   /** Groups map has channel information as key and groups as value. */
   private static final Map<IChannelInfo, List<String>> groupsMap =
       new HashMap<IChannelInfo, List<String>>();
@@ -71,7 +68,7 @@ public class ChannelUtil {
   public static final String getFormattedSCNL(String station, String channel, String network,
       String location) {
     return station + " " + channel + " " + network
-        + (location.length() > 0 ? (" " + location) : EMPTY);
+        + (location.length() > 0 ? (" " + location) : "");
   }
 
   /**

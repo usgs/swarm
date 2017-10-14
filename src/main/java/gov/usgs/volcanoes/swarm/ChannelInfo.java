@@ -44,9 +44,9 @@ public class ChannelInfo extends AbstractChannelInfo {
    */
   public ChannelInfo(String s) {
     String station;
-    String channel = EMPTY;
-    String network = EMPTY;
-    String location = EMPTY;
+    String channel = "";
+    String network = "";
+    String location = "";
     double latitude = Double.NaN;
     double longitude = Double.NaN;
 
