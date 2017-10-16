@@ -6,7 +6,6 @@
 
 package gov.usgs.volcanoes.swarm.data.seedLink;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -42,16 +41,6 @@ public class SeedLinkClient implements Runnable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SeedLinkClient.class);
 
-  /** SeedLink client counter */
-  private static int _seedLinkClientCounter;
-
-  /** Data type. */
-  private static final String DATA_TYPE = SeedLinkChannelInfo.DATA_TYPE;
-
-  /** The interval for sending info requests in milliseconds. */
-  // each hour
-  private static final long INFO_REQUEST_INTERVAL = 1000 * 60 * 60;
-
   /**
    * Get the Btime value from the specified blockette field.
    * 
@@ -84,16 +73,6 @@ public class SeedLinkClient implements Runnable {
     return Double.parseDouble(obj.toString());
   }
 
-  /**
-   * Get the next SeedLink client counter value.
-   * 
-   * @return the value.
-   */
-  private static int getNextSeedLinkClientCounter() {
-    final int counter = ++_seedLinkClientCounter;
-
-    return counter;
-  }
 
   /**
    * Converts a j2ksec to a SeedLink date string
@@ -109,10 +88,6 @@ public class SeedLinkClient implements Runnable {
     return J2kSec.format("yyyy,MM,dd,HH,mm,ss", j);
   }
 
-
-  /** The last info request time. */
-  private long lastInfoRequestTime;
-
   /** The SCNL or null if none. */
   private String scnl;
 
@@ -122,43 +97,23 @@ public class SeedLinkClient implements Runnable {
   /** The thread or null if none. */
   private Thread thread;
 
-  /** Thread synchronization object or null if none. */
-  private final Object threadSyncObj;
-
   /** The wave list or null if none. */
   private List<Wave> waveList;
 
   // parameters
   /** BaseSLConnection object for communicating with the BaseSLConnection over a socket. */
-  public final SeedLinkConnection slconn;
+  private final SeedLinkConnection slconn;
 
-  /** Name of file containing stream list for multi-station mode. */
-  public String streamfile = null;
+
   /** Selectors for uni-station or default selectors for multi-station. */
-  public String selectors = null;
+  private String selectors = null;
+
   /** Selectors for multi-station. */
-  public String multiselect = null;
-  /** Name of file for reading (if exists) and storing state. */
-  public String statefile = null;
-  /** Beginning of time window for read start in past. */
-  // 20050415 AJL changed from Btime to String
-  protected String begin_time = null;
-  /** End of time window for reading windowed data. */
-  // 20071214 AJL added
-  protected String end_time = null;
+  private String multiselect = null;
+
   /** INFO LEVEL for info request only. */
-  public String infolevel = null;
+  private String infolevel = null;
 
-
-  private SeedLinkClient() {
-    super();
-    slconn = new SeedLinkConnection(new SLLog());
-
-    startEndTime = new StartEndTime();
-    threadSyncObj = null; // logPrefixText;
-    // create thread so that it is not killed by default
-    thread = new Thread(this);
-  }
 
   /**
    * Create the SeedLink client.
@@ -167,7 +122,12 @@ public class SeedLinkClient implements Runnable {
    * @param port the server port.
    */
   public SeedLinkClient(String host, int port) {
-    this();
+    super();
+    slconn = new SeedLinkConnection(new SLLog());
+
+    startEndTime = new StartEndTime();
+    // create thread so that it is not killed by default
+    thread = new Thread(this);
     final String sladdr = host + ":" + port;
     slconn.setSLAddress(sladdr);
   }
@@ -178,7 +138,7 @@ public class SeedLinkClient implements Runnable {
    * @param scnl the SCNL.
    * @param wave the wave.
    */
-  protected void cacheWave(String scnl, Wave wave) {
+  private void cacheWave(String scnl, Wave wave) {
     if (scnl == null || wave == null) {
       return;
     }
@@ -204,8 +164,8 @@ public class SeedLinkClient implements Runnable {
   public String getInfoString() {
     try {
       infolevel = "STREAMS";
-      init();
-      runAndWait();
+      init(null, null);
+      run();
       // I don't know why this is clearing the info string. Perhaps simply to reclaim memory? I'm
       // getting rid of it and just leaving the side effect in place. That seems to be the real
       // goal. --TJP
@@ -227,7 +187,7 @@ public class SeedLinkClient implements Runnable {
   private String getMultiSelect(ChannelInfo channelInfo) {
     return channelInfo.getNetwork() + "_" + channelInfo.getStation() + ":"
         + channelInfo.getLocation() + channelInfo.getChannel() + "."
-        + DATA_TYPE;
+        + SeedLinkChannelInfo.DATA_TYPE;
   }
 
   /**
@@ -260,7 +220,7 @@ public class SeedLinkClient implements Runnable {
   public Wave getWave(String scnl, double t1, double t2) {
     waveList = new ArrayList<Wave>();
     init(scnl, t1, t2);
-    runAndWait();
+    run();
     final Wave wave = Wave.join(waveList);
     waveList = null;
     return wave;
@@ -279,24 +239,10 @@ public class SeedLinkClient implements Runnable {
     infolevel = null;
     // selectors = channelInfo.getFormattedSCNL();
     multiselect = getMultiSelect(channelInfo);
-    begin_time = j2kToSeedLinkDateString(t1);
-    end_time = j2kToSeedLinkDateString(t2);
-    StringBuilder sb = new StringBuilder(slconn.getSLAddress());
-    if (selectors != null) {
-      sb.append(" -s " + selectors);
-    }
-    if (multiselect != null) {
-      sb.append(" -S " + multiselect);
-    }
-    if (begin_time != null) {
-      sb.append(" -t " + begin_time);
-    }
-    if (end_time != null) {
-      sb.append(" -e " + end_time);
-    }
-    LOGGER.info(sb.toString());
+    String beginTime = j2kToSeedLinkDateString(t1);
+    String endTime = j2kToSeedLinkDateString(t2);
     try {
-      init();
+      init(beginTime, endTime);
     } catch (Exception ex) {
       LOGGER.warn("could start SeedLink client", ex);
     }
@@ -304,14 +250,14 @@ public class SeedLinkClient implements Runnable {
 
 
   /**
-   *
    * Initializes this SLCient.
    *
    * @exception SeedLinkException on error.
    * @exception UnknownHostException if no IP address for the local host could be found.
    *
    */
-  public void init() throws UnknownHostException, SeedLinkException {
+  private void init(String beginTime, String endTime)
+      throws UnknownHostException, SeedLinkException {
 
     // Make sure a server was specified
     if (slconn.getSLAddress() == null) {
@@ -325,87 +271,25 @@ public class SeedLinkClient implements Runnable {
       slconn.setSLAddress(InetAddress.getLocalHost().toString() + slconn.getSLAddress());
     }
 
-    // Load the stream list from a file if specified
-    if (streamfile != null) {
-      slconn.readStreamList(streamfile, selectors);
-    }
-
     // Parse the 'multiselect' string following '-S'
     if (multiselect != null) {
       slconn.parseStreamlist(multiselect, selectors);
-    } else if (streamfile == null) // No 'streams' array, assuming uni-station mode
-    {
+    } else {
       slconn.setUniParams(selectors, -1, null);
     }
 
-    // Attempt to recover sequence numbers from state file
-    if (statefile != null) {
-      slconn.setStateFile(statefile);
-    } else {
-      // Set begin time for read start in past
-      // 20050415 AJL added to support continuous data transfer from a time in the past
-      if (begin_time != null) {
-        slconn.setBeginTime(begin_time);
-      }
-      // Set end time for for reading windowed data
-      // 20071204 AJL added
-      if (end_time != null) {
-        slconn.setEndTime(end_time);
-      }
+    // Set begin time for read start in past
+    // 20050415 AJL added to support continuous data transfer from a time in the past
+    if (beginTime != null) {
+      slconn.setBeginTime(beginTime);
     }
-
-    // slconn.lastpkttime = true;
-
-  }
-
-
-  /**
-   *
-   * Start this SLCient.
-   *
-   * @exception SeedLinkException on error.
-   * @exception IOException if an I/O error occurs.
-   *
-   */
-  protected void oldrun() throws Exception {
-
-    if (infolevel != null) {
-      slconn.requestInfo(infolevel);
-    }
-
-    // Loop with the connection manager
-    SLPacket slpack = null;
-    int count = 1;
-    while ((slpack = slconn.collect()) != null) {
-
-      if (slpack == SLPacket.SLTERMINATE) {
-        break;
-      }
-
-      slpack.getType(); // ensure the blockette is created if needed
-      // reset the volume counter
-      BlocketteDecoratorFactory.reset();
-
-      try {
-        // do something with packet
-        boolean terminate = packetHandler(count, slpack);
-        if (terminate) {
-          break;
-        }
-
-      } catch (SeedLinkException sle) {
-        LOGGER.debug("error: ", sle);
-      }
-      // 20081127 AJL - test modification to prevent "Error: out of java heap space" problem
-      // identified by pwiejacz@igf.edu.pl
-      if (count >= Integer.MAX_VALUE) {
-        count = 1;
-        LOGGER.debug("Packet count reset to 1");
-      } else {
-        count++;
-      }
+    // Set end time for for reading windowed data
+    // 20071204 AJL added
+    if (endTime != null) {
+      slconn.setEndTime(endTime);
     }
   }
+
 
   /**
    * Determine if the client has been killed.
@@ -441,7 +325,7 @@ public class SeedLinkClient implements Runnable {
    * @exception implementation dependent
    * 
    */
-  public boolean packetHandler(int count, SLPacket slpack) throws Exception {
+  private boolean packetHandler(int count, SLPacket slpack) throws Exception {
     if (isKilled()) // if killed
     {
       return true; // close the connection
@@ -478,15 +362,15 @@ public class SeedLinkClient implements Runnable {
       }
     }
 
-    // send an in-line INFO request here
-    long currTime = System.currentTimeMillis();
-    if (currTime - lastInfoRequestTime > INFO_REQUEST_INTERVAL
-        && !slconn.getState().expect_info) {
-      LOGGER.debug("requesting INFO level ID");
-      String infostr = "ID";
-      slconn.requestInfo(infostr);
-      lastInfoRequestTime = currTime;
-    }
+    // station list should refresh on demand, not on a schedule.
+    // // send an in-line INFO request here
+    // long currTime = System.currentTimeMillis();
+    // if (currTime - lastInfoRequestTime > INFO_REQUEST_INTERVAL
+    // && !slconn.getState().expect_info) {
+    // LOGGER.debug("requesting INFO level ID");
+    // slconn.requestInfo("ID");
+    // lastInfoRequestTime = currTime;
+    // }
 
     // if here, must be a blockette
     final Blockette blockette = slpack.getBlockette();
@@ -558,35 +442,48 @@ public class SeedLinkClient implements Runnable {
    */
   public void run() {
     try {
-      oldrun();
+      if (infolevel != null) {
+        slconn.requestInfo(infolevel);
+      }
+
+      // Loop with the connection manager
+      SLPacket slpack = null;
+      int count = 1;
+      while ((slpack = slconn.collect()) != null) {
+
+        if (slpack == SLPacket.SLTERMINATE) {
+          break;
+        }
+
+        slpack.getType(); // ensure the blockette is created if needed
+        // reset the volume counter
+        BlocketteDecoratorFactory.reset();
+
+        try {
+          // do something with packet
+          boolean terminate = packetHandler(count, slpack);
+          if (terminate) {
+            break;
+          }
+
+        } catch (SeedLinkException sle) {
+          LOGGER.debug("error: ", sle);
+        }
+        // 20081127 AJL - test modification to prevent "Error: out of java heap space" problem
+        // identified by pwiejacz@igf.edu.pl
+        if (count >= Integer.MAX_VALUE) {
+          count = 1;
+          LOGGER.debug("Packet count reset to 1");
+        } else {
+          count++;
+        }
+      }
     } catch (Exception ex) {
       LOGGER.debug("error in run", ex);
     }
     // Close the BaseSLConnection
     slconn.close();
-    if (threadSyncObj != null) {
-      synchronized (threadSyncObj) {
-        threadSyncObj.notifyAll();
-      }
-    }
-  }
 
-  /**
-   * Run and wait for it to complete.
-   */
-  protected void runAndWait() {
-    if (threadSyncObj != null) {
-      start();
-      synchronized (threadSyncObj) {
-        try {
-          threadSyncObj.wait();
-        } catch (InterruptedException ex) {
-          kill();
-        }
-      }
-    } else {
-      run();
-    }
   }
 
   /**
