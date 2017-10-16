@@ -15,11 +15,14 @@ import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.border.Border;
@@ -113,6 +116,14 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
     toolBar.addSeparator();
 
     new RsamViewSettingsToolbar(settings, toolBar, this);
+    
+    JButton ratioButton = SwarmUtil.createToolBarButton(Icons.phi,
+        "RSAM Ratio", new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            openRsamRatio();
+          }
+        });
+    toolBar.add(ratioButton);
 
     toolBar.addSeparator();
 
@@ -144,6 +155,41 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
     this.setVisible(true);
 
     updateThread.start();
+  }
+  
+  /**
+   * Open RSAM Ratio Frame.
+   */
+  private void openRsamRatio() {
+    HashMap<String, RsamViewerFrame> rvfs = new HashMap<String, RsamViewerFrame>();
+    List<JInternalFrame> frames = SwarmInternalFrames.getFrames();
+    for (JInternalFrame frame : frames) {
+      if (frame instanceof RsamViewerFrame) {
+        RsamViewerFrame rvf = (RsamViewerFrame) frame;
+        if (rvf.channel != this.channel) {
+          rvfs.put(rvf.channel, rvf);
+        }
+      }
+    }
+
+    RsamViewerFrame rvf;
+    switch (rvfs.size()) {
+      case 0: 
+        JOptionPane.showMessageDialog(this, "No other RSAM frames are open.");
+        return;
+      case 1: 
+        rvf = (RsamViewerFrame) rvfs.values().toArray()[0];
+        break;
+      default:
+        String c = (String) JOptionPane.showInputDialog(this,
+            "Select channel to compare", "RSAM Ratio", JOptionPane.PLAIN_MESSAGE, null,
+            rvfs.keySet().toArray(), rvfs.keySet().iterator().next());
+        rvf = rvfs.get(c);
+    }
+
+    RsamRatioFrame rrf = new RsamRatioFrame(this.channel, this.dataSource, 
+                                            rvf.channel, rvf.dataSource);
+    SwarmInternalFrames.add(rrf);
   }
 
   /**

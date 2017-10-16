@@ -29,6 +29,7 @@ public class Icons {
   public static final ImageIcon minimize = getIcon("images/minimize.png");
   public static final ImageIcon monitor = getIcon("images/monitor.gif");
   public static final ImageIcon open = getIcon("images/wave_folder.gif");
+  public static final ImageIcon phi = getIcon("images/phi.png");
   public static final ImageIcon pick = getIcon("images/pick.png");
   public static final ImageIcon refresh = getIcon("images/refresh.gif");
   public static final ImageIcon right = getIcon("images/right.gif");

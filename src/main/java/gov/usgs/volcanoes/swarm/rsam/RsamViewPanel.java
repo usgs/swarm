@@ -12,9 +12,7 @@ import gov.usgs.plot.render.HistogramRenderer;
 import gov.usgs.plot.render.MatrixRenderer;
 import gov.usgs.plot.render.ShapeRenderer;
 import gov.usgs.plot.render.TextRenderer;
-import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
 import gov.usgs.volcanoes.swarm.time.UiTime;
 
 import java.awt.BasicStroke;
@@ -23,7 +21,6 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
