@@ -389,9 +389,9 @@ public class MapMiniPanel extends JComponent
         wavePanel.setChannel(activeMetadata.getChannel());
         Wave cw = wavePanel.getWave();
         // TODO: unify this and the monitor code
-        if (cw != null && cw.overlaps(st, et)) {
-          boolean before = activeMetadata.source.isUseCache();
+        if (cw != null && cw.numSamples() > 0 && cw.overlaps(st, et)) {
           activeMetadata.source.setUseCache(false);
+
           if (cw.getEndTime() < et) {
             Wave w2 = activeMetadata.source.getWave(activeMetadata.getChannel(),
                 cw.getEndTime() - 10, et);
@@ -399,6 +399,7 @@ public class MapMiniPanel extends JComponent
               cw = cw.combine(w2);
             }
           }
+
           if (cw.getStartTime() > st) {
             Wave w2 = activeMetadata.source.getWave(activeMetadata.getChannel(), st,
                 cw.getStartTime() + 10);
@@ -406,7 +407,10 @@ public class MapMiniPanel extends JComponent
               cw = cw.combine(w2);
             }
           }
+
           cw = cw.subset(st, Math.min(et, cw.getEndTime()));
+
+          boolean before = activeMetadata.source.isUseCache();
           activeMetadata.source.setUseCache(before);
         } else {
           cw = null;
@@ -755,7 +759,7 @@ public class MapMiniPanel extends JComponent
     }
 
     private void setMinMaxBoxes(FrameRenderer fr, double min, double max) {
-      //AxisRenderer ar = fr.getAxis();
+      // AxisRenderer ar = fr.getAxis();
       TextRenderer ultr = new TextRenderer();
       ultr.color = Color.BLACK;
 
