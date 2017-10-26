@@ -46,6 +46,8 @@ public class Hypo71Manager {
     stationsList.clear();
     crustalModelList.clear();
     phaseRecordsList.clear();
+    prevIns = ' ';
+    prevIew = ' ';
     hypo71 = new Hypo71();
   }
   
