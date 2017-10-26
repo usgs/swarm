@@ -2,6 +2,8 @@
   * Upgraded seedlink library
   * Corrected reliability of wave display of gappy data
   * Fix loading of crustal model file
+  * Fix hypo71 bug when checking for hemisphere
+  * RSAM ratio feature
   
 ## Version 2.8.0
   * Hypo71 support
