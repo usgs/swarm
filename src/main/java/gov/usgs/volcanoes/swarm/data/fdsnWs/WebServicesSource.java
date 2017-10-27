@@ -119,12 +119,12 @@ public class WebServicesSource extends SeismicDataSource {
     configString = String.format("%s;%s:" + PARAM_FMT_TEXT, name, typeString, net, sta, loc, chan,
         gulpSize, gulpDelay, wsDataSelectUrl, wsStationUrl);
     client = new WebServicesClient(this, net, sta, loc, chan, wsDataSelectUrl, wsStationUrl);
-    try {
+/*    try {
       client.getStationClient().fetch();
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
-    }
+    }*/
     LOGGER.debug("web service started {}", count);
   }
 
