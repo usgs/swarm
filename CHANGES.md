@@ -3,6 +3,7 @@
   * Corrected reliability of wave display of gappy data
   * Fix loading of crustal model file
   * Fix hypo71 bug when checking for hemisphere
+  * Fix FDSN WS opening on Swarm launch
   * RSAM ratio feature
   
 ## Version 2.8.0
