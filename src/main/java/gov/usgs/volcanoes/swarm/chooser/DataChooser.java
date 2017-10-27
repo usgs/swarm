@@ -598,12 +598,14 @@ public class DataChooser extends JPanel {
             List<Pair<ServerNode, String>> channels = getSelections();
             GeoRange gr = new GeoRange();
             int nc = 0;
-            for (Pair<ServerNode, String> pair : channels) {
-              Metadata md = SwarmConfig.getInstance().getMetadata(pair.item2);
-              Point2D.Double pt = md.getLonLat();
-              if (pt != null && !Double.isNaN(pt.x) && !Double.isNaN(pt.y)) {
-                nc++;
-                gr.includePoint(pt, 0.0001);
+            if (channels != null) {
+              for (Pair<ServerNode, String> pair : channels) {
+                Metadata md = SwarmConfig.getInstance().getMetadata(pair.item2);
+                Point2D.Double pt = md.getLonLat();
+                if (pt != null && !Double.isNaN(pt.x) && !Double.isNaN(pt.y)) {
+                  nc++;
+                  gr.includePoint(pt, 0.0001);
+                }
               }
             }
             if (nc == 1) {

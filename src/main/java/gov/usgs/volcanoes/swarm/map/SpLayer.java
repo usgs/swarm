@@ -93,6 +93,9 @@ public class SpLayer implements MapLayer {
     final double dx = (ext[1] - ext[0]);
     for (Sp sp : spList) {
       Metadata md = SwarmConfig.getInstance().getMetadata(sp.channel);
+      if (md == null) {
+        continue;
+      }
       if (md.hasLonLat()) {
         Point2D.Double center = panel.getXy(md.getLongitude(), md.getLatitude());
 
