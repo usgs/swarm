@@ -6,7 +6,6 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import gov.usgs.math.BinSize;
-import gov.usgs.math.Butterworth.FilterType;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmModalDialog;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
@@ -26,7 +25,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JSlider;
 import javax.swing.JTextField;
 
 /**
@@ -66,7 +64,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
   private JTextField eventMaxLength;
   private JComboBox<BinSize> binSize;
 
-  private ButtonGroup filterGroup;
+/*  private ButtonGroup filterGroup;
   private JCheckBox filterEnabled;
   private JRadioButton lowPass;
   private JRadioButton highPass;
@@ -74,7 +72,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
   private JCheckBox zeroPhaseShift;
   private JTextField corner1;
   private JTextField corner2;
-  private JSlider order;
+  private JSlider order;*/
   
   private RsamViewSettingsDialog() {
     super(applicationFrame, "RSAM Settings");
@@ -136,7 +134,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     scaleMin.setText("" + settings.scaleMin);
     scaleMin.setEnabled(!autoScale.isSelected());
     
-    filterEnabled.setSelected(settings.filterOn);
+/*    filterEnabled.setSelected(settings.filterOn);
 
     switch (settings.filter.getType()) {
       case LOWPASS:
@@ -157,7 +155,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
       default:
         break;
     }
-    order.setValue(settings.filter.getOrder());
+    order.setValue(settings.filter.getOrder());*/
   }
 
   private void createComponents() {
@@ -208,7 +206,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     eventMaxLength = new JTextField(4);
     binSize = new JComboBox<BinSize>(BinSize.values());
     
-    filterGroup = new ButtonGroup();
+/*    filterGroup = new ButtonGroup();
     filterEnabled = new JCheckBox("Enabled");
     lowPass = new JRadioButton("Low pass");
     highPass = new JRadioButton("High pass");
@@ -223,7 +221,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     order.setMajorTickSpacing(2);
     order.setSnapToTicks(true);
     order.createStandardLabels(2);
-    order.setPaintLabels(true);
+    order.setPaintLabels(true);*/
   }
 
   protected void createUi() {
@@ -312,7 +310,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     builder.nextLine();
 
     // Filter options
-    builder.appendSeparator("Butterworth Filter");
+/*    builder.appendSeparator("Butterworth Filter");
     
     builder.append(filterEnabled, 3);
     builder.append(zeroPhaseShift, 3);
@@ -336,7 +334,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     builder.appendRow("center:20dlu");
     builder.nextColumn(3);
     builder.append(order, 4);
-    builder.nextLine();
+    builder.nextLine();*/
 
     dialogPanel = builder.getPanel();
     mainPanel.add(dialogPanel, BorderLayout.CENTER);
@@ -420,7 +418,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
         settings.setType(ViewType.COUNTS);
       }
       
-      settings.filterOn = filterEnabled.isSelected();
+/*      settings.filterOn = filterEnabled.isSelected();
       settings.zeroPhaseShift = zeroPhaseShift.isSelected();
 
       FilterType ft = null;
@@ -439,7 +437,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
         c1 = Double.parseDouble(corner1.getText());
         c2 = Double.parseDouble(corner2.getText());
       }
-      settings.filter.set(ft, order.getValue(), 100.0, c1, c2);
+      settings.filter.set(ft, order.getValue(), 100.0, c1, c2);*/
       
     } catch (Exception e) {
       e.printStackTrace();
