@@ -5,6 +5,7 @@
   * Fix hypo71 bug when checking for hemisphere
   * Fix FDSN WS opening on Swarm launch
   * RSAM ratio feature
+  * Removal of RSAM filtering option
   
 ## Version 2.8.0
   * Hypo71 support

@@ -303,10 +303,6 @@ public class RsamRatioPanel extends JComponent implements SettingsListener {
       gdm.set2mean(1, settings.runningMeanPeriodS);
     }
 
-    if (settings.filterOn) {
-      gdm.filter(settings.filter, 1, settings.zeroPhaseShift);
-    }
-
     MatrixRenderer mr = new MatrixRenderer(gdm.getData(), false);
     double max;
     double min;
@@ -329,10 +325,10 @@ public class RsamRatioPanel extends JComponent implements SettingsListener {
     mr.createDefaultLineRenderers(Color.blue);
     plot.addRenderer(mr);
 
-    if (settings.filterOn) {
+/*    if (settings.filterOn) {
       plot.addRenderer(getFilterLabel(getWidth() - RIGHT_WIDTH, getHeight() - BOTTOM_HEIGHT,
           TextRenderer.RIGHT, TextRenderer.BOTTOM));
-    }
+    }*/
   }
 
   /**
@@ -417,7 +413,7 @@ public class RsamRatioPanel extends JComponent implements SettingsListener {
    * @param vertJustification vertical justification
    * @return text renderer
    */
-  public TextRenderer getFilterLabel(int x, int y, int horizJustification, int vertJustification) {
+/*  public TextRenderer getFilterLabel(int x, int y, int horizJustification, int vertJustification) {
     String ft = "";
     switch (settings.filter.getType()) {
       case BANDPASS:
@@ -438,5 +434,5 @@ public class RsamRatioPanel extends JComponent implements SettingsListener {
     tr.vertJustification = vertJustification;
     tr.color = Color.red;
     return tr;
-  }
+  }*/
 }
