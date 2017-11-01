@@ -178,6 +178,10 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
   }
 
   public void putRsam(final String station, RSAMData rsamData) {
+    if (rsamData == null || rsamData.getData() == null) {
+      return;
+    }
+    
     List<CachedRsam> rsams = rsamCache.get(station);
     if (rsams == null) {
       rsams = new ArrayList<CachedRsam>();
