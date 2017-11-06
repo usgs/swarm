@@ -4,6 +4,7 @@ import gov.usgs.plot.data.Wave;
 import gov.usgs.plot.data.file.FileType;
 import gov.usgs.plot.data.file.SeismicDataFile;
 import gov.usgs.plot.data.file.WinDataFile;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.contrib.PngEncoder;
 import gov.usgs.volcanoes.core.contrib.PngEncoderB;
 import gov.usgs.volcanoes.core.quakeml.Event;
@@ -1497,5 +1498,25 @@ public class WaveClipboardFrame extends SwarmFrame {
 
   public PickMenuBar getPickMenuBar() {
     return pickMenuBar;
+  }
+  
+  /**
+   * @see gov.usgs.volcanoes.swarm.SwarmFrame#saveLayout
+   * (gov.usgs.volcanoes.core.configfile.ConfigFile, java.lang.String)
+   */
+  public void saveLayout(final ConfigFile cf, final String prefix) {
+    super.saveLayout(cf, prefix);
+    cf.put(prefix + ".waves", Integer.toString(this.waves.size()));
+    for (int i = 0; i < this.waves.size(); i++) {
+      String wavePrefix = prefix + ".wave-" + i;
+      WaveViewPanel wvp = waves.get(i);
+      cf.put(wavePrefix + ".channel", wvp.getChannel());
+      cf.put(wavePrefix + ".startTime", Double.toString(wvp.getStartTime()));
+      cf.put(wavePrefix + ".endTime", Double.toString(wvp.getEndTime()));
+      SeismicDataSource ds = wvp.source;
+      cf.put(wavePrefix + ".source", ds.getName());
+      WaveViewSettings wvs = wvp.settings;
+      wvs.save(cf, wavePrefix);
+    }
   }
 }

@@ -1,7 +1,18 @@
 package gov.usgs.volcanoes.swarm;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.swarm.chooser.DataChooser;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.map.MapFrame;
+import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
+import gov.usgs.volcanoes.swarm.wave.SwarmMultiMonitors;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,18 +23,11 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.util.StringUtils;
-import gov.usgs.volcanoes.swarm.chooser.DataChooser;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
-import gov.usgs.volcanoes.swarm.map.MapFrame;
-import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
-import gov.usgs.volcanoes.swarm.wave.SwarmMultiMonitors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Swarm Layout class.
  *
  * @author Dan Cervelli
  */
@@ -38,18 +42,28 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
     config = c;
   }
 
+  /**
+   * Create Swarm layout.
+   * @param fn config file name
+   * @return swarm layout
+   */
   public static SwarmLayout createSwarmLayout(final String fn) {
     final ConfigFile cf = new ConfigFile(fn);
-    if (cf == null || !cf.wasSuccessfullyRead())
+    if (cf == null || !cf.wasSuccessfullyRead()) {
       return null;
+    }
 
     final String name = cf.getString("name");
-    if (name == null)
+    if (name == null) {
       return null;
-    else
+    } else {
       return new SwarmLayout(cf);
+    }
   }
 
+  /**
+   * Save layout.
+   */
   public void save() {
     String fn = getName().replace(' ', '_');
     final String n = fn.replaceAll("[^a-zA-Z0-9_]", "");
@@ -67,6 +81,9 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
     config.writeToFile(fn);
   }
 
+  /**
+   * Delete layout.
+   */
   public void delete() {
     try {
       final String fn = config.getName() + ".config";
@@ -85,6 +102,9 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
     return config.getString("name");
   }
 
+  /**
+   * Process layout.
+   */
   public void process() {
     final SwingWorker worker = new SwingWorker() {
       @Override
@@ -95,6 +115,7 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
         processWaves();
         processHelicorders();
         processMonitors();
+        processClipboard();
         return null;
       }
 
@@ -140,8 +161,9 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
     final ChooserListener cl = new ChooserListener();
     final List<String> sources = cf.getList("source");
     if (sources != null) {
-      for (final String src : sources)
+      for (final String src : sources) {
         cl.addSource(src);
+      }
       DataChooser.getInstance().processLayout(cf, cl);
       while (!cl.finished()) {
         try {
@@ -170,8 +192,9 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
 
   private void processMonitors() {
     final List<String> monitors = config.getList("monitor");
-    if (monitors == null)
+    if (monitors == null) {
       return;
+    }
 
     for (final String monitor : monitors) {
       final ConfigFile cf = config.getSubConfig(monitor);
@@ -186,8 +209,9 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
 
   private void processHelicorders() {
     final List<String> helis = config.getList("helicorder");
-    if (helis == null)
+    if (helis == null) {
       return;
+    }
 
     for (final String heli : helis) {
       final ConfigFile cf = config.getSubConfig(heli);
@@ -202,8 +226,9 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
 
   private void processKiosk() {
     String k = config.getString("kiosk");
-    if (k == null)
+    if (k == null) {
       k = "false";
+    }
     final int x = StringUtils.stringToInt(config.getString("kioskX"), -1);
     final int y = StringUtils.stringToInt(config.getString("kioskY"), -1);
 
@@ -212,6 +237,31 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
       applicationFrame.setLocation(x, y);
     }
     Swarm.getApplication().setFullScreenMode(kiosk);
+  }
+  
+  private void processClipboard() {
+    WaveClipboardFrame wcf = WaveClipboardFrame.getInstance();
+    final ConfigFile cf = config.getSubConfig("clipboard");
+    if (cf == null) {
+      return;
+    }
+    final int waves = cf.getInt("waves");
+    for (int i = 0; i < waves; i++) {
+      final ConfigFile scf = cf.getSubConfig("wave-" + i);
+      WaveViewSettings wvs = new WaveViewSettings();
+      wvs.set(scf);
+      WaveViewPanel wvp = new WaveViewPanel(wvs);
+      SeismicDataSource ds = SwarmConfig.getInstance().getSource(scf.getString("source"));
+      wvp.setDataSource(ds);
+      String channel = scf.getString("channel");
+      wvp.setChannel(channel);
+      double st = scf.getDouble("startTime");
+      double et = scf.getDouble("endTime");
+      Wave wave = ds.getWave(channel, st, et);
+      wvp.setWave(wave, st, et);
+      wcf.addWave(wvp);
+    }
+    wcf.setVisible(true);
   }
 
   public int compareTo(final SwarmLayout o) {

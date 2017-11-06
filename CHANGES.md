@@ -1,3 +1,6 @@
+## Version 2.8.2
+  * Save clipboard to layout
+
 ## Version 2.8.1
   * Upgraded seedlink library
   * Corrected reliability of wave display of gappy data
