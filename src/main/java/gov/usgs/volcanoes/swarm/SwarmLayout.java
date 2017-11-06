@@ -242,9 +242,11 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
   private void processClipboard() {
     WaveClipboardFrame wcf = WaveClipboardFrame.getInstance();
     final ConfigFile cf = config.getSubConfig("clipboard");
-    if (cf == null) {
+    if (cf.getConfig().size() == 0) {
+      wcf.hide();
       return;
     }
+    wcf.removeWaves();
     final int waves = cf.getInt("waves");
     for (int i = 0; i < waves; i++) {
       final ConfigFile scf = cf.getSubConfig("wave-" + i);
@@ -261,7 +263,7 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
       wvp.setWave(wave, st, et);
       wcf.addWave(wvp);
     }
-    wcf.setVisible(true);
+    wcf.show();
   }
 
   public int compareTo(final SwarmLayout o) {
