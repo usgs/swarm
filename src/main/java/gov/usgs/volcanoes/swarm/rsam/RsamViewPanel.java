@@ -11,7 +11,6 @@ import gov.usgs.plot.render.AxisRenderer;
 import gov.usgs.plot.render.HistogramRenderer;
 import gov.usgs.plot.render.MatrixRenderer;
 import gov.usgs.plot.render.ShapeRenderer;
-import gov.usgs.plot.render.TextRenderer;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.time.UiTime;
 
