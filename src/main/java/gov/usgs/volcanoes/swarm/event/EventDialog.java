@@ -520,12 +520,24 @@ public class EventDialog extends JFrame {
         // add station
         String channel = wvp.getChannel();
         Metadata md = SwarmConfig.getInstance().getMetadata(channel);
+        if (md == null) {
+          String message = "No metadata found for " + channel
+              + ". It will be not be used to calculate solution.";
+          LOGGER.error(message);
+          continue;
+        }
         String station = md.getSCNL().station;
         Double delay = Double.isNaN(md.getDelay()) ? 0 : md.getDelay();
         Double fmag = Double.isNaN(md.getFmagCorrection()) ? 0 : md.getFmagCorrection();
         Double xmag = Double.isNaN(md.getXmagCorrection()) ? 0 : md.getXmagCorrection();
         double latitude = md.getLatitude();
         double longitude = md.getLongitude();
+        if (Double.isNaN(latitude) || Double.isNaN(longitude)) {
+          String message = "No location metadata found for " + channel
+              + ". It will be not be used to calculate solution.";
+          LOGGER.error(message);
+          continue;
+        }
         double height = md.getHeight();
         try {
           hypo71Mgr.addStation(station, latitude, longitude, height, delay, fmag, xmag, 0);
@@ -570,7 +582,9 @@ public class EventDialog extends JFrame {
       PhaseRecord endRecord = new PhaseRecord();
       endRecord.setMSTA("    ");
       hypo71Mgr.phaseRecordsList.add(endRecord);
+      setAlwaysOnTop(false);
       success = hypo71Mgr.calculate(null);
+      setAlwaysOnTop(true);
     }
     if (success) {
       hypoResult = hypo71Mgr.hypo71.getResults();
@@ -837,9 +851,11 @@ public class EventDialog extends JFrame {
       // See if user wants to clear clipboard first
       int result = JOptionPane.showConfirmDialog(Swarm.getApplicationFrame(),
           "Clear clipboard first?", "Import Event", JOptionPane.YES_NO_OPTION);
+      String message = "This may take a while as it loads wave information from data sources.";
+      JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message);
       if (result == JOptionPane.YES_OPTION) {
         clipboard.importEvent(event, true);
-      }else{
+      } else {
         clipboard.importEvent(event, false);
       }
       setAlwaysOnTop(true);

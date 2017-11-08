@@ -1,5 +1,6 @@
 ## Version 2.8.2
   * Save clipboard to layout
+  * RSAM plot screen capture
 
 ## Version 2.8.1
   * Upgraded seedlink library
