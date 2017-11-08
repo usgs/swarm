@@ -1,6 +1,7 @@
 ## Version 2.8.2
   * Save clipboard to layout
   * RSAM plot screen capture
+  * Use S-picks in location algorithm
 
 ## Version 2.8.1
   * Upgraded seedlink library
