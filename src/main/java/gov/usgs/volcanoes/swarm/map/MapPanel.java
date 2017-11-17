@@ -51,7 +51,6 @@ import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.usgs.util.Util;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.legacy.plot.Plot;
 import gov.usgs.volcanoes.core.legacy.plot.map.GeoImageSet;
@@ -63,6 +62,7 @@ import gov.usgs.volcanoes.core.math.proj.GeoRange;
 import gov.usgs.volcanoes.core.math.proj.Mercator;
 import gov.usgs.volcanoes.core.math.proj.Projection;
 import gov.usgs.volcanoes.core.math.proj.TransverseMercator;
+import gov.usgs.volcanoes.core.util.GeoUtils;
 import gov.usgs.volcanoes.core.util.Pair;
 import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.swarm.Icons;
@@ -1276,7 +1276,7 @@ public class MapPanel extends JPanel {
     public void mouseMoved(final MouseEvent e) {
       final Point2D.Double latLon = getLonLat(e.getX(), e.getY());
       if (latLon != null) {
-        MapFrame.getInstance().setStatusText(Util.lonLatToString(latLon));
+        MapFrame.getInstance().setStatusText(GeoUtils.lonLatToString(latLon));
       }
 
       if (layers != null) {
@@ -1310,7 +1310,7 @@ public class MapPanel extends JPanel {
         }
       } else if (dragMode == DragMode.BOX) {
         if (lonLat != null) {
-          MapFrame.getInstance().setStatusText(Util.lonLatToString(lonLat));
+          MapFrame.getInstance().setStatusText(GeoUtils.lonLatToString(lonLat));
         }
       } else if (dragMode == DragMode.RULER) {
         final Point2D.Double origin = getLonLat(mouseDown.x, mouseDown.y);
@@ -1323,7 +1323,7 @@ public class MapPanel extends JPanel {
         }
         MapFrame.getInstance()
             .setStatusText(String.format("%s to %s, distance: %.1f %s, azimuth: %.2f%c",
-                Util.lonLatToString(origin), Util.lonLatToString(lonLat), d, label, az,
+                GeoUtils.lonLatToString(origin), GeoUtils.lonLatToString(lonLat), d, label, az,
                 StringUtils.DEGREE_SYMBOL));
       }
       repaint();
