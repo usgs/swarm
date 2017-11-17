@@ -1,3 +1,9 @@
+## Version 2.8.2
+  * Save clipboard to layout
+  * RSAM plot screen capture
+  * Use S-picks in location algorithm
+  * Fix Hypo71.config read 
+
 ## Version 2.8.1
   * Upgraded seedlink library
   * Corrected reliability of wave display of gappy data

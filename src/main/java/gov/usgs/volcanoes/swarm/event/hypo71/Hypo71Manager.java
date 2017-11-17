@@ -157,6 +157,7 @@ public class Hypo71Manager {
     // S-arrival time and remark
     float sSec = 0.0f;
     String sRemark = "";
+    String useS = "";
     if (sPick != null) {
       sSec = (float) (Double.parseDouble(pSec) + (sPick.getTime() - pPick.getTime()) / 1000);
       // SRMK
@@ -164,6 +165,7 @@ public class Hypo71Manager {
       String sMotion = getMotion(sPick.getPolarity());
       String sWeight = getWeightFromUncertainty(sPick.getTimeQuantity().getUncertainty())+".00";
       sRemark = sOnset + sMotion + "S" + sWeight;
+      useS = "USES";
     }
     // icard
     if (station.length() > 4) {
@@ -175,7 +177,7 @@ public class Hypo71Manager {
     PhaseRecord phaseRecord = new PhaseRecord(station, pRemark, 0.0f, 
         Integer.parseInt(pHour), Integer.parseInt(pMin),
         Float.parseFloat(pSec), sSec, sRemark, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, "", 0.0f,
-        fmp, "", pMotion.charAt(0), "", icard, ' ', pRemark);
+        fmp, "", pMotion.charAt(0), useS, icard, ' ', pRemark);
     phaseRecordsList.add(phaseRecord);    
   }
   

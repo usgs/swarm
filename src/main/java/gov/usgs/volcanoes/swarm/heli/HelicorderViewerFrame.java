@@ -186,7 +186,10 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     refreshThread = new RefreshThread();
   }
 
-  @Override
+  /**
+   * @see gov.usgs.volcanoes.swarm.SwarmFrame#saveLayout
+   * (gov.usgs.volcanoes.core.configfile.ConfigFile, java.lang.String)
+   */
   public void saveLayout(final ConfigFile cf, final String prefix) {
     super.saveLayout(cf, prefix);
     cf.put("helicorder", prefix);
