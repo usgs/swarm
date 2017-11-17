@@ -1,16 +1,5 @@
 package gov.usgs.volcanoes.swarm;
 
-import gov.usgs.plot.data.file.FileType;
-import gov.usgs.volcanoes.core.quakeml.EventSet;
-import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
-import gov.usgs.volcanoes.core.util.StringUtils;
-import gov.usgs.volcanoes.swarm.data.CachedDataSource;
-import gov.usgs.volcanoes.swarm.data.FileDataSource;
-import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
-import gov.usgs.volcanoes.swarm.map.MapFrame;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -47,6 +36,17 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
+
+import gov.usgs.volcanoes.core.data.file.FileType;
+import gov.usgs.volcanoes.core.quakeml.EventSet;
+import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.swarm.data.CachedDataSource;
+import gov.usgs.volcanoes.swarm.data.FileDataSource;
+import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.map.MapFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 
 /**
  * Swarm Menu.

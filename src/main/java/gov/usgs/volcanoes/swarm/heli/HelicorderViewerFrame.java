@@ -37,7 +37,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
-import gov.usgs.util.GridBagHelper;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.data.HelicorderData;
 import gov.usgs.volcanoes.core.data.Wave;
@@ -45,6 +44,7 @@ import gov.usgs.volcanoes.core.legacy.plot.Plot;
 import gov.usgs.volcanoes.core.legacy.plot.PlotException;
 import gov.usgs.volcanoes.core.legacy.plot.render.HelicorderRenderer;
 import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.ui.GridBagHelper;
 import gov.usgs.volcanoes.core.util.UiUtils;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Kioskable;

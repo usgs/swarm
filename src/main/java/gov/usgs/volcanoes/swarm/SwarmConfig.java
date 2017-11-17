@@ -1,13 +1,5 @@
 package gov.usgs.volcanoes.swarm;
 
-import gov.usgs.plot.map.WMSGeoImageSet;
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.util.StringUtils;
-import gov.usgs.volcanoes.swarm.data.DataSourceType;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.map.NationalMapLayer;
-import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterSource;
-
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
@@ -23,6 +15,13 @@ import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.swarm.data.DataSourceType;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.map.NationalMapLayer;
+import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterSource;
 
 /**
  * Swarm configuration class. 

@@ -1,13 +1,5 @@
 package gov.usgs.volcanoes.swarm.map;
 
-import gov.usgs.proj.GeoRange;
-import gov.usgs.proj.Projection;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.event.PickData;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -18,6 +10,14 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.Vector;
+
+import gov.usgs.volcanoes.core.math.proj.GeoRange;
+import gov.usgs.volcanoes.core.math.proj.Projection;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.event.PickData;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
 /**
  * This layer will draw S-P circles on the map.
