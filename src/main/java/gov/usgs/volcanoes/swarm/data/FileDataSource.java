@@ -1,10 +1,10 @@
 package gov.usgs.volcanoes.swarm.data;
 
-import gov.usgs.plot.data.HelicorderData;
-import gov.usgs.plot.data.Wave;
-import gov.usgs.plot.data.file.FileType;
-import gov.usgs.plot.data.file.SeismicDataFile;
-import gov.usgs.plot.data.file.WinDataFile;
+import gov.usgs.volcanoes.core.data.HelicorderData;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.data.file.FileType;
+import gov.usgs.volcanoes.core.data.file.SeismicDataFile;
+import gov.usgs.volcanoes.core.data.file.WinDataFile;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.FileTypeDialog;
 import gov.usgs.volcanoes.swarm.Metadata;

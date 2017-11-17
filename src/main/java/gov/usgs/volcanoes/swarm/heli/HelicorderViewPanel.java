@@ -1,28 +1,5 @@
 package gov.usgs.volcanoes.swarm.heli;
 
-import gov.usgs.plot.Plot;
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.data.HelicorderData;
-import gov.usgs.plot.data.Wave;
-import gov.usgs.plot.decorate.FrameDecorator;
-import gov.usgs.plot.decorate.SmartTick;
-import gov.usgs.plot.render.AxisRenderer;
-import gov.usgs.plot.render.FrameRenderer;
-import gov.usgs.plot.render.HelicorderRenderer;
-import gov.usgs.plot.render.TextRenderer;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.options.SwarmOptions;
-import gov.usgs.volcanoes.swarm.options.SwarmOptionsListener;
-import gov.usgs.volcanoes.swarm.time.UiTime;
-import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -50,6 +27,29 @@ import java.util.TimeZone;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
+
+import gov.usgs.volcanoes.core.data.HelicorderData;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.FrameDecorator;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
+import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.FrameRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.HelicorderRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.options.SwarmOptions;
+import gov.usgs.volcanoes.swarm.options.SwarmOptionsListener;
+import gov.usgs.volcanoes.swarm.time.UiTime;
+import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
 
 /**
  * A <code>JComponent</code> for displaying and interacting with a helicorder.

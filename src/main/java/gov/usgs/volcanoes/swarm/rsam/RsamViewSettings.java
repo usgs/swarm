@@ -1,14 +1,14 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
-import gov.usgs.math.BinSize;
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.util.StringUtils;
-
 import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.math.BinSize;
+import gov.usgs.volcanoes.core.util.StringUtils;
 
 /**
  * RSAM view settings.
