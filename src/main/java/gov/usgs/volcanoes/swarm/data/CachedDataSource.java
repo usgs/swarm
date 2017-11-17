@@ -1,7 +1,5 @@
 package gov.usgs.volcanoes.swarm.data;
 
-import gov.usgs.plot.data.RSAMData;
-
 /**
  * An implementation of <code>SeismicDataSource</code> that is used by Swarm to
  * cache all data that it comes across.

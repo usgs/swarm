@@ -1,6 +1,5 @@
 package gov.usgs.volcanoes.swarm.event;
 
-import gov.usgs.plot.data.Wave;
 import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
