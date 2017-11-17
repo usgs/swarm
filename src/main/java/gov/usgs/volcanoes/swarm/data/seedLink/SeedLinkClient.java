@@ -6,17 +6,6 @@
 
 package gov.usgs.volcanoes.swarm.data.seedLink;
 
-import edu.iris.Fissures.seed.container.Blockette;
-import edu.iris.Fissures.seed.container.Btime;
-import edu.iris.Fissures.seed.container.Waveform;
-import edu.iris.Fissures.seed.exception.SeedException;
-import gov.usgs.plot.data.Wave;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.swarm.ChannelInfo;
-import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.data.CachedDataSource;
-import gov.usgs.volcanoes.swarm.data.seedLink.orfeus.BaseSLClient;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -25,6 +14,16 @@ import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import edu.iris.Fissures.seed.container.Blockette;
+import edu.iris.Fissures.seed.container.Btime;
+import edu.iris.Fissures.seed.container.Waveform;
+import edu.iris.Fissures.seed.exception.SeedException;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.swarm.ChannelInfo;
+import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.data.CachedDataSource;
+import gov.usgs.volcanoes.swarm.data.seedLink.orfeus.BaseSLClient;
 import nl.knmi.orfeus.seedlink.SLPacket;
 import nl.knmi.orfeus.seedlink.SeedLinkException;
 

@@ -1,6 +1,6 @@
 package gov.usgs.volcanoes.swarm.data;
 
-import gov.usgs.plot.data.RSAMData;
+import gov.usgs.volcanoes.core.data.RSAMData;
 
 /**
  * Implemented by data sources which can provide RSAM.

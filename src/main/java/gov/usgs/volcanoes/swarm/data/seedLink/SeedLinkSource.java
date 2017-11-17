@@ -1,8 +1,14 @@
 package gov.usgs.volcanoes.swarm.data.seedLink;
 
-import gov.usgs.plot.data.HelicorderData;
-import gov.usgs.plot.data.RSAMData;
-import gov.usgs.plot.data.Wave;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import gov.usgs.volcanoes.core.data.HelicorderData;
+import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.ChannelUtil;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
@@ -11,13 +17,6 @@ import gov.usgs.volcanoes.swarm.data.Gulper;
 import gov.usgs.volcanoes.swarm.data.GulperList;
 import gov.usgs.volcanoes.swarm.data.GulperListener;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * An implementation of <code>SeismicDataSource</code> that connects to an

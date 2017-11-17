@@ -19,9 +19,9 @@ import javax.swing.JFrame;
 
 import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix2D;
-import gov.usgs.plot.data.HelicorderData;
-import gov.usgs.plot.data.RSAMData;
-import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.core.data.HelicorderData;
+import gov.usgs.volcanoes.core.data.RSAMData;
+import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.swarm.Swarm;
 
 /**
@@ -178,6 +178,10 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
   }
 
   public void putRsam(final String station, RSAMData rsamData) {
+    if (rsamData == null || rsamData.getData() == null) {
+      return;
+    }
+    
     List<CachedRsam> rsams = rsamCache.get(station);
     if (rsams == null) {
       rsams = new ArrayList<CachedRsam>();

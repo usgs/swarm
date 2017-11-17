@@ -1,15 +1,5 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
-import com.jgoodies.forms.builder.DefaultFormBuilder;
-import com.jgoodies.forms.factories.Borders;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
-
-import gov.usgs.math.BinSize;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.SwarmModalDialog;
-import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
-
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,6 +16,16 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.factories.Borders;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
+
+import gov.usgs.volcanoes.core.math.BinSize;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.SwarmModalDialog;
+import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
 
 /**
  * RSAM view settings dialog.

@@ -18,7 +18,7 @@ import edu.sc.seis.seisFile.mseed.Blockette1000;
 import edu.sc.seis.seisFile.mseed.Btime;
 import edu.sc.seis.seisFile.mseed.DataHeader;
 import edu.sc.seis.seisFile.mseed.DataRecord;
-import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.time.J2kSec;
 
 public class SeedUtils {

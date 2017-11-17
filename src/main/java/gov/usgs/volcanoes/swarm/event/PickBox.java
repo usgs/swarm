@@ -6,29 +6,6 @@
 
 package gov.usgs.volcanoes.swarm.event;
 
-import gov.usgs.plot.data.Wave;
-import gov.usgs.volcanoes.core.CodeTimer;
-import gov.usgs.volcanoes.core.contrib.PngEncoder;
-import gov.usgs.volcanoes.core.contrib.PngEncoderB;
-import gov.usgs.volcanoes.core.quakeml.Arrival;
-import gov.usgs.volcanoes.core.quakeml.Pick;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.util.UiUtils;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.data.CachedDataSource;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
-import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanelListener;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsDialog;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -62,6 +39,29 @@ import javax.swing.Scrollable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import gov.usgs.volcanoes.core.CodeTimer;
+import gov.usgs.volcanoes.core.contrib.PngEncoder;
+import gov.usgs.volcanoes.core.contrib.PngEncoderB;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.quakeml.Arrival;
+import gov.usgs.volcanoes.core.quakeml.Pick;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.UiUtils;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.data.CachedDataSource;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
+import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanelListener;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsDialog;
 
 /**
  * A panel to display picks for a single event.

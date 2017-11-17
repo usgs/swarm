@@ -5,10 +5,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import gov.usgs.earthworm.MenuItem;
-import gov.usgs.plot.data.HelicorderData;
-import gov.usgs.plot.data.RSAMData;
-import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.core.data.HelicorderData;
+import gov.usgs.volcanoes.core.data.RSAMData;
 import gov.usgs.volcanoes.core.data.Scnl;
+import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.TimeSpan;
 import gov.usgs.volcanoes.core.util.UtilException;
