@@ -8,46 +8,45 @@
 <div id="overview"><a href="../../../../../../apidocs/gov/usgs/volcanoes/swarm/wave/SwarmMultiMonitors.html">View Javadoc</a></div><pre>
 <a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> gov.usgs.volcanoes.swarm.wave;
 <a class="jxr_linenumber" name="L2" href="#L2">2</a>   
-<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> java.util.HashMap;
-<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> java.util.Map;
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   
-<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> java.util.HashMap;
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> java.util.Map;
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../gov/usgs/volcanoes/swarm/wave/SwarmMultiMonitors.html">SwarmMultiMonitors</a> {
-<a class="jxr_linenumber" name="L10" href="#L10">10</a>      <em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_javadoccomment">     * A singleton class to keep track of a list of Multimonitors</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_javadoccomment">     * </em>
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_javadoccomment">     * @author Tom Parker</em>
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_javadoccomment">     * </em>
-<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_javadoccomment">     */</em>
-<a class="jxr_linenumber" name="L16" href="#L16">16</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Map&lt;String, MultiMonitor&gt; monitors = <strong class="jxr_keyword">new</strong> HashMap&lt;String, MultiMonitor&gt;();
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>    <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_javadoccomment">   * A singleton class to keep track of a list of Multimonitors.</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_javadoccomment">   * </em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_javadoccomment">   * @author Tom Parker</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_javadoccomment">   * </em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Map&lt;String, MultiMonitor&gt; monitors = <strong class="jxr_keyword">new</strong> HashMap&lt;String, MultiMonitor&gt;();
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  
-<a class="jxr_linenumber" name="L18" href="#L18">18</a>      <strong class="jxr_keyword">private</strong> <a href="../../../../../gov/usgs/volcanoes/swarm/wave/SwarmMultiMonitors.html">SwarmMultiMonitors</a>() {
-<a class="jxr_linenumber" name="L19" href="#L19">19</a>      }
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>  
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> removeMonitor(<a href="../../../../../gov/usgs/volcanoes/swarm/wave/MultiMonitor.html">MultiMonitor</a> mm) {
-<a class="jxr_linenumber" name="L22" href="#L22">22</a>          monitors.remove(mm.getDataSource().getName());
-<a class="jxr_linenumber" name="L23" href="#L23">23</a>          SwarmInternalFrames.remove(mm);
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>          mm = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>      }
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>  
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../gov/usgs/volcanoes/swarm/wave/MultiMonitor.html">MultiMonitor</a> getMonitor(<a href="../../../../../gov/usgs/volcanoes/swarm/data/SeismicDataSource.html">SeismicDataSource</a> source) {
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>          <a href="../../../../../gov/usgs/volcanoes/swarm/wave/MultiMonitor.html">MultiMonitor</a> monitor = monitors.get(source.getName());
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>          <strong class="jxr_keyword">if</strong> (monitor == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>              monitor = <strong class="jxr_keyword">new</strong> <a href="../../../../../gov/usgs/volcanoes/swarm/wave/MultiMonitor.html">MultiMonitor</a>(source);
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>              monitors.put(source.getName(), monitor);
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>              SwarmInternalFrames.add(monitor);
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>          }
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>          <strong class="jxr_keyword">return</strong> monitor;
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>      }
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> monitorChannelSelected(<a href="../../../../../gov/usgs/volcanoes/swarm/data/SeismicDataSource.html">SeismicDataSource</a> source, String channel) {
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>          <a href="../../../../../gov/usgs/volcanoes/swarm/wave/MultiMonitor.html">MultiMonitor</a> monitor = getMonitor(source);
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>          monitor.setVisible(<strong class="jxr_keyword">true</strong>);
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>          monitor.addChannel(channel);
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>      }
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>  }
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>    <strong class="jxr_keyword">private</strong> <a href="../../../../../gov/usgs/volcanoes/swarm/wave/SwarmMultiMonitors.html">SwarmMultiMonitors</a>() {}
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> removeMonitor(<a href="../../../../../gov/usgs/volcanoes/swarm/wave/MultiMonitor.html">MultiMonitor</a> mm) {
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>      monitors.remove(mm.getDataSource().getName());
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>      SwarmInternalFrames.remove(mm);
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>      mm = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>    }
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../gov/usgs/volcanoes/swarm/wave/MultiMonitor.html">MultiMonitor</a> getMonitor(<a href="../../../../../gov/usgs/volcanoes/swarm/data/SeismicDataSource.html">SeismicDataSource</a> source) {
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>      <a href="../../../../../gov/usgs/volcanoes/swarm/wave/MultiMonitor.html">MultiMonitor</a> monitor = monitors.get(source.getName());
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>      <strong class="jxr_keyword">if</strong> (monitor == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>        monitor = <strong class="jxr_keyword">new</strong> <a href="../../../../../gov/usgs/volcanoes/swarm/wave/MultiMonitor.html">MultiMonitor</a>(source);
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>        monitors.put(source.getName(), monitor);
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>        SwarmInternalFrames.add(monitor);
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>      }
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>      <strong class="jxr_keyword">return</strong> monitor;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>    }
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> monitorChannelSelected(<a href="../../../../../gov/usgs/volcanoes/swarm/data/SeismicDataSource.html">SeismicDataSource</a> source, String channel) {
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>      <a href="../../../../../gov/usgs/volcanoes/swarm/wave/MultiMonitor.html">MultiMonitor</a> monitor = getMonitor(source);
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>      monitor.setVisible(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>      monitor.addChannel(channel);
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>    }
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2017. All rights reserved.</div>

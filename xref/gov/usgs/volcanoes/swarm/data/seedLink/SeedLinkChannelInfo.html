@@ -8,24 +8,24 @@
 <div id="overview"><a href="../../../../../../../apidocs/gov/usgs/volcanoes/swarm/data/seedLink/SeedLinkChannelInfo.html">View Javadoc</a></div><pre>
 <a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> gov.usgs.volcanoes.swarm.data.seedLink;
 <a class="jxr_linenumber" name="L2" href="#L2">2</a>   
-<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> gov.usgs.util.xml.SimpleXMLParser;
-<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> gov.usgs.util.xml.XMLDocHandler;
-<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.AbstractChannelInfo;
-<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.GroupsType;
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   
-<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> java.io.File;
-<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> java.io.FileInputStream;
-<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> java.io.FileWriter;
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> java.io.IOException;
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> java.io.Reader;
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <strong class="jxr_keyword">import</strong> java.io.StringReader;
-<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">import</strong> java.nio.MappedByteBuffer;
-<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <strong class="jxr_keyword">import</strong> java.nio.channels.FileChannel;
-<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> java.nio.charset.Charset;
-<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">import</strong> java.util.ArrayList;
-<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> java.util.List;
-<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> java.io.File;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> java.io.FileInputStream;
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> java.io.FileWriter;
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> java.io.IOException;
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> java.io.Reader;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> java.io.StringReader;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> java.nio.MappedByteBuffer;
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> java.nio.channels.FileChannel;
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> java.nio.charset.Charset;
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> java.util.ArrayList;
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> java.util.List;
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.core.xml.SimpleXmlParser;
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.core.xml.XmlDocHandler;
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.AbstractChannelInfo;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.GroupsType;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_javadoccomment"> * SeedLink channel information.</em>
@@ -37,7 +37,7 @@
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_javadoccomment">	 * SeedLink XML document handler.</em>
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../gov/usgs/volcanoes/swarm/data/seedLink/SeedLinkChannelInfo.html">SeedLinkStationXMLDocHandler</a> <strong class="jxr_keyword">implements</strong> XMLDocHandler
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../gov/usgs/volcanoes/swarm/data/seedLink/SeedLinkChannelInfo.html">SeedLinkStationXMLDocHandler</a> <strong class="jxr_keyword">implements</strong> XmlDocHandler
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  	{
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> clearChannel()
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  		{
@@ -344,7 +344,7 @@
 <a class="jxr_linenumber" name="L336" href="#L336">336</a> <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L337" href="#L337">337</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> parse(Reader reader) <strong class="jxr_keyword">throws</strong> Exception
 <a class="jxr_linenumber" name="L338" href="#L338">338</a> 	{
-<a class="jxr_linenumber" name="L339" href="#L339">339</a> 		SimpleXMLParser.parse(<strong class="jxr_keyword">new</strong> <a href="../../../../../../gov/usgs/volcanoes/swarm/data/seedLink/SeedLinkChannelInfo.html">SeedLinkStationXMLDocHandler</a>(), reader);
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> 		SimpleXmlParser.parse(<strong class="jxr_keyword">new</strong> <a href="../../../../../../gov/usgs/volcanoes/swarm/data/seedLink/SeedLinkChannelInfo.html">SeedLinkStationXMLDocHandler</a>(), reader);
 <a class="jxr_linenumber" name="L340" href="#L340">340</a> 	}
 <a class="jxr_linenumber" name="L341" href="#L341">341</a> 
 <a class="jxr_linenumber" name="L342" href="#L342">342</a> 	<em class="jxr_javadoccomment">/**</em>

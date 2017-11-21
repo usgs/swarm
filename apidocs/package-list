@@ -6,6 +6,7 @@ gov.usgs.volcanoes.swarm.data.fdsnWs
 gov.usgs.volcanoes.swarm.data.seedLink
 gov.usgs.volcanoes.swarm.data.seedLink.orfeus
 gov.usgs.volcanoes.swarm.event
+gov.usgs.volcanoes.swarm.event.hypo71
 gov.usgs.volcanoes.swarm.exp
 gov.usgs.volcanoes.swarm.heli
 gov.usgs.volcanoes.swarm.internalFrame
