@@ -900,6 +900,8 @@ public class EventDialog extends JFrame {
       Document doc = docBuilder.newDocument();
       Element quakeml = doc.createElement("q:quakeml");
       quakeml.setAttribute("xmlns:catalog", "http://xmlns/catalog/0.1");
+      quakeml.setAttribute("xmlns:q", "http://quakeml.org/xmlns/quakeml/1.2");
+      quakeml.setAttribute("xmlns", "http://quakeml.org/xmlns/bed/1.2");
       doc.appendChild(quakeml);
 
       Element eventParameters = doc.createElement("eventParameters");
