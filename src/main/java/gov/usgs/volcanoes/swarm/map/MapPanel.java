@@ -1,29 +1,5 @@
 package gov.usgs.volcanoes.swarm.map;
 
-import gov.usgs.plot.Plot;
-import gov.usgs.plot.map.GeoImageSet;
-import gov.usgs.plot.map.GeoLabelSet;
-import gov.usgs.plot.map.MapRenderer;
-import gov.usgs.plot.map.WMSGeoImageSet;
-import gov.usgs.plot.render.TextRenderer;
-import gov.usgs.proj.GeoRange;
-import gov.usgs.proj.Mercator;
-import gov.usgs.proj.Projection;
-import gov.usgs.proj.TransverseMercator;
-import gov.usgs.util.Pair;
-import gov.usgs.util.Util;
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.util.StringUtils;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.map.MapMiniPanel.Position;
-import gov.usgs.volcanoes.swarm.time.TimeListener;
-import gov.usgs.volcanoes.swarm.time.WaveViewTime;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -74,6 +50,30 @@ import javax.swing.SwingUtilities;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoImageSet;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoLabelSet;
+import gov.usgs.volcanoes.core.legacy.plot.map.MapRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.map.WMSGeoImageSet;
+import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
+import gov.usgs.volcanoes.core.math.proj.GeoRange;
+import gov.usgs.volcanoes.core.math.proj.Mercator;
+import gov.usgs.volcanoes.core.math.proj.Projection;
+import gov.usgs.volcanoes.core.math.proj.TransverseMercator;
+import gov.usgs.volcanoes.core.util.GeoUtils;
+import gov.usgs.volcanoes.core.util.Pair;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.map.MapMiniPanel.Position;
+import gov.usgs.volcanoes.swarm.time.TimeListener;
+import gov.usgs.volcanoes.swarm.time.WaveViewTime;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
 /**
  * Map panel.
@@ -1276,7 +1276,7 @@ public class MapPanel extends JPanel {
     public void mouseMoved(final MouseEvent e) {
       final Point2D.Double latLon = getLonLat(e.getX(), e.getY());
       if (latLon != null) {
-        MapFrame.getInstance().setStatusText(Util.lonLatToString(latLon));
+        MapFrame.getInstance().setStatusText(GeoUtils.lonLatToString(latLon));
       }
 
       if (layers != null) {
@@ -1310,7 +1310,7 @@ public class MapPanel extends JPanel {
         }
       } else if (dragMode == DragMode.BOX) {
         if (lonLat != null) {
-          MapFrame.getInstance().setStatusText(Util.lonLatToString(lonLat));
+          MapFrame.getInstance().setStatusText(GeoUtils.lonLatToString(lonLat));
         }
       } else if (dragMode == DragMode.RULER) {
         final Point2D.Double origin = getLonLat(mouseDown.x, mouseDown.y);
@@ -1323,7 +1323,7 @@ public class MapPanel extends JPanel {
         }
         MapFrame.getInstance()
             .setStatusText(String.format("%s to %s, distance: %.1f %s, azimuth: %.2f%c",
-                Util.lonLatToString(origin), Util.lonLatToString(lonLat), d, label, az,
+                GeoUtils.lonLatToString(origin), GeoUtils.lonLatToString(lonLat), d, label, az,
                 StringUtils.DEGREE_SYMBOL));
       }
       repaint();

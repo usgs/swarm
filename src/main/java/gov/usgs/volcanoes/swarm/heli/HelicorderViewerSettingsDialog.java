@@ -1,14 +1,5 @@
 package gov.usgs.volcanoes.swarm.heli;
 
-import gov.usgs.util.GridBagHelper;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.SwarmModalDialog;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsDialog;
-
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -33,6 +24,15 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.ui.GridBagHelper;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwarmModalDialog;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsDialog;
 
 /**
  * Helicorder viewer settings dialog.

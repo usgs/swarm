@@ -1,23 +1,5 @@
 package gov.usgs.volcanoes.swarm.map;
 
-import gov.usgs.plot.data.Wave;
-import gov.usgs.plot.decorate.FrameDecorator;
-import gov.usgs.plot.decorate.SmartTick;
-import gov.usgs.plot.render.AxisRenderer;
-import gov.usgs.plot.render.FrameRenderer;
-import gov.usgs.plot.render.RectangleRenderer;
-import gov.usgs.plot.render.TextRenderer;
-import gov.usgs.util.Util;
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.SCNL;
-import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
-import gov.usgs.volcanoes.swarm.map.MapPanel.LabelSetting;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -47,6 +29,24 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
+
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.FrameDecorator;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
+import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.FrameRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.RectangleRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
+import gov.usgs.volcanoes.core.util.GeoUtils;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.SCNL;
+import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
+import gov.usgs.volcanoes.swarm.map.MapPanel.LabelSetting;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
 /**
  * MapMiniPanel class.
@@ -591,7 +591,7 @@ public class MapMiniPanel extends JComponent
    */
   public void mouseEntered(MouseEvent e) {
     MapFrame.getInstance().setStatusText(
-        activeMetadata.getSCNL().station + ": " + Util.lonLatToString(activeMetadata.getLonLat()));
+        activeMetadata.getSCNL().station + ": " + GeoUtils.lonLatToString(activeMetadata.getLonLat()));
     // setTitleBackground(MOUSEOVER_BACKGROUND);
     // parent.setSelectedPanel(this);
   }

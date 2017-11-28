@@ -6,17 +6,16 @@
 
 package gov.usgs.volcanoes.swarm.data.fdsnWs;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import edu.iris.dmc.seedcodec.CodecException;
 import edu.iris.dmc.seedcodec.UnsupportedCompressionType;
 import edu.sc.seis.seisFile.mseed.Blockette;
 import edu.sc.seis.seisFile.mseed.Blockette1000;
 import edu.sc.seis.seisFile.mseed.DataRecord;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.ChannelInfo;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;

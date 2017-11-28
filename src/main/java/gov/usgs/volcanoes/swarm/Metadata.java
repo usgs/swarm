@@ -1,14 +1,5 @@
 package gov.usgs.volcanoes.swarm;
 
-import gov.usgs.proj.Projection;
-import gov.usgs.util.Pair;
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.time.TimeSpan;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.winston.Channel;
-import gov.usgs.volcanoes.winston.Instrument;
-
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +10,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.math.proj.Projection;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.time.TimeSpan;
+import gov.usgs.volcanoes.core.util.Pair;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.winston.Channel;
+import gov.usgs.volcanoes.winston.Instrument;
 
 /**
  * Metadata class.

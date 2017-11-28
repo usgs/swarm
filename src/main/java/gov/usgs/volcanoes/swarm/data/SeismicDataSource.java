@@ -1,7 +1,7 @@
 package gov.usgs.volcanoes.swarm.data;
 
-import gov.usgs.plot.data.HelicorderData;
-import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.core.data.HelicorderData;
+import gov.usgs.volcanoes.core.data.Wave;
 
 import java.util.List;
 

@@ -1,11 +1,5 @@
 package gov.usgs.volcanoes.swarm.data.seedLink;
 
-import gov.usgs.util.xml.SimpleXMLParser;
-import gov.usgs.util.xml.XMLDocHandler;
-import gov.usgs.volcanoes.swarm.AbstractChannelInfo;
-import gov.usgs.volcanoes.swarm.GroupsType;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -19,6 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import gov.usgs.volcanoes.core.xml.SimpleXmlParser;
+import gov.usgs.volcanoes.core.xml.XmlDocHandler;
+import gov.usgs.volcanoes.swarm.AbstractChannelInfo;
+import gov.usgs.volcanoes.swarm.GroupsType;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+
 /**
  * SeedLink channel information.
  * 
@@ -29,7 +29,7 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo
 	/**
 	 * SeedLink XML document handler.
 	 */
-	protected class SeedLinkStationXMLDocHandler implements XMLDocHandler
+	protected class SeedLinkStationXMLDocHandler implements XmlDocHandler
 	{
 		private void clearChannel()
 		{
@@ -336,7 +336,7 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo
 	 */
 	public void parse(Reader reader) throws Exception
 	{
-		SimpleXMLParser.parse(new SeedLinkStationXMLDocHandler(), reader);
+		SimpleXmlParser.parse(new SeedLinkStationXMLDocHandler(), reader);
 	}
 
 	/**
