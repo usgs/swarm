@@ -178,18 +178,18 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     switch (settings.filter.getType()) {
       case LOWPASS:
         lowPass.setSelected(true);
-        corner1.setText("0.0");
-        corner2.setText(String.format("%.1f", settings.filter.getCorner1()));
+        corner1.setText("0.00");
+        corner2.setText(String.format("%.2f", settings.filter.getCorner2()));
         break;
       case HIGHPASS:
         highPass.setSelected(true);
-        corner1.setText(String.format("%.1f", settings.filter.getCorner1()));
-        corner2.setText("0.0");
+        corner1.setText(String.format("%.2f", settings.filter.getCorner1()));
+        corner2.setText("0.00");
         break;
       case BANDPASS:
         bandPass.setSelected(true);
-        corner1.setText(String.format("%.1f", settings.filter.getCorner1()));
-        corner2.setText(String.format("%.1f", settings.filter.getCorner2()));
+        corner1.setText(String.format("%.2f", settings.filter.getCorner1()));
+        corner2.setText(String.format("%.2f", settings.filter.getCorner2()));
         break;
       default:
         break;
