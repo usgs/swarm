@@ -126,10 +126,8 @@ public class EventDialog extends SwarmFrame {
     setFrameIcon(Icons.pick);
     setResizable(false);
     createUi();
-    //setSizeAndLocation();
     user = SwarmConfig.getInstance().getUser();
     setContentPane(mainPanel);
-    setVisible(true);
     setFocusable(true);
   }
 
@@ -142,10 +140,6 @@ public class EventDialog extends SwarmFrame {
     Point parentLoc = Swarm.getApplicationFrame().getLocation();
     this.setLocation(parentLoc.x + (parentSize.width / 2 - d.width / 2),
         parentLoc.y + (parentSize.height / 2 - d.height / 2));
-    
-
-    //setSize(swarmConfig.clipboardWidth, swarmConfig.clipboardHeight);
-    //setLocation(swarmConfig.clipboardX, swarmConfig.clipboardY);
   }
 
   /**
@@ -255,7 +249,7 @@ public class EventDialog extends SwarmFrame {
           hypo71InputFile.setText(filename);
           hypo71Output = "";
         }
-        requestFocus();
+        //requestFocus();
       }
     });
     builder.append(openInputFileButton);
@@ -321,13 +315,7 @@ public class EventDialog extends SwarmFrame {
     viewHypo71Button.setToolTipText("View Hypo71 output.");
     viewHypo71Button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        JTextArea textArea = new JTextArea(40, 100);
-        textArea.setEditable(false);
-        textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        textArea.setText(hypo71Output);
-        JScrollPane scroll = new JScrollPane(textArea);
-        JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), scroll);
-        requestFocus();
+        showHypo71Output();
       }
     });
 
@@ -491,9 +479,6 @@ public class EventDialog extends SwarmFrame {
       }
       return file.getAbsolutePath();
     }
-    //setVisible(true);
-    //toFront();
-    //requestFocus();
     return null;
   }
 
@@ -583,7 +568,7 @@ public class EventDialog extends SwarmFrame {
         JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message, title,
             JOptionPane.INFORMATION_MESSAGE);
       }
-      requestFocus();
+      //requestFocus();
       PhaseRecord endRecord = new PhaseRecord();
       endRecord.setMSTA("    ");
       hypo71Mgr.phaseRecordsList.add(endRecord);
@@ -597,6 +582,19 @@ public class EventDialog extends SwarmFrame {
   }
 
   /**
+   * Show Hypo71 output text.
+   */
+  private void showHypo71Output() {
+    JTextArea textArea = new JTextArea(40, 100);
+    textArea.setEditable(false);
+    textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+    textArea.setText(hypo71Output);
+    JScrollPane scroll = new JScrollPane(textArea);
+    JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), scroll, "Hypo71 Output",
+        JOptionPane.INFORMATION_MESSAGE, null);
+  }
+  
+  /**
    * Update hypo71 output panel with key output information.
    * 
    * @param results hypo71 results
@@ -608,6 +606,7 @@ public class EventDialog extends SwarmFrame {
     if (stationResultList.size() == 0) {
       JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "Error running Hypo71.", "Error",
           JOptionPane.ERROR_MESSAGE);
+      showHypo71Output();
       return;
     }
     char ins = hypoResult.getStationsResultList().get(0).getINS();
