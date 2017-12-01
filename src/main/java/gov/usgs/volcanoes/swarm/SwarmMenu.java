@@ -108,6 +108,8 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     openFile.setMnemonic('O');
     openFile.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        SwarmConfig config = SwarmConfig.getInstance();
+        FileDataSource fds = FileDataSource.getInstance();
         JFileChooser chooser = new JFileChooser();
         chooser.resetChoosableFileFilters();
         for (FileType ft : FileType.getKnownTypes()) {
@@ -124,8 +126,11 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
         int result = chooser.showOpenDialog(Swarm.getApplicationFrame());
         if (result == JFileChooser.APPROVE_OPTION) {
           File[] fs = chooser.getSelectedFiles();
-          SwarmConfig.getInstance().lastPath = fs[0].getParent();
-          FileDataSource.getInstance().openFiles(fs);
+          config.lastPath = fs[0].getParent();
+          fds.openFiles(fs);
+          if (config.getSource(fds.getName()) == null) {
+            config.addSource(fds);
+          }
         }
       }
     });
