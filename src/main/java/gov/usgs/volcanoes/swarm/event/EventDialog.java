@@ -25,6 +25,7 @@ import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwarmFrame;
 import gov.usgs.volcanoes.swarm.Version;
 import gov.usgs.volcanoes.swarm.event.hypo71.Hypo71Manager;
 import gov.usgs.volcanoes.swarm.event.hypo71.Hypo71SettingsDialog;
@@ -55,7 +56,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -86,7 +86,7 @@ import org.xml.sax.SAXException;
  * 
  * @author Diana Norgaard
  */
-public class EventDialog extends JFrame {
+public class EventDialog extends SwarmFrame {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(EventDialog.class);
   private static final long serialVersionUID = 4870724789310886277L;
@@ -122,13 +122,12 @@ public class EventDialog extends JFrame {
    * Default constructor.
    */
   private EventDialog() {
-    super("Event Dialog");
-    setIconImage(Icons.pick.getImage());
+    super("Event Dialog", false, true, false, false);
+    setFrameIcon(Icons.pick);
     setResizable(false);
     createUi();
-    setSizeAndLocation();
     user = SwarmConfig.getInstance().getUser();
-    setAlwaysOnTop(true);
+    setContentPane(mainPanel);
     setFocusable(true);
   }
 
@@ -194,9 +193,7 @@ public class EventDialog extends JFrame {
     JButton testButton = new JButton("Settings");
     testButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        setAlwaysOnTop(false);
         Hypo71SettingsDialog.getInstance().setVisible(true);
-        setAlwaysOnTop(true);
       }
     });
     builder.append(testButton);
@@ -217,10 +214,10 @@ public class EventDialog extends JFrame {
     JButton openCrustalModelButton = new JButton("...");
     openCrustalModelButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        String filename = openFileChooser(JFileChooser.FILES_ONLY, null, null);
+        String filename = openFileChooser(JFileChooser.FILES_ONLY, null, null, false);
         if (filename != null) {
           crustalModelFile.setText(filename);
-          hypo71Mgr.crustalModelFileName=filename;
+          hypo71Mgr.crustalModelFileName = filename;
         }
         requestFocus();
       }
@@ -247,12 +244,12 @@ public class EventDialog extends JFrame {
     openInputFileButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         FileFilter filter = new FileNameExtensionFilter("Hypo71 Input (.INP)", "INP");
-        String filename = openFileChooser(JFileChooser.FILES_ONLY, null, filter);
+        String filename = openFileChooser(JFileChooser.FILES_ONLY, null, filter, false);
         if (filename != null) {
           hypo71InputFile.setText(filename);
           hypo71Output = "";
         }
-        requestFocus();
+        //requestFocus();
       }
     });
     builder.append(openInputFileButton);
@@ -318,15 +315,7 @@ public class EventDialog extends JFrame {
     viewHypo71Button.setToolTipText("View Hypo71 output.");
     viewHypo71Button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        setAlwaysOnTop(false);
-        JTextArea textArea = new JTextArea(40, 100);
-        textArea.setEditable(false);
-        textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        textArea.setText(hypo71Output);
-        JScrollPane scroll = new JScrollPane(textArea);
-        JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), scroll);
-        requestFocus();
-        setAlwaysOnTop(true);
+        showHypo71Output();
       }
     });
 
@@ -334,9 +323,7 @@ public class EventDialog extends JFrame {
     plotHypo71Button.setToolTipText("Plot located hypocenters on map.");
     plotHypo71Button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        setAlwaysOnTop(false);
         plotHypo71Output();
-        setAlwaysOnTop(true);
       }
     });
 
@@ -370,7 +357,7 @@ public class EventDialog extends JFrame {
     importQuakemlButton.setToolTipText("Import event from QuakeML file.");
     importQuakemlButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        String filename = openFileChooser(JFileChooser.FILES_ONLY, null, xmlFilter);
+        String filename = openFileChooser(JFileChooser.FILES_ONLY, null, xmlFilter, false);
         importQuakeMl(filename);
         checkForPicks();
         requestFocus();
@@ -383,7 +370,7 @@ public class EventDialog extends JFrame {
       public void actionPerformed(ActionEvent e) {
         String filename = SwarmConfig.getInstance().lastPath + "/Swarm" + Version.POM_VERSION
             + "_QuakeML_" + user + "_" + System.currentTimeMillis() + ".xml";
-        filename = openFileChooser(JFileChooser.FILES_ONLY, filename, xmlFilter);
+        filename = openFileChooser(JFileChooser.FILES_ONLY, filename, xmlFilter, true);
         saveQuakeMl(filename);
         requestFocus();
       }
@@ -436,7 +423,7 @@ public class EventDialog extends JFrame {
   private void saveHypo71Output() {
     String outputFile = SwarmConfig.getInstance().lastPath + "/Swarm" + Version.POM_VERSION
         + "_Hypo71_" + user + "_" + System.currentTimeMillis() + ".OUT";
-    outputFile = openFileChooser(JFileChooser.FILES_ONLY, outputFile, null);
+    outputFile = openFileChooser(JFileChooser.FILES_ONLY, outputFile, null, true);
     if (outputFile == null) {
       return;
     }
@@ -458,10 +445,13 @@ public class EventDialog extends JFrame {
    * Open file chooser dialog.
    * 
    * @param selectionMode file or directory
+   * @param filename file name
+   * @param filter file filter
+   * @param save true if use save dialog; false for open dialog
    * @return filename
    */
-  private String openFileChooser(int selectionMode, String filename, FileFilter filter) {
-    setAlwaysOnTop(false);
+  private String openFileChooser(int selectionMode, String filename, FileFilter filter,
+      boolean save) {
     JFileChooser chooser = new JFileChooser();
     chooser.setCurrentDirectory(new File(SwarmConfig.getInstance().lastPath));
     if (filename != null) {
@@ -472,8 +462,14 @@ public class EventDialog extends JFrame {
     }
     chooser.setFileSelectionMode(selectionMode);
     chooser.setMultiSelectionEnabled(false);
-    chooser.setDialogTitle("Open File...");
-    int result = chooser.showOpenDialog(Swarm.getApplicationFrame());
+    int result = JFileChooser.CANCEL_OPTION;
+    if (save) {
+      chooser.setDialogTitle("Save File...");
+      result = chooser.showSaveDialog(Swarm.getApplicationFrame());
+    } else {
+      chooser.setDialogTitle("Open File...");
+      result = chooser.showOpenDialog(Swarm.getApplicationFrame());
+    }
     if (result == JFileChooser.APPROVE_OPTION) {
       File file = chooser.getSelectedFile();
       if (selectionMode == JFileChooser.DIRECTORIES_ONLY) {
@@ -483,10 +479,6 @@ public class EventDialog extends JFrame {
       }
       return file.getAbsolutePath();
     }
-    setAlwaysOnTop(true);
-    setVisible(true);
-    toFront();
-    requestFocus();
     return null;
   }
 
@@ -567,7 +559,6 @@ public class EventDialog extends JFrame {
       int numPhaseRecords = hypo71Mgr.phaseRecordsList.size();
       String message = "Number of stations: " + numPhaseRecords;
       String title = "Hypo71";
-      setAlwaysOnTop(false);
       if (numPhaseRecords < 3) {
         message += "\n\nA minimum of 3 stations is required for a solution.";
         JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message, title,
@@ -577,14 +568,11 @@ public class EventDialog extends JFrame {
         JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message, title,
             JOptionPane.INFORMATION_MESSAGE);
       }
-      setAlwaysOnTop(true);
-      requestFocus();
+      //requestFocus();
       PhaseRecord endRecord = new PhaseRecord();
       endRecord.setMSTA("    ");
       hypo71Mgr.phaseRecordsList.add(endRecord);
-      setAlwaysOnTop(false);
       success = hypo71Mgr.calculate(null);
-      setAlwaysOnTop(true);
     }
     if (success) {
       hypoResult = hypo71Mgr.hypo71.getResults();
@@ -594,6 +582,19 @@ public class EventDialog extends JFrame {
   }
 
   /**
+   * Show Hypo71 output text.
+   */
+  private void showHypo71Output() {
+    JTextArea textArea = new JTextArea(40, 100);
+    textArea.setEditable(false);
+    textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+    textArea.setText(hypo71Output);
+    JScrollPane scroll = new JScrollPane(textArea);
+    JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), scroll, "Hypo71 Output",
+        JOptionPane.INFORMATION_MESSAGE, null);
+  }
+  
+  /**
    * Update hypo71 output panel with key output information.
    * 
    * @param results hypo71 results
@@ -601,7 +602,13 @@ public class EventDialog extends JFrame {
   private void updateHypo71Output(Hypo71.Results results) {
     String output = results.getOutput();
     hypo71Output = output;
-
+    List<Station> stationResultList = hypoResult.getStationsResultList();
+    if (stationResultList.size() == 0) {
+      JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "Error running Hypo71.", "Error",
+          JOptionPane.ERROR_MESSAGE);
+      showHypo71Output();
+      return;
+    }
     char ins = hypoResult.getStationsResultList().get(0).getINS();
     char iew = hypoResult.getStationsResultList().get(0).getIEW();
     Hypocenter hypocenter = results.getHypocenterOutput().get(0);
@@ -827,13 +834,10 @@ public class EventDialog extends JFrame {
       WaveClipboardFrame clipboard = WaveClipboardFrame.getInstance();
       EventSet eventSet = EventSet.parseQuakeml(new FileInputStream(new File(filename)));
       if (eventSet.size() == 0) {
-        setAlwaysOnTop(false);
         JOptionPane.showMessageDialog(clipboard, "No events found in file.");
-        setAlwaysOnTop(true);
         requestFocus();
         return;
       }
-      setAlwaysOnTop(false);
       Event event;
       if (eventSet.size() > 1) { // Get user to decide which event to import
         HashMap<String, Event> eventMap = new HashMap<String, Event>();
@@ -858,7 +862,6 @@ public class EventDialog extends JFrame {
       } else {
         clipboard.importEvent(event, false);
       }
-      setAlwaysOnTop(true);
       requestFocus();
       hypo71Output = "";
     } catch (FileNotFoundException e) {
@@ -890,6 +893,7 @@ public class EventDialog extends JFrame {
    */
   public void saveQuakeMl(String filename) {
     if (filename == null) {
+      JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "QuakeML not saved.");
       return;
     }
     try {

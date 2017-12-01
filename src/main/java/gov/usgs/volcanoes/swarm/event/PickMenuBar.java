@@ -1,6 +1,7 @@
 package gov.usgs.volcanoes.swarm.event;
 
 import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
@@ -26,7 +27,6 @@ public class PickMenuBar extends JMenuBar {
 
   private WaveClipboardFrame clipboard;
   private PickSettingsDialog settingsDialog;
-  private EventDialog eventDialog;
   private JMenu menu;
   
   /**
@@ -39,7 +39,6 @@ public class PickMenuBar extends JMenuBar {
     this.setLayout(new GridLayout(1, 1));
     this.clipboard = clipboard;
     this.settingsDialog = PickSettingsDialog.getInstance();
-    this.eventDialog = EventDialog.getInstance();
     this.createMenu();
   }
   
@@ -70,11 +69,14 @@ public class PickMenuBar extends JMenuBar {
    * Open event dialog for export to file.
    */
   private void openEventDialog() {
+    EventDialog eventDialog = EventDialog.getInstance();
     eventDialog.checkForPicks();
-    eventDialog.setState(java.awt.Frame.NORMAL);
     eventDialog.setSizeAndLocation();
     eventDialog.setVisible(true);   
     eventDialog.toFront();
+    eventDialog.requestFocus();
+    SwarmInternalFrames.add(eventDialog);
+
   }
   
   /**
