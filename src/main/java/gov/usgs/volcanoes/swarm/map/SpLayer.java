@@ -1,14 +1,5 @@
 package gov.usgs.volcanoes.swarm.map;
 
-import gov.usgs.proj.GeoRange;
-import gov.usgs.proj.Projection;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.event.PickData;
-import gov.usgs.volcanoes.swarm.event.PickMenu;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -19,6 +10,14 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.Vector;
+
+import gov.usgs.volcanoes.core.math.proj.GeoRange;
+import gov.usgs.volcanoes.core.math.proj.Projection;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.event.PickData;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
 /**
  * This layer will draw S-P circles on the map.
@@ -49,8 +48,8 @@ public class SpLayer implements MapLayer {
     for (WaveViewPanel wvp : waves) {
       if (wvp.getSettings().pickEnabled) {
         PickData pickData = wvp.getPickData();
-        if (pickData.isPlot() && pickData.getPick(PickMenu.P) != null
-            && pickData.isPickChannel(PickMenu.P)) {
+        if (pickData.isPlot() && pickData.getPick(PickData.P) != null
+            && pickData.isPickChannel(PickData.P)) {
           String channel = wvp.getChannel();
           double distance = pickData.getSpDistance();
           if (!Double.isNaN(distance)) {
@@ -94,6 +93,9 @@ public class SpLayer implements MapLayer {
     final double dx = (ext[1] - ext[0]);
     for (Sp sp : spList) {
       Metadata md = SwarmConfig.getInstance().getMetadata(sp.channel);
+      if (md == null) {
+        continue;
+      }
       if (md.hasLonLat()) {
         Point2D.Double center = panel.getXy(md.getLongitude(), md.getLatitude());
 

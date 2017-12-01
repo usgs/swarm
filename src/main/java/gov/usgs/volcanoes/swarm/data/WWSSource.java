@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import gov.usgs.earthworm.MenuItem;
-import gov.usgs.plot.data.HelicorderData;
-import gov.usgs.plot.data.RSAMData;
-import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.core.data.HelicorderData;
+import gov.usgs.volcanoes.core.data.RSAMData;
 import gov.usgs.volcanoes.core.data.Scnl;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.legacy.ew.MenuItem;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.TimeSpan;
 import gov.usgs.volcanoes.core.util.UtilException;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.winston.Channel;
-import gov.usgs.volcanoes.wwsclient.WwsClient;
+import gov.usgs.volcanoes.wwsclient.WWSClient;
 
 /**
  * An implementation of <code>SeismicDataSource</code> that communicates with a
@@ -28,7 +28,7 @@ import gov.usgs.volcanoes.wwsclient.WwsClient;
  */
 public class WWSSource extends SeismicDataSource implements RsamSource {
   private String params;
-  private WwsClient winstonClient;
+  private WWSClient winstonClient;
   private int timeout = 2000;
   private boolean compress = false;
   private int protocolVersion = 1;
@@ -67,7 +67,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
     timeout = Integer.parseInt(ss[2]);
     compress = ss[3].equals("1");
 
-    winstonClient = new WwsClient(server, port, timeout);
+    winstonClient = new WWSClient(server, port, timeout);
   }
 
   /**

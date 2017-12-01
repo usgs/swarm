@@ -27,14 +27,14 @@ import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.time.UiTime;
 
 /**
- * A component that renders a RSAM plot.
+ * A component that renders a RSAM Ratio plot.
  * 
  * 
- * @author Tom Parker
+ * @author Diana Norgaard
  */
 @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(value = "SE_BAD_FIELD",
     justification = "Class not serializable")
-public class RsamViewPanel extends JComponent implements SettingsListener {
+public class RsamRatioPanel extends JComponent implements SettingsListener {
   public static final long serialVersionUID = -1;
 
   private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
@@ -79,7 +79,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
   /**
    * Constructs a WaveViewPanel with default settings.
    */
-  public RsamViewPanel() {
+  public RsamRatioPanel() {
     this(new RsamViewSettings());
     settings.addListener(this);
   }
@@ -90,7 +90,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
    * @param s
    *          the settings
    */
-  public RsamViewPanel(RsamViewSettings s) {
+  public RsamRatioPanel(RsamViewSettings s) {
     settings = s;
 
     setupMouseHandler();
@@ -243,8 +243,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
   /**
    * Constructs the plot on the specified graphics context.
    * 
-   * @param g2
-   *          the graphics context
+   * @param g2 the graphics context
    */
   private synchronized void constructPlot(Graphics2D g2) {
     Dimension dim = this.getSize();
@@ -281,7 +280,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
     if (data == null || data.getData() == null || data.getData().rows() == 0) {
       return;
     }
-   
+
     GenericDataMatrix gdm = new GenericDataMatrix(data.getData().copy());
 
     gdm.despike(1, settings.valuesPeriodS);

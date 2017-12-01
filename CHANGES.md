@@ -1,3 +1,24 @@
+## Version 2.8.3
+  * Update seisFile library to 1.8.0
+  * Read blockette100 sample rate in SEED file if it exists
+  * Add xmlns:q and xmlns attributes to exported QuakeML files
+  * Allow 2 decimal places for Butterworth Filter corners
+
+## Version 2.8.2
+  * Save clipboard to layout
+  * RSAM plot screen capture
+  * Use S-picks in location algorithm
+  * Fix Hypo71.config read 
+
+## Version 2.8.1
+  * Upgraded seedlink library
+  * Corrected reliability of wave display of gappy data
+  * Fix loading of crustal model file
+  * Fix hypo71 bug when checking for hemisphere
+  * Fix FDSN WS opening on Swarm launch
+  * RSAM ratio feature
+  * Removal of RSAM filtering option
+  
 ## Version 2.8.0
   * Hypo71 support
   * RSAM filtering option

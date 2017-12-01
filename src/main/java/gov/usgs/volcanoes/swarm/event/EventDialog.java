@@ -26,6 +26,8 @@ import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.Version;
+import gov.usgs.volcanoes.swarm.event.hypo71.Hypo71Manager;
+import gov.usgs.volcanoes.swarm.event.hypo71.Hypo71SettingsDialog;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
@@ -98,16 +100,22 @@ public class EventDialog extends JFrame {
   private JComboBox<EventTypeCertainty> eventTypeCertainty;
   private JTextField description;
   private JTextArea comment;
-  
+
   // hypo71 info
-  private Hypo71Manager hypo71Mgr; 
+  private Hypo71Manager hypo71Mgr;
   private Hypo71.Results hypoResult;
   protected JRadioButton usePicks;
   protected JTextField crustalModelFile;
   protected JRadioButton useInputFile;
   protected JTextField hypo71InputFile;
-  protected JTextArea hypo71Output;
-  
+  protected JTextField location;
+  protected JTextField magnitude;
+  protected JTextField rms;
+  protected JTextField gap;
+  protected JTextField erh;
+  protected JTextField erz;
+  protected String hypo71Output;
+
   private String user;
 
   /**
@@ -120,8 +128,10 @@ public class EventDialog extends JFrame {
     createUi();
     setSizeAndLocation();
     user = SwarmConfig.getInstance().getUser();
+    setAlwaysOnTop(true);
+    setFocusable(true);
   }
-  
+
   protected void setSizeAndLocation() {
     Dimension d = mainPanel.getPreferredSize();
     setSize(d.width + 10, d.height + 30);
@@ -134,8 +144,9 @@ public class EventDialog extends JFrame {
   }
 
   /**
-   * Get instance of pick settings dialog.
-   * @return pick settings dialog
+   * Get instance of event dialog.
+   * 
+   * @return event dialog
    */
   public static EventDialog getInstance() {
     if (dialog == null) {
@@ -151,35 +162,46 @@ public class EventDialog extends JFrame {
 
     mainPanel = new JPanel(new BorderLayout());
     this.add(mainPanel);
-    //super.createUi();
-    
-    FormLayout layout = new FormLayout("left:75dlu, 5dlu, 130dlu, 3dlu, 10dlu");
+    // super.createUi();
+
+    FormLayout layout = new FormLayout("left:75dlu, 5dlu, 140dlu, 3dlu, 10dlu");
     DefaultFormBuilder builder = new DefaultFormBuilder(layout).border(Borders.DIALOG);
-    
+
     builder.appendSeparator("Event Details");
-    
+
     eventType = new JComboBox<EventType>(EventType.values());
     eventType.setSelectedItem(EventType.EARTHQUAKE);
     builder.append("Event Type", eventType);
     builder.nextLine();
-    
+
     eventTypeCertainty = new JComboBox<EventTypeCertainty>(EventTypeCertainty.values());
     eventTypeCertainty.setSelectedItem(EventTypeCertainty.SUSPECTED);
     builder.append("Event Type Certainty", eventTypeCertainty);
     builder.nextLine();
-    
+
     description = new JTextField("");
     builder.append("Description", description);
     builder.nextLine();
-    
-    comment = new JTextArea(4,1);
+
+    comment = new JTextArea(4, 1);
     JScrollPane scrollPane = new JScrollPane(comment);
     builder.append("Comment", scrollPane);
     builder.nextLine();
-    
+
     builder.appendSeparator("Hypo71 Input");
     hypo71Mgr = new Hypo71Manager();
- 
+
+    JButton testButton = new JButton("Settings");
+    testButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        setAlwaysOnTop(false);
+        Hypo71SettingsDialog.getInstance().setVisible(true);
+        setAlwaysOnTop(true);
+      }
+    });
+    builder.append(testButton);
+    builder.nextLine();
+    
     usePicks = new JRadioButton("Use Clipboard Picks");
     usePicks.setSelected(true);
     usePicks.addActionListener(new ActionListener() {
@@ -198,12 +220,14 @@ public class EventDialog extends JFrame {
         String filename = openFileChooser(JFileChooser.FILES_ONLY, null, null);
         if (filename != null) {
           crustalModelFile.setText(filename);
+          hypo71Mgr.crustalModelFileName=filename;
         }
+        requestFocus();
       }
     });
-    builder.append(openCrustalModelButton); 
+    builder.append(openCrustalModelButton);
     builder.nextLine();
-    
+
     useInputFile = new JRadioButton("Use Input File");
     useInputFile.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -212,7 +236,7 @@ public class EventDialog extends JFrame {
     });
     builder.append(useInputFile);
     builder.nextLine();
-    
+
     ButtonGroup hypoGroup = new ButtonGroup();
     hypoGroup.add(usePicks);
     hypoGroup.add(useInputFile);
@@ -226,13 +250,14 @@ public class EventDialog extends JFrame {
         String filename = openFileChooser(JFileChooser.FILES_ONLY, null, filter);
         if (filename != null) {
           hypo71InputFile.setText(filename);
-          hypo71Output.setText("");
+          hypo71Output = "";
         }
+        requestFocus();
       }
     });
     builder.append(openInputFileButton);
     builder.nextLine();
-    
+
     JButton locateButton = new JButton("Run");
     locateButton.setToolTipText("Locate hypocenter using Hypo71");
     locateButton.addActionListener(new ActionListener() {
@@ -246,7 +271,7 @@ public class EventDialog extends JFrame {
           // TODO Auto-generated catch block
           e1.printStackTrace();
         }
-      }   
+      }
     });
 
     ButtonBarBuilder bbBuilder = new ButtonBarBuilder();
@@ -255,43 +280,72 @@ public class EventDialog extends JFrame {
     JPanel buttonPanel = bbBuilder.getPanel();
     buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 10));
     builder.append(buttonPanel, 5);
-    
+
     builder.appendSeparator("Hypo71 Output");
-    
-    hypo71Output = new JTextArea(5,1);
-    hypo71Output.setEditable(false);
-    hypo71Output.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-    JScrollPane hypo71OutScroll = new JScrollPane(hypo71Output);
-    builder.append(hypo71OutScroll, 5);
+
+    location = new JTextField();
+    //location.setBorder(null);
+    location.setEditable(false);
+    builder.append("Location", location);
+    builder.nextLine();
+    magnitude = new JTextField();
+    //magnitude.setBorder(null);
+    magnitude.setEditable(false);
+    builder.append("Magnitude", magnitude);
+    builder.nextLine();
+    rms = new JTextField();
+    //rms.setBorder(null);
+    rms.setEditable(false);
+    builder.append("RMS", rms);
+    builder.nextLine();
+    gap = new JTextField();
+    //gap.setBorder(null);
+    gap.setEditable(false);
+    builder.append("GAP", gap);
+    builder.nextLine();
+    erh = new JTextField();
+    //erh.setBorder(null);
+    erh.setEditable(false);
+    builder.append("ERH", erh);
+    builder.nextLine();
+    erz = new JTextField();
+    //erz.setBorder(null);
+    erz.setEditable(false);
+    builder.append("ERZ", erz);
     builder.nextLine();
 
     JButton viewHypo71Button = new JButton("View");
     viewHypo71Button.setToolTipText("View Hypo71 output.");
     viewHypo71Button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        JTextArea textArea = new JTextArea(40,100);
+        setAlwaysOnTop(false);
+        JTextArea textArea = new JTextArea(40, 100);
         textArea.setEditable(false);
         textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        textArea.setText(hypo71Output.getText());
+        textArea.setText(hypo71Output);
         JScrollPane scroll = new JScrollPane(textArea);
         JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), scroll);
-      }   
+        requestFocus();
+        setAlwaysOnTop(true);
+      }
     });
-    
+
     JButton plotHypo71Button = new JButton("Plot");
     plotHypo71Button.setToolTipText("Plot located hypocenters on map.");
     plotHypo71Button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        setAlwaysOnTop(false);
         plotHypo71Output();
-      }   
+        setAlwaysOnTop(true);
+      }
     });
-    
+
     JButton saveHypo71Button = new JButton("Save");
     saveHypo71Button.setToolTipText("Save Hypo71 output to file.");
     saveHypo71Button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         saveHypo71Output();
-      }   
+      }
     });
 
     JButton clearHypo71Button = new JButton("Clear");
@@ -299,7 +353,7 @@ public class EventDialog extends JFrame {
     clearHypo71Button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         clearHypo71();
-      }   
+      }
     });
 
     bbBuilder = new ButtonBarBuilder();
@@ -308,7 +362,7 @@ public class EventDialog extends JFrame {
     buttonPanel = bbBuilder.getPanel();
     buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 10));
     builder.append(buttonPanel, 5);
-    
+
     builder.appendSeparator("QuakeML");
 
     final FileFilter xmlFilter = new FileNameExtensionFilter("QuakeML (.xml)", "XML");
@@ -319,9 +373,10 @@ public class EventDialog extends JFrame {
         String filename = openFileChooser(JFileChooser.FILES_ONLY, null, xmlFilter);
         importQuakeMl(filename);
         checkForPicks();
-      }   
-    }); 
-    
+        requestFocus();
+      }
+    });
+
     JButton exportQuakemlButton = new JButton("Export");
     exportQuakemlButton.setToolTipText("Export event to QuakeML file.");
     exportQuakemlButton.addActionListener(new ActionListener() {
@@ -330,27 +385,34 @@ public class EventDialog extends JFrame {
             + "_QuakeML_" + user + "_" + System.currentTimeMillis() + ".xml";
         filename = openFileChooser(JFileChooser.FILES_ONLY, filename, xmlFilter);
         saveQuakeMl(filename);
-      }   
+        requestFocus();
+      }
     });
-    
+
     bbBuilder = new ButtonBarBuilder();
     bbBuilder.addGlue();
     bbBuilder.addButton(importQuakemlButton, exportQuakemlButton);
     buttonPanel = bbBuilder.getPanel();
     buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 10));
     builder.append(buttonPanel, 5);
-    
+
     mainPanel.add(builder.getPanel(), BorderLayout.CENTER);
   }
-  
+
   /**
    * Clear event information and hypo71 run data.
    */
   private void clearHypo71() {
-    hypo71Output.setText("");
+    location.setText("");
+    magnitude.setText("");
+    rms.setText("");
+    gap.setText("");
+    erh.setText("");
+    erz.setText("");
+    hypo71Output = "";
     hypoResult = null;
   }
-  
+
   /**
    * Plot Hypo71 output on map.
    */
@@ -365,9 +427,9 @@ public class EventDialog extends JFrame {
       eventSet.put(event.publicId, event);
       MapFrame.getInstance().getHypocenterLayer().add(eventSet);
     }
-    
+
   }
-  
+
   /**
    * Export Hypo71 output text.
    */
@@ -389,16 +451,17 @@ public class EventDialog extends JFrame {
           JOptionPane.ERROR_MESSAGE);
       e.printStackTrace();
     }
-    JOptionPane.showMessageDialog(Swarm.getApplicationFrame(),
-        "Hypo71 output saved.");
+    JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "Hypo71 output saved.");
   }
 
   /**
    * Open file chooser dialog.
+   * 
    * @param selectionMode file or directory
    * @return filename
    */
   private String openFileChooser(int selectionMode, String filename, FileFilter filter) {
+    setAlwaysOnTop(false);
     JFileChooser chooser = new JFileChooser();
     chooser.setCurrentDirectory(new File(SwarmConfig.getInstance().lastPath));
     if (filename != null) {
@@ -420,11 +483,16 @@ public class EventDialog extends JFrame {
       }
       return file.getAbsolutePath();
     }
+    setAlwaysOnTop(true);
+    setVisible(true);
+    toFront();
+    requestFocus();
     return null;
   }
-  
+
   /**
    * Locate earthquake using hypo71.
+   * 
    * @throws ParseException parse exception
    * @throws IOException IO exception
    */
@@ -444,20 +512,32 @@ public class EventDialog extends JFrame {
       hypo71Mgr.description = description.getText();
       for (WaveViewPanel wvp : WaveClipboardFrame.getInstance().getWaves()) {
         PickData pickData = wvp.getPickData();
-        Pick p = pickData.getPick(PickMenu.P);
-        if (p == null || !pickData.isPickChannel(PickMenu.P)) {
+        Pick p = pickData.getPick(PickData.P);
+        if (p == null || !pickData.isPickChannel(PickData.P)) {
           continue;
         }
-        
+
         // add station
         String channel = wvp.getChannel();
         Metadata md = SwarmConfig.getInstance().getMetadata(channel);
+        if (md == null) {
+          String message = "No metadata found for " + channel
+              + ". It will be not be used to calculate solution.";
+          LOGGER.error(message);
+          continue;
+        }
         String station = md.getSCNL().station;
         Double delay = Double.isNaN(md.getDelay()) ? 0 : md.getDelay();
         Double fmag = Double.isNaN(md.getFmagCorrection()) ? 0 : md.getFmagCorrection();
         Double xmag = Double.isNaN(md.getXmagCorrection()) ? 0 : md.getXmagCorrection();
         double latitude = md.getLatitude();
         double longitude = md.getLongitude();
+        if (Double.isNaN(latitude) || Double.isNaN(longitude)) {
+          String message = "No location metadata found for " + channel
+              + ". It will be not be used to calculate solution.";
+          LOGGER.error(message);
+          continue;
+        }
         double height = md.getHeight();
         try {
           hypo71Mgr.addStation(station, latitude, longitude, height, delay, fmag, xmag, 0);
@@ -465,10 +545,10 @@ public class EventDialog extends JFrame {
           JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), e.getMessage());
           return;
         }
-        
+
         // add phase record
-        Pick coda1 = pickData.getPick(PickMenu.CODA1);
-        Pick coda2 = pickData.getPick(PickMenu.CODA2);
+        Pick coda1 = pickData.getPick(PickData.CODA1);
+        Pick coda2 = pickData.getPick(PickData.CODA2);
         double fmp = 0;
         if (coda1 != null || coda2 != null) {
           long endCoda = 0;
@@ -481,12 +561,13 @@ public class EventDialog extends JFrame {
           }
           fmp = (endCoda - p.getTime()) / 1000.0;
         }
-        Pick s = pickData.getPick(PickMenu.S);      
+        Pick s = pickData.getPick(PickData.S);
         hypo71Mgr.addPhaseRecord(station, p, s, fmp);
       }
       int numPhaseRecords = hypo71Mgr.phaseRecordsList.size();
       String message = "Number of stations: " + numPhaseRecords;
       String title = "Hypo71";
+      setAlwaysOnTop(false);
       if (numPhaseRecords < 3) {
         message += "\n\nA minimum of 3 stations is required for a solution.";
         JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message, title,
@@ -496,19 +577,53 @@ public class EventDialog extends JFrame {
         JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message, title,
             JOptionPane.INFORMATION_MESSAGE);
       }
+      setAlwaysOnTop(true);
+      requestFocus();
       PhaseRecord endRecord = new PhaseRecord();
       endRecord.setMSTA("    ");
       hypo71Mgr.phaseRecordsList.add(endRecord);
+      setAlwaysOnTop(false);
       success = hypo71Mgr.calculate(null);
+      setAlwaysOnTop(true);
     }
     if (success) {
       hypoResult = hypo71Mgr.hypo71.getResults();
-      String output = hypoResult.getOutput();
-      hypo71Output.setText(output);
+      updateHypo71Output(hypoResult);
       hypo71Mgr.clear();
     }
   }
-  
+
+  /**
+   * Update hypo71 output panel with key output information.
+   * 
+   * @param results hypo71 results
+   */
+  private void updateHypo71Output(Hypo71.Results results) {
+    String output = results.getOutput();
+    hypo71Output = output;
+
+    char ins = hypoResult.getStationsResultList().get(0).getINS();
+    char iew = hypoResult.getStationsResultList().get(0).getIEW();
+    Hypocenter hypocenter = results.getHypocenterOutput().get(0);
+    double latitude = hypocenter.getLatitude();
+    if (ins == 'S') {
+      latitude *= -1;
+    }
+    double longitude = hypocenter.getLongitude();
+    if (iew != 'E') {
+      longitude *= -1;
+    }
+    double depth = hypocenter.getZ();
+    String locationString =
+        String.format("%.2f  %.2f  %.2f km", latitude, longitude, depth);
+    location.setText(locationString);
+    magnitude.setText(hypocenter.getMAGOUT().trim());
+    rms.setText(String.format("%.2f s", hypocenter.getRMS()));
+    gap.setText(String.format("%s deg",hypocenter.getIGAP()));
+    erh.setText(hypocenter.getERHOUT().trim() + " km");
+    erz.setText(hypocenter.getSE3OUT().trim() + " km");
+  }
+
   /**
    * Create event.
    */
@@ -528,22 +643,22 @@ public class EventDialog extends JFrame {
     if (usePicks.isSelected()) {
       for (WaveViewPanel wvp : WaveClipboardFrame.getInstance().getWaves()) {
         PickData pickData = wvp.getPickData();
-        for (String phase : new String[] {PickMenu.P, PickMenu.S}) {
+        for (String phase : new String[] {PickData.P, PickData.S}) {
           if (pickData.getPick(phase) != null && pickData.isPickChannel(phase)) {
             Pick pick = pickData.getPick(phase);
             picks.put(pick.publicId, pick);
           }
         }
-        for (String phase : new String[] {PickMenu.CODA1, PickMenu.CODA2}) {
+        for (String phase : new String[] {PickData.CODA1, PickData.CODA2}) {
           Pick pick = pickData.getPick(phase);
           if (pick != null) {
             picks.put(pick.publicId, pick);
           }
         }
       }
-    } 
+    }
     event.setPicks(picks);
-    
+
     // If hypo71 was run
     if (hypoResult != null) {
       // get origins and magnitudes from hypo71 output
@@ -566,7 +681,7 @@ public class EventDialog extends JFrame {
           magCount++;
           event.setPreferredMagnitude(magnitude);
         }
-        
+
         try {
           // Origin
           // time
@@ -576,7 +691,7 @@ public class EventDialog extends JFrame {
           int sec = (int) hypocenter.getSEC();
           long time;
           time = getDate(kdate, khr, kmin, sec).getTime();
-          
+
           // hypocenter
           double latitude = hypocenter.getLatitude();
           if (ins == 'S') {
@@ -587,11 +702,11 @@ public class EventDialog extends JFrame {
             longitude *= -1;
           }
           double depth = hypocenter.getZ() * 1000;
-  
+
           publicId = QUAKEML_RESOURCE_ID + "/Origin/" + originCount;
           Origin origin = new Origin(publicId, time, longitude, latitude);
           origin.setDepth(depth);
-          
+
           // quality
           OriginQuality quality = new OriginQuality();
           quality.setAzimuthalGap(hypocenter.getIGAP());
@@ -602,8 +717,8 @@ public class EventDialog extends JFrame {
           dm = Math.toDegrees(dm / 6371); // convert km to degrees
           quality.setMinimumDistance(dm);
           origin.setQuality(quality);
-          
-          origin.setEvaluationMode(EvaluationMode.MANUAL); 
+
+          origin.setEvaluationMode(EvaluationMode.MANUAL);
           origins.put(publicId, origin);
           event.setPreferredOrigin(origin);
           originCount++;
@@ -618,7 +733,7 @@ public class EventDialog extends JFrame {
       if (origins.size() > 0) {
         event.setOrigins(origins);
       }
-      
+
       // get station results and create station magnitudes
       HashMap<String, StationMagnitude> stationMags = new HashMap<String, StationMagnitude>();
       HashMap<String, Station> stations = new HashMap<String, Station>();
@@ -636,14 +751,14 @@ public class EventDialog extends JFrame {
         }
       }
       event.setStationMagnitudes(stationMags);
-          
+
       // add arrivals
       Origin origin = event.getPreferredOrigin();
       if (origin != null) {
         HashMap<String, Arrival> arrivalMap = new HashMap<String, Arrival>();
         int arrivalNum = 1;
         for (Pick pick : picks.values()) {
-          if (!pick.getPhaseHint().equals(PickMenu.P) && !pick.getPhaseHint().equals(PickMenu.S)) {
+          if (!pick.getPhaseHint().equals(PickData.P) && !pick.getPhaseHint().equals(PickData.S)) {
             continue;
           }
           publicId = QUAKEML_RESOURCE_ID + "/Arrival/" + arrivalNum;
@@ -658,11 +773,11 @@ public class EventDialog extends JFrame {
           arrival.setDistance(distanceDeg);
           arrival.setAzimuth(station.getAZI());
           arrival.setTakeoffAngle(station.getAIN());
-          if (pick.getPhaseHint().equals(PickMenu.P)) {
+          if (pick.getPhaseHint().equals(PickData.P)) {
             arrival.setTimeResidual(station.getPRES());
             arrival.setTimeWeight(station.getPWT());
           }
-          if (pick.getPhaseHint().equals(PickMenu.S)) {
+          if (pick.getPhaseHint().equals(PickData.S)) {
             arrival.setTimeResidual(station.getSRES());
             arrival.setTimeWeight(station.getSWT());
           }
@@ -672,13 +787,13 @@ public class EventDialog extends JFrame {
         origin.setArrivals(arrivalMap);
       }
     }
-    
+
     return event;
   }
-  
-    
+
+
   private SimpleDateFormat df = new SimpleDateFormat("yyMMddHHmmss");
-  
+
   /**
    * Get date object from hypo71 hypocenter date format.
    * 
@@ -701,6 +816,7 @@ public class EventDialog extends JFrame {
 
   /**
    * Import event from file.
+   * 
    * @param f file
    */
   private void importQuakeMl(String filename) {
@@ -711,9 +827,13 @@ public class EventDialog extends JFrame {
       WaveClipboardFrame clipboard = WaveClipboardFrame.getInstance();
       EventSet eventSet = EventSet.parseQuakeml(new FileInputStream(new File(filename)));
       if (eventSet.size() == 0) {
+        setAlwaysOnTop(false);
         JOptionPane.showMessageDialog(clipboard, "No events found in file.");
+        setAlwaysOnTop(true);
+        requestFocus();
         return;
       }
+      setAlwaysOnTop(false);
       Event event;
       if (eventSet.size() > 1) { // Get user to decide which event to import
         HashMap<String, Event> eventMap = new HashMap<String, Event>();
@@ -727,9 +847,20 @@ public class EventDialog extends JFrame {
         event = openEventChooser(eventMap);
       } else {
         event = eventSet.values().iterator().next();
+      }        
+      // See if user wants to clear clipboard first
+      int result = JOptionPane.showConfirmDialog(Swarm.getApplicationFrame(),
+          "Clear clipboard first?", "Import Event", JOptionPane.YES_NO_OPTION);
+      String message = "This may take a while as it loads wave information from data sources.";
+      JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message);
+      if (result == JOptionPane.YES_OPTION) {
+        clipboard.importEvent(event, true);
+      } else {
+        clipboard.importEvent(event, false);
       }
-      clipboard.importEvent(event);
-      hypo71Output.setText("");
+      setAlwaysOnTop(true);
+      requestFocus();
+      hypo71Output = "";
     } catch (FileNotFoundException e) {
       LOGGER.warn(e.getMessage());
     } catch (IOException e) {
@@ -740,9 +871,10 @@ public class EventDialog extends JFrame {
       LOGGER.warn(e.getMessage());
     }
   }
-  
+
   /**
    * Open chooser with list of event descriptions.
+   * 
    * @param eventMap map of description to event
    * @return user selected event
    */
@@ -752,7 +884,7 @@ public class EventDialog extends JFrame {
         eventMap.keySet().toArray(), eventMap.keySet().iterator().next());
     return eventMap.get(s);
   }
-  
+
   /**
    * Save event to QuakeML file.
    */
@@ -768,14 +900,16 @@ public class EventDialog extends JFrame {
       Document doc = docBuilder.newDocument();
       Element quakeml = doc.createElement("q:quakeml");
       quakeml.setAttribute("xmlns:catalog", "http://xmlns/catalog/0.1");
+      quakeml.setAttribute("xmlns:q", "http://quakeml.org/xmlns/quakeml/1.2");
+      quakeml.setAttribute("xmlns", "http://quakeml.org/xmlns/bed/1.2");
       doc.appendChild(quakeml);
-      
+
       Element eventParameters = doc.createElement("eventParameters");
       eventParameters.setAttribute("publicID", QUAKEML_RESOURCE_ID);
       Event event = createEvent();
       eventParameters.appendChild(event.toElement(doc));
       quakeml.appendChild(eventParameters);
-      
+
       Element creationInfo = doc.createElement("creationInfo");
       Element author = doc.createElement("author");
       author.appendChild(doc.createTextNode(user));
@@ -787,7 +921,7 @@ public class EventDialog extends JFrame {
 
       // write to file
       FileOutputStream fos = new FileOutputStream(filename);
-      
+
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
       Transformer transformer = transformerFactory.newTransformer();
       transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
@@ -796,7 +930,7 @@ public class EventDialog extends JFrame {
       DOMSource source = new DOMSource(doc);
       StreamResult result = new StreamResult(fos);
       transformer.transform(source, result);
-      
+
       fos.close();
 
       String message = "QuakeML event saved.";
@@ -816,12 +950,12 @@ public class EventDialog extends JFrame {
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
-    }  
+    }
   }
-  
+
   /**
-   * Check to see if there are picks on clipboard.  If so, enable
-   * 'Use Picks' option. Otherwise, disable.
+   * Check to see if there are picks on clipboard. If so, enable 'Use Picks' option. Otherwise,
+   * disable.
    */
   public void checkForPicks() {
     boolean hasPicks = false;
@@ -837,37 +971,41 @@ public class EventDialog extends JFrame {
       usePicks.setSelected(true);
     } else {
       usePicks.setEnabled(false);
-      crustalModelFile.setEnabled(false); 
-      useInputFile.setSelected(true);     
+      crustalModelFile.setEnabled(false);
+      useInputFile.setSelected(true);
     }
   }
-  
+
   /**
    * Validate input values.
+   * 
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#allowOk()
    */
   protected boolean allowOk() {
     return true;
   }
-  
+
   /**
    * Create event and save to QuakeML file.
+   * 
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#wasOk()
    */
-  protected void wasOk() {    
-   
+  protected void wasOk() {
+
   }
 
   /**
    * Revert settings.
+   * 
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#wasCancelled()
    */
   protected void wasCancelled() {
 
   }
-  
+
   /**
    * Set event details from existing event.
+   * 
    * @param event existing event
    */
   public void setEventDetails(Event event) {
@@ -879,17 +1017,19 @@ public class EventDialog extends JFrame {
     setEventType(event.getType());
     setEventTypeCertainty(event.getTypeCertainty());
   }
-  
+
   /**
    * Set comment.
+   * 
    * @param comment comment text
    */
   public void setComment(String comment) {
     this.comment.setText(comment);
   }
-  
+
   /**
    * Set description.
+   * 
    * @param description event description
    */
   public void setDescription(String description) {
@@ -898,14 +1038,16 @@ public class EventDialog extends JFrame {
 
   /**
    * Set event type.
+   * 
    * @param eventType event type
    */
   public void setEventType(EventType eventType) {
     this.eventType.setSelectedItem(eventType);
   }
-  
+
   /**
    * Set event type certainty.
+   * 
    * @param eventTypeCertainty event type certainty
    */
   public void setEventTypeCertainty(EventTypeCertainty eventTypeCertainty) {

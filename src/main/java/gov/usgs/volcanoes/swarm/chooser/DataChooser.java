@@ -5,35 +5,6 @@
 
 package gov.usgs.volcanoes.swarm.chooser;
 
-import gov.usgs.proj.GeoRange;
-import gov.usgs.util.Pair;
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.util.StringUtils;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Messages;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.SwarmUtil;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.chooser.node.AbstractChooserNode;
-import gov.usgs.volcanoes.swarm.chooser.node.ChannelNode;
-import gov.usgs.volcanoes.swarm.chooser.node.GroupNode;
-import gov.usgs.volcanoes.swarm.chooser.node.MessageNode;
-import gov.usgs.volcanoes.swarm.chooser.node.ProgressNode;
-import gov.usgs.volcanoes.swarm.chooser.node.RootNode;
-import gov.usgs.volcanoes.swarm.chooser.node.ServerNode;
-import gov.usgs.volcanoes.swarm.data.DataSourceType;
-import gov.usgs.volcanoes.swarm.data.FileDataSource;
-import gov.usgs.volcanoes.swarm.data.RsamSource;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSourceListener;
-import gov.usgs.volcanoes.swarm.data.WWSSource;
-import gov.usgs.volcanoes.swarm.map.MapFrame;
-import gov.usgs.volcanoes.swarm.wave.SwarmMultiMonitors;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -90,6 +61,35 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.math.proj.GeoRange;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.Pair;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Messages;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwarmUtil;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.chooser.node.AbstractChooserNode;
+import gov.usgs.volcanoes.swarm.chooser.node.ChannelNode;
+import gov.usgs.volcanoes.swarm.chooser.node.GroupNode;
+import gov.usgs.volcanoes.swarm.chooser.node.MessageNode;
+import gov.usgs.volcanoes.swarm.chooser.node.ProgressNode;
+import gov.usgs.volcanoes.swarm.chooser.node.RootNode;
+import gov.usgs.volcanoes.swarm.chooser.node.ServerNode;
+import gov.usgs.volcanoes.swarm.data.DataSourceType;
+import gov.usgs.volcanoes.swarm.data.FileDataSource;
+import gov.usgs.volcanoes.swarm.data.RsamSource;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSourceListener;
+import gov.usgs.volcanoes.swarm.data.WWSSource;
+import gov.usgs.volcanoes.swarm.map.MapFrame;
+import gov.usgs.volcanoes.swarm.wave.SwarmMultiMonitors;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 
 /**
  * Data Source Chooser.
@@ -598,12 +598,14 @@ public class DataChooser extends JPanel {
             List<Pair<ServerNode, String>> channels = getSelections();
             GeoRange gr = new GeoRange();
             int nc = 0;
-            for (Pair<ServerNode, String> pair : channels) {
-              Metadata md = SwarmConfig.getInstance().getMetadata(pair.item2);
-              Point2D.Double pt = md.getLonLat();
-              if (pt != null && !Double.isNaN(pt.x) && !Double.isNaN(pt.y)) {
-                nc++;
-                gr.includePoint(pt, 0.0001);
+            if (channels != null) {
+              for (Pair<ServerNode, String> pair : channels) {
+                Metadata md = SwarmConfig.getInstance().getMetadata(pair.item2);
+                Point2D.Double pt = md.getLonLat();
+                if (pt != null && !Double.isNaN(pt.x) && !Double.isNaN(pt.y)) {
+                  nc++;
+                  gr.includePoint(pt, 0.0001);
+                }
               }
             }
             if (nc == 1) {

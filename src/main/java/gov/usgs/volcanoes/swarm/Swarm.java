@@ -1,28 +1,5 @@
 package gov.usgs.volcanoes.swarm;
 
-import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
-
-import gov.usgs.plot.data.Wave;
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.quakeml.Event;
-import gov.usgs.volcanoes.core.time.CurrentTime;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.ui.GlobalKeyManager;
-import gov.usgs.volcanoes.core.util.StringUtils;
-import gov.usgs.volcanoes.swarm.chooser.DataChooser;
-import gov.usgs.volcanoes.swarm.data.CachedDataSource;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.event.EventFrame;
-import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
-import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
-import gov.usgs.volcanoes.swarm.map.MapFrame;
-import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
-import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-import gov.usgs.volcanoes.swarm.wave.WaveViewerFrame;
-
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.KeyboardFocusManager;
@@ -50,11 +27,32 @@ import javax.swing.UIManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
+
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.quakeml.Event;
+import gov.usgs.volcanoes.core.time.CurrentTime;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.ui.GlobalKeyManager;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.swarm.chooser.DataChooser;
+import gov.usgs.volcanoes.swarm.data.CachedDataSource;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.event.EventFrame;
+import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
+import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.map.MapFrame;
+import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
+import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewerFrame;
+
 /**
  * The main UI and application class for Swarm. Only functions directly pertaining to the UI and
  * overall application operation belong here.
- *
- * TODO: resize listener TODO: chooser visibility TODO: name worker thread for better debugging
  *
  * @author Dan Cervelli, Peter Cervelli, and Thomas Parker.
  */
@@ -89,6 +87,10 @@ public class Swarm extends JFrame implements InternalFrameListener {
   private static SwarmConfig config;
   private String lastLayout = "";
 
+  /**
+   * Constructor.
+   * @param args arguments
+   */
   public Swarm(final String[] args) {
     super(TITLE + " [" + Version.POM_VERSION + "]");
     LOGGER.info("Swarm version/date: " + Version.VERSION_STRING);
@@ -104,7 +106,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
     SwarmInternalFrames.addInternalFrameListener(this);
     checkJavaVersion();
     setupGlobalKeys();
-    createUI();
+    createUi();
   }
 
   private void checkJavaVersion() {
@@ -274,7 +276,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
     return applicationFrame;
   }
 
-  private void createUI() {
+  private void createUi() {
     this.addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosing(final WindowEvent e) {
@@ -355,8 +357,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
         //
       }
     }
-
-    mapFrame.toFront();
+    if (applicationFrame.isVisible()) {
+      mapFrame.toFront();
+    }
 
     swarmMenu = new SwarmMenu();
     this.setJMenuBar(swarmMenu);
@@ -376,6 +379,10 @@ public class Swarm extends JFrame implements InternalFrameListener {
     }
   }
 
+  /**
+   * Make chooser visible or not visible with given parameter.
+   * @param vis true if make visible; false otherwise.
+   */
   public void setChooserVisible(final boolean vis) {
     if (vis) {
       split.setRightComponent(desktop);
@@ -404,6 +411,10 @@ public class Swarm extends JFrame implements InternalFrameListener {
     setFullScreenMode(!fullScreen);
   }
 
+  /**
+   * Set to full screen mode or not given the parameter.
+   * @param full true if set to full screen mode; false otherwise.
+   */
   public void setFullScreenMode(final boolean full) {
     if (fullScreen == full) {
       return;
@@ -459,6 +470,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
     tileKioskFrames();
   }
 
+  /**
+   * Save configurations and close Swarm.
+   */
   public void closeApp() {
     final Point p = this.getLocation();
 
@@ -518,10 +532,15 @@ public class Swarm extends JFrame implements InternalFrameListener {
       }
     } catch (final Exception e) {
       // doesn't matter at this point
-    } 
+    }
     System.exit(0);
   }
 
+  /**
+   * Load wave to clipboard.
+   * @param source data source for wave data
+   * @param channel wave channel
+   */
   public static void loadClipboardWave(final SeismicDataSource source, final String channel) {
     final WaveViewPanel wvp = new WaveViewPanel();
     wvp.setChannel(channel);
@@ -567,6 +586,12 @@ public class Swarm extends JFrame implements InternalFrameListener {
     worker.start();
   }
 
+  /**
+   * Open wave viewer frame.
+   * @param source wave data source
+   * @param channel wave channel
+   * @return wave viewer frame
+   */
   public static WaveViewerFrame openRealtimeWave(final SeismicDataSource source,
       final String channel) {
     final WaveViewerFrame frame = new WaveViewerFrame(source, channel);
@@ -574,6 +599,13 @@ public class Swarm extends JFrame implements InternalFrameListener {
     return frame;
   }
 
+  /**
+   * Open helicorder.
+   * @param source wave data source
+   * @param channel wave channel
+   * @param time bottom time
+   * @return helicorder viewer frame
+   */
   public static HelicorderViewerFrame openHelicorder(final SeismicDataSource source,
       final String channel, final double time) {
     source.establish();
@@ -583,32 +615,42 @@ public class Swarm extends JFrame implements InternalFrameListener {
     return frame;
   }
 
+  /**
+   * Open RSAM viewer frame.
+   * @param source RSAM data source
+   * @param channel RSAM channel
+   * @return RSAM viewer frame
+   */
   public static RsamViewerFrame openRsam(final SeismicDataSource source, final String channel) {
     final RsamViewerFrame frame = new RsamViewerFrame(source, channel);
     SwarmInternalFrames.add(frame);
     return frame;
   }
 
-//  public static PickerFrame openPicker(final WaveViewPanel insetWavePanel) {
-//    PickerWavePanel p = new PickerWavePanel(insetWavePanel);
-//    p.setDataSource(insetWavePanel.getDataSource().getCopy());
-//    PickerFrame pickerFrame = new PickerFrame();
-//    pickerFrame.setVisible(true);
-//    pickerFrame.requestFocus();
-//    SwarmInternalFrames.add(pickerFrame);
-//    pickerFrame.setBaseWave(p);
-//    return pickerFrame;
-//  }
+  // public static PickerFrame openPicker(final WaveViewPanel insetWavePanel) {
+  // PickerWavePanel p = new PickerWavePanel(insetWavePanel);
+  // p.setDataSource(insetWavePanel.getDataSource().getCopy());
+  // PickerFrame pickerFrame = new PickerFrame();
+  // pickerFrame.setVisible(true);
+  // pickerFrame.requestFocus();
+  // SwarmInternalFrames.add(pickerFrame);
+  // pickerFrame.setBaseWave(p);
+  // return pickerFrame;
+  // }
 
-//  public static PickerFrame openPicker(Event event) {
-//    PickerFrame pickerFrame = new PickerFrame(event);
-//    pickerFrame.setVisible(true);
-//    pickerFrame.requestFocus();
-//    SwarmInternalFrames.add(pickerFrame);
-//    return pickerFrame;
-//  }
+  // public static PickerFrame openPicker(Event event) {
+  // PickerFrame pickerFrame = new PickerFrame(event);
+  // pickerFrame.setVisible(true);
+  // pickerFrame.requestFocus();
+  // SwarmInternalFrames.add(pickerFrame);
+  // return pickerFrame;
+  // }
 
 
+  /**
+   * Save layout.
+   * @param name layout name
+   */
   public void saveLayout(String name) {
     final boolean fixedName = (name != null);
     final SwarmLayout sl = getCurrentLayout();
@@ -617,6 +659,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
       if (name == null) {
         name = (String) JOptionPane.showInputDialog(this, "Enter a name for this layout:",
             "Save Layout", JOptionPane.INFORMATION_MESSAGE, null, null, lastLayout);
+        if (name == null) {
+          return; // abort
+        }
         name = name.trim();
       }
       if (name != null && !"".equals(name)) {
@@ -655,6 +700,10 @@ public class Swarm extends JFrame implements InternalFrameListener {
     }
   }
 
+  /**
+   * Get current Swarm layout.
+   * @return Swarm layout
+   */
   public SwarmLayout getCurrentLayout() {
     final ConfigFile cf = new ConfigFile();
     cf.put("name", "Current Layout");
@@ -670,12 +719,17 @@ public class Swarm extends JFrame implements InternalFrameListener {
       if (frame instanceof HelicorderViewerFrame) {
         final HelicorderViewerFrame hvf = (HelicorderViewerFrame) frame;
         hvf.saveLayout(cf, "helicorder-" + i++);
-      } else if (frame instanceof MultiMonitor) {
+      } 
+      if (frame instanceof MultiMonitor) {
         final MultiMonitor mm = (MultiMonitor) frame;
         mm.saveLayout(cf, "monitor-" + i++);
       }
+    }      
+    
+    final WaveClipboardFrame wcf = WaveClipboardFrame.getInstance();
+    if(wcf.isVisible()){
+      wcf.saveLayout(cf, "clipboard");
     }
-
     final MapFrame mapFrame = MapFrame.getInstance();
     if (mapFrame.isVisible()) {
       mapFrame.saveLayout(cf, "map");
@@ -686,6 +740,10 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
 
 
+  /**
+   * Flush frame windows to specified position.
+   * @param position flush position
+   */
   public void flush(final int position) {
 
     final Dimension ds = desktop.getSize();
@@ -781,6 +839,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
     flush(TOP_LEFT);
   }
 
+  /**
+   * Tile kiosk frames.
+   */
   public void tileKioskFrames() {
     final Dimension ds = desktop.getSize();
 
@@ -856,6 +917,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
     }
   }
 
+  /**
+   * Tile helicorders.
+   */
   public void tileHelicorders() {
     final Dimension ds = desktop.getSize();
 
@@ -903,6 +967,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
     }
   }
 
+  /**
+   * Tile wave viewer frames.
+   */
   public void tileWaves() {
     final Dimension ds = desktop.getSize();
 
@@ -972,6 +1039,10 @@ public class Swarm extends JFrame implements InternalFrameListener {
     }
   }
 
+  /**
+   * @see gov.usgs.volcanoes.swarm.internalFrame
+   * .InternalFrameListener#internalFrameAdded(javax.swing.JInternalFrame)
+   */
   public void internalFrameAdded(final JInternalFrame f) {
     desktop.add(f);
     SwingUtilities.invokeLater(new Runnable() {
@@ -1005,6 +1076,11 @@ public class Swarm extends JFrame implements InternalFrameListener {
     }
   }
 
+  /**
+   * Open event frame with given event.
+   * @param event event
+   * @return event frame
+   */
   public static EventFrame openEvent(final Event event) {
     final EventFrame eventFrame = new EventFrame(event);
     eventFrame.setVisible(true);

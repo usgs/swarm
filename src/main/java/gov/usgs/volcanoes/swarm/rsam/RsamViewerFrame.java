@@ -1,9 +1,36 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
-import gov.usgs.plot.data.RSAMData;
+import java.awt.BorderLayout;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JInternalFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JToolBar;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
+
+import gov.usgs.volcanoes.core.contrib.PngEncoder;
+import gov.usgs.volcanoes.core.contrib.PngEncoderB;
+import gov.usgs.volcanoes.core.data.RSAMData;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.util.UiUtils;
 import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.Throbber;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
@@ -11,21 +38,6 @@ import gov.usgs.volcanoes.swarm.data.RsamSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
-
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JInternalFrame;
-import javax.swing.JPanel;
-import javax.swing.JToolBar;
-import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
 
 /**
  * RSAM Viewer Frame.
@@ -46,6 +58,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
   private Thread updateThread;
   private boolean run;
   private JToolBar toolBar;
+  private JButton captureButton;
 
   private RsamViewSettings settings;
   private RsamViewPanel viewPanel;
@@ -113,8 +126,21 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
     toolBar.addSeparator();
 
     new RsamViewSettingsToolbar(settings, toolBar, this);
+    
+    JButton ratioButton = SwarmUtil.createToolBarButton(Icons.phi,
+        "RSAM Ratio", new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            openRsamRatio();
+          }
+        });
+    toolBar.add(ratioButton);
 
-    toolBar.addSeparator();
+    toolBar.addSeparator();    
+    
+    captureButton = SwarmUtil.createToolBarButton(Icons.camera, "Save RSAM image (P)",
+        new CaptureActionListener());
+    UiUtils.mapKeyStrokeToButton(this, "P", "capture", captureButton);
+    toolBar.add(captureButton);
 
     toolBar.add(Box.createHorizontalGlue());
 
@@ -144,6 +170,41 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
     this.setVisible(true);
 
     updateThread.start();
+  }
+  
+  /**
+   * Open RSAM Ratio Frame.
+   */
+  private void openRsamRatio() {
+    HashMap<String, RsamViewerFrame> rvfs = new HashMap<String, RsamViewerFrame>();
+    List<JInternalFrame> frames = SwarmInternalFrames.getFrames();
+    for (JInternalFrame frame : frames) {
+      if (frame instanceof RsamViewerFrame) {
+        RsamViewerFrame rvf = (RsamViewerFrame) frame;
+        if (rvf.channel != this.channel) {
+          rvfs.put(rvf.channel, rvf);
+        }
+      }
+    }
+
+    RsamViewerFrame rvf;
+    switch (rvfs.size()) {
+      case 0: 
+        JOptionPane.showMessageDialog(this, "No other RSAM frames are open.");
+        return;
+      case 1: 
+        rvf = (RsamViewerFrame) rvfs.values().toArray()[0];
+        break;
+      default:
+        String c = (String) JOptionPane.showInputDialog(this,
+            "Select channel to compare", "RSAM Ratio", JOptionPane.PLAIN_MESSAGE, null,
+            rvfs.keySet().toArray(), rvfs.keySet().iterator().next());
+        rvf = rvfs.get(c);
+    }
+
+    RsamRatioFrame rrf = new RsamRatioFrame(this.channel, this.dataSource, 
+                                            rvf.channel, rvf.dataSource);
+    SwarmInternalFrames.add(rrf);
   }
 
   /**
@@ -208,5 +269,51 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
 
     spanIndex = i;
     getRsam();
+  }
+  
+  class CaptureActionListener implements ActionListener {
+    public void actionPerformed(final ActionEvent e) {
+      final JFileChooser chooser = new JFileChooser();
+      final File lastPath = new File(SwarmConfig.getInstance().lastPath);
+      chooser.setCurrentDirectory(lastPath);
+      String filename = "rsam_" + channel.trim().replaceAll(" ", "_") + ".png";
+      chooser.setSelectedFile(new File(filename));
+      chooser.setDialogTitle("Save RSAM Screen Capture");
+      final int result = chooser.showSaveDialog(Swarm.getApplicationFrame());
+      File f = null;
+      if (result == JFileChooser.APPROVE_OPTION) {
+        f = chooser.getSelectedFile();
+
+        if (f.exists()) {
+          final int choice = JOptionPane.showConfirmDialog(Swarm.getApplicationFrame(),
+              "File exists, overwrite?", "Confirm", JOptionPane.YES_NO_OPTION);
+          if (choice != JOptionPane.YES_OPTION) {
+            return;
+          }
+        }
+        SwarmConfig.getInstance().lastPath = f.getParent();
+      }
+      if (f == null) {
+        return;
+      }
+
+      int height = viewPanel.getHeight();
+      int width = viewPanel.getWidth();
+      
+      final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+      final Graphics g = image.getGraphics();
+      viewPanel.paint(g);
+      g.translate(0, height);
+      
+      try {
+        final PngEncoderB png = new PngEncoderB(image, false, PngEncoder.FILTER_NONE, 7);
+        final FileOutputStream out = new FileOutputStream(f);
+        final byte[] bytes = png.pngEncode();
+        out.write(bytes);
+        out.close();
+      } catch (final Exception ex) {
+        ex.printStackTrace();
+      }
+    }
   }
 }

@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import gov.usgs.util.xml.SimpleXMLParser;
-import gov.usgs.util.xml.XMLDocHandler;
+import gov.usgs.volcanoes.core.xml.SimpleXmlParser;
+import gov.usgs.volcanoes.core.xml.XmlDocHandler;
 import gov.usgs.volcanoes.swarm.AbstractChannelInfo;
 import gov.usgs.volcanoes.swarm.ChannelUtil;
 import gov.usgs.volcanoes.swarm.GroupsType;
@@ -22,7 +22,7 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo {
   /**
    * SeedLink XML document handler.
    */
-  protected class SeedLinkStationXMLDocHandler implements XMLDocHandler {
+  protected class SeedLinkStationXMLDocHandler implements XmlDocHandler {
     private void clearChannel() {
       channel = null;
       location = null;
@@ -126,7 +126,7 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo {
   public SeedLinkChannelInfo(SeedLinkSource dataSource, String infoStr) throws Exception {
     this.dataSource = dataSource;
     Reader reader = new StringReader(infoStr);
-    SimpleXMLParser.parse(new SeedLinkStationXMLDocHandler(), reader);
+    SimpleXmlParser.parse(new SeedLinkStationXMLDocHandler(), reader);
   }
 
   /**

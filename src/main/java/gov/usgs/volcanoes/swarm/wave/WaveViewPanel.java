@@ -1,31 +1,5 @@
 package gov.usgs.volcanoes.swarm.wave;
 
-import gov.usgs.math.Filter;
-import gov.usgs.plot.Plot;
-import gov.usgs.plot.PlotException;
-import gov.usgs.plot.data.SliceWave;
-import gov.usgs.plot.data.Wave;
-import gov.usgs.plot.decorate.FrameDecorator;
-import gov.usgs.plot.render.TextRenderer;
-import gov.usgs.plot.render.wave.ParticleMotionRenderer;
-import gov.usgs.plot.render.wave.SliceWaveRenderer;
-import gov.usgs.plot.render.wave.SpectraRenderer;
-import gov.usgs.plot.render.wave.SpectrogramRenderer;
-import gov.usgs.volcanoes.core.quakeml.Pick;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.data.CachedDataSource;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.event.PickData;
-import gov.usgs.volcanoes.swarm.event.PickMenu;
-import gov.usgs.volcanoes.swarm.event.PickWavePanel;
-import gov.usgs.volcanoes.swarm.time.UiTime;
-import gov.usgs.volcanoes.swarm.time.WaveViewTime;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -49,6 +23,32 @@ import javax.swing.event.EventListenerList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import gov.usgs.volcanoes.core.data.SliceWave;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.FrameDecorator;
+import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.wave.ParticleMotionRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.wave.SliceWaveRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.wave.SpectraRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.wave.SpectrogramRenderer;
+import gov.usgs.volcanoes.core.math.Filter;
+import gov.usgs.volcanoes.core.quakeml.Pick;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.data.CachedDataSource;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.event.PickData;
+import gov.usgs.volcanoes.swarm.event.PickMenu;
+import gov.usgs.volcanoes.swarm.event.PickWavePanel;
+import gov.usgs.volcanoes.swarm.time.UiTime;
+import gov.usgs.volcanoes.swarm.time.WaveViewTime;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
 
 
 public class WaveViewPanel extends JComponent {
@@ -286,7 +286,7 @@ public class WaveViewPanel extends JComponent {
         double j2k = e.getX() * t[0] + t[1];
         if (j2k >= startTime && j2k <= endTime) {
           pickMenu.setJ2k(j2k);
-          pickMenu.show(this, e.getX(), e.getY());
+          pickMenu.show(this, e.getX() + 30, e.getY());
         }
       }
     } else {
@@ -858,12 +858,12 @@ public class WaveViewPanel extends JComponent {
         return;
       }
       if (!pickData.isHidePhases()) {
-        for (String phase : new String[] {PickMenu.P, PickMenu.S}) {
+        for (String phase : new String[] {PickData.P, PickData.S}) {
           drawPick(pickData.getPick(phase), g2, !pickData.isPickChannel(phase));
         }
       }
       if (!pickData.isHideCoda()) {
-        for (String coda : new String[] {PickMenu.CODA1, PickMenu.CODA2}) {
+        for (String coda : new String[] {PickData.CODA1, PickData.CODA2}) {
           drawPick(pickData.getPick(coda), g2, false);
         }
       }
@@ -878,7 +878,7 @@ public class WaveViewPanel extends JComponent {
   public void paint(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
     Dimension dim = this.getSize();
-    if (wave == null) {
+    if (wave == null || wave.numSamples() < 1) {
       g2.setColor(backgroundColor);
       g2.fillRect(0, 0, dim.width, dim.height);
       g2.setColor(Color.black);

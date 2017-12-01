@@ -22,7 +22,7 @@ import edu.iris.Fissures.seed.container.BlocketteDecoratorFactory;
 import edu.iris.Fissures.seed.container.Btime;
 import edu.iris.Fissures.seed.container.Waveform;
 import edu.iris.Fissures.seed.exception.SeedException;
-import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.ChannelInfo;
 import gov.usgs.volcanoes.swarm.Swarm;

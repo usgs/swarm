@@ -1,15 +1,14 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
-import gov.usgs.math.BinSize;
-import gov.usgs.math.Butterworth;
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.util.StringUtils;
-
 import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.math.BinSize;
+import gov.usgs.volcanoes.core.util.StringUtils;
 
 /**
  * RSAM view settings.
@@ -41,9 +40,9 @@ public class RsamViewSettings {
   public int scaleMax;
   public int scaleMin;
   
-  public boolean filterOn;
+/*  public boolean filterOn;
   public Butterworth filter;
-  public boolean zeroPhaseShift;
+  public boolean zeroPhaseShift;*/
 
   private int spanLengthS;
   private ViewType viewType;
@@ -71,9 +70,9 @@ public class RsamViewSettings {
     DEFAULT_RSAM_VIEW_SETTINGS.autoScale = true;
     DEFAULT_RSAM_VIEW_SETTINGS.scaleMax = 100;
     DEFAULT_RSAM_VIEW_SETTINGS.scaleMin = 0;
-    DEFAULT_RSAM_VIEW_SETTINGS.filter = new Butterworth();
+/*    DEFAULT_RSAM_VIEW_SETTINGS.filter = new Butterworth();
     DEFAULT_RSAM_VIEW_SETTINGS.filterOn = false;
-    DEFAULT_RSAM_VIEW_SETTINGS.zeroPhaseShift = true;
+    DEFAULT_RSAM_VIEW_SETTINGS.zeroPhaseShift = true;*/
 
     List<String> candidateNames = new LinkedList<String>();
     candidateNames.add(DEFAULTS_FILENAME);
@@ -126,9 +125,9 @@ public class RsamViewSettings {
     autoScale = s.autoScale;
     scaleMax = s.scaleMax;
     scaleMin = s.scaleMin;
-    filterOn = s.filterOn;
+/*    filterOn = s.filterOn;
     filter = new Butterworth(s.filter);
-    zeroPhaseShift = s.zeroPhaseShift;
+    zeroPhaseShift = s.zeroPhaseShift;*/
   }
 
   /**

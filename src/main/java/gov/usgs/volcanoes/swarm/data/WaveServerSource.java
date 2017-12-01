@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import gov.usgs.earthworm.Menu;
-import gov.usgs.earthworm.MenuItem;
-import gov.usgs.earthworm.WaveServer;
-import gov.usgs.plot.data.HelicorderData;
-import gov.usgs.plot.data.Wave;
+import gov.usgs.volcanoes.core.data.HelicorderData;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.legacy.ew.Menu;
+import gov.usgs.volcanoes.core.legacy.ew.MenuItem;
+import gov.usgs.volcanoes.core.legacy.ew.WaveServer;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
