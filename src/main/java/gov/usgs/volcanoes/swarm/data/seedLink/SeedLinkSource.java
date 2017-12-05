@@ -23,6 +23,7 @@ import gov.usgs.volcanoes.swarm.data.DataSourceType;
 import gov.usgs.volcanoes.swarm.data.Gulper;
 import gov.usgs.volcanoes.swarm.data.GulperList;
 import gov.usgs.volcanoes.swarm.data.GulperListener;
+import gov.usgs.volcanoes.swarm.data.NopGulperListener;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 
 /**
@@ -90,6 +91,7 @@ public class SeedLinkSource extends SeismicDataSource {
    * Close the data source.
    */
   public void close() {
+    System.err.println("TOMP SAYS CLOSING source");
     // close clients
     synchronized (seedLinkClientList) {
       if (seedLinkClientList.size() != 0) {
@@ -155,7 +157,7 @@ public class SeedLinkSource extends SeismicDataSource {
         try {
           stream.close();
         } catch (IOException ignore) {
-          //ignore
+          // ignore
         }
       }
 
@@ -176,7 +178,7 @@ public class SeedLinkSource extends SeismicDataSource {
       try {
         writer.close();
       } catch (IOException ignore) {
-        //ignore
+        // ignore
       }
     }
   }
@@ -240,21 +242,26 @@ public class SeedLinkSource extends SeismicDataSource {
    * @return the wave or null if none.
    */
   public Wave getWave(String scnl, double t1, double t2) {
-    // check if data is in the cache
-    Wave wave = CachedDataSource.getInstance().getWave(scnl, t1, t2);
-    if (wave == null) {
-      // remove all data in the future to avoid blocking
-      final double now = J2kSec.now();
-      if (t1 <= now) {
-        final SeedLinkClient client = createClient();
-        wave = client.getWave(scnl, t1, t2);
-        removeClient(client);
-      }
-    }
+    GulperList.INSTANCE.requestGulper("sls:" + scnl, new NopGulperListener(), this.getCopy(), scnl,
+        t1, t2, 0, 0);
 
-    LOGGER.debug("getWave(scnl={}, start={}, end={})\nDATA={}", scnl, J2kSec.toDateString(t1),
-        J2kSec.toDateString(t2), (wave == null ? "NONE" : wave.toString()));
-    return wave;
+    return CachedDataSource.getInstance().getBestWave(scnl, t1, t2);
+
+    // // check if data is in the cache
+    // Wave wave = CachedDataSource.getInstance().getWave(scnl, t1, t2);
+    // if (wave == null) {
+    // // remove all data in the future to avoid blocking
+    // final double now = J2kSec.now();
+    // if (t1 <= now) {
+    // final SeedLinkClient client = createClient();
+    // wave = client.getWave(scnl, t1, t2);
+    // removeClient(client);
+    // }
+    // }
+    //
+    // LOGGER.debug("getWave(scnl={}, start={}, end={})\nDATA={}", scnl, J2kSec.toDateString(t1),
+    // J2kSec.toDateString(t2), (wave == null ? "NONE" : wave.toString()));
+    // return wave;
   }
 
   /**
