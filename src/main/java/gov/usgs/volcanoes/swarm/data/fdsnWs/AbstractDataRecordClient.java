@@ -7,19 +7,27 @@
 package gov.usgs.volcanoes.swarm.data.fdsnWs;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+
+import edu.iris.dmc.seedcodec.Codec;
 import java.util.Date;
 import java.util.List;
 
 import edu.iris.dmc.seedcodec.CodecException;
+import edu.iris.dmc.seedcodec.DecompressedData;
 import edu.iris.dmc.seedcodec.UnsupportedCompressionType;
 import edu.sc.seis.seisFile.mseed.Blockette;
 import edu.sc.seis.seisFile.mseed.Blockette1000;
+import edu.sc.seis.seisFile.mseed.Btime;
+import edu.sc.seis.seisFile.mseed.DataHeader;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.ChannelInfo;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.data.seedLink.SeedUtils;
 
 public abstract class AbstractDataRecordClient {
   private final SeismicDataSource source;
@@ -46,10 +54,40 @@ public abstract class AbstractDataRecordClient {
       throws UnsupportedCompressionType, CodecException {
     for (Blockette blockette : dr.getBlockettes(1000)) {
       if (blockette instanceof Blockette1000) {
-        waves.add(SeedUtils.createWave(dr, (Blockette1000) blockette));
+        waves.add(createWave(dr, (Blockette1000) blockette));
       }
     }
     return waves;
+  }
+
+  private static Wave createWave(DataRecord dr, Blockette1000 b1000)
+      throws UnsupportedCompressionType, CodecException {
+    final DataHeader dh = dr.getHeader();
+    final int type = b1000.getEncodingFormat();
+    final byte[] data = dr.getData();
+    final boolean swapNeeded = b1000.getWordOrder() == 0;
+    final Codec codec = new Codec();
+    final DecompressedData decomp =
+        codec.decompress(type, data, dr.getHeader().getNumSamples(), swapNeeded);
+    final Wave wave = new Wave();
+    wave.setSamplingRate(dh.getSampleRate());
+
+    Btime btime = dh.getStartBtime();
+
+    Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+    cal.set(Calendar.YEAR, btime.getYear());
+    cal.set(Calendar.DAY_OF_YEAR, btime.getDayOfYear());
+    cal.set(Calendar.HOUR_OF_DAY, btime.getHour());
+    cal.set(Calendar.MINUTE, btime.getMin());
+    cal.set(Calendar.SECOND, btime.getSec());
+    cal.set(Calendar.MILLISECOND, btime.getTenthMilli() / 10);
+    Date date = cal.getTime();
+    double j2k = J2kSec.fromDate(date);
+
+    wave.setStartTime(j2k);
+    wave.buffer = decomp.getAsInt();
+    wave.register();
+    return wave;
   }
 
   /**
