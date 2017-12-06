@@ -420,8 +420,11 @@ public class WaveClipboardFrame extends SwarmFrame {
     copyButton = SwarmUtil.createToolBarButton(Icons.clipboard,
         "Place another copy of wave on clipboard (C or Ctrl-C)", new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
-            WaveViewPanel wvp = new WaveViewPanel(getSingleSelected());
-            addWave(wvp);
+            WaveViewPanel selected = getSingleSelected();
+            if (selected != null) {
+              WaveViewPanel wvp = new WaveViewPanel(selected);
+              addWave(wvp);
+            }
           }
         });
     UiUtils.mapKeyStrokeToButton(this, "C", "clipboard1", copyButton);
