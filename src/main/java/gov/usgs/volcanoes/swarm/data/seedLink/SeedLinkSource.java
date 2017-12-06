@@ -9,12 +9,16 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.usgs.volcanoes.core.data.HelicorderData;
+import gov.usgs.volcanoes.core.data.Scnl;
 import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.ChannelUtil;
@@ -31,13 +35,14 @@ import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
  * SeedLink Server.
  * 
  * @author Kevin Frechette (ISTI)
+ * @author Tom Parker
  */
 public class SeedLinkSource extends SeismicDataSource {
   /** The logger. */
   private static final Logger LOGGER = LoggerFactory.getLogger(SeedLinkSource.class);
 
   /** The gulp delay. */
-  private static final int GULP_DELAY = 1000;
+  public static final int GULP_DELAY = 1000;
 
   /** The gulp size. */
   private static final int GULP_SIZE = 60;
@@ -61,8 +66,18 @@ public class SeedLinkSource extends SeismicDataSource {
   /** SeedLink client list. */
   private final List<SeedLinkClient> seedLinkClientList;
 
+  /** Active gulpers. */
+  private Map<String, Gulper> gulperMap;
+
+  /** time of last gulped data access. */
+  private Map<String, SeedLinkGulperListener> gulperListeners;
+
   public SeedLinkSource() {
+    LOGGER.debug("Constructing new seedlink source");
     seedLinkClientList = new ArrayList<SeedLinkClient>();
+    gulperMap = new HashMap<String, Gulper>();
+    gulperListeners = new HashMap<String, SeedLinkGulperListener>();
+
   }
 
   /**
@@ -71,7 +86,8 @@ public class SeedLinkSource extends SeismicDataSource {
    * @param s the colon separated parameters.
    */
   public SeedLinkSource(String name, String s) {
-    seedLinkClientList = new ArrayList<SeedLinkClient>();
+    this();
+    LOGGER.debug("Constructing new seedlink source2");
     this.name = name;
     parse(s);
   }
@@ -91,7 +107,7 @@ public class SeedLinkSource extends SeismicDataSource {
    * Close the data source.
    */
   public void close() {
-    System.err.println("TOMP SAYS CLOSING source");
+    System.err.println("TOMP SAYS CLOSING source: " + seedLinkClientList.size());
     // close clients
     synchronized (seedLinkClientList) {
       if (seedLinkClientList.size() != 0) {
@@ -242,8 +258,22 @@ public class SeedLinkSource extends SeismicDataSource {
    * @return the wave or null if none.
    */
   public Wave getWave(String scnl, double t1, double t2) {
-    GulperList.INSTANCE.requestGulper("sls:" + scnl, new NopGulperListener(), this.getCopy(), scnl,
-        t1, t2, 0, 0);
+    SeedLinkGulperListener gulperListener = gulperListeners.get(scnl);
+    if (gulperListener != null && gulperListener.isAlive() == false) {
+      gulperListeners.remove(scnl);
+      gulperListener = null;
+    }
+    
+    if (gulperListener == null) {
+      gulperListener = new SeedLinkGulperListener();
+      gulperListeners.put(scnl, gulperListener);
+      Gulper gulper = GulperList.INSTANCE.requestGulper(getGulperKey(scnl), gulperListener,
+          this.getCopy(), scnl, t1, t2, 0, 0);
+      gulperListener.setGulper(gulper);
+    }
+
+    SeedLinkGulperListener gulperListner = gulperListeners.get(scnl);
+    gulperListner.read();
 
     return CachedDataSource.getInstance().getBestWave(scnl, t1, t2);
 
@@ -329,4 +359,5 @@ public class SeedLinkSource extends SeismicDataSource {
     return String.format("%s;%s:%s:%d", name, DataSourceType.getShortName(SeedLinkSource.class),
         host, port);
   }
+
 }
