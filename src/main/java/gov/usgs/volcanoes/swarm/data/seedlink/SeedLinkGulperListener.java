@@ -1,12 +1,10 @@
-package gov.usgs.volcanoes.swarm.data.seedLink;
-
-import java.util.Map.Entry;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package gov.usgs.volcanoes.swarm.data.seedlink;
 
 import gov.usgs.volcanoes.swarm.data.Gulper;
 import gov.usgs.volcanoes.swarm.data.GulperListener;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SeedLinkGulperListener implements GulperListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(SeedLinkGulperListener.class);
@@ -27,8 +25,11 @@ public class SeedLinkGulperListener implements GulperListener {
     LOGGER.debug("gulper stopped");
   }
 
+  /**
+   * Gulper received new data.
+   */
   public void gulperGulped(double t1, double t2, boolean success) {
-    LOGGER.debug("gulper gulped");
+    LOGGER.debug("gulper {} gulped", gulper.hashCode());
     long now = System.currentTimeMillis();
     if (now - lastRead > 2 * SeedLinkSource.GULP_DELAY) {
       LOGGER.debug("killing gulper");

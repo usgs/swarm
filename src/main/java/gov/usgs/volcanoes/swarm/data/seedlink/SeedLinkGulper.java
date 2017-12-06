@@ -1,4 +1,4 @@
-package gov.usgs.volcanoes.swarm.data.seedLink;
+package gov.usgs.volcanoes.swarm.data.seedlink;
 
 import gov.usgs.volcanoes.swarm.data.Gulper;
 import gov.usgs.volcanoes.swarm.data.GulperList;
@@ -15,6 +15,18 @@ public class SeedLinkGulper extends Gulper {
   /** The start end time. */
   private final StartEndTime startEndTime;
 
+  /**
+   * Constructor.
+   * 
+   * @param gl gulper list
+   * @param k key
+   * @param source data source
+   * @param ch channel
+   * @param t1 start time
+   * @param t2 end time
+   * @param size gulper size
+   * @param delay gulper delay
+   */
   public SeedLinkGulper(GulperList gl, String k, SeedLinkSource source,
       String ch, double t1, double t2, int size, int delay) {
     super(gl, k, source, ch, t1, t2, size, delay);

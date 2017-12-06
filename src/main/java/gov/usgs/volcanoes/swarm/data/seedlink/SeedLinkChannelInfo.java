@@ -1,10 +1,4 @@
-package gov.usgs.volcanoes.swarm.data.seedLink;
-
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+package gov.usgs.volcanoes.swarm.data.seedlink;
 
 import gov.usgs.volcanoes.core.xml.SimpleXmlParser;
 import gov.usgs.volcanoes.core.xml.XmlDocHandler;
@@ -12,6 +6,12 @@ import gov.usgs.volcanoes.swarm.AbstractChannelInfo;
 import gov.usgs.volcanoes.swarm.ChannelUtil;
 import gov.usgs.volcanoes.swarm.GroupsType;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * SeedLink channel information.
@@ -22,7 +22,7 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo {
   /**
    * SeedLink XML document handler.
    */
-  protected class SeedLinkStationXMLDocHandler implements XmlDocHandler {
+  protected class SeedLinkStationXmlDocHandler implements XmlDocHandler {
     private void clearChannel() {
       channel = null;
       location = null;
@@ -36,33 +36,33 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo {
     }
 
     /**
-     * Document ended
+     * Document ended.
      * 
-     * @throws Exception
+     * @throws Exception when things go wrong
      */
     public void endDocument() throws Exception {}
 
     /**
-     * Element ended
+     * Element ended.
      * 
      * @param tag Tag name
-     * @throws Exception
+     * @throws Exception when things go wrong
      */
     public void endElement(String tag) throws Exception {}
 
     /**
-     * Document started
+     * Document started.
      * 
-     * @throws Exception
+     * @throws Exception when things go wrong
      */
     public void startDocument() throws Exception {}
 
     /**
-     * Element started
+     * Element started.
      * 
      * @param tag Tag name
      * @param h map of tag attributes and values
-     * @throws Exception
+     * @throws Exception when things go wrong
      */
     public void startElement(String tag, Map<String, String> h)
         throws Exception {
@@ -96,10 +96,10 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo {
     }
 
     /**
-     * Text or CDATA found
+     * Text or CDATA found.
      * 
-     * @param str
-     * @throws Exception
+     * @param str string
+     * @throws Exception when things go wrong
      */
     public void text(String str) throws Exception {}
   }
@@ -122,11 +122,17 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo {
   private String station;
   private String type;
 
-
+  /**
+   * Constructor.
+   * 
+   * @param dataSource data source
+   * @param infoStr info string
+   * @throws Exception when things go wrong
+   */
   public SeedLinkChannelInfo(SeedLinkSource dataSource, String infoStr) throws Exception {
     this.dataSource = dataSource;
     Reader reader = new StringReader(infoStr);
-    SimpleXmlParser.parse(new SeedLinkStationXMLDocHandler(), reader);
+    SimpleXmlParser.parse(new SeedLinkStationXmlDocHandler(), reader);
   }
 
   /**

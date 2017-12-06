@@ -1,4 +1,4 @@
-package gov.usgs.volcanoes.swarm.data.seedLink;
+package gov.usgs.volcanoes.swarm.data.seedlink;
 
 /**
  * Stores the start and end time.

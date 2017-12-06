@@ -1,4 +1,15 @@
-package gov.usgs.volcanoes.swarm.data.seedLink;
+package gov.usgs.volcanoes.swarm.data.seedlink;
+
+import gov.usgs.volcanoes.core.data.HelicorderData;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.swarm.ChannelUtil;
+import gov.usgs.volcanoes.swarm.data.CachedDataSource;
+import gov.usgs.volcanoes.swarm.data.DataSourceType;
+import gov.usgs.volcanoes.swarm.data.Gulper;
+import gov.usgs.volcanoes.swarm.data.GulperList;
+import gov.usgs.volcanoes.swarm.data.GulperListener;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,23 +23,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import gov.usgs.volcanoes.core.data.HelicorderData;
-import gov.usgs.volcanoes.core.data.Scnl;
-import gov.usgs.volcanoes.core.data.Wave;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.swarm.ChannelUtil;
-import gov.usgs.volcanoes.swarm.data.CachedDataSource;
-import gov.usgs.volcanoes.swarm.data.DataSourceType;
-import gov.usgs.volcanoes.swarm.data.Gulper;
-import gov.usgs.volcanoes.swarm.data.GulperList;
-import gov.usgs.volcanoes.swarm.data.GulperListener;
-import gov.usgs.volcanoes.swarm.data.NopGulperListener;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 
 /**
  * An implementation of <code>SeismicDataSource</code> that connects to an
@@ -66,16 +63,15 @@ public class SeedLinkSource extends SeismicDataSource {
   /** SeedLink client list. */
   private final List<SeedLinkClient> seedLinkClientList;
 
-  /** Active gulpers. */
-  private Map<String, Gulper> gulperMap;
-
   /** time of last gulped data access. */
   private Map<String, SeedLinkGulperListener> gulperListeners;
 
+  /**
+   * Default constructor.
+   */
   public SeedLinkSource() {
     LOGGER.debug("Constructing new seedlink source");
     seedLinkClientList = new ArrayList<SeedLinkClient>();
-    gulperMap = new HashMap<String, Gulper>();
     gulperListeners = new HashMap<String, SeedLinkGulperListener>();
 
   }
@@ -93,14 +89,18 @@ public class SeedLinkSource extends SeismicDataSource {
   }
 
 
+  /**
+   * Parse config string.
+   */
   public void parse(String params) {
     this.params = params;
     String[] ss = params.split(":");
     int ssIndex = 0;
     host = ss[ssIndex++];
-    port = Integer.parseInt(ss[ssIndex++]);
-    if (INFO_FILE_TEXT != null)
+    port = Integer.parseInt(ss[ssIndex]);
+    if (INFO_FILE_TEXT != null) {
       infoStringFile = new File(INFO_FILE_TEXT + host + port + ".xml");
+    }
   }
 
   /**
@@ -171,7 +171,9 @@ public class SeedLinkSource extends SeismicDataSource {
         LOGGER.error("Cannot read seedlink channel cache. ({})", infoStringFile);
       } finally {
         try {
-          stream.close();
+          if (stream != null) {
+            stream.close();
+          }
         } catch (IOException ignore) {
           // ignore
         }
@@ -192,7 +194,9 @@ public class SeedLinkSource extends SeismicDataSource {
       LOGGER.error("Cannot write seedlink channel cache. ({})", infoStringFile);
     } finally {
       try {
-        writer.close();
+        if (writer != null) {
+          writer.close();
+        }
       } catch (IOException ignore) {
         // ignore
       }
@@ -236,9 +240,9 @@ public class SeedLinkSource extends SeismicDataSource {
     if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10)
         || hd.getEndTime() < t2) {
       requestGulper(scnl, t1, t2, gl);
-    }
-    // if data end time is less than requested
-    else if (hd.getEndTime() < t2) {
+
+    } else if (hd.getEndTime() < t2) {
+      // if data end time is less than requested
       requestGulper(scnl, hd.getEndTime(), t2, gl);
     }
 
@@ -263,7 +267,7 @@ public class SeedLinkSource extends SeismicDataSource {
       gulperListeners.remove(scnl);
       gulperListener = null;
     }
-    
+
     if (gulperListener == null) {
       gulperListener = new SeedLinkGulperListener();
       gulperListeners.put(scnl, gulperListener);

@@ -1,7 +1,7 @@
 package gov.usgs.volcanoes.swarm.data;
 
 import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
-import gov.usgs.volcanoes.swarm.data.seedLink.SeedLinkSource;
+import gov.usgs.volcanoes.swarm.data.seedlink.SeedLinkSource;
 
 /**
  * Enumerate known types of SeismicDataSources and their short names.

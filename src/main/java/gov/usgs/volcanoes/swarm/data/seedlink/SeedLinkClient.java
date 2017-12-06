@@ -4,7 +4,19 @@
  * https://creativecommons.org/publicdomain/zero/1.0/legalcode
  */
 
-package gov.usgs.volcanoes.swarm.data.seedLink;
+package gov.usgs.volcanoes.swarm.data.seedlink;
+
+import edu.iris.Fissures.seed.container.Blockette;
+import edu.iris.Fissures.seed.container.BlocketteDecoratorFactory;
+import edu.iris.Fissures.seed.container.Btime;
+import edu.iris.Fissures.seed.container.Waveform;
+import edu.iris.Fissures.seed.exception.SeedException;
+
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.swarm.ChannelInfo;
+import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -14,23 +26,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import edu.iris.Fissures.seed.container.Blockette;
-import edu.iris.Fissures.seed.container.BlocketteDecoratorFactory;
-import edu.iris.Fissures.seed.container.Btime;
-import edu.iris.Fissures.seed.container.Waveform;
-import edu.iris.Fissures.seed.exception.SeedException;
-import gov.usgs.volcanoes.core.data.Wave;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.swarm.ChannelInfo;
-import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import nl.knmi.orfeus.seedlink.SLLog;
 import nl.knmi.orfeus.seedlink.SLPacket;
 import nl.knmi.orfeus.seedlink.SeedLinkException;
 import nl.knmi.orfeus.seedlink.client.SeedLinkConnection;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * SeedLink client.
@@ -52,8 +54,9 @@ public class SeedLinkClient implements Runnable {
   private static Btime getBtime(Blockette blockette, int fieldNum)
       throws SeedException {
     Object obj = blockette.getFieldVal(fieldNum);
-    if (obj instanceof Btime)
+    if (obj instanceof Btime) {
       return (Btime) obj;
+    }
     return new Btime(obj.toString());
   }
 
@@ -68,8 +71,9 @@ public class SeedLinkClient implements Runnable {
   private static double getDouble(Blockette blockette, int fieldNum)
       throws SeedException {
     Object obj = blockette.getFieldVal(fieldNum);
-    if (obj instanceof Number)
+    if (obj instanceof Number) {
       return ((Number) obj).doubleValue();
+    }
     return Double.parseDouble(obj.toString());
   }
 
@@ -118,7 +122,7 @@ public class SeedLinkClient implements Runnable {
   /**
    * Create the SeedLink client.
    * 
-   * @param server the server host.
+   * @param host the server host.
    * @param port the server port.
    */
   public SeedLinkClient(String host, int port) {
@@ -326,9 +330,8 @@ public class SeedLinkClient implements Runnable {
    * 
    */
   private boolean packetHandler(int count, SLPacket slpack) throws Exception {
-    if (isKilled()) // if killed
-    {
-      return true; // close the connection
+    if (isKilled()) {
+      return true;
     }
 
     if (count % 10000 == 0) {
