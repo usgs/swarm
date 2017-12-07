@@ -13,11 +13,14 @@ import java.util.Map;
  * 
  * @author Kevin Frechette (ISTI)
  */
-public abstract class ChannelUtil {
+public final class ChannelUtil {
   /** Groups map has channel information as key and groups as value. */
   private static final Map<AbstractChannelInfo, List<String>> groupsMap =
       new HashMap<AbstractChannelInfo, List<String>>();
 
+  private ChannelUtil() {
+    // uninstantiatable
+  }
   /**
    * Add the channel.
    * 
@@ -78,7 +81,7 @@ public abstract class ChannelUtil {
    * @param groupsType groups type.
    * @return the group.
    */
-  public static final String getGroup(AbstractChannelInfo ch, GroupsType groupsType) {
+  private static final String getGroup(AbstractChannelInfo ch, GroupsType groupsType) {
     switch (groupsType) {
       case SITE:
         return getSiteName(ch);
@@ -118,7 +121,7 @@ public abstract class ChannelUtil {
    * @param ch the channel information.
    * @return the site name if available otherwise the station name.
    */
-  public static final String getSiteName(AbstractChannelInfo ch) {
+  private static final String getSiteName(AbstractChannelInfo ch) {
     String s = ch.getSiteName();
     if (s == null) {
       s = ch.getStation();
