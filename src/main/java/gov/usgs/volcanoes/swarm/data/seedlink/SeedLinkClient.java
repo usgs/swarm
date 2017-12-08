@@ -357,7 +357,8 @@ public class SeedLinkClient implements Runnable {
     }
     // process message and return if terminated
     if (type == SLPacket.TYPE_SLINFT) {
-      LOGGER.debug("received INFO packet:\n{}", slconn.getInfoString());
+      // LOGGER.debug("received INFO packet:\n{}", slconn.getInfoString());
+      LOGGER.debug("infolevel: {}", infolevel);
       if (infolevel != null) {
         return true; // close the connection
       } else {
