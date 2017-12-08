@@ -526,7 +526,7 @@
 		<dependency>
 			<groupId>edu.sc.seis</groupId>
 			<artifactId>seisFile</artifactId>
-			<version>1.8.0</version>
+			<version>1.8.0-JDK7</version>
 		</dependency>
 		<dependency>
 			<groupId>net.alomax</groupId>
