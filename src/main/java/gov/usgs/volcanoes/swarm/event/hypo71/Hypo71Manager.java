@@ -61,6 +61,7 @@ public class Hypo71Manager {
   public boolean calculate(String inputFile) throws IOException, ParseException {
     try {
       Hypo71Settings settings = Hypo71SettingsDialog.getInstance().getSettings();
+      controlCard.setKSING(settings.getKsing());
       hypo71.calculateHypo71(description, settings.getTestValues(), stationsList,
           crustalModelList, controlCard, phaseRecordsList, inputFile);
     } catch (Exception e) {
@@ -168,10 +169,8 @@ public class Hypo71Manager {
       useS = "USES";
     }
     // icard
-    if (station.length() > 4) {
-      station = station.substring(0, 4);
-    }
-    String icard = station + pRemark + " " + pTime;
+    //String icard = station + pRemark + " " + pTime;
+    String icard = null;
     
     // create phase record
     PhaseRecord phaseRecord = new PhaseRecord(station, pRemark, 0.0f, 

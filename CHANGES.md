@@ -3,6 +3,8 @@
   * Read blockette100 sample rate in SEED file if it exists
   * Add xmlns:q and xmlns attributes to exported QuakeML files
   * Allow 2 decimal places for Butterworth Filter corners
+  * Support Hypo71 KSING option
+  * Fix printing of 5 char station names in Hypo71 output
 
 ## Version 2.8.2
   * Save clipboard to layout
