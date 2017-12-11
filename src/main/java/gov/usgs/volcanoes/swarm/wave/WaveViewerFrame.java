@@ -64,6 +64,7 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
     kill = false;
     updateThread = new Thread(this, "WaveViewerFrame-" + sds + "-" + ch);
     createUi();
+    updateThread.start();
   }
 
   /**
@@ -153,8 +154,6 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
     this.setContentPane(mainPanel);
     this.setSize(750, 280);
     this.setVisible(true);
-
-    updateThread.start();
   }
 
   /**

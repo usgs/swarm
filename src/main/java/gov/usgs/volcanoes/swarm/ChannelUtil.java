@@ -13,13 +13,10 @@ import java.util.Map;
  * 
  * @author Kevin Frechette (ISTI)
  */
-public class ChannelUtil {
-  /** Empty string. */
-  public static final String EMPTY = "";
-
+public abstract class ChannelUtil {
   /** Groups map has channel information as key and groups as value. */
-  private static final Map<IChannelInfo, List<String>> groupsMap =
-      new HashMap<IChannelInfo, List<String>>();
+  private static final Map<AbstractChannelInfo, List<String>> groupsMap =
+      new HashMap<AbstractChannelInfo, List<String>>();
 
   /**
    * Add the channel.
@@ -29,7 +26,7 @@ public class ChannelUtil {
    * @param source the seismic data source.
    * @return the channel information text.
    */
-  public static String addChannel(List<String> channels, IChannelInfo ch,
+  public static String addChannel(List<String> channels, AbstractChannelInfo ch,
       SeismicDataSource source) {
     final String formattedScnl = ch.getFormattedSCNL();
     if (!channels.contains(formattedScnl)) {
@@ -71,7 +68,7 @@ public class ChannelUtil {
   public static final String getFormattedSCNL(String station, String channel, String network,
       String location) {
     return station + " " + channel + " " + network
-        + (location.length() > 0 ? (" " + location) : EMPTY);
+        + (location.length() > 0 ? (" " + location) : "");
   }
 
   /**
@@ -81,7 +78,7 @@ public class ChannelUtil {
    * @param groupsType groups type.
    * @return the group.
    */
-  public static final String getGroup(IChannelInfo ch, GroupsType groupsType) {
+  public static final String getGroup(AbstractChannelInfo ch, GroupsType groupsType) {
     switch (groupsType) {
       case SITE:
         return getSiteName(ch);
@@ -102,7 +99,7 @@ public class ChannelUtil {
    * @param groupsType groups type.
    * @return the list of groups.
    */
-  public static final List<String> getGroups(IChannelInfo ch, GroupsType groupsType) {
+  public static final List<String> getGroups(AbstractChannelInfo ch, GroupsType groupsType) {
     List<String> groups = groupsMap.get(ch);
     if (groups == null) {
       groups = new ArrayList<String>(1);
@@ -121,7 +118,7 @@ public class ChannelUtil {
    * @param ch the channel information.
    * @return the site name if available otherwise the station name.
    */
-  public static final String getSiteName(IChannelInfo ch) {
+  public static final String getSiteName(AbstractChannelInfo ch) {
     String s = ch.getSiteName();
     if (s == null) {
       s = ch.getStation();

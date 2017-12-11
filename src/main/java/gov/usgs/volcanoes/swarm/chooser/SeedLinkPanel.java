@@ -5,7 +5,7 @@ import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.FormLayout;
 
 import gov.usgs.volcanoes.swarm.data.DataSourceType;
-import gov.usgs.volcanoes.swarm.data.seedLink.SeedLinkSource;
+import gov.usgs.volcanoes.swarm.data.seedlink.SeedLinkSource;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;

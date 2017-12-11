@@ -68,6 +68,6 @@ public class ChannelGroupInfo extends ChannelInfo {
    * @return the list of groups.
    */
   public List<String> getGroups() {
-    return getGroups(this, groupsType);
+    return ChannelUtil.getGroups(this, groupsType);
   }
 }

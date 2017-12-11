@@ -34,7 +34,7 @@ public class ChannelInfo extends AbstractChannelInfo {
     this.channel = channel;
     this.location = location;
     formattedSCNL =
-        getFormattedSCNL(stationInfo.getStation(), channel, stationInfo.getNetwork(), location);
+        ChannelUtil.getFormattedSCNL(stationInfo.getStation(), channel, stationInfo.getNetwork(), location);
   }
 
   /**
@@ -44,9 +44,9 @@ public class ChannelInfo extends AbstractChannelInfo {
    */
   public ChannelInfo(String s) {
     String station;
-    String channel = EMPTY;
-    String network = EMPTY;
-    String location = EMPTY;
+    String channel = "";
+    String network = "";
+    String location = "";
     double latitude = Double.NaN;
     double longitude = Double.NaN;
 
@@ -69,7 +69,7 @@ public class ChannelInfo extends AbstractChannelInfo {
     stationInfo = new StationInfo(station, network, latitude, longitude);
     this.channel = channel;
     this.location = location;
-    formattedSCNL = getFormattedSCNL(station, channel, network, location);
+    formattedSCNL = ChannelUtil.getFormattedSCNL(station, channel, network, location);
   }
 
   /**
