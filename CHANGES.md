@@ -5,6 +5,7 @@
   * Allow 2 decimal places for Butterworth Filter corners
   * Support Hypo71 KSING option
   * Fix printing of 5 char station names in Hypo71 output
+  * Display start date on clipboard waveforms
 
 ## Version 2.8.2
   * Save clipboard to layout
