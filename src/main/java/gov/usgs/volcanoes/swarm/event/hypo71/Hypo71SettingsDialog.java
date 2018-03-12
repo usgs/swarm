@@ -10,9 +10,11 @@ import gov.usgs.volcanoes.swarm.SwarmModalDialog;
 import java.awt.BorderLayout;
 import java.io.IOException;
 
+import javax.swing.ButtonGroup;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
@@ -26,6 +28,8 @@ public class Hypo71SettingsDialog extends SwarmModalDialog {
   private static final long serialVersionUID = 2107880206447383082L;
   private static Hypo71SettingsDialog dialog;
   private Hypo71Settings settings = new Hypo71Settings();
+  private JRadioButton ksing0Button;
+  private JRadioButton ksing1Button;
   private JTextField[] test;
   private static final String testMessage = "Value must be a numeric.";
 
@@ -56,10 +60,30 @@ public class Hypo71SettingsDialog extends SwarmModalDialog {
     super.createUi();
     settings = new Hypo71Settings();
     
-    FormLayout layout = new FormLayout("center:50dlu, 10dlu, 50dlu");
+    FormLayout layout = new FormLayout("center:50dlu, 10dlu, 50dlu, 50dlu");
     DefaultFormBuilder builder = new DefaultFormBuilder(layout).border(Borders.DIALOG);
     
-    // Test varialbes
+    // KSING
+    builder.appendSeparator("KSING");
+    ksing0Button = new JRadioButton("Use original SINGLE subroutine. (KSING=0)");
+    ksing0Button.setToolTipText("Locate in-network earthquakes only.");
+    ButtonGroup ksingGroup = new ButtonGroup();
+    ksingGroup.add(ksing0Button);
+    builder.append(ksing0Button, 4);
+    builder.nextLine();
+    ksing1Button = new JRadioButton("Use modified SINGLE subroutine. (KSING=1)");
+    ksing1Button.setToolTipText(
+        "Locate earthquakes outside the network using extended distance weighting.");
+    ksingGroup.add(ksing1Button);
+    builder.append(ksing1Button, 4);
+    builder.nextLine();
+    if (settings.getKsing() == 0) {
+      ksing0Button.setSelected(true);
+    } else {
+      ksing1Button.setSelected(true);      
+    }
+    
+    // Test variables
     builder.appendSeparator("Test Variables");
     test = new JTextField[Hypo71Settings.testDefault.length];
     for (int i = 1; i <= test.length; i++) {
@@ -110,6 +134,14 @@ public class Hypo71SettingsDialog extends SwarmModalDialog {
    * Set settings and save to file.
    */
   private void saveSettings() {
+    
+    // KSING
+    if (ksing0Button.isSelected()) {
+      settings.setProperty(Hypo71Settings.KSING, "0");
+    } else {
+      settings.setProperty(Hypo71Settings.KSING, "1");
+    }
+    
     // Test variables
     for (int i = 1; i <= test.length; i++) {
       String propertyName = String.format(Hypo71Settings.TEST + "%02d", i);
@@ -135,6 +167,12 @@ public class Hypo71SettingsDialog extends SwarmModalDialog {
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#wasCancelled()
    */
   protected void wasCancelled() {
+    String ksing = settings.getProperty(Hypo71Settings.KSING);
+    if (ksing.equals("0")) {
+      ksing0Button.setSelected(true);
+    } else {
+      ksing1Button.setSelected(true);
+    }
     for (int i = 1; i <= Hypo71Settings.testDefault.length; i++) {
       String propertyName = String.format(Hypo71Settings.TEST + "%02d", i);
       String text = settings.getProperty(propertyName);
