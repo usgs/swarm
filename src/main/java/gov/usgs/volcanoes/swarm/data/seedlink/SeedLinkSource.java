@@ -275,7 +275,7 @@ public class SeedLinkSource extends SeismicDataSource {
       gulperListener = new SeedLinkGulperListener();
       gulperListeners.put(scnl, gulperListener);
       Gulper gulper = GulperList.INSTANCE.requestGulper(getGulperKey(scnl), gulperListener,
-          this.getCopy(), scnl, t1, t2, 0, 0);
+          this.getCopy(), scnl, t1, t2, 0, 1000);
       gulperListener.setGulper(gulper);
     }
 
