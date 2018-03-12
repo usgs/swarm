@@ -1,34 +1,12 @@
 package gov.usgs.volcanoes.swarm.wave;
 
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Paint;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Line2D;
-import java.awt.image.BufferedImage;
-import java.util.Arrays;
-import java.util.HashMap;
-
-import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
-import javax.swing.event.EventListenerList;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gov.usgs.volcanoes.core.data.SliceWave;
 import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.legacy.plot.Plot;
 import gov.usgs.volcanoes.core.legacy.plot.PlotException;
 import gov.usgs.volcanoes.core.legacy.plot.decorate.FrameDecorator;
+import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.FrameRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.wave.ParticleMotionRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.wave.SliceWaveRenderer;
@@ -49,6 +27,34 @@ import gov.usgs.volcanoes.swarm.event.PickWavePanel;
 import gov.usgs.volcanoes.swarm.time.UiTime;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
+
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Paint;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
+import java.awt.image.BufferedImage;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.TimeZone;
+
+import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
+import javax.swing.event.EventListenerList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class WaveViewPanel extends JComponent {
@@ -124,7 +130,7 @@ public class WaveViewPanel extends JComponent {
 
   protected boolean pauseCursorMark;
   protected double time;
-
+  
   // pick data
   private PickData pickData;
 
@@ -141,7 +147,6 @@ public class WaveViewPanel extends JComponent {
     pickData = new PickData();
     setupMouseHandler();
   }
-  
 
   /**
    * Constructor.
@@ -904,7 +909,6 @@ public class WaveViewPanel extends JComponent {
 
       annotateImage(g2);
 
-
       if (!Double.isNaN(cursorMark)) {
         paintCursor(g2);
       }
@@ -1174,6 +1178,7 @@ public class WaveViewPanel extends JComponent {
     waveRenderer.setRemoveBias(settings.removeBias);
     if (channel != null && displayTitle) {
       waveRenderer.setTitle(channel);
+      waveRenderer.setDate(J2kSec.asDate(startTime));
     }
 
     waveRenderer.update();
@@ -1218,6 +1223,7 @@ public class WaveViewPanel extends JComponent {
     spectraRenderer.setYUnitText("Power");
     if (channel != null && displayTitle) {
       spectraRenderer.setTitle(channel);
+      spectraRenderer.setDate(J2kSec.asDate(startTime));      
     }
 
     spectraRenderer.update();
@@ -1272,6 +1278,7 @@ public class WaveViewPanel extends JComponent {
 
     if (channel != null && displayTitle) {
       spectrogramRenderer.setTitle(channel);
+      spectrogramRenderer.setDate(J2kSec.asDate(startTime));
     }
 
     spectrogramRenderer.setYUnitText("Frequency (Hz)");
@@ -1360,9 +1367,13 @@ public class WaveViewPanel extends JComponent {
           if (settings.filterOn) {
             filter(w);
           }
-          SliceWave sw = new SliceWave(w);
-          sw.setSlice(startTime, endTime);
-          data.put(direction, sw.getSignal());
+          try {
+            SliceWave sw = new SliceWave(w);
+            sw.setSlice(startTime, endTime);
+            data.put(direction, sw.getSignal());
+          } catch (NullPointerException e) {
+            data.put(direction, new double[0]);            
+          }
         } else {
           data.put(direction, new double[0]);
         }
@@ -1379,12 +1390,14 @@ public class WaveViewPanel extends JComponent {
     if (channel != null && displayTitle) {
       String title = s + " " + c.replaceFirst(".$", "*") + " " + n + " " + l;
       particleMotionRenderer.setTitle(title.trim());
+      particleMotionRenderer.setDate(J2kSec.asDate(startTime));
     }
     plot.addRenderer(particleMotionRenderer);
     if (useFilterLabel && settings.filterOn) {
       plot.addRenderer(getFilterLabel(getWidth() - rightWidth, getHeight() - bottomHeight,
           TextRenderer.RIGHT, TextRenderer.BOTTOM));
     }
+    
     translation = null;
   }
   
@@ -1494,7 +1507,7 @@ public class WaveViewPanel extends JComponent {
     }
     return true;
   }
-
+ 
   /**
    * Get pick data.
    * @return pick data
