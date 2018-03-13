@@ -5,8 +5,6 @@ import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.legacy.plot.Plot;
 import gov.usgs.volcanoes.core.legacy.plot.PlotException;
 import gov.usgs.volcanoes.core.legacy.plot.decorate.FrameDecorator;
-import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
-import gov.usgs.volcanoes.core.legacy.plot.render.FrameRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.wave.ParticleMotionRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.wave.SliceWaveRenderer;
@@ -42,12 +40,8 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.TimeZone;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -633,7 +627,9 @@ public class WaveViewPanel extends JComponent {
         // S-P
         double spDuration = pickData.getSpDuration();
         if (!Double.isNaN(spDuration)) {
-          double spDistance = SwarmConfig.getInstance().pVelocity * spDuration;
+          double vp = SwarmConfig.getInstance().pVelocity;
+          double vs = vp/SwarmConfig.getInstance().velocityRatio;
+          double spDistance = spDuration * (vp*vs)/(vp-vs);
           pickStatus = String.format("S-P: %.2fs (%.2fkm)", spDuration, spDistance);
         }
         // Coda 
