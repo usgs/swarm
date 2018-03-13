@@ -167,7 +167,8 @@ public class PickSettingsDialog extends SwarmModalDialog {
    */
   protected void wasCancelled() {
     // revert uncertainty settings
-    if (settings.getProperty(PickSettings.WEIGHT_UNIT).equals(PickSettings.WeightUnit.SAMPLES)) {
+    WeightUnit unit = settings.getWeightUnit();
+    if (unit.equals(WeightUnit.SAMPLES)) {
       sampleButton.setSelected(true);
     } else {
       millisButton.setSelected(true);
