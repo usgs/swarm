@@ -37,6 +37,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.data.file.FileType;
 import gov.usgs.volcanoes.core.quakeml.EventSet;
 import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
@@ -58,9 +59,9 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
   private JMenuItem openFile;
   private JMenuItem closeFiles;
   private JMenuItem clearCache;
-  private JMenuItem exit;
-
   private JMenuItem options;
+  private JMenuItem save;
+  private JMenuItem exit;
 
   private String lastLayoutName;
   private JMenu layoutMenu;
@@ -211,6 +212,19 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
       }
     });
     fileMenu.add(options);
+
+    if (SwarmConfig.getInstance().saveConfig) {
+      save = new JMenuItem("Save Configuration");
+      save.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          SwarmConfig config = SwarmConfig.getInstance();
+          final ConfigFile configFile = config.toConfigFile();
+          configFile.remove("configFile");
+          configFile.writeToFile(config.configFilename);
+        }
+      });
+      fileMenu.add(save);
+    }
 
     fileMenu.addSeparator();
 
