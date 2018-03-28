@@ -64,6 +64,7 @@ public class SwarmConfig {
   public double durationB;
   
   public double pVelocity;
+  public double velocityRatio;
 
   public int span;
   public int timeChunk;
@@ -358,6 +359,7 @@ public class SwarmConfig {
     durationB = StringUtils.stringToDouble(config.getString("durationB"), -0.85);
 
     pVelocity = StringUtils.stringToDouble(config.getString("pVelocity"), 6.0);
+    velocityRatio = StringUtils.stringToDouble(config.getString("velocityRatio"), 1.73);
 
     showClip = StringUtils.stringToBoolean(config.getString("showClip"), true);
     alertClip = StringUtils.stringToBoolean(config.getString("alertClip"), false);
@@ -539,6 +541,7 @@ public class SwarmConfig {
     config.put("durationB", Double.toString(durationB));
     
     config.put("pVelocity", Double.toString(pVelocity));
+    config.put("velocityRatio", Double.toString(velocityRatio));
 
     config.put("showClip", Boolean.toString(showClip));
     config.put("alertClip", Boolean.toString(alertClip));

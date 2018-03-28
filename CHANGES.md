@@ -1,3 +1,7 @@
+## Version 2.8.4
+  * Allow input of Vp/Vs ratio under File->Options
+  * Add option to save configuration file through File menu
+ 
 ## Version 2.8.3
   * Update seisFile library to 1.8.0
   * Read blockette100 sample rate in SEED file if it exists
