@@ -107,7 +107,6 @@ public class SeedLinkSource extends SeismicDataSource {
    * Close the data source.
    */
   public void close() {
-    System.err.println("TOMP SAYS CLOSING source: " + seedLinkClientList.size());
     // close clients
     synchronized (seedLinkClientList) {
       if (seedLinkClientList.size() != 0) {
@@ -133,6 +132,7 @@ public class SeedLinkSource extends SeismicDataSource {
    */
   public List<String> getChannels() {
     String infoString = readChannelCache();
+
     if (infoString == null) {
       final SeedLinkClient client = createClient();
       infoString = client.getInfoString();
@@ -186,6 +186,9 @@ public class SeedLinkSource extends SeismicDataSource {
 
 
   private void writeChannelCache(String infoString) {
+    if (infoStringFile == null) {
+      return;
+    }
     FileWriter writer = null;
     try {
       writer = new FileWriter(infoStringFile);
@@ -272,7 +275,7 @@ public class SeedLinkSource extends SeismicDataSource {
       gulperListener = new SeedLinkGulperListener();
       gulperListeners.put(scnl, gulperListener);
       Gulper gulper = GulperList.INSTANCE.requestGulper(getGulperKey(scnl), gulperListener,
-          this.getCopy(), scnl, t1, t2, 0, 0);
+          this.getCopy(), scnl, t1, t2, 0, 1000);
       gulperListener.setGulper(gulper);
     }
 
