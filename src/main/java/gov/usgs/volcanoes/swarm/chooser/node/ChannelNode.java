@@ -6,12 +6,12 @@
 
 package gov.usgs.volcanoes.swarm.chooser.node;
 
-import javax.swing.Icon;
-
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
+
+import javax.swing.Icon;
 
 public class ChannelNode extends AbstractChooserNode {
   public static final int ONE_DAY_S = 60 * 60 * 24;
@@ -25,42 +25,58 @@ public class ChannelNode extends AbstractChooserNode {
     label = channel;
   }
 
+  /**
+   * Get icon for channel bullet.
+   * @see gov.usgs.volcanoes.swarm.chooser.node.AbstractChooserNode#getIcon()
+   */
   public Icon getIcon() {
     Metadata md = SwarmConfig.getInstance().getMetadata(channel);
-    if (md == null || !md.isTouched())
+    if (md == null || !md.isTouched()) {
       return Icons.graybullet;
-    else if (md.hasLonLat())
+    } else if (md.hasLonLat()) {
       return Icons.bluebullet;
-    else
+    } else {
       return Icons.bullet;
+    }
   }
 
   public String getChannel() {
     return channel;
   }
 
+  /**
+   * Get tool tip for channel bullet.
+   * @see gov.usgs.volcanoes.swarm.chooser.node.AbstractChooserNode#getToolTip()
+   */
   public String getToolTip() {
     Metadata md = SwarmConfig.getInstance().getMetadata(channel);
-    if (md == null)
+    if (md == null) {
       return null;
+    }
     double minTime = md.getMinTime();
     double maxTime = md.getMaxTime();
-    if (Double.isNaN(minTime) || Double.isNaN(maxTime))
+    if (Double.isNaN(minTime) || Double.isNaN(maxTime)) {
       return "No data";
-    else
+    } else {
       return J2kSec.format(TOOL_TIP_DATE_FORMAT, minTime) + " - "
           + J2kSec.format(TOOL_TIP_DATE_FORMAT, maxTime);
+    }
   }
 
+  /**
+   * Check to see if data is stale.
+   * @return
+   */
   public boolean isStale() {
     Metadata md = SwarmConfig.getInstance().getMetadata(channel);
-    if (md == null)
+    if (md == null) {
       return false;
-
+    }
     double maxTime = md.getMaxTime();
-    if (Double.isNaN(maxTime) || J2kSec.now() - maxTime > ONE_DAY_S)
+    if (Double.isNaN(maxTime) || J2kSec.now() - maxTime > ONE_DAY_S) {
       return true;
-    else
+    } else {
       return false;
+    }
   }
 }
