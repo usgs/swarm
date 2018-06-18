@@ -1,3 +1,6 @@
+## Version 2.8.5 - TBD
+  * Fix issue with zoom/scroll for cached data source (#197)
+
 ## Version 2.8.4 - April 6, 2018
   * Allow input of Vp/Vs ratio under File->Options
   * Add option to save configuration file through File menu

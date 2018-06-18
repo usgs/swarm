@@ -1336,10 +1336,10 @@ public class WaveClipboardFrame extends SwarmFrame {
       public Object construct() {
         throbber.increment();
         final SeismicDataSource sds = wvp.getDataSource();
-        // Hacky fix for bug #84
         Wave sw = null;
         if (sds instanceof CachedDataSource) {
-          sw = ((CachedDataSource) sds).getBestWave(wvp.getChannel(), nst, net);
+          String station = wvp.getChannel().replace(' ', '$');
+          sw = ((CachedDataSource) sds).getBestWave(station, nst, net);
         } else {
           sw = sds.getWave(wvp.getChannel(), nst, net);
         }
