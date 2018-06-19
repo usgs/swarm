@@ -1,5 +1,38 @@
 package gov.usgs.volcanoes.swarm.wave;
 
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.contrib.PngEncoder;
+import gov.usgs.volcanoes.core.contrib.PngEncoderB;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.data.file.FileType;
+import gov.usgs.volcanoes.core.data.file.SeismicDataFile;
+import gov.usgs.volcanoes.core.data.file.WinDataFile;
+import gov.usgs.volcanoes.core.quakeml.Event;
+import gov.usgs.volcanoes.core.quakeml.Pick;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
+import gov.usgs.volcanoes.core.util.UiUtils;
+import gov.usgs.volcanoes.swarm.FileTypeDialog;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwarmFrame;
+import gov.usgs.volcanoes.swarm.SwarmUtil;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.Throbber;
+import gov.usgs.volcanoes.swarm.chooser.DataChooser;
+import gov.usgs.volcanoes.swarm.data.CachedDataSource;
+import gov.usgs.volcanoes.swarm.data.FileDataSource;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
+import gov.usgs.volcanoes.swarm.event.EventDialog;
+import gov.usgs.volcanoes.swarm.event.PickData;
+import gov.usgs.volcanoes.swarm.event.PickMenuBar;
+import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanelListener;
+import gov.usgs.volcanoes.swarm.time.TimeListener;
+import gov.usgs.volcanoes.swarm.time.WaveViewTime;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -48,39 +81,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.contrib.PngEncoder;
-import gov.usgs.volcanoes.core.contrib.PngEncoderB;
-import gov.usgs.volcanoes.core.data.Wave;
-import gov.usgs.volcanoes.core.data.file.FileType;
-import gov.usgs.volcanoes.core.data.file.SeismicDataFile;
-import gov.usgs.volcanoes.core.data.file.WinDataFile;
-import gov.usgs.volcanoes.core.quakeml.Event;
-import gov.usgs.volcanoes.core.quakeml.Pick;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
-import gov.usgs.volcanoes.core.util.UiUtils;
-import gov.usgs.volcanoes.swarm.FileTypeDialog;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.SwarmFrame;
-import gov.usgs.volcanoes.swarm.SwarmUtil;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.Throbber;
-import gov.usgs.volcanoes.swarm.chooser.DataChooser;
-import gov.usgs.volcanoes.swarm.data.CachedDataSource;
-import gov.usgs.volcanoes.swarm.data.FileDataSource;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
-import gov.usgs.volcanoes.swarm.event.EventDialog;
-import gov.usgs.volcanoes.swarm.event.PickData;
-import gov.usgs.volcanoes.swarm.event.PickMenuBar;
-import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanelListener;
-import gov.usgs.volcanoes.swarm.time.TimeListener;
-import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 
 /**
  * The wave clipboard internal frame.
@@ -268,30 +268,32 @@ public class WaveClipboardFrame extends SwarmFrame {
     UiUtils.mapKeyStrokeToButton(this, "P", "capture", captureButton);
     toolbar.add(captureButton);
     
-
+    // Pick and tag buttons
     toolbar.addSeparator();
+    
     pickMenuBar = new PickMenuBar(this);
     pickButton = SwarmUtil.createToolBarToggleButton(Icons.pick,
-        "Pick Mode", new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            if (pickButton.isSelected()) {
-              pickMenuBar.setVisible(true);
-            } else {
-              pickMenuBar.setVisible(false);
-            }
-            for (WaveViewPanel awp : waves) {
-              if (awp instanceof WaveViewPanel) {
-                WaveViewPanel wvp = (WaveViewPanel) awp;
-                wvp.getSettings().pickEnabled = pickButton.isSelected();
-              }
-            }
-            repaint();
-          }
-        });
+        "Pick Mode", null);
     pickButton.setEnabled(true);
     toolbar.add(pickButton);
     toolbar.add(pickMenuBar);
     pickMenuBar.setVisible(false);
+    pickButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (pickButton.isSelected()) {
+          pickMenuBar.setVisible(true);
+        } else {
+          pickMenuBar.setVisible(false);
+        }
+        for (WaveViewPanel awp : waves) {
+          if (awp instanceof WaveViewPanel) {
+            WaveViewPanel wvp = (WaveViewPanel) awp;
+            wvp.getSettings().pickEnabled = pickButton.isSelected();
+          }
+        }
+        repaint();
+      }
+    });
   }
 
   // TODO: don't write image on event thread
@@ -1504,6 +1506,7 @@ public class WaveClipboardFrame extends SwarmFrame {
   }
   
   /**
+   * Save Layout.
    * @see gov.usgs.volcanoes.swarm.SwarmFrame#saveLayout
    * (gov.usgs.volcanoes.core.configfile.ConfigFile, java.lang.String)
    */
@@ -1522,4 +1525,9 @@ public class WaveClipboardFrame extends SwarmFrame {
       wvs.save(cf, wavePrefix);
     }
   }
+  
+  public boolean isPickEnabled() {
+    return pickButton.isSelected();
+  }
+ 
 }

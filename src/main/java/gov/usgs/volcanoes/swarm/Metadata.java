@@ -337,6 +337,7 @@ public class Metadata implements Comparable<Metadata> {
     Instrument ins = chan.instrument;
     updateLongitude(ins.longitude);
     updateLatitude(ins.latitude);
+    updateHeight(ins.height);
     
     TimeSpan timeSpan = chan.timeSpan;
     updateMinTime(J2kSec.fromEpoch(timeSpan.startTime));
