@@ -4,7 +4,6 @@ import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.Version;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanel;
-import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
 import java.awt.event.ActionEvent;
@@ -40,25 +39,22 @@ public class TagMenu extends JPopupMenu {
   private String eventFileName;
 
   public static String[] classifications = {
+      "VT",
       "VT - distal",
-      "VT - proxima",
+      "VT - proximal",
       "LP",
       "VLP",
       "Hybrid",
-      "Explosion - small",
-      "Explosion - large",
-      "Tremor - broadband",
-      "Tremor - LF",
-      "Tremor - harmonic",
+      "Explosion",
+      "Tremor",
       "Lahar",
       "Pyroclastic Flow",
       "Regional",
+      "Rock Fall",
       "Teleseism",
       "Ice quake",
       "Noise",
-      "Cultural - helicopter",
-      "Cultural - mining",
-      "Cultural - other",
+      "Cultural",
       "Unclassified"
   };
   

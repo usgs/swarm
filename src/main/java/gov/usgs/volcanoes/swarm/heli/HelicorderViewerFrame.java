@@ -27,6 +27,7 @@ import gov.usgs.volcanoes.swarm.time.UiTime;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
 
@@ -421,6 +422,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
       public void actionPerformed(ActionEvent e) {
         if (tagButton.isSelected()) {
           helicorderViewPanel.getTagMenu().browseForEventFileName();
+          helicorderViewPanel.makeInsetPanelTagEnabled();
         } else {
           helicorderViewPanel.tagData.clear();
         }

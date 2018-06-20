@@ -540,9 +540,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
     insetWavePanel.setChannel(settings.channel);
     insetWavePanel.setDataSource(parent.getDataSource());
     insetWavePanel.setStatusText(parent.getStatusText());
-    insetWavePanel.getSettings().tagEnabled = parent.isTagEnabled();
-    insetWavePanel.setTagData(tagData);
-    insetWavePanel.setTagMenu(getTagMenu());
+    makeInsetPanelTagEnabled();
     
     Dimension d = getSize();
     insetHeight = getHeight() / 4;
@@ -594,6 +592,17 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
     worker.start();
   }
 
+  /**
+   * Make inset panel tag enabled.
+   */
+  protected void makeInsetPanelTagEnabled() {
+    if (insetWavePanel != null) {
+      insetWavePanel.getSettings().tagEnabled = parent.isTagEnabled();
+      insetWavePanel.setTagData(tagData);
+      insetWavePanel.setTagMenu(getTagMenu());    
+    }
+  }
+  
   /**
    * Set helicorder.
    * @param d helicorder data
