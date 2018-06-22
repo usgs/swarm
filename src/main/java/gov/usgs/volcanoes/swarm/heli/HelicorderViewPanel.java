@@ -356,7 +356,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
         if (parent.isTagEnabled()) {
           TagMenu tagMenu = getTagMenu();
           tagMenu.setJ2k(j2k);
-          tagMenu.show(HelicorderViewPanel.this, mx + 30, mx);
+          tagMenu.show(HelicorderViewPanel.this, mx, my);
         } 
       }
       /*
