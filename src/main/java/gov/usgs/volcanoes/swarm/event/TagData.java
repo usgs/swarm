@@ -4,8 +4,9 @@ import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.Time;
 
 import java.text.ParseException;
+import java.util.Comparator;
 
-public class TagData {
+public class TagData implements Comparator<TagData> {
   
   public String channel;
   public double startTime;
@@ -41,13 +42,22 @@ public class TagData {
   
   private void parse(String line) throws ParseException {
     String[] data = line.split(",");
-    channel = data[0].trim();
-    startTime = J2kSec.parse(Time.STANDARD_TIME_FORMAT, data[1].trim());
+    startTime = J2kSec.parse(Time.STANDARD_TIME_FORMAT, data[0].trim());
+    channel = data[1].trim();
     classification = data[2].trim();
   }
 
   public String toString() {
-    return channel + "," + J2kSec.format(Time.STANDARD_TIME_FORMAT, startTime) + ","
+    return J2kSec.format(Time.STANDARD_TIME_FORMAT, startTime) + "," + channel + ","
         + classification;
+  }
+
+  public String getTimeString() {
+    return J2kSec.format(Time.STANDARD_TIME_FORMAT, startTime);
+  }
+  
+  @Override
+  public int compare(TagData d1, TagData d2) {
+    return Double.compare(d1.startTime, d2.startTime);
   }
 }

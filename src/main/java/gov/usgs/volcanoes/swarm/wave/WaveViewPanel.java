@@ -42,9 +42,9 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Vector;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -130,7 +130,7 @@ public class WaveViewPanel extends JComponent {
   
   // pick and tag data
   private PickData pickData;
-  private Vector<TagData> tagData = new Vector<TagData>();
+  protected ArrayList<TagData> tagData = new ArrayList<TagData>();
   private TagMenu tagMenu;
   
   /**
@@ -1589,7 +1589,7 @@ public class WaveViewPanel extends JComponent {
     return mark2;
   }
 
-  public void setTagData(Vector<TagData> tagData) {
+  public void setTagData(ArrayList<TagData> tagData) {
     this.tagData = tagData;
   }
 

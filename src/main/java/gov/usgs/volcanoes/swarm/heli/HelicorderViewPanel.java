@@ -46,9 +46,9 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
-import java.util.Vector;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -115,7 +115,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
   private static SwarmConfig swarmConfig;
 
   private TagMenu tagMenu;
-  protected Vector<TagData> tagData = new Vector<TagData>();
+  protected ArrayList<TagData> tagData = new ArrayList<TagData>();
   
   /**
    * Constructor.
@@ -438,7 +438,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
             }
           }
           if (showTag != null) {
-            status += "\n" + showTag.toString();
+            status += "\n" + showTag.getTimeString() + " - " + showTag.classification;
           }
         }
         
@@ -1015,7 +1015,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
     }
   }
 
-  public Vector<TagData> getTagData() {
+  public ArrayList<TagData> getTagData() {
     return tagData;
   }
   

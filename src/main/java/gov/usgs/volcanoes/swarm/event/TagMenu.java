@@ -17,6 +17,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
@@ -30,7 +31,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * 
  * @author Diana Norgaard
  */
-public class TagMenu extends JPopupMenu {
+public class TagMenu extends JPopupMenu  {
 
 
   private static final String settingsFileName = "EventClassifications.config";
@@ -153,31 +154,15 @@ public class TagMenu extends JPopupMenu {
   
   /**
    * Write tag data to file.
-   * @param data tag data
    */
-  public synchronized void write(TagData data) {
+  public synchronized void write() {
     FileWriter fw;
     try {
-      fw = new FileWriter(eventFileName, true);
+      fw = new FileWriter(eventFileName, false);
       BufferedWriter bw = new BufferedWriter(fw);
-      bw.write(data.toString() + "\n");
-      bw.close();
-      fw.close();
-    } catch (IOException e) {
-      JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), e.getMessage(),
-          "Error writing tag", JOptionPane.ERROR_MESSAGE);
-    }
-  }
-
-  /**
-   * Rewrite tags to file. Usually called after a tag is deleted.
-   */
-  public synchronized void rewrite() {
-    FileWriter fw;
-    try {
-      fw = new FileWriter(eventFileName);
-      BufferedWriter bw = new BufferedWriter(fw);
-      for (TagData data : hvp.getTagData()) {
+      ArrayList<TagData> tagData = hvp.getTagData();
+      Collections.sort(tagData, new TagData());
+      for (TagData data : tagData) {
         bw.write(data.toString() + "\n");
       }
       bw.close();
@@ -212,7 +197,7 @@ public class TagMenu extends JPopupMenu {
           if (wvp != null) {
             wvp.repaint();
           }
-          write(tag);
+          write();
         }
       });
 
@@ -248,6 +233,7 @@ public class TagMenu extends JPopupMenu {
             if (wvp != null) {
               wvp.repaint();
             }
+            write();
           }
         } else {
           JOptionPane.showMessageDialog(hvp, "No event to delete.");
@@ -276,6 +262,7 @@ public class TagMenu extends JPopupMenu {
   public void setJ2k(double j2k) {
     this.j2k = j2k;
   }
+
 
 
 }
