@@ -22,6 +22,8 @@ import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.event.PickData;
 import gov.usgs.volcanoes.swarm.event.PickMenu;
 import gov.usgs.volcanoes.swarm.event.PickWavePanel;
+import gov.usgs.volcanoes.swarm.event.TagData;
+import gov.usgs.volcanoes.swarm.event.TagMenu;
 import gov.usgs.volcanoes.swarm.time.UiTime;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
@@ -40,6 +42,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -125,9 +128,11 @@ public class WaveViewPanel extends JComponent {
   protected boolean pauseCursorMark;
   protected double time;
   
-  // pick data
+  // pick and tag data
   private PickData pickData;
-
+  protected ArrayList<TagData> tagData = new ArrayList<TagData>();
+  private TagMenu tagMenu;
+  
   /**
    * Default constructor.
    */
@@ -288,6 +293,18 @@ public class WaveViewPanel extends JComponent {
           pickMenu.show(this, e.getX() + 30, e.getY());
         }
       }
+    } else if (settings.tagEnabled 
+        && (settings.viewType.equals(ViewType.WAVE)
+            || settings.viewType.equals(ViewType.SPECTROGRAM))) {
+      double[] t = getTranslation();
+      if (t != null) {
+        double j2k = e.getX() * t[0] + t[1];
+        if (j2k >= startTime && j2k <= endTime) {
+          tagMenu.setJ2k(j2k);
+          tagMenu.show(this, e.getX() + 30, e.getY());
+        }
+      }
+
     } else {
       settings.cycleType();
     }
@@ -869,6 +886,11 @@ public class WaveViewPanel extends JComponent {
         }
       }
     }
+    if (settings.tagEnabled) {
+      for (TagData tag : tagData) {
+        drawTag(tag, g2, true);
+      }
+    }
   }
 
   /**
@@ -1024,6 +1046,50 @@ public class WaveViewPanel extends JComponent {
     g2.drawRect((int) x, 3, lw, height + 2 * offset);
     
     g2.drawString(tag, (int) x + offset, 3 + (fm.getAscent() + offset));
+    
+  }
+
+  /**
+   * Draw tag.
+   * @param tag tag data to draw
+   * @param g2 graphics
+   * @param transparent true if tags should have transparent background
+   */
+  private void drawTag(TagData tag, Graphics2D g2, boolean transparent) {
+    if (tag == null) {
+      return;
+    }
+
+    double[] t = getTranslation();
+    double j2k = tag.startTime;
+    double x = (j2k - t[1]) / t[0];
+    
+    // draw line
+    g2.setColor(PickWavePanel.DARK_GREEN);
+    g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
+
+    // get color
+    Color color = Color.GRAY;
+    g2.setColor(color);
+
+    // draw tag/label box
+    if (transparent) {
+      g2.setColor(Color.WHITE);
+    } else {
+      g2.setColor(color);
+    }
+    FontMetrics fm = g2.getFontMetrics();
+    int width = fm.stringWidth(tag.classification);
+    int height = fm.getAscent();
+    int offset = 2;
+    int lw = width + 2 * offset;
+    g2.fillRect((int) x, 3, lw, height + 2 * offset);
+    
+    // draw text in tag/label box
+    g2.setColor(Color.BLACK);
+    g2.drawRect((int) x, 3, lw, height + 2 * offset);
+    
+    g2.drawString(tag.classification, (int) x + offset, 3 + (fm.getAscent() + offset));
     
   }
   
@@ -1522,5 +1588,12 @@ public class WaveViewPanel extends JComponent {
   public Double getMark2() {
     return mark2;
   }
-  
+
+  public void setTagData(ArrayList<TagData> tagData) {
+    this.tagData = tagData;
+  }
+
+  public void setTagMenu(TagMenu tagMenu) {
+    this.tagMenu = tagMenu;
+  }
 }

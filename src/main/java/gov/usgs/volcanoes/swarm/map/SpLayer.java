@@ -45,10 +45,11 @@ public class SpLayer implements MapLayer {
   private synchronized Vector<Sp> updateSpList() {
     Vector<Sp> spList = new Vector<Sp>();
     List<WaveViewPanel> waves = WaveClipboardFrame.getInstance().getWaves();
-    for (WaveViewPanel wvp : waves) {
-      if (wvp.getSettings().pickEnabled) {
+    if (WaveClipboardFrame.getInstance().isPickEnabled()) {
+      for (WaveViewPanel wvp : waves) {
         PickData pickData = wvp.getPickData();
-        if (pickData.isPlot() && pickData.getPick(PickData.P) != null
+        if (pickData != null && pickData.isPlot() 
+            && pickData.getPick(PickData.P) != null
             && pickData.isPickChannel(PickData.P)) {
           String channel = wvp.getChannel();
           double distance = pickData.getSpDistance();

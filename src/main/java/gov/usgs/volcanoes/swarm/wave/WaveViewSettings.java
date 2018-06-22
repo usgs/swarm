@@ -75,6 +75,7 @@ public class WaveViewSettings {
   public boolean useAlternateOrientationCode = false;
   public String alternateOrientationCode = "Z12";
   public boolean pickEnabled = false;
+  public boolean tagEnabled = false;
 
   private static WaveViewSettings DEFAULT_WAVE_VIEW_SETTINGS;
 

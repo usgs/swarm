@@ -38,6 +38,7 @@ public class Icons {
   public static final ImageIcon settings = getIcon("images/settings.gif");
   public static final ImageIcon spectra = getIcon("images/spectra.gif");
   public static final ImageIcon spectrogram = getIcon("images/spectrogram.png");
+  public static final ImageIcon tag = getIcon("images/tag.png");
   public static final ImageIcon up = getIcon("images/up.gif");
   public static final ImageIcon wave = getIcon("images/wave.gif");
   public static final ImageIcon waveclip = getIcon("images/waveclip.gif");

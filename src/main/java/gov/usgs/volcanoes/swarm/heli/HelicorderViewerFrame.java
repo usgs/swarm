@@ -1,5 +1,36 @@
 package gov.usgs.volcanoes.swarm.heli;
 
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.data.HelicorderData;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.legacy.plot.render.HelicorderRenderer;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.ui.GridBagHelper;
+import gov.usgs.volcanoes.core.util.UiUtils;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Kioskable;
+import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwarmFrame;
+import gov.usgs.volcanoes.swarm.SwarmUtil;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.Throbber;
+import gov.usgs.volcanoes.swarm.chooser.DataChooser;
+import gov.usgs.volcanoes.swarm.data.GulperListener;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSourceListener;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.map.MapFrame;
+import gov.usgs.volcanoes.swarm.time.TimeListener;
+import gov.usgs.volcanoes.swarm.time.UiTime;
+import gov.usgs.volcanoes.swarm.time.WaveViewTime;
+import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -36,36 +67,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.data.HelicorderData;
-import gov.usgs.volcanoes.core.data.Wave;
-import gov.usgs.volcanoes.core.legacy.plot.Plot;
-import gov.usgs.volcanoes.core.legacy.plot.PlotException;
-import gov.usgs.volcanoes.core.legacy.plot.render.HelicorderRenderer;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.ui.GridBagHelper;
-import gov.usgs.volcanoes.core.util.UiUtils;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Kioskable;
-import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.SwarmFrame;
-import gov.usgs.volcanoes.swarm.SwarmUtil;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.Throbber;
-import gov.usgs.volcanoes.swarm.chooser.DataChooser;
-import gov.usgs.volcanoes.swarm.data.GulperListener;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSourceListener;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
-import gov.usgs.volcanoes.swarm.map.MapFrame;
-import gov.usgs.volcanoes.swarm.time.TimeListener;
-import gov.usgs.volcanoes.swarm.time.UiTime;
-import gov.usgs.volcanoes.swarm.time.WaveViewTime;
-import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
 
 /**
  * <code>JInternalFrame</code> that holds a helicorder.
@@ -105,7 +106,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
   private JButton compY;
   private JButton expY;
   private JButton clipboard;
-  // private JButton picker;
+  private JToggleButton tagButton;
   private JButton removeWave;
   private JButton capture;
   private JFileChooser chooser;
@@ -187,6 +188,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
   }
 
   /**
+   * Save layout.
    * @see gov.usgs.volcanoes.swarm.SwarmFrame#saveLayout
    * (gov.usgs.volcanoes.core.configfile.ConfigFile, java.lang.String)
    */
@@ -411,6 +413,25 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
     toolBar.addSeparator();
 
+    tagButton = SwarmUtil.createToolBarToggleButton(Icons.tag,
+        "Tag Mode", null);
+    tagButton.setEnabled(true);
+    toolBar.add(tagButton);
+
+    tagButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (tagButton.isSelected()) {
+          helicorderViewPanel.getTagMenu().browseForEventFileName();
+          helicorderViewPanel.makeInsetPanelTagEnabled();
+        } else {
+          helicorderViewPanel.tagData.clear();
+        }
+        repaint();
+      }
+    });
+
+    toolBar.addSeparator();
+    
     scaleButton = SwarmUtil.createToolBarButton(Icons.wavezoom,
         "Toggle between adjusting helicoder scale and clip", new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
@@ -1036,5 +1057,12 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
       chooser.setAccessory(null);
     }
   }
+  
+  public boolean isTagEnabled() {
+    return tagButton.isSelected();
+  }
 
+  public void disableTag() {
+    tagButton.setSelected(false);
+  }
 }
