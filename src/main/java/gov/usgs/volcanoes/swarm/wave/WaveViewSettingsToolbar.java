@@ -106,7 +106,7 @@ public class WaveViewSettingsToolbar {
     dest.add(spectrogramToggle);
     
     particleMotionToggle = SwarmUtil.createToolBarToggleButton(Icons.particle_motion,
-        "Particle Motion Analysis (R or ')", new ActionListener() {
+        "Particle Motion Analysis (O or ')", new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             for (WaveViewSettings settings : settingsSet) {
               settings.setType(ViewType.PARTICLE_MOTION);
