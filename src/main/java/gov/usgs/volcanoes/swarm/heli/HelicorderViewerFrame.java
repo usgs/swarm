@@ -1,6 +1,8 @@
 package gov.usgs.volcanoes.swarm.heli;
 
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.contrib.PngEncoder;
+import gov.usgs.volcanoes.core.contrib.PngEncoderB;
 import gov.usgs.volcanoes.core.data.HelicorderData;
 import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.legacy.plot.Plot;
@@ -32,14 +34,20 @@ import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -992,62 +1000,108 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
           }
         }
 
-        int width = -1;
-        int height = -1;
-        try {
-          width = Integer.parseInt(widthTextField.getText());
-          height = Integer.parseInt(heightTextField.getText());
-        } catch (final Exception ex) {
-          ex.printStackTrace();
-        }
-        if (width <= 0 || height <= 0) {
-          JOptionPane.showMessageDialog(HelicorderViewerFrame.this, "Illegal width or height.",
-              "Error", JOptionPane.ERROR_MESSAGE);
-          return;
-        }
+        // Render helicorder
+        if (tagButton.isSelected()) { // if tag mode enabled (image displays exactly as in Swarm)
+          int height = helicorderViewPanel.getHeight();
+          int width = helicorderViewPanel.getWidth();
 
-        final Plot plot = new Plot(width, height);
+          final BufferedImage image =
+              new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+          final Graphics g = image.getGraphics();
+          helicorderViewPanel.paint(g);
+          // draw label
+          if (includeChannel.isSelected()) {
+            Font oldFont = g.getFont();
+            g.setFont(Font.decode("Dialog-BOLD-40"));
+            String channel = settings.channel.replace('_', ' ');
 
-        Double end = settings.getBottomTime();
-        if (Double.isNaN(end)) {
-          end = J2kSec.now();
-        }
+            FontMetrics fm = g.getFontMetrics();
+            Font font = g.getFont();
+            float s = font.getSize();
+            int swidth = fm.stringWidth(channel);
+            while ((swidth / (double) width > .5) && (--s > 1)) {
+              g.setFont(font.deriveFont(s));
+              fm = g.getFontMetrics();
+              swidth = fm.stringWidth(channel);
+            }
+            height = fm.getAscent() + fm.getDescent();
+            int lw = swidth + 20;
+            g.setColor(new Color(255, 255, 255, 192));
+            g.fillRect(helicorderViewPanel.getX() + width / 2 - lw / 2, 3, lw, height);
+            g.setColor(Color.black);
+            g.drawRect(helicorderViewPanel.getX() + width / 2 - lw / 2, 3, lw, height);
 
-        final Double before = end - settings.span * 60;
-        final int tc = 30;
-
-        // TODO: this should use existing data.
-        final HelicorderData heliData =
-            dataSource.getHelicorder(settings.channel, before - tc, end + tc, null);
-        final HelicorderRenderer heliRenderer =
-            new HelicorderRenderer(heliData, settings.timeChunk);
-        if (swarmConfig.heliColors != null) {
-          heliRenderer.setDefaultColors(swarmConfig.heliColors); // DCK: add configured colors
-        }
-
-        heliRenderer.setChannel(settings.channel);
-        heliRenderer.setLocation(HelicorderViewPanel.X_OFFSET, HelicorderViewPanel.Y_OFFSET,
-            width - HelicorderViewPanel.X_OFFSET - HelicorderViewPanel.RIGHT_WIDTH,
-            height - HelicorderViewPanel.Y_OFFSET - HelicorderViewPanel.BOTTOM_HEIGHT);
-        heliRenderer.setHelicorderExtents(before, end, -1 * Math.abs(settings.barRange),
-            Math.abs(settings.barRange));
-        heliRenderer.setTimeZone(swarmConfig.getTimeZone(settings.channel));
-        heliRenderer.setForceCenter(settings.forceCenter);
-        heliRenderer.setClipBars(settings.clipBars);
-        heliRenderer.setShowClip(settings.showClip);
-        heliRenderer.setClipValue(settings.clipValue);
-        heliRenderer.setChannel(settings.channel);
-        heliRenderer.setLargeChannelDisplay(includeChannel.isSelected());
-        heliRenderer.createDefaultAxis();
-        plot.addRenderer(heliRenderer);
-
-        if (fileFormatCb.getSelectedItem().equals("PS")) {
-          plot.writePS(f.getAbsolutePath());
-        } else {
+            g.drawString(channel, helicorderViewPanel.getX() + width / 2 - swidth / 2,
+                height - fm.getDescent());
+            g.setFont(oldFont);
+          }
           try {
-            plot.writePNG(f.getAbsolutePath());
-          } catch (final PlotException e1) {
-            e1.printStackTrace();
+            final PngEncoderB png = new PngEncoderB(image, false, PngEncoder.FILTER_NONE, 7);
+            final FileOutputStream out = new FileOutputStream(f);
+            final byte[] bytes = png.pngEncode();
+            out.write(bytes);
+            out.close();
+          } catch (final Exception ex) {
+            ex.printStackTrace();
+          }
+        } else {    // if tag mode not enabled (image is scaled to display nicely)
+          int width = -1;
+          int height = -1;
+          try {
+            width = Integer.parseInt(widthTextField.getText());
+            height = Integer.parseInt(heightTextField.getText());
+          } catch (final Exception ex) {
+            ex.printStackTrace();
+          }
+          if (width <= 0 || height <= 0) {
+            JOptionPane.showMessageDialog(HelicorderViewerFrame.this, "Illegal width or height.",
+                "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+          }
+  
+          final Plot plot = new Plot(width, height);
+  
+          Double end = settings.getBottomTime();
+          if (Double.isNaN(end)) {
+            end = J2kSec.now();
+          }
+  
+          final Double before = end - settings.span * 60;
+          final int tc = 30;
+  
+          // TODO: this should use existing data.
+          final HelicorderData heliData =
+              dataSource.getHelicorder(settings.channel, before - tc, end + tc, null);
+          final HelicorderRenderer heliRenderer =
+              new HelicorderRenderer(heliData, settings.timeChunk);
+          if (swarmConfig.heliColors != null) {
+            heliRenderer.setDefaultColors(swarmConfig.heliColors); // DCK: add configured colors
+          }
+  
+          heliRenderer.setChannel(settings.channel);
+          heliRenderer.setLocation(HelicorderViewPanel.X_OFFSET, HelicorderViewPanel.Y_OFFSET,
+              width - HelicorderViewPanel.X_OFFSET - HelicorderViewPanel.RIGHT_WIDTH,
+              height - HelicorderViewPanel.Y_OFFSET - HelicorderViewPanel.BOTTOM_HEIGHT);
+          heliRenderer.setHelicorderExtents(before, end, -1 * Math.abs(settings.barRange),
+              Math.abs(settings.barRange));
+          heliRenderer.setTimeZone(swarmConfig.getTimeZone(settings.channel));
+          heliRenderer.setForceCenter(settings.forceCenter);
+          heliRenderer.setClipBars(settings.clipBars);
+          heliRenderer.setShowClip(settings.showClip);
+          heliRenderer.setClipValue(settings.clipValue);
+          heliRenderer.setChannel(settings.channel);
+          heliRenderer.setLargeChannelDisplay(includeChannel.isSelected());
+          heliRenderer.createDefaultAxis();
+          plot.addRenderer(heliRenderer);
+  
+          if (fileFormatCb.getSelectedItem().equals("PS")) {
+            plot.writePS(f.getAbsolutePath());
+          } else {
+            try {
+              plot.writePNG(f.getAbsolutePath());
+            } catch (final PlotException e1) {
+              e1.printStackTrace();
+            }
           }
         }
 

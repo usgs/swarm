@@ -1,6 +1,8 @@
 ## Version 2.8.5 - TBD
   * Fix issue with zoom/scroll for cached data source (#197)
   * Add event classifier (#199)
+  * Fix tooltip for Particle Motion shortcut
+  * Fix loading of groups from SwarmMetadata.config (#205)
 
 ## Version 2.8.4 - April 6, 2018
   * Allow input of Vp/Vs ratio under File->Options

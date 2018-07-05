@@ -827,7 +827,6 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
   }
   
   private static final Color DARK_GREEN = new Color(0, 168, 0);
-  private static final Color ORANGE = new Color(255, 69, 0, 180);
 
   private void drawMark(Graphics2D g2, double t, Color color) {
     if (Double.isNaN(t)) {
@@ -863,6 +862,12 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
     }
   }
 
+  /**
+   * Draw event circle.
+   * @param g2 graphics
+   * @param t start time
+   * @param color color
+   */
   private void drawEvent(Graphics2D g2, double t, Color color) {
     if (Double.isNaN(t)) {
       return;
@@ -899,7 +904,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
     if (parent.isTagEnabled()) {
       for (TagData tag : tagData) {
         if (tag.channel.equals(settings.channel)) {
-          drawEvent(g2, tag.startTime, ORANGE);
+          drawEvent(g2, tag.startTime, tag.color);
         }
       }      
     }

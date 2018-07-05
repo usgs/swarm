@@ -3,6 +3,7 @@ package gov.usgs.volcanoes.swarm.event;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.Time;
 
+import java.awt.Color;
 import java.text.ParseException;
 import java.util.Comparator;
 
@@ -11,6 +12,7 @@ public class TagData implements Comparator<TagData> {
   public String channel;
   public double startTime;
   public String classification;
+  public Color color;
 
   /**
    * Default constructor.
@@ -22,7 +24,7 @@ public class TagData implements Comparator<TagData> {
   /**
    * Constructor that reads line from event classification file.
    * @param line string in format of "channel, yyyy-MM-dd HH:mm:ss, classification"
-   * @throws ParseException 
+   * @throws ParseException parse exception
    */
   public TagData(String line) throws ParseException {
     parse(line);
@@ -38,6 +40,8 @@ public class TagData implements Comparator<TagData> {
     this.channel = channel;
     this.startTime = startTime;
     this.classification = classification;
+    setColor();
+
   }
   
   private void parse(String line) throws ParseException {
@@ -45,8 +49,19 @@ public class TagData implements Comparator<TagData> {
     startTime = J2kSec.parse(Time.STANDARD_TIME_FORMAT, data[0].trim());
     channel = data[1].trim();
     classification = data[2].trim();
+    setColor();
   }
 
+  private void setColor() {
+    this.color = TagMenu.colors.get(classification);
+    if (this.color == null) {
+      this.color = TagMenu.defaultColor;
+    } else {
+      this.color =
+          new Color(color.getRed(), color.getGreen(), color.getBlue(), TagMenu.transparency);
+    }
+  }
+  
   public String toString() {
     return J2kSec.format(Time.STANDARD_TIME_FORMAT, startTime) + "," + channel + ","
         + classification;

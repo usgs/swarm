@@ -1061,6 +1061,10 @@ public class Swarm extends JFrame implements InternalFrameListener {
     // do nothing
   }
 
+  /**
+   * Main method.
+   * @param args arguments
+   */
   public static void main(final String[] args) {
     try {
       UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
