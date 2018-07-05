@@ -57,6 +57,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
   }
 
   /**
+   * Parse parameters.
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#parse(java.lang.String)
    */
   public synchronized void parse(String params) {
@@ -71,6 +72,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
   }
 
   /**
+   * Get copy of data source.  (Deprecated)
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getCopy()
    */
   @Deprecated
@@ -79,6 +81,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
   }
 
   /**
+   * Establish protocol version.
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#establish()
    */
   public void establish() {
@@ -89,6 +92,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
   }
 
   /**
+   * Print config text.
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#toConfigString()
    */
   public String toConfigString() {
@@ -98,6 +102,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
   }
 
   /**
+   * Close Winston client connection.
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#close()
    */
   public void close() {
@@ -134,6 +139,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
   }
 
   /**
+   * Get wave data.
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getWave(java.lang.String,
    *      double, double)
    */
@@ -171,6 +177,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
   }
 
   /**
+   * Get RSAM data.
    * @see gov.usgs.volcanoes.swarm.data.RsamSource#getRsam(java.lang.String,
    *      double, double, int)
    */
@@ -209,6 +216,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
   }
 
   /**
+   * Get helicorder data.
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getHelicorder(java.lang.String,
    *      double, double, gov.usgs.volcanoes.swarm.data.GulperListener)
    */
@@ -224,17 +232,17 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
       try {
         scnl = Scnl.parse(station, delimiter);
         fireHelicorderProgress(station, -1);
-//      winstonClient.setReadListener(new ReadListener() {
-//        public void readProgress(double p) {
-//          fireHelicorderProgress(station, p);
-//        }
-//      });
-      TimeSpan timeSpan = TimeSpan.fromJ2kSec(t1, t2);
-      hd = winstonClient.getHelicorder(scnl, timeSpan, compress);
-//      winstonClient.setReadListener(null);
-      fireHelicorderProgress(station, 1.0);
+        // winstonClient.setReadListener(new ReadListener() {
+        // public void readProgress(double p) {
+        // fireHelicorderProgress(station, p);
+        // }
+        // });
+        TimeSpan timeSpan = TimeSpan.fromJ2kSec(t1, t2);
+        hd = winstonClient.getHelicorder(scnl, timeSpan, compress);
+        // winstonClient.setReadListener(null);
+        fireHelicorderProgress(station, 1.0);
       } catch (UtilException e) {
-       System.err.println("WWSSource.getHelicorder: Cannot parse SCNL '" + station + "'.");
+        System.err.println("WWSSource.getHelicorder: Cannot parse SCNL '" + station + "'.");
       }
 
       if (hd != null && hd.rows() != 0) {
@@ -250,6 +258,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
   }
 
   /**
+   * Get list of channels.
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getChannels()
    */
   public synchronized List<String> getChannels() {
@@ -269,6 +278,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
   }
 
   /**
+   * Check if active source.
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#isActiveSource()
    */
   public synchronized boolean isActiveSource() {
