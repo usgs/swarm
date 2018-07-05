@@ -6,6 +6,7 @@ import gov.usgs.volcanoes.swarm.Version;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
@@ -36,10 +38,15 @@ public class TagMenu extends JPopupMenu  {
 
   private static final String settingsFileName = "EventClassifications.config";
   private static final long serialVersionUID = 8681764007165352268L;
+
+  protected static final int transparency = 180;
+  protected static final Color defaultColor = new Color(255, 69, 0, transparency); 
+  protected static HashMap<String, Color> colors = new HashMap<String, Color>();
   
   private String eventFileName;
 
-  public static String[] classifications = {
+  protected static String[] classifications;
+  private static String[] defaultClassifications = {
       "VT",
       "VT - distal",
       "VT - proximal",
@@ -66,16 +73,26 @@ public class TagMenu extends JPopupMenu  {
       BufferedReader br = new BufferedReader(fr);
       String line;
       while ((line = br.readLine()) != null) {
-        list.add(line.trim());
+        String[] tmp = line.trim().split(",");
+        String classification = tmp[0].trim();
+        list.add(classification);
+        Color color = defaultColor;
+        if (tmp.length > 1) {
+          color = Color.decode(tmp[1].trim());
+        }
+        colors.put(classification, color);
       }
       br.close();
       fr.close();
       classifications = new String[list.size()];
       list.toArray(classifications);
-    } catch (FileNotFoundException e) {
-      //
-    } catch (IOException e) {
-      // 
+    } catch (Exception e) {
+      System.err
+          .println("Error reading EventClassifications.config. Using default classifications.");
+      classifications = defaultClassifications;
+      for (String c : defaultClassifications) {
+        colors.put(c, defaultColor);        
+      }
     }
 
 
