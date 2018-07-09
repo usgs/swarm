@@ -5,6 +5,7 @@
   * Fix loading of groups from SwarmMetadata.config (#205)
   * Fix tooltip for Particle Motion shortcut
   * Fix URL for Imagery Topo map
+  * Fix earth button on map to show full extent
 
 ## Version 2.8.4 - April 6, 2018
   * Allow input of Vp/Vs ratio under File->Options
