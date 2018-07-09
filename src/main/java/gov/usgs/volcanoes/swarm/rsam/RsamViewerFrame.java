@@ -51,7 +51,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
 
   private long intervalMs = 5 * 1000;
   private static final int[] SPANS_S = new int[] {1 * H_TO_S, 12 * H_TO_S, 1 * D_TO_S, 2 * D_TO_S,
-      1 * W_TO_S, 2 * W_TO_S, 4 * W_TO_S};
+      1 * W_TO_S, 2 * W_TO_S, 4 * W_TO_S, 6 * W_TO_S, 8 * W_TO_S};
   private int spanIndex;
   private SeismicDataSource dataSource;
   private String channel;
