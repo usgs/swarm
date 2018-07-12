@@ -345,7 +345,7 @@ public class RsamViewerFrame extends SwarmFrame implements Runnable, SettingsLis
     cf.put("rsam", prefix);
     cf.put(prefix + ".channel", channel);
     cf.put(prefix + ".source", dataSource.getName());
-    settings.save(cf, prefix + ".setting");
+    settings.save(cf, prefix);
   }
 
   /**

@@ -22,6 +22,7 @@ import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
 import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
 import gov.usgs.volcanoes.swarm.wave.WaveViewerFrame;
 
 import java.awt.Dimension;
@@ -599,6 +600,20 @@ public class Swarm extends JFrame implements InternalFrameListener {
     SwarmInternalFrames.add(frame);
     return frame;
   }
+  
+  /**
+   * Open wave viewer frame.
+   * @param source wave data source
+   * @param channel wave channel
+   * @param settings wave view settings
+   * @return wave viewer frame
+   */
+  public static WaveViewerFrame openRealtimeWave(final SeismicDataSource source,
+      final String channel, final WaveViewSettings settings) {
+    final WaveViewerFrame frame = new WaveViewerFrame(source, channel, settings);
+    SwarmInternalFrames.add(frame);
+    return frame;
+  }
 
   /**
    * Open helicorder.
@@ -734,6 +749,11 @@ public class Swarm extends JFrame implements InternalFrameListener {
       if (frame instanceof HelicorderViewerFrame) {
         final HelicorderViewerFrame hvf = (HelicorderViewerFrame) frame;
         hvf.saveLayout(cf, "helicorder-" + i++);
+      } 
+
+      if (frame instanceof WaveViewerFrame) {
+        final WaveViewerFrame wvf = (WaveViewerFrame) frame;
+        wvf.saveLayout(cf, "wave-" + i++);
       } 
       if (frame instanceof MultiMonitor) {
         final MultiMonitor mm = (MultiMonitor) frame;

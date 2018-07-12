@@ -1,5 +1,17 @@
 package gov.usgs.volcanoes.swarm.wave;
 
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.UiUtils;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.SwarmFrame;
+import gov.usgs.volcanoes.swarm.SwarmUtil;
+import gov.usgs.volcanoes.swarm.Throbber;
+import gov.usgs.volcanoes.swarm.chooser.DataChooser;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,7 +19,6 @@ import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
@@ -16,21 +27,11 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
-import gov.usgs.volcanoes.core.data.Wave;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.util.UiUtils;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.SwarmUtil;
-import gov.usgs.volcanoes.swarm.Throbber;
-import gov.usgs.volcanoes.swarm.chooser.DataChooser;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
-
 /**
  * Wave Viewer Frame.
  * @author Dan Cervelli
  */
-public class WaveViewerFrame extends JInternalFrame implements Runnable {
+public class WaveViewerFrame extends SwarmFrame implements Runnable {
   public static final long serialVersionUID = -1;
 
   private final long interval = 2000;
@@ -56,10 +57,24 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
    * @param ch channel
    */
   public WaveViewerFrame(final SeismicDataSource sds, final String ch) {
+    this(sds,ch,null);
+  }
+  
+  /**
+   * Constructor.
+   * @param sds seismic data source
+   * @param ch channel
+   * @param settings wave view settings
+   */
+  public WaveViewerFrame(final SeismicDataSource sds, final String ch, WaveViewSettings settings) {
     super(ch + ", [" + sds + "]", true, true, false, true);
     dataSource = sds;
     channel = ch;
-    settings = new WaveViewSettings();
+    if (settings == null) {
+      this.settings = new WaveViewSettings();
+    } else {
+      this.settings = settings;
+    }
     spanIndex = 3;
     kill = false;
     updateThread = new Thread(this, "WaveViewerFrame-" + sds + "-" + ch);
@@ -179,6 +194,7 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
   }
 
   /**
+   * Run thread.
    * @see java.lang.Runnable#run()
    */
   public void run() {
@@ -191,5 +207,18 @@ public class WaveViewerFrame extends JInternalFrame implements Runnable {
       }
     }
     dataSource.close();
+  }
+  
+  /**
+   * Save Layout.
+   * @see gov.usgs.volcanoes.swarm.SwarmFrame#saveLayout
+   * (gov.usgs.volcanoes.core.configfile.ConfigFile, java.lang.String)
+   */
+  public void saveLayout(final ConfigFile cf, final String prefix) {
+    super.saveLayout(cf, prefix);
+    cf.put("wave", prefix);
+    cf.put(prefix + ".channel", channel);
+    cf.put(prefix + ".source", dataSource.getName());
+    settings.save(cf, prefix);
   }
 }

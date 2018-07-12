@@ -9,7 +9,6 @@ import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings;
-import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
 import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
 import gov.usgs.volcanoes.swarm.wave.SwarmMultiMonitors;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
@@ -178,10 +177,6 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
     }
   }
 
-  private void processWaves() {
-
-  }
-
   private void processMap() {
     final ConfigFile cf = config.getSubConfig("map");
     final MapFrame mapFrame = MapFrame.getInstance();
@@ -224,6 +219,22 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
         hvf.addLinkListeners();
         SwarmInternalFrames.add(hvf, false);
       }
+    }
+  }
+  
+  private void processWaves() {
+    final List<String> waves = config.getList("wave");
+    if (waves == null) {
+      return;
+    }
+
+    for (final String wave : waves) {
+      final ConfigFile cf = config.getSubConfig(wave);
+      final SeismicDataSource sds = SwarmConfig.getInstance().getSource(cf.getString("source"));
+      String channel = cf.getString("channel");
+      WaveViewSettings wvs = new WaveViewSettings();
+      wvs.set(cf);
+      Swarm.openRealtimeWave(sds, channel, wvs);
     }
   }
 
@@ -278,11 +289,9 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
       final ConfigFile cf = config.getSubConfig(rsam);
       final SeismicDataSource sds = SwarmConfig.getInstance().getSource(cf.getString("source"));
       String channel = cf.getString("channel");
-      ConfigFile scf = cf.getSubConfig("setting");
       RsamViewSettings setting = new RsamViewSettings();
-      setting.set(scf);
-      RsamViewerFrame rvf = Swarm.openRsam(sds, channel, setting);
-      //rvf.setSettings(setting);
+      setting.set(cf);
+      Swarm.openRsam(sds, channel, setting);
     }
   }
 
