@@ -1,5 +1,20 @@
 package gov.usgs.volcanoes.swarm;
 
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.swarm.chooser.DataChooser;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.map.MapFrame;
+import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings;
+import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
+import gov.usgs.volcanoes.swarm.wave.SwarmMultiMonitors;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -11,20 +26,6 @@ import javax.swing.JOptionPane;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.data.Wave;
-import gov.usgs.volcanoes.core.util.StringUtils;
-import gov.usgs.volcanoes.swarm.chooser.DataChooser;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
-import gov.usgs.volcanoes.swarm.map.MapFrame;
-import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
-import gov.usgs.volcanoes.swarm.wave.SwarmMultiMonitors;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
 
 /**
  * Swarm Layout class.
@@ -116,6 +117,7 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
         processHelicorders();
         processMonitors();
         processClipboard();
+        processRsam();
         return null;
       }
 
@@ -175,10 +177,6 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
     }
   }
 
-  private void processWaves() {
-
-  }
-
   private void processMap() {
     final ConfigFile cf = config.getSubConfig("map");
     final MapFrame mapFrame = MapFrame.getInstance();
@@ -223,6 +221,22 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
       }
     }
   }
+  
+  private void processWaves() {
+    final List<String> waves = config.getList("wave");
+    if (waves == null) {
+      return;
+    }
+
+    for (final String wave : waves) {
+      final ConfigFile cf = config.getSubConfig(wave);
+      final SeismicDataSource sds = SwarmConfig.getInstance().getSource(cf.getString("source"));
+      String channel = cf.getString("channel");
+      WaveViewSettings wvs = new WaveViewSettings();
+      wvs.set(cf);
+      Swarm.openRealtimeWave(sds, channel, wvs);
+    }
+  }
 
   private void processKiosk() {
     String k = config.getString("kiosk");
@@ -264,6 +278,21 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
       wcf.addWave(wvp);
     }
     wcf.show();
+  }
+  
+  private void processRsam() {
+    final List<String> rsams = config.getList("rsam");
+    if (rsams == null) {
+      return;
+    }
+    for (final String rsam : rsams) {
+      final ConfigFile cf = config.getSubConfig(rsam);
+      final SeismicDataSource sds = SwarmConfig.getInstance().getSource(cf.getString("source"));
+      String channel = cf.getString("channel");
+      RsamViewSettings setting = new RsamViewSettings();
+      setting.set(cf);
+      Swarm.openRsam(sds, channel, setting);
+    }
   }
 
   public int compareTo(final SwarmLayout o) {

@@ -1,5 +1,18 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
+import gov.usgs.volcanoes.core.data.GenericDataMatrix;
+import gov.usgs.volcanoes.core.data.RSAMData;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
+import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.HistogramRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.LineRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.ShapeRenderer;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.time.UiTime;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -8,30 +21,29 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
 import cern.colt.matrix.DoubleMatrix2D;
-import gov.usgs.volcanoes.core.data.GenericDataMatrix;
-import gov.usgs.volcanoes.core.data.RSAMData;
-import gov.usgs.volcanoes.core.legacy.plot.Plot;
-import gov.usgs.volcanoes.core.legacy.plot.PlotException;
-import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
-import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
-import gov.usgs.volcanoes.core.legacy.plot.render.HistogramRenderer;
-import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
-import gov.usgs.volcanoes.core.legacy.plot.render.ShapeRenderer;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.time.UiTime;
 
 /**
- * A component that renders a RSAM plot.
- * 
+ * A component that renders a RSAM plot. 
  * 
  * @author Tom Parker
  */
+
 @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(value = "SE_BAD_FIELD",
     justification = "Class not serializable")
 public class RsamViewPanel extends JComponent implements SettingsListener {
@@ -61,6 +73,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
 
   private double startTime;
   private double endTime;
+  private double lastClipTime=0;
   private RsamViewSettings settings;
 
   private String channel;
@@ -281,7 +294,6 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
     if (data == null || data.getData() == null || data.getData().rows() == 0) {
       return;
     }
-   
     GenericDataMatrix gdm = new GenericDataMatrix(data.getData().copy());
 
     gdm.despike(1, settings.valuesPeriodS);
@@ -305,7 +317,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
     MatrixRenderer mr = new MatrixRenderer(gdm.getData(), false);
     double max;
     double min;
-    if (settings.getAutoScale()) {
+    if (settings.autoScale) {
       max = gdm.max(1) + gdm.max(1) * .1;
       min = gdm.min(1) - gdm.max(1) * .1;
     } else {
@@ -322,8 +334,23 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
     mr.getAxis().setLeftLabelAsText("RSAM Values", -55, Color.BLACK);
 
     mr.createDefaultLineRenderers(Color.blue);
-    plot.addRenderer(mr);
 
+    
+    if (settings.alarm) {
+      // draw threshold line
+      LineRenderer lr = new LineRenderer();
+      lr.color = Color.RED;
+      lr.stroke = new BasicStroke(1.0f);
+      double y = mr.getYPixel(settings.eventThreshold);
+      lr.line = new Line2D.Double(X_OFFSET, y, this.getWidth() - RIGHT_WIDTH, y);
+      plot.addRenderer(lr);
+      
+      // sound audio alarm
+      alarm(gdm.getData());
+    }
+
+    plot.addRenderer(mr);
+    
 /*    if (settings.filterOn) {
       plot.addRenderer(getFilterLabel(getWidth() - RIGHT_WIDTH, getHeight() - BOTTOM_HEIGHT,
           TextRenderer.RIGHT, TextRenderer.BOTTOM));
@@ -385,6 +412,50 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
     plot.addRenderer(hr);
   }
 
+  /**
+   * Play audio alarm if value exceeds threshold.
+   * @param data matrix data
+   */
+  private void alarm(DoubleMatrix2D data) {
+    double currentTime = data.get(data.rows() - 1, 0);
+    double lastValue = data.get(data.rows() - 1, 1);
+    if (lastValue >= settings.eventThreshold && currentTime > lastClipTime) {
+      //System.out.println(currentTime + " " + lastValue);
+      File soundFile = new File(settings.soundFile);
+      AudioInputStream audioInputStream = null;
+      try {
+        audioInputStream = AudioSystem.getAudioInputStream(soundFile);
+        AudioFormat audioFormat = audioInputStream.getFormat();
+        DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
+
+        SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
+        line.open(audioFormat);
+        line.start();
+
+        int nBytesRead = 0;
+        byte[] abData = new byte[1024];
+        while (nBytesRead != -1) {
+          nBytesRead = audioInputStream.read(abData, 0, abData.length);
+          if (nBytesRead >= 0) {
+            line.write(abData, 0, nBytesRead);
+          }
+        }
+
+        line.drain();
+        line.close();
+        lastClipTime = currentTime;
+      } catch (UnsupportedAudioFileException e) {
+        System.err.println(e.getMessage());
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (LineUnavailableException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+
+  }
 
   /**
    * Overload of Component. Always returns the developer-specified size.

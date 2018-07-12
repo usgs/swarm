@@ -1,6 +1,7 @@
 package gov.usgs.volcanoes.swarm.internalFrame;
 
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
+import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
 import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
 import gov.usgs.volcanoes.swarm.wave.WaveViewerFrame;
 
@@ -26,6 +27,9 @@ public final class SwarmInternalFrames {
 
   private SwarmInternalFrames() {}
 
+  /**
+   * Remove all internal frames.
+   */
   public static void removeAllFrames() {
     Runnable r = new Runnable() {
       public void run() {
@@ -33,7 +37,7 @@ public final class SwarmInternalFrames {
         List<JInternalFrame> toRemove = new LinkedList<JInternalFrame>();
         for (JInternalFrame frame : internalFrames) {
           if (frame instanceof HelicorderViewerFrame || frame instanceof WaveViewerFrame
-              || frame instanceof MultiMonitor) {
+              || frame instanceof MultiMonitor || frame instanceof RsamViewerFrame) {
             toRemove.add(frame);
           }
         }
@@ -59,6 +63,10 @@ public final class SwarmInternalFrames {
     }
   }
 
+  /**
+   * Remove an internal frame.
+   * @param f frame
+   */
   public static void remove(final JInternalFrame f) {
     for (InternalFrameListener listener : internalFrameListeners
         .getListeners(InternalFrameListener.class)) {
@@ -72,6 +80,11 @@ public final class SwarmInternalFrames {
     add(f, true);
   }
 
+  /**
+   * Add an internal frame.
+   * @param f frame
+   * @param setLoc set location
+   */
   public static void add(final JInternalFrame f, boolean setLoc) {
     if (setLoc) {
       f.setLocation(internalFrames.size() * 24, internalFrames.size() * 24);

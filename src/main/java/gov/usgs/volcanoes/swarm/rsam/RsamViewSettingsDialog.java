@@ -54,6 +54,8 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
   private JTextField scaleMax;
   private JTextField scaleMin;
   
+  private JCheckBox alarm;
+  
   private JCheckBox runningMedianButton;
   private JTextField runningMedianPeriod;
   private JCheckBox runningMeanButton;
@@ -128,7 +130,8 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     eventRatio.setText(String.format("%.1f", settings.eventRatio));
     eventMaxLength.setText(String.format("%.1f", settings.eventMaxLengthS));
     binSize.setSelectedItem(settings.binSize);
-    autoScale.setSelected(settings.getAutoScale());
+    autoScale.setSelected(settings.autoScale);
+    alarm.setSelected(settings.alarm);
     scaleMax.setText("" + settings.scaleMax);
     scaleMax.setEnabled(!autoScale.isSelected());
     scaleMin.setText("" + settings.scaleMin);
@@ -195,6 +198,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
         scaleMin.setEnabled(!autoScale.isSelected());
       }
     });
+    alarm = new JCheckBox("Alarm");
 
     scaleMax = new JTextField(4);
     scaleMax.setInputVerifier(new IntegerInputVerifier());
@@ -268,8 +272,9 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     builder.nextColumn(2);
     builder.add(scaleMin, cc.xyw(builder.getColumn(), builder.getRow(), 1));
     builder.nextLine();
-    builder.appendRow("center:18dlu");
-    builder.nextColumn(4);
+    builder.append(alarm);
+    //builder.appendRow("center:18dlu");
+    builder.nextColumn(2);
     builder.add(new JLabel("Scale Max:"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
@@ -406,8 +411,8 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
       settings.eventMaxLengthS = Double.parseDouble(eventMaxLength.getText());
       settings.binSize = (BinSize) binSize.getSelectedItem();
 
-      settings.setAutoScale(autoScale.isSelected());
-      if (!autoScale.isSelected()) {
+      settings.autoScale = autoScale.isSelected();
+      if (!settings.autoScale) {
         settings.scaleMax = Integer.parseInt(scaleMax.getText());
         settings.scaleMin = Integer.parseInt(scaleMin.getText());
       }
@@ -417,7 +422,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
       } else {
         settings.setType(ViewType.COUNTS);
       }
-      
+      settings.alarm = alarm.isSelected();
 /*      settings.filterOn = filterEnabled.isSelected();
       settings.zeroPhaseShift = zeroPhaseShift.isSelected();
 
@@ -463,6 +468,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     }
 
     /**
+     * Verify.
      * @see javax.swing.InputVerifier#verify(javax.swing.JComponent)
      */
     public boolean verify(JComponent input) {
