@@ -1,14 +1,14 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.math.BinSize;
+import gov.usgs.volcanoes.core.util.StringUtils;
+
 import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.math.BinSize;
-import gov.usgs.volcanoes.core.util.StringUtils;
 
 /**
  * RSAM view settings.
@@ -205,7 +205,7 @@ public class RsamViewSettings {
     cf.put(prefix + ".runningMean", Boolean.toString(runningMean));
     cf.put(prefix + ".runningMeanPeriod", Double.toString(runningMeanPeriodS));
     cf.put(prefix + ".eventRatio", Double.toString(eventRatio));
-    cf.put(prefix + ".eventThreshold", Double.toString(eventThreshold));
+    cf.put(prefix + ".eventThreshold", Integer.toString(eventThreshold));
     cf.put(prefix + ".eventMaxLength", Double.toString(eventMaxLengthS));
     cf.put(prefix + ".binSize", binSize.toString());
     cf.put(prefix + ".autoScale", Boolean.toString(autoScale));

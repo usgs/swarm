@@ -1,5 +1,29 @@
 package gov.usgs.volcanoes.swarm;
 
+import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
+
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.quakeml.Event;
+import gov.usgs.volcanoes.core.time.CurrentTime;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.ui.GlobalKeyManager;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.swarm.chooser.DataChooser;
+import gov.usgs.volcanoes.swarm.data.CachedDataSource;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.event.EventFrame;
+import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
+import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.map.MapFrame;
+import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings;
+import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
+import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewerFrame;
+
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.KeyboardFocusManager;
@@ -26,29 +50,6 @@ import javax.swing.UIManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
-
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.data.Wave;
-import gov.usgs.volcanoes.core.quakeml.Event;
-import gov.usgs.volcanoes.core.time.CurrentTime;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.ui.GlobalKeyManager;
-import gov.usgs.volcanoes.core.util.StringUtils;
-import gov.usgs.volcanoes.swarm.chooser.DataChooser;
-import gov.usgs.volcanoes.swarm.data.CachedDataSource;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.event.EventFrame;
-import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
-import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
-import gov.usgs.volcanoes.swarm.map.MapFrame;
-import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
-import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-import gov.usgs.volcanoes.swarm.wave.WaveViewerFrame;
 
 /**
  * The main UI and application class for Swarm. Only functions directly pertaining to the UI and
@@ -626,6 +627,20 @@ public class Swarm extends JFrame implements InternalFrameListener {
     SwarmInternalFrames.add(frame);
     return frame;
   }
+  
+  /**
+   * Open RSAM viewer frame.
+   * @param source RSAM data source
+   * @param channel RSAM channel
+   * @param settings RSAM settings
+   * @return RSAM viewer frame
+   */
+  public static RsamViewerFrame openRsam(final SeismicDataSource source, final String channel,
+      final RsamViewSettings settings) {
+    final RsamViewerFrame frame = new RsamViewerFrame(source, channel, settings);
+    SwarmInternalFrames.add(frame);
+    return frame;
+  }
 
   // public static PickerFrame openPicker(final WaveViewPanel insetWavePanel) {
   // PickerWavePanel p = new PickerWavePanel(insetWavePanel);
@@ -724,10 +739,14 @@ public class Swarm extends JFrame implements InternalFrameListener {
         final MultiMonitor mm = (MultiMonitor) frame;
         mm.saveLayout(cf, "monitor-" + i++);
       }
+      if (frame instanceof RsamViewerFrame) {
+        final RsamViewerFrame rvf = (RsamViewerFrame) frame;
+        rvf.saveLayout(cf, "rsam-" + i++);
+      } 
     }      
     
     final WaveClipboardFrame wcf = WaveClipboardFrame.getInstance();
-    if(wcf.isVisible()){
+    if (wcf.isVisible()) {
       wcf.saveLayout(cf, "clipboard");
     }
     final MapFrame mapFrame = MapFrame.getInstance();
@@ -1040,6 +1059,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
   }
 
   /**
+   * Internal frame added.
    * @see gov.usgs.volcanoes.swarm.internalFrame
    * .InternalFrameListener#internalFrameAdded(javax.swing.JInternalFrame)
    */

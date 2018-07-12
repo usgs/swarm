@@ -1,5 +1,23 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.contrib.PngEncoder;
+import gov.usgs.volcanoes.core.contrib.PngEncoderB;
+import gov.usgs.volcanoes.core.data.RSAMData;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.UiUtils;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwarmFrame;
+import gov.usgs.volcanoes.swarm.SwarmUtil;
+import gov.usgs.volcanoes.swarm.Throbber;
+import gov.usgs.volcanoes.swarm.chooser.DataChooser;
+import gov.usgs.volcanoes.swarm.data.RsamSource;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
+
 import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -23,27 +41,11 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
-import gov.usgs.volcanoes.core.contrib.PngEncoder;
-import gov.usgs.volcanoes.core.contrib.PngEncoderB;
-import gov.usgs.volcanoes.core.data.RSAMData;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.util.UiUtils;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.SwarmUtil;
-import gov.usgs.volcanoes.swarm.Throbber;
-import gov.usgs.volcanoes.swarm.chooser.DataChooser;
-import gov.usgs.volcanoes.swarm.data.RsamSource;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
-import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
-
 /**
  * RSAM Viewer Frame.
  * @author Tom Parker
  */
-public class RsamViewerFrame extends JInternalFrame implements Runnable, SettingsListener {
+public class RsamViewerFrame extends SwarmFrame implements Runnable, SettingsListener {
   public static final long serialVersionUID = -1;
   private static final int H_TO_S = 60 * 60;
   private static final int D_TO_S = 24 * H_TO_S;
@@ -74,15 +76,29 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
    * @param ch channel
    */
   public RsamViewerFrame(SeismicDataSource sds, String ch) {
+    this(sds, ch, null);
+  }
+  
+  /**
+   * RSAM viewer frame constructor.
+   * @param sds seismic data source
+   * @param ch channel
+   * @param settings RSAM view settings
+   */
+  public RsamViewerFrame(SeismicDataSource sds, String ch, RsamViewSettings settings) {
     super(ch + ", [" + sds + "]", true, true, false, true);
-    dataSource = sds;
-    channel = ch;
-    settings = new RsamViewSettings();
-    settings.addListener(this);
+    this.dataSource = sds;
+    this.channel = ch;
+    if (settings == null) {
+      this.settings = new RsamViewSettings();
+    } else {
+      this.settings = settings;
+    }
+    this.settings.addListener(this);
     run = true;
     updateThread = new Thread(this, "RsamViewerFrame-" + sds + "-" + ch);
     createUi();
-    settings.setSpanLength(2 * D_TO_S);
+    this.settings.setSpanLength(2 * D_TO_S);
   }
 
   private void createUi() {
@@ -242,6 +258,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
   }
 
   /**
+   * Run thread.
    * @see java.lang.Runnable#run()
    */
   public void run() {
@@ -257,6 +274,7 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
   }
 
   /**
+   * Span settings changed.
    * @see gov.usgs.volcanoes.swarm.rsam.SettingsListener#settingsChanged()
    */
   public void settingsChanged() {
@@ -315,5 +333,28 @@ public class RsamViewerFrame extends JInternalFrame implements Runnable, Setting
         ex.printStackTrace();
       }
     }
+  }
+  
+  /**
+   * Save Layout.
+   * @see gov.usgs.volcanoes.swarm.SwarmFrame#saveLayout
+   * (gov.usgs.volcanoes.core.configfile.ConfigFile, java.lang.String)
+   */
+  public void saveLayout(final ConfigFile cf, final String prefix) {
+    super.saveLayout(cf, prefix);
+    cf.put("rsam", prefix);
+    cf.put(prefix + ".channel", channel);
+    cf.put(prefix + ".source", dataSource.getName());
+    settings.save(cf, prefix + ".setting");
+  }
+
+  /**
+   * Set settings.
+   * @param settings RSAM view settings
+   */
+  public void setSettings(RsamViewSettings settings) {
+    this.settings = settings;
+    this.settings.addListener(this);
+    this.settingsChanged();
   }
 }
