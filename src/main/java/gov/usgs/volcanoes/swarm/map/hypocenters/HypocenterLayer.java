@@ -303,6 +303,9 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
     }
 
     GeoRange range = panel.getRange();
+    if (range == null){
+      return false;
+    }
     Projection projection = panel.getProjection();
     if (projection == null) {
       return false;
