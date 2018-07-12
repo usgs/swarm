@@ -1,4 +1,7 @@
-## Version 2.8.5 - TBD
+## Version 2.8.5 - July 13, 2018
+  * Support real-time wave viewer in layouts (#40)
+  * Support RSAM viewer in layouts
+  * Add audio alarm for RSAM (#44)
   * Add 6 and 8 week time span for RSAM viewer (#188)
   * Fix issue with zoom/scroll for cached data source (#197)
   * Add event classifier (#199)
