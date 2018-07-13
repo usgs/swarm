@@ -86,16 +86,17 @@ public class TagMenu extends JPopupMenu  {
       fr.close();
       classifications = new String[list.size()];
       list.toArray(classifications);
-    } catch (Exception e) {
-      System.err
-          .println("Error reading EventClassifications.config. Using default classifications.");
+    } catch (FileNotFoundException e) {
+      System.out
+          .println("EventClassifications.config not found. Using default classifications.");
       classifications = defaultClassifications;
       for (String c : defaultClassifications) {
-        colors.put(c, defaultColor);        
+        colors.put(c, defaultColor);
       }
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
-
-
   }
   
   private HelicorderViewPanel hvp;
