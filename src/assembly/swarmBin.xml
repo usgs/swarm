@@ -19,6 +19,7 @@
 				<include>NTP.config</include>
 				<include>WaveDefaults.config</include>
 				<include>clip.wav</include>
+				<include>ding.wav</include>
 				<include>swarm.sh</include>
 				<include>swarm_console.bat</include>
 				<include>layouts</include>
