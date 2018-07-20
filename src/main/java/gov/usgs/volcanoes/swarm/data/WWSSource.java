@@ -149,7 +149,6 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
       CachedDataSource cache = CachedDataSource.getInstance();
       wave = cache.getWave(station, t1, t2);
     }
-
     if (wave == null) {
       String delimiter = station.indexOf("$") == -1 ? " " : "$";
       Scnl scnl;
@@ -170,9 +169,7 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
         CachedDataSource cache = CachedDataSource.getInstance();
         cache.putWave(station, wave);
       }
-    } else {
-      // System.out.println("cached");
-    }
+    } 
     return wave;
   }
 
