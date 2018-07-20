@@ -1,3 +1,6 @@
+## Version 2.8.6 - TBD
+  * Fix issue with streamining failing on loss of data (#142)
+
 ## Version 2.8.5 - July 13, 2018
   * Support real-time wave viewer in layouts (#40)
   * Support RSAM viewer in layouts

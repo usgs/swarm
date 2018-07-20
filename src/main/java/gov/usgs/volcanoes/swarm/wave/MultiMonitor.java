@@ -110,6 +110,10 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
 
   private double pauseStartTime = Double.NaN;
 
+  /**
+   * Constructor.
+   * @param sds seismic data source
+   */
   public MultiMonitor(final SeismicDataSource sds) {
     super("Monitor, [" + sds.getName() + "]", true, true, true, true);
     waveMap = Collections.synchronizedMap(new HashMap<String, Wave>());
@@ -139,6 +143,10 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     cf.put(prefix + ".refreshInterval", Long.toString(refreshInterval));
   }
 
+  /**
+   * Process layout when opened.
+   * @param cf config file
+   */
   public void processLayout(final ConfigFile cf) {
     processStandardLayout(cf);
 
@@ -569,7 +577,11 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     }
   }
 
-  // TODO: add sorted
+  /**
+   * Add channel to monitor.
+   * @param ch channel
+   * @return
+   */
   public synchronized WaveViewPanel addChannel(final String ch) {
     final WaveViewPanel panel = new WaveViewPanel();
     panel.setChannel(ch);
@@ -591,6 +603,9 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     return panel;
   }
 
+  /**
+   * De-select panel.
+   */
   public void deselect() {
     if (selectedIndex >= 0) {
       final WaveViewPanel panel = panels.get(selectedIndex);
@@ -600,6 +615,10 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     }
   }
 
+  /**
+   * Select a wave view panel.
+   * @param p wave view panel
+   */
   public void select(final WaveViewPanel p) {
     deselect();
     for (int i = 0; i < panels.size(); i++) {
@@ -616,6 +635,10 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     repaint();
   }
 
+  /**
+   * Remove wave at index.
+   * @param i index
+   */
   public void removeWaveAtIndex(final int i) {
     final WaveViewPanel wvp = panels.get(i);
     waveMap.remove(wvp.getChannel());
@@ -624,6 +647,9 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     resizeWaves();
   }
 
+  /**
+   * Remove all waves from monitor.
+   */
   public void removeAllWaves() {
     waveMap.clear();
     panels.clear();
@@ -802,6 +828,10 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
     worker.start();
   }
 
+  /**
+   * Set kiosk mode.
+   * @see gov.usgs.volcanoes.swarm.Kioskable#setKioskMode(boolean)
+   */
   public void setKioskMode(final boolean b) {
     setDefaultKioskMode(b);
     if (fullScreen) {
