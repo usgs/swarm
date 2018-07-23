@@ -1,6 +1,7 @@
 ## Version 2.8.6 - TBD
   * Addition of map option to hide station icons (#124)
   * Add RSAM value of selected wave panel period to status bar (#103)
+  * Annotate WWS new data source panel with OSOP port info (#141)
   * Fix issue with streaming failing on loss of data (#142)
   * Fix multiple event dialog showing up under Window menu (#216)
 
