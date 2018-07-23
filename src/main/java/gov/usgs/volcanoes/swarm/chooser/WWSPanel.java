@@ -63,7 +63,7 @@ public class WWSPanel extends DataSourcePanel {
 
     DefaultFormBuilder builder = new DefaultFormBuilder(layout).border(Borders.DIALOG);
     builder.append(new JLabel(
-        "Use this data source to connect to a Winston Wave Server (WWS) or OSOP WS (OWS)."),
+        "Use this data source to connect to servers supporting Winston Wave Server protocol."),
         5);
     builder.nextLine();
     builder.appendSeparator();
@@ -72,7 +72,7 @@ public class WWSPanel extends DataSourcePanel {
     builder.nextLine();
     builder.append("Port:");
     builder.append(wwsPort);
-    builder.append(" Winston default: 16022, OWS default: 16032");
+    builder.append(" Winston default: 16022");
     builder.nextLine();
 
     builder.append("Timeout:");
