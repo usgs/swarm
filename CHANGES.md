@@ -1,4 +1,5 @@
 ## Version 2.8.6 - TBD
+  * Add RSAM value of selected wave panel period to status bar (#103)
   * Fix issue with streamining failing on loss of data (#142)
 
 ## Version 2.8.5 - July 13, 2018
