@@ -188,6 +188,7 @@ public class MapPanel extends JPanel {
   private int dragDy = Integer.MAX_VALUE;
 
   private LabelSetting labelSetting = LabelSetting.SOME;
+  protected boolean hideStations  = false;
 
   private List<MapLayer> layers;
 
@@ -227,6 +228,7 @@ public class MapPanel extends JPanel {
     cf.put(prefix + ".latitude", Double.toString(center.y));
     cf.put(prefix + ".scale", Double.toString(scale));
     cf.put(prefix + ".labelSetting", labelSetting.code);
+    cf.put(prefix + ".hideStations", Boolean.toString(hideStations));
     synchronized (visiblePanels) {
       int waves = 0;
       for (final MapMiniPanel panel : visiblePanels) {
@@ -254,6 +256,7 @@ public class MapPanel extends JPanel {
     }
 
     labelSetting = LabelSetting.fromString(cf.getString("labelSetting"));
+    hideStations = Boolean.parseBoolean(cf.getString("hideStations"));
     final double lon = Double.parseDouble(cf.getString("longitude"));
     final double lat = Double.parseDouble(cf.getString("latitude"));
     final Point2D.Double c = new Point2D.Double(lon, lat);
@@ -829,6 +832,9 @@ public class MapPanel extends JPanel {
 
     final Map<String, Metadata> allMetadata = swarmConfig.getMetadata();
     synchronized (allMetadata) {
+      if (hideStations) {
+        return new Pair<List<JComponent>, List<Line2D.Double>>(compsToAdd, linesToAdd);
+      }
       for (final MapMiniPanel panel : miniPanels.values()) {
         if (panel.getPosition() == MapMiniPanel.Position.MANUAL_SET) {
           panel.setPosition(Position.MANUAL_UNSET);
