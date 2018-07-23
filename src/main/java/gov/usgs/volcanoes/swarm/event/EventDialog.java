@@ -29,6 +29,7 @@ import gov.usgs.volcanoes.swarm.SwarmFrame;
 import gov.usgs.volcanoes.swarm.Version;
 import gov.usgs.volcanoes.swarm.event.hypo71.Hypo71Manager;
 import gov.usgs.volcanoes.swarm.event.hypo71.Hypo71SettingsDialog;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
@@ -62,6 +63,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.parsers.DocumentBuilder;
@@ -129,6 +132,7 @@ public class EventDialog extends SwarmFrame {
     user = SwarmConfig.getInstance().getUser();
     setContentPane(mainPanel);
     setFocusable(true);
+    createListeners();
   }
 
   protected void setSizeAndLocation() {
@@ -1056,5 +1060,24 @@ public class EventDialog extends SwarmFrame {
    */
   public void setEventTypeCertainty(EventTypeCertainty eventTypeCertainty) {
     this.eventTypeCertainty.setSelectedItem(eventTypeCertainty);
+  }
+  
+  private void createListeners() {
+    this.addInternalFrameListener(new InternalFrameAdapter() {
+      @Override
+      public void internalFrameActivated(final InternalFrameEvent e) {}
+
+      @Override
+      public void internalFrameDeiconified(final InternalFrameEvent e) {}
+
+      @Override
+      public void internalFrameClosing(final InternalFrameEvent e) {
+        dispose();
+        SwarmInternalFrames.remove(EventDialog.this);
+      }
+
+      @Override
+      public void internalFrameClosed(final InternalFrameEvent e) {}
+    });
   }
 }

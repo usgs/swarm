@@ -1,6 +1,7 @@
 ## Version 2.8.6 - TBD
   * Add RSAM value of selected wave panel period to status bar (#103)
   * Fix issue with streamining failing on loss of data (#142)
+  * Fix multiple event dialog showing up under Window menu (#216)
 
 ## Version 2.8.5 - July 13, 2018
   * Support real-time wave viewer in layouts (#40)
