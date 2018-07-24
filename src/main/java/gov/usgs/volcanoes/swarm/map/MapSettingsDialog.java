@@ -16,6 +16,7 @@ import java.awt.geom.Point2D;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -48,6 +49,7 @@ public class MapSettingsDialog extends SwarmModalDialog {
   private JRadioButton someLabels;
   private JRadioButton allLabels;
   private JRadioButton noLabels;
+  private JCheckBox hideStations;
   private JButton mapLine;
   private JColorChooser lineChooser;
   private JComboBox<HypocenterSource> hypocenterSource;
@@ -102,7 +104,7 @@ public class MapSettingsDialog extends SwarmModalDialog {
     labelGroup.add(someLabels);
     labelGroup.add(allLabels);
     labelGroup.add(noLabels);
-    
+    hideStations = new JCheckBox();
     hypocenterSource = new JComboBox<HypocenterSource>(HypocenterSource.values());
   }
 
@@ -144,7 +146,10 @@ public class MapSettingsDialog extends SwarmModalDialog {
     builder.nextLine();
     builder.append(" ");
     builder.append(allLabels);
-
+    builder.nextLine();
+    builder.append("Hide Stations");
+    builder.append(hideStations);
+    
     builder.nextLine();
     builder.append("NEIC Event Summary");
     builder.append(hypocenterSource, 3);
@@ -192,6 +197,7 @@ public class MapSettingsDialog extends SwarmModalDialog {
       default:
         break;
     }
+    hideStations.setSelected(panel.hideStations);
     hypocenterSource.setSelectedItem(swarmConfig.getHypocenterSource());
   }
 
@@ -205,6 +211,7 @@ public class MapSettingsDialog extends SwarmModalDialog {
         ls = LabelSetting.NONE;
       }
       panel.setLabelSetting(ls);
+      panel.hideStations = hideStations.isSelected();
       Point2D.Double center = new Point2D.Double();
       center.x = Double.parseDouble(longitude.getText());
       center.y = Double.parseDouble(latitude.getText());
