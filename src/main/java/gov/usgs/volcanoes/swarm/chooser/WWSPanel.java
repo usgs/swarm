@@ -34,6 +34,7 @@ public class WWSPanel extends DataSourcePanel {
   }
 
   /**
+   * Reset source.
    * @see gov.usgs.volcanoes.swarm.chooser.DataSourcePanel#resetSource(java.lang.String)
    */
   public void resetSource(String source) {
@@ -58,10 +59,11 @@ public class WWSPanel extends DataSourcePanel {
   @Override
   protected void createPanel() {
     createFields();
-    FormLayout layout = new FormLayout("right:max(20dlu;pref), 3dlu, 40dlu, 0dlu, 126dlu", "");
+    FormLayout layout = new FormLayout("right:max(20dlu;pref), 3dlu, 40dlu, 0dlu, 156dlu", "");
 
     DefaultFormBuilder builder = new DefaultFormBuilder(layout).border(Borders.DIALOG);
-    builder.append(new JLabel("Use this data source to connect to a Winston Wave Server (WWS)."),
+    builder.append(new JLabel(
+        "Use this data source to connect to servers supporting Winston Wave Server protocol."),
         5);
     builder.nextLine();
     builder.appendSeparator();

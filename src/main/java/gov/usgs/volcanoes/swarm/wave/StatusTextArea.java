@@ -74,13 +74,15 @@ public class StatusTextArea extends JTextArea {
    */
   public static String getWaveInfo(Wave wave) {
     int[] dataRange = wave.getDataRange();
+    
+    
     String waveInfo = null;
     try {
-      waveInfo = String.format("[%s - %s (UTC), %d samples (%.2f s), %d samples/s, %d, %d]",
+      waveInfo = String.format("[%s - %s (UTC), %d samples (%.2f s), %d samples/s, %d, %d, %.1f]",
           J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, wave.getStartTime()),
           J2kSec.format(Time.STANDARD_TIME_FORMAT_MS, wave.getEndTime()), wave.numSamples(),
           wave.numSamples() / wave.getSamplingRate(), (int) wave.getSamplingRate(), dataRange[0],
-          dataRange[1]);
+          dataRange[1], wave.rsam());
     } catch (NullPointerException e) {
       // do nothing
     }

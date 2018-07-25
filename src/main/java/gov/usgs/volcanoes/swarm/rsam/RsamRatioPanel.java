@@ -304,7 +304,7 @@ public class RsamRatioPanel extends JComponent implements SettingsListener {
     MatrixRenderer mr = new MatrixRenderer(gdm.getData(), false);
     double max;
     double min;
-    if (settings.getAutoScale()) {
+    if (settings.autoScale) {
       max = gdm.max(1) + gdm.max(1) * .1;
       min = gdm.min(1) - gdm.max(1) * .1;
     } else {

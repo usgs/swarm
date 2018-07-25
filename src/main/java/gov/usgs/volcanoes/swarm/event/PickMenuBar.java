@@ -9,9 +9,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.util.List;
 
-import javax.swing.JInternalFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -72,11 +70,14 @@ public class PickMenuBar extends JMenuBar {
    */
   private void openEventDialog() {
     EventDialog eventDialog = EventDialog.getInstance();
+    eventDialog.toFront();
+    eventDialog.requestFocus();
+    if (eventDialog.isVisible()) {
+      return;
+    }
     eventDialog.checkForPicks();
     eventDialog.setSizeAndLocation();
     eventDialog.setVisible(true);   
-    eventDialog.toFront();
-    eventDialog.requestFocus();
 
     // if event dialog is already in frame it throws an IllegalArgumentException.
     // catch and try again.

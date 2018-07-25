@@ -1,14 +1,14 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.math.BinSize;
+import gov.usgs.volcanoes.core.util.StringUtils;
+
 import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.math.BinSize;
-import gov.usgs.volcanoes.core.util.StringUtils;
 
 /**
  * RSAM view settings.
@@ -16,29 +16,32 @@ import gov.usgs.volcanoes.core.util.StringUtils;
  */
 
 public class RsamViewSettings {
-  private static final String DEFAULTS_FILENAME = "RsamDefaults.config";
+  protected static final String DEFAULTS_FILENAME = "RsamDefaults.config";
 
-  public enum ViewType {
+  protected enum ViewType {
     VALUES, COUNTS;
   }
 
-  public int valuesPeriodS;
-  public int countsPeriodS;
-  public boolean detrend;
-  public boolean despike;
-  public int despikePeriod;
-  public boolean runningMedian;
-  public double runningMedianPeriodS;
-  public boolean runningMean;
-  public double runningMeanPeriodS;
+  protected int valuesPeriodS;
+  protected int countsPeriodS;
+  protected boolean detrend;
+  protected boolean despike;
+  protected int despikePeriod;
+  protected boolean runningMedian;
+  protected double runningMedianPeriodS;
+  protected boolean runningMean;
+  protected double runningMeanPeriodS;
 
-  public int eventThreshold;
-  public double eventRatio;
-  public double eventMaxLengthS;
-  public BinSize binSize;
-  private boolean autoScale;
-  public int scaleMax;
-  public int scaleMin;
+  protected int eventThreshold;
+  protected double eventRatio;
+  protected double eventMaxLengthS;
+  protected BinSize binSize;
+  protected boolean autoScale;
+  protected int scaleMax;
+  protected int scaleMin;
+  
+  protected boolean alarm;
+  protected String soundFile;
   
 /*  public boolean filterOn;
   public Butterworth filter;
@@ -47,7 +50,7 @@ public class RsamViewSettings {
   private int spanLengthS;
   private ViewType viewType;
 
-  private static RsamViewSettings DEFAULT_RSAM_VIEW_SETTINGS;
+  protected static RsamViewSettings DEFAULT_RSAM_VIEW_SETTINGS;
   private Set<SettingsListener> listeners;
 
   static {
@@ -70,6 +73,8 @@ public class RsamViewSettings {
     DEFAULT_RSAM_VIEW_SETTINGS.autoScale = true;
     DEFAULT_RSAM_VIEW_SETTINGS.scaleMax = 100;
     DEFAULT_RSAM_VIEW_SETTINGS.scaleMin = 0;
+    DEFAULT_RSAM_VIEW_SETTINGS.alarm = false;
+    DEFAULT_RSAM_VIEW_SETTINGS.soundFile = "ding.wav";
 /*    DEFAULT_RSAM_VIEW_SETTINGS.filter = new Butterworth();
     DEFAULT_RSAM_VIEW_SETTINGS.filterOn = false;
     DEFAULT_RSAM_VIEW_SETTINGS.zeroPhaseShift = true;*/
@@ -125,6 +130,8 @@ public class RsamViewSettings {
     autoScale = s.autoScale;
     scaleMax = s.scaleMax;
     scaleMin = s.scaleMin;
+    alarm = s.alarm;
+    soundFile = s.soundFile;
 /*    filterOn = s.filterOn;
     filter = new Butterworth(s.filter);
     zeroPhaseShift = s.zeroPhaseShift;*/
@@ -167,7 +174,11 @@ public class RsamViewSettings {
         StringUtils.stringToInt(cf.getString("scaleMax"), DEFAULT_RSAM_VIEW_SETTINGS.scaleMax);
     scaleMin =
         StringUtils.stringToInt(cf.getString("scaleMin"), DEFAULT_RSAM_VIEW_SETTINGS.scaleMin);
-    
+    alarm =
+        StringUtils.stringToBoolean(cf.getString("alarm"), DEFAULT_RSAM_VIEW_SETTINGS.alarm);
+    soundFile =
+        StringUtils.stringToString(cf.getString("soundFile"), DEFAULT_RSAM_VIEW_SETTINGS.soundFile);
+
 
     //filter.set(cf.getSubConfig("filter"));
     //filterOn =
@@ -194,12 +205,14 @@ public class RsamViewSettings {
     cf.put(prefix + ".runningMean", Boolean.toString(runningMean));
     cf.put(prefix + ".runningMeanPeriod", Double.toString(runningMeanPeriodS));
     cf.put(prefix + ".eventRatio", Double.toString(eventRatio));
-    cf.put(prefix + ".eventThreshold", Double.toString(eventThreshold));
+    cf.put(prefix + ".eventThreshold", Integer.toString(eventThreshold));
     cf.put(prefix + ".eventMaxLength", Double.toString(eventMaxLengthS));
     cf.put(prefix + ".binSize", binSize.toString());
     cf.put(prefix + ".autoScale", Boolean.toString(autoScale));
     cf.put(prefix + ".scaleMax", Double.toString(scaleMax));
     cf.put(prefix + ".scaleMin", Double.toString(scaleMin));
+    cf.put(prefix + ".alarm", Boolean.toString(alarm));
+    cf.put(prefix + ".soundFile", soundFile);
     //filter.save(cf, prefix + ".filter");
     //cf.put(prefix + ".filterOn", Boolean.toString(filterOn));
     //cf.put(prefix + ".zeroPhaseShift", Boolean.toString(zeroPhaseShift));
@@ -221,14 +234,6 @@ public class RsamViewSettings {
 
   public ViewType getType() {
     return viewType;
-  }
-
-  public void setAutoScale(boolean isAutoScale) {
-    this.autoScale = isAutoScale;
-  }
-
-  public boolean getAutoScale() {
-    return autoScale;
   }
 
   /**

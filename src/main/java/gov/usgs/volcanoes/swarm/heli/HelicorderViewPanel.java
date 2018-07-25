@@ -1,5 +1,30 @@
 package gov.usgs.volcanoes.swarm.heli;
 
+import gov.usgs.volcanoes.core.data.HelicorderData;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.FrameDecorator;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
+import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.FrameRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.HelicorderRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.event.TagData;
+import gov.usgs.volcanoes.swarm.event.TagMenu;
+import gov.usgs.volcanoes.swarm.options.SwarmOptions;
+import gov.usgs.volcanoes.swarm.options.SwarmOptionsListener;
+import gov.usgs.volcanoes.swarm.time.UiTime;
+import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
+
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -21,35 +46,13 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
-
-import gov.usgs.volcanoes.core.data.HelicorderData;
-import gov.usgs.volcanoes.core.data.Wave;
-import gov.usgs.volcanoes.core.legacy.plot.Plot;
-import gov.usgs.volcanoes.core.legacy.plot.PlotException;
-import gov.usgs.volcanoes.core.legacy.plot.decorate.FrameDecorator;
-import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
-import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
-import gov.usgs.volcanoes.core.legacy.plot.render.FrameRenderer;
-import gov.usgs.volcanoes.core.legacy.plot.render.HelicorderRenderer;
-import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.options.SwarmOptions;
-import gov.usgs.volcanoes.swarm.options.SwarmOptionsListener;
-import gov.usgs.volcanoes.swarm.time.UiTime;
-import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
 
 /**
  * A <code>JComponent</code> for displaying and interacting with a helicorder.
@@ -111,6 +114,9 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
   private EventListenerList listeners = new EventListenerList();
   private static SwarmConfig swarmConfig;
 
+  private TagMenu tagMenu;
+  protected ArrayList<TagData> tagData = new ArrayList<TagData>();
+  
   /**
    * Constructor.
    * @param hvf helicorder viewer frame
@@ -330,22 +336,28 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 
     public void mousePressed(MouseEvent e) {
       UiTime.touchTime();
-      if (e.getButton() == MouseEvent.BUTTON1) {
-        int mx = e.getX();
-        int my = e.getY();
-        if (mx < heliRenderer.getGraphX() || my < heliRenderer.getGraphY()
-            || mx > heliRenderer.getGraphX() + heliRenderer.getGraphWidth() - 1
-            || my > heliRenderer.getGraphY() + heliRenderer.getGraphHeight() - 1) {
-          return;
-        }
+      int mx = e.getX();
+      int my = e.getY();
+      if (mx < heliRenderer.getGraphX() || my < heliRenderer.getGraphY()
+          || mx > heliRenderer.getGraphX() + heliRenderer.getGraphWidth() - 1
+          || my > heliRenderer.getGraphY() + heliRenderer.getGraphHeight() - 1) {
+        return;
+      }
+      double j2k = getMouseJ2K(mx, my);
 
-        double j2k = getMouseJ2K(mx, my);
+      if (e.getButton() == MouseEvent.BUTTON1) {
         if (j2k != -1E300) {
           if (insetWavePanel != null) {
             insetWavePanel.setWave(null, 0, 1);
           }
           createWaveInset(j2k, mx, my);
         }
+      } else if (SwingUtilities.isRightMouseButton(e)) {
+        if (parent.isTagEnabled()) {
+          TagMenu tagMenu = getTagMenu();
+          tagMenu.setJ2k(j2k);
+          tagMenu.show(HelicorderViewPanel.this, mx, my);
+        } 
       }
       /*
        * else if (e.getButton() == MouseEvent.BUTTON3) { if (insetWavePanel != null) {
@@ -396,8 +408,6 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
       return;
     }
 
-    String status = null;
-
     boolean wp = false;
     if (insetWavePanel != null) {
       Point loc = insetWavePanel.getLocation();
@@ -405,22 +415,36 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
     }
 
     if (!wp) {
-      if (status == null) {
-        if (!(x < heliRenderer.getGraphX() || y < heliRenderer.getGraphY()
-            || x > heliRenderer.getGraphX() + heliRenderer.getGraphWidth() - 1
-            || y > heliRenderer.getGraphY() + heliRenderer.getGraphHeight() - 1)) {
+      if (!(x < heliRenderer.getGraphX() || y < heliRenderer.getGraphY()
+          || x > heliRenderer.getGraphX() + heliRenderer.getGraphWidth() - 1
+          || y > heliRenderer.getGraphY() + heliRenderer.getGraphHeight() - 1)) {
+        // set status text at bottom
 
-          double j2k = getMouseJ2K(x, y);
-          status = StatusTextArea.getTimeString(j2k, swarmConfig.getTimeZone(settings.channel));
+        double j2k = getMouseJ2K(x, y);
+        String status =
+            StatusTextArea.getTimeString(j2k, swarmConfig.getTimeZone(settings.channel));
+        
+        // look for event to show
+        if (parent.isTagEnabled()) {
+          double mindiff = Double.MAX_VALUE;
+          TagData showTag = null;
+          for (TagData tag : tagData) { // get closest within
+            if (tag.channel.equals(settings.channel)) {
+              double diff = Math.abs(j2k - tag.startTime);
+              if (diff < 60 && diff < mindiff) {
+                mindiff = diff;
+                showTag = tag;
+              }
+            }
+          }
+          if (showTag != null) {
+            status += "\n" + showTag.getTimeString() + " - " + showTag.classification;
+          }
         }
-      }
-
-      if (status == null) {
-        status = " ";
-      }
-
-      if (status != null) {
+        
         parent.setStatus(status);
+      } else {
+        parent.setStatus(" ");
       }
     }
   }
@@ -516,7 +540,8 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
     insetWavePanel.setChannel(settings.channel);
     insetWavePanel.setDataSource(parent.getDataSource());
     insetWavePanel.setStatusText(parent.getStatusText());
-
+    makeInsetPanelTagEnabled();
+    
     Dimension d = getSize();
     insetHeight = getHeight() / 4;
     int height = insetHeight;
@@ -567,6 +592,17 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
     worker.start();
   }
 
+  /**
+   * Make inset panel tag enabled.
+   */
+  protected void makeInsetPanelTagEnabled() {
+    if (insetWavePanel != null) {
+      insetWavePanel.getSettings().tagEnabled = parent.isTagEnabled();
+      insetWavePanel.setTagData(tagData);
+      insetWavePanel.setTagMenu(getTagMenu());    
+    }
+  }
+  
   /**
    * Set helicorder.
    * @param d helicorder data
@@ -789,6 +825,8 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
   public void setMinimal(boolean b) {
     minimal = b;
   }
+  
+  private static final Color DARK_GREEN = new Color(0, 168, 0);
 
   private void drawMark(Graphics2D g2, double t, Color color) {
     if (Double.isNaN(t)) {
@@ -798,34 +836,56 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
     int x = (int) (heliRenderer.helicorderGetXPixel(t));
     int row = heliRenderer.getRow(t);
     int y = (int) Math.ceil(row * translation[2] + translation[3]);
-    g2.setColor(color);
-    g2.draw(new Line2D.Double(x, y, x, y + translation[2]));
 
-    GeneralPath gp = new GeneralPath();
-    gp.moveTo(x, y);
-    gp.lineTo((float) x - 4, (float) y - 6);
-    gp.lineTo((float) x + 4, (float) y - 6);
-    gp.closePath();
-    g2.setColor(Color.GREEN);
-    g2.fill(gp);
-    g2.setColor(DARK_GREEN);
-    g2.draw(gp);
-
-    gp.reset();
-    gp.moveTo(x, (float) (y + translation[2]));
-    gp.lineTo((float) x - 4, (float) (y + 6 + translation[2]));
-    gp.lineTo((float) x + 4, (float) (y + 6 + translation[2]));
-    gp.closePath();
-    gp.closePath();
-    g2.setColor(Color.GREEN);
-    g2.fill(gp);
-    g2.setColor(DARK_GREEN);
-    g2.draw(gp);
+    if (!(x < heliRenderer.getGraphX() || y < heliRenderer.getGraphY()
+        || x > heliRenderer.getGraphX() + heliRenderer.getGraphWidth() - 1
+        || y > heliRenderer.getGraphY() + heliRenderer.getGraphHeight() - 1)) {
+      g2.setColor(color);
+      g2.draw(new Line2D.Double(x, y, x, y + translation[2]));
+  
+      GeneralPath gp = new GeneralPath();
+      gp.moveTo(x, y);
+      gp.lineTo((float) x - 4, (float) y - 6);
+      gp.lineTo((float) x + 4, (float) y - 6);
+      gp.closePath();
+      g2.fill(gp);
+      g2.draw(gp);
+  
+      gp.reset();
+      gp.moveTo(x, (float) (y + translation[2]));
+      gp.lineTo((float) x - 4, (float) (y + 6 + translation[2]));
+      gp.lineTo((float) x + 4, (float) (y + 6 + translation[2]));
+      gp.closePath();
+      gp.closePath();
+      g2.fill(gp);
+      g2.draw(gp);
+    }
   }
 
-  private static final Color DARK_GREEN = new Color(0, 168, 0);
+  /**
+   * Draw event circle.
+   * @param g2 graphics
+   * @param t start time
+   * @param color color
+   */
+  private void drawEvent(Graphics2D g2, double t, Color color) {
+    if (Double.isNaN(t)) {
+      return;
+    }
+    int x = (int) (heliRenderer.helicorderGetXPixel(t));
+    int row = heliRenderer.getRow(t);
+    int y = (int) Math.ceil(row * translation[2] + translation[3]);
+    if (!(x < heliRenderer.getGraphX() || y < heliRenderer.getGraphY()
+        || x > heliRenderer.getGraphX() + heliRenderer.getGraphWidth() - 1
+        || y > heliRenderer.getGraphY() + heliRenderer.getGraphHeight() - 1)) {
+      g2.setColor(color);
+      int r = 12;
+      g2.fillOval(x - (r / 2), y, r, r);
+    }
+  }
 
   /**
+   * Paint.
    * @see javax.swing.JComponent#paint(java.awt.Graphics)
    */
   public void paint(Graphics g) {
@@ -841,6 +901,13 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 
     drawMark(g2, startMark, DARK_GREEN);
     drawMark(g2, endMark, DARK_GREEN);
+    if (parent.isTagEnabled()) {
+      for (TagData tag : tagData) {
+        if (tag.channel.equals(settings.channel)) {
+          drawEvent(g2, tag.startTime, tag.color);
+        }
+      }      
+    }
 
     if (insetWavePanel != null) {
       // find out where time highlight will be, possibly reposition the
@@ -942,6 +1009,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
   }
 
   /**
+   * Option changed.
    * @see gov.usgs.volcanoes.swarm.options.SwarmOptionsListener#optionsChanged()
    */
   public void optionsChanged() {
@@ -952,11 +1020,31 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
     }
   }
 
-  // public void insetToPicker() {
-  // if (insetWavePanel != null) {
-  // LOGGER.debug("Sending wave to picker");
-  // Swarm.openPicker(insetWavePanel);
-  // }
-  // }
+  public ArrayList<TagData> getTagData() {
+    return tagData;
+  }
+  
+  /**
+   * Get tag menu.
+   * @return
+   */
+  public TagMenu getTagMenu() {
+    if (tagMenu == null) {
+      tagMenu = new TagMenu(this);
+    }
+    return tagMenu;
+  }
+  
+  public HelicorderViewerSettings getSettings() {
+    return settings;
+  }
+  
+  public WaveViewPanel getInsetPanel() {
+    return insetWavePanel;
+  }
+  
+  public HelicorderViewerFrame getFrame() {
+    return parent;
+  }
 
 }

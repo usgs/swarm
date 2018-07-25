@@ -38,10 +38,10 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
   /** roughly max size of a single wave in bytes. Actually, (numSamples * 4) */
   private static final int MAX_WAVE_SIZE = 1000000;
 
-  /** microsecond conversion */
+  /** microsecond conversion. */
   protected static final long TO_USEC = (long) 1E6;
 
-  /** microsecond conversion */
+  /** microsecond conversion. */
   protected static final double FROM_USEC = 1E-6;
 
   protected long maxSize;
@@ -52,6 +52,9 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
   protected static Logger logger;
   protected static final JFrame applicationFrame = Swarm.getApplicationFrame();
 
+  /**
+   * Constructor.
+   */
   public AbstractCachingDataSource() {
     helicorderCache = new HashMap<String, List<CachedHelicorder>>();
     waveCache = new HashMap<String, List<CachedWave>>();
@@ -65,6 +68,9 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
     // no-op
   }
 
+  /**
+   * Flush.
+   */
   public void flush() {
     flushWaves();
     flushHelicorders();
@@ -76,6 +82,10 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
     return false;
   }
 
+  /**
+   * Get total size of cache.
+   * @return
+   */
   public synchronized long getSize() {
     long size = getSize(waveCache);
     size += getSize(helicorderCache);
@@ -88,24 +98,30 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
     for (final String key : cache.keySet()) {
       final List<T> cwl = cache.get(key);
 
-      for (final T ce : cwl)
+      for (final T ce : cwl) {
         size += ce.getMemorySize();
+      }
     }
     return size;
   }
 
+  /**
+   * Output cache size.
+   */
   public void output() {
     long size = outputCache("Wave", waveCache);
     size += outputCache("Helicorder", helicorderCache);
     System.out.println("Wave Last Access Order:");
     final List<CacheEntry> wl = getEntriesByLastAccess(waveCache);
-    for (final CacheEntry ce : wl)
+    for (final CacheEntry ce : wl) {
       System.out.println(ce.getInfoString());
+    }
 
     System.out.println("Helicorder Last Access Order:");
     final List<CacheEntry> hl = getEntriesByLastAccess(helicorderCache);
-    for (final CacheEntry ce : hl)
+    for (final CacheEntry ce : hl) {
       System.out.println(ce.getInfoString());
+    }
 
     System.out.println("Total size: " + size + " bytes");
   }
@@ -115,13 +131,17 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
     final List<CacheEntry> cl = new ArrayList<CacheEntry>();
     for (final String key : cache.keySet()) {
       final List<T> cwl = cache.get(key);
-      for (final T ce : cwl)
+      for (final T ce : cwl){
         cl.add(ce);
+      }
     }
 
     return cl;
   }
 
+  /**
+   * Create purge actions.
+   */
   public void createPurgeActions() {
     purgeActions = new CachePurgeAction[] {
         // purge anything that hasn't been hit in 5 minutes
@@ -146,8 +166,9 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
 
   /** TODO: maybe this should be an observer? */
   private synchronized void enforceSize() {
-    if (purgeActions == null)
+    if (purgeActions == null) {
       return;
+    }
 
     long target = getSize() - maxSize;
     int i = 0;
@@ -177,6 +198,11 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
     enforceSize();
   }
 
+  /**
+   * Put RSAM into cache.
+   * @param station channel
+   * @param rsamData rsam data 
+   */
   public void putRsam(final String station, RSAMData rsamData) {
     if (rsamData == null || rsamData.getData() == null) {
       return;
@@ -221,6 +247,11 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
     }
   }
 
+  /**
+   * Put helicorder.
+   * @param station channel
+   * @param helicorder helicorder data
+   */
   public synchronized void putHelicorder(final String station, HelicorderData helicorder) {
     List<CachedHelicorder> helis = helicorderCache.get(station);
     if (helis == null) {
@@ -266,10 +297,16 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
     }
   }
 
+  /**
+   * Cache wave as helicorder.
+   * @param station channel
+   * @param wave wave data
+   */
   public synchronized void cacheWaveAsHelicorder(final String station, final Wave wave) {
-    if (inHelicorderCache(station, wave.getStartTime(), wave.getEndTime()))
+    if (inHelicorderCache(station, wave.getStartTime(), wave.getEndTime())) {
       return;
-
+    }
+    
     final int seconds = (int) Math.ceil(wave.numSamples() * wave.getSamplingPeriod());
     final DoubleMatrix2D data = DoubleFactory2D.dense.make(seconds, 3);
     for (int i = 0; i < seconds; i++) {
@@ -294,12 +331,13 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
 
     for (int i = 0; i < seconds; i++) {
       final double min = data.getQuick(i, 1);
-      if (min == Integer.MAX_VALUE)
+      if (min == Integer.MAX_VALUE) {
         data.setQuick(i, 1, wave.mean());
-
+      }
       final double max = data.getQuick(i, 2);
-      if (max == Integer.MIN_VALUE)
+      if (max == Integer.MIN_VALUE) {
         data.setQuick(i, 2, wave.mean());
+      }
     }
 
     final HelicorderData hd = new HelicorderData();
@@ -311,31 +349,43 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
     return helicorderCache.size() + waveCache.size() == 0;
   }
 
+  /**
+   * Check to see if there are any cached helicorders for given time.
+   * @param station channel
+   * @param t1 start time 
+   * @param t2 end time
+   * @return
+   */
   public synchronized boolean inHelicorderCache(final String station, final double t1,
       final double t2) {
     final List<CachedHelicorder> helis = helicorderCache.get(station);
-    if (helis == null)
+    if (helis == null) {
       return false;
-
+    }
     for (final CachedHelicorder ch : helis) {
-      if (t1 >= ch.t1 && t2 <= ch.t2)
+      if (t1 >= ch.t1 && t2 <= ch.t2) {
         return true;
+      }
     }
 
     return false;
   }
 
+  /**
+   * Get RSAM.
+   * @see gov.usgs.volcanoes.swarm.data.RsamSource#getRsam(java.lang.String, double, double, int)
+   */
   public RSAMData getRsam(final String channel, final double t1, final double t2,
       final int period) {
     final List<CachedRsam> rsam = rsamCache.get(channel);
-    if (rsam == null)
+    if (rsam == null) {
       return null;
-    else {
+    } else {
 
       for (final CachedRsam cr : rsam) {
-        if (cr.rsamData.getPeriod() != period)
+        if (cr.rsamData.getPeriod() != period) {
           continue;
-
+        }
         if (t1 >= cr.t1 && t2 <= cr.t2) {
           return cr.slice(t1, t2);
         }
@@ -348,10 +398,9 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
   public synchronized Wave getWave(final String station, final double t1, final double t2) {
 
     final List<CachedWave> waves = waveCache.get(station);
-    if (waves == null)
+    if (waves == null) {
       return null;
-    else {
-
+    } else {
       for (final CachedWave cw : waves) {
         if (t1 >= cw.t1 && t2 <= cw.t2) {
           // TODO: fix this. It's a sloppy.
@@ -380,18 +429,26 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
 
     Collections.sort(st);
 
-    if (st.size() == 0)
+    if (st.size() == 0) {
       return null;
-    else
+    } else {
       return st;
+    }
   }
 
+  /**
+   * Get best wave for given time range.
+   * @param station channel
+   * @param t1 start time
+   * @param t2 end time
+   * @return
+   */
   public synchronized Wave getBestWave(final String station, final double t1, final double t2) {
     Wave wave;
     final List<CachedWave> waves = waveCache.get(station);
-    if (waves == null)
+    if (waves == null) {
       return null;
-    else {
+    } else {
       final List<Wave> parts = new ArrayList<Wave>();
       double minT = 1E300;
       double maxT = -1E300;
@@ -403,16 +460,23 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
         }
       }
 
-      if (parts.size() == 1)
+      if (parts.size() == 1) {
         return parts.get(0);
+      }
 
       wave = Wave.join(parts, minT, maxT);
-      if (wave != null)
+      if (wave != null) {
         wave = wave.subset(t1, t2);
+      }
     }
     return wave;
   }
 
+  /**
+   * Put wave.
+   * @param station channel
+   * @param wave wave
+   */
   public synchronized void putWave(final String station, final Wave wave) {
     List<CachedWave> waves = waveCache.get(station);
     if (waves == null) {
@@ -422,11 +486,14 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
     } else {
       for (final CachedWave cw : waves) {
         boolean join = false;
-        if (cw.wave.adjacent(wave))
-          if (cw.wave.getMemorySize() + wave.getMemorySize() < MAX_WAVE_SIZE)
+        if (cw.wave.adjacent(wave)) {
+          if (cw.wave.getMemorySize() + wave.getMemorySize() < MAX_WAVE_SIZE) {
             join = true;
-        if (cw.wave.overlaps(wave))
+          }
+        }
+        if (cw.wave.overlaps(wave)) {
           join = true;
+        }
 
         if (join) {
           final Wave newWave = cw.wave.combine(wave);
@@ -452,9 +519,9 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
       final double endTime, final GulperListener gl) {
     station = station.replace(' ', '$');
     final List<CachedHelicorder> helis = helicorderCache.get(station);
-    if (helis == null)
+    if (helis == null) {
       return null;
-    else {
+    } else {
       HelicorderData hd = new HelicorderData();
       HelicorderData hd2 = null;
       for (final CachedHelicorder ch : helis) {
@@ -468,13 +535,11 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
         // just a piece, put it in the result
         if (startTime <= ch.t1 && endTime >= ch.t2) {
           hd2 = ch.helicorder;
-        }
-        // cached is right side
-        else if (endTime >= ch.t1 && endTime <= ch.t2) {
+        } else if (endTime >= ch.t1 && endTime <= ch.t2) {
+          // cached is right side
           hd2 = ch.helicorder.subset(ch.t1, endTime);
-        }
-        // cached is left side
-        else if (startTime >= ch.t1 && startTime <= ch.t2) {
+        } else if (startTime >= ch.t1 && startTime <= ch.t2) {
+          // cached is left side
           hd2 = ch.helicorder.subset(startTime, ch.t2);
         }
 
@@ -486,19 +551,28 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
         }
       }
       hd.sort();
-      if (hd.getData() == null)
+      if (hd.getData() == null) {
         hd = null;
+      }
 
       return hd;
     }
   }
 
+  /**
+   * Get helicorder data.
+   * @param station channel
+   * @param t1 start time 
+   * @param t2 end time
+   * @param source data source
+   * @return
+   */
   public synchronized HelicorderData getHelicorder(final String station, final double t1,
       final double t2, final SeismicDataSource source) {
     final List<CachedHelicorder> helis = helicorderCache.get(station);
-    if (helis == null)
+    if (helis == null) {
       return null;
-    else {
+    } else {
       HelicorderData hd;
       for (final CachedHelicorder ch : helis) {
         // asked for area completely within one cache entry
@@ -513,15 +587,15 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
         if (t1 < ch.t1 && t2 > ch.t2) {
           // System.out.println("cache is centered chunk");
           HelicorderData nhd = source.getHelicorder(station, t1, ch.t1, null);
-          if (nhd != null)
+          if (nhd != null) {
             hd = ch.helicorder.combine(nhd);
-          else
+          } else {
             hd = ch.helicorder;
-
+          }
           nhd = source.getHelicorder(station, ch.t2, t2, null);
-          if (nhd != null)
+          if (nhd != null) {
             hd = hd.combine(nhd);
-
+          }
           ch.lastAccess = System.currentTimeMillis();
           return hd;
         }
@@ -703,13 +777,13 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
     }
   }
 
-  abstract protected class CachePurgeAction {
+  protected abstract class CachePurgeAction {
     public CachePurgeAction() {}
 
-    abstract public long purge();
+    public abstract long purge();
   }
 
-  abstract private class CacheEntry implements Comparable<CacheEntry> {
+  private abstract class CacheEntry implements Comparable<CacheEntry> {
     public String station;
     public double t1;
     public double t2;
@@ -719,9 +793,9 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
       return (int) (lastAccess - oce.lastAccess);
     }
 
-    abstract public String getInfoString();
+    public abstract String getInfoString();
 
-    abstract public int getMemorySize();
+    public abstract int getMemorySize();
   }
 
   public class CachedWave extends CacheEntry implements Comparable<CacheEntry> {
@@ -769,9 +843,16 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
       return station + " " + t1 + " " + t2;
     }
 
+    /**
+     * Slice.
+     * @param t1 start time
+     * @param t2 end time
+     * @return RSAM data
+     */
     public RSAMData slice(final double t1, final double t2) {
-      if (t1 >= this.t2 || t2 <= this.t1)
+      if (t1 >= this.t2 || t2 <= this.t1) {
         return null;
+      }
 
       final DoubleMatrix2D d = rsamData.getData();
       int i = 0;
@@ -779,19 +860,21 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
       int firstRow = Integer.MAX_VALUE;
       while (firstRow == Integer.MAX_VALUE && i < d.rows()) {
         final double t = d.getQuick(i, 0);
-        if (t >= t1)
+        if (t >= t1) {
           firstRow = i;
-        else
+        } else {
           i++;
+        }
       }
 
       int lastRow = -Integer.MAX_VALUE;
       while (lastRow == -Integer.MAX_VALUE && i < d.rows()) {
         final double t = d.getQuick(i, 0);
-        if (t >= t2)
+        if (t >= t2) {
           lastRow = i;
-        else
+        } else {
           i++;
+        }
       }
 
       final RSAMData rd = new RSAMData();

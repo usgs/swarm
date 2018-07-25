@@ -292,7 +292,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
     final JButton earthButton = SwarmUtil.createToolBarButton(Icons.earth,
         "Zoom out to full scale (Home)", new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
-            final Point2D.Double c = new Point2D.Double(mapPanel.getCenter().x, 0);
+            final Point2D.Double c = new Point2D.Double(0, 0);
             mapPanel.setCenterAndScale(c, 100000);
           }
         });

@@ -137,7 +137,9 @@ public class PickData {
       return Double.NaN;
     }
     double duration = (stime - ptime) / 1000d;
-    double distance = SwarmConfig.getInstance().pVelocity * duration;
+    double vp = SwarmConfig.getInstance().pVelocity;
+    double vs = vp/SwarmConfig.getInstance().velocityRatio;
+    double distance = duration * (vp*vs)/(vp-vs);
     return distance;
   }
   

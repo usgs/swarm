@@ -40,6 +40,7 @@ public class OptionsDialog extends SwarmModalDialog {
   private JTextField durationA;
   private JTextField durationB;
   private JTextField pVelocity;
+  private JTextField velocityRatio;
   private JCheckBox useLargeCursor;
 
   private JCheckBox tzInstrument;
@@ -71,6 +72,7 @@ public class OptionsDialog extends SwarmModalDialog {
     durationA = new JTextField();
     durationB = new JTextField();
     pVelocity = new JTextField();
+    velocityRatio = new JTextField();
     useLargeCursor = new JCheckBox("Large Helicorder Cursor");
     tzInstrument = new JCheckBox("Use instrument time zone if available");
     tzLocal = new JRadioButton("Use local machine time zone:");
@@ -130,6 +132,8 @@ public class OptionsDialog extends SwarmModalDialog {
 
     builder.appendSeparator("S-P Distance");
     builder.append("P-velocity (km/s)=", pVelocity);
+    builder.nextLine();
+    builder.append("Vp/Vs Ratio =", velocityRatio);
     builder.nextLine();
     
     builder.appendSeparator("Maps");
@@ -201,6 +205,7 @@ public class OptionsDialog extends SwarmModalDialog {
     durationB.setText(Double.toString(swarmConfig.durationB));
     durationEnabled.setSelected(swarmConfig.durationEnabled);
     pVelocity.setText(Double.toString(swarmConfig.pVelocity));
+    velocityRatio.setText(Double.toString(swarmConfig.velocityRatio));
     tzInstrument.setSelected(swarmConfig.useInstrumentTimeZone);
     if (swarmConfig.useLocalTimeZone) {
       tzLocal.setSelected(true);
@@ -243,6 +248,13 @@ public class OptionsDialog extends SwarmModalDialog {
       JOptionPane.showMessageDialog(this, message, "Options Error", JOptionPane.ERROR_MESSAGE);
       ok = false;
     }
+    try {
+      Double.parseDouble(velocityRatio.getText().trim());
+    } catch (Exception e) {
+      String message = "The Vp/Vs ratio must be a number.";
+      JOptionPane.showMessageDialog(this, message, "Options Error", JOptionPane.ERROR_MESSAGE);
+      ok = false;
+    }
     return ok;
   }
 
@@ -255,6 +267,7 @@ public class OptionsDialog extends SwarmModalDialog {
     swarmConfig.durationA = Double.parseDouble(durationA.getText().trim());
     swarmConfig.durationB = Double.parseDouble(durationB.getText().trim());
     swarmConfig.pVelocity = Double.parseDouble(pVelocity.getText().trim());
+    swarmConfig.velocityRatio = Double.parseDouble(velocityRatio.getText().trim());
     swarmConfig.useInstrumentTimeZone = tzInstrument.isSelected();
     swarmConfig.useLocalTimeZone = tzLocal.isSelected();
     swarmConfig.specificTimeZone = TimeZone.getTimeZone((String) timeZones.getSelectedItem());

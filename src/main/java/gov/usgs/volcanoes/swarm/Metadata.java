@@ -337,15 +337,24 @@ public class Metadata implements Comparable<Metadata> {
     Instrument ins = chan.instrument;
     updateLongitude(ins.longitude);
     updateLatitude(ins.latitude);
+    updateHeight(ins.height);
     
     TimeSpan timeSpan = chan.timeSpan;
     updateMinTime(J2kSec.fromEpoch(timeSpan.startTime));
     updateMaxTime(J2kSec.fromEpoch(timeSpan.endTime));
     
-    if (getGroups() != null) {
+    /*
+     * TODO: This was added for the refresh feature (in case a group is deleted from data source).
+     * However, adding this breaks the feature that allows user to add groups in
+     * SwarmMetadata.config. Ideally groups no longer used in data source would be removed upon 
+     * refresh but until there is a fix or work around, leave this out.
+     */
+    /*
+     if (getGroups() != null) { // clear in case of refresh
       getGroups().clear();
-    }
-    
+     }
+     */
+    // add groups from source
     List<String> groups = chan.groups;
     if (groups != null) {
       for (String g : groups) {
@@ -457,10 +466,14 @@ public class Metadata implements Comparable<Metadata> {
     return result.size() == 0 ? null : result;
   }
 
+  /**
+   * To String.
+   * @see java.lang.Object#toString()
+   */
   public String toString() {
     return channel + "," + alias + "," + unit + "," + multiplier + "," + offset + "," + longitude
         + "," + latitude + "," + height + "," + timeZone + ", " + delay + ", "
-        + xmagCorrection + ", " + fmagCorrection;
+        + xmagCorrection + ", " + fmagCorrection + "," + groups.toString();
   }
 
   public int compareTo(Metadata o) {
