@@ -552,11 +552,6 @@
 			<version>1.7.1</version>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.13</version>
-		</dependency>
-		<dependency>
 			<groupId>gov.usgs.volcanoes</groupId>
 			<artifactId>volcano-core</artifactId>
 			<version>1.4.8</version>
