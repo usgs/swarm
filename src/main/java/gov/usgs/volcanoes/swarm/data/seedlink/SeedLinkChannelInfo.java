@@ -115,6 +115,7 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo {
 
   private double latitude = Double.NaN;
   private double longitude = Double.NaN;
+  private double elevation = Double.NaN;
 
   private String location;
   private String network;
@@ -233,5 +234,10 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo {
    */
   public String getType() {
     return type;
+  }
+
+  @Override
+  public double getHeight() {
+    return elevation;
   }
 }

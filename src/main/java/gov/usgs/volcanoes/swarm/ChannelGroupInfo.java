@@ -53,12 +53,13 @@ public class ChannelGroupInfo extends ChannelInfo {
    * @param location the location name.
    * @param latitude the latitude.
    * @param longitude the longitude.
+   * @param elevation the elevation
    * @param siteName the site name.
    * @param groupsType groups type.
    */
   public ChannelGroupInfo(String station, String channel, String network, String location,
-      double latitude, double longitude, String siteName, GroupsType groupsType) {
-    super(station, channel, network, location, latitude, longitude, siteName);
+      double latitude, double longitude, double elevation, String siteName, GroupsType groupsType) {
+    super(station, channel, network, location, latitude, longitude, elevation, siteName);
     this.groupsType = groupsType;
   }
 

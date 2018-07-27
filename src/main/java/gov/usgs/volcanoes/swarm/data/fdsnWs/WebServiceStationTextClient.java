@@ -153,8 +153,10 @@ public class WebServiceStationTextClient extends AbstractWebServiceStationClient
           String station = getColumnText(columns, 1);
           double latitude = StationInfo.parseDouble(getColumnText(columns, 2));
           double longitude = StationInfo.parseDouble(getColumnText(columns, 3));
+          double elevation = StationInfo.parseDouble(getColumnText(columns, 4));
           String siteName = getColumnText(columns, 5);
-          processStation(createStationInfo(station, network, latitude, longitude, siteName));
+          processStation(
+              createStationInfo(station, network, latitude, longitude, elevation, siteName));
         }
         break;
       case CHANNEL:
@@ -169,8 +171,13 @@ public class WebServiceStationTextClient extends AbstractWebServiceStationClient
           String siteName = null; // site name is not available
           double latitude = StationInfo.parseDouble(getColumnText(columns, 4));
           double longitude = StationInfo.parseDouble(getColumnText(columns, 5));
-          processChannel(createChannelInfo(station, channel, network, location, latitude, longitude,
-              siteName, groupsType));
+          double elevation = Double.NaN;
+          if (columns.length > 6) {
+            elevation = StationInfo.parseDouble(getColumnText(columns, 6));
+          }
+          processChannel(
+              createChannelInfo(station, channel, network, location, latitude, longitude, elevation,
+                  siteName, groupsType));
         }
         break;
       default:

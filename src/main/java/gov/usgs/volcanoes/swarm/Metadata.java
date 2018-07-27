@@ -416,32 +416,6 @@ public class Metadata implements Comparable<Metadata> {
   }
 
   /**
-   * Find nearest stations to point.
-   * @param metadata map of metadata
-   * @param pt point 
-   * @param requireDs true if data source required
-   * @return list of dance and channels
-   */
-  @Deprecated
-  public static List<Pair<Double, String>> findNearest(Map<String, Metadata> metadata,
-      Point2D.Double pt, boolean requireDs) {
-    ArrayList<Pair<Double, String>> result = new ArrayList<Pair<Double, String>>();
-    synchronized (metadata) {
-      for (String key : metadata.keySet()) {
-        Metadata md = metadata.get(key);
-        if (md.hasLonLat() && (!requireDs || md.source != null)) {
-          double d = md.distanceTo(pt);
-          if (!Double.isNaN(d) && d > 0) {
-            result.add(new Pair<Double, String>(new Double(d), md.channel));
-          }
-        }
-      }
-    }
-    Collections.sort(result, getDistanceComparator());
-    return result.size() == 0 ? null : result;
-  }
-
-  /**
    * Find nearest stations to channel.
    * @param metadata map of metadata
    * @param channel channel name

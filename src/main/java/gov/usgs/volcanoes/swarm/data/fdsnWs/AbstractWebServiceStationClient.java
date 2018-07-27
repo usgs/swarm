@@ -247,18 +247,22 @@ public abstract class AbstractWebServiceStationClient {
    * @param location the location.
    * @param latitude the latitude.
    * @param longitude the longitude.
+   * @param elevation the elevation
    * @param siteName the site name.
    * @param groupsType groups type.
    * @return the channel information.
    */
   protected ChannelInfo createChannelInfo(String station, String channel, String network,
-      String location, double latitude, double longitude, String siteName, GroupsType groupsType) {
+      String location, double latitude, double longitude, double elevation, String siteName,
+      GroupsType groupsType) {
     if (currentStation == null) {
       if (clearLatLon()) {
         latitude = Double.NaN;
         longitude = Double.NaN;
+        elevation = Double.NaN;
       }
       return new ChannelGroupInfo(station, channel, network, location, latitude, longitude,
+          elevation,
           siteName, groupsType);
     } else {
       return new ChannelGroupInfo(currentStation, channel, location, groupsType);
@@ -272,16 +276,18 @@ public abstract class AbstractWebServiceStationClient {
    * @param network the network.
    * @param latitude the latitude.
    * @param longitude the longitude.
+   * @param elevation the elevation
    * @param siteName the site name.
    * @return the station information.
    */
   protected StationInfo createStationInfo(String station, String network, double latitude,
-      double longitude, String siteName) {
+      double longitude, double elevation, String siteName) {
     if (clearLatLon()) {
       latitude = Double.NaN;
       longitude = Double.NaN;
+      elevation = Double.NaN;
     }
-    return new StationInfo(station, network, latitude, longitude, siteName);
+    return new StationInfo(station, network, latitude, longitude, elevation, siteName);
   }
 
   /**

@@ -45,6 +45,13 @@ public abstract class AbstractChannelInfo {
   public abstract double getLongitude();
 
   /**
+   * Get the elevation.
+   * 
+   * @return the elevation.
+   */
+  public abstract double getHeight();
+  
+  /**
    * Get the network name.
    * 
    * @return the network name.

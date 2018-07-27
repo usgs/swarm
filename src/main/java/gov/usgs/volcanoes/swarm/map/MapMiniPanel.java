@@ -511,6 +511,7 @@ public class MapMiniPanel extends JComponent
   }
 
   /**
+   * Paint.
    * @see javax.swing.JComponent#paint(java.awt.Graphics)
    */
   public void paint(Graphics g) {
@@ -553,6 +554,7 @@ public class MapMiniPanel extends JComponent
   }
 
   /**
+   * Mouse clicked event.
    * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
    */
   public void mouseClicked(MouseEvent e) {
@@ -587,11 +589,17 @@ public class MapMiniPanel extends JComponent
   }
 
   /**
+   * Mouse entered event.
    * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
    */
   public void mouseEntered(MouseEvent e) {
-    MapFrame.getInstance().setStatusText(
-        activeMetadata.getSCNL().station + ": " + GeoUtils.lonLatToString(activeMetadata.getLonLat()));
+    String text =
+        activeMetadata.getSCNL().station + ": "
+            + GeoUtils.lonLatToString(activeMetadata.getLonLat());
+    if (!Double.isNaN(activeMetadata.getHeight()) && activeMetadata.getHeight() != -999.0) {
+      text += ", " + activeMetadata.getHeight() + " m";
+    }
+    MapFrame.getInstance().setStatusText(text);
     // setTitleBackground(MOUSEOVER_BACKGROUND);
     // parent.setSelectedPanel(this);
   }
@@ -607,6 +615,7 @@ public class MapMiniPanel extends JComponent
   private int deltaY;
 
   /**
+   * Mouse pressed event.
    * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
    */
   public void mousePressed(MouseEvent e) {
@@ -622,6 +631,7 @@ public class MapMiniPanel extends JComponent
   }
 
   /**
+   * Mouse released event.
    * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
    */
   public void mouseReleased(MouseEvent e) {
@@ -659,6 +669,7 @@ public class MapMiniPanel extends JComponent
   }
 
   /**
+   * Mouse dragged event.
    * @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent)
    */
   public void mouseDragged(MouseEvent e) {

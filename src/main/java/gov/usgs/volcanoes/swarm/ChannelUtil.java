@@ -36,6 +36,7 @@ public final class ChannelUtil {
       Metadata md = SwarmConfig.getInstance().getMetadata(formattedScnl, true);
       md.updateLongitude(ch.getLongitude());
       md.updateLatitude(ch.getLatitude());
+      md.updateHeight(ch.getHeight());
       for (String g : ch.getGroups()) {
         md.addGroup(g);
       }

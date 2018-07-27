@@ -49,6 +49,7 @@ public class ChannelInfo extends AbstractChannelInfo {
     String location = "";
     double latitude = Double.NaN;
     double longitude = Double.NaN;
+    double elevation = Double.NaN;
 
     String delimiter = s.indexOf('$') == -1 ? " " : "\\$";
     String[] ss = s.split(delimiter);
@@ -56,17 +57,20 @@ public class ChannelInfo extends AbstractChannelInfo {
     if (ss.length > 2) {
       channel = ss[1];
       network = ss[2];
-      if (ss.length > 3) {
-        location = ss[3];
-        if (ss.length > 4) {
-          latitude = StationInfo.parseDouble(ss[4]);
-          if (ss.length > 5) {
-            longitude = StationInfo.parseDouble(ss[5]);
-          }
-        }
-      }
     }
-    stationInfo = new StationInfo(station, network, latitude, longitude);
+    if (ss.length > 3) {
+      location = ss[3];
+    }
+    if (ss.length > 4) {
+      latitude = StationInfo.parseDouble(ss[4]);
+    }
+    if (ss.length > 5) {
+      longitude = StationInfo.parseDouble(ss[5]);
+    }
+    if (ss.length > 6) {
+      elevation = StationInfo.parseDouble(ss[6]);
+    }
+    stationInfo = new StationInfo(station, network, latitude, longitude, elevation);
     this.channel = channel;
     this.location = location;
     formattedSCNL = ChannelUtil.getFormattedSCNL(station, channel, network, location);
@@ -80,12 +84,14 @@ public class ChannelInfo extends AbstractChannelInfo {
    * @param network the network name.
    * @param location the location name.
    * @param latitude the latitude.
+   * @param elevation the elevation
    * @param longitude the longitude.
    * @param siteName the site name.
    */
   public ChannelInfo(String station, String channel, String network, String location,
-      double latitude, double longitude, String siteName) {
-    this(new StationInfo(station, network, latitude, longitude, siteName), channel, location);
+      double latitude, double longitude, double elevation, String siteName) {
+    this(new StationInfo(station, network, latitude, longitude, elevation, siteName), channel,
+        location);
   }
 
   /**
@@ -176,5 +182,14 @@ public class ChannelInfo extends AbstractChannelInfo {
    */
   public StationInfo getStationInfo() {
     return stationInfo;
+  }
+
+
+  /**
+   * Get elevation.
+   * @see gov.usgs.volcanoes.swarm.AbstractChannelInfo#getHeight()
+   */
+  public double getHeight() {
+    return stationInfo.getElevation();
   }
 }
