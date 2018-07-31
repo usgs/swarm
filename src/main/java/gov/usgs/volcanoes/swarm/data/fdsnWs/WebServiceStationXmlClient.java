@@ -106,6 +106,7 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
         return true;
       }
     } catch (Exception ex) {
+      //
     }
     LOGGER.warn(
         "XM schema of this document ({}) does not match this code ({}) , results may be incorrect.",
@@ -164,6 +165,8 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
             String station = s.getCode();
             double latitude = s.getLatitude().getValue();
             double longitude = s.getLongitude().getValue();
+            double elevation = s.getElevation().getValue();
+          
             String siteName = null;
             if (s.getSite() != null) {
               siteName = s.getSite().getName();
@@ -171,8 +174,7 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
             switch (getLevel()) {
               case STATION:
                 processStation(createStationInfo(station,
-
-                    network, latitude, longitude, siteName));
+                    network, latitude, longitude, elevation, siteName));
                 // break;
                 // case CHANNEL:
                 // List<Channel> chanList = s.getChannelList();
@@ -187,8 +189,7 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
                   String location = chan.getLocCode();
                   String channel = chan.getCode();
                   processChannel(createChannelInfo(station,
-
-                      channel, network, location, latitude, longitude, siteName, groupsType));
+                      channel, network, location, latitude, longitude, elevation, siteName, groupsType));
                 }
                 // break;
                 // default:

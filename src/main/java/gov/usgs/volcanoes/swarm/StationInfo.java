@@ -34,12 +34,15 @@ public class StationInfo {
 
   /** The longitude. */
   private final double longitude;
+  
+  /** The height */
+  private final double elevation;
 
   /** The site name. */
   private final String siteName;
 
-  public StationInfo(String station, String network, double latitude, double longitude) {
-    this(station, network, latitude, longitude, (String) null);
+  public StationInfo(String station, String network, double latitude, double longitude, double elevation) {
+    this(station, network, latitude, longitude, elevation, (String) null);
   }
 
   /**
@@ -48,14 +51,15 @@ public class StationInfo {
    * @param network network
    * @param latitude latitude
    * @param longitude longitude
+   * @param elevation elevation
    * @param siteName name
    */
-  public StationInfo(String station, String network, double latitude, double longitude,
-      String siteName) {
+  public StationInfo(String station, String network, double latitude, double longitude, double elevation, String siteName) {
     this.station = station;
     this.network = network;
     this.latitude = latitude;
     this.longitude = longitude;
+    this.elevation = elevation;
     this.siteName = siteName != null ? siteName : station;
   }
 
@@ -110,6 +114,13 @@ public class StationInfo {
    * @return the string representation of the station information.
    */
   public String toString() {
-    return station + " " + network + " " + latitude + " " + longitude + " " + siteName;
+    return station + " " + network + " " + latitude + " " + longitude + " " + elevation + " "+ siteName;
+  }
+
+  /**
+   * @return the elevation
+   */
+  public double getElevation() {
+    return elevation;
   }
 }
