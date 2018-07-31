@@ -9,11 +9,13 @@ import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings;
+import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
 import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
 import gov.usgs.volcanoes.swarm.wave.SwarmMultiMonitors;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
+import gov.usgs.volcanoes.swarm.wave.WaveViewerFrame;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -234,7 +236,8 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
       String channel = cf.getString("channel");
       WaveViewSettings wvs = new WaveViewSettings();
       wvs.set(cf);
-      Swarm.openRealtimeWave(sds, channel, wvs);
+      WaveViewerFrame wvf = Swarm.openRealtimeWave(sds, channel, wvs);
+      wvf.processStandardLayout(cf);
     }
   }
 
@@ -291,7 +294,8 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
       String channel = cf.getString("channel");
       RsamViewSettings setting = new RsamViewSettings();
       setting.set(cf);
-      Swarm.openRsam(sds, channel, setting);
+      RsamViewerFrame rf = Swarm.openRsam(sds, channel, setting);
+      rf.processStandardLayout(cf);
     }
   }
 

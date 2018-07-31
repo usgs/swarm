@@ -5,6 +5,8 @@
   * Fix issue using WWS instrument time zone (#201)
   * Fix multiple event dialog showing up under Window menu (#216)
   * Fix problem parsing server response from CWB (#221)
+  * Support height metadata for FDSN data source (#222)
+  * Position real-time wave viewer and RSAM viewer when opening layout (#224)
   * Updated WWS Client to 1.3.5
 
 ## Version 2.8.5 - July 13, 2018
