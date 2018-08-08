@@ -71,7 +71,6 @@ public class TagData implements Comparator<TagData> {
     return J2kSec.format(Time.STANDARD_TIME_FORMAT, startTime);
   }
   
-  @Override
   public int compare(TagData d1, TagData d2) {
     return Double.compare(d1.startTime, d2.startTime);
   }

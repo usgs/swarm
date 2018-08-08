@@ -1,4 +1,4 @@
-## Version 2.8.6 - TBD
+## Version 2.8.6 - August 8, 2018
   * Addition of map option to hide station icons (#124)
   * Add RSAM value of selected wave panel period to status bar (#103)
   * Fix issue with streaming failing on loss of data (#142)
