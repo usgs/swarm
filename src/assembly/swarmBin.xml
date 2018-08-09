@@ -22,8 +22,9 @@
 				<include>ding.wav</include>
 				<include>swarm.sh</include>
 				<include>swarm_console.bat</include>
-				<include>layouts</include>
+				<include>layouts/Augustine.config</include>
 				<include>mapdata</include>
+				<include>docs/swarm_v2.pdf</include>
 			</includes>
 		</fileSet>
 		<fileSet>
