@@ -25,6 +25,7 @@
 				<include>layouts/Augustine.config</include>
 				<include>mapdata</include>
 				<include>docs/swarm_v2.pdf</include>
+				<include>docs/hypo71manual.pdf</include>
 			</includes>
 		</fileSet>
 		<fileSet>
