@@ -31,7 +31,30 @@ public class Hypo71SettingsDialog extends SwarmModalDialog {
   private JRadioButton ksing0Button;
   private JRadioButton ksing1Button;
   private JTextField[] test;
-  private static final String testMessage = "Value must be a numeric.";
+  private static final String[] testToolTip = {
+      "Cutoff value for RMS below which Jeffreys' weighting of residuals is not used. "
+      + "It should be set to a value approximately equal to the overall timing accuracy of P-arrivals in seconds.", // TEST01
+      "For each iteration step, if the epicentral adjustment >= TEST02, this step is recalculated without focal-depth adjustment."
+      + "TEST02 should be set to a value approximately equal to station spacing in kilometers.", // TEST02
+      "Critical F-value for the stepwise multiple regression. "
+      + "TEST03 should be set according to the number and quality of P- and S- arrivals. "
+      + "A value between 0.5 and 2 is recommended.", // TEST03
+      "If the hypocentral adjustment is less than TEST04, Geiger's iteration is terminated. In km.", // TEST04
+      "If the focal-depth adjustment (DZ) is greater than TEST05, DS is rest to DZ/(K+1), where K=DZ/TEST05. "
+      + "TEST05 should be set to a value approximately equal to half the range of focal depth expected, in km.",
+      "If no significant variable is found in the stepwise multiple regression, the cricial F-value, TEST03,"
+      + " is reduced to TEST03/TEST06, and the regression is repeated.",
+      "Coefficients for calculating the duration magnitude: FMAG = TEST07 + TEST08*log(T) + TEST09*D",
+      "Coefficients for calculating the duration magnitude: FMAG = TEST07 + TEST08*log(T) + TEST09*D",
+      "Coefficients for calculating the duration magnitude: FMAG = TEST07 + TEST08*log(T) + TEST09*D",
+      "If the latitude or logitude adjustment (DX or DY) is greater than TEST10, then DX is reset to DX/(J+1), "
+      + "and DY is reset to DY/(J+1), where J=D/TEST10, D being the larger of DX or DY. In km.",
+      "Maximum number of iterations in the hypocentral adjustment.",
+      "If the focal-depth adjustment (DZ) would place the hypocenter in the air, then DX i sreset to DZ=-Z*TEST12, where Z is the focal depth.",
+      "Auxiliary RMS values are optionally calculated at ten points on a sphere of radius cube-root*TEST13 centered on the final solution. "
+      + "TEST13 should be set to a value approximately equal to the standard error of hypocenter in kilometers.",
+      
+  };
 
   /**
    * Default constructor.
@@ -86,15 +109,15 @@ public class Hypo71SettingsDialog extends SwarmModalDialog {
     // Test variables
     builder.appendSeparator("Test Variables");
     test = new JTextField[Hypo71Settings.testDefault.length];
-    for (int i = 1; i <= test.length; i++) {
-      String propertyName = String.format(Hypo71Settings.TEST + "%02d", i);
+    for (int i = 0; i < test.length; i++) {
+      String propertyName = String.format(Hypo71Settings.TEST + "%02d", i + 1);
       String testValue = settings.getProperty(propertyName);
-      test[i - 1] = new JTextField(testValue);
-      test[i - 1].setInputVerifier(new TestVariableVerifier());
-      test[i - 1].setHorizontalAlignment(SwingConstants.RIGHT);
-      test[i - 1].setToolTipText(testMessage);
-      String labelName = String.format(Hypo71Settings.TEST + " %02d", i);
-      builder.append(labelName, test[i - 1], true);
+      test[i] = new JTextField(testValue);
+      test[i].setInputVerifier(new TestVariableVerifier());
+      test[i].setHorizontalAlignment(SwingConstants.RIGHT);
+      test[i].setToolTipText(testToolTip[i]);
+      String labelName = String.format(Hypo71Settings.TEST + " %02d", i + 1);
+      builder.append(labelName, test[i], true);
     }
 
     mainPanel.add(builder.getPanel(), BorderLayout.CENTER);
@@ -114,7 +137,7 @@ public class Hypo71SettingsDialog extends SwarmModalDialog {
         ok = false;
       }
       if (!ok) {
-        JOptionPane.showMessageDialog(this, testMessage, Hypo71Settings.TEST + i,
+        JOptionPane.showMessageDialog(this, testToolTip, Hypo71Settings.TEST + i,
             JOptionPane.ERROR_MESSAGE);
         return false;
       }
