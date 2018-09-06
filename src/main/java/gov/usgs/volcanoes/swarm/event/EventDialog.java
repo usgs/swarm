@@ -194,14 +194,7 @@ public class EventDialog extends SwarmFrame {
     builder.appendSeparator("Hypo71 Input");
     hypo71Mgr = new Hypo71Manager();
 
-    JButton testButton = new JButton("Settings");
-    testButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        Hypo71SettingsDialog.getInstance().setVisible(true);
-      }
-    });
-    builder.append(testButton);
-    builder.nextLine();
+
     
     usePicks = new JRadioButton("Use Clipboard Picks");
     usePicks.setSelected(true);
@@ -258,7 +251,16 @@ public class EventDialog extends SwarmFrame {
     });
     builder.append(openInputFileButton);
     builder.nextLine();
-
+    
+    
+    JButton settingsButton = new JButton("Settings");
+    settingsButton.setToolTipText("For use with clipboard picks only.");
+    settingsButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        Hypo71SettingsDialog.getInstance().setVisible(true);
+      }
+    });
+       
     JButton locateButton = new JButton("Run");
     locateButton.setToolTipText("Locate hypocenter using Hypo71");
     locateButton.addActionListener(new ActionListener() {
@@ -277,9 +279,9 @@ public class EventDialog extends SwarmFrame {
 
     ButtonBarBuilder bbBuilder = new ButtonBarBuilder();
     bbBuilder.addGlue();
-    bbBuilder.addButton(locateButton);
+    bbBuilder.addButton(settingsButton, locateButton);
     JPanel buttonPanel = bbBuilder.getPanel();
-    buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 10));
+    buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 5, 10));
     builder.append(buttonPanel, 5);
 
     builder.appendSeparator("Hypo71 Output");
