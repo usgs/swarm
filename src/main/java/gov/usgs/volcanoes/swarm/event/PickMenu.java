@@ -193,8 +193,10 @@ public class PickMenu extends JPopupMenu {
     
     // hide P & S
     hidePhasesMenu = new JCheckBoxMenuItem("P & S");
+    hidePhasesMenu.setSelected(pickData.isHidePhases());
     hidePhasesMenu.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        pickData.setHidePhases(hidePhasesMenu.isSelected());
         wvp.repaint();
       }
     });
@@ -202,8 +204,10 @@ public class PickMenu extends JPopupMenu {
     
 
     hideCodaMenu = new JCheckBoxMenuItem("Coda");
+    hideCodaMenu.setSelected(pickData.isHideCoda());
     hideCodaMenu.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        pickData.setHideCoda(hideCodaMenu.isSelected());
         wvp.repaint();
       }
     });
