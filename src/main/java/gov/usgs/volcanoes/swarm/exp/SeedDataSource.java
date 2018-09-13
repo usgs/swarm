@@ -3,6 +3,7 @@ package gov.usgs.volcanoes.swarm.exp;
 /**
  * @author Peter Cervelli (USGS)
  */
+@Deprecated
 public class SeedDataSource {}
 /*
 public class SeedDataSource extends SeismicDataSource

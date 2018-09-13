@@ -5,6 +5,7 @@ package gov.usgs.volcanoes.swarm.exp;
  * @author Dan Cervelli
  *
  */
+@Deprecated
 public class ParticleView
 {}
 /*
