@@ -26,6 +26,9 @@
 				<include>mapdata</include>
 				<include>docs/swarm_v2.pdf</include>
 				<include>docs/hypo71manual.pdf</include>
+				<include>DefaultVelocityModel.txt</include>
+				<include>EventClassifications.config</include>
+				<include>Hypo71.config</include>
 			</includes>
 		</fileSet>
 		<fileSet>
