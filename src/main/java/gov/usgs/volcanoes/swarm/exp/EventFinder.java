@@ -10,7 +10,7 @@ import gov.usgs.valve.data.wave.*;
 import gov.usgs.valve.math.*;
 import gov.usgs.valve.plot.*;
 */
-
+@Deprecated
 public class EventFinder
 {
 	/*

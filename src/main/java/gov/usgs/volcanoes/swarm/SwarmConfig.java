@@ -114,6 +114,8 @@ public class SwarmConfig {
   private Map<String, Metadata> defaultMetadata;
 
   public SortedMap<String, SwarmLayout> layouts;
+  public String layout = ""; // default layout
+  public boolean loadLayout = false; // set to true to auto-load layout
 
   public boolean useWMS;
   public String wmsServer;
@@ -407,6 +409,11 @@ public class SwarmConfig {
     fdsnStationURL = StringUtils.stringToString(config.getString("fdsnStationURL"),
         "http://service.iris.edu/fdsnws/station/1/query");
 
+    layout =
+        StringUtils.stringToString(config.getString("layout"), "");
+
+    loadLayout = StringUtils.stringToBoolean(config.getString("loadLayout"), false);
+    
     sources = new HashMap<String, SeismicDataSource>();
     final List<String> servers = config.getList("server");
     if (servers != null && servers.size() > 0) {
@@ -576,6 +583,9 @@ public class SwarmConfig {
 
     config.put("fdsnDataselectURL", fdsnDataselectURL);
     config.put("fdsnStationURL", fdsnStationURL);
+    
+    config.put("layout", layout);
+    config.put("loadLayout", Boolean.toString(loadLayout));
 
     final List<String> servers = new ArrayList<String>();
     for (final SeismicDataSource sds : sources.values()) {

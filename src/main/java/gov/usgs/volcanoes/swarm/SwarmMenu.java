@@ -1,5 +1,17 @@
 package gov.usgs.volcanoes.swarm;
 
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.data.file.FileType;
+import gov.usgs.volcanoes.core.quakeml.EventSet;
+import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.swarm.data.CachedDataSource;
+import gov.usgs.volcanoes.swarm.data.FileDataSource;
+import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
+import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.map.MapFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -37,18 +49,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.data.file.FileType;
-import gov.usgs.volcanoes.core.quakeml.EventSet;
-import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
-import gov.usgs.volcanoes.core.util.StringUtils;
-import gov.usgs.volcanoes.swarm.data.CachedDataSource;
-import gov.usgs.volcanoes.swarm.data.FileDataSource;
-import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
-import gov.usgs.volcanoes.swarm.map.MapFrame;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-
 /**
  * Swarm Menu.
  * @author Dan Cervelli
@@ -68,6 +68,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
   private JMenuItem saveLayout;
   private JMenuItem saveLastLayout;
   private JMenuItem removeLayouts;
+  protected JCheckBoxMenuItem autoLoadLayout;
 
   private JMenu windowMenu;
   private JMenuItem tileWaves;
@@ -287,6 +288,17 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
       }
     });
     layoutMenu.add(removeLayouts);
+    
+    autoLoadLayout = new JCheckBoxMenuItem("Auto-load Layout");
+    autoLoadLayout.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        SwarmConfig.getInstance().loadLayout = autoLoadLayout.isSelected();
+      }
+    });
+    autoLoadLayout.setToolTipText(
+        "Enable if you would like to open this layout automatically next time Swarm is started.");
+    layoutMenu.add(autoLoadLayout);
+    
     layoutMenu.addSeparator();
     add(layoutMenu);
   }
@@ -315,10 +327,11 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
       public void actionPerformed(ActionEvent e) {
         sl.process();
         setLastLayoutName(sl.getName());
+        SwarmConfig.getInstance().layout = sl.getName();
       }
     });
     int i;
-    for (i = 4; i < layoutMenu.getItemCount(); i++) {
+    for (i = 5; i < layoutMenu.getItemCount(); i++) {
       JMenuItem m = layoutMenu.getItem(i);
       if (m.getText().compareToIgnoreCase(sl.getName()) >= 0) {
         layoutMenu.add(mi, i);

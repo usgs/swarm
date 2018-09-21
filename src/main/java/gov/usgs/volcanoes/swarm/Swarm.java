@@ -370,6 +370,12 @@ public class Swarm extends JFrame implements InternalFrameListener {
       swarmMenu.addLayout(sl);
     }
 
+    swarmMenu.autoLoadLayout.setSelected(Swarm.config.loadLayout);
+    if (Swarm.config.loadLayout && !Swarm.config.layout.equals("")) {
+      SwarmLayout sl = Swarm.config.layouts.get(Swarm.config.layout);
+      sl.process();
+    }
+
     this.setVisible(true);
 
     final long offset = CurrentTime.getInstance().getOffset();

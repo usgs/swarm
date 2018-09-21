@@ -1,3 +1,11 @@
+
+## Version 2.8.7 - TBD
+  * Bundle user manual into zip file (under docs)
+  * Bundle Hypo71 manual into zip file (under docs)
+  * Add tooltips for Hypo71 TEST settings.
+  * Fix Pick menu Hide option
+
+
 ## Version 2.8.6 - August 8, 2018
   * Addition of map option to hide station icons (#124)
   * Add RSAM value of selected wave panel period to status bar (#103)
