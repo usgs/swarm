@@ -415,10 +415,11 @@ public class EventDialog extends SwarmFrame {
       String message = "No origin associated with event.";
       JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message);
     } else {
-      this.setVisible(false);
       EventSet eventSet = new EventSet();
       eventSet.put(event.publicId, event);
       MapFrame.getInstance().getHypocenterLayer().add(eventSet);
+      MapFrame.getInstance().setVisible(true);
+      MapFrame.getInstance().toFront();
     }
 
   }

@@ -4,6 +4,7 @@
   * Bundle Hypo71 manual into zip file (under docs)
   * Add tooltips for Hypo71 TEST settings.
   * Fix Pick menu Hide option
+  * Don't hide Event Dialog after plotting hypocenter (#234)
 
 
 ## Version 2.8.6 - August 8, 2018
