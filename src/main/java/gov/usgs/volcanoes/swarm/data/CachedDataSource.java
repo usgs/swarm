@@ -8,19 +8,19 @@ package gov.usgs.volcanoes.swarm.data;
  */
 public class CachedDataSource extends AbstractCachingDataSource {
 
-	private CachedDataSource(String name) {
-		super();
-	}
+  private CachedDataSource(String name) {
+    super();
+  }
 
-	private static class CachedDataSourceHolder {
-		private static final CachedDataSource INSTANCE = new CachedDataSource("singleton");
-	}
+  private static class CachedDataSourceHolder {
+    private static final CachedDataSource INSTANCE = new CachedDataSource("singleton");
+  }
 
-	public static CachedDataSource getInstance() {
-		return CachedDataSourceHolder.INSTANCE;
-	}
+  public static CachedDataSource getInstance() {
+    return CachedDataSourceHolder.INSTANCE;
+  }
 
-	public String toConfigString() {
-		return "cache:";
-	}
+  public String toConfigString() {
+    return "cache:";
+  }
 }

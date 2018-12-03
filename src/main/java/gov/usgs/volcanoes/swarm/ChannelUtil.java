@@ -21,6 +21,7 @@ public final class ChannelUtil {
   private ChannelUtil() {
     // uninstantiatable
   }
+  
   /**
    * Add the channel.
    * 
@@ -71,8 +72,8 @@ public final class ChannelUtil {
    */
   public static final String getFormattedSCNL(String station, String channel, String network,
       String location) {
-    return station + " " + channel + " " + network
-        + (location.length() > 0 ? (" " + location) : "");
+    String scnl = station + " " + channel + " " + network + " " + location;
+    return scnl.trim();
   }
 
   /**

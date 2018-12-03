@@ -5,7 +5,8 @@
   * Add tooltips for Hypo71 TEST settings.
   * Fix Pick menu Hide option
   * Don't hide Event Dialog after plotting hypocenter (#234)
-
+  * Handle null timezone when writing to config (#240) 
+  * Fix gap issues when reading seed files (#241)
 
 ## Version 2.8.6 - August 8, 2018
   * Addition of map option to hide station icons (#124)
