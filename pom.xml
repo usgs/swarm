@@ -554,7 +554,7 @@
 		<dependency>
 			<groupId>gov.usgs.volcanoes</groupId>
 			<artifactId>volcano-core</artifactId>
-			<version>1.4.9</version>
+			<version>1.4.10</version>
 		</dependency>
 		<dependency>
 			<groupId>gov.usgs.volcanoes</groupId>
