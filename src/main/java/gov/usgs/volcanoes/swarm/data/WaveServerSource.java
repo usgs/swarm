@@ -58,10 +58,12 @@ public class WaveServerSource extends SeismicDataSource {
     timeout = Integer.parseInt(ss[2]);
     gulpSize = Integer.parseInt(ss[3]);
     gulpDelay = Integer.parseInt(ss[4]);
-    if (ss.length >= 6)
+    if (ss.length >= 6) {
       timeZone = TimeZone.getTimeZone(ss[5]);
-    else
+    }
+    if(timeZone == null) {
       timeZone = TimeZone.getTimeZone("UTC");
+    }
 
     waveServer = new WaveServer(server, port);
     setTimeout(timeout);

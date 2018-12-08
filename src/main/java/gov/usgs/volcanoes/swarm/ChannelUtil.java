@@ -72,7 +72,10 @@ public final class ChannelUtil {
    */
   public static final String getFormattedSCNL(String station, String channel, String network,
       String location) {
-    String scnl = station + " " + channel + " " + network + " " + location;
+    String scnl = station + " " + channel + " " + network;
+    if(location != null && (location.length() > 0)) {
+      scnl += " " + location;
+    }
     return scnl.trim();
   }
 
