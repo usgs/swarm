@@ -1,5 +1,5 @@
 
-## Version 2.8.7 - TBD
+## Version 2.8.7 - December 13, 2018
   * Bundle user manual into zip file (under docs)
   * Bundle Hypo71 manual into zip file (under docs)
   * Add tooltips for Hypo71 TEST settings.
