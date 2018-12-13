@@ -10,7 +10,6 @@ import gov.usgs.volcanoes.core.legacy.plot.render.wave.ParticleMotionRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.wave.SliceWaveRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.wave.SpectraRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.wave.SpectrogramRenderer;
-import gov.usgs.volcanoes.core.math.Filter;
 import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.Icons;
@@ -43,7 +42,6 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 import javax.swing.JComponent;
@@ -821,42 +819,6 @@ public class WaveViewPanel extends JComponent {
     createImage();
   }
 
-  private void filter(Wave w) {
-    double mean = w.mean();
-
-    double[] buf = new double[w.buffer.length + (int) (w.buffer.length * 0.5)];
-    Arrays.fill(buf, mean);
-    int trueStart = (int) (w.buffer.length * 0.25);
-    for (int i = 0; i < w.buffer.length; i++) {
-      if (w.buffer[i] != Wave.NO_DATA) {
-        buf[i + trueStart] = w.buffer[i];
-      }
-    }
-
-    settings.filter.setSamplingRate(w.getSamplingRate());
-    settings.filter.create();
-    Filter.filter(buf, settings.filter.getSize(), settings.filter.getXCoeffs(),
-        settings.filter.getYCoeffs(), settings.filter.getGain(), 0, 0);
-    if (settings.zeroPhaseShift) {
-      double[] buf2 = new double[buf.length];
-      for (int i = 0, j = buf.length - 1; i < buf.length; i++, j--) {
-        buf2[j] = buf[i];
-      }
-
-      Filter.filter(buf2, settings.filter.getSize(), settings.filter.getXCoeffs(),
-          settings.filter.getYCoeffs(), settings.filter.getGain(), 0, 0);
-
-      for (int i = 0, j = buf2.length - 1 - trueStart; i < w.buffer.length; i++, j--) {
-        w.buffer[i] = (int) Math.round(buf2[j]);
-      }
-    } else {
-      for (int i = 0; i < w.buffer.length; i++) {
-        w.buffer[i] = (int) Math.round(buf[i + trueStart]);
-      }
-    }
-    w.invalidateStatistics();
-  }
-
   /**
    * Annotate image with pick marks.
    * @param g2 graphics
@@ -1147,7 +1109,7 @@ public class WaveViewPanel extends JComponent {
     
     if (settings.filterOn) {
       renderWave = new Wave(wave);
-      filter(renderWave);
+      renderWave.filter(settings.filter, settings.zeroPhaseShift);
     }
     switch (settings.viewType) {
       case WAVE:
@@ -1427,7 +1389,7 @@ public class WaveViewPanel extends JComponent {
         Wave w = source.getWave(newStation, startTime, endTime);
         if (w != null) {
           if (settings.filterOn) {
-            filter(w);
+            w.filter(settings.filter, settings.zeroPhaseShift);
           }
           try {
             SliceWave sw = new SliceWave(w);
