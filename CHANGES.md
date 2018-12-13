@@ -4,7 +4,7 @@
   * Bundle Hypo71 manual into zip file (under docs)
   * Add tooltips for Hypo71 TEST settings.
   * Fix Pick menu Hide option
-  * Fix memory error when retrieving old helicorder data from FDSN (#181)
+  * Fix memory error when retrieving old helicorder data from FDSN (#182)
   * Don't hide Event Dialog after plotting hypocenter (#234)
   * Handle null timezone when writing to config (#240) 
   * Fix gap issues when reading seed files (#241)
