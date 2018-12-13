@@ -186,15 +186,6 @@ public class WebServicesSource extends SeismicDataSource {
    */
   public synchronized HelicorderData getHelicorder(String station, double t1, double t2,
       GulperListener gl) {
-    // lifted from gov.usgs.swarm.data.DHIDataSource
-    double now = J2kSec.now();
-    // if a time later than now has been asked for make sure to get the
-    // latest so that, if possible, a small bit of helicorder data will be
-    // displayed
-    // if ((t2 - now) >= -20)
-    // {
-    // getWave(station, now - 2*60, now);
-    // }
 
     CachedDataSource cache = CachedDataSource.getInstance();
 
@@ -203,11 +194,6 @@ public class WebServicesSource extends SeismicDataSource {
     if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10)) {
       GulperList.INSTANCE.requestGulper(getGulperKey(station), gl, this, station, t1, t2, gulpSize,
           gulpDelay);
-    }
-
-    // this gets the tail end, replacing commented out section above
-    if (hd != null && hd.getEndTime() < now) {
-      getWave(station, hd.getEndTime(), now);
     }
 
     return hd;
