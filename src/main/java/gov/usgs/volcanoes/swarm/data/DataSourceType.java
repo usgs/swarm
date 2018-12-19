@@ -10,8 +10,8 @@ import gov.usgs.volcanoes.swarm.data.seedlink.SeedLinkSource;
  */
 public enum DataSourceType {
   WAVE_SERVER_V("ws", WaveServerSource.class), 
-  WINSTON_WAVE_SERVER("wws", WWSSource.class), 
-  WINSTON_DIRECT("wwsd", DirectWWSSource.class), 
+  WINSTON_WAVE_SERVER("wws", WwsSource.class), 
+  WINSTON_DIRECT("wwsd", DirectWwsSource.class), 
   CACHE("cache", CachedDataSource.class), 
   FDSN_WS("wsc", WebServicesSource.class), 
   SEED_LINK("sls", SeedLinkSource.class);
@@ -27,10 +27,6 @@ public enum DataSourceType {
   private DataSourceType(String shortName, Class<? extends SeismicDataSource> seismicDataSource) {
     this.shortName = shortName;
     this.seismicDataSource = seismicDataSource;
-  }
-
-  public Class<? extends SeismicDataSource> getSDS() {
-    return seismicDataSource;
   }
 
   /**

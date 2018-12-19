@@ -1,9 +1,5 @@
 package gov.usgs.volcanoes.swarm.data;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import gov.usgs.volcanoes.core.data.HelicorderData;
 import gov.usgs.volcanoes.core.data.RSAMData;
 import gov.usgs.volcanoes.core.data.Scnl;
@@ -17,6 +13,10 @@ import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.winston.Channel;
 import gov.usgs.volcanoes.wwsclient.WWSClient;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * An implementation of <code>SeismicDataSource</code> that communicates with a
  * WinstonWaveServer. This is essentially just a copy of WaveServerSource with
@@ -26,42 +26,24 @@ import gov.usgs.volcanoes.wwsclient.WWSClient;
  * 
  * @author Dan Cervelli
  */
-public class WWSSource extends SeismicDataSource implements RsamSource {
-  private String params;
+public class WwsSource extends SeismicDataSource implements RsamSource {
   private WWSClient winstonClient;
   private int timeout = 2000;
   private boolean compress = false;
-  private int protocolVersion = 1;
 
   private String server;
   private int port;
 
-  private boolean established;
-
   /**
    * Explicit default constructor required for reflection.
    */
-  public WWSSource() {}
-
-  /**
-   * Constructor requiring WWS source.
-   * 
-   * @param wws
-   *            Winston Wave Server Source
-   */
-  @Deprecated
-  public WWSSource(WWSSource wws) {
-    this.name = wws.name;
-    parse(wws.params);
-    protocolVersion = wws.protocolVersion;
-  }
+  public WwsSource() {}
 
   /**
    * Parse parameters.
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#parse(java.lang.String)
    */
   public synchronized void parse(String params) {
-    this.params = params;
     String[] ss = params.split(":");
     server = ss[0];
     port = Integer.parseInt(ss[1]);
@@ -69,26 +51,6 @@ public class WWSSource extends SeismicDataSource implements RsamSource {
     compress = ss[3].equals("1");
 
     winstonClient = new WWSClient(server, port, timeout);
-  }
-
-  /**
-   * Get copy of data source.  (Deprecated)
-   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getCopy()
-   */
-  @Deprecated
-  public SeismicDataSource getCopy() {
-    return new WWSSource(this);
-  }
-
-  /**
-   * Establish protocol version.
-   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#establish()
-   */
-  public void establish() {
-    if (!established) {
-      protocolVersion = winstonClient.getProtocolVersion();
-      established = true;
-    }
   }
 
   /**

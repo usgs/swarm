@@ -1,12 +1,14 @@
 package gov.usgs.volcanoes.swarm.data;
 
 /**
- * $Log: not supported by cvs2svn $
+ * Gulper Listener.
+ * 
  * @author Dan Cervelli
  */
-public interface GulperListener
-{
-	public void gulperStarted();
-	public void gulperStopped(boolean killed);
-	public void gulperGulped(double t1, double t2, boolean success);
+public interface GulperListener {
+  public void gulperStarted();
+
+  public void gulperStopped(boolean killed);
+
+  public void gulperGulped(double t1, double t2, boolean success);
 }

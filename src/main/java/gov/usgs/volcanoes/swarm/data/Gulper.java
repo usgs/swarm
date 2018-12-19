@@ -1,16 +1,16 @@
 package gov.usgs.volcanoes.swarm.data;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.time.J2kSec;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import gov.usgs.volcanoes.core.data.Wave;
-import gov.usgs.volcanoes.core.time.J2kSec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Gulper.
  * @author Dan Cervelli
  */
 public class Gulper implements Runnable {
@@ -52,34 +52,9 @@ public class Gulper implements Runnable {
     lastTime = t2;
 
     final double now = J2kSec.now();
-    if (lastTime > now)
+    if (lastTime > now) {
       lastTime = now;
-  }
-
-  /**
-   * Create the gulper and start it.
-   *
-   * @param gl the gulper list.
-   * @param k the key.
-   * @param glnr the gulper listener.
-   * @param source the seismic data source.
-   * @param ch the channel.
-   * @param t1 the start time.
-   * @param t2 the end time.
-   * @param size the gulper size.
-   * @param delay the gulper delay.
-   * @deprecated use
-   *             {@link #Gulper(GulperList, String, SeismicDataSource, String, double, double, int, int)}
-   *             that does not call methods to support subclassing.
-   */
-  @Deprecated
-  public Gulper(final GulperList gl, final String k, final GulperListener glnr,
-      final SeismicDataSource source, final String ch, final double t1, final double t2,
-      final int size, final int delay) {
-    this(gl, k, source, ch, t1, t2, size, delay);
-    addListener(glnr);
-    update(t1, t2);
-    start();
+    }
   }
 
   public synchronized void addListener(final GulperListener gl) {
@@ -112,6 +87,17 @@ public class Gulper implements Runnable {
   }
 
   /**
+   * Kill gulper.
+   * @param gl gulper listener
+   */
+  public void kill(final GulperListener gl) {
+    removeListener(gl);
+    if (listeners.size() == 0) {
+      kill();
+    }
+  }
+  
+  /**
    * Determine if this gulper has been killed.
    *
    * @return true if the gulper has been killed or was never started.
@@ -120,23 +106,26 @@ public class Gulper implements Runnable {
     return thread == null;
   }
 
-  public void kill(final GulperListener gl) {
-    removeListener(gl);
-    if (listeners.size() == 0) {
-      kill();
-    }
-  }
 
+  /**
+   * Start gulper.
+   */
   public void start() {
     thread = new Thread(this);
     thread.start();
     LOGGER.debug("gulper started for {}", channel);
   }
 
+  /**
+   * Update gulper.
+   * @param t1 start time
+   * @param t2 end time
+   */
   public void update(final double t1, final double t2) {
     final CachedDataSource cache = CachedDataSource.getInstance();
-    if (t2 < lastTime)
+    if (t2 < lastTime) {
       lastTime = t2;
+    }
     goalTime = t1;
 
     while (cache.inHelicorderCache(channel, lastTime - gulpSize, lastTime) && lastTime > goalTime
@@ -147,8 +136,9 @@ public class Gulper implements Runnable {
   }
 
   protected synchronized void fireStarted() {
-    for (final GulperListener listener : listeners)
+    for (final GulperListener listener : listeners) {
       listener.gulperStarted();
+    }
   }
 
   protected synchronized void fireGulped(final double t1, final double t2, final Wave w) {
@@ -156,24 +146,31 @@ public class Gulper implements Runnable {
   }
 
   protected synchronized void fireGulped(final double t1, final double t2, final boolean success) {
-    for (final GulperListener listener : listeners)
+    for (final GulperListener listener : listeners) {
       listener.gulperGulped(t1, t2, success);
+    }
   }
 
   protected synchronized void fireStopped() {
     final boolean killed = isKilled();
-    for (final GulperListener listener : listeners)
+    for (final GulperListener listener : listeners) {
       listener.gulperStopped(killed);
+    }
   }
 
+  /**
+   * Thread's run method.
+   * @see java.lang.Runnable#run()
+   */
   public void run() {
     fireStarted();
     runLoop();
     gulpSource.close();
-    if (isKilled())
+    if (isKilled()) {
       LOGGER.debug("gulper killed");
-    else
+    } else {
       LOGGER.debug("gulper finished");
+    }
     gulperList.removeGulper(this);
     fireStopped();
   }
@@ -198,11 +195,13 @@ public class Gulper implements Runnable {
   }
 
   protected void delay() {
-    if (!isKilled())
+    if (!isKilled()) {
       try {
         Thread.sleep(gulpDelay);
       } catch (final InterruptedException ignore) {
+        //
       }
+    }
   }
 
   @Override
