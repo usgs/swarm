@@ -67,7 +67,7 @@ public class WwsSource extends SeismicDataSource implements RsamSource {
    * Close Winston client connection.
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#close()
    */
-  public void close() {
+  public synchronized void close() {
     if (winstonClient != null) {
       winstonClient.close();
     }

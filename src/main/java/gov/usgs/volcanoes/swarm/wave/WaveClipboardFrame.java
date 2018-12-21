@@ -1331,7 +1331,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
   // TODO: This isn't right, this should be a method of waveviewpanel
   private void fetchNewWave(final WaveViewPanel wvp, final double nst, final double net) {
-    System.err.println(
+    System.out.println(
         "Fetching new wave " + J2kSec.toDateString(nst) + " -> " + J2kSec.toDateString(net));
     final SwingWorker worker = new SwingWorker() {
       @Override
