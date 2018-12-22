@@ -181,10 +181,7 @@ public class WwsSource extends SeismicDataSource implements RsamSource {
    */
   public synchronized HelicorderData getHelicorder(final String station, double t1, double t2,
       GulperListener gl) {
-    
-    System.out.println(
-        "requesting heli: " + station + " " + J2kSec.toDateString(t1) + " " + J2kSec.toDateString(t2));
-    
+       
     CachedDataSource cache = CachedDataSource.getInstance();
 
     HelicorderData hd = cache.getHelicorder(station, t1, t2, this);

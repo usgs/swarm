@@ -43,6 +43,7 @@ public class SeedLinkClient implements Runnable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SeedLinkClient.class);
 
+  /** SeedLink server address. */
   private String sladdr;
 
   /** The wave list or null if none. */
@@ -54,7 +55,7 @@ public class SeedLinkClient implements Runnable {
   /** INFO LEVEL for info request only. */
   private String infolevel = null;
   
-  /** multiselect string.   */
+  /** Multiselect string.  Example: "IU_KONO:BHE BHN,GE_WLF,MN_AQU:HH?.D" */
   private String multiselect = null;
   
   /** SCNL's and last request time. */
@@ -63,7 +64,9 @@ public class SeedLinkClient implements Runnable {
   /** Client thread. */
   private Thread thread;
   
-  private double startTime = Double.MAX_VALUE; // J2K 
+  /** Start and end time of thread. In J2k seconds. */
+  private double startTime = Double.MAX_VALUE;
+  private double endTime = 0;
  
 
   /**
@@ -82,7 +85,11 @@ public class SeedLinkClient implements Runnable {
     createConnection();    
     slconn.setBeginTime(j2kToSeedLinkDateString(startTime));
     slconn.setEndTime(j2kToSeedLinkDateString(endTime));
-    //slconn.setLastpkttime(true);
+    // slconn.setLastpkttime(true);
+    this.startTime = startTime;
+    this.endTime = endTime;
+    LOGGER.debug("SeedLinkClient started: {} {} {} {} ", sladdr, multiselect,
+        j2kToSeedLinkDateString(startTime), j2kToSeedLinkDateString(endTime));
   }
   
   /**
@@ -125,7 +132,8 @@ public class SeedLinkClient implements Runnable {
         return;
       }
     }
-
+    slconn.setBeginTime(j2kToSeedLinkDateString(startTime)); 
+    
     updateMultiSelect();
     if (multiselect != null) {
       try {
@@ -162,9 +170,9 @@ public class SeedLinkClient implements Runnable {
    * @param key gulper listener
    * @param scnl channel string
    * @param t1 start time
-   * @param t2 end time
    */
   protected synchronized void add(String scnl, double t1) {
+    this.startTime = t1;
     boolean reconnect = false;
     if (!scnlMap.keySet().contains(scnl)) {
       reconnect = true;
@@ -174,9 +182,7 @@ public class SeedLinkClient implements Runnable {
       infolevel = null;
       slconn.terminate();
       createConnection();
-    }
-    startTime = Math.min(t1, startTime);
-    slconn.setBeginTime(j2kToSeedLinkDateString(startTime));    
+    }   
   }
 
   /**
@@ -216,20 +222,7 @@ public class SeedLinkClient implements Runnable {
     }
     tmpMs += "." + SeedLinkChannelInfo.DATA_TYPE;
     multiselect = tmpMs;
-    //LOGGER.info("SeedLink multiselect updated: " + multiselect);
-  }
-  
-  /**
-   * Get the multiple select text.
-   * 
-   * @param channelInfo the channel information.   
-   * @return the multiple select text.
-   */
-  @Deprecated
-  private String getMultiSelect(ChannelInfo channelInfo) {
-    return channelInfo.getNetwork() + "_" + channelInfo.getStation() + ":"
-        + channelInfo.getLocation() + channelInfo.getChannel() + "."
-        + SeedLinkChannelInfo.DATA_TYPE;
+    LOGGER.debug("{} {}",sladdr, multiselect);
   }
   
   /**
@@ -422,7 +415,9 @@ public class SeedLinkClient implements Runnable {
    * Start this SeedLinkClient.
    */
   public void run() {
+    
     try {
+      
       if (infolevel != null) {
         LOGGER.debug("Requesting SeedLink info: " + infolevel);
         slconn.requestInfo(infolevel);
@@ -460,8 +455,15 @@ public class SeedLinkClient implements Runnable {
           count++;
         }
       }
-    } catch (Exception ex) {
-      LOGGER.debug("error in run", ex);
+    } catch (Exception e) {
+      LOGGER.error(e.getMessage());
+    }
+
+    if (multiselect != null) {
+      if (endTime > 0) {
+        LOGGER.debug("SeedLinkClient ended: {} {} {} {} ", sladdr, multiselect,
+            j2kToSeedLinkDateString(startTime), j2kToSeedLinkDateString(endTime));
+      } 
     }
     // Close the BaseSLConnection
     slconn.close();
@@ -486,8 +488,8 @@ public class SeedLinkClient implements Runnable {
    * Close the SeedLink connection.
    */
   public synchronized void close() {
-    LOGGER.debug("close the SeedLinkConnection");
+    LOGGER.debug("Close the SeedLinkConnection");
     slconn.terminate();
   }
-
+  
 }
