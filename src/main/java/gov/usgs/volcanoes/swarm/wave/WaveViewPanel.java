@@ -327,10 +327,10 @@ public class WaveViewPanel extends JComponent {
         if (t != null) {
           int x = e.getX();
           double j2k = x * t[0] + t[1];
-          if (timeSeries) {
+/*          if (timeSeries) {
             System.out.printf("%s UTC: %s j2k: %.3f ew: %d\n", channel, J2kSec.toDateString(j2k),
                 j2k, J2kSec.asEpoch(j2k));
-          }
+          }*/
 
           if (timeSeries && j2k >= startTime && j2k <= endTime) {
             fireTimePressed(e, j2k);

@@ -6,8 +6,10 @@ import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.ChannelUtil;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.DataSourceType;
+import gov.usgs.volcanoes.swarm.data.GulperList;
 import gov.usgs.volcanoes.swarm.data.GulperListener;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -47,7 +49,7 @@ public class SeedLinkSource extends SeismicDataSource {
   private int port;
 
   /** SeedLink client. */
-  private SeedLinkClient client = null;
+  private SeedLinkClient realtimeClient = null;
   
   /**
    * Default constructor.
@@ -76,7 +78,7 @@ public class SeedLinkSource extends SeismicDataSource {
     String[] ss = params.split(":");
     host = ss[0];
     port = Integer.parseInt(ss[1]);
-    client = new SeedLinkClient(host,port);
+    realtimeClient = new SeedLinkClient(host,port);
     if (INFO_FILE_TEXT != null) {
       infoStringFile = new File(INFO_FILE_TEXT + host + port + ".xml");
     }
@@ -101,7 +103,7 @@ public class SeedLinkSource extends SeismicDataSource {
     String infoString = readChannelCache();
 
     if (infoString == null) {
-      infoString = client.getInfoString("STREAMS");
+      infoString = realtimeClient.getInfoString("STREAMS");
       writeChannelCache(infoString);
     }
 
@@ -187,23 +189,50 @@ public class SeedLinkSource extends SeismicDataSource {
    * @param gl the gulper listener.
    * @return the helicorder data or null if none.
    */
-  public HelicorderData getHelicorder(String scnl, double t1, double t2,
+  public synchronized HelicorderData getHelicorder(String scnl, double t1, double t2,
       GulperListener gl) {
-    if (t2 > J2kSec.now()) {
-      t2 = J2kSec.now();
+    scnl = scnl.replace(" ", "$"); // just to be sure
+    if ((J2kSec.now() - t2) > 600) {
+/*      System.out.println(
+          "requesting past heli: " + scnl + " " + J2kSec.toDateString(t1) + " " + J2kSec.toDateString(t2));*/
+      SeedLinkClient client = new SeedLinkClient(host, port, t1, t2, scnl);
+      client.run();
+    } else {
+/*      System.out.println(
+          "requesting heli: " + scnl + " " + J2kSec.toDateString(t1) + " " + J2kSec.toDateString(t2));*/
+      if ((t2 - t1) > 300) {
+        // if request size is more than 5 minutes start a separate client for the older data
+        t2 = Math.min(J2kSec.now(), t2);
+        SeedLinkClient client = new SeedLinkClient(host, port, t1, t2 - 120, scnl);
+        client.run();
+        realtimeClient.add(scnl, t2 - 120);
+      }else {
+        realtimeClient.add(scnl, t1);
+      }
+      realtimeClient.start();
     }
-    LOGGER.debug("requesting heli: " + J2kSec.toDateString(t1) + " " + J2kSec.toDateString(t2));
-    scnl = scnl.replace(" ", "$");
-    client.add(scnl, t1, t2);
-    client.start();
+    CachedDataSource cache = CachedDataSource.getInstance();
 
-    HelicorderData hd = CachedDataSource.getInstance().getHelicorder(scnl, t1, t2, gl);
-    
-    LOGGER.debug("getHelicorder(scnl={}, start={}, end={})\nDATA={}", scnl, J2kSec.toDateString(t1),
-        J2kSec.toDateString(t2), (hd == null ? "NONE" : hd.toString()));
+    HelicorderData hd = cache.getHelicorder(scnl, t1, t2, (GulperListener) null);
+
+    int count = 0;
+    while (count < 3 && hd == null) {
+      try {
+        Thread.sleep(10 * 1000); // wait for it for about 30 seconds...
+      } catch (InterruptedException e) {
+        // 
+      }
+      hd = cache.getHelicorder(scnl, t1, t2, (GulperListener) null);
+      count++;
+    }
+
+/*    if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10)) {
+      GulperList.INSTANCE.requestGulper(getGulperKey(scnl), gl, this, scnl, t1, t2, 60,
+          1000);
+    }*/
     return hd;
   }
-
+  
   /**
    * Either returns the wave successfully or null if the data source could not
    * get the wave.
@@ -214,16 +243,40 @@ public class SeedLinkSource extends SeismicDataSource {
    * @return the wave or null if none.
    */
   public Wave getWave(String scnl, double t1, double t2) {
-    if (t2 > J2kSec.now()) {
-      t2 = J2kSec.now();
+    scnl = scnl.replace(" ", "$"); // just to be sure
+    if ((J2kSec.now() - t2) > 600) {
+/*      System.out.println(
+          "requesting past wave: " + scnl + " " + J2kSec.toDateString(t1) + " "
+              + J2kSec.toDateString(t2));*/
+      t2 = Math.min(J2kSec.now(), t2);
+      SeedLinkClient client = new SeedLinkClient(host, port, t1, t2, scnl);
+      client.run();
+    } else {
+      if ((t2 - t1) > 300) {
+        // if request size is more than 5 minutes start a separate client for the older data
+        t2 = Math.min(J2kSec.now(), t2);
+        SeedLinkClient client = new SeedLinkClient(host, port, t1, t2 - 120, scnl);
+        client.run();
+        realtimeClient.add(scnl, t2 - 120);
+      } else {
+        realtimeClient.add(scnl, t1);
+      }
+      realtimeClient.start();
     }
-    LOGGER.debug("requesting wave: " + J2kSec.toDateString(t1) + " " + J2kSec.toDateString(t2));
-    scnl = scnl.replace(" ", "$");
-    client.add(scnl, t1, t2);
-    client.start();
 
-    return CachedDataSource.getInstance().getBestWave(scnl, t1, t2);
-
+    Wave wave = CachedDataSource.getInstance().getBestWave(scnl, t1, t2);
+    
+    int count = 0;
+    while (count < 3 && wave == null) {
+      try {
+        Thread.sleep(10 * 1000); // wait for it for about 30 seconds...
+      } catch (InterruptedException e) {
+        // 
+      }
+      wave = CachedDataSource.getInstance().getBestWave(scnl, t1, t2);
+      count++;
+    }
+    return wave;
   }
 
   /**
@@ -243,9 +296,11 @@ public class SeedLinkSource extends SeismicDataSource {
    */
   public synchronized void notifyDataNotNeeded(String station, double t1,
       double t2, GulperListener gl) {
+
     // not sure if other viewers are using the station. 
     // any good way to check?
-    // client.remove(station);
+    // will be added back later if other frames are using it but may lead to gaps in data?
+    realtimeClient.remove(station); 
   }
 
   /**
