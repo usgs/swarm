@@ -54,7 +54,7 @@ public class SeedLinkClient implements Runnable {
 
   /** INFO LEVEL for info request only. */
   private String infolevel = null;
-  
+
   /** Multiselect string.  Example: "IU_KONO:BHE BHN,GE_WLF,MN_AQU:HH?.D" */
   private String multiselect = null;
   
@@ -63,11 +63,10 @@ public class SeedLinkClient implements Runnable {
   
   /** Client thread. */
   private Thread thread;
-  
+
   /** Start and end time of thread. In J2k seconds. */
   private double startTime = Double.MAX_VALUE;
   private double endTime = 0;
- 
 
   /**
    * Create SeedLink client with channel, start and end time.
@@ -82,16 +81,13 @@ public class SeedLinkClient implements Runnable {
     super();
     sladdr = host + ":" + port;
     scnlMap.put(scnl, J2kSec.now());
-    createConnection();    
-    slconn.setBeginTime(j2kToSeedLinkDateString(startTime));
-    slconn.setEndTime(j2kToSeedLinkDateString(endTime));
+    createConnection();
+    setStartEndTimes(startTime, endTime);
     // slconn.setLastpkttime(true);
-    this.startTime = startTime;
-    this.endTime = endTime;
-    LOGGER.debug("SeedLinkClient started: {} {} {} {} ", sladdr, multiselect,
+    LOGGER.debug("SeedLinkClient initialized: {} {} {} {} ", sladdr, multiselect,
         j2kToSeedLinkDateString(startTime), j2kToSeedLinkDateString(endTime));
   }
-  
+
   /**
    * Create SeedLink client.
    * 
@@ -103,7 +99,14 @@ public class SeedLinkClient implements Runnable {
     sladdr = host + ":" + port;
     createConnection();
   }
-  
+
+  protected void setStartEndTimes(double st, double et) {
+    this.startTime = st;
+    this.endTime = et;
+    slconn.setBeginTime(j2kToSeedLinkDateString(st));
+    slconn.setEndTime(j2kToSeedLinkDateString(et));
+  }
+
   /**
    * Creates SeedLink connection.
    *
@@ -115,7 +118,7 @@ public class SeedLinkClient implements Runnable {
 
     slconn = new SeedLinkConnection(new SLLog());
     slconn.setSLAddress(sladdr);
-    
+
     // Make sure a server was specified
     if (slconn.getSLAddress() == null) {
       String message = "No SeedLink server specified";
@@ -132,8 +135,8 @@ public class SeedLinkClient implements Runnable {
         return;
       }
     }
-    slconn.setBeginTime(j2kToSeedLinkDateString(startTime)); 
-    
+    slconn.setBeginTime(j2kToSeedLinkDateString(startTime));
+
     updateMultiSelect();
     if (multiselect != null) {
       try {
@@ -151,7 +154,7 @@ public class SeedLinkClient implements Runnable {
    * @return the SeedLink information string or null if error.
    */
   public String getInfoString(String info) {
-    try {      
+    try {
       infolevel = info;
       run();
       return slconn.getInfoString();
@@ -160,11 +163,11 @@ public class SeedLinkClient implements Runnable {
     }
     return null;
   }
-  
+
   protected synchronized void add(String scnl) {
     add(scnl, Double.MAX_VALUE);
   }
-  
+
   /**
    * Add channel for client to get.
    * @param key gulper listener
@@ -179,10 +182,11 @@ public class SeedLinkClient implements Runnable {
     }
     scnlMap.put(scnl, J2kSec.now());
     if (reconnect) {
+      LOGGER.debug("Added {}", scnl);
       infolevel = null;
-      slconn.terminate();
+      closeConnection();
       createConnection();
-    }   
+    }
   }
 
   /**
@@ -191,11 +195,12 @@ public class SeedLinkClient implements Runnable {
   protected synchronized void remove(String scnl) {
     Double lrt = scnlMap.remove(scnl);
     if (lrt != null && !Double.isNaN(lrt)) {
-      slconn.terminate();
+      closeConnection();
       createConnection();
     }
+    LOGGER.debug("Removed {}", scnl);
   }
-  
+
   /**
    * Update multiselect statement.
    */
@@ -222,9 +227,9 @@ public class SeedLinkClient implements Runnable {
     }
     tmpMs += "." + SeedLinkChannelInfo.DATA_TYPE;
     multiselect = tmpMs;
-    LOGGER.debug("{} {}",sladdr, multiselect);
+    LOGGER.debug("Multiselect updated: {} {}", sladdr, multiselect);
   }
-  
+
   /**
    * Cache the wave.
    * 
@@ -238,13 +243,12 @@ public class SeedLinkClient implements Runnable {
     Double lastRequestTime = scnlMap.get(scnl);
     if (scnlMap.keySet().contains(scnl)) {
       if (Double.isNaN(lastRequestTime) || J2kSec.now() - lastRequestTime < 300) {
-        LOGGER.debug("putting wave in cache ({}):", scnl, wave);
         CachedDataSource.getInstance().putWave(scnl, wave);
         CachedDataSource.getInstance().cacheWaveAsHelicorder(scnl, wave);
       } else {
         // Don't save if last request time is more than 5 min ago.
         // Remove SCNL from list.
-        scnlMap.remove(scnl);
+        remove(scnl);
       }
     }
   }
@@ -287,7 +291,7 @@ public class SeedLinkClient implements Runnable {
     }
     return J2kSec.format("yyyy,MM,dd,HH,mm,ss", j);
   }
-  
+
   /**
    * Get the Btime value from the specified blockette field.
    * 
@@ -362,7 +366,6 @@ public class SeedLinkClient implements Runnable {
     // process message and return if terminated
     if (type == SLPacket.TYPE_SLINFT) {
       // LOGGER.debug("received INFO packet:\n{}", slconn.getInfoString());
-      LOGGER.debug("infolevel: {}", infolevel);
       if (infolevel != null) {
         return true; // close the connection
       } else {
@@ -372,7 +375,7 @@ public class SeedLinkClient implements Runnable {
 
     // if here, must be a blockette
     final Blockette blockette = slpack.getBlockette();
-    LOGGER.debug("packet seqnum={}, packet type={}, blockette type={}, blockette={}",
+    LOGGER.trace("packet seqnum={}, packet type={}, blockette type={}, blockette={}",
         slpack.getSequenceNumber(), type, blockette.getType(), blockette);
 
     final Waveform waveform = blockette.getWaveform();
@@ -402,7 +405,7 @@ public class SeedLinkClient implements Runnable {
         cacheWave(scnl, wave);
         if (waveList != null) {
           waveList.add(wave);
-        } 
+        }
       } catch (Exception ex) {
         LOGGER.warn("packetHandler: could create wave", ex);
         return true; // close the connection
@@ -415,9 +418,9 @@ public class SeedLinkClient implements Runnable {
    * Start this SeedLinkClient.
    */
   public void run() {
-    
+
     try {
-      
+
       if (infolevel != null) {
         LOGGER.debug("Requesting SeedLink info: " + infolevel);
         slconn.requestInfo(infolevel);
@@ -444,9 +447,9 @@ public class SeedLinkClient implements Runnable {
           }
 
         } catch (SeedLinkException sle) {
-          LOGGER.debug("error: ", sle);
+          LOGGER.debug("packetHandler error: ", sle);
         }
-        // 20081127 AJL - test modification to prevent "Error: out of java heap space" problem
+        // 20081127 AJL - test modification to prevent "Error: out of java heap space" problems
         // identified by pwiejacz@igf.edu.pl
         if (count >= Integer.MAX_VALUE) {
           count = 1;
@@ -456,14 +459,14 @@ public class SeedLinkClient implements Runnable {
         }
       }
     } catch (Exception e) {
-      LOGGER.error(e.getMessage());
+      e.printStackTrace();
     }
 
     if (multiselect != null) {
       if (endTime > 0) {
         LOGGER.debug("SeedLinkClient ended: {} {} {} {} ", sladdr, multiselect,
             j2kToSeedLinkDateString(startTime), j2kToSeedLinkDateString(endTime));
-      } 
+      }
     }
     // Close the BaseSLConnection
     slconn.close();
@@ -476,7 +479,7 @@ public class SeedLinkClient implements Runnable {
     }
     return thread.isAlive();
   }
-  
+
   protected synchronized void start() {
     if (thread == null) {
       thread = new Thread(this);
@@ -487,9 +490,9 @@ public class SeedLinkClient implements Runnable {
   /**
    * Close the SeedLink connection.
    */
-  public synchronized void close() {
-    LOGGER.debug("Close the SeedLinkConnection");
+  public synchronized void closeConnection() {
+    LOGGER.debug("Closing the SeedLinkConnection");
     slconn.terminate();
   }
-  
+
 }

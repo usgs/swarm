@@ -17,8 +17,8 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,28 +47,20 @@ public class SeedLinkSource extends SeismicDataSource {
   /** The server port. */
   private int port;
 
-  /** SeedLink client. */
+  /** SeedLink client for real time updates. */
   private SeedLinkClient realtimeClient = null;
-  private HashMap<String,SeedLinkClient> clients = new HashMap<String, SeedLinkClient>();
   
+  /** Lower time limit for getting real-time data. */
+  private double realtimeLimit = 600.0; // 10 min
+  
+  /** SeedLink clients for past data. */
+  private ConcurrentHashMap<String, SeedLinkClient> clients =
+      new ConcurrentHashMap<String, SeedLinkClient>();
+    
   /**
    * Default constructor.
    */
-  public SeedLinkSource() {
-    LOGGER.debug("Constructing new seedlink source");
-  }
-
-  /**
-   * Create a SeedLink server source.
-   * @param name name of data source
-   * @param params host and port config string
-   */
-  public SeedLinkSource(String name, String params) {
-    this();
-    LOGGER.debug("Constructing new seedlink source " + name);
-    this.name = name;
-    parse(params);
-  }
+  public SeedLinkSource() {   }
 
   /**
    * Parse config string.
@@ -179,8 +171,6 @@ public class SeedLinkSource extends SeismicDataSource {
       }
     }
   }
-
-  private double realtimeLimit = 600; // 10 min
   
   /**
    * Get the helicorder data.
@@ -194,7 +184,7 @@ public class SeedLinkSource extends SeismicDataSource {
   public synchronized HelicorderData getHelicorder(String scnl, double t1, double t2,
       GulperListener gl) {
     LOGGER.debug(
-        "requesting heli: {} {} {}", scnl, J2kSec.toDateString(t1), J2kSec.toDateString(t2));
+        "getHelicorder: {} {} {}", scnl, J2kSec.toDateString(t1), J2kSec.toDateString(t2));
     scnl = scnl.replace(" ", "$"); // just to be sure
     
     CachedDataSource cache = CachedDataSource.getInstance();
@@ -207,12 +197,15 @@ public class SeedLinkSource extends SeismicDataSource {
     } else {
       double startDiff = hd.getStartTime() - t1;
       double endDiff = t2 - hd.getEndTime();
-      if (endDiff - startDiff > 0) {
-        getData(scnl, hd.getEndTime(), t2, now); // get newer stuff
-      } else {
+      if (endDiff == 0 && startDiff == 0) {
+        return hd;
+      }
+      if (startDiff > 1) {
         getData(scnl, t1, hd.getStartTime(), now); // get older stuff
       }
-      // above doesn't quite handle gaps tho 
+      if (endDiff > 1) {
+        getData(scnl, hd.getEndTime(), t2, now); // get newer stuff
+      } 
     }
     
     hd = cache.getHelicorder(scnl, t1, t2, (GulperListener) null);
@@ -243,18 +236,26 @@ public class SeedLinkSource extends SeismicDataSource {
    * @return the wave or null if none.
    */
   public Wave getWave(String scnl, double t1, double t2) {
+    LOGGER.trace(
+        "getWave: {} {} {}", scnl, J2kSec.toDateString(t1), J2kSec.toDateString(t2));
     scnl = scnl.replace(" ", "$"); // just to be sure
     double now = J2kSec.now();
     t2 = Math.min(now, t2);
     Wave wave = CachedDataSource.getInstance().getBestWave(scnl, t1, t2);
     if (wave == null) {
-      getData(scnl, t1, t2, now); // no wave; go get all
+      if ((t2 - t1) > 1) {
+        getData(scnl, t1, t2, now); // no wave; go get all
+      }
     } else {
       double startDiff = wave.getStartTime() - t1;
       double endDiff = t2 - wave.getEndTime();
-      if (endDiff - startDiff > 0) {
+      if (endDiff == 0 && startDiff == 0) {
+        return wave;
+      }
+      if (endDiff > 1) {
         getData(scnl, wave.getEndTime(), t2, now); // get newer stuff
-      } else {
+      } 
+      if (startDiff > 1) {
         getData(scnl, t1, wave.getStartTime(), now); // get older stuff
       }
     }
@@ -269,34 +270,44 @@ public class SeedLinkSource extends SeismicDataSource {
    * @param t1 start time
    * @param t2 end time
    */
-  private synchronized void getData(String scnl, double t1, double t2, double now) {
+  private void getData(String scnl, double t1, double t2, double now) {
+    LOGGER.trace(
+        "getData: {} {} {}", scnl, J2kSec.toDateString(t1), J2kSec.toDateString(t2));
     if ((now - t2) > realtimeLimit) {  // if it is all past data
-      SeedLinkClient client = clients.get(scnl);
-      if (client != null) {
-        client.close();
-      }
-      client = new SeedLinkClient(host, port, t1, t2, scnl);
-      Thread t = new Thread(client);
-      t.start();
-      clients.put(scnl, client);
+      getPastData(scnl, t1, t2);
     } else {
-      if ((now - t1) > realtimeLimit) {
+      if ((now - t1) > (realtimeLimit + 1)) {
         // if request size is more than gulpSize start a separate client for the older data
         realtimeClient.add(scnl, now - realtimeLimit);
         realtimeClient.start();
-        SeedLinkClient client = clients.get(scnl);
-        if (client != null) {
-          client.close();
-        }
-        client = new SeedLinkClient(host, port, t1, now - realtimeLimit, scnl);
-        Thread t = new Thread(client);
-        t.start();
-        clients.put(scnl, client);
+        getPastData(scnl, t1, now - realtimeLimit);
       } else {
         realtimeClient.add(scnl, now - realtimeLimit);
         realtimeClient.start();
       }
     }
+  }
+  
+  /**
+   * Start new client to get past data if there isn't already one running.
+   * @param scnl channel
+   * @param t1 start time
+   * @param t2 end time
+   */
+  private void getPastData(String scnl, double t1, double t2) {
+    LOGGER.debug(
+        "getPastData: {} {} {}", scnl, J2kSec.toDateString(t1), J2kSec.toDateString(t2));
+    SeedLinkClient client = clients.get(scnl);
+    if (client != null && client.isRunning()) {
+      return; // let it finish what it was doing
+    }
+    if (client != null) {
+      client.closeConnection();
+    } 
+    client = new SeedLinkClient(host, port, t1, t2, scnl);
+    clients.put(scnl, client);
+    Thread t = new Thread(client);
+    t.start();
   }
   
   /**
@@ -320,7 +331,7 @@ public class SeedLinkSource extends SeismicDataSource {
     // not sure if other viewers are using the station. 
     // any good way to check?
     // will be added back later if other frames are using it but may lead to gaps in data?
-    realtimeClient.remove(station); 
+    realtimeClient.remove(station.replace(" ", "$")); 
   }
 
   /**
