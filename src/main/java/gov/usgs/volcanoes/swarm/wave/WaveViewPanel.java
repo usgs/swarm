@@ -1100,6 +1100,9 @@ public class WaveViewPanel extends JComponent {
    * @param g2 the graphics context
    */
   private synchronized void constructPlot(Graphics2D g2) {
+    if (wave == null) {
+      return;
+    }
     Dimension dim = this.getSize();
     
     Plot plot = new Plot();
