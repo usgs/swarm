@@ -295,19 +295,18 @@ public class SeedLinkSource extends SeismicDataSource {
    * @param t2 end time
    */
   private void getPastData(String scnl, double t1, double t2) {
-    LOGGER.debug(
-        "getPastData: {} {} {}", scnl, J2kSec.toDateString(t1), J2kSec.toDateString(t2));
     SeedLinkClient client = clients.get(scnl);
     if (client != null && client.isRunning()) {
       return; // let it finish what it was doing
     }
+    LOGGER.debug(
+        "getPastData: {} {} {}", scnl, J2kSec.toDateString(t1), J2kSec.toDateString(t2));
     if (client != null) {
       client.closeConnection();
     } 
     client = new SeedLinkClient(host, port, t1, t2, scnl);
     clients.put(scnl, client);
-    Thread t = new Thread(client);
-    t.start();
+    client.start();
   }
   
   /**
