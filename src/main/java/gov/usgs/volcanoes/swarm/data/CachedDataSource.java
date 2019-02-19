@@ -23,4 +23,10 @@ public class CachedDataSource extends AbstractCachingDataSource {
   public String toConfigString() {
     return "cache:";
   }
+
+  @Override
+  public void close() {
+    // TODO Auto-generated method stub
+    
+  }
 }

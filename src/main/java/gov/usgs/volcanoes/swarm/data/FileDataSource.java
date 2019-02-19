@@ -270,4 +270,10 @@ public class FileDataSource extends AbstractCachingDataSource {
   public String toConfigString() {
     return name + ";file:";
   }
+
+  @Override
+  public void close() {
+    // TODO Auto-generated method stub
+    
+  }
 }
