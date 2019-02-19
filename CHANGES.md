@@ -1,4 +1,6 @@
-
+## Version 2.8.8 - February 19, 2019
+  * Fix SeedLink stream break issues (#131)
+  
 ## Version 2.8.7 - December 13, 2018
   * Bundle user manual into zip file (under docs)
   * Bundle Hypo71 manual into zip file (under docs)
