@@ -56,6 +56,9 @@ public abstract class SeismicDataSource {
     listeners.remove(SeismicDataSourceListener.class, l);
   }
 
+  /**
+   * Fire channels updated.
+   */
   public void fireChannelsUpdated() {
     Object[] ls = listeners.getListenerList();
     for (int i = ls.length - 2; i >= 0; i -= 2) {
@@ -65,6 +68,11 @@ public abstract class SeismicDataSource {
     }
   }
 
+  /**
+   * Fire channels progress.
+   * @param id progress id
+   * @param p progress percent
+   */
   public void fireChannelsProgress(String id, double p) {
     Object[] ls = listeners.getListenerList();
     for (int i = ls.length - 2; i >= 0; i -= 2) {
@@ -74,6 +82,11 @@ public abstract class SeismicDataSource {
     }
   }
 
+  /**
+   * Fire helicorder progress.
+   * @param id progress id
+   * @param p progress percent
+   */
   public void fireHelicorderProgress(String id, double p) {
     Object[] ls = listeners.getListenerList();
     for (int i = ls.length - 2; i >= 0; i -= 2) {
@@ -113,23 +126,7 @@ public abstract class SeismicDataSource {
   /**
    * Close the data source.
    */
-  public void close() {}
-
-  public void remove() {}
-
-  /**
-   * Get a copy of the data source. The default implementation returns an identical copy, that is,
-   * <code>this</code>.
-   * 
-   * <p>This is confusing. Why return a reference to an object the caller already has? Should this
-   * really return a clone? If so, why not call it clone()? --tjp
-   * 
-   * @return the identical data source (this)
-   */
-  @Deprecated
-  public SeismicDataSource getCopy() {
-    return this;
-  }
+  public abstract void close();
 
   /**
    * Get a string representation of this data source. The default implementation return the name of
@@ -158,8 +155,6 @@ public abstract class SeismicDataSource {
   public String getName() {
     return name;
   }
-
-  public void establish() {}
 
   public int getMinimumRefreshInterval() {
     return minimumRefreshInterval;

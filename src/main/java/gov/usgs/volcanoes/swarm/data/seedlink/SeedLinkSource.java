@@ -6,8 +6,6 @@ import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.ChannelUtil;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.DataSourceType;
-import gov.usgs.volcanoes.swarm.data.Gulper;
-import gov.usgs.volcanoes.swarm.data.GulperList;
 import gov.usgs.volcanoes.swarm.data.GulperListener;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 
@@ -18,11 +16,9 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,13 +33,7 @@ import org.slf4j.LoggerFactory;
 public class SeedLinkSource extends SeismicDataSource {
   /** The logger. */
   private static final Logger LOGGER = LoggerFactory.getLogger(SeedLinkSource.class);
-
-  /** The gulp delay. */
-  public static final int GULP_DELAY = 1000;
-
-  /** The gulp size. */
-  private static final int GULP_SIZE = 60;
-
+  
   // /** Info string prefix text or null if none. */
   private static final String INFO_FILE_TEXT =
       System.getProperty(DataSourceType.getShortName(SeedLinkSource.class) + "infofile");
@@ -54,50 +44,33 @@ public class SeedLinkSource extends SeismicDataSource {
   /** The information string File or null if none. */
   private File infoStringFile;
 
-  /** The colon separated parameters. */
-  private String params;
-
   /** The server port. */
   private int port;
 
-  /** SeedLink client list. */
-  private final List<SeedLinkClient> seedLinkClientList;
-
-  /** time of last gulped data access. */
-  private Map<String, SeedLinkGulperListener> gulperListeners;
-
+  /** SeedLink client for real time updates. */
+  private SeedLinkClient realtimeClient = null;
+  
+  /** Lower time limit for getting real-time data. */
+  private double realtimeLimit = 600.0; // 10 min
+  
+  /** SeedLink clients for past data. */
+  private ConcurrentHashMap<String, SeedLinkClient> clients =
+      new ConcurrentHashMap<String, SeedLinkClient>();
+    
   /**
    * Default constructor.
    */
-  public SeedLinkSource() {
-    LOGGER.debug("Constructing new seedlink source");
-    seedLinkClientList = new ArrayList<SeedLinkClient>();
-    gulperListeners = new HashMap<String, SeedLinkGulperListener>();
-
-  }
-
-  /**
-   * Create a SeedLink server source.
-   * 
-   * @param s the colon separated parameters.
-   */
-  public SeedLinkSource(String name, String s) {
-    this();
-    LOGGER.debug("Constructing new seedlink source2");
-    this.name = name;
-    parse(s);
-  }
-
+  public SeedLinkSource() {   }
 
   /**
    * Parse config string.
+   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#parse(java.lang.String)
    */
   public void parse(String params) {
-    this.params = params;
     String[] ss = params.split(":");
-    int ssIndex = 0;
-    host = ss[ssIndex++];
-    port = Integer.parseInt(ss[ssIndex]);
+    host = ss[0];
+    port = Integer.parseInt(ss[1]);
+    realtimeClient = new SeedLinkClient(host,port);
     if (INFO_FILE_TEXT != null) {
       infoStringFile = new File(INFO_FILE_TEXT + host + port + ".xml");
     }
@@ -105,24 +78,12 @@ public class SeedLinkSource extends SeismicDataSource {
 
   /**
    * Close the data source.
+   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#close()
    */
   public void close() {
-    // close clients
-    synchronized (seedLinkClientList) {
-      if (seedLinkClientList.size() != 0) {
-        LOGGER.debug("close the data source");
-        for (SeedLinkClient client : seedLinkClientList) {
-          client.close();
-        }
-        seedLinkClientList.clear();
-      }
-    }
-  }
-
-
-  public Gulper createGulper(GulperList gl, String k, String ch, double t1,
-      double t2, int size, int delay) {
-    return new SeedLinkGulper(gl, k, this, ch, t1, t2, size, delay);
+    // Don't close.  SeedLink data source and client are shared by all viewers.
+    // Closing one viewer triggers close on data source, but should not do anything
+    // in case other viewers are using it.
   }
 
   /**
@@ -134,9 +95,7 @@ public class SeedLinkSource extends SeismicDataSource {
     String infoString = readChannelCache();
 
     if (infoString == null) {
-      final SeedLinkClient client = createClient();
-      infoString = client.getInfoString();
-      removeClient(client);
+      infoString = realtimeClient.getInfoString("STREAMS");
       writeChannelCache(infoString);
     }
 
@@ -155,6 +114,10 @@ public class SeedLinkSource extends SeismicDataSource {
   }
 
 
+  /**
+   * Read channel data from cache.
+   * @return
+   */
   private String readChannelCache() {
     String infoString = null;
 
@@ -184,7 +147,10 @@ public class SeedLinkSource extends SeismicDataSource {
     return infoString;
   }
 
-
+  /**
+   * Write channel data to cache file.
+   * @param infoString info string
+   */
   private void writeChannelCache(String infoString) {
     if (infoStringFile == null) {
       return;
@@ -205,26 +171,7 @@ public class SeedLinkSource extends SeismicDataSource {
       }
     }
   }
-
-  /**
-   * Get a copy of this data source.
-   * 
-   * @return a copy of this data source.
-   */
-  public SeismicDataSource getCopy() {
-    return new SeedLinkSource(name, params);
-  }
-
-  /**
-   * Get the gulper key for the specified station.
-   * 
-   * @param station the station.
-   * @return the gulper key.
-   */
-  private String getGulperKey(String station) {
-    return DataSourceType.getShortName(SeedLinkSource.class) + ":" + station;
-  }
-
+  
   /**
    * Get the helicorder data.
    * 
@@ -234,27 +181,51 @@ public class SeedLinkSource extends SeismicDataSource {
    * @param gl the gulper listener.
    * @return the helicorder data or null if none.
    */
-  public HelicorderData getHelicorder(String scnl, double t1, double t2,
+  public synchronized HelicorderData getHelicorder(String scnl, double t1, double t2,
       GulperListener gl) {
-    // check if data is in the cache
-    HelicorderData hd = CachedDataSource.getInstance().getHelicorder(scnl,
-        t1, t2, gl);
-    // if no data or data start time is greater than requested
-    if (hd == null || hd.rows() == 0 || (hd.getStartTime() - t1 > 10)
-        || hd.getEndTime() < t2) {
-      requestGulper(scnl, t1, t2, gl);
+    LOGGER.debug(
+        "getHelicorder: {} {} {}", scnl, J2kSec.toDateString(t1), J2kSec.toDateString(t2));
+    scnl = scnl.replace(" ", "$"); // just to be sure
+    
+    CachedDataSource cache = CachedDataSource.getInstance();
+    HelicorderData hd = cache.getHelicorder(scnl, t1, t2, (GulperListener) null);
 
-    } else if (hd.getEndTime() < t2) {
-      // if data end time is less than requested
-      requestGulper(scnl, hd.getEndTime(), t2, gl);
+    double now = J2kSec.now();
+    t2 = Math.min(now, t2);
+    if (hd == null) {
+      getData(scnl, t1, t2, now); // no wave; go get all
+    } else {
+      double startDiff = hd.getStartTime() - t1;
+      double endDiff = t2 - hd.getEndTime();
+      if (endDiff == 0 && startDiff == 0) {
+        return hd;
+      }
+      if (startDiff > 1) {
+        getData(scnl, t1, hd.getStartTime(), now); // get older stuff
+      }
+      if (endDiff > 1) {
+        getData(scnl, hd.getEndTime(), t2, now); // get newer stuff
+      } 
+    }
+    
+    hd = cache.getHelicorder(scnl, t1, t2, (GulperListener) null);
+
+    int count = 0;
+    // keep trying for about 30 seconds...
+    while (count < 3 && hd == null) {
+      try {
+        Thread.sleep(10 * 1000); 
+      } catch (InterruptedException e) {
+        // 
+      }
+      hd = cache.getHelicorder(scnl, t1, t2, (GulperListener) null);
+      count++;
     }
 
-    LOGGER.debug("getHelicorder(scnl={}, start={}, end={})\nDATA={}", scnl, J2kSec.toDateString(t1),
-        J2kSec.toDateString(t2), (hd == null ? "NONE" : hd.toString()));
     return hd;
   }
 
-
+  
   /**
    * Either returns the wave successfully or null if the data source could not
    * get the wave.
@@ -265,44 +236,81 @@ public class SeedLinkSource extends SeismicDataSource {
    * @return the wave or null if none.
    */
   public Wave getWave(String scnl, double t1, double t2) {
-    SeedLinkGulperListener gulperListener = gulperListeners.get(scnl);
-    if (gulperListener != null && gulperListener.isAlive() == false) {
-      gulperListeners.remove(scnl);
-      gulperListener = null;
+    LOGGER.trace(
+        "getWave: {} {} {}", scnl, J2kSec.toDateString(t1), J2kSec.toDateString(t2));
+    scnl = scnl.replace(" ", "$"); // just to be sure
+    double now = J2kSec.now();
+    t2 = Math.min(now, t2);
+    Wave wave = CachedDataSource.getInstance().getBestWave(scnl, t1, t2);
+    if (wave == null) {
+      if ((t2 - t1) > 1) {
+        getData(scnl, t1, t2, now); // no wave; go get all
+      }
+    } else {
+      double startDiff = wave.getStartTime() - t1;
+      double endDiff = t2 - wave.getEndTime();
+      if (endDiff == 0 && startDiff == 0) {
+        return wave;
+      }
+      if (endDiff > 1) {
+        getData(scnl, wave.getEndTime(), t2, now); // get newer stuff
+      } 
+      if (startDiff > 1) {
+        getData(scnl, t1, wave.getStartTime(), now); // get older stuff
+      }
     }
-
-    if (gulperListener == null) {
-      gulperListener = new SeedLinkGulperListener();
-      gulperListeners.put(scnl, gulperListener);
-      Gulper gulper = GulperList.INSTANCE.requestGulper(getGulperKey(scnl), gulperListener,
-          this.getCopy(), scnl, t1, t2, 0, 1000);
-      gulperListener.setGulper(gulper);
-    }
-
-    SeedLinkGulperListener gulperListner = gulperListeners.get(scnl);
-    gulperListner.read();
-
-    return CachedDataSource.getInstance().getBestWave(scnl, t1, t2);
-
-    // // check if data is in the cache
-    // Wave wave = CachedDataSource.getInstance().getWave(scnl, t1, t2);
-    // if (wave == null) {
-    // // remove all data in the future to avoid blocking
-    // final double now = J2kSec.now();
-    // if (t1 <= now) {
-    // final SeedLinkClient client = createClient();
-    // wave = client.getWave(scnl, t1, t2);
-    // removeClient(client);
-    // }
-    // }
-    //
-    // LOGGER.debug("getWave(scnl={}, start={}, end={})\nDATA={}", scnl, J2kSec.toDateString(t1),
-    // J2kSec.toDateString(t2), (wave == null ? "NONE" : wave.toString()));
-    // return wave;
+    wave = CachedDataSource.getInstance().getBestWave(scnl, t1, t2);
+  
+    return wave;
   }
 
   /**
-   * Is this data source active; that is, is new data being added in real-time
+   * Get seedlink data.
+   * @param scnl channel
+   * @param t1 start time
+   * @param t2 end time
+   */
+  private void getData(String scnl, double t1, double t2, double now) {
+    LOGGER.trace(
+        "getData: {} {} {}", scnl, J2kSec.toDateString(t1), J2kSec.toDateString(t2));
+    if ((now - t2) > realtimeLimit) {  // if it is all past data
+      getPastData(scnl, t1, t2);
+    } else {
+      if ((now - t1) > (realtimeLimit + 1)) {
+        // if request size is more than gulpSize start a separate client for the older data
+        realtimeClient.add(scnl, now - realtimeLimit);
+        realtimeClient.start();
+        getPastData(scnl, t1, now - realtimeLimit);
+      } else {
+        realtimeClient.add(scnl, now - realtimeLimit);
+        realtimeClient.start();
+      }
+    }
+  }
+  
+  /**
+   * Start new client to get past data if there isn't already one running.
+   * @param scnl channel
+   * @param t1 start time
+   * @param t2 end time
+   */
+  private void getPastData(String scnl, double t1, double t2) {
+    SeedLinkClient client = clients.get(scnl);
+    if (client != null && client.isRunning()) {
+      return; // let it finish what it was doing
+    }
+    LOGGER.debug(
+        "getPastData: {} {} {}", scnl, J2kSec.toDateString(t1), J2kSec.toDateString(t2));
+    if (client != null) {
+      client.closeConnection();
+    } 
+    client = new SeedLinkClient(host, port, t1, t2, scnl);
+    clients.put(scnl, client);
+    client.start();
+  }
+  
+  /**
+   * Check if data source is active.  That is, is new data being added in real-time
    * to this data source?
    * 
    * @return whether or not this is an active data source.
@@ -311,50 +319,18 @@ public class SeedLinkSource extends SeismicDataSource {
     return true;
   }
 
+  /**
+   * Notify client that a station is no longer needed.
+   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#notifyDataNotNeeded
+   * (java.lang.String, double, double, gov.usgs.volcanoes.swarm.data.GulperListener)
+   */
   public synchronized void notifyDataNotNeeded(String station, double t1,
       double t2, GulperListener gl) {
-    GulperList.INSTANCE.killGulper(getGulperKey(station), gl);
-  }
 
-
-  /**
-   * Create a client.
-   * 
-   * @return the client.
-   */
-  protected SeedLinkClient createClient() {
-    final SeedLinkClient client = new SeedLinkClient(host, port);
-    synchronized (seedLinkClientList) {
-      seedLinkClientList.add(client);
-    }
-    return client;
-  }
-
-
-  /**
-   * Remove the client.
-   * 
-   * @param client the client.
-   */
-  protected void removeClient(SeedLinkClient client) {
-    synchronized (seedLinkClientList) {
-      seedLinkClientList.remove(client);
-    }
-  }
-
-
-  /**
-   * Request data from the gulper.
-   * 
-   * @param scnl the scnl.
-   * @param t1 the start time.
-   * @param t2 the end time.
-   * @param gl the gulper listener.
-   */
-  protected void requestGulper(String scnl, double t1, double t2,
-      GulperListener gl) {
-    GulperList.INSTANCE.requestGulper(getGulperKey(scnl), gl, this,
-        scnl, t1, t2, GULP_SIZE, GULP_DELAY);
+    // not sure if other viewers are using the station. 
+    // any good way to check?
+    // will be added back later if other frames are using it but may lead to gaps in data?
+    realtimeClient.remove(station.replace(" ", "$")); 
   }
 
   /**

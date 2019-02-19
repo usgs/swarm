@@ -6,8 +6,10 @@
 
 package gov.usgs.volcanoes.swarm.data;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import gov.usgs.volcanoes.core.data.HelicorderData;
+import gov.usgs.volcanoes.core.data.RSAMData;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.swarm.Swarm;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,18 +19,17 @@ import java.util.Map;
 
 import javax.swing.JFrame;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix2D;
-import gov.usgs.volcanoes.core.data.HelicorderData;
-import gov.usgs.volcanoes.core.data.RSAMData;
-import gov.usgs.volcanoes.core.data.Wave;
-import gov.usgs.volcanoes.swarm.Swarm;
 
 /**
  * An implementation of <code>SeismicDataSource</code> which caches data that
- * passes through it. Requires another SeismicDataSource to provide data
- *
- * Mostly build with Dan's code pulled from CachedDataSource
+ * passes through it. Requires another SeismicDataSource to provide data.
+ * 
+ * <p>Mostly build with Dan's code pulled from CachedDataSource.
  *
  * @author Tom Parker
  */

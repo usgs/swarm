@@ -86,7 +86,7 @@ import gov.usgs.volcanoes.swarm.data.FileDataSource;
 import gov.usgs.volcanoes.swarm.data.RsamSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSourceListener;
-import gov.usgs.volcanoes.swarm.data.WWSSource;
+import gov.usgs.volcanoes.swarm.data.WwsSource;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.wave.SwarmMultiMonitors;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
@@ -758,7 +758,6 @@ public class DataChooser extends JPanel {
   private List<String> openSource(SeismicDataSource sds) {
     List<String> channels = null;
     try {
-      sds.establish();
       channels = sds.getChannels();
       MapFrame.getInstance().reset(false);
       sds.close();
@@ -1266,7 +1265,7 @@ public class DataChooser extends JPanel {
 
         // greyout stale channels
         Metadata md = SwarmConfig.getInstance().getMetadata(node.getLabel());
-        if (md != null && md.source instanceof WWSSource) {
+        if (md != null && md.source instanceof WwsSource) {
           setToolTipText(node.getToolTip());
           if (value instanceof ChannelNode && ((ChannelNode) value).isStale()) {
             setForeground(Color.GRAY);

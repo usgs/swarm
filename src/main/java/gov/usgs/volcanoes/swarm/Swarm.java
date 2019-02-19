@@ -630,7 +630,6 @@ public class Swarm extends JFrame implements InternalFrameListener {
    */
   public static HelicorderViewerFrame openHelicorder(final SeismicDataSource source,
       final String channel, final double time) {
-    source.establish();
     final HelicorderViewerFrame frame = new HelicorderViewerFrame(source, channel, time);
     frame.addLinkListeners();
     SwarmInternalFrames.add(frame);

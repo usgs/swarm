@@ -20,11 +20,11 @@ import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.TreeMap;
 
 import nl.knmi.orfeus.seedlink.SLLog;
 import nl.knmi.orfeus.seedlink.SLPacket;
@@ -42,6 +42,255 @@ import org.slf4j.LoggerFactory;
 public class SeedLinkClient implements Runnable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SeedLinkClient.class);
+
+  /** SeedLink server address. */
+  private String sladdr;
+
+  /** The wave list or null if none. */
+  private List<Wave> waveList;
+
+  /** BaseSLConnection object for communicating with the BaseSLConnection over a socket. */
+  private SeedLinkConnection slconn;
+
+  /** INFO LEVEL for info request only. */
+  private String infolevel = null;
+
+  /** Multiselect string.  Example: "IU_KONO:BHE BHN,GE_WLF,MN_AQU:HH?.D" */
+  private String multiselect = null;
+  
+  /** SCNL's and last request time. */
+  private TreeMap<String, Double> scnlMap = new TreeMap<String, Double>(); 
+  
+  /** Client thread. */
+  private Thread thread;
+
+  /** Start and end time of thread. In J2k seconds. */
+  private double startTime = Double.MAX_VALUE;
+  private double endTime = 0;
+
+  /**
+   * Create SeedLink client with channel, start and end time.
+   * 
+   * @param host seedlink server host
+   * @param port seedlink server port
+   * @param startTime data request start time
+   * @param endTime data request end time
+   * @param scnl channel to get
+   */
+  public SeedLinkClient(String host, int port, double startTime, double endTime, String scnl) {
+    super();
+    sladdr = host + ":" + port;
+    scnlMap.put(scnl, J2kSec.now());
+    createConnection();
+    setStartEndTimes(startTime, endTime);
+    // slconn.setLastpkttime(true);
+    LOGGER.debug("SeedLinkClient initialized: {} {} {} {} ", sladdr, multiselect,
+        j2kToSeedLinkDateString(startTime), j2kToSeedLinkDateString(endTime));
+  }
+
+  /**
+   * Create SeedLink client.
+   * 
+   * @param host the server host.
+   * @param port the server port.
+   */
+  public SeedLinkClient(String host, int port) {
+    super();   
+    sladdr = host + ":" + port;
+    createConnection();
+  }
+
+  protected void setStartEndTimes(double st, double et) {
+    this.startTime = st;
+    this.endTime = et;
+    slconn.setBeginTime(j2kToSeedLinkDateString(st));
+    slconn.setEndTime(j2kToSeedLinkDateString(et));
+  }
+
+  /**
+   * Creates SeedLink connection.
+   *
+   * @exception SeedLinkException on error.
+   * @exception UnknownHostException if no IP address for the local host could be found.
+   *
+   */
+  private void createConnection() {
+
+    slconn = new SeedLinkConnection(new SLLog());
+    slconn.setSLAddress(sladdr);
+
+    // Make sure a server was specified
+    if (slconn.getSLAddress() == null) {
+      String message = "No SeedLink server specified";
+      LOGGER.error(message);
+      return;
+    }
+
+    // If no host is given for the SeedLink server, add 'localhost'
+    if (slconn.getSLAddress().startsWith(":")) {
+      try {
+        slconn.setSLAddress(InetAddress.getLocalHost().toString() + slconn.getSLAddress());
+      } catch (UnknownHostException e) {
+        LOGGER.error(e.getMessage());
+        return;
+      }
+    }
+    slconn.setBeginTime(j2kToSeedLinkDateString(startTime));
+
+    updateMultiSelect();
+    if (multiselect != null) {
+      try {
+        slconn.parseStreamlist(multiselect, null);
+      } catch (SeedLinkException e) {
+        LOGGER.error("Unable to parse stream list: " + multiselect);
+      }
+    }
+  }
+
+  /**
+   * Get the SeedLink information string.
+   * 
+   * @param info should be ID, STATIONS, STREAMS, GAPS, CONNECTIONS, ALL
+   * @return the SeedLink information string or null if error.
+   */
+  public String getInfoString(String info) {
+    try {
+      infolevel = info;
+      run();
+      return slconn.getInfoString();
+    } catch (Exception ex) {
+      LOGGER.warn("Could not get channels", ex);
+    }
+    return null;
+  }
+
+  protected synchronized void add(String scnl) {
+    add(scnl, Double.MAX_VALUE);
+  }
+
+  /**
+   * Add channel for client to get.
+   * @param key gulper listener
+   * @param scnl channel string
+   * @param t1 start time
+   */
+  protected synchronized void add(String scnl, double t1) {
+    this.startTime = t1;
+    boolean reconnect = false;
+    if (!scnlMap.keySet().contains(scnl)) {
+      reconnect = true;
+    }
+    scnlMap.put(scnl, J2kSec.now());
+    if (reconnect) {
+      LOGGER.debug("Added {}", scnl);
+      infolevel = null;
+      closeConnection();
+      createConnection();
+    }
+  }
+
+  /**
+   * Remove station from list of channels to get.
+   */
+  protected synchronized void remove(String scnl) {
+    Double lrt = scnlMap.remove(scnl);
+    if (lrt != null && !Double.isNaN(lrt)) {
+      closeConnection();
+      createConnection();
+    }
+    LOGGER.debug("Removed {}", scnl);
+  }
+
+  /**
+   * Update multiselect statement.
+   */
+  private void updateMultiSelect() {
+    if (scnlMap.size() == 0) {
+      multiselect = null;
+      return;
+    }
+    String tmpMs = "";
+    String prevStation = "";
+    for (String scnl : scnlMap.keySet()) {
+      ChannelInfo channelInfo = new ChannelInfo(scnl);
+      String station = channelInfo.getNetwork() + "_" + channelInfo.getStation();
+      String selector = channelInfo.getLocation() + channelInfo.getChannel();
+      if (station.equals(prevStation)) {
+        tmpMs += " " + selector;
+      } else {
+        if (!tmpMs.equals("")) {
+          tmpMs += ",";
+        }
+        tmpMs += station + ":" + selector;
+      }
+      prevStation = station;
+    }
+    tmpMs += "." + SeedLinkChannelInfo.DATA_TYPE;
+    multiselect = tmpMs;
+    LOGGER.debug("Multiselect updated: {} {}", sladdr, multiselect);
+  }
+
+  /**
+   * Cache the wave.
+   * 
+   * @param scnl the SCNL.
+   * @param wave the wave.
+   */
+  private void cacheWave(String scnl, Wave wave) {
+    if (scnl == null || wave == null) {
+      return;
+    }
+    Double lastRequestTime = scnlMap.get(scnl);
+    if (scnlMap.keySet().contains(scnl)) {
+      if (Double.isNaN(lastRequestTime) || J2kSec.now() - lastRequestTime < 300) {
+        CachedDataSource.getInstance().putWave(scnl, wave);
+        CachedDataSource.getInstance().cacheWaveAsHelicorder(scnl, wave);
+      } else {
+        // Don't save if last request time is more than 5 min ago.
+        // Remove SCNL from list.
+        remove(scnl);
+      }
+    }
+  }
+
+  /*
+   * taken from Robert Casey's PDCC seed code.
+   */
+  private float getSampleRate(double factor, double multiplier) {
+    float sampleRate = (float) 10000.0; // default (impossible) value;
+    if ((factor * multiplier) != 0.0) { // in the case of log records
+      sampleRate = (float) (Math.pow(Math.abs(factor),
+          (factor / Math.abs(factor)))
+          * Math.pow(Math.abs(multiplier),
+              (multiplier / Math.abs(multiplier))));
+    }
+    return sampleRate;
+  }
+
+  private Date btimeToDate(Btime btime) {
+    Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+    cal.set(Calendar.YEAR, btime.getYear());
+    cal.set(Calendar.DAY_OF_YEAR, btime.getDayOfYear());
+    cal.set(Calendar.HOUR_OF_DAY, btime.getHour());
+    cal.set(Calendar.MINUTE, btime.getMinute());
+    cal.set(Calendar.SECOND, btime.getSecond());
+    cal.set(Calendar.MILLISECOND, btime.getTenthMill() / 10);
+    return cal.getTime();
+  }
+
+  /**
+   * Converts a j2ksec to a SeedLink date string
+   * ("year,month,day,hour,minute,second").
+   * 
+   * @param j the j2ksec or NaN if none.
+   * @return a SeedLink date string or null if none.
+   */
+  private static String j2kToSeedLinkDateString(double j) {
+    if (Double.isNaN(j)) {
+      return null;
+    }
+    return J2kSec.format("yyyy,MM,dd,HH,mm,ss", j);
+  }
 
   /**
    * Get the Btime value from the specified blockette field.
@@ -77,244 +326,6 @@ public class SeedLinkClient implements Runnable {
     return Double.parseDouble(obj.toString());
   }
 
-
-  /**
-   * Converts a j2ksec to a SeedLink date string
-   * ("year,month,day,hour,minute,second").
-   * 
-   * @param j the j2ksec or NaN if none.
-   * @return a SeedLink date string or null if none.
-   */
-  private static String j2kToSeedLinkDateString(double j) {
-    if (Double.isNaN(j)) {
-      return null;
-    }
-    return J2kSec.format("yyyy,MM,dd,HH,mm,ss", j);
-  }
-
-  /** The SCNL or null if none. */
-  private String scnl;
-
-  /** The start and end time. */
-  private final StartEndTime startEndTime;
-
-  /** The thread or null if none. */
-  private Thread thread;
-
-  /** The wave list or null if none. */
-  private List<Wave> waveList;
-
-  // parameters
-  /** BaseSLConnection object for communicating with the BaseSLConnection over a socket. */
-  private final SeedLinkConnection slconn;
-
-
-  /** Selectors for uni-station or default selectors for multi-station. */
-  private String selectors = null;
-
-  /** Selectors for multi-station. */
-  private String multiselect = null;
-
-  /** INFO LEVEL for info request only. */
-  private String infolevel = null;
-
-
-  /**
-   * Create the SeedLink client.
-   * 
-   * @param host the server host.
-   * @param port the server port.
-   */
-  public SeedLinkClient(String host, int port) {
-    super();
-    slconn = new SeedLinkConnection(new SLLog());
-
-    startEndTime = new StartEndTime();
-    // create thread so that it is not killed by default
-    thread = new Thread(this);
-    final String sladdr = host + ":" + port;
-    slconn.setSLAddress(sladdr);
-  }
-
-  /**
-   * Cache the wave.
-   * 
-   * @param scnl the SCNL.
-   * @param wave the wave.
-   */
-  private void cacheWave(String scnl, Wave wave) {
-    if (scnl == null || wave == null) {
-      return;
-    }
-    LOGGER.debug("putting wave in cache ({}):", scnl, wave);
-    CachedDataSource.getInstance().putWave(scnl, wave);
-    CachedDataSource.getInstance().cacheWaveAsHelicorder(scnl, wave);
-  }
-
-  /**
-   * Close the SeedLink connection.
-   */
-  public void close() {
-    LOGGER.debug("close the SeedLinkConnection");
-    slconn.terminate();
-    kill();
-  }
-
-  /**
-   * Get the SeedLink information string.
-   * 
-   * @return the SeedLink information string or null if error.
-   */
-  public String getInfoString() {
-    try {
-      infolevel = "STREAMS";
-      init(null, null);
-      run();
-      // I don't know why this is clearing the info string. Perhaps simply to reclaim memory? I'm
-      // getting rid of it and just leaving the side effect in place. That seems to be the real
-      // goal. --TJP
-      // return slconn.clearInfoString();
-      return slconn.getInfoString();
-    } catch (Exception ex) {
-      LOGGER.warn("could not get channels", ex);
-    }
-    return null;
-  }
-
-  /**
-   * Get the multiple select text.
-   * 
-   * @param channelInfo the channel information.
-   * 
-   * @return the multiple select text.
-   */
-  private String getMultiSelect(ChannelInfo channelInfo) {
-    return channelInfo.getNetwork() + "_" + channelInfo.getStation() + ":"
-        + channelInfo.getLocation() + channelInfo.getChannel() + "."
-        + SeedLinkChannelInfo.DATA_TYPE;
-  }
-
-  /**
-   * Get the start and end time and clears the value for the next call.
-   * 
-   * @param o the start end time to set or null to return a new copy.
-   * 
-   * @return the start and end time.
-   */
-  public StartEndTime getStartEndTime(StartEndTime o) {
-    synchronized (startEndTime) {
-      if (o == null) {
-        o = new StartEndTime(startEndTime.getStartTime(), startEndTime.getEndTime());
-      } else {
-        o.set(startEndTime);
-      }
-      startEndTime.clear();
-    }
-    return o;
-  }
-
-  /**
-   * Get the wave, waiting until all data is available.
-   * 
-   * @param scnl the scnl.
-   * @param t1 the start time.
-   * @param t2 the end time.
-   * @return the wave.
-   */
-  public Wave getWave(String scnl, double t1, double t2) {
-    waveList = new ArrayList<Wave>();
-    init(scnl, t1, t2);
-    run();
-    final Wave wave = Wave.join(waveList);
-    waveList = null;
-    return wave;
-  }
-
-  /**
-   * Initialize the client.
-   * 
-   * @param scnl the scnl.
-   * @param t1 the start time or NaN if none.
-   * @param t2 the end time or NaN if none.
-   */
-  public void init(String scnl, double t1, double t2) {
-    this.scnl = scnl;
-    final ChannelInfo channelInfo = new ChannelInfo(scnl);
-    infolevel = null;
-    // selectors = channelInfo.getFormattedSCNL();
-    multiselect = getMultiSelect(channelInfo);
-    String beginTime = j2kToSeedLinkDateString(t1);
-    String endTime = j2kToSeedLinkDateString(t2);
-    try {
-      init(beginTime, endTime);
-    } catch (Exception ex) {
-      LOGGER.warn("could start SeedLink client", ex);
-    }
-  }
-
-
-  /**
-   * Initializes this SLCient.
-   *
-   * @exception SeedLinkException on error.
-   * @exception UnknownHostException if no IP address for the local host could be found.
-   *
-   */
-  private void init(String beginTime, String endTime)
-      throws UnknownHostException, SeedLinkException {
-
-    // Make sure a server was specified
-    if (slconn.getSLAddress() == null) {
-      String message = "no SeedLink server specified";
-      throw (new SeedLinkException(message));
-    }
-
-
-    // If no host is given for the SeedLink server, add 'localhost'
-    if (slconn.getSLAddress().startsWith(":")) {
-      slconn.setSLAddress(InetAddress.getLocalHost().toString() + slconn.getSLAddress());
-    }
-
-    // Parse the 'multiselect' string following '-S'
-    if (multiselect != null) {
-      slconn.parseStreamlist(multiselect, selectors);
-    } else {
-      slconn.setUniParams(selectors, -1, null);
-    }
-
-    // Set begin time for read start in past
-    // 20050415 AJL added to support continuous data transfer from a time in the past
-    if (beginTime != null) {
-      slconn.setBeginTime(beginTime);
-    }
-    // Set end time for for reading windowed data
-    // 20071204 AJL added
-    if (endTime != null) {
-      slconn.setEndTime(endTime);
-    }
-  }
-
-
-  /**
-   * Determine if the client has been killed.
-   * 
-   * @return true if the client has been killed.
-   */
-  protected boolean isKilled() {
-    return thread == null;
-  }
-
-  /**
-   * Kill the client.
-   */
-  protected void kill() {
-    final Thread t = thread;
-    if (t != null) {
-      thread = null;
-      t.interrupt();
-    }
-  }
-
   /**
    * Method that processes each packet received from the SeedLink server. This
    * is based on code lifted from SeedLinkManager in SeisGram2K with clock
@@ -330,9 +341,6 @@ public class SeedLinkClient implements Runnable {
    * 
    */
   private boolean packetHandler(int count, SLPacket slpack) throws Exception {
-    if (isKilled()) {
-      return true;
-    }
 
     if (count % 10000 == 0) {
       Runtime.getRuntime().gc();
@@ -358,7 +366,6 @@ public class SeedLinkClient implements Runnable {
     // process message and return if terminated
     if (type == SLPacket.TYPE_SLINFT) {
       // LOGGER.debug("received INFO packet:\n{}", slconn.getInfoString());
-      LOGGER.debug("infolevel: {}", infolevel);
       if (infolevel != null) {
         return true; // close the connection
       } else {
@@ -366,19 +373,9 @@ public class SeedLinkClient implements Runnable {
       }
     }
 
-    // station list should refresh on demand, not on a schedule.
-    // // send an in-line INFO request here
-    // long currTime = System.currentTimeMillis();
-    // if (currTime - lastInfoRequestTime > INFO_REQUEST_INTERVAL
-    // && !slconn.getState().expect_info) {
-    // LOGGER.debug("requesting INFO level ID");
-    // slconn.requestInfo("ID");
-    // lastInfoRequestTime = currTime;
-    // }
-
     // if here, must be a blockette
     final Blockette blockette = slpack.getBlockette();
-    LOGGER.debug("packet seqnum={}, packet type={}, blockette type={}, blockette={}",
+    LOGGER.trace("packet seqnum={}, packet type={}, blockette type={}, blockette={}",
         slpack.getSequenceNumber(), type, blockette.getType(), blockette);
 
     final Waveform waveform = blockette.getWaveform();
@@ -399,14 +396,15 @@ public class SeedLinkClient implements Runnable {
         wave.setStartTime(startTime);
         wave.buffer = waveform.getDecodedIntegers();
         wave.register();
+        String network = (String) blockette.getFieldVal(7);
+        String station = (String) blockette.getFieldVal(4);
+        String location = (String) blockette.getFieldVal(5);
+        String channel = (String) blockette.getFieldVal(6);
+        String scnl = station + " " + channel + " " + network + " " + location;
+        scnl = scnl.trim().replace(" ", "$");
         cacheWave(scnl, wave);
         if (waveList != null) {
           waveList.add(wave);
-        } else {
-          final double endTime = wave.getEndTime();
-          synchronized (startEndTime) {
-            startEndTime.update(startTime, endTime);
-          }
         }
       } catch (Exception ex) {
         LOGGER.warn("packetHandler: could create wave", ex);
@@ -416,37 +414,15 @@ public class SeedLinkClient implements Runnable {
     return false; // do not close the connection
   }
 
-  /*
-   * taken from Robert Casey's PDCC seed code.
-   */
-  private float getSampleRate(double factor, double multiplier) {
-    float sampleRate = (float) 10000.0; // default (impossible) value;
-    if ((factor * multiplier) != 0.0) { // in the case of log records
-      sampleRate = (float) (java.lang.Math.pow(java.lang.Math.abs(factor),
-          (factor / java.lang.Math.abs(factor)))
-          * java.lang.Math.pow(java.lang.Math.abs(multiplier),
-              (multiplier / java.lang.Math.abs(multiplier))));
-    }
-    return sampleRate;
-  }
-
-  private Date btimeToDate(Btime btime) {
-    Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-    cal.set(Calendar.YEAR, btime.getYear());
-    cal.set(Calendar.DAY_OF_YEAR, btime.getDayOfYear());
-    cal.set(Calendar.HOUR_OF_DAY, btime.getHour());
-    cal.set(Calendar.MINUTE, btime.getMinute());
-    cal.set(Calendar.SECOND, btime.getSecond());
-    cal.set(Calendar.MILLISECOND, btime.getTenthMill() / 10);
-    return cal.getTime();
-  }
-
   /**
    * Start this SeedLinkClient.
    */
   public void run() {
+
     try {
+
       if (infolevel != null) {
+        LOGGER.debug("Requesting SeedLink info: " + infolevel);
         slconn.requestInfo(infolevel);
       }
 
@@ -471,9 +447,9 @@ public class SeedLinkClient implements Runnable {
           }
 
         } catch (SeedLinkException sle) {
-          LOGGER.debug("error: ", sle);
+          LOGGER.debug("packetHandler error: ", sle);
         }
-        // 20081127 AJL - test modification to prevent "Error: out of java heap space" problem
+        // 20081127 AJL - test modification to prevent "Error: out of java heap space" problems
         // identified by pwiejacz@igf.edu.pl
         if (count >= Integer.MAX_VALUE) {
           count = 1;
@@ -482,21 +458,41 @@ public class SeedLinkClient implements Runnable {
           count++;
         }
       }
-    } catch (Exception ex) {
-      LOGGER.debug("error in run", ex);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    if (multiselect != null) {
+      if (endTime > 0) {
+        LOGGER.debug("SeedLinkClient ended: {} {} {} {} ", sladdr, multiselect,
+            j2kToSeedLinkDateString(startTime), j2kToSeedLinkDateString(endTime));
+      }
     }
     // Close the BaseSLConnection
     slconn.close();
+    thread = null;
+  }
 
+  protected boolean isRunning() {
+    if (thread == null) {
+      return false;
+    }
+    return thread.isAlive();
+  }
+
+  protected synchronized void start() {
+    if (thread == null) {
+      thread = new Thread(this);
+      thread.start();
+    }
   }
 
   /**
-   * Start the client.
+   * Close the SeedLink connection.
    */
-  public void start() {
-    final Thread t = thread;
-    if (t != null) {
-      t.start();
-    }
+  public synchronized void closeConnection() {
+    LOGGER.debug("Closing the SeedLinkConnection");
+    slconn.terminate();
   }
+
 }

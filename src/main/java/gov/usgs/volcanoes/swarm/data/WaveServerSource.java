@@ -1,15 +1,5 @@
 package gov.usgs.volcanoes.swarm.data;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-
 import gov.usgs.volcanoes.core.data.HelicorderData;
 import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.legacy.ew.Menu;
@@ -19,6 +9,13 @@ import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+
 /**
  * An implementation of <code>SeismicDataSource</code> that connects to an Earthworm Wave Server.
  * 
@@ -26,7 +23,7 @@ import gov.usgs.volcanoes.swarm.SwarmConfig;
  * @author Dan Cervelli
  */
 public class WaveServerSource extends SeismicDataSource {
-  private final static Logger LOGGER = LoggerFactory.getLogger(WaveServerSource.class);
+  //private final static Logger LOGGER = LoggerFactory.getLogger(WaveServerSource.class);
 
   private String params;
   private WaveServer waveServer;
@@ -50,6 +47,11 @@ public class WaveServerSource extends SeismicDataSource {
     this.name = source.name;
     parse(source.params);
   }
+  
+  /**
+   * Parse data source parameters.
+   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#parse(java.lang.String)
+   */
   public void parse(String params) {
     this.params = params;
     String[] ss = params.split(":");
@@ -61,7 +63,7 @@ public class WaveServerSource extends SeismicDataSource {
     if (ss.length >= 6) {
       timeZone = TimeZone.getTimeZone(ss[5]);
     }
-    if(timeZone == null) {
+    if (timeZone == null) {
       timeZone = TimeZone.getTimeZone("UTC");
     }
 
@@ -69,25 +71,30 @@ public class WaveServerSource extends SeismicDataSource {
     setTimeout(timeout);
   }
 
+  /**
+   * To config string.
+   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#toConfigString()
+   */
   public String toConfigString() {
     String typeString = DataSourceType.getShortName(this.getClass());
     return String.format("%s;" + typeString + ":%s:%d:%d:%d:%d:%s", name, server, port, timeout,
         gulpSize, gulpDelay, timeZone.getID());
   }
 
-  public boolean isSCNL(String p) {
+  private boolean isScnl(String p) {
     Boolean b = scnlSources.get(p);
     if (b == null) {
       getMenu();
       b = scnlSources.get(p);
-      if (b == null)
+      if (b == null) {
         return false;
+      }
     }
 
     return b.booleanValue();
   }
 
-  public static void setIsSCNL(String p, boolean b) {
+  private static void setIsScnl(String p, boolean b) {
     scnlSources.put(p, b);
   }
 
@@ -95,53 +102,75 @@ public class WaveServerSource extends SeismicDataSource {
     waveServer.setTimeout(to);
   }
 
+  /**
+   * Close data source.
+   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#close()
+   */
   public synchronized void close() {
-    if (waveServer != null)
+    if (waveServer != null) {
       waveServer.close();
+    }
   }
 
+  /**
+   * Get menu.
+   * @return menu
+   */
   public synchronized Menu getMenu() {
     Menu menu = waveServer.getMenuSCNL();
-    setIsSCNL(params, menu.isSCNL());
+    setIsScnl(params, menu.isSCNL());
     return menu;
   }
 
-  public String getFormattedSCNL(MenuItem mi) {
-    if (isSCNL(params))
+  private String getFormattedScnl(MenuItem mi) {
+    if (isScnl(params)) {
       return mi.getSCNL(" ");
-    else
+    } else {
       return mi.getSCN(" ");
+    }
   }
 
+  /**
+   * Get menu list.
+   * @param items list of menus
+   * @return
+   */
   public List<String> getMenuList(List<MenuItem> items) {
     List<String> list = new ArrayList<String>(items.size());
     for (Iterator<MenuItem> it = items.iterator(); it.hasNext();) {
       MenuItem mi = it.next();
-      list.add(getFormattedSCNL(mi));
+      list.add(getFormattedScnl(mi));
     }
     return list;
   }
 
+  /**
+   * Get wave.
+   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getWave(java.lang.String, double, double)
+   */
   public synchronized Wave getWave(String station, double t1, double t2) {
     CachedDataSource cache = CachedDataSource.getInstance();
     Wave sw = null;
-    if (useCache)
+    if (useCache) {
       sw = cache.getWave(station, t1, t2);
+    }
     if (sw == null) {
       String seperator = station.indexOf('$') != -1 ? "\\$" : " ";
       String[] ss = station.split(seperator);
       String loc = null;
-      if (isSCNL(params)) {
+      if (isScnl(params)) {
         loc = "--";
-        if (ss.length == 4)
+        if (ss.length == 4) {
           loc = ss[3];
+        }
       }
       double offset = timeZone.getOffset(J2kSec.asEpoch(t1));
       double at1 = Time.j2kToEw(t1) + offset / 1000.0;
       double at2 = Time.j2kToEw(t2) + offset / 1000.0;
       sw = waveServer.getRawData(ss[0], ss[1], ss[2], loc, at1, at2);
-      if (sw == null)
+      if (sw == null) {
         return null;
+      }
       sw.convertToJ2K();
       sw.setStartTime(sw.getStartTime() - offset / 1000.0);
       sw.register();
@@ -153,6 +182,10 @@ public class WaveServerSource extends SeismicDataSource {
     return sw;
   }
 
+  /**
+   * Get channels.
+   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getChannels()
+   */
   public synchronized List<String> getChannels() {
     Menu menu = getMenu();
     List<String> channels = getMenuList(menu.getSortedItems());
@@ -160,12 +193,18 @@ public class WaveServerSource extends SeismicDataSource {
     return channels;
   }
 
+  /**
+   * Get helicorders.
+   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getHelicorder
+   * (java.lang.String, double, double, gov.usgs.volcanoes.swarm.data.GulperListener)
+   */
   public synchronized HelicorderData getHelicorder(String station, double t1, double t2,
       GulperListener gl) {
     double now = J2kSec.now();
     // if a time later than now has been asked for make sure to get the latest
-    if ((t2 - now) >= -20)
+    if ((t2 - now) >= -20) {
       getWave(station, now - 2 * 60, now);
+    }
 
     CachedDataSource cache = CachedDataSource.getInstance();
 
@@ -180,7 +219,7 @@ public class WaveServerSource extends SeismicDataSource {
 
   public SeismicDataSource getCopy() {
     return new WaveServerSource(this);
-}
+  }
 
   public synchronized void notifyDataNotNeeded(String station, double t1, double t2,
       GulperListener gl) {
