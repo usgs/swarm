@@ -1,3 +1,6 @@
+## Version 2.8.9 - TBD
+  * Fix waveform export issue in clipboard (#254)
+
 ## Version 2.8.8 - February 19, 2019
   * Fix SeedLink stream break issues (#131)
   
