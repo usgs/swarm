@@ -651,6 +651,8 @@ public class WaveClipboardFrame extends SwarmFrame {
     public void actionPerformed(final ActionEvent e) {
       final WaveViewPanel selected = getSingleSelected();
       if (selected == null) {
+        JOptionPane.showMessageDialog(applicationFrame,
+            "Please select a wave panel to save.", "Error", JOptionPane.ERROR_MESSAGE);
         return;
       }
 
@@ -699,13 +701,18 @@ public class WaveClipboardFrame extends SwarmFrame {
             final String fn = f.getPath();
             final SeismicDataFile file = SeismicDataFile.getFile(fn);
             final Wave wave = selected.getWave();
+            if (wave == null || wave.buffer == null) {
+              JOptionPane.showMessageDialog(applicationFrame, "Wave panel does not contain data.",
+                  "Error", JOptionPane.ERROR_MESSAGE);
+              return;
+            }
             file.putWave(selected.getChannel(), wave);
             file.write();
           } catch (final FileNotFoundException ex) {
-            JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "Directory does not exist.",
+            JOptionPane.showMessageDialog(applicationFrame, "Directory does not exist.",
                 "Error", JOptionPane.ERROR_MESSAGE);
           } catch (final IOException ex) {
-            JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "Error writing file.",
+            JOptionPane.showMessageDialog(applicationFrame, "Error writing file.",
                 "Error", JOptionPane.ERROR_MESSAGE);
           }
         }
@@ -785,7 +792,7 @@ public class WaveClipboardFrame extends SwarmFrame {
             for (final WaveViewPanel wvp : waves) {
               Wave sw = wvp.getWave();
 
-              if (sw != null) {
+              if (sw != null && sw.buffer != null) {
                 sw = sw.subset(wvp.getStartTime(), wvp.getEndTime());
                 final String date = saveAllDateFormat.format(J2kSec.asDate(sw.getStartTime()));
                 final File dir = new File(f.getPath() + File.separatorChar + date);
@@ -803,10 +810,10 @@ public class WaveClipboardFrame extends SwarmFrame {
           }
           swarmConfig.lastPath = f.getPath();
         } catch (final FileNotFoundException ex) {
-          JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "Directory does not exist.",
+          JOptionPane.showMessageDialog(applicationFrame, "Directory does not exist.",
               "Error", JOptionPane.ERROR_MESSAGE);
         } catch (final IOException ex) {
-          JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), "Error writing file.", "Error",
+          JOptionPane.showMessageDialog(applicationFrame, "Error writing file.", "Error",
               JOptionPane.ERROR_MESSAGE);
         }
       }
