@@ -12,6 +12,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 /**
+ * Swarm Frame.
  * 
  * @author Dan Cervelli
  */
@@ -25,6 +26,14 @@ public class SwarmFrame extends JInternalFrame {
   protected static final JFrame applicationFrame = Swarm.getApplicationFrame();
 
 
+  /**
+   * Swarm Frame.
+   * @param title frame title
+   * @param resizable whether resizable
+   * @param closable whether closable
+   * @param maximizable whether maximizable
+   * @param iconifiable whether iconifiable
+   */
   public SwarmFrame(String title, boolean resizable, boolean closable, boolean maximizable,
       boolean iconifiable) {
     super(title, resizable, closable, maximizable, iconifiable);
@@ -49,6 +58,11 @@ public class SwarmFrame extends JInternalFrame {
     }
   }
 
+  /**
+   * Save layout.
+   * @param cf config file
+   * @param prefix config file prefix
+   */
   public void saveLayout(ConfigFile cf, String prefix) {
     Point pt = getLocation();
     cf.put(prefix + ".x", Integer.toString(pt.x));
