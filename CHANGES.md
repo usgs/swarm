@@ -1,5 +1,6 @@
-## Version 2.8.9 - TBD
+## Version 2.8.9 - March 14, 2019
   * Fix waveform export issue in clipboard (#254)
+  * Fix QuakeML date parse precision problem (#255)
 
 ## Version 2.8.8 - February 19, 2019
   * Fix SeedLink stream break issues (#131)
