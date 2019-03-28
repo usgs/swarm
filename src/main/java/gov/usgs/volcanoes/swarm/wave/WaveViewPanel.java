@@ -1390,7 +1390,7 @@ public class WaveViewPanel extends JComponent {
         }
         stations.put(direction,  newStation);
         Wave w = source.getWave(newStation, startTime, endTime);
-        if (w != null) {
+        if (w != null && w.buffer != null) {
           if (settings.filterOn) {
             w.filter(settings.filter, settings.zeroPhaseShift);
           }
