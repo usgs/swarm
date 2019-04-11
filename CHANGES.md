@@ -1,3 +1,6 @@
+## Version 2.8.10 - TBD 
+  * Don't round sample rate in status text (#260)
+  
 ## Version 2.8.9 - March 14, 2019
   * Fix waveform export issue in clipboard (#254)
   * Fix QuakeML date parse precision problem (#255)
