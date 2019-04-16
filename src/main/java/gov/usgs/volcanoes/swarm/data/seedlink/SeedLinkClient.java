@@ -22,7 +22,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
@@ -45,9 +44,6 @@ public class SeedLinkClient implements Runnable {
 
   /** SeedLink server address. */
   private String sladdr;
-
-  /** The wave list or null if none. */
-  private List<Wave> waveList;
 
   /** BaseSLConnection object for communicating with the BaseSLConnection over a socket. */
   private SeedLinkConnection slconn;
@@ -403,9 +399,6 @@ public class SeedLinkClient implements Runnable {
         String scnl = station + " " + channel + " " + network + " " + location;
         scnl = scnl.trim().replace(" ", "$");
         cacheWave(scnl, wave);
-        if (waveList != null) {
-          waveList.add(wave);
-        }
       } catch (Exception ex) {
         LOGGER.warn("packetHandler: could create wave", ex);
         return true; // close the connection
