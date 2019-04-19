@@ -519,12 +519,12 @@
 		<dependency>
 			<groupId>edu.iris</groupId>
 			<artifactId>JavaSeedLite</artifactId>
-			<version>1.0</version>
+			<version>3.8.4</version>
 		</dependency>
 		<dependency>
-			<groupId>edu.iris</groupId>
+			<groupId>edu.sc.seis</groupId>
 			<artifactId>seedCodec</artifactId>
-			<version>1.0.10</version>
+			<version>1.0.11</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.sc.seis</groupId>
@@ -554,7 +554,7 @@
 		<dependency>
 			<groupId>gov.usgs.volcanoes</groupId>
 			<artifactId>volcano-core</artifactId>
-			<version>1.4.11</version>
+			<version>1.4.12</version>
 		</dependency>
 		<dependency>
 			<groupId>gov.usgs.volcanoes</groupId>
