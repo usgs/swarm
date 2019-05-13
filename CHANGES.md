@@ -1,4 +1,5 @@
 ## Version 2.8.10 - TBD 
+  * Add option to apply helicorder view settins to all open helicorders (#237)
   * Fixes for non-integer sample rate (#260)
   
 ## Version 2.8.9 - March 14, 2019
