@@ -1,5 +1,6 @@
 ## Version 2.8.10 - TBD 
   * Add legend for events on map (#192)
+  * Option to plot event colors based on depth (#193)
   * Add option to apply helicorder view settins to all open helicorders (#237)
   * Fixes for non-integer sample rate (#260)
   

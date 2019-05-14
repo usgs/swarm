@@ -5,6 +5,7 @@ import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.FormLayout;
 
 import gov.usgs.volcanoes.swarm.SwarmModalDialog;
+import gov.usgs.volcanoes.swarm.map.MapPanel.ColorSetting;
 import gov.usgs.volcanoes.swarm.map.MapPanel.LabelSetting;
 import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterSource;
 
@@ -54,6 +55,9 @@ public class MapSettingsDialog extends SwarmModalDialog {
   private JColorChooser lineChooser;
   private JComboBox<HypocenterSource> hypocenterSource;
   private JCheckBox hideLegend;
+  private ButtonGroup colorGroup;
+  private JRadioButton colorByAge;
+  private JRadioButton colorByDepth;
 
   private MapFrame mapFrame;
 
@@ -108,6 +112,11 @@ public class MapSettingsDialog extends SwarmModalDialog {
     hideStations = new JCheckBox();
     hypocenterSource = new JComboBox<HypocenterSource>(HypocenterSource.values());
     hideLegend = new JCheckBox();
+    colorGroup = new ButtonGroup();
+    colorByAge = new JRadioButton("Age");
+    colorByDepth = new JRadioButton("Depth");
+    colorGroup.add(colorByAge);
+    colorGroup.add(colorByDepth);
   }
 
   protected void createUi() {
@@ -150,14 +159,21 @@ public class MapSettingsDialog extends SwarmModalDialog {
     builder.append(allLabels);
     builder.nextLine();
     builder.append("Hide Stations");
-    builder.append(hideStations);
-    
+    builder.append(hideStations);    
     builder.nextLine();
+
+    builder.appendSeparator("Events");
     builder.append("NEIC Event Summary");
     builder.append(hypocenterSource, 3);
     builder.nextLine();
     builder.append("Hide Legend");
     builder.append(hideLegend);
+    builder.nextLine();
+    builder.append("Plot event color by:");
+    builder.append(colorByAge);
+    builder.nextLine();
+    builder.append(" ");
+    builder.append(colorByDepth);
 
     dialogPanel = builder.getPanel();
     mainPanel.add(dialogPanel, BorderLayout.CENTER);
@@ -205,6 +221,16 @@ public class MapSettingsDialog extends SwarmModalDialog {
     hideStations.setSelected(panel.hideStations);
     hypocenterSource.setSelectedItem(swarmConfig.getHypocenterSource());
     hideLegend.setSelected(panel.hideLegend);
+    ColorSetting cs = panel.colorSetting;
+    switch (cs) {
+      case DEPTH:
+        colorByDepth.setSelected(true);
+        break;
+      case AGE:
+      default:
+        colorByAge.setSelected(true);
+        break;
+    }
   }
 
   protected void wasOk() {
@@ -219,6 +245,11 @@ public class MapSettingsDialog extends SwarmModalDialog {
       panel.setLabelSetting(ls);
       panel.hideStations = hideStations.isSelected();
       panel.hideLegend = hideLegend.isSelected();
+      ColorSetting cs = ColorSetting.AGE;
+      if (colorByDepth.isSelected()) {
+        cs = ColorSetting.DEPTH;
+      }
+      panel.colorSetting = cs;
       Point2D.Double center = new Point2D.Double();
       center.x = Double.parseDouble(longitude.getText());
       center.y = Double.parseDouble(latitude.getText());
