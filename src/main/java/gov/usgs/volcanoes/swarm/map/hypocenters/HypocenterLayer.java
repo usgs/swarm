@@ -38,6 +38,7 @@ import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.map.MapLayer;
 import gov.usgs.volcanoes.swarm.map.MapPanel;
+import gov.usgs.volcanoes.swarm.map.MapPanel.ColorSetting;
 
 public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlObserver {
   private static final Logger LOGGER = LoggerFactory.getLogger(HypocenterLayer.class);
@@ -55,6 +56,8 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
   private static final Color YELLOW = new Color(225, 225, 0, 200);
   private static final Color WHITE = new Color(200, 200, 200, 200);
   private static final Color GREEN = new Color(0, 200, 0, 200);
+  private static final Color BLUE = new Color(0, 0, 200, 200);
+  private static final Color PURPLE = new Color(200, 0, 200, 200);
   private static final Color BLACK = new Color(0, 0, 0, 200);
 
   private final Map<String, Event> events;
@@ -141,18 +144,40 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
       }
       renderer.shape = new Ellipse2D.Float(0f, 0f, diameter, diameter);
 
-      long age = J2kSec.asEpoch(J2kSec.now()) - origin.getTime();
+      
       Color markerColor;
-      if (event == hoverEvent) {
-        markerColor = GREEN;
-      } else if (age < ONE_HOUR) {
-        markerColor = RED;
-      } else if (age < ONE_DAY) {
-        markerColor = ORANGE;
-      } else if (age < ONE_WEEK) {
-        markerColor = YELLOW;
-      } else {
-        markerColor = WHITE;
+      if (panel.getColorSetting() == ColorSetting.DEPTH) {
+        double depth = origin.getDepth() / 1000; // km
+        if (event == hoverEvent) {
+          markerColor = GREEN;
+        } else if (Double.isNaN(depth)) {
+          markerColor = WHITE;
+        } else if (depth < 0) {
+          markerColor = RED;
+        } else if (depth < 5) {
+          markerColor = ORANGE;
+        } else if (depth < 13) {
+          markerColor = YELLOW;
+        } else if (depth < 20) {
+          markerColor = GREEN;
+        } else if (depth < 40) {
+          markerColor = BLUE;
+        } else {
+          markerColor = PURPLE;
+        }
+      } else { // color events by age
+        long age = J2kSec.asEpoch(J2kSec.now()) - origin.getTime();
+        if (event == hoverEvent) {
+          markerColor = GREEN;
+        } else if (age < ONE_HOUR) {
+          markerColor = RED;
+        } else if (age < ONE_DAY) {
+          markerColor = ORANGE;
+        } else if (age < ONE_WEEK) {
+          markerColor = YELLOW;
+        } else {
+          markerColor = WHITE;
+        }
       }
 
       // int alpha = 0x80FFFFFF;
@@ -433,13 +458,112 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
   }
   
   /**
-   * Draw legend.
-   * @param g2 graphics 2D.
-   */
-  /**
+   * Draw legend for event plots.
    * @param g2
    */
   public void drawLegend(Graphics2D g2) {
+    if (panel.getColorSetting() == ColorSetting.DEPTH) {
+      drawDepthLegend(g2);
+    }else {
+      drawAgeLegend(g2);
+    }
+  }
+  
+  /**
+   * Draw legend when events colors are plotted by depth.
+   * @param g2 Grahics2D
+   */
+  public void drawDepthLegend(Graphics2D g2) {
+    int heightPx = panel.getGraphHeight();
+    int insetPx = panel.getInset();
+
+    // legend background
+    int recHeight = 90;
+    int recWidth = 280;
+    g2.setStroke(new BasicStroke(1.2f));
+    g2.setColor(WHITE);
+    g2.drawRect(insetPx, insetPx + heightPx - recHeight, recWidth, recHeight);
+    g2.fillRect(insetPx, insetPx + heightPx - recHeight, recWidth, recHeight);
+
+    g2.setStroke(new BasicStroke(2.0f));
+    g2.setColor(BLACK);
+    // Depth label
+    float x = insetPx + 5;
+    float y = insetPx + (heightPx - recHeight) + 15;
+    g2.drawString("Depth (km):", x, y);
+    y += 15;
+    int size = getMarkerSize(3);
+    // < 0 km
+    Ellipse2D.Double circle = new Ellipse2D.Double(x, y - size / 2, size, size);
+    g2.setColor(RED);
+    g2.fill(circle);
+    x += size + 2;
+    g2.setColor(BLACK);
+    g2.drawString("< 0", x, y + size / 2);
+    x += 25;
+    // 0-5 km
+    circle = new Ellipse2D.Double(x, y - size / 2, size, size);
+    g2.setColor(ORANGE);
+    g2.fill(circle);
+    x += size + 2;
+    g2.setColor(BLACK);
+    g2.drawString("0-5", x, y + size / 2);
+    x += 30;
+    // 5-13 km
+    circle = new Ellipse2D.Double(x, y - size / 2, size, size);
+    g2.setColor(YELLOW);
+    g2.fill(circle);
+    x += size + 2;
+    g2.setColor(BLACK);
+    g2.drawString("5-13", x, y + size / 2);
+    x += 35;
+    // 13-20 km
+    circle = new Ellipse2D.Double(x, y - size / 2, size, size);
+    g2.setColor(GREEN);
+    g2.fill(circle);
+    x += size + 2;
+    g2.setColor(BLACK);
+    g2.drawString("13-20", x, y + size / 2);
+    x += 40;
+    // 20-40 km
+    circle = new Ellipse2D.Double(x, y - size / 2, size, size);
+    g2.setColor(BLUE);
+    g2.fill(circle);
+    x += size + 2;
+    g2.setColor(BLACK);
+    g2.drawString("20-40", x, y + size / 2);
+    x += 40;
+    // 40+ km
+    circle = new Ellipse2D.Double(x, y - size / 2, size, size);
+    g2.setColor(PURPLE);
+    g2.fill(circle);
+    x += size + 2;
+    g2.setColor(BLACK);
+    g2.drawString("40+", x, y + size / 2);
+    
+    // Magnitudes
+    x = insetPx + 5;
+    y = insetPx + (heightPx - recHeight / 2) + 10;
+    g2.setColor(BLACK);
+    g2.drawString("Magnitude:", x, y);
+    y += 15;
+    for (int i = 1; i <= 7; i++) {
+      size = getMarkerSize(i);
+      g2.setColor(BLACK);
+      g2.drawString(Integer.toString(i), x, y + 5);
+      x += 10;
+      circle = new Ellipse2D.Double(x, y - size / 2, size, size);
+      g2.setColor(ORANGE);
+      g2.fill(circle);
+      x += size + 10;
+    }
+  }
+  
+  /**
+   * Draw legend when events colors are plotted by age.
+   * @param g2 graphics 2D.
+   */
+  public void drawAgeLegend(Graphics2D g2) {
 
     int heightPx = panel.getGraphHeight();
     int insetPx = panel.getInset();
@@ -492,7 +616,6 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
       g2.fill(circle);
       x += size + 10;
     }
-
   }
 
 }

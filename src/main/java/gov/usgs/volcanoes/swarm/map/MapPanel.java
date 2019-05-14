@@ -89,6 +89,28 @@ public class MapPanel extends JPanel {
     DRAG_MAP, BOX, RULER;
   }
 
+  public enum ColorSetting {
+    AGE, DEPTH;
+
+    /**
+     * Get color setting from string.
+     * @param s string text
+     * @return color setting
+     */
+    public static ColorSetting fromString(final String s) {
+      if (s == null) {
+        return AGE;
+      }
+
+      if (s.equals("DEPTH")) {
+        return DEPTH;
+      } else {
+        return AGE;
+      }
+    }
+
+  };
+  
   public enum LabelSetting {
     NONE("N", Icons.label_none), SOME("S", Icons.label_some), ALL("A", Icons.label_all);
 
@@ -187,8 +209,11 @@ public class MapPanel extends JPanel {
   private int dragDx = Integer.MAX_VALUE;
   private int dragDy = Integer.MAX_VALUE;
 
+  // for station labels
   private LabelSetting labelSetting = LabelSetting.SOME;
   protected boolean hideStations  = false;
+  // for events
+  protected ColorSetting colorSetting = ColorSetting.AGE;
   protected boolean hideLegend = false;
 
   private List<MapLayer> layers;
@@ -231,6 +256,7 @@ public class MapPanel extends JPanel {
     cf.put(prefix + ".labelSetting", labelSetting.code);
     cf.put(prefix + ".hideStations", Boolean.toString(hideStations));
     cf.put(prefix + ".hideLegend", Boolean.toString(hideLegend));
+    cf.put(prefix + ".colorSetting", colorSetting.toString());
     synchronized (visiblePanels) {
       int waves = 0;
       for (final MapMiniPanel panel : visiblePanels) {
@@ -260,6 +286,7 @@ public class MapPanel extends JPanel {
     labelSetting = LabelSetting.fromString(cf.getString("labelSetting"));
     hideStations = Boolean.parseBoolean(cf.getString("hideStations"));
     hideLegend = Boolean.parseBoolean(cf.getString("hideLegend"));
+    colorSetting = ColorSetting.fromString(cf.getString("colorSetting"));
     final double lon = Double.parseDouble(cf.getString("longitude"));
     final double lat = Double.parseDouble(cf.getString("latitude"));
     final Point2D.Double c = new Point2D.Double(lon, lat);
@@ -1342,4 +1369,9 @@ public class MapPanel extends JPanel {
   public boolean isLegendEnabled() {
     return !hideLegend;
   }
+  
+  public ColorSetting getColorSetting() {
+    return colorSetting;
+  }
+  
 }
