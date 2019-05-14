@@ -55,6 +55,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
   private static final Color YELLOW = new Color(225, 225, 0, 200);
   private static final Color WHITE = new Color(200, 200, 200, 200);
   private static final Color GREEN = new Color(0, 200, 0, 200);
+  private static final Color BLACK = new Color(0, 0, 0, 200);
 
   private final Map<String, Event> events;
   private final Map<String, Event> importedEvents;
@@ -163,6 +164,9 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
     }
 
     drawPopup(g2);
+    if (panel.isLegendEnabled()) {
+      drawLegend(g2);
+    }
   }
 
   private int getMarkerSize(double mag) {
@@ -171,6 +175,10 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
     return markerSize[markerMag];
   }
 
+  /**
+   * Draw popup box.
+   * @param g2 graphics 2D
+   */
   private void drawPopup(Graphics2D g2) {
     if (hoverEvent == null) {
       return;
@@ -303,7 +311,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
     }
 
     GeoRange range = panel.getRange();
-    if (range == null){
+    if (range == null) {
       return false;
     }
     Projection projection = panel.getProjection();
@@ -422,6 +430,69 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
       events.remove(publicId);
     }
     
+  }
+  
+  /**
+   * Draw legend.
+   * @param g2 graphics 2D.
+   */
+  /**
+   * @param g2
+   */
+  public void drawLegend(Graphics2D g2) {
+
+    int heightPx = panel.getGraphHeight();
+    int insetPx = panel.getInset();
+
+    // legend background
+    int recHeight = 50;
+    int recWidth = 330;
+    g2.setStroke(new BasicStroke(1.2f));
+    g2.setColor(WHITE);
+    g2.drawRect(insetPx, insetPx + heightPx - recHeight, recWidth, recHeight);
+    g2.fillRect(insetPx, insetPx + heightPx - recHeight, recWidth, recHeight);
+
+    int size = getMarkerSize(3);
+    g2.setStroke(new BasicStroke(2.0f));
+    // 1 hour ago key
+    float x = insetPx + 5;
+    float y = insetPx + (heightPx - recHeight) + 2;
+    Ellipse2D.Double circle = new Ellipse2D.Double(x, y, size, size);
+    g2.setColor(RED);
+    g2.fill(circle);
+    g2.setColor(BLACK);
+    g2.drawString("< 1 Hour", x + size + 1, y + size);
+    // 1 day ago key
+    y = y + size + 5;
+    circle = new Ellipse2D.Double(x, y, size, size);
+    g2.setColor(ORANGE);
+    g2.fill(circle);
+    g2.setColor(BLACK);
+    g2.drawString("< 1 Day", x + size + 1, y + size);
+    // 1 week ago key
+    y = y + size + 5;
+    circle = new Ellipse2D.Double(x, y, size, size);
+    g2.setColor(YELLOW);
+    g2.fill(circle);
+    g2.setColor(BLACK);
+    g2.drawString("< 1 Week", x + size + 1, y + size);
+    
+    // Magnitudes
+    x = x + size + 70;
+    y = insetPx + (heightPx - recHeight) + 15;
+    g2.drawString("Magnitude:", x, y);
+    y = y + 15;
+    for (int i = 1; i <= 7; i++) {
+      size = getMarkerSize(i);
+      g2.setColor(BLACK);
+      g2.drawString(Integer.toString(i), x, y + 5);
+      x += 10;
+      circle = new Ellipse2D.Double(x, y - size / 2, size, size);
+      g2.setColor(ORANGE);
+      g2.fill(circle);
+      x += size + 10;
+    }
+
   }
 
 }

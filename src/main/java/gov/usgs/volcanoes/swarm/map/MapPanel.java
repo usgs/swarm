@@ -189,6 +189,7 @@ public class MapPanel extends JPanel {
 
   private LabelSetting labelSetting = LabelSetting.SOME;
   protected boolean hideStations  = false;
+  protected boolean hideLegend = false;
 
   private List<MapLayer> layers;
 
@@ -229,6 +230,7 @@ public class MapPanel extends JPanel {
     cf.put(prefix + ".scale", Double.toString(scale));
     cf.put(prefix + ".labelSetting", labelSetting.code);
     cf.put(prefix + ".hideStations", Boolean.toString(hideStations));
+    cf.put(prefix + ".hideLegend", Boolean.toString(hideLegend));
     synchronized (visiblePanels) {
       int waves = 0;
       for (final MapMiniPanel panel : visiblePanels) {
@@ -257,6 +259,7 @@ public class MapPanel extends JPanel {
 
     labelSetting = LabelSetting.fromString(cf.getString("labelSetting"));
     hideStations = Boolean.parseBoolean(cf.getString("hideStations"));
+    hideLegend = Boolean.parseBoolean(cf.getString("hideLegend"));
     final double lon = Double.parseDouble(cf.getString("longitude"));
     final double lat = Double.parseDouble(cf.getString("latitude"));
     final Point2D.Double c = new Point2D.Double(lon, lat);
@@ -1334,5 +1337,9 @@ public class MapPanel extends JPanel {
       }
       repaint();
     }
+  }
+  
+  public boolean isLegendEnabled() {
+    return !hideLegend;
   }
 }
