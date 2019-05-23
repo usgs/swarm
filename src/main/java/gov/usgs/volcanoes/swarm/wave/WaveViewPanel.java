@@ -628,10 +628,10 @@ public class WaveViewPanel extends JComponent {
         status.append(String.format(", %s: %.3f", unit, multiplier * yi + offset));
       } else {
         double xi = time;
-        if (settings.viewType == ViewType.SPECTRA && settings.logFreq) {
+        if (settings.viewType == ViewType.SPECTRA && settings.spectraLogFreq) {
           xi = Math.pow(10.0, xi);
         }
-        if (settings.viewType == ViewType.SPECTRA && settings.logPower) {
+        if (settings.viewType == ViewType.SPECTRA && settings.spectraLogPower) {
           yi = Math.pow(10.0, yi);
         }
         status.append(String.format("\nFrequency (Hz): %.6f, Power: %.3f", xi, yi));
@@ -724,7 +724,8 @@ public class WaveViewPanel extends JComponent {
     maxSpectraPower = -1E300;
     maxSpectrogramPower = -1E300;
     settings.autoScaleAmp = true;
-    settings.autoScalePower = true;
+    settings.autoScaleSpectrogramPower = true;
+    settings.autoScaleSpectraPower = true;
     processSettings();
   }
 
@@ -733,21 +734,30 @@ public class WaveViewPanel extends JComponent {
    * @param pct percent to scale to.
    */
   public void adjustScale(double pct) {
-    double maxa = settings.autoScaleAmp ? maxAmp : settings.maxAmp;
-    double mina = settings.autoScaleAmp ? minAmp : settings.minAmp;
+    double maxa = settings.autoScaleAmp ? maxAmp : settings.waveMaxAmp;
+    double mina = settings.autoScaleAmp ? minAmp : settings.waveMinAmp;
     settings.autoScaleAmp = false;
     double range = maxa - mina;
     double center = range / 2 + mina;
     double newRange = range * pct;
-    settings.minAmp = center - newRange / 2;
-    settings.maxAmp = center + newRange / 2;
+    settings.waveMinAmp = center - newRange / 2;
+    settings.waveMaxAmp = center + newRange / 2;
 
-    if (settings.viewType == ViewType.SPECTROGRAM) {
-      double maxf = settings.maxFreq * pct;
+    if (settings.viewType == ViewType.SPECTRA) {
+      double maxf = settings.spectraMaxFreq * pct;
       System.out.printf("WaveViewPanel(804): maxf = %f\n", maxf);
-      settings.maxFreq = (maxf > wave.getSamplingRate() / 2) ? wave.getSamplingRate() / 2 : maxf;
-      System.out.printf("WaveViewPanel(806): settings.maxFreq = %f\n", settings.maxFreq);
-
+      settings.spectrogramMaxFreq =
+          (maxf > wave.getSamplingRate() / 2) ? wave.getSamplingRate() / 2 : maxf;
+      System.out.printf("WaveViewPanel(806): settings.spectraMaxFreq = %f\n",
+          settings.spectraMaxFreq);
+    }
+    if (settings.viewType == ViewType.SPECTROGRAM) {
+      double maxf = settings.spectrogramMaxFreq * pct;
+      System.out.printf("WaveViewPanel(804): maxf = %f\n", maxf);
+      settings.spectrogramMaxFreq =
+          (maxf > wave.getSamplingRate() / 2) ? wave.getSamplingRate() / 2 : maxf;
+      System.out.printf("WaveViewPanel(806): settings.spectrogramMaxFreq = %f\n",
+          settings.spectrogramMaxFreq);
     }
 
     processSettings();
@@ -803,8 +813,8 @@ public class WaveViewPanel extends JComponent {
       return;
     }
 
-    if (settings.maxFreq > wave.getNyquist()) {
-      settings.maxFreq = wave.getNyquist();
+    if (settings.spectrogramMaxFreq > wave.getNyquist()) {
+      settings.spectrogramMaxFreq = wave.getNyquist();
     }
 
     switch (settings.viewType) {
@@ -1166,8 +1176,8 @@ public class WaveViewPanel extends JComponent {
       bias = wv.mean();
     }
     
-    double minY = (settings.minAmp - offset) / multiplier;
-    double maxY = (settings.maxAmp - offset) / multiplier;
+    double minY = (settings.waveMinAmp - offset) / multiplier;
+    double maxY = (settings.waveMaxAmp - offset) / multiplier;
 
     if (settings.autoScaleAmp) {
       double[] dr = new double[] {wv.min(), wv.max()};
@@ -1242,11 +1252,13 @@ public class WaveViewPanel extends JComponent {
         this.getHeight() - bottomHeight - yOffset);
     spectraRenderer.setWave(wv);
 
-    spectraRenderer.setAutoScale(settings.autoScalePower);
-    spectraRenderer.setLogPower(settings.logPower);
-    spectraRenderer.setLogFreq(settings.logFreq);
-    spectraRenderer.setMaxFreq(settings.maxFreq);
-    spectraRenderer.setMinFreq(settings.minFreq);
+    spectraRenderer.setLogPower(settings.spectraLogPower);
+    spectraRenderer.setLogFreq(settings.spectraLogFreq);
+    spectraRenderer.setMaxFreq(settings.spectraMaxFreq);
+    spectraRenderer.setMinFreq(settings.spectraMinFreq);
+    spectraRenderer.setAutoScale(settings.autoScaleSpectraPower);
+    spectraRenderer.setMinY(settings.spectraMinPower);
+    spectraRenderer.setMaxY(settings.spectraMaxPower);
     spectraRenderer.setYUnitText("Power");
     if (channel != null && displayTitle) {
       spectraRenderer.setTitle(channel);
@@ -1290,15 +1302,15 @@ public class WaveViewPanel extends JComponent {
 
     spectrogramRenderer.setViewStartTime(startTime);
     spectrogramRenderer.setViewEndTime(endTime);
-    spectrogramRenderer.setAutoScale(settings.autoScalePower);
-    spectrogramRenderer.setLogPower(settings.logPower);
+    spectrogramRenderer.setAutoScale(settings.autoScaleSpectrogramPower);
+    spectrogramRenderer.setLogPower(settings.spectrogramLogPower);
 
     spectrogramRenderer.setOverlap(settings.spectrogramOverlap);
-    spectrogramRenderer.setMaxFreq(settings.maxFreq);
-    spectrogramRenderer.setMinFreq(settings.minFreq);
+    spectrogramRenderer.setMaxFreq(settings.spectrogramMaxFreq);
+    spectrogramRenderer.setMinFreq(settings.spectrogramMinFreq);
 
-    spectrogramRenderer.setMaxPower(settings.maxPower);
-    spectrogramRenderer.setMinPower(settings.minPower);
+    spectrogramRenderer.setMaxPower(settings.spectrogramMaxPower);
+    spectrogramRenderer.setMinPower(settings.spectrogramMinPower);
 
     spectrogramRenderer.setBinSize((int) Math.pow(2,
         Math.ceil(Math.log(settings.binSize * wave.getSamplingRate()) / Math.log(2))));
@@ -1314,8 +1326,8 @@ public class WaveViewPanel extends JComponent {
 
     double[] power = spectrogramRenderer.update();
 
-    settings.minPower = power[0];
-    settings.maxPower = power[1];
+    settings.spectrogramMinPower = power[0];
+    settings.spectrogramMaxPower = power[1];
 
     plot.addRenderer(spectrogramRenderer);
     if (useFilterLabel && settings.filterOn) {

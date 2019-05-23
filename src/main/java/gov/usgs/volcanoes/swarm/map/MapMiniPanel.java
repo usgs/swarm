@@ -826,7 +826,7 @@ public class MapMiniPanel extends JComponent
       createAxis(fr);
       // setLinearAxis(fr, wavePanel.getSettings().logFreq);
 
-      if (wavePanel.getSettings().logPower) {
+      if (wavePanel.getSettings().spectraLogPower) {
         setLeftLabel(fr, "log(P)");
       } else {
         setLeftLabel(fr, "Power");
