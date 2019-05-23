@@ -1,8 +1,10 @@
 ## Version 2.8.10 - TBD 
   * Add legend for events on map (#192)
   * Option to plot event colors based on depth (#193)
-  * Add option to apply helicorder view settins to all open helicorders (#237)
+  * Manual scale of y-axis for spectra view (#219)
+  * Add option to apply helicorder view settings to all open helicorders (#237)
   * Fixes for non-integer sample rate (#260)
+  * Separate log power and min/max frequency option for spectra and spectrogram views (#268)
   
 ## Version 2.8.9 - March 14, 2019
   * Fix waveform export issue in clipboard (#254)

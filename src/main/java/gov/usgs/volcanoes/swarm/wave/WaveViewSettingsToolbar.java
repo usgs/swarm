@@ -2,6 +2,7 @@ package gov.usgs.volcanoes.swarm.wave;
 
 import gov.usgs.volcanoes.core.util.UiUtils;
 import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
 
@@ -14,6 +15,7 @@ import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
@@ -55,6 +57,8 @@ public class WaveViewSettingsToolbar {
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             if (settingsSet.size() == 0) {
+              JOptionPane.showMessageDialog(Swarm.getApplicationFrame(),
+                  "You must select at least one wave panel.");
               return;
             }
             WaveViewSettings s = settingsSet.iterator().next();
@@ -128,7 +132,7 @@ public class WaveViewSettingsToolbar {
             settings.cycleLogSettings();
           }
           if (settings.viewType == ViewType.SPECTROGRAM) {
-            settings.toggleLogPower();
+            settings.toggleSpectrogramLogPower();
           }
         }
       }

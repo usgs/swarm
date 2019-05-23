@@ -36,6 +36,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
 
   private JLabel warningLabel;
 
+  // view options
   private ButtonGroup viewGroup;
   private JRadioButton waveButton;
   private JCheckBox removeBias;
@@ -44,6 +45,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
   private JRadioButton spectrogramButton;
   private JRadioButton particleMotionButton;
 
+  // wave options
   private ButtonGroup waveScaleGroup;
   private JRadioButton waveAutoScale;
   private JRadioButton waveManualScale;
@@ -51,18 +53,29 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
   private JTextField minAmp;
   private JTextField maxAmp;
 
-  private JCheckBox logPower;
-  private JCheckBox logFreq;
-  private JTextField powerRange;
-  private JTextField minFreq;
-  private JTextField maxFreq;
+  // spectra options
+  private JCheckBox spectraLogPower;
+  private JCheckBox spectraLogFreq;
   private ButtonGroup spectraScaleGroup;
   private JRadioButton spectraAutoScale;
   private JRadioButton spectraManualScale;
+  private JTextField spectraMinFreq;
+  private JTextField spectraMaxFreq;
+  private JTextField spectraPowerRange;
+  
+  // spectrogram options
+  private ButtonGroup spectrogramScaleGroup;
+  private JRadioButton spectrogramAutoScale;
+  private JRadioButton spectrogramManualScale;  
+  private JCheckBox spectrogramLogPower;
+  private JTextField spectrogramPowerRange;
+  private JTextField spectrogramMinFreq;
+  private JTextField spectrogramMaxFreq;
   private JTextField binSize;
   private JTextField nfft;
   private JTextField spectrogramOverlap;
 
+  // filter options
   private ButtonGroup filterGroup;
   private JCheckBox filterEnabled;
   private JRadioButton lowPass;
@@ -142,39 +155,53 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
       default:
         break;
     }
+    
+    // wave settings
     removeBias.setSelected(settings.removeBias);
     useUnits.setSelected(settings.useUnits);
-
     if (settings.autoScaleAmp) {
       waveAutoScale.setSelected(true);
     } else {
       waveManualScale.setSelected(true);
     }
     waveAutoScaleMemory.setSelected(settings.autoScaleAmpMemory);
+    minAmp.setText(String.format("%.1f", settings.waveMinAmp));
+    maxAmp.setText(String.format("%.1f", settings.waveMaxAmp));
 
-    if (settings.autoScalePower) {
+    // spectra options
+    spectraLogPower.setSelected(settings.spectraLogPower);
+    spectraLogFreq.setSelected(settings.spectraLogFreq);
+    spectraMinFreq.setText(String.format("%.1f", settings.spectraMinFreq));
+    spectraMaxFreq.setText(String.format("%.1f", settings.spectraMaxFreq));
+    if (settings.autoScaleSpectraPower) {
       spectraAutoScale.setSelected(true);
     } else {
       spectraManualScale.setSelected(true);
     }
-
-    minAmp.setText(String.format("%.1f", settings.minAmp));
-    maxAmp.setText(String.format("%.1f", settings.maxAmp));
-    powerRange.setText(String.format("%.1f, %.1f", settings.minPower, settings.maxPower));
-
+    spectraPowerRange
+        .setText(String.format("%.1f, %.1f", settings.spectraMinPower, settings.spectraMaxPower));
+    
+    // spectrogram options
+    if (settings.autoScaleSpectrogramPower) {
+      spectrogramAutoScale.setSelected(true);
+    } else {
+      spectrogramManualScale.setSelected(true);
+    }
+    spectrogramMinFreq.setText(String.format("%.1f", settings.spectrogramMinFreq));
+    spectrogramMaxFreq.setText(String.format("%.1f", settings.spectrogramMaxFreq));
+    spectrogramLogPower.setSelected(settings.spectrogramLogPower);
     binSize.setText(String.format("%.1f", settings.binSize));
     nfft.setText(String.format("%d", settings.nfft));
-    minFreq.setText(String.format("%.1f", settings.minFreq));
-    maxFreq.setText(String.format("%.1f", settings.maxFreq));
-    logFreq.setSelected(settings.logFreq);
-    logPower.setSelected(settings.logPower);
+    spectrogramPowerRange.setText(
+        String.format("%.1f, %.1f", settings.spectrogramMinPower, settings.spectrogramMaxPower));
     spectrogramOverlap.setText(String.format("%3.0f", settings.spectrogramOverlap * 100));
 
+    // particle motion options
     useAlternateOrientationCode.setSelected(settings.useAlternateOrientationCode);
     alternateOrientationCode.setText(settings.alternateOrientationCode);
     
+    // filter options
     filterEnabled.setSelected(settings.filterOn);
-
     switch (settings.filter.getType()) {
       case LOWPASS:
         lowPass.setSelected(true);
@@ -200,6 +227,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
   private void createComponents() {
     warningLabel = new JLabel(" ");
 
+    // View options
     viewGroup = new ButtonGroup();
     waveButton = new JRadioButton("Wave");
     spectraButton = new JRadioButton("Spectra");
@@ -210,31 +238,49 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     viewGroup.add(spectrogramButton);
     viewGroup.add(particleMotionButton);
 
+    // Wave options
     waveScaleGroup = new ButtonGroup();
     removeBias = new JCheckBox("Remove bias");
     useUnits = new JCheckBox("Use calibrations");
-    waveManualScale = new JRadioButton("Manual scale");
-    waveAutoScale = new JRadioButton("Autoscale");
+    waveManualScale = new JRadioButton("Manual scale amp.");
+    waveAutoScale = new JRadioButton("Auto scale amp.");
     waveScaleGroup.add(waveAutoScale);
     waveScaleGroup.add(waveManualScale);
     waveAutoScaleMemory = new JCheckBox("Persistent rescale");
     minAmp = new JTextField(7);
     maxAmp = new JTextField(7);
 
-    logPower = new JCheckBox("Log power");
-    logFreq = new JCheckBox("Log frequency");
-    powerRange = new JTextField(6);
-    minFreq = new JTextField(4);
-    maxFreq = new JTextField(4);
+    // spectra options
+    spectraLogPower = new JCheckBox("Log power");
+    spectraLogFreq = new JCheckBox("Log frequency");
+    spectraMinFreq = new JTextField(4);
+    spectraMaxFreq = new JTextField(4);
     spectraScaleGroup = new ButtonGroup();
-    spectraAutoScale = new JRadioButton("Auto scale");
-    spectraManualScale = new JRadioButton("Manual scale");
+    spectraAutoScale = new JRadioButton("Auto scale power");
+    spectraManualScale = new JRadioButton("Manual scale power");
     spectraScaleGroup.add(spectraAutoScale);
     spectraScaleGroup.add(spectraManualScale);
+    spectraPowerRange = new JTextField(6);
+    
+    // spectrogram options
+    spectrogramLogPower = new JCheckBox("Log power");
+    spectrogramPowerRange = new JTextField(6);
+    spectrogramMinFreq = new JTextField(4);
+    spectrogramMaxFreq = new JTextField(4);
+    spectrogramScaleGroup = new ButtonGroup();
+    spectrogramAutoScale = new JRadioButton("Auto scale power");
+    spectrogramManualScale = new JRadioButton("Manual scale power");
+    spectrogramScaleGroup.add(spectrogramAutoScale);
+    spectrogramScaleGroup.add(spectrogramManualScale);
     binSize = new JTextField(4);
     nfft = new JTextField(4);
     spectrogramOverlap = new JTextField(4);
 
+    // particle motion options
+    useAlternateOrientationCode = new JCheckBox("Use alternate orientation code");
+    alternateOrientationCode = new JTextField("Z12");
+    
+    // filter options
     filterGroup = new ButtonGroup();
     filterEnabled = new JCheckBox("Enabled");
     lowPass = new JRadioButton("Low pass");
@@ -251,9 +297,6 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     order.setSnapToTicks(true);
     order.createStandardLabels(2);
     order.setPaintLabels(true);
-    
-    useAlternateOrientationCode = new JCheckBox("Use alternate orientation code");
-    alternateOrientationCode = new JTextField("Z12");
   }
 
   protected void createUi() {
@@ -266,6 +309,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
 
     CellConstraints cc = new CellConstraints();
 
+    // view options
     builder.appendSeparator("View");
     builder.nextLine();
     builder.append(waveButton);
@@ -274,6 +318,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     builder.append(particleMotionButton);
     builder.nextLine();
 
+    // wave options
     builder.appendSeparator("Wave Options");
     builder.nextLine();
     builder.append(removeBias);
@@ -295,50 +340,73 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     builder.append(waveAutoScaleMemory);
     builder.nextLine();
 
+    // spectra optins
     builder.appendSeparator("Spectra Options");
-    builder.nextLine();
-    builder.append(new JLabel(""), 1);
-    builder.append(logPower);
-    builder.append(logFreq);
-    builder.nextLine();
-
-    builder.appendSeparator("Spectrogram Options");
-    builder.nextLine();
-    builder.append(new JLabel(""), 1);
-    builder.append(spectraAutoScale);
-    builder.append(spectraManualScale);
-    builder.nextLine();
+    builder.nextLine(); // row 1
     builder.appendRow("center:18dlu");
     builder.add(new JLabel("Min. frequency:"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
-    builder.append(minFreq);
-    builder.add(new JLabel("Window size (s):"),
-        cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
-    builder.nextColumn(2);
-    builder.append(binSize);
-    builder.nextLine();
+    builder.append(spectraMinFreq);
+    builder.append(spectraAutoScale, 3);
+    builder.nextLine(); // row 2
     builder.appendRow("center:18dlu");
     builder.add(new JLabel("Max. frequency:"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
-    builder.append(maxFreq);
+    builder.append(spectraMaxFreq);
+    builder.append(spectraManualScale, 3);
+    builder.nextLine(); // row 3
+    builder.append(spectraLogPower);
+    builder.append(spectraLogFreq);
+    builder.add(new JLabel("Power range (dB):"),
+        cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+    builder.nextColumn(2);
+    builder.append(spectraPowerRange);
+    builder.nextLine();
+
+    // spectrogram
+    builder.appendSeparator("Spectrogram Options");
+    builder.nextLine(); // row 1
+    builder.appendRow("center:18dlu");
+    builder.add(new JLabel("Min. frequency:"),
+        cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+    builder.nextColumn(2);
+    builder.append(spectrogramMinFreq);
+    builder.append(spectrogramAutoScale, 3);
+    builder.nextLine(); // row 2
+    builder.appendRow("center:18dlu");
+    builder.add(new JLabel("Max. frequency:"),
+        cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+    builder.nextColumn(2);
+    builder.append(spectrogramMaxFreq);
+    builder.append(spectrogramManualScale, 3);
+    builder.nextLine(); // row 3
+    builder.appendRow("center:18dlu");
+    builder.add(new JLabel("Window size (s):"),
+        cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+    builder.nextColumn(2);
+    builder.append(binSize);
+    builder.add(new JLabel("Power range (dB):"),
+        cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+    builder.nextColumn(2);
+    builder.append(spectrogramPowerRange);
+    builder.nextLine(); // row 4
+    builder.appendRow("center:18dlu");
     builder.add(new JLabel("# of FFT points:"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.append(nfft);
-    builder.nextLine();
+    builder.append(spectrogramLogPower,3);
+    builder.nextLine(); // row 5
     builder.appendRow("center:18dlu");
     builder.add(new JLabel("Overlap (%)"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.append(spectrogramOverlap);
-    builder.add(new JLabel("Power range (dB):"),
-        cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
-    builder.nextColumn(2);
-    builder.append(powerRange);
     builder.nextLine();
     
+    // particle motion
     builder.appendSeparator("Particle Motion Options");
     builder.nextLine();
     builder.append(useAlternateOrientationCode, 3);
@@ -346,6 +414,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     builder.append(alternateOrientationCode);
     builder.nextLine();
 
+    // filter
     builder.appendSeparator("Butterworth Filter");
     builder.append(filterEnabled, 3);
     builder.append(zeroPhaseShift, 3);
@@ -394,9 +463,9 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
       }
 
       message = "Error in minimum frequency format.";
-      double minf = Double.parseDouble(minFreq.getText());
+      double minf = Double.parseDouble(spectrogramMinFreq.getText());
       message = "Error in maximum frequency format.";
-      double maxf = Double.parseDouble(maxFreq.getText());
+      double maxf = Double.parseDouble(spectrogramMaxFreq.getText());
       message = "Minimum frequency must be 0 or above and less than maximum frequency.";
       if (minf < 0 || minf >= maxf) {
         throw new NumberFormatException();
@@ -442,6 +511,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
    */
   public void wasOk() {
     try {
+      // view option
       if (waveButton.isSelected()) {
         settings.viewType = ViewType.WAVE;
       } else if (spectraButton.isSelected()) {
@@ -451,48 +521,65 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
       } else if (particleMotionButton.isSelected()) {
         settings.viewType = ViewType.PARTICLE_MOTION;
       } 
-
+      
+      // wave options
       settings.removeBias = removeBias.isSelected();
       settings.useUnits = useUnits.isSelected();
       settings.autoScaleAmp = waveAutoScale.isSelected();
       settings.autoScaleAmpMemory = waveAutoScaleMemory.isSelected();
-
-      settings.autoScalePower = spectraAutoScale.isSelected();
-
-      double newMinPower = Double.parseDouble(powerRange.getText().split(",")[0]);
-      double newMaxPower = Double.parseDouble(powerRange.getText().split(",")[1]);
-
-      if (newMinPower != settings.minPower | newMaxPower != settings.maxPower) {
-        settings.minPower = Double.parseDouble(powerRange.getText().split(",")[0]);
-        settings.maxPower = Double.parseDouble(powerRange.getText().split(",")[1]);
-        settings.autoScalePower = false;
+      settings.waveMinAmp = Double.parseDouble(minAmp.getText());
+      settings.waveMaxAmp = Double.parseDouble(maxAmp.getText());
+      
+      // spectra options
+      settings.spectraLogFreq = spectraLogFreq.isSelected();
+      settings.spectraLogPower = spectraLogPower.isSelected();
+      settings.spectraMaxFreq = Double.parseDouble(spectraMaxFreq.getText());
+      settings.spectraMinFreq = Double.parseDouble(spectraMinFreq.getText());
+      if (settings.spectraMinFreq < 0) {
+        settings.spectraMinFreq = 0;
       }
-
-      settings.minAmp = Double.parseDouble(minAmp.getText());
-      settings.maxAmp = Double.parseDouble(maxAmp.getText());
-
-      settings.maxFreq = Double.parseDouble(maxFreq.getText());
-      settings.minFreq = Double.parseDouble(minFreq.getText());
-      if (settings.minFreq < 0) {
-        settings.minFreq = 0;
+      settings.autoScaleSpectraPower = spectraAutoScale.isSelected();
+      double newMinPower = Double.parseDouble(spectraPowerRange.getText().split(",")[0]);
+      double newMaxPower = Double.parseDouble(spectraPowerRange.getText().split(",")[1]);
+      if (newMinPower != settings.spectraMinPower | newMaxPower != settings.spectraMaxPower) {
+        settings.spectraMinPower = Double.parseDouble(spectraPowerRange.getText().split(",")[0]);
+        settings.spectraMaxPower = Double.parseDouble(spectraPowerRange.getText().split(",")[1]);
+        settings.autoScaleSpectraPower = false;
       }
-
+      
+      // spectrogram options
+      settings.spectrogramMaxFreq = Double.parseDouble(spectrogramMaxFreq.getText());
+      settings.spectrogramMinFreq = Double.parseDouble(spectrogramMinFreq.getText());
+      if (settings.spectrogramMinFreq < 0) {
+        settings.spectrogramMinFreq = 0;
+      }
+      settings.autoScaleSpectrogramPower = spectrogramAutoScale.isSelected();
+      newMinPower = Double.parseDouble(spectrogramPowerRange.getText().split(",")[0]);
+      newMaxPower = Double.parseDouble(spectrogramPowerRange.getText().split(",")[1]);
+      if (newMinPower != settings.spectrogramMinPower
+          | newMaxPower != settings.spectrogramMaxPower) {
+        settings.spectrogramMinPower =
+            Double.parseDouble(spectrogramPowerRange.getText().split(",")[0]);
+        settings.spectrogramMaxPower =
+            Double.parseDouble(spectrogramPowerRange.getText().split(",")[1]);
+        settings.autoScaleSpectrogramPower = false;
+      }
       settings.binSize = Double.parseDouble(binSize.getText());
       settings.nfft = Integer.parseInt(nfft.getText());
-      settings.logFreq = logFreq.isSelected();
-      settings.logPower = logPower.isSelected();
       settings.spectrogramOverlap = Double.parseDouble(spectrogramOverlap.getText()) / 100;
       if (settings.spectrogramOverlap > 0.95 || settings.spectrogramOverlap < 0) {
         settings.spectrogramOverlap = 0;
       }
+      settings.spectrogramLogPower = spectrogramLogPower.isSelected();
       settings.notifyView();
       
+      // particle motion options
       settings.useAlternateOrientationCode = useAlternateOrientationCode.isSelected();
       settings.alternateOrientationCode = alternateOrientationCode.getText();
 
+      // filter options
       settings.filterOn = filterEnabled.isSelected();
       settings.zeroPhaseShift = zeroPhaseShift.isSelected();
-
       FilterType ft = null;
       double c1 = 0;
       double c2 = 0;

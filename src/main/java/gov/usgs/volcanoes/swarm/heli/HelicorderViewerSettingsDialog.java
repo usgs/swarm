@@ -433,8 +433,9 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
           if (frame instanceof HelicorderViewerFrame) {
             HelicorderViewerFrame hvf = (HelicorderViewerFrame)frame;
             hvf.getHelicorderViewerSettings().set(hcf);
-            hvf.getWaveViewSettings().set(wcf);
             hvf.getHelicorderViewerSettings().notifyView();
+            hvf.getWaveViewSettings().set(wcf);
+            hvf.getWaveViewSettings().notifyView();
           }
         }
       }
