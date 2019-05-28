@@ -15,7 +15,6 @@ import gov.usgs.volcanoes.core.util.UiUtils;
 import gov.usgs.volcanoes.swarm.FileTypeDialog;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwarmFrame;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
@@ -707,6 +706,9 @@ public class WaveClipboardFrame extends SwarmFrame {
               return;
             }
             file.putWave(selected.getChannel(), wave);
+            for (Pick pick : selected.getPickData().getPicks().values()) {
+              file.putPick(selected.getChannel(), pick);
+            }
             file.write();
           } catch (final FileNotFoundException ex) {
             JOptionPane.showMessageDialog(applicationFrame, "Directory does not exist.",
@@ -804,6 +806,9 @@ public class WaveClipboardFrame extends SwarmFrame {
                     dir + File.separator + wvp.getChannel().replace(' ', '_') + fileType.extension;
                 final SeismicDataFile file = SeismicDataFile.getFile(fn);
                 file.putWave(wvp.getChannel(), sw);
+                for (Pick pick : wvp.getPickData().getPicks().values()) {
+                  file.putPick(wvp.getChannel(), pick);
+                }
                 file.write();
               }
             }
@@ -876,6 +881,12 @@ public class WaveClipboardFrame extends SwarmFrame {
       cache.putWave(channel, wave);
       wvp.setDataSource(cache);
       wvp.setWave(wave, wave.getStartTime(), wave.getEndTime());
+      ArrayList<Pick> picks = file.getPicks(channel);
+      if (picks != null) {
+        for (Pick p : picks) {
+          wvp.getPickData().getPicks().put(p.getPhaseHint(), p);
+        }
+      }
       WaveClipboardFrame.this.addWave(new WaveViewPanel(wvp));
     }
   }
