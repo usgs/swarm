@@ -256,8 +256,8 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     spectraMinFreq = new JTextField(4);
     spectraMaxFreq = new JTextField(4);
     spectraScaleGroup = new ButtonGroup();
-    spectraAutoScale = new JRadioButton("Auto scale power");
-    spectraManualScale = new JRadioButton("Manual scale power");
+    spectraAutoScale = new JRadioButton("Auto scale Y-axis");
+    spectraManualScale = new JRadioButton("Manual scale Y-axis");
     spectraScaleGroup.add(spectraAutoScale);
     spectraScaleGroup.add(spectraManualScale);
     spectraPowerRange = new JTextField(6);
@@ -359,7 +359,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     builder.nextLine(); // row 3
     builder.append(spectraLogPower);
     builder.append(spectraLogFreq);
-    builder.add(new JLabel("Power range (dB):"),
+    builder.add(new JLabel("Y-axis range:"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.append(spectraPowerRange);
