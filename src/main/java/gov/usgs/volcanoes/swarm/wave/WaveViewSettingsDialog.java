@@ -303,7 +303,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     super.createUi();
     createComponents();
     FormLayout layout =
-        new FormLayout("left:70dlu, 3dlu, left:60dlu, 3dlu, left:60dlu, 3dlu, left:70dlu", "");
+        new FormLayout("left:70dlu, 3dlu, left:70dlu, 3dlu, left:70dlu, 3dlu, left:70dlu, 3dlu, left: 70dlu, 3dlu, left: 70dlu", "");
 
     DefaultFormBuilder builder = new DefaultFormBuilder(layout).border(Borders.DIALOG);
 
@@ -320,27 +320,28 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
 
     // wave options
     builder.appendSeparator("Wave Options");
-    builder.nextLine();
-    builder.append(removeBias);
+    builder.nextLine(); // row 1
+    builder.appendRow("center:18dlu");
     builder.add(new JLabel("Min. Amplitude:"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.append(minAmp);
     builder.append(waveAutoScale);
-    builder.nextLine();
-    builder.append(useUnits);
+    builder.append(waveAutoScaleMemory);
+    builder.append(removeBias);
+    builder.nextLine(); // row 2
+    builder.appendRow("center:18dlu");
     builder.add(new JLabel("Max. Amplitude:"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.append(maxAmp);
     builder.append(waveManualScale);
+    builder.append(new JLabel(""));
+    builder.append(useUnits);
 
-    builder.nextLine();
-    builder.append(new JLabel(""), 5);
-    builder.append(waveAutoScaleMemory);
-    builder.nextLine();
+    builder.nextLine(); 
 
-    // spectra optins
+    // spectra options
     builder.appendSeparator("Spectra Options");
     builder.nextLine(); // row 1
     builder.appendRow("center:18dlu");
@@ -348,22 +349,21 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.append(spectraMinFreq);
-    builder.append(spectraAutoScale, 3);
+    builder.append(spectraLogFreq);
+    builder.append(spectraAutoScale);
+    builder.add(new JLabel("Y-axis range:"),
+        cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+    builder.nextColumn(2);
+    builder.append(spectraPowerRange);
     builder.nextLine(); // row 2
     builder.appendRow("center:18dlu");
     builder.add(new JLabel("Max. frequency:"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.append(spectraMaxFreq);
-    builder.append(spectraManualScale, 3);
-    builder.nextLine(); // row 3
     builder.append(spectraLogPower);
-    builder.append(spectraLogFreq);
-    builder.add(new JLabel("Y-axis range:"),
-        cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
-    builder.nextColumn(2);
-    builder.append(spectraPowerRange);
-    builder.nextLine();
+    builder.append(spectraManualScale,2);
+    builder.nextLine(); 
 
     // spectrogram
     builder.appendSeparator("Spectrogram Options");
@@ -373,7 +373,11 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.append(spectrogramMinFreq);
-    builder.append(spectrogramAutoScale, 3);
+    builder.append(spectrogramAutoScale,3);
+    builder.add(new JLabel("Window size (s):"),
+        cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+    builder.nextColumn(2);
+    builder.append(binSize);
     builder.nextLine(); // row 2
     builder.appendRow("center:18dlu");
     builder.add(new JLabel("Max. frequency:"),
@@ -381,25 +385,17 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     builder.nextColumn(2);
     builder.append(spectrogramMaxFreq);
     builder.append(spectrogramManualScale, 3);
-    builder.nextLine(); // row 3
-    builder.appendRow("center:18dlu");
-    builder.add(new JLabel("Window size (s):"),
-        cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
-    builder.nextColumn(2);
-    builder.append(binSize);
-    builder.add(new JLabel("Power range (dB):"),
-        cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
-    builder.nextColumn(2);
-    builder.append(spectrogramPowerRange);
-    builder.nextLine(); // row 4
-    builder.appendRow("center:18dlu");
     builder.add(new JLabel("# of FFT points:"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.append(nfft);
-    builder.append(spectrogramLogPower,3);
-    builder.nextLine(); // row 5
-    builder.appendRow("center:18dlu");
+    builder.nextLine(); // row 3
+    builder.append(new JLabel(""),1);
+    builder.append(spectrogramLogPower);
+    builder.add(new JLabel("Power range (dB):"),
+        cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
+    builder.nextColumn(2);
+    builder.append(spectrogramPowerRange);
     builder.add(new JLabel("Overlap (%)"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
@@ -416,30 +412,29 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
 
     // filter
     builder.appendSeparator("Butterworth Filter");
-    builder.append(filterEnabled, 3);
-    builder.append(zeroPhaseShift, 3);
-    builder.nextLine();
-    builder.append(lowPass, 3);
+    builder.nextLine(); // row 1
+    builder.append(filterEnabled);
+    builder.append(lowPass);
     builder.add(new JLabel("Min. frequency:"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.append(corner1);
-    builder.nextLine();
-    builder.append(highPass, 3);
+    builder.append(zeroPhaseShift, 3);
+    builder.nextLine(); // row 2
+    builder.append(new JLabel(""));
+    builder.append(highPass);
     builder.add(new JLabel("Max. frequency:"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.append(corner2);
-    builder.nextLine();
-    builder.append(bandPass, 3);
     builder.add(new JLabel("Order"),
         cc.xyw(builder.getColumn(), builder.getRow(), 3, "center, center"));
-    builder.nextLine();
-    builder.appendRow("center:20dlu");
-    builder.nextColumn(3);
+    builder.nextLine(); // row 3
+    builder.append(new JLabel(""));
+    builder.append(bandPass,4);
     builder.append(order, 4);
-    builder.nextLine();
-    builder.append(warningLabel, 7);
+    builder.nextLine(); // row 4
+    builder.append(warningLabel, 11);
     builder.nextLine();
 
     dialogPanel = builder.getPanel();
