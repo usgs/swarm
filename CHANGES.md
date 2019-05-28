@@ -3,6 +3,7 @@
   * Option to plot event colors based on depth (#193)
   * Manual scale of y-axis for spectra view (#219)
   * Add option to apply helicorder view settings to all open helicorders (#237)
+  * Include picks in SAC header on export (#249)
   * Fixes for non-integer sample rate (#260)
   * Separate log power and min/max frequency option for spectra and spectrogram views (#268)
   
