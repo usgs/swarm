@@ -1,9 +1,10 @@
-## Version 2.8.10 - TBD 
+## Version 2.8.10 - May 31, 2019 
   * Add legend for events on map (#192)
   * Option to plot event colors based on depth (#193)
   * Manual scale of y-axis for spectra view (#219)
   * Add option to apply helicorder view settings to all open helicorders (#237)
-  * Include picks in SAC header on export (#249)
+  * Read/write picks in SAC header on import/export (#249)
+  * Set B & E fields in SAC header on export
   * Fixes for non-integer sample rate (#260)
   * Separate log power and min/max frequency option for spectra and spectrogram views (#268)
   
