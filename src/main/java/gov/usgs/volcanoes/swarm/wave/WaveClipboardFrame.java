@@ -80,6 +80,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * The wave clipboard internal frame.
@@ -657,28 +658,36 @@ public class WaveClipboardFrame extends SwarmFrame {
 
       final JFileChooser chooser = new JFileChooser();
       chooser.resetChoosableFileFilters();
-      chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+      chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
       chooser.setMultiSelectionEnabled(false);
       chooser.setDialogTitle("Save Wave");
 
       for (final FileType ft : FileType.values()) {
-        if (ft == FileType.UNKNOWN) {
+        if (ft == FileType.UNKNOWN || ft == FileType.WIN) {
           continue;
         }
-
         final ExtensionFileFilter f = new ExtensionFileFilter(ft.extension, ft.description);
         chooser.addChoosableFileFilter(f);
+        if (ft == FileType.SAC) {
+          chooser.setFileFilter(f);          
+        }
       }
-
-      chooser.setFileFilter(chooser.getAcceptAllFileFilter());
 
       final File lastPath = new File(swarmConfig.lastPath);
       chooser.setCurrentDirectory(lastPath);
-      final String fileName = selected.getChannel().replace(' ', '_') + ".sac";
+      final String fileName = selected.getChannel().replace(' ', '_');
       chooser.setSelectedFile(new File(fileName));
       final int result = chooser.showSaveDialog(applicationFrame);
       if (result == JFileChooser.APPROVE_OPTION) {
-        final File f = chooser.getSelectedFile();
+        File f = chooser.getSelectedFile();
+        String fn = f.getPath();
+        FileFilter filter = chooser.getFileFilter();
+        if (filter instanceof ExtensionFileFilter) {
+          ExtensionFileFilter extFilter = (ExtensionFileFilter)filter;
+          String ext = extFilter.getExtension();
+          fn += ext;
+          f = new File(fn);
+        } 
         boolean confirm = true;
         if (f.exists()) {
           if (f.isDirectory()) {
@@ -697,8 +706,13 @@ public class WaveClipboardFrame extends SwarmFrame {
         if (confirm) {
           try {
             swarmConfig.lastPath = f.getParent();
-            final String fn = f.getPath();
-            final SeismicDataFile file = SeismicDataFile.getFile(fn);
+            SeismicDataFile file = SeismicDataFile.getFile(fn);
+            if (file == null) {
+              JOptionPane.showMessageDialog(applicationFrame,
+                  "Error writing file. Please ensure file type is selected or proper file extension is specified.",
+                  "Error", JOptionPane.ERROR_MESSAGE);
+              return;
+            }
             final Wave wave = selected.getWave();
             if (wave == null || wave.buffer == null) {
               JOptionPane.showMessageDialog(applicationFrame, "Wave panel does not contain data.",
