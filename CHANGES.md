@@ -1,3 +1,7 @@
+## Version 2.8.11 - June 3, 2019
+  * Fix hypocenter display error for high magnitudes 
+  * Winston client to version 1.3.7 (fix issue against Winston 1.3 on Windows)
+
 ## Version 2.8.10 - May 31, 2019 
   * Add legend for events on map (#192)
   * Option to plot event colors based on depth (#193)

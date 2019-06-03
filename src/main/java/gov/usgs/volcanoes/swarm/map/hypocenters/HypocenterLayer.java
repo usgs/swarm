@@ -49,7 +49,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 
   private static final int POPUP_PADDING = 2;
 
-  private static final int[] markerSize = {5, 7, 9, 11, 13, 17, 21, 25};
+  private static final int[] markerSize = {5, 7, 9, 11, 13, 17, 21, 25, 29, 33, 37};
 
   private static final Color ORANGE = new Color(225, 175, 0, 200);
   private static final Color RED = new Color(200, 0, 0, 200);
