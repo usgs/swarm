@@ -1,3 +1,6 @@
+## Version 2.8.12 - TBD
+  * Fix start time precision in Seisan file export (#280)
+
 ## Version 2.8.11 - June 3, 2019
   * Fix hypocenter display error for high magnitudes 
   * Winston client to version 1.3.7 (fix issue against Winston 1.3 on Windows)
