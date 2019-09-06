@@ -35,10 +35,6 @@
 			<directory>${project.basedir}/mapdata</directory>
 			<outputDirectory>/mapdata</outputDirectory>
 		</fileSet>
-		<fileSet>
-			<directory>${project.basedir}/layouts</directory>
-			<outputDirectory>/layouts</outputDirectory>
-		</fileSet>
 	</fileSets>
 	<files>
 		<file>

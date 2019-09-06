@@ -1,0 +1,47 @@
+[
+  {
+    "name": "usgs/swarm",
+    "organization": "U.S. Geological Survey",
+    "description": "A Java application designed to display and analyze seismic waveforms in real-time.",
+    "version": "2.8.12",
+    "status": "snapshot",
+
+    "permissions": {
+      "usageType": "openSource",
+      "licenses": [
+        {
+          "name": "Public Domain, CC0-1.0",
+          "URL": "https://github.com/usgs/swarm/blob/master/LICENSE.md"
+        }
+      ]
+    },
+
+    "homepageURL": "https://usgs.github.io/swarm/",
+    "downloadURL": "https://github.com/usgs/swarm/archive/master.zip",
+    "disclaimerURL": "https://github.com/usgs/swarm/blob/master/LICENSE.md",
+    "repositoryURL": "https://github.com/usgs/swarm.git",
+    "vcs": "git",
+
+    "laborHours": 0,
+
+    "tags": [
+      "seismic",
+      "waveform",
+      "helicorder",
+      "visualization"
+    ],
+
+    "languages": [
+      "English"
+    ],
+
+    "contact": {
+      "name": "Tom Parker",
+      "email": "tparker@usgs.gov"
+    },
+
+    "date": {
+      "metadataLastUpdated": "2019-09-03"
+    }
+  }
+]

@@ -602,7 +602,8 @@ public class DataChooser extends JPanel {
               for (Pair<ServerNode, String> pair : channels) {
                 Metadata md = SwarmConfig.getInstance().getMetadata(pair.item2);
                 Point2D.Double pt = md.getLonLat();
-                if (pt != null && !Double.isNaN(pt.x) && !Double.isNaN(pt.y)) {
+                if (pt != null && !Double.isNaN(pt.x) && !Double.isNaN(pt.y) && pt.x != -999.0
+                    && pt.y != -999.0) {
                   nc++;
                   gr.includePoint(pt, 0.0001);
                 }

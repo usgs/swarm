@@ -73,7 +73,8 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
   private JTextField spectrogramMaxFreq;
   private JTextField binSize;
   private JTextField nfft;
-  private JTextField spectrogramOverlap;
+  private JTextField spectrogramOverlap; 
+  private JCheckBox useAlternateSpectrum;
 
   // filter options
   private ButtonGroup filterGroup;
@@ -195,6 +196,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     spectrogramPowerRange.setText(
         String.format("%.1f, %.1f", settings.spectrogramMinPower, settings.spectrogramMaxPower));
     spectrogramOverlap.setText(String.format("%3.0f", settings.spectrogramOverlap * 100));
+    useAlternateSpectrum.setSelected(settings.useAlternateSpectrum);
 
     // particle motion options
     useAlternateOrientationCode.setSelected(settings.useAlternateOrientationCode);
@@ -222,6 +224,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
         break;
     }
     order.setValue(settings.filter.getOrder());
+    
   }
 
   private void createComponents() {
@@ -275,6 +278,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     binSize = new JTextField(4);
     nfft = new JTextField(4);
     spectrogramOverlap = new JTextField(4);
+    useAlternateSpectrum = new JCheckBox("Use alternate color spectrum");
 
     // particle motion options
     useAlternateOrientationCode = new JCheckBox("Use alternate orientation code");
@@ -400,7 +404,9 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.append(spectrogramOverlap);
-    builder.nextLine();
+    builder.nextLine(); // row 4
+    builder.append(useAlternateSpectrum,3);
+    builder.nextLine(); 
     
     // particle motion
     builder.appendSeparator("Particle Motion Options");
@@ -566,6 +572,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
         settings.spectrogramOverlap = 0;
       }
       settings.spectrogramLogPower = spectrogramLogPower.isSelected();
+      settings.useAlternateSpectrum = useAlternateSpectrum.isSelected();
       settings.notifyView();
       
       // particle motion options

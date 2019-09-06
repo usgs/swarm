@@ -1,3 +1,9 @@
+## Version 2.8.12 - TBD
+  * Add color-blind friendly spectrum option for spectrogram (#275)
+  * Fix start time precision in Seisan file export (#280)
+  * Fix wrong year in wave panel for Dec 31
+  * Handle error when map view selected for station with no lat/lon in metadata
+
 ## Version 2.8.11 - June 3, 2019
   * Fix hypocenter display error for high magnitudes 
   * Winston client to version 1.3.7 (fix issue against Winston 1.3 on Windows)
