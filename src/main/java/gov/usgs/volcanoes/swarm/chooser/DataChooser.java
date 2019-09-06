@@ -1073,6 +1073,9 @@ public class DataChooser extends JPanel {
     rootNode.add(allNode);
     for (String channel : channels) {
       ChannelNode newNode = new ChannelNode(channel);
+      if(SwarmConfig.getInstance().hideStaleChannel && newNode.isStale()) {
+        continue;
+      }
       allNode.add(newNode);
 
       Metadata md = SwarmConfig.getInstance().getMetadata(channel);
@@ -1269,11 +1272,7 @@ public class DataChooser extends JPanel {
         if (md != null && md.source instanceof WwsSource) {
           setToolTipText(node.getToolTip());
           if (value instanceof ChannelNode && ((ChannelNode) value).isStale()) {
-            if (SwarmConfig.getInstance().hideStaleChannel) {
-              setVisible(false);
-            } else {
-              setForeground(Color.GRAY);
-            }
+            setForeground(Color.GRAY);
           }
         }
 
