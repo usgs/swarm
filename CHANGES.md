@@ -1,4 +1,5 @@
 ## Version 2.8.12 - TBD
+  * Add option to hide stale channels in Data Chooser (#274)
   * Add color-blind friendly spectrum option for spectrogram (#275)
   * Fix start time precision in Seisan file export (#280)
   * Fix wrong year in wave panel for Dec 31

@@ -1269,7 +1269,11 @@ public class DataChooser extends JPanel {
         if (md != null && md.source instanceof WwsSource) {
           setToolTipText(node.getToolTip());
           if (value instanceof ChannelNode && ((ChannelNode) value).isStale()) {
-            setForeground(Color.GRAY);
+            if (SwarmConfig.getInstance().hideStaleChannel) {
+              setVisible(false);
+            } else {
+              setForeground(Color.GRAY);
+            }
           }
         }
 
