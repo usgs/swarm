@@ -1,6 +1,7 @@
 package gov.usgs.volcanoes.swarm.wave;
 
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.legacy.plot.color.Spectrum;
 import gov.usgs.volcanoes.core.math.Butterworth;
 import gov.usgs.volcanoes.core.util.StringUtils;
 
@@ -79,6 +80,7 @@ public class WaveViewSettings {
   public double spectrogramOverlap;
   public double binSize;
   public int nfft;
+  public boolean useAlternateSpectrum = false;
   
   // particle motion settings
   public boolean useAlternateOrientationCode = false;
@@ -126,6 +128,7 @@ public class WaveViewSettings {
     DEFAULT_WAVE_VIEW_SETTINGS.binSize = 2;
     DEFAULT_WAVE_VIEW_SETTINGS.nfft = 0; // Zero means automatic
     DEFAULT_WAVE_VIEW_SETTINGS.spectrogramLogPower = true;
+    DEFAULT_WAVE_VIEW_SETTINGS.useAlternateSpectrum = false;
     // particle motion options
     DEFAULT_WAVE_VIEW_SETTINGS.useAlternateOrientationCode = false;
     DEFAULT_WAVE_VIEW_SETTINGS.alternateOrientationCode = "Z12";
@@ -203,6 +206,7 @@ public class WaveViewSettings {
     nfft = s.nfft;
     spectrogramOverlap = s.spectrogramOverlap;
     spectrogramLogPower = s.spectrogramLogPower;
+    useAlternateSpectrum = s.useAlternateSpectrum;
     
     // particle motion options
     useAlternateOrientationCode = s.useAlternateOrientationCode;
@@ -272,8 +276,9 @@ public class WaveViewSettings {
     spectrogramMaxFreq =
         StringUtils.stringToDouble(cf.getString("spectrogramMaxFreq"),
             DEFAULT_WAVE_VIEW_SETTINGS.spectrogramMaxFreq);
-    autoScaleSpectrogramPower = StringUtils.stringToBoolean(cf.getString("autoScaleSpectrogramPower"),
-        DEFAULT_WAVE_VIEW_SETTINGS.autoScaleSpectrogramPower);
+    autoScaleSpectrogramPower =
+        StringUtils.stringToBoolean(cf.getString("autoScaleSpectrogramPower"),
+            DEFAULT_WAVE_VIEW_SETTINGS.autoScaleSpectrogramPower);
     autoScaleSpectrogramPowerMemory =
         StringUtils.stringToBoolean(cf.getString("autoScaleSpectrogramPowerMemory"),
             DEFAULT_WAVE_VIEW_SETTINGS.autoScaleSpectrogramPowerMemory);
@@ -291,6 +296,9 @@ public class WaveViewSettings {
     spectrogramLogPower =
         StringUtils.stringToBoolean(cf.getString("spectrogramLogPower"),
             DEFAULT_WAVE_VIEW_SETTINGS.spectrogramLogPower);
+    useAlternateSpectrum = 
+        StringUtils.stringToBoolean(cf.getString("useAlternateSpectrum"),
+            DEFAULT_WAVE_VIEW_SETTINGS.useAlternateSpectrum);
     
     // particle motion settings
     useAlternateOrientationCode =
@@ -328,7 +336,8 @@ public class WaveViewSettings {
     cf.put(prefix + ".spectraMinFreq", Double.toString(spectraMinFreq));
     cf.put(prefix + ".spectraMaxFreq", Double.toString(spectraMaxFreq));
     cf.put(prefix + ".autoScaleSpectrogramPower", Boolean.toString(autoScaleSpectrogramPower));
-    cf.put(prefix + ".autoScaleSpectrogramPowerMemory", Boolean.toString(autoScaleSpectrogramPowerMemory));
+    cf.put(prefix + ".autoScaleSpectrogramPowerMemory",
+        Boolean.toString(autoScaleSpectrogramPowerMemory));
     cf.put(prefix + ".spectraMinPower", Double.toString(spectraMinPower));
     cf.put(prefix + ".spectraMaxPower", Double.toString(spectraMaxPower));
     // spectrogram settings
@@ -342,6 +351,7 @@ public class WaveViewSettings {
     cf.put(prefix + ".nfft", Integer.toString(nfft));
     cf.put(prefix + ".spectrogramOverlap", Double.toString(spectrogramOverlap));
     cf.put(prefix + ".spectrogramLogPower", Boolean.toString(spectrogramLogPower));
+    cf.put(prefix + ".useAlternateSpectrum", Boolean.toString(useAlternateSpectrum));
     // particle motion settings
     cf.put(prefix + ".useAlternateOrientationCode", Boolean.toString(useAlternateOrientationCode));
     cf.put(prefix + ".alternateOrientationCode", alternateOrientationCode);

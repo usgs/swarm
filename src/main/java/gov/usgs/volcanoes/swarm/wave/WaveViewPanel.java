@@ -4,6 +4,8 @@ import gov.usgs.volcanoes.core.data.SliceWave;
 import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.legacy.plot.Plot;
 import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.legacy.plot.color.Inferno;
+import gov.usgs.volcanoes.core.legacy.plot.color.Jet2;
 import gov.usgs.volcanoes.core.legacy.plot.decorate.FrameDecorator;
 import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.wave.ParticleMotionRenderer;
@@ -1296,6 +1298,12 @@ public class WaveViewPanel extends JComponent {
       spectrogramRenderer.setFrameDecorator(decorator);
     }
 
+    if (settings.useAlternateSpectrum) {
+      spectrogramRenderer.setSpectrum(Inferno.getInstance());
+    } else {
+      spectrogramRenderer.setSpectrum(Jet2.getInstance());      
+    }
+    
     spectrogramRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset,
         this.getHeight() - bottomHeight - yOffset);
     spectrogramRenderer.setWave(wv);
