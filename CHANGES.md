@@ -1,8 +1,10 @@
 ## Version 2.8.12 - TBD
   * Add option to hide stale channels in Data Chooser (#274)
   * Add color-blind friendly spectrum option for spectrogram (#275)
+  * Indicate event classification color in tag menu (#279)
+  * New default colors for default event classifications
   * Fix start time precision in Seisan file export (#280)
-  * Fix wrong year in wave panel for Dec 31
+  * Fix wrong year in wave panel when date is Dec 31
   * Handle error when map view selected for station with no lat/lon in metadata
 
 ## Version 2.8.11 - June 3, 2019
