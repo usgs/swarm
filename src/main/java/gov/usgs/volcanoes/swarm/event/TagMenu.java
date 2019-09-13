@@ -39,31 +39,31 @@ public class TagMenu extends JPopupMenu  {
   private static final String settingsFileName = "EventClassifications.config";
   private static final long serialVersionUID = 8681764007165352268L;
 
-  protected static final int transparency = 180;
+  protected static final int transparency = 240;
   protected static final Color defaultColor = new Color(255, 69, 0, transparency); 
   protected static HashMap<String, Color> colors = new HashMap<String, Color>();
   
   private String eventFileName;
 
   protected static String[] classifications;
-  private static String[] defaultClassifications = {
-      "VT",
-      "VT - distal",
-      "VT - proximal",
-      "LP",
-      "VLP",
-      "Hybrid",
-      "Explosion",
-      "Tremor",
-      "Lahar",
-      "Pyroclastic Flow",
-      "Regional",
-      "Rock Fall",
-      "Teleseism",
-      "Ice quake",
-      "Noise",
-      "Cultural",
-      "Unclassified"
+  private static String[][] defaultClassifications = {
+      {"VT","#fc7703"},
+      {"VT - distal","#fc7703"},
+      {"VT - proximal","#fc7703"},
+      {"LP","#6b4934"},
+      {"VLP","#c79fc6"},
+      {"Hybrid","#84e087"},
+      {"Explosion","#ab2f2b"},
+      {"Tremor", "#dbd976"},
+      {"Lahar", "#5481a8"},
+      {"Pyroclastic Flow", "#e33bdf"},
+      {"Regional", "#6f5796"},
+      {"Rock Fall", "#857876"},
+      {"Teleseism", "#965771"},
+      {"Ice quake", "#76d6db"},
+      {"Noise", "#57754d"},
+      {"Cultural", "#57754d"},
+      {"Unclassified", "#57754d"}
   };
   
   static {
@@ -89,9 +89,10 @@ public class TagMenu extends JPopupMenu  {
     } catch (FileNotFoundException e) {
       System.out
           .println("EventClassifications.config not found. Using default classifications.");
-      classifications = defaultClassifications;
-      for (String c : defaultClassifications) {
-        colors.put(c, defaultColor);
+      classifications = new String[defaultClassifications.length];
+      for (int i = 0; i < classifications.length; i++) {
+        classifications[i] = defaultClassifications[i][0];
+        colors.put(defaultClassifications[i][0], Color.decode(defaultClassifications[i][1]));    
       }
     } catch (IOException e) {
       // TODO Auto-generated catch block
@@ -206,6 +207,7 @@ public class TagMenu extends JPopupMenu  {
   private void createClassificationMenus() {
     for (final String c : classifications) {
       JMenuItem menuItem = new JMenuItem(c);
+      menuItem.setBackground(colors.get(c));
       menuItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           TagData tag = new TagData(hvp.getSettings().channel, j2k, c);
