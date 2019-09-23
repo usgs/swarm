@@ -1,4 +1,4 @@
-## Version 2.8.12 - TBD
+## Version 2.8.12 - September 23, 2019
   * Add option to hide stale channels in Data Chooser (#274)
   * Add color-blind friendly spectrum option for spectrogram (#275)
   * Indicate event classification color in tag menu (#279)
