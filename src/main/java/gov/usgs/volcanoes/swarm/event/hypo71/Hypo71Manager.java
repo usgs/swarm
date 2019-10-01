@@ -7,6 +7,7 @@ import gov.usgs.volcanoes.core.contrib.hypo71.PhaseRecord;
 import gov.usgs.volcanoes.core.contrib.hypo71.Station;
 import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -62,6 +63,7 @@ public class Hypo71Manager {
     try {
       Hypo71Settings settings = Hypo71SettingsDialog.getInstance().getSettings();
       controlCard.setKSING(settings.getKsing());
+      controlCard.setPOS(SwarmConfig.getInstance().velocityRatio);
       hypo71.calculateHypo71(description, settings.getTestValues(), stationsList,
           crustalModelList, controlCard, phaseRecordsList, inputFile);
     } catch (Exception e) {
