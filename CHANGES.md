@@ -1,3 +1,7 @@
+## Version 2.8.13 - TBD
+  * Use Swarm config Vp/Vs for Hypo71 Control Card POS (#277)
+  * Fix map display issue introduced in 2.8.12 (#288)
+
 ## Version 2.8.12 - September 23, 2019
   * Add option to hide stale channels in Data Chooser (#274)
   * Add color-blind friendly spectrum option for spectrogram (#275)
