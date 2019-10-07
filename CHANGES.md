@@ -1,3 +1,6 @@
+## Version 2.8.14 - TBD
+  * Remove includeavailability option in FDSN query statement (#295)
+
 ## Version 2.8.13 - October 2, 2019
   * Use Swarm config Vp/Vs for Hypo71 Control Card POS (#277)
   * Fix map display issue introduced in 2.8.12 (#288)

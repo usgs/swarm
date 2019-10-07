@@ -211,7 +211,8 @@ public class WebServicesPanel extends DataSourcePanel {
     }
 
     protected String getUrlTextWithTime() {
-      return getBaseUrlText() + "net=*&level=network&format=xml&includeavailability=false";
+      //return getBaseUrlText() + "net=*&level=network&format=xml&includeavailability=false";
+      return getBaseUrlText() + "net=*&level=network&format=xml";
     }
 
     protected void fetch(URL url) throws Exception {
