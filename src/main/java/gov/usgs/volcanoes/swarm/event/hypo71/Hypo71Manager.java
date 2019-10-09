@@ -143,10 +143,19 @@ public class Hypo71Manager {
     // "1.22", 'D', "", "SR01IPD0 691005120651.22", ' ', "IPD0"));
     
     // PRMK
-    String pOnset = pPick.getOnset().toString().substring(0, 1).toUpperCase();
-    String pMotion = getMotion(pPick.getPolarity());
-    String pWeight = getWeightFromUncertainty(pPick.getTimeQuantity().getUncertainty())+".00";
-    if(sPick != null){
+    String pOnset = " ";
+    if (pPick.getOnset() != null) {
+      pOnset = pPick.getOnset().toString().substring(0, 1).toUpperCase();
+    }
+    String pMotion = " ";
+    if (pPick.getPolarity() != null) {
+      pMotion = getMotion(pPick.getPolarity());
+    }
+    String pWeight = " ";
+    if (pPick.getTimeQuantity().getUncertainty() != Double.NaN) {
+      pWeight = getWeightFromUncertainty(pPick.getTimeQuantity().getUncertainty()) + ".00";
+    }
+    if (sPick != null) {
       pWeight = "9.00";
     }
     String pRemark = pOnset + pMotion + "P" + pWeight;
@@ -164,9 +173,18 @@ public class Hypo71Manager {
     if (sPick != null) {
       sSec = (float) (Double.parseDouble(pSec) + (sPick.getTime() - pPick.getTime()) / 1000);
       // SRMK
-      String sOnset = sPick.getOnset().toString().substring(0, 1).toUpperCase();
-      String sMotion = getMotion(sPick.getPolarity());
-      String sWeight = getWeightFromUncertainty(sPick.getTimeQuantity().getUncertainty())+".00";
+      String sOnset = " ";
+      if (sPick.getOnset() != null) {
+        sOnset = sPick.getOnset().toString().substring(0, 1).toUpperCase();
+      }
+      String sMotion = "N";
+      if (sPick.getPolarity() != null) {
+        sMotion = getMotion(pPick.getPolarity());
+      }
+      String sWeight = " ";
+      if (sPick.getTimeQuantity().getUncertainty() != Double.NaN) {
+        sWeight = getWeightFromUncertainty(pPick.getTimeQuantity().getUncertainty()) + ".00";
+      }
       sRemark = sOnset + sMotion + "S" + sWeight;
       useS = "USES";
     }
