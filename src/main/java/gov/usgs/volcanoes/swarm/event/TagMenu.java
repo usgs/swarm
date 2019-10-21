@@ -153,7 +153,7 @@ public class TagMenu extends JPopupMenu  {
       fr = new FileReader(eventFileName);
       BufferedReader br = new BufferedReader(fr);
       String line;
-      while ((line = br.readLine()) != null) {
+      while ((line = br.readLine()) != null && !line.equals("")) {
         TagData tag = new TagData(line);
         hvp.getTagData().add(tag);
       }
