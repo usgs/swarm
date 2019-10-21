@@ -171,7 +171,7 @@ public class Hypo71Manager {
     String sRemark = "";
     String useS = "";
     if (sPick != null) {
-      sSec = (float) (Double.parseDouble(pSec) + (sPick.getTime() - pPick.getTime()) / 1000);
+      sSec = (float) (Double.parseDouble(pSec) + (sPick.getTime() - pPick.getTime()) / 1000.0);
       // SRMK
       String sOnset = " ";
       if (sPick.getOnset() != null) {
