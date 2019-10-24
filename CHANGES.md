@@ -1,8 +1,13 @@
-## Version 2.8.14 - TBD
+## Version 3.0.0 - TBD
+  * Support import of QuakeML without onset, polarity, and uncertainty (#292)
   * Remove includeavailability option in FDSN query statement (#295)
+  * Support QuakeML timestamp with six decimal places for seconds (#296)
+  * Require Java 8 or higher (previously supported Java 7)  
+  * volcano-core dependency to 2.0.0
+  * wwsclient dependency to 2.0.0
 
 ## Version 2.8.13 - October 2, 2019
-  * Use Swarm config Vp/Vs for Hypo71 Control Card POS (#277)
+  * Use Swarm config Vp/Vs for Hypo71 Control Card POS (#287)
   * Fix map display issue introduced in 2.8.12 (#288)
 
 ## Version 2.8.12 - September 23, 2019
