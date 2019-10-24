@@ -1,5 +1,6 @@
 ## Version 3.0.0 - TBD
   * Support import of QuakeML without onset, polarity, and uncertainty (#292)
+  * Improve loading of wave clipboard upon QuakeML import (#293)
   * Remove includeavailability option in FDSN query statement (#295)
   * Support QuakeML timestamp with six decimal places for seconds (#296)
   * Require Java 8 or higher (previously supported Java 7)  
