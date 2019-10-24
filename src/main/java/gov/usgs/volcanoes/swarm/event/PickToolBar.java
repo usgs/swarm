@@ -168,8 +168,11 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
             List<PickWavePanel> panels = pickBox.getPanels();
             for (WaveViewPanel wvp : panels) {
               clipboard.addWave(new WaveViewPanel(wvp));
+              wvp.getDataSource().getChannels(); // get metadata for channels
+              wvp.getDataSource().close();
             }
-
+            
+            // Propagate picks to other channels
             for (WaveViewPanel wvp : clipboard.getWaves()) {
               wvp.getSettings().pickEnabled = true;
               PickData pickData = wvp.getPickData();
