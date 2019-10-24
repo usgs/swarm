@@ -3,6 +3,7 @@
   * Improve loading of wave clipboard upon QuakeML import (#293)
   * Remove includeavailability option in FDSN query statement (#295)
   * Support QuakeML timestamp with six decimal places for seconds (#296)
+  * Fix issue opening wave view from helicorder on Windows 10 against Winston 1.3.* (#299)
   * Require Java 8 or higher (previously supported Java 7)  
   * volcano-core dependency to 2.0.0
   * wwsclient dependency to 2.0.0
