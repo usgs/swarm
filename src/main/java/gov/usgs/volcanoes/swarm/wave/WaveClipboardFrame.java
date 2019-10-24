@@ -25,6 +25,7 @@ import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.FileDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
+import gov.usgs.volcanoes.swarm.data.seedlink.SeedLinkSource;
 import gov.usgs.volcanoes.swarm.event.EventDialog;
 import gov.usgs.volcanoes.swarm.event.PickData;
 import gov.usgs.volcanoes.swarm.event.PickMenuBar;
@@ -1490,6 +1491,11 @@ public class WaveClipboardFrame extends SwarmFrame {
               for (SeismicDataSource source : SwarmConfig.getInstance().getSources().values()) {
                 if (source.equals(sourceToUse)) {
                   continue; // already tried above
+                }                
+                if (source instanceof SeedLinkSource) {
+                  // currently not supported. bunch of unhappy errors 
+                  // are displayed if channel is not found here.
+                  continue; 
                 }
                 Wave wave = source.getWave(channel, waveStart, waveEnd);
                 if (wave != null && wave.buffer != null) {
