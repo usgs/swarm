@@ -82,12 +82,17 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.filechooser.FileFilter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The wave clipboard internal frame.
  *
  * @author Dan Cervelli
  */
 public class WaveClipboardFrame extends SwarmFrame {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(WaveClipboardFrame.class);
   public static final long serialVersionUID = -1;
   private static final Color SELECT_COLOR = new Color(200, 220, 241);
   private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
@@ -1458,6 +1463,7 @@ public class WaveClipboardFrame extends SwarmFrame {
 
         // create wave view panels 
         HashMap<String, WaveViewPanel> panels = new HashMap<String, WaveViewPanel>();
+        SeismicDataSource sourceToUse = null;
         for (Pick pick : event.getPicks().values()) {
           String channel = pick.getChannel().replaceAll("\\$", " ").trim();
           WaveViewPanel wvp = panels.get(channel);
@@ -1466,46 +1472,72 @@ public class WaveClipboardFrame extends SwarmFrame {
             wvp.setChannel(channel);
             wvp.setStartTime(waveStart);
             wvp.setEndTime(waveEnd);
-            boolean foundSource = false;
-            for (SeismicDataSource source : SwarmConfig.getInstance().getSources().values()) {
-              for (String ch : source.getChannels()) {
-                if (ch.equals(channel)) {
-                  wvp.setDataSource(source);
-                  Wave wave = source.getWave(channel, waveStart, waveEnd);
-                  if (wave != null) {
-                    wvp.setWave(wave, waveStart, waveEnd);
-                    foundSource = true;
-                    break;
-                  }
-                }
+            // Try previously found source if one exists
+            if (sourceToUse != null) { 
+              Wave wave = sourceToUse.getWave(channel, waveStart, waveEnd);
+              if (wave != null && wave.buffer != null) {
+                LOGGER.info(channel + " ditto");
+                wvp.setWave(wave, waveStart, waveEnd);
+                wvp.setDataSource(sourceToUse);
+              } else { 
+                LOGGER.info(
+                    "Unable to get wave from " + sourceToUse.getName()
+                        + ". Looking for another source. ");
               }
-              if (foundSource) {
-                break;
+            }
+            // If no data source already look from existing data sources
+            if (wvp.getDataSource() == null) {
+              for (SeismicDataSource source : SwarmConfig.getInstance().getSources().values()) {
+                if (source.equals(sourceToUse)) {
+                  continue; // already tried above
+                }
+                Wave wave = source.getWave(channel, waveStart, waveEnd);
+                if (wave != null && wave.buffer != null) {
+                  LOGGER.info(channel + " found in " + source.getName());
+                  wvp.setWave(wave, waveStart, waveEnd);
+                  wvp.setDataSource(source);
+                  sourceToUse = source;
+                  break;
+                }
               }
             }
             // If no data source already available go to IRIS
             if (wvp.getDataSource() == null) {
               WebServicesSource source = new WebServicesSource(pick.getChannel());
-              wvp.setDataSource(source);
               Wave wave = source.getWave(channel, waveStart, waveEnd);
-              if (wave != null) {
+              if (wave != null && wave.buffer != null) {
+                LOGGER
+                    .info(channel + " found in IRIS Web Service.  Channel location not available.");
                 wvp.setWave(wave, waveStart, waveEnd);
+                wvp.setDataSource(source);
+                sourceToUse = source;
               }
             }
-            panels.put(channel, wvp);
+            // Check to see if we finally found usable data source
+            if (wvp.getDataSource() == null) {
+              LOGGER.warn("No data source found for " + channel);              
+            } else {
+              // Put wave panel in clipboard map of panels
+              panels.put(channel, wvp);
+            }
           }
+          // add phase hint to pick data
           String phaseHint = pick.getPhaseHint();
           PickData pickData = wvp.getPickData();
-          pickData.setPick(phaseHint, pick, true);
-          
+          pickData.setPick(phaseHint, pick, true);          
         }
+
         
         // add wave view panels to clipboard
         for (WaveViewPanel wvp : panels.values()) {
           addWave(wvp);
+          wvp.getDataSource().getChannels(); // get channel metadata 
+          wvp.getDataSource().close();
         }
         
-        // propagate picks
+        // Propagate picks. Get picks for the same
+        // station on another channel. They will be shown 
+        // in white tags.
         for (WaveViewPanel wvp : waves) {
           PickData pickData = wvp.getPickData();
           for (String phase : new String[] {PickData.P, PickData.S}) {
