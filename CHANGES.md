@@ -1,4 +1,4 @@
-## Version 3.0.0 - TBD
+## Version 3.0.0 - November 18, 2019
   * Support import of QuakeML without onset, polarity, and uncertainty (#292)
   * Improve loading of wave clipboard upon QuakeML import (#293)
   * Remove includeavailability option in FDSN query statement (#295)
