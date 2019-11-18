@@ -127,7 +127,7 @@ public class WebServicesClient extends AbstractDataRecordClient {
   public List<String> getChannels() {
     final List<String> channelList = stationClient.getChannelList();
     if (channelList.size() != 0) {
-      LOGGER.info("channel list is not empty");
+      //LOGGER.info("channel list is not empty");
     } else {
       String error = null;
       long start = System.currentTimeMillis();
