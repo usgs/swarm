@@ -1,5 +1,29 @@
 package gov.usgs.volcanoes.swarm.map;
 
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoImageSet;
+import gov.usgs.volcanoes.core.legacy.plot.map.GeoLabelSet;
+import gov.usgs.volcanoes.core.legacy.plot.map.MapRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.map.WMSGeoImageSet;
+import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
+import gov.usgs.volcanoes.core.math.proj.GeoRange;
+import gov.usgs.volcanoes.core.math.proj.Mercator;
+import gov.usgs.volcanoes.core.math.proj.Projection;
+import gov.usgs.volcanoes.core.math.proj.TransverseMercator;
+import gov.usgs.volcanoes.core.util.GeoUtils;
+import gov.usgs.volcanoes.core.util.Pair;
+import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.map.MapMiniPanel.Position;
+import gov.usgs.volcanoes.swarm.time.TimeListener;
+import gov.usgs.volcanoes.swarm.time.WaveViewTime;
+import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -50,30 +74,6 @@ import javax.swing.SwingUtilities;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.legacy.plot.Plot;
-import gov.usgs.volcanoes.core.legacy.plot.map.GeoImageSet;
-import gov.usgs.volcanoes.core.legacy.plot.map.GeoLabelSet;
-import gov.usgs.volcanoes.core.legacy.plot.map.MapRenderer;
-import gov.usgs.volcanoes.core.legacy.plot.map.WMSGeoImageSet;
-import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
-import gov.usgs.volcanoes.core.math.proj.GeoRange;
-import gov.usgs.volcanoes.core.math.proj.Mercator;
-import gov.usgs.volcanoes.core.math.proj.Projection;
-import gov.usgs.volcanoes.core.math.proj.TransverseMercator;
-import gov.usgs.volcanoes.core.util.GeoUtils;
-import gov.usgs.volcanoes.core.util.Pair;
-import gov.usgs.volcanoes.core.util.StringUtils;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.map.MapMiniPanel.Position;
-import gov.usgs.volcanoes.swarm.time.TimeListener;
-import gov.usgs.volcanoes.swarm.time.WaveViewTime;
-import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 
 /**
  * Map panel.

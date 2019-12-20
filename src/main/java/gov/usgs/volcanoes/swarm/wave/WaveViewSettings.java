@@ -1,7 +1,6 @@
 package gov.usgs.volcanoes.swarm.wave;
 
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.legacy.plot.color.Spectrum;
 import gov.usgs.volcanoes.core.math.Butterworth;
 import gov.usgs.volcanoes.core.util.StringUtils;
 

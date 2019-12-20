@@ -1,6 +1,7 @@
 package gov.usgs.volcanoes.swarm.wave;
 
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
+
 import javax.swing.AbstractButton;
 
 public interface WaveViewToolBarListener {

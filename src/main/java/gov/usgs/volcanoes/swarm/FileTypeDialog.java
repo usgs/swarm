@@ -1,6 +1,8 @@
 package gov.usgs.volcanoes.swarm;
 
 
+import gov.usgs.volcanoes.core.data.file.FileType;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -16,8 +18,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-
-import gov.usgs.volcanoes.core.data.file.FileType;
 
 /*
  * @author Tom Parker

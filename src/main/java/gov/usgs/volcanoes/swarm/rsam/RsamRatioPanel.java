@@ -1,5 +1,17 @@
 package gov.usgs.volcanoes.swarm.rsam;
 
+import gov.usgs.volcanoes.core.data.GenericDataMatrix;
+import gov.usgs.volcanoes.core.data.RSAMData;
+import gov.usgs.volcanoes.core.legacy.plot.Plot;
+import gov.usgs.volcanoes.core.legacy.plot.PlotException;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
+import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.HistogramRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.ShapeRenderer;
+import gov.usgs.volcanoes.swarm.SwingWorker;
+import gov.usgs.volcanoes.swarm.time.UiTime;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -14,17 +26,6 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
 import cern.colt.matrix.DoubleMatrix2D;
-import gov.usgs.volcanoes.core.data.GenericDataMatrix;
-import gov.usgs.volcanoes.core.data.RSAMData;
-import gov.usgs.volcanoes.core.legacy.plot.Plot;
-import gov.usgs.volcanoes.core.legacy.plot.PlotException;
-import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
-import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
-import gov.usgs.volcanoes.core.legacy.plot.render.HistogramRenderer;
-import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
-import gov.usgs.volcanoes.core.legacy.plot.render.ShapeRenderer;
-import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.time.UiTime;
 
 /**
  * A component that renders a RSAM Ratio plot.

@@ -1,5 +1,27 @@
 package gov.usgs.volcanoes.swarm.map;
 
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.contrib.PngEncoder;
+import gov.usgs.volcanoes.core.contrib.PngEncoderB;
+import gov.usgs.volcanoes.core.math.proj.GeoRange;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.UiUtils;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Kioskable;
+import gov.usgs.volcanoes.swarm.SwarmFrame;
+import gov.usgs.volcanoes.swarm.SwarmUtil;
+import gov.usgs.volcanoes.swarm.Throbber;
+import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanelListener;
+import gov.usgs.volcanoes.swarm.map.MapPanel.DragMode;
+import gov.usgs.volcanoes.swarm.map.MapPanel.LabelSetting;
+import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterLayer;
+import gov.usgs.volcanoes.swarm.options.SwarmOptions;
+import gov.usgs.volcanoes.swarm.options.SwarmOptionsListener;
+import gov.usgs.volcanoes.swarm.time.UiTime;
+import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
+import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
+
 import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.Insets;
@@ -34,28 +56,6 @@ import javax.swing.event.InternalFrameEvent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.contrib.PngEncoder;
-import gov.usgs.volcanoes.core.contrib.PngEncoderB;
-import gov.usgs.volcanoes.core.math.proj.GeoRange;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.util.UiUtils;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Kioskable;
-import gov.usgs.volcanoes.swarm.SwarmFrame;
-import gov.usgs.volcanoes.swarm.SwarmUtil;
-import gov.usgs.volcanoes.swarm.Throbber;
-import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanelListener;
-import gov.usgs.volcanoes.swarm.map.MapPanel.DragMode;
-import gov.usgs.volcanoes.swarm.map.MapPanel.LabelSetting;
-import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterLayer;
-import gov.usgs.volcanoes.swarm.options.SwarmOptions;
-import gov.usgs.volcanoes.swarm.options.SwarmOptionsListener;
-import gov.usgs.volcanoes.swarm.time.UiTime;
-import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
-import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
 
 /**
  * Map frame.

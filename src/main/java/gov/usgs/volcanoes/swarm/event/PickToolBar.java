@@ -5,8 +5,8 @@
 
 package gov.usgs.volcanoes.swarm.event;
 
-import gov.usgs.volcanoes.core.quakeml.Event;
-import gov.usgs.volcanoes.core.quakeml.Pick;
+import gov.usgs.volcanoes.quakeml.Event;
+import gov.usgs.volcanoes.quakeml.Pick;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmUtil;

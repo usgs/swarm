@@ -1,8 +1,8 @@
 package gov.usgs.volcanoes.swarm.map;
 
-import javax.swing.JFrame;
-
 import gov.usgs.volcanoes.swarm.SwarmModalDialog;
+
+import javax.swing.JFrame;
 
 public class MapLineDialog extends SwarmModalDialog {
 

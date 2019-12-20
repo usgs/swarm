@@ -1,7 +1,5 @@
 package gov.usgs.volcanoes.swarm;
 
-import org.pegdown.PegDownProcessor;
-
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.Scanner;
@@ -11,6 +9,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+
+import org.pegdown.PegDownProcessor;
 
 public final class HelpDialog {
   

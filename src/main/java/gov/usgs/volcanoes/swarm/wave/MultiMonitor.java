@@ -1,5 +1,26 @@
 package gov.usgs.volcanoes.swarm.wave;
 
+import gov.usgs.volcanoes.core.configfile.ConfigFile;
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.FrameDecorator;
+import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
+import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.FrameRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.RectangleRenderer;
+import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.util.UiUtils;
+import gov.usgs.volcanoes.swarm.Icons;
+import gov.usgs.volcanoes.swarm.Kioskable;
+import gov.usgs.volcanoes.swarm.Metadata;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.SwarmFrame;
+import gov.usgs.volcanoes.swarm.SwarmUtil;
+import gov.usgs.volcanoes.swarm.Throbber;
+import gov.usgs.volcanoes.swarm.chooser.DataChooser;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -39,27 +60,6 @@ import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-
-import gov.usgs.volcanoes.core.configfile.ConfigFile;
-import gov.usgs.volcanoes.core.data.Wave;
-import gov.usgs.volcanoes.core.legacy.plot.decorate.FrameDecorator;
-import gov.usgs.volcanoes.core.legacy.plot.decorate.SmartTick;
-import gov.usgs.volcanoes.core.legacy.plot.render.AxisRenderer;
-import gov.usgs.volcanoes.core.legacy.plot.render.FrameRenderer;
-import gov.usgs.volcanoes.core.legacy.plot.render.RectangleRenderer;
-import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.util.UiUtils;
-import gov.usgs.volcanoes.swarm.Icons;
-import gov.usgs.volcanoes.swarm.Kioskable;
-import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.SwarmFrame;
-import gov.usgs.volcanoes.swarm.SwarmUtil;
-import gov.usgs.volcanoes.swarm.Throbber;
-import gov.usgs.volcanoes.swarm.chooser.DataChooser;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
 
 /**
  * MultiMonitor is a window that is used to display multiple seismic

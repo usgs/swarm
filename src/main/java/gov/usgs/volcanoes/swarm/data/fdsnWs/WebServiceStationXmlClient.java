@@ -9,8 +9,7 @@ import edu.sc.seis.seisFile.fdsnws.stationxml.StationIterator;
 import edu.sc.seis.seisFile.fdsnws.stationxml.StationXMLException;
 import edu.sc.seis.seisFile.fdsnws.stationxml.StationXMLTagNames;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import gov.usgs.volcanoes.swarm.StationInfo;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -21,7 +20,8 @@ import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.events.XMLEvent;
 
-import gov.usgs.volcanoes.swarm.StationInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebServiceStationXmlClient extends AbstractWebServiceStationClient {
 
