@@ -6,11 +6,11 @@
 
 package gov.usgs.volcanoes.swarm.event;
 
-import gov.usgs.volcanoes.core.quakeml.EvaluationMode;
-import gov.usgs.volcanoes.core.quakeml.EvaluationStatus;
-import gov.usgs.volcanoes.core.quakeml.Event;
-import gov.usgs.volcanoes.core.quakeml.Magnitude;
-import gov.usgs.volcanoes.core.quakeml.Origin;
+import gov.usgs.volcanoes.quakeml.EvaluationMode;
+import gov.usgs.volcanoes.quakeml.EvaluationStatus;
+import gov.usgs.volcanoes.quakeml.Event;
+import gov.usgs.volcanoes.quakeml.Magnitude;
+import gov.usgs.volcanoes.quakeml.Origin;
 
 import java.awt.Component;
 import java.awt.Font;

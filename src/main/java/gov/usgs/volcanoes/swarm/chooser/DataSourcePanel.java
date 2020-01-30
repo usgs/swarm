@@ -1,10 +1,10 @@
 package gov.usgs.volcanoes.swarm.chooser;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
 import gov.usgs.volcanoes.core.util.ResourceReader;
 import gov.usgs.volcanoes.swarm.Swarm;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 /**
  * Data Source Panel.

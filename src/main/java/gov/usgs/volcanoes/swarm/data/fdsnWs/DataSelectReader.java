@@ -6,8 +6,7 @@ import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.mseed.SeedRecord;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import gov.usgs.volcanoes.swarm.Version;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -21,8 +20,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.Version;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The data select reader reads data from the web services. This class a based

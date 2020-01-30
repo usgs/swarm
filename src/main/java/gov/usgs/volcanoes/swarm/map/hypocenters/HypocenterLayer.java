@@ -1,5 +1,24 @@
 package gov.usgs.volcanoes.swarm.map.hypocenters;
 
+import gov.usgs.volcanoes.core.legacy.plot.render.DataPointRenderer;
+import gov.usgs.volcanoes.core.math.proj.GeoRange;
+import gov.usgs.volcanoes.core.math.proj.Projection;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.core.time.Time;
+import gov.usgs.volcanoes.quakeml.Event;
+import gov.usgs.volcanoes.quakeml.EventSet;
+import gov.usgs.volcanoes.quakeml.Magnitude;
+import gov.usgs.volcanoes.quakeml.Origin;
+import gov.usgs.volcanoes.quakeml.QuakemlObserver;
+import gov.usgs.volcanoes.quakeml.QuakemlSource;
+import gov.usgs.volcanoes.swarm.ConfigListener;
+import gov.usgs.volcanoes.swarm.Swarm;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.map.MapFrame;
+import gov.usgs.volcanoes.swarm.map.MapLayer;
+import gov.usgs.volcanoes.swarm.map.MapPanel;
+import gov.usgs.volcanoes.swarm.map.MapPanel.ColorSetting;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -20,25 +39,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import gov.usgs.volcanoes.core.legacy.plot.render.DataPointRenderer;
-import gov.usgs.volcanoes.core.math.proj.GeoRange;
-import gov.usgs.volcanoes.core.math.proj.Projection;
-import gov.usgs.volcanoes.core.quakeml.Event;
-import gov.usgs.volcanoes.core.quakeml.EventSet;
-import gov.usgs.volcanoes.core.quakeml.Magnitude;
-import gov.usgs.volcanoes.core.quakeml.Origin;
-import gov.usgs.volcanoes.core.quakeml.QuakemlObserver;
-import gov.usgs.volcanoes.core.quakeml.QuakemlSource;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.core.time.Time;
-import gov.usgs.volcanoes.swarm.ConfigListener;
-import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.map.MapFrame;
-import gov.usgs.volcanoes.swarm.map.MapLayer;
-import gov.usgs.volcanoes.swarm.map.MapPanel;
-import gov.usgs.volcanoes.swarm.map.MapPanel.ColorSetting;
 
 public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlObserver {
   private static final Logger LOGGER = LoggerFactory.getLogger(HypocenterLayer.class);

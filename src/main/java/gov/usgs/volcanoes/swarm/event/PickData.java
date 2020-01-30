@@ -1,7 +1,7 @@
 package gov.usgs.volcanoes.swarm.event;
 
-import gov.usgs.volcanoes.core.quakeml.Pick;
 import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.quakeml.Pick;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;

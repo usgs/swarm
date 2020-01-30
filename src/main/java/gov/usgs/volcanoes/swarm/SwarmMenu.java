@@ -2,9 +2,9 @@ package gov.usgs.volcanoes.swarm;
 
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.data.file.FileType;
-import gov.usgs.volcanoes.core.quakeml.EventSet;
 import gov.usgs.volcanoes.core.ui.ExtensionFileFilter;
 import gov.usgs.volcanoes.core.util.StringUtils;
+import gov.usgs.volcanoes.quakeml.EventSet;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.FileDataSource;
 import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;

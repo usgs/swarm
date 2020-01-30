@@ -1,13 +1,13 @@
 package gov.usgs.volcanoes.swarm.wave;
 
-import java.util.TimeZone;
-
-import javax.swing.JTextArea;
-
 import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
+
+import java.util.TimeZone;
+
+import javax.swing.JTextArea;
 
 /**
  * Holds and displays information about wave at selected time.

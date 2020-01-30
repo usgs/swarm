@@ -1,11 +1,11 @@
 package gov.usgs.volcanoes.swarm.event.hypo71;
 
-import gov.usgs.volcanoes.core.contrib.hypo71.ControlCard;
-import gov.usgs.volcanoes.core.contrib.hypo71.CrustalModel;
-import gov.usgs.volcanoes.core.contrib.hypo71.Hypo71;
-import gov.usgs.volcanoes.core.contrib.hypo71.PhaseRecord;
-import gov.usgs.volcanoes.core.contrib.hypo71.Station;
-import gov.usgs.volcanoes.core.quakeml.Pick;
+import gov.usgs.volcanoes.hypo71.ControlCard;
+import gov.usgs.volcanoes.hypo71.CrustalModel;
+import gov.usgs.volcanoes.hypo71.Hypo71;
+import gov.usgs.volcanoes.hypo71.PhaseRecord;
+import gov.usgs.volcanoes.hypo71.Station;
+import gov.usgs.volcanoes.quakeml.Pick;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 
