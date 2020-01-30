@@ -1,3 +1,7 @@
+## Version 3.0.1 - January 30, 2020
+  * Fix plot tick labels for really small values (#306)
+  * volcano-core dependency to 3.0.2
+
 ## Version 3.0.0 - November 18, 2019
   * Support import of QuakeML without onset, polarity, and uncertainty (#292)
   * Improve loading of wave clipboard upon QuakeML import (#293)
