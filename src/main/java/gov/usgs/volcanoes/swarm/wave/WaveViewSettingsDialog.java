@@ -166,8 +166,16 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
       waveManualScale.setSelected(true);
     }
     waveAutoScaleMemory.setSelected(settings.autoScaleAmpMemory);
-    minAmp.setText(String.format("%.1f", settings.waveMinAmp));
-    maxAmp.setText(String.format("%.1f", settings.waveMaxAmp));
+    if (settings.waveMinAmp < 1 && settings.waveMinAmp > -1) {
+      minAmp.setText(String.format("%.6f", settings.waveMinAmp));
+    } else {
+      minAmp.setText(String.format("%.1f", settings.waveMinAmp));
+    }
+    if (settings.waveMaxAmp < 1 && settings.waveMaxAmp > -1) {
+      maxAmp.setText(String.format("%.6f", settings.waveMaxAmp));
+    } else {
+      maxAmp.setText(String.format("%.1f", settings.waveMaxAmp));
+    }
 
     // spectra options
     spectraLogPower.setSelected(settings.spectraLogPower);
