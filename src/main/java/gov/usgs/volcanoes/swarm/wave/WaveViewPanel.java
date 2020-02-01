@@ -12,6 +12,7 @@ import gov.usgs.volcanoes.core.legacy.plot.render.wave.ParticleMotionRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.wave.SliceWaveRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.wave.SpectraRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.wave.SpectrogramRenderer;
+import gov.usgs.volcanoes.core.math.Util;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.quakeml.Pick;
 import gov.usgs.volcanoes.swarm.Icons;
@@ -43,6 +44,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -57,6 +59,7 @@ import org.slf4j.LoggerFactory;
 public class WaveViewPanel extends JComponent {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WaveViewPanel.class);
+  protected static NumberFormat numberFormat = NumberFormat.getInstance();
   public static final long serialVersionUID = -1;
   protected static SwarmConfig swarmConfig;
   /**
@@ -626,8 +629,12 @@ public class WaveViewPanel extends JComponent {
             unit = "Counts";
           }
         }
-
-        status.append(String.format(", %s: %.3f", unit, multiplier * yi + offset));
+        double yi2 = multiplier * yi + offset;
+        double exp = Util.getExp(yi2);
+        String value = (yi2 != 0.0 && (exp >= 5.0 || exp <= -5.0)
+            ? numberFormat.format(yi2 / Math.pow(10, exp)) + "e" + numberFormat.format(exp)
+            : numberFormat.format(yi2));
+        status.append(String.format(", %s: %s", unit, value));
       } else {
         double xi = time;
         if (settings.viewType == ViewType.SPECTRA && settings.spectraLogFreq) {
