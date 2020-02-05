@@ -4,7 +4,7 @@
 
 	<groupId>gov.usgs.volcanoes</groupId>
 	<artifactId>swarm</artifactId>
-	<version>3.0.1</version>
+	<version>3.0.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Swarm</name>
@@ -552,7 +552,7 @@
 		<dependency>
 			<groupId>gov.usgs.volcanoes</groupId>
 			<artifactId>volcano-core</artifactId>
-			<version>3.0.2</version>
+			<version>3.0.3</version>
 		</dependency>		
 		<dependency>
 			<groupId>gov.usgs.volcanoes</groupId>
