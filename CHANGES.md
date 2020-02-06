@@ -1,3 +1,8 @@
+## Version 3.0.2 - February 3, 2020
+  * Fix display of really small values in status area
+  * Allow decimals for one bar range and clip value in helicorder settings (#309)
+  * Allow decimals in min/max amp in wave settings for small values (#310)
+
 ## Version 3.0.1 - January 30, 2020
   * Fix plot tick labels for really small values (#306)
   * volcano-core dependency to 3.0.2

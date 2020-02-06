@@ -26,8 +26,8 @@ public class HelicorderViewerSettings {
   public boolean showClip;
   public boolean alertClip;
   public int alertClipTimeout;
-  public int clipValue;
-  public int barRange;
+  public double clipValue;
+  public double barRange;
   public double barMult;
   public HelicorderViewPanel view;
 
@@ -106,9 +106,9 @@ public class HelicorderViewerSettings {
     cf.put(prefix + ".waveZoomOffset", Integer.toString(waveZoomOffset));
     cf.put(prefix + ".refreshInterval", Integer.toString(refreshInterval));
     cf.put(prefix + ".scrollSize", Integer.toString(scrollSize));
-    cf.put(prefix + ".clipValue", Integer.toString(clipValue));
+    cf.put(prefix + ".clipValue", Double.toString(clipValue));
     cf.put(prefix + ".clipBars", Integer.toString(clipBars));
-    cf.put(prefix + ".barRange", Integer.toString(barRange));
+    cf.put(prefix + ".barRange", Double.toString(barRange));
     cf.put(prefix + ".alertClipTimeout", Integer.toString(alertClipTimeout));
     cf.put(prefix + ".bottomTime", Double.toString(bottomTime));
     cf.put(prefix + ".barMult", Double.toString(barMult));

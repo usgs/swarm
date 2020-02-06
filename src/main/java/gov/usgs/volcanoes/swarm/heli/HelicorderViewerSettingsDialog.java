@@ -373,8 +373,8 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
 
     removeDrift.setSelected(settings.forceCenter);
 
-    clipValue.setText(Integer.toString(settings.clipValue));
-    barRange.setText(Integer.toString(settings.barRange));
+    clipValue.setText(Double.toString(settings.clipValue));
+    barRange.setText(Double.toString(settings.barRange));
     autoScale.setSelected(settings.autoScale);
     showClip.setSelected(settings.showClip);
     alertClip.setSelected(settings.alertClip);
@@ -411,9 +411,9 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
 
       // Calibration cb = Swarm.getParentFrame().getCalibration(channel);
 
-      settings.clipValue = Integer.parseInt(clipValue.getText());
+      settings.clipValue = Double.parseDouble(clipValue.getText());
       settings.autoScale = autoScale.isSelected();
-      settings.barRange = Integer.parseInt(barRange.getText());
+      settings.barRange = Double.parseDouble(barRange.getText());
       settings.notifyView();
       
       // If option to apply to all helicorders is selected
@@ -474,11 +474,11 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
         throw new NumberFormatException();
       }
 
-      message = "Invalid clip value.";
-      Integer.parseInt(clipValue.getText());
-
       message = "Invalid one bar range.";
-      Integer.parseInt(barRange.getText());
+      Double.parseDouble(barRange.getText());
+      
+      message = "Invalid clip value.";
+      Double.parseDouble(clipValue.getText());
 
       return true;
     } catch (Exception e) {
