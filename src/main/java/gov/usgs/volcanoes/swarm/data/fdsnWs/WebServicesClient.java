@@ -1,0 +1,273 @@
+package gov.usgs.volcanoes.swarm.data.fdsnWs;
+
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.swarm.ChannelInfo;
+import gov.usgs.volcanoes.swarm.SwarmConfig;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import edu.sc.seis.seisFile.mseed.DataRecord;
+
+public class WebServicesClient extends AbstractDataRecordClient {
+  private static final Logger LOGGER = LoggerFactory.getLogger(WebServicesClient.class);
+
+  /**
+   * Test flag to use XML instead of text for station details. XML is more robust at the cost of a
+   * lot of speed. This will crawl if there are many networks. To use add "-DSWARM_WS_USE_XML=TRUE"
+   * to the Java command line.
+   */
+  private static boolean useXmlClientFlag = Boolean
+      .valueOf(WebServiceUtils.getProperty(WebServiceUtils.SWARM_WS_PROP_KEY_PREFIX + "USE_XML"));
+
+  /**
+   * Get the default web services data select URL text.
+   * 
+   * @return the default web services data select URL text.
+   */
+  public static String getDefaultWsDataSelectUrl() {
+    return DataSelectReader.DEFAULT_WS_URL;
+  }
+
+  /**
+   * Get the default web services station URL text.
+   * 
+   * @return the default web services station URL text.
+   */
+  public static String getDefaultWsStationUrl() {
+    return AbstractWebServiceStationClient.DEFAULT_WS_URL;
+  }
+
+  /** The station client. */
+  private final AbstractWebServiceStationClient stationClient;
+
+  /** The web services data select URL text. */
+  private final String wsDataSelectUrl;
+
+  private String lastStation = "";
+  private int numStations = 0;
+  private int stationCount = 0;
+  private final String progressId = "channels";
+
+  /**
+   * Creates the web services client.
+   * 
+   * @param net the network filter or empty if none.
+   * @param sta the station filter or empty if none.
+   * @param loc the location filter or empty if none.
+   * @param chan the channel filter or empty if none.
+   */
+  public WebServicesClient(final SeismicDataSource source, String net, String sta, String loc,
+      String chan) {
+    this(source, net, sta, loc, chan, getDefaultWsDataSelectUrl(), getDefaultWsStationUrl());
+  }
+
+  /**
+   * Creates the web services client.
+   * 
+   * @param net the network filter or empty if none.
+   * @param sta the station filter or empty if none.
+   * @param loc the location filter or empty if none.
+   * @param chan the channel filter or empty if none.
+   * @param wsDataSelectUrl the web services data select URL text.
+   * @param wsStationUrl the web services station URL text.
+   * @see #getDefaultWsDataSelectUrl()
+   * @see #getDefaultWsStationUrl()
+   */
+  public WebServicesClient(final SeismicDataSource source, String net, String sta, String loc,
+      String chan, String wsDataSelectUrl, String wsStationUrl) {
+    super(source);
+    Date date = null; // use current date
+    final List<String> channelList = WebServiceStationXmlClient.createChannelList();
+    if (useXmlClientFlag) {
+      stationClient = new WebServiceStationXmlClient(wsStationUrl, net, sta, loc, chan, date) {
+        public void processChannel(ChannelInfo ch) {
+          WebServiceUtils.addChannel(channelList, ch, source);
+          if (lastStation.compareTo(ch.getStation()) != 0) {
+            lastStation = ch.getStation();
+            if (numStations > 0) {
+              getSource().fireChannelsProgress(progressId,
+                  (double) stationCount / (double) numStations);
+            }
+            stationCount++;
+          }
+
+        }
+      };
+    } else {
+      stationClient = new WebServiceStationTextClient(wsStationUrl, net, sta, loc, chan, date) {
+        public void processChannel(ChannelInfo ch) {
+          WebServiceUtils.addChannel(channelList, ch, source);
+          if (lastStation.compareTo(ch.getStation()) != 0) {
+            lastStation = ch.getStation();
+            if (numStations > 0) {
+              getSource().fireChannelsProgress(progressId,
+                  (double) stationCount / (double) numStations);
+            }
+            stationCount++;
+          }
+
+        }
+      };
+    }
+    stationClient.setStationList(AbstractWebServiceStationClient.createStationList());
+    stationClient.setChannelList(channelList);
+    this.wsDataSelectUrl = wsDataSelectUrl;
+  }
+
+  /**
+   * Get the channel information.
+   * 
+   * @return the list of channel information.
+   */
+  public List<String> getChannels() {
+    final List<String> channelList = stationClient.getChannelList();
+    if (channelList.size() != 0) {
+      // LOGGER.info("channel list is not empty");
+    } else {
+      String error = null;
+      long start = System.currentTimeMillis();
+      if (stationClient.isAllNetworks()) {
+        stationClient.setCurrentStation(null);
+        // error = stationClient.fetchChannels();
+        error = stationClient.fetchStations();
+        if (error == null) {
+          getSource().fireChannelsProgress(progressId, 0.);
+          numStations = stationClient.getStationList().size();
+          error = stationClient.fetchChannels();
+        }
+
+      } else {
+        // final String id = "channels";
+        getSource().fireChannelsProgress(progressId, 0.);
+        // getSource().fireChannelsProgress(id, 0.);
+        error = stationClient.fetchStations();
+        numStations = stationClient.getStationList().size();
+        if (error == null) {
+          /*
+           * final List<StationInfo> stationList = stationClient.getStationList(); final int ns =
+           * stationList.size(); for (StationInfo station : stationList) {
+           * getSource().fireChannelsProgress(id, (double) cnt / (double) ns); cnt++;
+           * stationClient.setCurrentStation(station); error = stationClient.fetchChannels(); if
+           * (error != null) { break; } }
+           */
+          stationClient.setCurrentStation(null);
+          error = stationClient.fetchChannels();
+
+        }
+        // getSource().fireChannelsProgress(id, 1.);
+        getSource().fireChannelsProgress(progressId, 1.);
+      }
+      long end = System.currentTimeMillis();
+      if (WebServiceUtils.isDebug()) {
+        LOGGER.debug("getChannels({}): {} seconds", (useXmlClientFlag ? "XML" : "Text"),
+            ((end - start) / 1000.));
+      }
+      if (error != null) {
+        LOGGER.warn("could not get channels: {}", error);
+      }
+      assignChannels(channelList);
+    }
+    return channelList;
+  }
+
+  /**
+   * Get the raw data.
+   * 
+   * @param channelInfo the channel information.
+   * @param t1 the start time.
+   * @param t2 the end time.
+   * @return the raw data.
+   */
+  public Wave getRawData(final ChannelInfo channelInfo, final double t1, final double t2) {
+    final Date begin = getDate(t1);
+    final Date end = getDate(t2);
+    final List<Wave> waves = createWaves();
+    final DataSelectReader reader = new DataSelectReader(wsDataSelectUrl) {
+      /**
+       * Process a data record.
+       * 
+       * @param dr the data record.
+       * @return true if data record should be added to the list, false otherwise.
+       */
+      public boolean processRecord(DataRecord dr) {
+        try {
+          addWaves(waves, dr);
+        } catch (Exception ex) {
+          LOGGER.warn("could not get web service raw data ({}): {}", channelInfo, ex.getMessage());
+        }
+        return true;
+      }
+    };
+    try {
+      final String query = reader.createQuery(channelInfo.getNetwork(), channelInfo.getStation(),
+          channelInfo.getLocation(), channelInfo.getChannel(), begin, end);
+      reader.read(query, (List<DataRecord>) null);
+    } catch (Exception ex) {
+      LOGGER.warn("could not get web service raw data ({}): {}", channelInfo, ex.getMessage());
+    }
+    Wave wave = join(waves);
+    if (wave != null && WebServiceUtils.isDebug()) {
+      LOGGER.debug("web service raw data ({}, {})", getDateText(wave.getStartTime()),
+          getDateText(wave.getEndTime()) + ")");
+    }
+    return wave;
+  }
+
+  /**
+   * Retrieve a single waveform without providing full SDS functions.
+   * 
+   * <p>TODO: integrate with getRawData(). should all SDSs have a static wave retrieval method?
+   * 
+   * @param code the channel information.
+   * @param t1 the start time.
+   * @param t2 the end time.
+   * @return the raw data.
+   */
+  public static Wave getWave(final String code, final double t1, final double t2) {
+    final Date begin = getDate(t1);
+    final Date end = getDate(t2);
+    final List<Wave> waves = new ArrayList<Wave>();
+    final DataSelectReader reader =
+        new DataSelectReader(SwarmConfig.getInstance().fdsnDataselectUrl) {
+          /**
+           * Process a data record.
+           * 
+           * @param dr the data record.
+           * @return true if data record should be added to the list, false otherwise.
+           */
+          public boolean processRecord(DataRecord dr) {
+            try {
+              addWaves(waves, dr);
+            } catch (Exception ex) {
+              LOGGER.warn("could not get web service raw data ({}): {}", code, ex.getMessage());
+            }
+            return true;
+          }
+        };
+    try {
+      String[] comps = code.split("\\$");
+      final String query = reader.createQuery(comps[2], comps[0],
+          (comps.length > 3 ? comps[3] : "--"), comps[1], begin, end);
+      reader.read(query, (List<DataRecord>) null);
+    } catch (Exception ex) {
+      LOGGER.warn("could not get web service raw data ({}): {}", code, ex.getMessage());
+    }
+    Wave wave = join(waves);
+    if (wave != null && WebServiceUtils.isDebug()) {
+      LOGGER.debug("web service raw data ({}, {})", getDateText(wave.getStartTime()),
+          getDateText(wave.getEndTime()) + ")");
+    }
+    return wave;
+  }
+
+  public AbstractWebServiceStationClient getStationClient() {
+    return stationClient;
+  }
+
+}

@@ -1,0 +1,46 @@
+<assembly
+	xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+	<id>bin</id>
+	<formats>
+		<format>tar.gz</format>
+		<format>zip</format>
+	</formats>
+	<fileSets>
+		<fileSet>
+			<directory>${project.basedir}</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>README.md</include>
+				<include>LICENSE.md</include>
+				<include>CHANGES.md</include>
+				<include>NTP.config</include>
+				<include>WaveDefaults.config</include>
+				<include>RsamDefaults.config</include>
+				<include>EventClassifications.config</include>
+				<include>Hypo71.config</include>
+				<include>layouts/Augustine.config</include>
+				<include>DefaultVelocityModel.txt</include>
+				<include>clip.wav</include>
+				<include>ding.wav</include>
+				<include>swarm.sh</include>
+				<include>swarm_console.bat</include>
+				<include>mapdata</include>
+				<include>docs/swarm_v3.pdf</include>
+				<include>docs/hypo71manual.pdf</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/mapdata</directory>
+			<outputDirectory>/mapdata</outputDirectory>
+		</fileSet>
+	</fileSets>
+	<files>
+		<file>
+			<outputDirectory>lib</outputDirectory>
+			<source>${project.build.directory}/${project.build.finalName}.jar</source>
+			<destName>swarm.jar</destName>
+		</file>
+	</files>
+</assembly>
