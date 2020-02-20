@@ -1,33 +1,32 @@
-## Version 3.0.2 - February 3, 2020
+## Version 3.1.0 - February 18, 2020
+  * Allow decimals for one bar range and clip value in helicorder settings 
+  * Allow decimals in min/max amp in wave settings for small values 
+  * Fix plot tick labels for really small values 
   * Fix display of really small values in status area
-  * Allow decimals for one bar range and clip value in helicorder settings (#309)
-  * Allow decimals in min/max amp in wave settings for small values (#310)
-
-## Version 3.0.1 - January 30, 2020
-  * Fix plot tick labels for really small values (#306)
   * volcano-core dependency to 3.0.2
   * use new hypo71 1.0.0 and quakeml 1.0.0 libraries
+  * Migration of source code from github.com/usgs to code.usgs.gov
 
 ## Version 3.0.0 - November 18, 2019
-  * Support import of QuakeML without onset, polarity, and uncertainty (#292)
-  * Improve loading of wave clipboard upon QuakeML import (#293)
-  * Remove includeavailability option in FDSN query statement (#295)
-  * Support QuakeML timestamp with six decimal places for seconds (#296)
-  * Fix issue opening wave view from helicorder on Windows 10 against Winston 1.3.* (#299)
+  * Support import of QuakeML without onset, polarity, and uncertainty 
+  * Improve loading of wave clipboard upon QuakeML import 
+  * Remove includeavailability option in FDSN query statement 
+  * Support QuakeML timestamp with six decimal places for seconds 
+  * Fix issue opening wave view from helicorder on Windows 10 against Winston 1.3.x 
   * Require Java 8 or higher (previously supported Java 7)  
   * volcano-core dependency to 2.0.0
   * wwsclient dependency to 2.0.0
 
 ## Version 2.8.13 - October 2, 2019
-  * Use Swarm config Vp/Vs for Hypo71 Control Card POS (#287)
-  * Fix map display issue introduced in 2.8.12 (#288)
+  * Use Swarm config Vp/Vs for Hypo71 Control Card POS 
+  * Fix map display issue introduced in 2.8.12 
 
 ## Version 2.8.12 - September 23, 2019
-  * Add option to hide stale channels in Data Chooser (#274)
-  * Add color-blind friendly spectrum option for spectrogram (#275)
-  * Indicate event classification color in tag menu (#279)
+  * Add option to hide stale channels in Data Chooser 
+  * Add color-blind friendly spectrum option for spectrogram 
+  * Indicate event classification color in tag menu 
   * New default colors for default event classifications
-  * Fix start time precision in Seisan file export (#280)
+  * Fix start time precision in Seisan file export 
   * Fix wrong year in wave panel when date is Dec 31
   * Handle error when map view selected for station with no lat/lon in metadata
 
@@ -36,51 +35,51 @@
   * Winston client to version 1.3.7 (fix issue against Winston 1.3 on Windows)
 
 ## Version 2.8.10 - May 31, 2019 
-  * Add legend for events on map (#192)
-  * Option to plot event colors based on depth (#193)
-  * Manual scale of y-axis for spectra view (#219)
-  * Add option to apply helicorder view settings to all open helicorders (#237)
-  * Read/write picks in SAC header on import/export (#249)
+  * Add legend for events on map 
+  * Option to plot event colors based on depth 
+  * Manual scale of y-axis for spectra view 
+  * Add option to apply helicorder view settings to all open helicorders 
+  * Read/write picks in SAC header on import/export 
   * Set B & E fields in SAC header on export
-  * Fixes for non-integer sample rate (#260)
-  * Separate log power and min/max frequency option for spectra and spectrogram views (#268)
+  * Fixes for non-integer sample rate 
+  * Separate log power and min/max frequency option for spectra and spectrogram views
   
 ## Version 2.8.9 - March 14, 2019
-  * Fix waveform export issue in clipboard (#254)
-  * Fix QuakeML date parse precision problem (#255)
+  * Fix waveform export issue in clipboard 
+  * Fix QuakeML date parse precision problem 
 
 ## Version 2.8.8 - February 19, 2019
-  * Fix SeedLink stream break issues (#131)
+  * Fix SeedLink stream break issues 
   
 ## Version 2.8.7 - December 13, 2018
   * Bundle user manual into zip file (under docs)
   * Bundle Hypo71 manual into zip file (under docs)
   * Add tooltips for Hypo71 TEST settings.
   * Fix Pick menu Hide option
-  * Fix memory error when retrieving old helicorder data from FDSN (#182)
-  * Don't hide Event Dialog after plotting hypocenter (#234)
-  * Handle null timezone when writing to config (#240) 
-  * Fix gap issues when reading seed files (#241)
+  * Fix memory error when retrieving old helicorder data from FDSN
+  * Don't hide Event Dialog after plotting hypocenter 
+  * Handle null timezone when writing to config 
+  * Fix gap issues when reading seed files 
 
 ## Version 2.8.6 - August 8, 2018
-  * Addition of map option to hide station icons (#124)
-  * Add RSAM value of selected wave panel period to status bar (#103)
-  * Fix issue with streaming failing on loss of data (#142)
-  * Fix issue using WWS instrument time zone (#201)
-  * Fix multiple event dialog showing up under Window menu (#216)
-  * Fix problem parsing server response from CWB (#221)
-  * Support height metadata for FDSN data source (#222)
-  * Position real-time wave viewer and RSAM viewer when opening layout (#224)
+  * Addition of map option to hide station icons 
+  * Add RSAM value of selected wave panel period to status bar 
+  * Fix issue with streaming failing on loss of data 
+  * Fix issue using WWS instrument time zone 
+  * Fix multiple event dialog showing up under Window menu 
+  * Fix problem parsing server response from CWB 
+  * Support height metadata for FDSN data source 
+  * Position real-time wave viewer and RSAM viewer when opening layout
   * Updated WWS Client to 1.3.5
 
 ## Version 2.8.5 - July 13, 2018
-  * Support real-time wave viewer in layouts (#40)
+  * Support real-time wave viewer in layouts 
   * Support RSAM viewer in layouts
-  * Add audio alarm for RSAM (#44)
-  * Add 6 and 8 week time span for RSAM viewer (#188)
-  * Fix issue with zoom/scroll for cached data source (#197)
-  * Add event classifier (#199)
-  * Fix loading of groups from SwarmMetadata.config (#205)
+  * Add audio alarm for RSAM 
+  * Add 6 and 8 week time span for RSAM viewer 
+  * Fix issue with zoom/scroll for cached data source 
+  * Add event classifier 
+  * Fix loading of groups from SwarmMetadata.config 
   * Fix tooltip for Particle Motion shortcut
   * Fix URL for Imagery Topo map
   * Fix earth button on map to show full extent

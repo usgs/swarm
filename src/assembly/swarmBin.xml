@@ -1,7 +1,7 @@
 <assembly
-	xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
+	xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
+	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
 	<id>bin</id>
 	<formats>
 		<format>tar.gz</format>
@@ -15,20 +15,20 @@
 				<include>README.md</include>
 				<include>LICENSE.md</include>
 				<include>CHANGES.md</include>
-				<include>IRIS_networks.txt</include>
 				<include>NTP.config</include>
 				<include>WaveDefaults.config</include>
+				<include>RsamDefaults.config</include>
+				<include>EventClassifications.config</include>
+				<include>Hypo71.config</include>
+				<include>layouts/Augustine.config</include>
+				<include>DefaultVelocityModel.txt</include>
 				<include>clip.wav</include>
 				<include>ding.wav</include>
 				<include>swarm.sh</include>
 				<include>swarm_console.bat</include>
-				<include>layouts/Augustine.config</include>
 				<include>mapdata</include>
-				<include>docs/swarm_v2.pdf</include>
+				<include>docs/swarm_v3.pdf</include>
 				<include>docs/hypo71manual.pdf</include>
-				<include>DefaultVelocityModel.txt</include>
-				<include>EventClassifications.config</include>
-				<include>Hypo71.config</include>
 			</includes>
 		</fileSet>
 		<fileSet>

@@ -1,7 +1,5 @@
+/bin/
 /target/
-/classes/
-src/main/java/gov/usgs/volcanoes/swarm/Version.java
-.DS_Store
-/dependency-reduced-pom.xml
 /Swarm.config
 /Swarm.config.bak
+/PickSettings.config
