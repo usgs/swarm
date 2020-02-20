@@ -82,9 +82,9 @@ public class HelicorderViewerSettings {
     waveZoomOffset = Integer.parseInt(cf.getString("waveZoomOffset"));
     refreshInterval = Integer.parseInt(cf.getString("refreshInterval"));
     scrollSize = Integer.parseInt(cf.getString("scrollSize"));
-    clipValue = Integer.parseInt(cf.getString("clipValue"));
+    clipValue = Double.parseDouble(cf.getString("clipValue"));
     clipBars = Integer.parseInt(cf.getString("clipBars"));
-    barRange = Integer.parseInt(cf.getString("barRange"));
+    barRange = Double.parseDouble(cf.getString("barRange"));
     alertClipTimeout = Integer.parseInt(cf.getString("alertClipTimeout"));
     setBottomTime(Double.parseDouble(cf.getString("bottomTime")));
     barMult = Double.parseDouble(cf.getString("barMult"));
