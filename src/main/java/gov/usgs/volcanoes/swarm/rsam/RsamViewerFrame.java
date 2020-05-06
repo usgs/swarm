@@ -197,7 +197,7 @@ public class RsamViewerFrame extends SwarmFrame implements Runnable, SettingsLis
     for (JInternalFrame frame : frames) {
       if (frame instanceof RsamViewerFrame) {
         RsamViewerFrame rvf = (RsamViewerFrame) frame;
-        if (rvf.channel != this.channel) {
+        if (!rvf.channel.equals(this.channel)) {
           rvfs.put(rvf.channel, rvf);
         }
       }
