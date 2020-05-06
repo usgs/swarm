@@ -252,8 +252,8 @@ public class Hypo71Manager {
     try {
       FileReader fileReader = new FileReader(crustalModelFileName);
       BufferedReader bufReader = new BufferedReader(fileReader);
-      while (bufReader.ready()) {
-        String line = bufReader.readLine();
+      String line;
+      while ((line = bufReader.readLine()) != null) {
         String[] data = line.trim().split("\\s+");
         double velocity = Double.valueOf(data[0]);
         double depth = Double.valueOf(data[1]);
