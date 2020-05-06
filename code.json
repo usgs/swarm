@@ -10,13 +10,13 @@
       "licenses": [
         {
           "name": "Public Domain, CC0-1.0",
-          "URL": "https://code.usgs.gov/vsc/swarm/LICENSE.md"
+          "URL": "https://code.usgs.gov/vsc/swarm/blob/master/LICENSE.md"
         }
       ]
     },
     "homepageURL": "https://volcanoes.usgs.gov/software/swarm/index.shtml",
     "downloadURL": "https://volcanoes.usgs.gov/software/swarm/download.shtml",
-    "disclaimerURL": "https://code.usgs.gov/vsc/swarm/LICENSE.md",
+    "disclaimerURL": "https://code.usgs.gov/vsc/swarm/blob/master/DISCLAIMER.md",
     "repositoryURL": "https://code.usgs.gov/vsc/swarm.git",
     "vcs": "git",
     "laborHours": 0,
@@ -34,7 +34,7 @@
       "email": "dnorgaard@usgs.gov"
     },
     "date": {
-      "metadataLastUpdated": "2020-02-18"
+      "metadataLastUpdated": "2020-05-05"
     }
   }
 ]
