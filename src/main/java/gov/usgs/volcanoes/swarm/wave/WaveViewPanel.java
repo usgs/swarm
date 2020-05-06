@@ -688,7 +688,7 @@ public class WaveViewPanel extends JComponent {
             pickStatus += coda + ", " + avgCoda;
           }
         } 
-        if (!pickStatus.equals("")) {
+        if (!pickStatus.equals(new String(""))) {
           status.append("\n");
           status.append(pickStatus);
         }
@@ -708,7 +708,7 @@ public class WaveViewPanel extends JComponent {
       });
     }
 
-    return !status.equals(" ");
+    return !status.toString().equals(new String(" "));
   }
 
   /**
