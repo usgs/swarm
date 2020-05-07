@@ -4,13 +4,10 @@ import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
-
 import gov.usgs.volcanoes.core.math.Butterworth.FilterType;
 import gov.usgs.volcanoes.swarm.SwarmModalDialog;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
-
 import java.awt.BorderLayout;
-
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -62,18 +59,18 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
   private JTextField spectraMinFreq;
   private JTextField spectraMaxFreq;
   private JTextField spectraPowerRange;
-  
+
   // spectrogram options
   private ButtonGroup spectrogramScaleGroup;
   private JRadioButton spectrogramAutoScale;
-  private JRadioButton spectrogramManualScale;  
+  private JRadioButton spectrogramManualScale;
   private JCheckBox spectrogramLogPower;
   private JTextField spectrogramPowerRange;
   private JTextField spectrogramMinFreq;
   private JTextField spectrogramMaxFreq;
   private JTextField binSize;
   private JTextField nfft;
-  private JTextField spectrogramOverlap; 
+  private JTextField spectrogramOverlap;
   private JCheckBox useAlternateSpectrum;
 
   // filter options
@@ -96,13 +93,14 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     createUi();
     setSizeAndLocation();
   }
-  
+
   public static WaveViewSettingsDialog getInstance(WaveViewSettings s) {
     return getInstance(s, 1);
   }
-  
+
   /**
    * Get instance of wave view settings dialog.
+   * 
    * @param s wave view settings
    * @param count settings count
    * @return wave view settings dialog
@@ -120,6 +118,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
 
   /**
    * Set settings count.
+   * 
    * @param i number of different waves
    */
   public void setSettingsCount(int i) {
@@ -156,7 +155,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
       default:
         break;
     }
-    
+
     // wave settings
     removeBias.setSelected(settings.removeBias);
     useUnits.setSelected(settings.useUnits);
@@ -189,7 +188,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     }
     spectraPowerRange
         .setText(String.format("%.1f, %.1f", settings.spectraMinPower, settings.spectraMaxPower));
-    
+
     // spectrogram options
     if (settings.autoScaleSpectrogramPower) {
       spectrogramAutoScale.setSelected(true);
@@ -209,7 +208,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     // particle motion options
     useAlternateOrientationCode.setSelected(settings.useAlternateOrientationCode);
     alternateOrientationCode.setText(settings.alternateOrientationCode);
-    
+
     // filter options
     filterEnabled.setSelected(settings.filterOn);
     switch (settings.filter.getType()) {
@@ -232,7 +231,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
         break;
     }
     order.setValue(settings.filter.getOrder());
-    
+
   }
 
   private void createComponents() {
@@ -272,7 +271,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     spectraScaleGroup.add(spectraAutoScale);
     spectraScaleGroup.add(spectraManualScale);
     spectraPowerRange = new JTextField(6);
-    
+
     // spectrogram options
     spectrogramLogPower = new JCheckBox("Log power");
     spectrogramPowerRange = new JTextField(6);
@@ -291,7 +290,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     // particle motion options
     useAlternateOrientationCode = new JCheckBox("Use alternate orientation code");
     alternateOrientationCode = new JTextField("Z12");
-    
+
     // filter options
     filterGroup = new ButtonGroup();
     filterEnabled = new JCheckBox("Enabled");
@@ -314,8 +313,9 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
   protected void createUi() {
     super.createUi();
     createComponents();
-    FormLayout layout =
-        new FormLayout("left:70dlu, 3dlu, left:70dlu, 3dlu, left:70dlu, 3dlu, left:70dlu, 3dlu, left: 70dlu, 3dlu, left: 70dlu", "");
+    FormLayout layout = new FormLayout(
+        "left:70dlu, 3dlu, left:70dlu, 3dlu, left:70dlu, 3dlu, left:70dlu, 3dlu, left: 70dlu, 3dlu, left: 70dlu",
+        "");
 
     DefaultFormBuilder builder = new DefaultFormBuilder(layout).border(Borders.DIALOG);
 
@@ -351,7 +351,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     builder.append(new JLabel(""));
     builder.append(useUnits);
 
-    builder.nextLine(); 
+    builder.nextLine();
 
     // spectra options
     builder.appendSeparator("Spectra Options");
@@ -374,8 +374,8 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     builder.nextColumn(2);
     builder.append(spectraMaxFreq);
     builder.append(spectraLogPower);
-    builder.append(spectraManualScale,2);
-    builder.nextLine(); 
+    builder.append(spectraManualScale, 2);
+    builder.nextLine();
 
     // spectrogram
     builder.appendSeparator("Spectrogram Options");
@@ -385,7 +385,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.append(spectrogramMinFreq);
-    builder.append(spectrogramAutoScale,3);
+    builder.append(spectrogramAutoScale, 3);
     builder.add(new JLabel("Window size (s):"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
@@ -402,7 +402,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     builder.nextColumn(2);
     builder.append(nfft);
     builder.nextLine(); // row 3
-    builder.append(new JLabel(""),1);
+    builder.append(new JLabel(""), 1);
     builder.append(spectrogramLogPower);
     builder.add(new JLabel("Power range (dB):"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
@@ -413,9 +413,9 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
     builder.nextColumn(2);
     builder.append(spectrogramOverlap);
     builder.nextLine(); // row 4
-    builder.append(useAlternateSpectrum,3);
-    builder.nextLine(); 
-    
+    builder.append(useAlternateSpectrum, 3);
+    builder.nextLine();
+
     // particle motion
     builder.appendSeparator("Particle Motion Options");
     builder.nextLine();
@@ -445,7 +445,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
         cc.xyw(builder.getColumn(), builder.getRow(), 3, "center, center"));
     builder.nextLine(); // row 3
     builder.append(new JLabel(""));
-    builder.append(bandPass,4);
+    builder.append(bandPass, 4);
     builder.append(order, 4);
     builder.nextLine(); // row 4
     builder.append(warningLabel, 11);
@@ -457,6 +457,8 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
   }
 
   /**
+   * Allow ok.
+   * 
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#allowOk()
    */
   public boolean allowOk() {
@@ -516,6 +518,8 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
   }
 
   /**
+   * Was ok.
+   * 
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#wasOk()
    */
   public void wasOk() {
@@ -529,8 +533,8 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
         settings.viewType = ViewType.SPECTROGRAM;
       } else if (particleMotionButton.isSelected()) {
         settings.viewType = ViewType.PARTICLE_MOTION;
-      } 
-      
+      }
+
       // wave options
       settings.removeBias = removeBias.isSelected();
       settings.useUnits = useUnits.isSelected();
@@ -538,7 +542,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
       settings.autoScaleAmpMemory = waveAutoScaleMemory.isSelected();
       settings.waveMinAmp = Double.parseDouble(minAmp.getText());
       settings.waveMaxAmp = Double.parseDouble(maxAmp.getText());
-      
+
       // spectra options
       settings.spectraLogFreq = spectraLogFreq.isSelected();
       settings.spectraLogPower = spectraLogPower.isSelected();
@@ -555,7 +559,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
         settings.spectraMaxPower = Double.parseDouble(spectraPowerRange.getText().split(",")[1]);
         settings.autoScaleSpectraPower = false;
       }
-      
+
       // spectrogram options
       settings.spectrogramMaxFreq = Double.parseDouble(spectrogramMaxFreq.getText());
       settings.spectrogramMinFreq = Double.parseDouble(spectrogramMinFreq.getText());
@@ -582,7 +586,7 @@ public class WaveViewSettingsDialog extends SwarmModalDialog {
       settings.spectrogramLogPower = spectrogramLogPower.isSelected();
       settings.useAlternateSpectrum = useAlternateSpectrum.isSelected();
       settings.notifyView();
-      
+
       // particle motion options
       settings.useAlternateOrientationCode = useAlternateOrientationCode.isSelected();
       settings.alternateOrientationCode = alternateOrientationCode.getText();

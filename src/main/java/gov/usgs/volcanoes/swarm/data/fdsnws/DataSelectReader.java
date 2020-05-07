@@ -1,13 +1,6 @@
-package gov.usgs.volcanoes.swarm.data.fdsnWs;
-
-import edu.sc.seis.seisFile.SeisFileException;
-import edu.sc.seis.seisFile.StringMSeedQueryReader;
-import edu.sc.seis.seisFile.mseed.DataRecord;
-import edu.sc.seis.seisFile.mseed.SeedFormatException;
-import edu.sc.seis.seisFile.mseed.SeedRecord;
+package gov.usgs.volcanoes.swarm.data.fdsnws;
 
 import gov.usgs.volcanoes.swarm.Version;
-
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
@@ -19,14 +12,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import edu.sc.seis.seisFile.SeisFileException;
+import edu.sc.seis.seisFile.StringMSeedQueryReader;
+import edu.sc.seis.seisFile.mseed.DataRecord;
+import edu.sc.seis.seisFile.mseed.SeedFormatException;
+import edu.sc.seis.seisFile.mseed.SeedRecord;
 
 /**
- * The data select reader reads data from the web services. This class a based
- * on the edu.sc.seis.seisFile.dataSelectWS.DataSelectReader class with minor
- * changes for Swarm.
+ * The data select reader reads data from the web services. This class a based on the
+ * edu.sc.seis.seisFile.dataSelectWS.DataSelectReader class with minor changes for Swarm.
  * 
  * @author Kevin Frechette (ISTI)
  */
@@ -50,8 +46,7 @@ public class DataSelectReader extends StringMSeedQueryReader {
   }
 
   /**
-   * Create the data select reader with the specified URL and the default
-   * timeout.
+   * Create the data select reader with the specified URL and the default timeout.
    * 
    * @param urlBase the URL base.
    */
@@ -105,9 +100,8 @@ public class DataSelectReader extends StringMSeedQueryReader {
    * @param end the end date.
    * @return the query.
    * @see WebServiceUtils.EMPTY_LOC_CODE
-   * @see edu.sc.seis.seisFile.dataSelectWS.MSeedQueryReader#createQuery(java.lang
-   *      .String, java.lang.String, java.lang.String, java.lang.String,
-   *      java.util.Date, float)
+   * @see edu.sc.seis.seisFile.dataSelectWS.MSeedQueryReader#createQuery(java.lang .String,
+   *      java.lang.String, java.lang.String, java.lang.String, java.util.Date, float)
    */
   @Override
   public String createQuery(String network, String station, String location, String channel,
@@ -165,8 +159,7 @@ public class DataSelectReader extends StringMSeedQueryReader {
    * 
    * @return the data record list.
    * 
-   * @see
-   * edu.sc.seis.seisFile.dataSelectWS.MSeedQueryReader#read(java.lang.String)
+   * @see edu.sc.seis.seisFile.dataSelectWS.MSeedQueryReader#read(java.lang.String)
    */
   public List<DataRecord> read(String query) throws IOException, SeisFileException {
     return read(query, new ArrayList<DataRecord>());
@@ -179,13 +172,13 @@ public class DataSelectReader extends StringMSeedQueryReader {
    * @param records the data record list or null if none.
    * @return the data record list.
    * @throws IOException if an I/O exception occurs.
-   * @throws SeisFileException
+   * @throws SeisFileException seisfile exception
    * @throws DataSelectException if not OK repsonse code.
    */
   public List<DataRecord> read(String query, List<DataRecord> records)
       throws IOException, SeisFileException {
-    URL requestURL = new URL(urlBase + "?" + query);
-    HttpURLConnection conn = (HttpURLConnection) requestURL.openConnection();
+    URL requestUrl = new URL(urlBase + "?" + query);
+    HttpURLConnection conn = (HttpURLConnection) requestUrl.openConnection();
     if (timeoutMillis != 0) {
       conn.setReadTimeout(timeoutMillis);
     }
@@ -197,7 +190,7 @@ public class DataSelectReader extends StringMSeedQueryReader {
         return records;
       } else {
         throw new SeisFileException("Did not get an OK repsonse code (code="
-            + conn.getResponseCode() + ", url=" + requestURL + "\"");
+            + conn.getResponseCode() + ", url=" + requestUrl + "\"");
       }
     }
     BufferedInputStream bif = new BufferedInputStream(conn.getInputStream());

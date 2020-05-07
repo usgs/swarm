@@ -19,6 +19,7 @@ public class GulperList {
 
   /**
    * Request gulper.
+   * 
    * @param key gulper key
    * @param gl gulper listener
    * @param source seismic data source
@@ -50,7 +51,8 @@ public class GulperList {
   }
 
   /**
-   * Kill gulper. 
+   * Kill gulper.
+   * 
    * @param key gulper key
    * @param gl gulper listener
    */
@@ -63,6 +65,7 @@ public class GulperList {
 
   /**
    * Called from the gulper.
+   * 
    * @param g gulper
    */
   public synchronized void removeGulper(Gulper g) {

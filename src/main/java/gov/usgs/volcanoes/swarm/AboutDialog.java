@@ -1,7 +1,6 @@
 package gov.usgs.volcanoes.swarm;
 
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -14,7 +13,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -165,8 +163,7 @@ public class AboutDialog extends JDialog implements Runnable {
         + "<DIV style=\"text-align: center;\"><B>Developed by:</B><br>U.S. Geological Survey"
         + "<p><B>With contributions from:</B>"
         + "<BR>Instrumental Software Technologies, Inc. (ISTI)"
-        + "<BR>The Incorporated Research Institutions for Seismology (IRIS)"
-        + "</DIV></HTML>");
+        + "<BR>The Incorporated Research Institutions for Seismology (IRIS)" + "</DIV></HTML>");
     return pane;
   }
 
@@ -178,6 +175,8 @@ public class AboutDialog extends JDialog implements Runnable {
   }
 
   /**
+   * set visible.
+   * 
    * @see java.awt.Dialog#setVisible(boolean)
    */
   public void setVisible(boolean v) {
@@ -188,6 +187,8 @@ public class AboutDialog extends JDialog implements Runnable {
   }
 
   /**
+   * run.
+   * 
    * @see java.lang.Runnable#run()
    */
   public void run() {

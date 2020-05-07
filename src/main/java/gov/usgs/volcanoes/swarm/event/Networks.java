@@ -1,7 +1,6 @@
 /**
- * I waive copyright and related rights in the this work worldwide
- * through the CC0 1.0 Universal public domain dedication.
- * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ * I waive copyright and related rights in the this work worldwide through the CC0 1.0 Universal
+ * public domain dedication. https://creativecommons.org/publicdomain/zero/1.0/legalcode
  */
 
 package gov.usgs.volcanoes.swarm.event;
@@ -13,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +22,9 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class Networks {
-  private final static Logger LOGGER = LoggerFactory.getLogger(Networks.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(Networks.class);
 
-  private final static String NETWORKS_FILE = "networks.csv";
+  private static final String NETWORKS_FILE = "networks.csv";
   private final Map<String, String> networks;
 
   public String getName(String code) {
@@ -56,6 +54,7 @@ public class Networks {
         try {
           reader.close();
         } catch (IOException ignored) {
+          //
         }
       }
     }
@@ -71,11 +70,12 @@ public class Networks {
   }
 
   /**
-   * Adapted from https://agiletribe.wordpress.com/2012/11/23/the-only-class-you-need-for-csv-files/
+   * Adapted from
+   * https://agiletribe.wordpress.com/2012/11/23/the-only-class-you-need-for-csv-files/.
    * 
-   * @param r
-   * @return
-   * @throws Exception
+   * @param r reader
+   * @return list of strings
+   * @throws Exception exception
    */
   public static List<String> parseLine(Reader r) throws Exception {
     int ch = r.read();

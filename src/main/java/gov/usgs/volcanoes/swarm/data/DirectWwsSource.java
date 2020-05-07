@@ -8,14 +8,12 @@ import gov.usgs.volcanoes.winston.Channel;
 import gov.usgs.volcanoes.winston.db.Channels;
 import gov.usgs.volcanoes.winston.db.Data;
 import gov.usgs.volcanoes.winston.db.WinstonDatabase;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An implementation of <code>SeismicDataSource</code> that communicates
- * directly with a Winston database. Essentially identical to
- * DirectWinstonSource.
+ * An implementation of <code>SeismicDataSource</code> that communicates directly with a Winston
+ * database. Essentially identical to DirectWinstonSource.
  *
  *
  * @author Dan Cervelli
@@ -34,6 +32,7 @@ public class DirectWwsSource extends SeismicDataSource {
 
   /**
    * Parse data source parameters.
+   * 
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#parse(java.lang.String)
    */
   public void parse(String params) {
@@ -53,6 +52,7 @@ public class DirectWwsSource extends SeismicDataSource {
 
   /**
    * Get wave.
+   * 
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getWave(java.lang.String, double, double)
    */
   public synchronized Wave getWave(String station, double t1, double t2) {
@@ -77,6 +77,7 @@ public class DirectWwsSource extends SeismicDataSource {
 
   /**
    * Get channels.
+   * 
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getChannels()
    */
   public synchronized List<String> getChannels() {
@@ -90,8 +91,9 @@ public class DirectWwsSource extends SeismicDataSource {
 
   /**
    * Get helicorder.
-   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getHelicorder
-   * (java.lang.String, double, double, gov.usgs.volcanoes.swarm.data.GulperListener)
+   * 
+   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getHelicorder (java.lang.String, double,
+   *      double, gov.usgs.volcanoes.swarm.data.GulperListener)
    */
   public synchronized HelicorderData getHelicorder(String station, double t1, double t2,
       GulperListener gl) {

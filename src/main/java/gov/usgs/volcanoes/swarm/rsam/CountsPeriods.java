@@ -20,6 +20,12 @@ public enum CountsPeriods {
     return periodS;
   }
 
+  /**
+   * Get counts period from seconds.
+   * 
+   * @param s seconds
+   * @return
+   */
   public static CountsPeriods fromS(int s) {
     for (CountsPeriods p : CountsPeriods.values()) {
       if (p.periodS == s) {

@@ -1,4 +1,4 @@
-package gov.usgs.volcanoes.swarm.data.fdsnWs;
+package gov.usgs.volcanoes.swarm.data.fdsnws;
 
 import gov.usgs.volcanoes.core.data.HelicorderData;
 import gov.usgs.volcanoes.core.data.Wave;
@@ -9,10 +9,8 @@ import gov.usgs.volcanoes.swarm.data.DataSourceType;
 import gov.usgs.volcanoes.swarm.data.GulperList;
 import gov.usgs.volcanoes.swarm.data.GulperListener;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-
 import java.util.Collections;
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,9 +64,10 @@ public class WebServicesSource extends SeismicDataSource {
    * Default constructor.
    */
   public WebServicesSource() {}
-  
+
   /**
    * Get web services source for channel.
+   * 
    * @param channel channel name
    */
   public WebServicesSource(String channel) {
@@ -78,6 +77,7 @@ public class WebServicesSource extends SeismicDataSource {
 
   /**
    * Build params for channel using IRIS web service and parse.
+   * 
    * @param channel channel name
    */
   private void setChannel(String channel) {
@@ -99,8 +99,10 @@ public class WebServicesSource extends SeismicDataSource {
     sb.append(STATION_URL);
     parse(sb.toString());
   }
-  
+
   /**
+   * Parse parameters.
+   * 
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#parse(java.lang.String)
    */
   public void parse(String params) {
@@ -118,18 +120,16 @@ public class WebServicesSource extends SeismicDataSource {
     configString = String.format("%s;%s:" + PARAM_FMT_TEXT, name, typeString, net, sta, loc, chan,
         gulpSize, gulpDelay, wsDataSelectUrl, wsStationUrl);
     client = new WebServicesClient(this, net, sta, loc, chan, wsDataSelectUrl, wsStationUrl);
-/*    try {
-      client.getStationClient().fetch();
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }*/
+    /*
+     * try { client.getStationClient().fetch(); } catch (Exception e) { // TODO Auto-generated catch
+     * block e.printStackTrace(); }
+     */
     LOGGER.debug("web service started {}", count);
   }
 
   /**
-   * Create a Web Services server source with the same parameters as the
-   * specified Web Services server source.
+   * Create a Web Services server source with the same parameters as the specified Web Services
+   * server source.
    * 
    * @param sls the Web Services server source.
    */
@@ -199,8 +199,7 @@ public class WebServicesSource extends SeismicDataSource {
   }
 
   /**
-   * Either returns the wave successfully or null if the data source could not
-   * get the wave.
+   * Either returns the wave successfully or null if the data source could not get the wave.
    * 
    * @param station the station.
    * @param t1 the start time.
@@ -229,8 +228,7 @@ public class WebServicesSource extends SeismicDataSource {
   }
 
   /**
-   * Is this data source active; that is, is new data being added in real-time
-   * to this data source?
+   * Is this data source active; that is, is new data being added in real-time to this data source?
    * 
    * @return whether or not this is an active data source.
    */
@@ -251,5 +249,5 @@ public class WebServicesSource extends SeismicDataSource {
   public String toConfigString() {
     return configString;
   }
-  
+
 }

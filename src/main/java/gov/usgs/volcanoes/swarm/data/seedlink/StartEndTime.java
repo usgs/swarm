@@ -56,7 +56,7 @@ public class StartEndTime {
     return startTime;
   }
 
-  
+
   /**
    * Set this start end time to the specified start end time.
    * 

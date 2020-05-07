@@ -7,15 +7,15 @@ package gov.usgs.volcanoes.swarm.time;
  *
  */
 public final class UiTime {
-    private static long lastUiTime = System.currentTimeMillis();
-    
-    private UiTime() {}
-    
-    public static void touchTime() {
-        lastUiTime = System.currentTimeMillis();
-    }
+  private static long lastUiTime = System.currentTimeMillis();
 
-    public static long getTime() {
-        return lastUiTime;
-    }
+  private UiTime() {}
+
+  public static void touchTime() {
+    lastUiTime = System.currentTimeMillis();
+  }
+
+  public static long getTime() {
+    return lastUiTime;
+  }
 }

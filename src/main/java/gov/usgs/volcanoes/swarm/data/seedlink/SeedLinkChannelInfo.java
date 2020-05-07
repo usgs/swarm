@@ -6,7 +6,6 @@ import gov.usgs.volcanoes.swarm.AbstractChannelInfo;
 import gov.usgs.volcanoes.swarm.ChannelUtil;
 import gov.usgs.volcanoes.swarm.GroupsType;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -64,8 +63,7 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo {
      * @param h map of tag attributes and values
      * @throws Exception when things go wrong
      */
-    public void startElement(String tag, Map<String, String> h)
-        throws Exception {
+    public void startElement(String tag, Map<String, String> h) throws Exception {
       if ("station".equals(tag)) {
         clearStation();
         for (String key : h.keySet()) {
@@ -88,8 +86,8 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo {
             type = val;
           }
         }
-        if (station != null && network != null && channel != null
-            && location != null && DATA_TYPE.equals(type)) {
+        if (station != null && network != null && channel != null && location != null
+            && DATA_TYPE.equals(type)) {
           ChannelUtil.addChannel(channels, SeedLinkChannelInfo.this, getSource());
         }
       }
@@ -200,8 +198,7 @@ public class SeedLinkChannelInfo extends AbstractChannelInfo {
   }
 
   /**
-   * Get the site name.
-   * A noop since siteName is not set.
+   * Get the site name. A noop since siteName is not set.
    * 
    * @return the site name.
    */

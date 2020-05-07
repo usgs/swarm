@@ -23,7 +23,6 @@ import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -63,7 +62,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.Semaphore;
-
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -71,12 +69,12 @@ import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Map panel.
+ * 
  * @author Dan Cervelli
  */
 public class MapPanel extends JPanel {
@@ -94,6 +92,7 @@ public class MapPanel extends JPanel {
 
     /**
      * Get color setting from string.
+     * 
      * @param s string text
      * @return color setting
      */
@@ -110,7 +109,7 @@ public class MapPanel extends JPanel {
     }
 
   };
-  
+
   public enum LabelSetting {
     NONE("N", Icons.label_none), SOME("S", Icons.label_some), ALL("A", Icons.label_all);
 
@@ -124,6 +123,7 @@ public class MapPanel extends JPanel {
 
     /**
      * Get next station label setting.
+     * 
      * @return label setting
      */
     public LabelSetting next() {
@@ -144,6 +144,7 @@ public class MapPanel extends JPanel {
 
     /**
      * Get label setting from string.
+     * 
      * @param s string
      * @return label setting
      */
@@ -201,7 +202,7 @@ public class MapPanel extends JPanel {
   private int missing;
 
   private final Set<MapMiniPanel> selectedPanels;
-  //private final boolean allowMultiSelection = false;
+  // private final boolean allowMultiSelection = false;
 
   private double startTime;
   private double endTime;
@@ -211,7 +212,7 @@ public class MapPanel extends JPanel {
 
   // for station labels
   private LabelSetting labelSetting = LabelSetting.SOME;
-  protected boolean hideStations  = false;
+  protected boolean hideStations = false;
   // for events
   protected ColorSetting colorSetting = ColorSetting.AGE;
   protected boolean hideLegend = false;
@@ -246,6 +247,7 @@ public class MapPanel extends JPanel {
 
   /**
    * Save layout.
+   * 
    * @param cf config file.
    * @param prefix config file prefix
    */
@@ -272,6 +274,7 @@ public class MapPanel extends JPanel {
 
   /**
    * Process layout.
+   * 
    * @param cf config file
    */
   public void processLayout(final ConfigFile cf) {
@@ -296,11 +299,12 @@ public class MapPanel extends JPanel {
 
   /**
    * Load maps.
+   * 
    * @param redraw true to redraw
    */
   public void loadMaps(final boolean redraw) {
     Pair<GeoImageSet, GeoLabelSet> pair;
-    if (swarmConfig.useWMS) {
+    if (swarmConfig.useWms) {
       // TODO: what about GeoLabelSet?
       final WMSGeoImageSet wms = new WMSGeoImageSet();
       wms.setServer(swarmConfig.wmsServer);
@@ -374,16 +378,11 @@ public class MapPanel extends JPanel {
 
     addKeyListener(new KeyListener() {
       public void keyPressed(final KeyEvent e) {
-        /*        if (allowMultiSelection && e.isControlDown() && e.getKeyCode() == KeyEvent.VK_A) {
-          deselectAllPanels();
-          synchronized (visiblePanels) {
-            for (final MapMiniPanel panel : visiblePanels) {
-              if (panel.isWaveVisible()) {
-                addSelectedPanel(panel);
-              }
-            }
-          }
-        }*/
+        /*
+         * if (allowMultiSelection && e.isControlDown() && e.getKeyCode() == KeyEvent.VK_A) {
+         * deselectAllPanels(); synchronized (visiblePanels) { for (final MapMiniPanel panel :
+         * visiblePanels) { if (panel.isWaveVisible()) { addSelectedPanel(panel); } } } }
+         */
         if (e.isShiftDown() && e.getKeyCode() == KeyEvent.VK_R) {
           resetAllAutoScaleMemory();
         }
@@ -410,10 +409,10 @@ public class MapPanel extends JPanel {
         if (panel.isWaveVisible()) {
           cnt++;
           final WaveViewPanel p = new WaveViewPanel(panel.getWaveViewPanel());
-//          final SeismicDataSource src = panel.getWaveViewPanel().getDataSource();
-//          if (src != null) {
-//            p.setDataSource(src);
-//          }
+          // final SeismicDataSource src = panel.getWaveViewPanel().getDataSource();
+          // if (src != null) {
+          // p.setDataSource(src);
+          // }
           cb.addWave(p);
         }
       }
@@ -436,6 +435,7 @@ public class MapPanel extends JPanel {
 
   /**
    * Deselect selected panel.
+   * 
    * @param p map mini panel
    */
   public synchronized void deselectPanel(final MapMiniPanel p) {
@@ -447,18 +447,19 @@ public class MapPanel extends JPanel {
 
   /**
    * Add selected panel.
+   * 
    * @param p map mini panel
    */
   public synchronized void addSelectedPanel(final MapMiniPanel p) {
-    /*    if (allowMultiSelection) {
-      p.setSelected(true);
-      selectedPanels.add(p);
-    } else*/
+    /*
+     * if (allowMultiSelection) { p.setSelected(true); selectedPanels.add(p); } else
+     */
     setSelectedPanel(p);
   }
 
   /**
    * Set selected panel.
+   * 
    * @param p map mini panel
    */
   public synchronized void setSelectedPanel(final MapMiniPanel p) {
@@ -486,12 +487,13 @@ public class MapPanel extends JPanel {
    */
   public void mapPush() {
     if (center != null) {
-      mapHistory.push(new double[] {center.x, center.y, scale});
+      mapHistory.push(new double[] { center.x, center.y, scale });
     }
   }
 
   /**
    * Remove last map view and reset map.
+   * 
    * @return true if successful
    */
   public boolean mapPop() {
@@ -507,11 +509,12 @@ public class MapPanel extends JPanel {
   }
 
   public void timePush() {
-    timeHistory.push(new double[] {startTime, endTime});
+    timeHistory.push(new double[] { startTime, endTime });
   }
 
   /**
    * Remove last time view and reset time.
+   * 
    * @return true if successful
    */
   public boolean timePop() {
@@ -526,6 +529,7 @@ public class MapPanel extends JPanel {
 
   /**
    * Zoom into map.
+   * 
    * @param f fraction to change scale by
    */
   public void zoom(final double f) {
@@ -544,6 +548,7 @@ public class MapPanel extends JPanel {
 
   /**
    * Scale time by percent.
+   * 
    * @param pct percent
    */
   public void scaleTime(final double pct) {
@@ -557,6 +562,7 @@ public class MapPanel extends JPanel {
 
   /**
    * Shift time by percent.
+   * 
    * @param pct percent
    */
   public void shiftTime(final double pct) {
@@ -569,6 +575,7 @@ public class MapPanel extends JPanel {
 
   /**
    * Go to time.
+   * 
    * @param j2k J2K time
    */
   public void gotoTime(final double j2k) {
@@ -581,6 +588,7 @@ public class MapPanel extends JPanel {
 
   /**
    * Get XY location on map.
+   * 
    * @param lon longitude in DD
    * @param lat latitude in DD
    * @return 2D point with xy coordinate
@@ -601,6 +609,7 @@ public class MapPanel extends JPanel {
 
   /**
    * Get longitude and latitude from point.
+   * 
    * @param x x value of point
    * @param y y value of point
    * @return 2D point with longitude and latitude coordinates
@@ -635,6 +644,7 @@ public class MapPanel extends JPanel {
 
   /**
    * Set wave times in all panels.
+   * 
    * @param st start time
    * @param et end time
    * @param repaint true to repaint
@@ -666,6 +676,7 @@ public class MapPanel extends JPanel {
 
   /**
    * Set map center and scale.
+   * 
    * @param c 2D point
    * @param s scale
    */
@@ -677,6 +688,7 @@ public class MapPanel extends JPanel {
 
   /**
    * Set map center and scale.
+   * 
    * @param gr geo range
    */
   public void setCenterAndScale(final GeoRange gr) {
@@ -697,7 +709,8 @@ public class MapPanel extends JPanel {
 
   /**
    * Pick map parameters.
-   * @param width map panel width 
+   * 
+   * @param width map panel width
    * @param height map panel height
    */
   public void pickMapParameters(final int width, final int height) {
@@ -721,10 +734,10 @@ public class MapPanel extends JPanel {
 
   private Point getLabelPosition(final GeneralPath boxes, final int x, final int y, final int w,
       final int h) {
-    final int[] dxy =
-        new int[] {x + 5, y - 5, x + 5, y, x + 5, y - 10, x - w - 5, y - 5, x - w - 5, y, x - w - 5,
-            y - 10, x + 5, y - 15, x + 5, y + 5, x, y - 15, x, y + 5, x, y - 20, x, y + 10,
-            x - w - 5, y - 15, x - w - 5, y + 5, x, y - 20, x + 40, y + 10, x - w - 40, y - 15,};
+    final int[] dxy = new int[] { x + 5, y - 5, x + 5, y, x + 5, y - 10, x - w - 5, y - 5,
+        x - w - 5, y, x - w - 5, y - 10, x + 5, y - 15, x + 5, y + 5, x, y - 15, x, y + 5, x,
+        y - 20, x, y + 10, x - w - 5, y - 15, x - w - 5, y + 5, x, y - 20, x + 40, y + 10,
+        x - w - 40, y - 15, };
 
     for (int i = 0; i < dxy.length / 2; i++) {
       final int px = dxy[i * 2];
@@ -909,7 +922,7 @@ public class MapPanel extends JPanel {
             }
 
             final int w = (int) Math
-                .round(MapMiniPanel.FONT.getStringBounds(md.getSCNL().station + 6, frc).getWidth());
+                .round(MapMiniPanel.FONT.getStringBounds(md.getScnl().station + 6, frc).getWidth());
             int locX = (int) xy.x;
             int locY = (int) xy.y;
             Point pt = null;
@@ -961,10 +974,11 @@ public class MapPanel extends JPanel {
   public void resetImage() {
     resetImage(true);
   }
-  
+
   // this function should not allow reentrancy
   /**
    * Reset map image.
+   * 
    * @param doMap true to redraw map.
    */
   public void resetImage(final boolean doMap) {
@@ -1207,6 +1221,7 @@ public class MapPanel extends JPanel {
 
   /**
    * Get graph width.
+   * 
    * @return width
    */
   public int getGraphWidth() {
@@ -1219,6 +1234,7 @@ public class MapPanel extends JPanel {
 
   /**
    * Get graph height.
+   * 
    * @return height
    */
   public int getGraphHeight() {
@@ -1307,6 +1323,8 @@ public class MapPanel extends JPanel {
   public class MapMouseMotionListener implements MouseMotionListener {
 
     /**
+     * Mouse moved event.
+     * 
      * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
      */
     public void mouseMoved(final MouseEvent e) {
@@ -1331,6 +1349,8 @@ public class MapPanel extends JPanel {
 
 
     /**
+     * Mouse dragged event.
+     * 
      * @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent)
      */
     public void mouseDragged(final MouseEvent e) {
@@ -1365,13 +1385,13 @@ public class MapPanel extends JPanel {
       repaint();
     }
   }
-  
+
   public boolean isLegendEnabled() {
     return !hideLegend;
   }
-  
+
   public ColorSetting getColorSetting() {
     return colorSetting;
   }
-  
+
 }

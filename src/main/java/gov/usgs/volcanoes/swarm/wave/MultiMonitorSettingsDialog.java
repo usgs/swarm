@@ -3,11 +3,8 @@ package gov.usgs.volcanoes.swarm.wave;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.FormLayout;
-
 import gov.usgs.volcanoes.swarm.SwarmModalDialog;
-
 import java.awt.BorderLayout;
-
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -77,6 +74,7 @@ public class MultiMonitorSettingsDialog extends SwarmModalDialog {
 
   /**
    * Get instance of multi-monitor settings dialog.
+   * 
    * @param mm multi-monitor
    * @return multi-monitor settings dialog
    */
@@ -91,6 +89,8 @@ public class MultiMonitorSettingsDialog extends SwarmModalDialog {
   }
 
   /**
+   * Set visible.
+   * 
    * @see java.awt.Dialog#setVisible(boolean)
    */
   public void setVisible(boolean b) {
@@ -131,14 +131,14 @@ public class MultiMonitorSettingsDialog extends SwarmModalDialog {
     String message = null;
     try {
       message =
-        "Invalid refresh interval; legal values are between 0 and 3600, 0 to refresh continuously.";
+          "Invalid refresh interval; legal values are between 0 and 3600, 0 to refresh continuously.";
       double ri = Double.parseDouble(refreshInterval.getText());
       if (ri < 0 || ri > 3600) {
         throw new NumberFormatException();
       }
 
       message =
-        "Invalid redraw interval; legal values are between 0 and 3600, 0 to refresh continuously.";
+          "Invalid redraw interval; legal values are between 0 and 3600, 0 to refresh continuously.";
       ri = Double.parseDouble(refreshInterval.getText());
       if (ri < 0 || ri > 3600) {
         throw new NumberFormatException();

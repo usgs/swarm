@@ -15,9 +15,8 @@ import gov.usgs.volcanoes.swarm.Throbber;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.RsamSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.internalframe.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
-
 import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -27,7 +26,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -43,6 +41,7 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * RSAM Viewer Frame.
+ * 
  * @author Tom Parker
  */
 public class RsamViewerFrame extends SwarmFrame implements Runnable, SettingsListener {
@@ -52,8 +51,8 @@ public class RsamViewerFrame extends SwarmFrame implements Runnable, SettingsLis
   private static final int W_TO_S = 7 * D_TO_S;
 
   private long intervalMs = 5 * 1000;
-  private static final int[] SPANS_S = new int[] {1 * H_TO_S, 12 * H_TO_S, 1 * D_TO_S, 2 * D_TO_S,
-      1 * W_TO_S, 2 * W_TO_S, 4 * W_TO_S, 6 * W_TO_S, 8 * W_TO_S};
+  private static final int[] SPANS_S = new int[] { 1 * H_TO_S, 12 * H_TO_S, 1 * D_TO_S, 2 * D_TO_S,
+      1 * W_TO_S, 2 * W_TO_S, 4 * W_TO_S, 6 * W_TO_S, 8 * W_TO_S };
   private int spanIndex;
   private SeismicDataSource dataSource;
   private String channel;
@@ -72,15 +71,17 @@ public class RsamViewerFrame extends SwarmFrame implements Runnable, SettingsLis
 
   /**
    * RSAM viewer frame constructor.
+   * 
    * @param sds seismic data source
    * @param ch channel
    */
   public RsamViewerFrame(SeismicDataSource sds, String ch) {
     this(sds, ch, null);
   }
-  
+
   /**
    * RSAM viewer frame constructor.
+   * 
    * @param sds seismic data source
    * @param ch channel
    * @param settings RSAM view settings
@@ -142,17 +143,17 @@ public class RsamViewerFrame extends SwarmFrame implements Runnable, SettingsLis
     toolBar.addSeparator();
 
     new RsamViewSettingsToolbar(settings, toolBar, this);
-    
-    JButton ratioButton = SwarmUtil.createToolBarButton(Icons.phi,
-        "RSAM Ratio", new ActionListener() {
+
+    JButton ratioButton =
+        SwarmUtil.createToolBarButton(Icons.phi, "RSAM Ratio", new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             openRsamRatio();
           }
         });
     toolBar.add(ratioButton);
 
-    toolBar.addSeparator();    
-    
+    toolBar.addSeparator();
+
     captureButton = SwarmUtil.createToolBarButton(Icons.camera, "Save RSAM image (P)",
         new CaptureActionListener());
     UiUtils.mapKeyStrokeToButton(this, "P", "capture", captureButton);
@@ -187,7 +188,7 @@ public class RsamViewerFrame extends SwarmFrame implements Runnable, SettingsLis
 
     updateThread.start();
   }
-  
+
   /**
    * Open RSAM Ratio Frame.
    */
@@ -205,21 +206,21 @@ public class RsamViewerFrame extends SwarmFrame implements Runnable, SettingsLis
 
     RsamViewerFrame rvf;
     switch (rvfs.size()) {
-      case 0: 
+      case 0:
         JOptionPane.showMessageDialog(this, "No other RSAM frames are open.");
         return;
-      case 1: 
+      case 1:
         rvf = (RsamViewerFrame) rvfs.values().toArray()[0];
         break;
       default:
-        String c = (String) JOptionPane.showInputDialog(this,
-            "Select channel to compare", "RSAM Ratio", JOptionPane.PLAIN_MESSAGE, null,
-            rvfs.keySet().toArray(), rvfs.keySet().iterator().next());
+        String c = (String) JOptionPane.showInputDialog(this, "Select channel to compare",
+            "RSAM Ratio", JOptionPane.PLAIN_MESSAGE, null, rvfs.keySet().toArray(),
+            rvfs.keySet().iterator().next());
         rvf = rvfs.get(c);
     }
 
-    RsamRatioFrame rrf = new RsamRatioFrame(this.channel, this.dataSource, 
-                                            rvf.channel, rvf.dataSource);
+    RsamRatioFrame rrf =
+        new RsamRatioFrame(this.channel, this.dataSource, rvf.channel, rvf.dataSource);
     SwarmInternalFrames.add(rrf);
   }
 
@@ -259,6 +260,7 @@ public class RsamViewerFrame extends SwarmFrame implements Runnable, SettingsLis
 
   /**
    * Run thread.
+   * 
    * @see java.lang.Runnable#run()
    */
   public void run() {
@@ -275,6 +277,7 @@ public class RsamViewerFrame extends SwarmFrame implements Runnable, SettingsLis
 
   /**
    * Span settings changed.
+   * 
    * @see gov.usgs.volcanoes.swarm.rsam.SettingsListener#settingsChanged()
    */
   public void settingsChanged() {
@@ -288,7 +291,7 @@ public class RsamViewerFrame extends SwarmFrame implements Runnable, SettingsLis
     spanIndex = i;
     getRsam();
   }
-  
+
   class CaptureActionListener implements ActionListener {
     public void actionPerformed(final ActionEvent e) {
       final JFileChooser chooser = new JFileChooser();
@@ -317,12 +320,12 @@ public class RsamViewerFrame extends SwarmFrame implements Runnable, SettingsLis
 
       int height = viewPanel.getHeight();
       int width = viewPanel.getWidth();
-      
+
       final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
       final Graphics g = image.getGraphics();
       viewPanel.paint(g);
       g.translate(0, height);
-      
+
       try {
         final PngEncoderB png = new PngEncoderB(image, false, PngEncoder.FILTER_NONE, 7);
         final FileOutputStream out = new FileOutputStream(f);
@@ -334,11 +337,12 @@ public class RsamViewerFrame extends SwarmFrame implements Runnable, SettingsLis
       }
     }
   }
-  
+
   /**
    * Save Layout.
+   * 
    * @see gov.usgs.volcanoes.swarm.SwarmFrame#saveLayout
-   * (gov.usgs.volcanoes.core.configfile.ConfigFile, java.lang.String)
+   *      (gov.usgs.volcanoes.core.configfile.ConfigFile, java.lang.String)
    */
   public void saveLayout(final ConfigFile cf, final String prefix) {
     super.saveLayout(cf, prefix);
@@ -350,6 +354,7 @@ public class RsamViewerFrame extends SwarmFrame implements Runnable, SettingsLis
 
   /**
    * Set settings.
+   * 
    * @param settings RSAM view settings
    */
   public void setSettings(RsamViewSettings settings) {

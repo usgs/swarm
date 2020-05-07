@@ -1,26 +1,23 @@
-package gov.usgs.volcanoes.swarm.data.fdsnWs;
-
-import edu.sc.seis.seisFile.mseed.DataRecord;
+package gov.usgs.volcanoes.swarm.data.fdsnws;
 
 import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.swarm.ChannelInfo;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import edu.sc.seis.seisFile.mseed.DataRecord;
 
 public class WebServicesClient extends AbstractDataRecordClient {
   private static final Logger LOGGER = LoggerFactory.getLogger(WebServicesClient.class);
 
   /**
-   * Test flag to use XML instead of text for station details. XML is more
-   * robust at the cost of a lot of speed. This will crawl if there are many
-   * networks. To use add "-DSWARM_WS_USE_XML=TRUE" to the Java command line.
+   * Test flag to use XML instead of text for station details. XML is more robust at the cost of a
+   * lot of speed. This will crawl if there are many networks. To use add "-DSWARM_WS_USE_XML=TRUE"
+   * to the Java command line.
    */
   private static boolean useXmlClientFlag = Boolean
       .valueOf(WebServiceUtils.getProperty(WebServiceUtils.SWARM_WS_PROP_KEY_PREFIX + "USE_XML"));
@@ -128,7 +125,7 @@ public class WebServicesClient extends AbstractDataRecordClient {
   public List<String> getChannels() {
     final List<String> channelList = stationClient.getChannelList();
     if (channelList.size() != 0) {
-      //LOGGER.info("channel list is not empty");
+      // LOGGER.info("channel list is not empty");
     } else {
       String error = null;
       long start = System.currentTimeMillis();
@@ -150,17 +147,11 @@ public class WebServicesClient extends AbstractDataRecordClient {
         numStations = stationClient.getStationList().size();
         if (error == null) {
           /*
-           * final List<StationInfo> stationList = stationClient.getStationList();
-           * final int ns = stationList.size();
-           * for (StationInfo station : stationList) {
-           * getSource().fireChannelsProgress(id, (double) cnt / (double) ns);
-           * cnt++;
-           * stationClient.setCurrentStation(station);
-           * error = stationClient.fetchChannels();
-           * if (error != null) {
-           * break;
-           * }
-           * }
+           * final List<StationInfo> stationList = stationClient.getStationList(); final int ns =
+           * stationList.size(); for (StationInfo station : stationList) {
+           * getSource().fireChannelsProgress(id, (double) cnt / (double) ns); cnt++;
+           * stationClient.setCurrentStation(station); error = stationClient.fetchChannels(); if
+           * (error != null) { break; } }
            */
           stationClient.setCurrentStation(null);
           error = stationClient.fetchChannels();
@@ -199,8 +190,7 @@ public class WebServicesClient extends AbstractDataRecordClient {
        * Process a data record.
        * 
        * @param dr the data record.
-       * @return true if data record should be added to the list, false
-       *         otherwise.
+       * @return true if data record should be added to the list, false otherwise.
        */
       public boolean processRecord(DataRecord dr) {
         try {
@@ -229,7 +219,8 @@ public class WebServicesClient extends AbstractDataRecordClient {
   /**
    * Retrieve a single waveform without providing full SDS functions.
    * 
-   * <p>TODO: integrate with getRawData(). should all SDSs have a static wave retrieval method?
+   * <p>
+   * TODO: integrate with getRawData(). should all SDSs have a static wave retrieval method?
    * 
    * @param code the channel information.
    * @param t1 the start time.
@@ -241,13 +232,12 @@ public class WebServicesClient extends AbstractDataRecordClient {
     final Date end = getDate(t2);
     final List<Wave> waves = new ArrayList<Wave>();
     final DataSelectReader reader =
-        new DataSelectReader(SwarmConfig.getInstance().fdsnDataselectURL) {
+        new DataSelectReader(SwarmConfig.getInstance().fdsnDataselectUrl) {
           /**
            * Process a data record.
            * 
            * @param dr the data record.
-           * @return true if data record should be added to the list, false
-           *         otherwise.
+           * @return true if data record should be added to the list, false otherwise.
            */
           public boolean processRecord(DataRecord dr) {
             try {
@@ -259,7 +249,7 @@ public class WebServicesClient extends AbstractDataRecordClient {
           }
         };
     try {
-      String[] comps = code.split("\\$"); 
+      String[] comps = code.split("\\$");
       final String query = reader.createQuery(comps[2], comps[0],
           (comps.length > 3 ? comps[3] : "--"), comps[1], begin, end);
       reader.read(query, (List<DataRecord>) null);

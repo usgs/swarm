@@ -1,8 +1,8 @@
 package gov.usgs.volcanoes.swarm.data;
 
 /**
- * An implementation of <code>SeismicDataSource</code> that is used by Swarm to
- * cache all data that it comes across.
+ * An implementation of <code>SeismicDataSource</code> that is used by Swarm to cache all data that
+ * it comes across.
  * 
  * @author Dan Cervelli
  */
@@ -27,6 +27,6 @@ public class CachedDataSource extends AbstractCachingDataSource {
   @Override
   public void close() {
     // TODO Auto-generated method stub
-    
+
   }
 }

@@ -1,9 +1,7 @@
 package gov.usgs.volcanoes.swarm.chooser.node;
 
 import gov.usgs.volcanoes.swarm.Icons;
-
 import java.awt.Dimension;
-
 import javax.swing.JProgressBar;
 
 public class ProgressNode extends AbstractChooserNode {

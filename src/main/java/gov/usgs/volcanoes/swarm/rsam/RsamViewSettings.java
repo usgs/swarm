@@ -3,7 +3,6 @@ package gov.usgs.volcanoes.swarm.rsam;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.math.BinSize;
 import gov.usgs.volcanoes.core.util.StringUtils;
-
 import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -12,6 +11,7 @@ import java.util.Set;
 
 /**
  * RSAM view settings.
+ * 
  * @author Tom Parker
  */
 
@@ -39,13 +39,13 @@ public class RsamViewSettings {
   protected boolean autoScale;
   protected int scaleMax;
   protected int scaleMin;
-  
+
   protected boolean alarm;
   protected String soundFile;
-  
-/*  public boolean filterOn;
-  public Butterworth filter;
-  public boolean zeroPhaseShift;*/
+
+  /*
+   * public boolean filterOn; public Butterworth filter; public boolean zeroPhaseShift;
+   */
 
   private int spanLengthS;
   private ViewType viewType;
@@ -75,9 +75,10 @@ public class RsamViewSettings {
     DEFAULT_RSAM_VIEW_SETTINGS.scaleMin = 0;
     DEFAULT_RSAM_VIEW_SETTINGS.alarm = false;
     DEFAULT_RSAM_VIEW_SETTINGS.soundFile = "ding.wav";
-/*    DEFAULT_RSAM_VIEW_SETTINGS.filter = new Butterworth();
-    DEFAULT_RSAM_VIEW_SETTINGS.filterOn = false;
-    DEFAULT_RSAM_VIEW_SETTINGS.zeroPhaseShift = true;*/
+    /*
+     * DEFAULT_RSAM_VIEW_SETTINGS.filter = new Butterworth(); DEFAULT_RSAM_VIEW_SETTINGS.filterOn =
+     * false; DEFAULT_RSAM_VIEW_SETTINGS.zeroPhaseShift = true;
+     */
 
     List<String> candidateNames = new LinkedList<String>();
     candidateNames.add(DEFAULTS_FILENAME);
@@ -110,6 +111,7 @@ public class RsamViewSettings {
 
   /**
    * Copy in existing RSAM view settings.
+   * 
    * @param s settings
    */
   public void copy(RsamViewSettings s) {
@@ -132,13 +134,14 @@ public class RsamViewSettings {
     scaleMin = s.scaleMin;
     alarm = s.alarm;
     soundFile = s.soundFile;
-/*    filterOn = s.filterOn;
-    filter = new Butterworth(s.filter);
-    zeroPhaseShift = s.zeroPhaseShift;*/
+    /*
+     * filterOn = s.filterOn; filter = new Butterworth(s.filter); zeroPhaseShift = s.zeroPhaseShift;
+     */
   }
 
   /**
    * Set settings from configuration file.
+   * 
    * @param cf config file
    */
   public void set(ConfigFile cf) {
@@ -174,22 +177,22 @@ public class RsamViewSettings {
         StringUtils.stringToInt(cf.getString("scaleMax"), DEFAULT_RSAM_VIEW_SETTINGS.scaleMax);
     scaleMin =
         StringUtils.stringToInt(cf.getString("scaleMin"), DEFAULT_RSAM_VIEW_SETTINGS.scaleMin);
-    alarm =
-        StringUtils.stringToBoolean(cf.getString("alarm"), DEFAULT_RSAM_VIEW_SETTINGS.alarm);
+    alarm = StringUtils.stringToBoolean(cf.getString("alarm"), DEFAULT_RSAM_VIEW_SETTINGS.alarm);
     soundFile =
         StringUtils.stringToString(cf.getString("soundFile"), DEFAULT_RSAM_VIEW_SETTINGS.soundFile);
 
 
-    //filter.set(cf.getSubConfig("filter"));
-    //filterOn =
-    //    StringUtils.stringToBoolean(cf.getString("filterOn"), DEFAULT_RSAM_VIEW_SETTINGS.filterOn);
-    //zeroPhaseShift = StringUtils.stringToBoolean(cf.getString("zeroPhaseShift"),
-    //    DEFAULT_RSAM_VIEW_SETTINGS.zeroPhaseShift);
-    
+    // filter.set(cf.getSubConfig("filter"));
+    // filterOn =
+    // StringUtils.stringToBoolean(cf.getString("filterOn"), DEFAULT_RSAM_VIEW_SETTINGS.filterOn);
+    // zeroPhaseShift = StringUtils.stringToBoolean(cf.getString("zeroPhaseShift"),
+    // DEFAULT_RSAM_VIEW_SETTINGS.zeroPhaseShift);
+
   }
 
   /**
    * Save settings to configuration file.
+   * 
    * @param cf config file
    * @param prefix config file prefix
    */
@@ -213,9 +216,9 @@ public class RsamViewSettings {
     cf.put(prefix + ".scaleMin", Double.toString(scaleMin));
     cf.put(prefix + ".alarm", Boolean.toString(alarm));
     cf.put(prefix + ".soundFile", soundFile);
-    //filter.save(cf, prefix + ".filter");
-    //cf.put(prefix + ".filterOn", Boolean.toString(filterOn));
-    //cf.put(prefix + ".zeroPhaseShift", Boolean.toString(zeroPhaseShift));
+    // filter.save(cf, prefix + ".filter");
+    // cf.put(prefix + ".filterOn", Boolean.toString(filterOn));
+    // cf.put(prefix + ".zeroPhaseShift", Boolean.toString(zeroPhaseShift));
   }
 
   public void setSpanLength(int spanLengthS) {

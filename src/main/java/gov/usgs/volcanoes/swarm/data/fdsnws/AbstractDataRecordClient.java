@@ -1,11 +1,19 @@
 /**
- * I waive copyright and related rights in the this work worldwide through the CC0 1.0
- * Universal public domain dedication.
- * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ * I waive copyright and related rights in the this work worldwide through the CC0 1.0 Universal
+ * public domain dedication. https://creativecommons.org/publicdomain/zero/1.0/legalcode
  */
 
-package gov.usgs.volcanoes.swarm.data.fdsnWs;
+package gov.usgs.volcanoes.swarm.data.fdsnws;
 
+import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.time.J2kSec;
+import gov.usgs.volcanoes.swarm.ChannelInfo;
+import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 import edu.iris.dmc.seedcodec.Codec;
 import edu.iris.dmc.seedcodec.CodecException;
 import edu.iris.dmc.seedcodec.DecompressedData;
@@ -15,17 +23,6 @@ import edu.sc.seis.seisFile.mseed.Blockette1000;
 import edu.sc.seis.seisFile.mseed.Btime;
 import edu.sc.seis.seisFile.mseed.DataHeader;
 import edu.sc.seis.seisFile.mseed.DataRecord;
-
-import gov.usgs.volcanoes.core.data.Wave;
-import gov.usgs.volcanoes.core.time.J2kSec;
-import gov.usgs.volcanoes.swarm.ChannelInfo;
-import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
 
 public abstract class AbstractDataRecordClient {
   private final SeismicDataSource source;
@@ -45,8 +42,8 @@ public abstract class AbstractDataRecordClient {
    * @param waves the list of waves.
    * @param dr the data record.
    * @return the list of waves.
-   * @throws UnsupportedCompressionType
-   * @throws CodecException
+   * @throws UnsupportedCompressionType unsupported compression type
+   * @throws CodecException codec exception
    */
   public static List<Wave> addWaves(final List<Wave> waves, final DataRecord dr)
       throws UnsupportedCompressionType, CodecException {
@@ -68,7 +65,7 @@ public abstract class AbstractDataRecordClient {
     final DecompressedData decomp =
         codec.decompress(type, data, dr.getHeader().getNumSamples(), swapNeeded);
     final Wave wave = new Wave();
-    wave.setSamplingRate(dh.getSampleRate());
+    wave.setSamplingRate(dr.getSampleRate());
 
     Btime btime = dh.getStartBtime();
 

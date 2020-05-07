@@ -50,7 +50,7 @@ public abstract class AbstractChannelInfo {
    * @return the elevation.
    */
   public abstract double getHeight();
-  
+
   /**
    * Get the network name.
    * 
@@ -75,13 +75,11 @@ public abstract class AbstractChannelInfo {
   /**
    * Determines if this channel information is the same as another.
    * 
-   * @return true if this channel information is the same as another, false
-   *         otherwise.
+   * @return true if this channel information is the same as another, false otherwise.
    */
   public boolean equals(Object obj) {
     return obj instanceof AbstractChannelInfo
-        && getFormattedSCNL().equals(
-            ((AbstractChannelInfo) obj).getFormattedSCNL());
+        && getFormattedScnl().equals(((AbstractChannelInfo) obj).getFormattedScnl());
   }
 
   /**
@@ -89,9 +87,8 @@ public abstract class AbstractChannelInfo {
    * 
    * @return the formatted SCNL.
    */
-  public String getFormattedSCNL() {
-    return ChannelUtil.getFormattedSCNL(getStation(), getChannel(), getNetwork(),
-        getLocation());
+  public String getFormattedScnl() {
+    return ChannelUtil.getFormattedScnl(getStation(), getChannel(), getNetwork(), getLocation());
   }
 
   /**
@@ -100,7 +97,7 @@ public abstract class AbstractChannelInfo {
    * @return the hash code.
    */
   public int hashCode() {
-    return getFormattedSCNL().hashCode();
+    return getFormattedScnl().hashCode();
   }
 
   /**
@@ -109,6 +106,6 @@ public abstract class AbstractChannelInfo {
    * @return the string representation of the channel information.
    */
   public String toString() {
-    return getFormattedSCNL();
+    return getFormattedScnl();
   }
 }

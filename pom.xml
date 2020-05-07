@@ -4,9 +4,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>gov.usgs.volcanoes</groupId>
 	<artifactId>swarm</artifactId>
-	<version>3.1.0</version>
+	<version>3.2.0-snapshot</version>
 	<packaging>jar</packaging>
-	
+
 	<name>Swarm</name>
 	<url>https://volcanoes.usgs.gov/software/swarm</url>
 	<description>Swarm is a Java application designed to display and analyze seismic waveforms in real-time. Swarm can connect to and read from a variety of different static and dynamics data sources, including Earthworm waveservers, IRIS DMCs, SEED and SAC files, and simple ASCII. Swarm has both time- and frequency-domain analysis tools, along with a simple but powerful mapping platfrom. A full-screen kiosk mode can act as a low-cost, low-maintenance replacement for paper drum recorders. Swarm was written by and for scientists and provides fine control over many different program settings and variables. </description>
@@ -14,12 +14,12 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<version.template.file>src/main/resources/Version.java.template</version.template.file>
 		<version.file>src/main/java/gov/usgs/volcanoes/swarm/Version.java</version.file>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<junit.jupiter.version>5.5.2</junit.jupiter.version>
 		<junit-platform.version>5.3.1</junit-platform.version>
 	</properties>
-	
+
 	<licenses>
 		<license>
 			<name>CC0 1.0 Universal</name>
@@ -27,7 +27,7 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-	
+
 	<developers>
 		<developer>
 			<id>tparker</id>
@@ -91,7 +91,7 @@
 			<name>Ivan Henson</name>
 		</contributor>
 	</contributors>
-	
+
 	<issueManagement>
 		<url>https://code.usgs.gov/vsc/swarm/issues</url>
 		<system>GitLab</system>
@@ -117,7 +117,7 @@
 			<url>scm:git:https://code.usgs.gov/vsc/swarm.git</url>
 		</site>
 	</distributionManagement>
-	
+
 	<repositories>
 		<repository>
 			<id>volcanoes</id>
@@ -127,7 +127,7 @@
 			<url>http://volcanoes.usgs.gov/software/maven2/</url>
 		</repository>
 	</repositories>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -370,28 +370,42 @@
 						</execution>
 					</executions>
 				</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.2.0</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-							<mainClass>gov.usgs.volcanoes.swarm.Swarm</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.2</version>
-			</plugin>
-			<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.22.0</version>
-            </plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.2.0</version>
+					<configuration>
+						<archive>
+							<manifest>
+								<addClasspath>true</addClasspath>
+								<mainClass>gov.usgs.volcanoes.swarm.Swarm</mainClass>
+							</manifest>
+						</archive>
+					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.22.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>2.22.0</version>
+				</plugin>
+				<plugin>
+					<groupId>com.github.spotbugs</groupId>
+					<artifactId>spotbugs-maven-plugin</artifactId>
+					<version>4.0.0</version>
+					<dependencies>
+						<!-- overwrite dependency on spotbugs if you want to specify the version 
+							of spotbugs -->
+						<dependency>
+							<groupId>com.github.spotbugs</groupId>
+							<artifactId>spotbugs</artifactId>
+							<version>4.0.2</version>
+						</dependency>
+					</dependencies>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -469,7 +483,7 @@
 			<groupId>gov.usgs.volcanoes</groupId>
 			<artifactId>volcano-core</artifactId>
 			<version>3.0.3</version>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>gov.usgs.volcanoes</groupId>
 			<artifactId>hypo71</artifactId>
@@ -520,11 +534,6 @@
 			<groupId>gov.usgs.volcanoes</groupId>
 			<artifactId>wwsclient</artifactId>
 			<version>2.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>findbugs</artifactId>
-			<version>[3.0.1,)</version>
 		</dependency>
 	</dependencies>
 	<organization>

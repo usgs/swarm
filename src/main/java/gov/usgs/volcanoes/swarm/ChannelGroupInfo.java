@@ -13,9 +13,11 @@ public class ChannelGroupInfo extends ChannelInfo {
   private final GroupsType groupsType;
 
   /**
+   * Constructor.
+   * 
    * @param stationInfo station information.
    * @param channel channel name
-   * @param location location 
+   * @param location location
    * @param groupsType group type
    */
   public ChannelGroupInfo(StationInfo stationInfo, String channel, String location,

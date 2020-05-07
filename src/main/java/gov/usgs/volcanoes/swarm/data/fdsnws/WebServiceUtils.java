@@ -1,9 +1,8 @@
-package gov.usgs.volcanoes.swarm.data.fdsnWs;
+package gov.usgs.volcanoes.swarm.data.fdsnws;
 
 import gov.usgs.volcanoes.swarm.ChannelInfo;
 import gov.usgs.volcanoes.swarm.ChannelUtil;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -11,17 +10,13 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Level;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Web service utility methods.
  *
  * @author Kevin Frechette (ISTI)
  */
 public class WebServiceUtils {
-  private static final Logger LOGGER = LoggerFactory.getLogger(WebServiceUtils.class);
-  
+
   /** Swarm web services property key prefix. */
   public static final String SWARM_WS_PROP_KEY_PREFIX = "SWARM_WS_";
 
@@ -141,7 +136,7 @@ public class WebServiceUtils {
     }
     return s;
   }
-  
+
   /**
    * Determines if debug logging is enabled.
    * 
@@ -160,7 +155,7 @@ public class WebServiceUtils {
   public static boolean isDebug(final Level level) {
     return debugLevel != null && level.intValue() >= debugLevel.intValue();
   }
-  
+
   /**
    * Get the date for the text.
    * 

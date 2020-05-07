@@ -8,6 +8,7 @@ public class MessageNode extends AbstractChooserNode {
 
   /**
    * Constructor.
+   * 
    * @param m message
    */
   public MessageNode(String m) {

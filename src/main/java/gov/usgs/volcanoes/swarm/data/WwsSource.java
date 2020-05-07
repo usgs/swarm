@@ -12,16 +12,14 @@ import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.winston.Channel;
 import gov.usgs.volcanoes.wwsclient.WWSClient;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 /**
- * An implementation of <code>SeismicDataSource</code> that communicates with a
- * WinstonWaveServer. This is essentially just a copy of WaveServerSource with
- * different helicorder functions. It should probably be made a descendant of
- * WaveServerSource.
+ * An implementation of <code>SeismicDataSource</code> that communicates with a WinstonWaveServer.
+ * This is essentially just a copy of WaveServerSource with different helicorder functions. It
+ * should probably be made a descendant of WaveServerSource.
  * 
  * 
  * @author Dan Cervelli
@@ -41,6 +39,7 @@ public class WwsSource extends SeismicDataSource implements RsamSource {
 
   /**
    * Parse parameters.
+   * 
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#parse(java.lang.String)
    */
   public synchronized void parse(String params) {
@@ -55,6 +54,7 @@ public class WwsSource extends SeismicDataSource implements RsamSource {
 
   /**
    * Print config text.
+   * 
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#toConfigString()
    */
   public String toConfigString() {
@@ -65,6 +65,7 @@ public class WwsSource extends SeismicDataSource implements RsamSource {
 
   /**
    * Close Winston client connection.
+   * 
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#close()
    */
   public synchronized void close() {
@@ -76,8 +77,7 @@ public class WwsSource extends SeismicDataSource implements RsamSource {
   /**
    * Get formatted SCNL.
    * 
-   * @param mi
-   *            menu item
+   * @param mi menu item
    * @return SCNL string space delimited
    */
   public String getFormattedScnl(MenuItem mi) {
@@ -87,8 +87,7 @@ public class WwsSource extends SeismicDataSource implements RsamSource {
   /**
    * Get menu list.
    * 
-   * @param items
-   *            list of menu items
+   * @param items list of menu items
    * @return list of SCNL string
    */
   public List<String> getMenuList(List<MenuItem> items) {
@@ -102,8 +101,8 @@ public class WwsSource extends SeismicDataSource implements RsamSource {
 
   /**
    * Get wave data.
-   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getWave(java.lang.String,
-   *      double, double)
+   * 
+   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getWave(java.lang.String, double, double)
    */
   public synchronized Wave getWave(String station, double t1, double t2) {
     Wave wave = null;
@@ -131,14 +130,14 @@ public class WwsSource extends SeismicDataSource implements RsamSource {
         CachedDataSource cache = CachedDataSource.getInstance();
         cache.putWave(station, wave);
       }
-    } 
+    }
     return wave;
   }
 
   /**
    * Get RSAM data.
-   * @see gov.usgs.volcanoes.swarm.data.RsamSource#getRsam(java.lang.String,
-   *      double, double, int)
+   * 
+   * @see gov.usgs.volcanoes.swarm.data.RsamSource#getRsam(java.lang.String, double, double, int)
    */
   public synchronized RSAMData getRsam(String station, double t1, double t2, int period) {
     RSAMData rsamData = null;
@@ -155,8 +154,7 @@ public class WwsSource extends SeismicDataSource implements RsamSource {
       try {
         Scnl scnl = Scnl.parse(station, delimiter);
         TimeSpan timeSpan = TimeSpan.fromJ2kSec(t1, t2);
-        rsamData =
-            winstonClient.getRSAMData(scnl, timeSpan, period, compress);
+        rsamData = winstonClient.getRSAMData(scnl, timeSpan, period, compress);
       } catch (UtilException e) {
         System.err.println("WWSSource.getRsam: Cannot parse station " + station);
       }
@@ -176,18 +174,19 @@ public class WwsSource extends SeismicDataSource implements RsamSource {
 
   /**
    * Get helicorder data.
-   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getHelicorder(java.lang.String,
-   *      double, double, gov.usgs.volcanoes.swarm.data.GulperListener)
+   * 
+   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getHelicorder(java.lang.String, double,
+   *      double, gov.usgs.volcanoes.swarm.data.GulperListener)
    */
   public synchronized HelicorderData getHelicorder(final String station, double t1, double t2,
       GulperListener gl) {
-       
+
     CachedDataSource cache = CachedDataSource.getInstance();
 
     HelicorderData hd = cache.getHelicorder(station, t1, t2, this);
     if (hd == null) {
       String delimiter = station.indexOf("$") == -1 ? " " : "$";
-     
+
       Scnl scnl;
       try {
         scnl = Scnl.parse(station, delimiter);
@@ -219,6 +218,7 @@ public class WwsSource extends SeismicDataSource implements RsamSource {
 
   /**
    * Get list of channels.
+   * 
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getChannels()
    */
   public synchronized List<String> getChannels() {
@@ -239,6 +239,7 @@ public class WwsSource extends SeismicDataSource implements RsamSource {
 
   /**
    * Check if active source.
+   * 
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#isActiveSource()
    */
   public synchronized boolean isActiveSource() {

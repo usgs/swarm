@@ -24,7 +24,6 @@ import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -49,7 +48,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
-
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
@@ -60,7 +58,7 @@ import javax.swing.event.EventListenerList;
  * @author Dan Cervelli
  */
 public class HelicorderViewPanel extends JComponent implements SwarmOptionsListener {
-  //private static final Logger LOGGER = LoggerFactory.getLogger(HelicorderViewPanel.class);
+  // private static final Logger LOGGER = LoggerFactory.getLogger(HelicorderViewPanel.class);
 
   private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
   public static final long serialVersionUID = -1;
@@ -76,9 +74,9 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
   private static final int GRAPH_RIGHT = 1;
   private static final int ROW_HEIGHT = 2;
   private static final int GRAPH_Y = 3;
-  //private static final int MIN_TIME_LOCAL = 4;
-  //private static final int MAX_TIME_LOCAL = 5;
-  //private static final int TIME_CHUNK = 6;
+  // private static final int MIN_TIME_LOCAL = 4;
+  // private static final int MAX_TIME_LOCAL = 5;
+  // private static final int TIME_CHUNK = 6;
   private static final int PIXEL_TIME_SPAN = 7;
 
   private Plot plot;
@@ -116,9 +114,10 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 
   private TagMenu tagMenu;
   protected ArrayList<TagData> tagData = new ArrayList<TagData>();
-  
+
   /**
    * Constructor.
+   * 
    * @param hvf helicorder viewer frame
    */
   public HelicorderViewPanel(HelicorderViewerFrame hvf) {
@@ -155,7 +154,8 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 
   /**
    * Trigger on inset creation.
-   * @param st start time 
+   * 
+   * @param st start time
    * @param et end time
    */
   public void fireInsetCreated(double st, double et) {
@@ -209,6 +209,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 
   /**
    * Set cursor mark on inset wave panel to given time.
+   * 
    * @param t time
    */
   public void setCursorMark(double t) {
@@ -219,6 +220,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 
   /**
    * Mark time on inset wave panel.
+   * 
    * @param t time
    */
   public void markTime(double t) {
@@ -357,7 +359,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
           TagMenu tagMenu = getTagMenu();
           tagMenu.setJ2k(j2k);
           tagMenu.show(HelicorderViewPanel.this, mx, my);
-        } 
+        }
       }
       /*
        * else if (e.getButton() == MouseEvent.BUTTON3) { if (insetWavePanel != null) {
@@ -400,6 +402,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 
   /**
    * Process mouse position.
+   * 
    * @param x mouse x position
    * @param y mouse y position
    */
@@ -423,7 +426,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
         double j2k = getMouseJ2K(x, y);
         String status =
             StatusTextArea.getTimeString(j2k, swarmConfig.getTimeZone(settings.channel));
-        
+
         // look for event to show
         if (parent.isTagEnabled()) {
           double mindiff = Double.MAX_VALUE;
@@ -441,7 +444,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
             status += "\n" + showTag.getTimeString() + " - " + showTag.classification;
           }
         }
-        
+
         parent.setStatus(status);
       } else {
         parent.setStatus(" ");
@@ -451,6 +454,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 
   /**
    * Get time at point.
+   * 
    * @param mx mouse x position
    * @param my mouse y position
    * @return time in J2K
@@ -508,6 +512,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 
   /**
    * Create wave inset.
+   * 
    * @param j2k time
    * @param mx mouse x position
    * @param my mouse y position
@@ -528,7 +533,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 
         public void waveTimePressed(WaveViewPanel src, MouseEvent e, double j2k) {
           if (swarmConfig.durationEnabled && SwingUtilities.isLeftMouseButton(e)) {
-            markTime(j2k);   
+            markTime(j2k);
           }
           insetWavePanel.processMousePosition(e.getX(), e.getY());
         }
@@ -541,7 +546,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
     insetWavePanel.setDataSource(parent.getDataSource());
     insetWavePanel.setStatusText(parent.getStatusText());
     makeInsetPanelTagEnabled();
-    
+
     Dimension d = getSize();
     insetHeight = getHeight() / 4;
     int height = insetHeight;
@@ -599,12 +604,13 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
     if (insetWavePanel != null) {
       insetWavePanel.getSettings().tagEnabled = parent.isTagEnabled();
       insetWavePanel.setTagData(tagData);
-      insetWavePanel.setTagMenu(getTagMenu());    
+      insetWavePanel.setTagMenu(getTagMenu());
     }
   }
-  
+
   /**
    * Set helicorder.
+   * 
    * @param d helicorder data
    * @param time1 start time
    * @param time2 end time
@@ -825,7 +831,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
   public void setMinimal(boolean b) {
     minimal = b;
   }
-  
+
   private static final Color DARK_GREEN = new Color(0, 168, 0);
 
   private void drawMark(Graphics2D g2, double t, Color color) {
@@ -842,7 +848,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
         || y > heliRenderer.getGraphY() + heliRenderer.getGraphHeight() - 1)) {
       g2.setColor(color);
       g2.draw(new Line2D.Double(x, y, x, y + translation[2]));
-  
+
       GeneralPath gp = new GeneralPath();
       gp.moveTo(x, y);
       gp.lineTo((float) x - 4, (float) y - 6);
@@ -850,7 +856,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
       gp.closePath();
       g2.fill(gp);
       g2.draw(gp);
-  
+
       gp.reset();
       gp.moveTo(x, (float) (y + translation[2]));
       gp.lineTo((float) x - 4, (float) (y + 6 + translation[2]));
@@ -864,6 +870,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 
   /**
    * Draw event circle.
+   * 
    * @param g2 graphics
    * @param t start time
    * @param color color
@@ -886,6 +893,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 
   /**
    * Paint.
+   * 
    * @see javax.swing.JComponent#paint(java.awt.Graphics)
    */
   public void paint(Graphics g) {
@@ -906,7 +914,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
         if (tag.channel.equals(settings.channel)) {
           drawEvent(g2, tag.startTime, tag.color);
         }
-      }      
+      }
     }
 
     if (insetWavePanel != null) {
@@ -1010,6 +1018,7 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
 
   /**
    * Option changed.
+   * 
    * @see gov.usgs.volcanoes.swarm.options.SwarmOptionsListener#optionsChanged()
    */
   public void optionsChanged() {
@@ -1023,9 +1032,10 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
   public ArrayList<TagData> getTagData() {
     return tagData;
   }
-  
+
   /**
    * Get tag menu.
+   * 
    * @return
    */
   public TagMenu getTagMenu() {
@@ -1034,15 +1044,15 @@ public class HelicorderViewPanel extends JComponent implements SwarmOptionsListe
     }
     return tagMenu;
   }
-  
+
   public HelicorderViewerSettings getSettings() {
     return settings;
   }
-  
+
   public WaveViewPanel getInsetPanel() {
     return insetWavePanel;
   }
-  
+
   public HelicorderViewerFrame getFrame() {
     return parent;
   }

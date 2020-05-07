@@ -8,7 +8,6 @@ import gov.usgs.volcanoes.hypo71.Station;
 import gov.usgs.volcanoes.quakeml.Pick;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -18,7 +17,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.Queue;
-
 import javax.swing.JOptionPane;
 
 public class Hypo71Manager {
@@ -51,9 +49,10 @@ public class Hypo71Manager {
     prevIew = ' ';
     hypo71 = new Hypo71();
   }
-  
+
   /**
    * Calculate hypocenter using hypo71.
+   * 
    * @param inputFile hypo71 input file
    * @return true if hypo71 ran without errors
    * @throws IOException IO exception
@@ -64,8 +63,8 @@ public class Hypo71Manager {
       Hypo71Settings settings = Hypo71SettingsDialog.getInstance().getSettings();
       controlCard.setKSING(settings.getKsing());
       controlCard.setPOS(SwarmConfig.getInstance().velocityRatio);
-      hypo71.calculateHypo71(description, settings.getTestValues(), stationsList,
-          crustalModelList, controlCard, phaseRecordsList, inputFile);
+      hypo71.calculateHypo71(description, settings.getTestValues(), stationsList, crustalModelList,
+          controlCard, phaseRecordsList, inputFile);
     } catch (Exception e) {
       e.printStackTrace();
       String message = "Error running Hypo71:\n" + e.getMessage();
@@ -74,7 +73,7 @@ public class Hypo71Manager {
     }
     return true;
   }
-  
+
   /**
    * Add station to station list.
    * 
@@ -93,7 +92,7 @@ public class Hypo71Manager {
       double delay, double fmag, double xmag, int sysNum) throws IllegalArgumentException {
     // stationsList.add(new Station(' ', "SR01", 38, 42.55f, ' ', 122, 59.17f,
     // ' ', 0, -0.15f, 0.4f, 0.25f, 8, 0.0f, 0.0f, 0, 0, 0));
-    //SR013842.55 12259.17      -0.15     0.40   0.25 8
+    // SR013842.55 12259.17 -0.15 0.40 0.25 8
 
     char ins = 'N';
     if (latitude < 0) {
@@ -121,10 +120,10 @@ public class Hypo71Manager {
 
     Station station = new Station(' ', name, (int) lat1, lat2, ins, (int) lon1, lon2, iew,
         (int) elevation, delay, fmag, xmag, sysNum, 0f, 0f, 0, 0, 0);
-    
+
     stationsList.add(station);
   }
-  
+
   /**
    * Create and add phase record.
    * 
@@ -141,7 +140,7 @@ public class Hypo71Manager {
     // phaseRecordsList.add(new PhaseRecord("SR01", "IPD0", 0.0f, 69100512, 6,
     // 51.22f, 0.0f, "", 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, "", 0.0f, 0.0f,
     // "1.22", 'D', "", "SR01IPD0 691005120651.22", ' ', "IPD0"));
-    
+
     // PRMK
     String pOnset = " ";
     if (pPick.getOnset() != null) {
@@ -189,17 +188,16 @@ public class Hypo71Manager {
       useS = "USES";
     }
     // icard
-    //String icard = station + pRemark + " " + pTime;
+    // String icard = station + pRemark + " " + pTime;
     String icard = null;
-    
+
     // create phase record
-    PhaseRecord phaseRecord = new PhaseRecord(station, pRemark, 0.0f, 
-        Integer.parseInt(pHour), Integer.parseInt(pMin),
-        Float.parseFloat(pSec), sSec, sRemark, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, "", 0.0f,
-        fmp, "", pMotion.charAt(0), useS, icard, ' ', pRemark);
-    phaseRecordsList.add(phaseRecord);    
+    PhaseRecord phaseRecord = new PhaseRecord(station, pRemark, 0.0f, Integer.parseInt(pHour),
+        Integer.parseInt(pMin), Float.parseFloat(pSec), sSec, sRemark, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        "", 0.0f, fmp, "", pMotion.charAt(0), useS, icard, ' ', pRemark);
+    phaseRecordsList.add(phaseRecord);
   }
-  
+
   /**
    * Get hypo71 weight based on pick uncertainty.
    * 
@@ -219,7 +217,7 @@ public class Hypo71Manager {
     }
     return weight;
   }
-  
+
   /**
    * Get first motion direction of an arrival.
    * 
@@ -243,7 +241,7 @@ public class Hypo71Manager {
     }
     return motion;
   }
-  
+
   /**
    * Load crustal model from crustal model file.
    */
@@ -282,7 +280,7 @@ public class Hypo71Manager {
         // TODO Auto-generated catch block
         e1.printStackTrace();
       }
-      
+
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -295,9 +293,12 @@ public class Hypo71Manager {
    */
   public String getMagOutType() {
     switch (controlCard.getIMAG()) {
-      case 0: return "Mx";
-      case 1: return "Md";
-      default: return "M";
+      case 0:
+        return "Mx";
+      case 1:
+        return "Md";
+      default:
+        return "M";
     }
   }
 }

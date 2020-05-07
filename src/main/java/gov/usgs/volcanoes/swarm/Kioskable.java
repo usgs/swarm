@@ -1,10 +1,10 @@
 package gov.usgs.volcanoes.swarm;
 
 /**
- * $Log: not supported by cvs2svn $
+ * Kioskable interface.
+ * 
  * @author Dan Cervelli
  */
-public interface Kioskable
-{
-	public void setKioskMode(boolean b);
+public interface Kioskable {
+  public void setKioskMode(boolean b);
 }

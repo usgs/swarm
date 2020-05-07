@@ -1,10 +1,9 @@
-package gov.usgs.volcanoes.swarm.data.fdsnWs;
+package gov.usgs.volcanoes.swarm.data.fdsnws;
 
 import gov.usgs.volcanoes.swarm.ChannelGroupInfo;
 import gov.usgs.volcanoes.swarm.ChannelInfo;
 import gov.usgs.volcanoes.swarm.GroupsType;
 import gov.usgs.volcanoes.swarm.StationInfo;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -151,24 +150,17 @@ public abstract class AbstractWebServiceStationClient {
     this.date = date;
     // if network contains wild card
     /*
-     * if (net == null || net.length() == 0 || net.matches(".*[\\*?].*"))
-     * {
-     * if (useOnlyChannels())
-     * groupsType = GroupsType.NETWORK;
-     * else
-     * groupsType = GroupsType.NETWORK_AND_SITE;
-     * }
-     * else
-     * {
-     * groupsType = GroupsType.SITE;
-     * }
+     * if (net == null || net.length() == 0 || net.matches(".*[\\*?].*")) { if (useOnlyChannels())
+     * groupsType = GroupsType.NETWORK; else groupsType = GroupsType.NETWORK_AND_SITE; } else {
+     * groupsType = GroupsType.SITE; }
      */
     groupsType = GroupsType.NETWORK;
   }
 
   /**
    * Constructor.
-   * @param baseUrlText base URL 
+   * 
+   * @param baseUrlText base URL
    */
   public AbstractWebServiceStationClient(String baseUrlText) {
     this.baseUrlText = baseUrlText;
@@ -212,8 +204,7 @@ public abstract class AbstractWebServiceStationClient {
   /**
    * Determine if latitude and longitude should be cleared.
    * 
-   * @return true if latitude and longitude should be cleared, false
-   *         otherwise.
+   * @return true if latitude and longitude should be cleared, false otherwise.
    */
   protected boolean clearLatLon() {
     // clear if all networks
@@ -262,8 +253,7 @@ public abstract class AbstractWebServiceStationClient {
         elevation = Double.NaN;
       }
       return new ChannelGroupInfo(station, channel, network, location, latitude, longitude,
-          elevation,
-          siteName, groupsType);
+          elevation, siteName, groupsType);
     } else {
       return new ChannelGroupInfo(currentStation, channel, location, groupsType);
     }
@@ -302,10 +292,9 @@ public abstract class AbstractWebServiceStationClient {
       conn = (HttpURLConnection) urlConn;
       if (conn.getResponseCode() != 200) { // if response not OK
         /*
-         * final BufferedReader errorReader =
-         * new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-         * error.append("Error in connection with url: " + url + "\n");
-         * for (String line; (line = readLine(errorReader)) != null;) {
+         * final BufferedReader errorReader = new BufferedReader(new
+         * InputStreamReader(conn.getErrorStream())); error.append("Error in connection with url: "
+         * + url + "\n"); for (String line; (line = readLine(errorReader)) != null;) {
          * error.append(line + "\n");
          */
         error.append("Error in connection with url: " + url);
@@ -336,8 +325,7 @@ public abstract class AbstractWebServiceStationClient {
   protected abstract void fetch(URL url) throws Exception;
 
   /**
-   * Fetch the channels and optionally put them in the channel list if it is
-   * set.
+   * Fetch the channels and optionally put them in the channel list if it is set.
    * 
    * @return an error message or null if none.
    * @see #getChannelList()
@@ -358,8 +346,7 @@ public abstract class AbstractWebServiceStationClient {
   }
 
   /**
-   * Fetch the stations and optionally put them in the stations list if it is
-   * set.
+   * Fetch the stations and optionally put them in the stations list if it is set.
    * 
    * @return an error message or null if none.
    * @see #getStationList()

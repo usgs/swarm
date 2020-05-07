@@ -10,6 +10,7 @@ import java.util.Vector;
 
 /**
  * Hypo71 Test Variable Settings.
+ * 
  * @author Diana Norgaard
  *
  */
@@ -22,8 +23,8 @@ public class Hypo71Settings extends Properties {
   public static final String ksingDefault = "0";
   public static final String TEST = "TEST";
   public static final double[] testDefault =
-      {0.10f, 10.0f, 2.0f, 0.05f, 5.0f, 4.0f, -0.87f, 2.00f, 0.0035f, 100.0f, 8.0f, 0.5f, 1.0f};
-  
+      { 0.10f, 10.0f, 2.0f, 0.05f, 5.0f, 4.0f, -0.87f, 2.00f, 0.0035f, 100.0f, 8.0f, 0.5f, 1.0f };
+
   /**
    * Default constructor.
    */
@@ -35,7 +36,7 @@ public class Hypo71Settings extends Properties {
    * Read pick settings file.
    */
   private void readSettings() {
-    loadDefaultProperties(); 
+    loadDefaultProperties();
     try {
       load(new FileReader(SETTINGS_FILENAME));
     } catch (IOException e) {
@@ -50,7 +51,7 @@ public class Hypo71Settings extends Properties {
   private void loadDefaultProperties() {
     // KSING
     this.setProperty(KSING, ksingDefault);
-    
+
     // Test Variables
     int i = 1;
     for (double t : testDefault) {
@@ -59,26 +60,27 @@ public class Hypo71Settings extends Properties {
       i++;
     }
   }
-  
+
   /**
    * Save pick settings properties to file.
+   * 
    * @throws IOException IOException
    */
   protected void save() throws IOException {
     FileWriter writer = new FileWriter(SETTINGS_FILENAME);
     store(writer, COMMENTS);
   }
-  
+
   /**
    * Get KSING value for Control Card input.
-   * @return 0 if using original SINGLE subroutine;
-   *         1 if using modified SINGLE subroutine
+   * 
+   * @return 0 if using original SINGLE subroutine; 1 if using modified SINGLE subroutine
    */
   protected int getKsing() {
     int ksing = Integer.valueOf(this.getProperty(KSING));
     return ksing;
   }
-   
+
   /**
    * Get array of Hypo71 test variables.
    * 
@@ -92,8 +94,10 @@ public class Hypo71Settings extends Properties {
     }
     return test;
   }
-  
-  /* (non-Javadoc)
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see java.util.Hashtable#keys()
    */
   public Enumeration keys() {

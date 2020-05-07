@@ -3,14 +3,11 @@ package gov.usgs.volcanoes.swarm.event;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.FormLayout;
-
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmModalDialog;
 import gov.usgs.volcanoes.swarm.event.PickSettings.WeightUnit;
-
 import java.awt.BorderLayout;
 import java.io.IOException;
-
 import javax.swing.ButtonGroup;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
@@ -46,6 +43,7 @@ public class PickSettingsDialog extends SwarmModalDialog {
 
   /**
    * Get instance of pick settings dialog.
+   * 
    * @return pick settings dialog
    */
   public static PickSettingsDialog getInstance() {
@@ -59,13 +57,13 @@ public class PickSettingsDialog extends SwarmModalDialog {
    * Create UI.
    */
   protected void createUi() {
-    
+
     super.createUi();
     settings = new PickSettings();
-    
+
     FormLayout layout = new FormLayout("center:70dlu, 10dlu, 70dlu");
     DefaultFormBuilder builder = new DefaultFormBuilder(layout).border(Borders.DIALOG);
-    
+
     // Uncertainty weights
     builder.appendSeparator("Uncertainty");
     builder.nextLine();
@@ -101,6 +99,7 @@ public class PickSettingsDialog extends SwarmModalDialog {
 
   /**
    * Validate input values.
+   * 
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#allowOk()
    */
   protected boolean allowOk() {
@@ -125,13 +124,14 @@ public class PickSettingsDialog extends SwarmModalDialog {
     }
     return true;
   }
-  
+
   /**
    * Save settings if values validated.
+   * 
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#wasOk()
    */
   protected void wasOk() {
-    saveSettings();    
+    saveSettings();
   }
 
   /**
@@ -158,11 +158,12 @@ public class PickSettingsDialog extends SwarmModalDialog {
       } else {
         e.printStackTrace();
       }
-    } 
+    }
   }
-  
+
   /**
    * Revert settings.
+   * 
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#wasCancelled()
    */
   protected void wasCancelled() {
@@ -184,6 +185,8 @@ public class PickSettingsDialog extends SwarmModalDialog {
    */
   public class WeightInputVerifier extends InputVerifier {
     /**
+     * Verify.
+     * 
      * @see javax.swing.InputVerifier#verify(javax.swing.JComponent)
      */
     public boolean verify(JComponent input) {
@@ -200,9 +203,10 @@ public class PickSettingsDialog extends SwarmModalDialog {
       }
     }
   }
-  
+
   /**
    * Get pick settings.
+   * 
    * @return pick settings
    */
   public PickSettings getSettings() {

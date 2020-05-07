@@ -7,6 +7,7 @@ import java.util.Properties;
 
 /**
  * Pick Settings.
+ * 
  * @author Diana Norgaard
  *
  */
@@ -17,10 +18,12 @@ public class PickSettings extends Properties {
   public static final String WEIGHT_UNIT = "weight_unit";
   public static final int numWeight = 5;
   private static final String COMMENTS = "Swarm Pick Settings Configuration";
-  
-  public enum WeightUnit { SAMPLES, MILLISECONDS }
-  
-  
+
+  public enum WeightUnit {
+    SAMPLES, MILLISECONDS
+  }
+
+
   /**
    * Default constructor.
    */
@@ -32,7 +35,7 @@ public class PickSettings extends Properties {
    * Read pick settings file.
    */
   private void readSettings() {
-    loadDefaultProperties(); 
+    loadDefaultProperties();
     try {
       load(new FileReader(SETTINGS_FILENAME));
     } catch (IOException e) {
@@ -52,19 +55,20 @@ public class PickSettings extends Properties {
     this.setProperty(WEIGHT + ".3", "10");
     this.setProperty(WEIGHT + ".4", "20");
   }
-  
+
   /**
    * Save pick settings properties to file.
+   * 
    * @throws IOException IOException
    */
   protected void save() throws IOException {
     FileWriter writer = new FileWriter(SETTINGS_FILENAME);
     store(writer, COMMENTS);
   }
-   
+
   /**
-   * Convert weight to time. In case where unit is in samples, 
-   * the sample rate is required.
+   * Convert weight to time. In case where unit is in samples, the sample rate is required.
+   * 
    * @param weight weight
    * @param sampleRate sample rate to use if weights are in samples
    * @return milliseconds
@@ -86,6 +90,7 @@ public class PickSettings extends Properties {
 
   /**
    * Type of unit mapped to weight.
+   * 
    * @return WeightUnit
    */
   public WeightUnit getWeightUnit() {

@@ -5,7 +5,6 @@ import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.Version;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,7 +19,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -29,43 +27,31 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
- * Right click menu for picks. 
+ * Right click menu for picks.
  * 
  * @author Diana Norgaard
  */
-public class TagMenu extends JPopupMenu  {
+public class TagMenu extends JPopupMenu {
 
 
   private static final String settingsFileName = "EventClassifications.config";
   private static final long serialVersionUID = 8681764007165352268L;
 
   protected static final int transparency = 240;
-  protected static final Color defaultColor = new Color(255, 69, 0, transparency); 
+  protected static final Color defaultColor = new Color(255, 69, 0, transparency);
   protected static HashMap<String, Color> colors = new HashMap<String, Color>();
-  
+
   private String eventFileName;
 
   protected static String[] classifications;
-  private static String[][] defaultClassifications = {
-      {"VT","#fc7703"},
-      {"VT - distal","#fc7703"},
-      {"VT - proximal","#fc7703"},
-      {"LP","#6b4934"},
-      {"VLP","#c79fc6"},
-      {"Hybrid","#84e087"},
-      {"Explosion","#ab2f2b"},
-      {"Tremor", "#dbd976"},
-      {"Lahar", "#5481a8"},
-      {"Pyroclastic Flow", "#e33bdf"},
-      {"Regional", "#6f5796"},
-      {"Rock Fall", "#857876"},
-      {"Teleseism", "#965771"},
-      {"Ice quake", "#76d6db"},
-      {"Noise", "#57754d"},
-      {"Cultural", "#57754d"},
-      {"Unclassified", "#57754d"}
-  };
-  
+  private static String[][] defaultClassifications =
+      { { "VT", "#fc7703" }, { "VT - distal", "#fc7703" }, { "VT - proximal", "#fc7703" },
+          { "LP", "#6b4934" }, { "VLP", "#c79fc6" }, { "Hybrid", "#84e087" },
+          { "Explosion", "#ab2f2b" }, { "Tremor", "#dbd976" }, { "Lahar", "#5481a8" },
+          { "Pyroclastic Flow", "#e33bdf" }, { "Regional", "#6f5796" }, { "Rock Fall", "#857876" },
+          { "Teleseism", "#965771" }, { "Ice quake", "#76d6db" }, { "Noise", "#57754d" },
+          { "Cultural", "#57754d" }, { "Unclassified", "#57754d" } };
+
   static {
     try {
       ArrayList<String> list = new ArrayList<String>();
@@ -87,22 +73,21 @@ public class TagMenu extends JPopupMenu  {
       classifications = new String[list.size()];
       list.toArray(classifications);
     } catch (FileNotFoundException e) {
-      System.out
-          .println("EventClassifications.config not found. Using default classifications.");
+      System.out.println("EventClassifications.config not found. Using default classifications.");
       classifications = new String[defaultClassifications.length];
       for (int i = 0; i < classifications.length; i++) {
         classifications[i] = defaultClassifications[i][0];
-        colors.put(defaultClassifications[i][0], Color.decode(defaultClassifications[i][1]));    
+        colors.put(defaultClassifications[i][0], Color.decode(defaultClassifications[i][1]));
       }
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
-  
+
   private HelicorderViewPanel hvp;
   private double j2k;
-  
+
   /**
    * Constructor.
    */
@@ -110,9 +95,8 @@ public class TagMenu extends JPopupMenu  {
     super("Tag Menu");
     this.hvp = hvp;
     createMenu();
-    eventFileName = SwarmConfig.getInstance().lastPath + "/Swarm" + Version.POM_VERSION
-        + "_Events_" + SwarmConfig.getInstance().getUser() + "_" + System.currentTimeMillis()
-        + ".csv";
+    eventFileName = SwarmConfig.getInstance().lastPath + "/Swarm" + Version.POM_VERSION + "_Events_"
+        + SwarmConfig.getInstance().getUser() + "_" + System.currentTimeMillis() + ".csv";
   }
 
   /**
@@ -143,7 +127,7 @@ public class TagMenu extends JPopupMenu  {
       hvp.getFrame().disableTag();
     }
   }
-  
+
   /**
    * Load tags from event file.
    */
@@ -161,7 +145,7 @@ public class TagMenu extends JPopupMenu  {
       fr.close();
     } catch (FileNotFoundException e) {
       // TODO Auto-generated catch block
-      //e.printStackTrace();
+      // e.printStackTrace();
     } catch (ParseException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -170,7 +154,7 @@ public class TagMenu extends JPopupMenu  {
       e.printStackTrace();
     }
   }
-  
+
   /**
    * Write tag data to file.
    */
@@ -191,7 +175,7 @@ public class TagMenu extends JPopupMenu  {
           "Error writing tags", JOptionPane.ERROR_MESSAGE);
     }
   }
-  
+
   /**
    * Create right click menu for pick.
    */
@@ -200,7 +184,7 @@ public class TagMenu extends JPopupMenu  {
     this.addSeparator();
     createClearMenu();
   }
- 
+
   /**
    * Classification menus.
    */
@@ -224,7 +208,7 @@ public class TagMenu extends JPopupMenu  {
       this.add(menuItem);
     }
   }
-  
+
   /**
    * Clear menu.
    */
@@ -264,7 +248,7 @@ public class TagMenu extends JPopupMenu  {
 
     this.add(menuItem);
   }
-  
+
   /**
    * Get currently set time as J2K.
    * 

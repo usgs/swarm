@@ -1,37 +1,32 @@
 /**
- * I waive copyright and related rights in the this work worldwide through the CC0 1.0
- * Universal public domain dedication.
- * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ * I waive copyright and related rights in the this work worldwide through the CC0 1.0 Universal
+ * public domain dedication. https://creativecommons.org/publicdomain/zero/1.0/legalcode
  */
 
 package gov.usgs.volcanoes.swarm.data.seedlink;
-
-import edu.iris.Fissures.seed.container.Blockette;
-import edu.iris.Fissures.seed.container.BlocketteDecoratorFactory;
-import edu.iris.Fissures.seed.container.Btime;
-import edu.iris.Fissures.seed.container.Waveform;
-import edu.iris.Fissures.seed.exception.SeedException;
 
 import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.ChannelInfo;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.TreeMap;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import edu.iris.Fissures.seed.container.Blockette;
+import edu.iris.Fissures.seed.container.BlocketteDecoratorFactory;
+import edu.iris.Fissures.seed.container.Btime;
+import edu.iris.Fissures.seed.container.Waveform;
+import edu.iris.Fissures.seed.exception.SeedException;
 import nl.knmi.orfeus.seedlink.SLLog;
 import nl.knmi.orfeus.seedlink.SLPacket;
 import nl.knmi.orfeus.seedlink.SeedLinkException;
 import nl.knmi.orfeus.seedlink.client.SeedLinkConnection;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * SeedLink client.
@@ -51,12 +46,12 @@ public class SeedLinkClient implements Runnable {
   /** INFO LEVEL for info request only. */
   private String infolevel = null;
 
-  /** Multiselect string.  Example: "IU_KONO:BHE BHN,GE_WLF,MN_AQU:HH?.D" */
+  /** Multiselect string. Example: "IU_KONO:BHE BHN,GE_WLF,MN_AQU:HH?.D" */
   private String multiselect = null;
-  
+
   /** SCNL's and last request time. */
-  private TreeMap<String, Double> scnlMap = new TreeMap<String, Double>(); 
-  
+  private TreeMap<String, Double> scnlMap = new TreeMap<String, Double>();
+
   /** Client thread. */
   private Thread thread;
 
@@ -91,7 +86,7 @@ public class SeedLinkClient implements Runnable {
    * @param port the server port.
    */
   public SeedLinkClient(String host, int port) {
-    super();   
+    super();
     sladdr = host + ":" + port;
     createConnection();
   }
@@ -166,6 +161,7 @@ public class SeedLinkClient implements Runnable {
 
   /**
    * Add channel for client to get.
+   * 
    * @param key gulper listener
    * @param scnl channel string
    * @param t1 start time
@@ -255,10 +251,8 @@ public class SeedLinkClient implements Runnable {
   private float getSampleRate(double factor, double multiplier) {
     float sampleRate = (float) 10000.0; // default (impossible) value;
     if ((factor * multiplier) != 0.0) { // in the case of log records
-      sampleRate = (float) (Math.pow(Math.abs(factor),
-          (factor / Math.abs(factor)))
-          * Math.pow(Math.abs(multiplier),
-              (multiplier / Math.abs(multiplier))));
+      sampleRate = (float) (Math.pow(Math.abs(factor), (factor / Math.abs(factor)))
+          * Math.pow(Math.abs(multiplier), (multiplier / Math.abs(multiplier))));
     }
     return sampleRate;
   }
@@ -275,8 +269,7 @@ public class SeedLinkClient implements Runnable {
   }
 
   /**
-   * Converts a j2ksec to a SeedLink date string
-   * ("year,month,day,hour,minute,second").
+   * Converts a j2ksec to a SeedLink date string ("year,month,day,hour,minute,second").
    * 
    * @param j the j2ksec or NaN if none.
    * @return a SeedLink date string or null if none.
@@ -296,8 +289,7 @@ public class SeedLinkClient implements Runnable {
    * @return the Btime value.
    * @throws SeedException if error.
    */
-  private static Btime getBtime(Blockette blockette, int fieldNum)
-      throws SeedException {
+  private static Btime getBtime(Blockette blockette, int fieldNum) throws SeedException {
     Object obj = blockette.getFieldVal(fieldNum);
     if (obj instanceof Btime) {
       return (Btime) obj;
@@ -313,8 +305,7 @@ public class SeedLinkClient implements Runnable {
    * @return the double value.
    * @throws SeedException if error.
    */
-  private static double getDouble(Blockette blockette, int fieldNum)
-      throws SeedException {
+  private static double getDouble(Blockette blockette, int fieldNum) throws SeedException {
     Object obj = blockette.getFieldVal(fieldNum);
     if (obj instanceof Number) {
       return ((Number) obj).doubleValue();
@@ -323,15 +314,14 @@ public class SeedLinkClient implements Runnable {
   }
 
   /**
-   * Method that processes each packet received from the SeedLink server. This
-   * is based on code lifted from SeedLinkManager in SeisGram2K with clock
-   * logic removed.
+   * Method that processes each packet received from the SeedLink server. This is based on code
+   * lifted from SeedLinkManager in SeisGram2K with clock logic removed.
    * 
    * @param count the packet to process.
    * @param slpack the packet to process.
    * 
-   * @return true if connection to SeedLink server should be closed and
-   *         session terminated, false otherwise.
+   * @return true if connection to SeedLink server should be closed and session terminated, false
+   *         otherwise.
    * 
    * @exception implementation dependent
    * 
@@ -346,8 +336,7 @@ public class SeedLinkClient implements Runnable {
     // may not be on AWT-Event Thread, so do not call any GUI methods
 
     // check if not a complete packet
-    if (slpack == null || slpack == SLPacket.SLNOPACKET
-        || slpack == SLPacket.SLERROR) {
+    if (slpack == null || slpack == SLPacket.SLNOPACKET || slpack == SLPacket.SLERROR) {
       return false; // do not close the connection
     }
 
@@ -376,8 +365,7 @@ public class SeedLinkClient implements Runnable {
 
     final Waveform waveform = blockette.getWaveform();
     // if waveform and FSDH
-    if (waveform != null && blockette.getType() == 999
-        && Swarm.getApplicationFrame() != null) {
+    if (waveform != null && blockette.getType() == 999 && Swarm.getApplicationFrame() != null) {
       // convert waveform to wave (also done in
       // gov.usgs.swarm.data.FileDataSource)
       try {
@@ -385,8 +373,7 @@ public class SeedLinkClient implements Runnable {
         final double factor = getDouble(blockette, 10);
         final double multiplier = getDouble(blockette, 11);
         final double startTime = J2kSec.fromDate(btimeToDate(bTime));
-        final double samplingRate = getSampleRate(factor,
-            multiplier);
+        final double samplingRate = getSampleRate(factor, multiplier);
         final Wave wave = new Wave();
         wave.setSamplingRate(samplingRate);
         wave.setStartTime(startTime);

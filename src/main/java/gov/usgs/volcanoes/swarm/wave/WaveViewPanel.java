@@ -29,7 +29,6 @@ import gov.usgs.volcanoes.swarm.event.TagMenu;
 import gov.usgs.volcanoes.swarm.time.UiTime;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -47,11 +46,9 @@ import java.awt.image.BufferedImage;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,12 +127,12 @@ public class WaveViewPanel extends JComponent {
 
   protected boolean pauseCursorMark;
   protected double time;
-  
+
   // pick and tag data
   private PickData pickData;
   protected ArrayList<TagData> tagData = new ArrayList<TagData>();
   private TagMenu tagMenu;
-  
+
   /**
    * Default constructor.
    */
@@ -152,6 +149,7 @@ public class WaveViewPanel extends JComponent {
 
   /**
    * Constructor.
+   * 
    * @param s wave settings
    */
   public WaveViewPanel(WaveViewSettings s) {
@@ -197,6 +195,7 @@ public class WaveViewPanel extends JComponent {
 
   /**
    * Set offsets.
+   * 
    * @param xo x offset
    * @param yo y offset
    * @param rw right width
@@ -219,25 +218,27 @@ public class WaveViewPanel extends JComponent {
 
   /**
    * Fire zoom on wave.
+   * 
    * @param e mouse event
    * @param oldStartTime old start time
    * @param oldEndTime old end time
    * @param newStartTime new start time
    * @param newEndTime new end time
    */
-  public void fireZoomed(MouseEvent e, double oldStartTime, double oldEndTime, 
-                                        double newStartTime, double newEndTime) {
+  public void fireZoomed(MouseEvent e, double oldStartTime, double oldEndTime, double newStartTime,
+      double newEndTime) {
     Object[] ls = listeners.getListenerList();
     for (int i = ls.length - 2; i >= 0; i -= 2) {
       if (ls[i] == WaveViewPanelListener.class) {
-        ((WaveViewPanelListener) ls[i + 1]).waveZoomed(
-                  this, oldStartTime, oldEndTime, newStartTime, newEndTime);
+        ((WaveViewPanelListener) ls[i + 1]).waveZoomed(this, oldStartTime, oldEndTime, newStartTime,
+            newEndTime);
       }
     }
   }
 
   /**
    * Fire time pressed.
+   * 
    * @param e mouse event
    * @param j2k J2000 time
    */
@@ -252,6 +253,7 @@ public class WaveViewPanel extends JComponent {
 
   /**
    * Fire mouse pressed event.
+   * 
    * @param e mouse event
    */
   public void fireMousePressed(MouseEvent e) {
@@ -279,13 +281,14 @@ public class WaveViewPanel extends JComponent {
   public void setAllowClose(boolean b) {
     allowClose = b;
   }
-    
+
   /**
    * Process right mouse press.
+   * 
    * @param e mouse event
    */
   protected void processRightMousePress(MouseEvent e) {
-    if (settings.pickEnabled && (settings.viewType.equals(ViewType.WAVE) 
+    if (settings.pickEnabled && (settings.viewType.equals(ViewType.WAVE)
         || settings.viewType.equals(ViewType.SPECTROGRAM))) {
       PickMenu pickMenu = new PickMenu(pickData, this);
       double[] t = getTranslation();
@@ -296,9 +299,8 @@ public class WaveViewPanel extends JComponent {
           pickMenu.show(this, e.getX() + 30, e.getY());
         }
       }
-    } else if (settings.tagEnabled 
-        && (settings.viewType.equals(ViewType.WAVE)
-            || settings.viewType.equals(ViewType.SPECTROGRAM))) {
+    } else if (settings.tagEnabled && (settings.viewType.equals(ViewType.WAVE)
+        || settings.viewType.equals(ViewType.SPECTROGRAM))) {
       double[] t = getTranslation();
       if (t != null) {
         double j2k = e.getX() * t[0] + t[1];
@@ -314,7 +316,7 @@ public class WaveViewPanel extends JComponent {
   }
 
   protected void processRightMouseRelease(MouseEvent e) {
-    
+
   }
 
   protected void setupMouseHandler() {
@@ -332,10 +334,10 @@ public class WaveViewPanel extends JComponent {
         if (t != null) {
           int x = e.getX();
           double j2k = x * t[0] + t[1];
-/*          if (timeSeries) {
-            System.out.printf("%s UTC: %s j2k: %.3f ew: %d\n", channel, J2kSec.toDateString(j2k),
-                j2k, J2kSec.asEpoch(j2k));
-          }*/
+          /*
+           * if (timeSeries) { System.out.printf("%s UTC: %s j2k: %.3f ew: %d\n", channel,
+           * J2kSec.toDateString(j2k), j2k, J2kSec.asEpoch(j2k)); }
+           */
 
           if (timeSeries && j2k >= startTime && j2k <= endTime) {
             fireTimePressed(e, j2k);
@@ -429,6 +431,7 @@ public class WaveViewPanel extends JComponent {
 
   /**
    * Wave zoom.
+   * 
    * @param st start time
    * @param et end time
    */
@@ -605,7 +608,7 @@ public class WaveViewPanel extends JComponent {
           status.append(",");
           status.append(durationString);
         }
-        
+
         String timeString = StatusTextArea.getTimeString(time, swarmConfig.getTimeZone(channel));
         if (timeString != null) {
           status.append("\n");
@@ -656,7 +659,7 @@ public class WaveViewPanel extends JComponent {
           double spDistance = spDuration * (vp * vs) / (vp - vs);
           pickStatus = String.format("S-P: %.2fs (%.2fkm)", spDuration, spDistance);
         }
-        // Coda 
+        // Coda
         if (swarmConfig.durationEnabled && !Double.isNaN(pickData.getCodaDuration())) {
           if (!pickStatus.equals("")) {
             pickStatus += "; ";
@@ -664,7 +667,7 @@ public class WaveViewPanel extends JComponent {
           double duration = pickData.getCodaDuration();
           double durationMagnitude = swarmConfig.getDurationMagnitude(duration);
           String coda = String.format("Coda: %.2fs (Mc: %.2f)", duration, durationMagnitude);
-          
+
           // get clipboard average
           WaveClipboardFrame cb = WaveClipboardFrame.getInstance();
           int count = 0;
@@ -683,18 +686,18 @@ public class WaveViewPanel extends JComponent {
             double avgDurationMagnitude = swarmConfig.getDurationMagnitude(avgDuration);
             String avgCoda =
                 String.format("Avg Coda: %.2fs (Mc: %.2f)", avgDuration, avgDurationMagnitude);
-  
+
             // add final coda string
             pickStatus += coda + ", " + avgCoda;
           }
-        } 
+        }
         if (!pickStatus.equals(new String(""))) {
           status.append("\n");
           status.append(pickStatus);
         }
       }
-    } 
-    
+    }
+
     if (!pauseCursorMark) {
       WaveViewTime.fireTimeChanged(time);
     }
@@ -713,6 +716,7 @@ public class WaveViewPanel extends JComponent {
 
   /**
    * Set wave.
+   * 
    * @param sw wave to set to
    * @param st start time
    * @param et end time
@@ -740,6 +744,7 @@ public class WaveViewPanel extends JComponent {
 
   /**
    * Adjust scale by percent.
+   * 
    * @param pct percent to scale to.
    */
   public void adjustScale(double pct) {
@@ -840,6 +845,7 @@ public class WaveViewPanel extends JComponent {
 
   /**
    * Annotate image with pick marks.
+   * 
    * @param g2 graphics
    */
   protected void annotateImage(Graphics2D g2) {
@@ -857,12 +863,12 @@ public class WaveViewPanel extends JComponent {
         return;
       }
       if (!pickData.isHidePhases()) {
-        for (String phase : new String[] {PickData.P, PickData.S}) {
+        for (String phase : new String[] { PickData.P, PickData.S }) {
           drawPick(pickData.getPick(phase), g2, !pickData.isPickChannel(phase));
         }
       }
       if (!pickData.isHideCoda()) {
-        for (String coda : new String[] {PickData.CODA1, PickData.CODA2}) {
+        for (String coda : new String[] { PickData.CODA1, PickData.CODA2 }) {
           drawPick(pickData.getPick(coda), g2, false);
         }
       }
@@ -932,6 +938,7 @@ public class WaveViewPanel extends JComponent {
 
   /**
    * Draw duration markers.
+   * 
    * @param g2 graphics
    * @param j2k time in j2k
    */
@@ -959,9 +966,10 @@ public class WaveViewPanel extends JComponent {
     g2.setColor(DARK_GREEN);
     g2.draw(gp);
   }
-  
+
   /**
    * Draw pick marks.
+   * 
    * @param pick pick to draw
    * @param g2 graphics
    * @param transparent true if tags should have transparent background
@@ -988,7 +996,7 @@ public class WaveViewPanel extends JComponent {
       color = PickWavePanel.S_BACKGROUND;
     } else if (tag.indexOf('C') != -1) {
       color = Color.YELLOW;
-    } 
+    }
     g2.setColor(color);
 
     // draw uncertainty
@@ -1001,12 +1009,13 @@ public class WaveViewPanel extends JComponent {
       long lowTime = (long) (pick.getTime() - 1000.0 * uncertainty);
       double luJ2k = J2kSec.fromEpoch(lowTime);
       double luX = (luJ2k - t[1]) / t[0];
-      g2.fillRect((int)luX, yOffset + 1, (int)(x - luX), getHeight() - bottomHeight - yOffset - 1);
+      g2.fillRect((int) luX, yOffset + 1, (int) (x - luX),
+          getHeight() - bottomHeight - yOffset - 1);
       // upperUncertainty
       long highTime = (long) (pick.getTime() + 1000.0 * uncertainty);
       double uuJ2k = J2kSec.fromEpoch(highTime);
       double uuX = (uuJ2k - t[1]) / t[0];
-      g2.fillRect((int)x, yOffset + 1, (int)(uuX - x), getHeight() - bottomHeight - yOffset - 1);
+      g2.fillRect((int) x, yOffset + 1, (int) (uuX - x), getHeight() - bottomHeight - yOffset - 1);
     }
 
     // draw tag/label box
@@ -1021,17 +1030,18 @@ public class WaveViewPanel extends JComponent {
     int offset = 2;
     int lw = width + 2 * offset;
     g2.fillRect((int) x, 3, lw, height + 2 * offset);
-    
+
     // draw text in tag/label box
     g2.setColor(Color.BLACK);
     g2.drawRect((int) x, 3, lw, height + 2 * offset);
-    
+
     g2.drawString(tag, (int) x + offset, 3 + (fm.getAscent() + offset));
-    
+
   }
 
   /**
    * Draw tag.
+   * 
    * @param tag tag data to draw
    * @param g2 graphics
    * @param transparent true if tags should have transparent background
@@ -1044,7 +1054,7 @@ public class WaveViewPanel extends JComponent {
     double[] t = getTranslation();
     double j2k = tag.startTime;
     double x = (j2k - t[1]) / t[0];
-    
+
     // draw line
     g2.setColor(PickWavePanel.DARK_GREEN);
     g2.draw(new Line2D.Double(x, yOffset, x, getHeight() - bottomHeight - 1));
@@ -1065,15 +1075,15 @@ public class WaveViewPanel extends JComponent {
     int offset = 2;
     int lw = width + 2 * offset;
     g2.fillRect((int) x, 3, lw, height + 2 * offset);
-    
+
     // draw text in tag/label box
     g2.setColor(Color.BLACK);
     g2.drawRect((int) x, 3, lw, height + 2 * offset);
-    
+
     g2.drawString(tag.classification, (int) x + offset, 3 + (fm.getAscent() + offset));
-    
+
   }
-  
+
   public void setUseFilterLabel(boolean b) {
     useFilterLabel = b;
   }
@@ -1084,6 +1094,7 @@ public class WaveViewPanel extends JComponent {
 
   /**
    * Get filter label.
+   * 
    * @param x x text location
    * @param y y text location
    * @param horizJustification horizontal justification
@@ -1123,12 +1134,12 @@ public class WaveViewPanel extends JComponent {
       return;
     }
     Dimension dim = this.getSize();
-    
+
     Plot plot = new Plot();
     plot.setBackgroundColor(backgroundColor);
     plot.setSize(dim);
     Wave renderWave = wave;
-    
+
     if (settings.filterOn) {
       renderWave = new Wave(wave);
       renderWave.filter(settings.filter, settings.zeroPhaseShift);
@@ -1155,7 +1166,7 @@ public class WaveViewPanel extends JComponent {
     } catch (PlotException e) {
       e.printStackTrace();
     }
-    
+
   }
 
   /**
@@ -1184,12 +1195,12 @@ public class WaveViewPanel extends JComponent {
     if (settings.removeBias) {
       bias = wv.mean();
     }
-    
+
     double minY = (settings.waveMinAmp - offset) / multiplier;
     double maxY = (settings.waveMaxAmp - offset) / multiplier;
 
     if (settings.autoScaleAmp) {
-      double[] dr = new double[] {wv.min(), wv.max()};
+      double[] dr = new double[] { wv.min(), wv.max() };
       if (settings.autoScaleAmpMemory) {
         minY = Math.min(minAmp, dr[0] - bias);
         maxY = Math.max(maxAmp, dr[1] - bias);
@@ -1271,7 +1282,7 @@ public class WaveViewPanel extends JComponent {
     spectraRenderer.setYUnitText("Power");
     if (channel != null && displayTitle) {
       spectraRenderer.setTitle(channel);
-      spectraRenderer.setDate(J2kSec.asDate(startTime));      
+      spectraRenderer.setDate(J2kSec.asDate(startTime));
     }
 
     spectraRenderer.update();
@@ -1308,9 +1319,9 @@ public class WaveViewPanel extends JComponent {
     if (settings.useAlternateSpectrum) {
       spectrogramRenderer.setSpectrum(Inferno.getInstance());
     } else {
-      spectrogramRenderer.setSpectrum(Jet2.getInstance());      
+      spectrogramRenderer.setSpectrum(Jet2.getInstance());
     }
-    
+
     spectrogramRenderer.setLocation(xOffset, yOffset, this.getWidth() - rightWidth - xOffset,
         this.getHeight() - bottomHeight - yOffset);
     spectrogramRenderer.setWave(wv);
@@ -1351,9 +1362,9 @@ public class WaveViewPanel extends JComponent {
     }
     translation = spectrogramRenderer.getDefaultTranslation();
   }
-  
+
   /**
-   * Plot particle motion using detrended data.   
+   * Plot particle motion using detrended data.
    */
   private void plotParticleMotion(Plot plot, Wave wave) {
     if (source == null) {
@@ -1372,11 +1383,11 @@ public class WaveViewPanel extends JComponent {
       plot.addRenderer(renderer);
       return;
     }
-    String s = md.getSCNL().station;
-    String c = md.getSCNL().channel;
-    String n = md.getSCNL().network == null ? "" : md.getSCNL().network;
-    String l = md.getSCNL().location == null ? "" : md.getSCNL().location;
-    
+    String s = md.getScnl().station;
+    String c = md.getScnl().channel;
+    String n = md.getScnl().network == null ? "" : md.getScnl().network;
+    String l = md.getScnl().location == null ? "" : md.getScnl().location;
+
     if (s == null || c == null) {
       String message = "Unable to plot due to missing Station or Channel information.";
       TextRenderer renderer = new TextRenderer(30, 30, message);
@@ -1387,22 +1398,22 @@ public class WaveViewPanel extends JComponent {
     SliceWave swave = new SliceWave(wave);
     swave.setSlice(startTime, endTime);
     String component = c.substring(2);
-    String[] orientationType = new String[] {"Z", "N", "E"};
+    String[] orientationType = new String[] { "Z", "N", "E" };
     if (component.matches("[ABC]")) {
-      orientationType = new String[] {"A", "B", "C"};
+      orientationType = new String[] { "A", "B", "C" };
     }
     if (component.matches("[123]")) {
-      orientationType = new String[] {"1", "2", "3"};
+      orientationType = new String[] { "1", "2", "3" };
     }
     if (component.matches("[UVW]")) {
-      orientationType = new String[] {"U", "V", "W"};
+      orientationType = new String[] { "U", "V", "W" };
     }
     if (settings.useAlternateOrientationCode
         && component.matches("[" + settings.alternateOrientationCode + "]")) {
       String zOrientation = settings.alternateOrientationCode.substring(0, 1);
       String nOrientation = settings.alternateOrientationCode.substring(1, 2);
       String eOrientation = settings.alternateOrientationCode.substring(2);
-      orientationType = new String[]{ zOrientation, nOrientation, eOrientation};
+      orientationType = new String[] { zOrientation, nOrientation, eOrientation };
     }
     HashMap<String, double[]> data = new HashMap<String, double[]>();
     HashMap<String, String> stations = new HashMap<String, String>();
@@ -1415,7 +1426,7 @@ public class WaveViewPanel extends JComponent {
         if (!l.equals("")) {
           newStation += " " + l;
         }
-        stations.put(direction,  newStation);
+        stations.put(direction, newStation);
         Wave w = source.getWave(newStation, startTime, endTime);
         if (w != null && w.buffer != null) {
           if (settings.filterOn) {
@@ -1426,14 +1437,14 @@ public class WaveViewPanel extends JComponent {
             sw.setSlice(startTime, endTime);
             data.put(direction, sw.getSignal());
           } catch (NullPointerException e) {
-            data.put(direction, new double[0]);            
+            data.put(direction, new double[0]);
           }
         } else {
           data.put(direction, new double[0]);
         }
       }
     }
-    
+
     ParticleMotionRenderer particleMotionRenderer =
         new ParticleMotionRenderer(data.get(orientationType[2]), data.get(orientationType[1]),
             data.get(orientationType[0]), stations.get(orientationType[2]),
@@ -1451,10 +1462,10 @@ public class WaveViewPanel extends JComponent {
       plot.addRenderer(getFilterLabel(getWidth() - rightWidth, getHeight() - bottomHeight,
           TextRenderer.RIGHT, TextRenderer.BOTTOM));
     }
-    
+
     translation = null;
   }
-  
+
   /**
    * Paints the zoom drag box.
    * 
@@ -1521,10 +1532,11 @@ public class WaveViewPanel extends JComponent {
     mark1 = m1;
     mark2 = m2;
   }
-  
+
   /**
-   * Determines if the other wave view panel represents a wave from the
-   * same station. This means it has the same station, network, and location.
+   * Determines if the other wave view panel represents a wave from the same station. This means it
+   * has the same station, network, and location.
+   * 
    * @param wvp another wave view panel
    * @return true if same station
    */
@@ -1538,16 +1550,16 @@ public class WaveViewPanel extends JComponent {
     if (thatMd == null) {
       return false;
     }
-    
+
     // get this station info
-    String thisS = thisMd.getSCNL().station;
-    String thisN = thisMd.getSCNL().network;
-    String thisL = thisMd.getSCNL().location == null ? "" : thisMd.getSCNL().location;
+    String thisS = thisMd.getScnl().station;
+    String thisN = thisMd.getScnl().network;
+    String thisL = thisMd.getScnl().location == null ? "" : thisMd.getScnl().location;
 
     // get that station info
-    String thatS = thatMd.getSCNL().station;
-    String thatN = thatMd.getSCNL().network;
-    String thatL = thatMd.getSCNL().location == null ? "" : thatMd.getSCNL().location;
+    String thatS = thatMd.getScnl().station;
+    String thatN = thatMd.getScnl().network;
+    String thatL = thatMd.getScnl().location == null ? "" : thatMd.getScnl().location;
 
     // compare
     if (!thisS.equals(thatS)) {
@@ -1561,9 +1573,10 @@ public class WaveViewPanel extends JComponent {
     }
     return true;
   }
- 
+
   /**
    * Get pick data.
+   * 
    * @return pick data
    */
   public PickData getPickData() {

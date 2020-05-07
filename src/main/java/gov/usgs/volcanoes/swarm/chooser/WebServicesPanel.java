@@ -3,20 +3,17 @@ package gov.usgs.volcanoes.swarm.chooser;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.FormLayout;
-
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
-import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServiceStationXmlClient;
-import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServiceUtils;
-import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
-
+import gov.usgs.volcanoes.swarm.data.fdsnws.WebServiceStationXmlClient;
+import gov.usgs.volcanoes.swarm.data.fdsnws.WebServiceUtils;
+import gov.usgs.volcanoes.swarm.data.fdsnws.WebServicesSource;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -32,7 +29,6 @@ import javax.swing.text.JTextComponent;
  * @author Kevin Frechette (ISTI)
  */
 public class WebServicesPanel extends DataSourcePanel {
-  private static final String WS_NETWORK_FILE = "IRIS_networks.txt";
   private static final String codeText = ";" + WebServicesSource.typeString + ":";
   private JComboBox<String> network;
 
@@ -132,10 +128,10 @@ public class WebServicesPanel extends DataSourcePanel {
     String chan = "";
     String gs = "60";
     String gd = "1.0";
-//    String wsDataSelectUrl = getDefaultText(wsDataselectUrlField);
-//    String wsStationUrl = getDefaultText(wsStationUrlField);
-  String wsDataSelectUrl = "";
-  String wsStationUrl = "";
+    // String wsDataSelectUrl = getDefaultText(wsDataselectUrlField);
+    // String wsStationUrl = getDefaultText(wsStationUrlField);
+    String wsDataSelectUrl = "";
+    String wsStationUrl = "";
     int index;
     if (source != null && (index = source.indexOf(codeText)) != -1) {
       String[] ss =
@@ -166,6 +162,9 @@ public class WebServicesPanel extends DataSourcePanel {
     });
   }
 
+  /**
+   * Reset source.
+   */
   public void resetSource(String src) {
     if (src != null && (source == null || src.compareTo(source) != 0)) {
       source = src;
@@ -176,10 +175,10 @@ public class WebServicesPanel extends DataSourcePanel {
       String chan = "";
       String gs = "60";
       String gd = "1.0";
-//      String wsDataSelectUrl = getDefaultText(wsDataselectUrlField);
-//      String wsStationUrl = getDefaultText(wsStationUrlField);
-    String wsDataSelectUrl = "";
-    String wsStationUrl = "";
+      // String wsDataSelectUrl = getDefaultText(wsDataselectUrlField);
+      // String wsStationUrl = getDefaultText(wsStationUrlField);
+      String wsDataSelectUrl = "";
+      String wsStationUrl = "";
       int index;
       if (source != null && (index = source.indexOf(codeText)) != -1) {
         String[] ss =
@@ -205,13 +204,13 @@ public class WebServicesPanel extends DataSourcePanel {
     }
   }
 
-  private class WSNetworkClient extends WebServiceStationXmlClient {
-    public WSNetworkClient(String baseUrlText) {
+  private class WsNetworkClient extends WebServiceStationXmlClient {
+    public WsNetworkClient(String baseUrlText) {
       super(baseUrlText);
     }
 
     protected String getUrlTextWithTime() {
-      //return getBaseUrlText() + "net=*&level=network&format=xml&includeavailability=false";
+      // return getBaseUrlText() + "net=*&level=network&format=xml&includeavailability=false";
       return getBaseUrlText() + "net=*&level=network&format=xml";
     }
 
@@ -337,30 +336,30 @@ public class WebServicesPanel extends DataSourcePanel {
     builder.nextLine();
     builder.append(" ");
     panel = builder.getPanel();
-    
-    
+
+
   }
 
-//  /**
-//   * Get the default text for the specified component.
-//   * 
-//   * @param component the component.
-//   * @return the default text.
-//   */
-//  private String getDefaultText(Component component) {
-//    String s;
-//    if (component == wsDataselectUrlField) {
-//      // s = DataSelectReader.DEFAULT_WS_URL;
-//      s = SwarmConfig.getInstance().fdsnDataselectURL;
-//    } else
-//      if (component == wsStationUrlField) {
-//        // s = WebServiceStationTextClient.DEFAULT_WS_URL;
-//        s = SwarmConfig.getInstance().fdsnStationURL;
-//      } else {
-//        s = "";
-//      }
-//    return s;
-//  }
+  // /**
+  // * Get the default text for the specified component.
+  // *
+  // * @param component the component.
+  // * @return the default text.
+  // */
+  // private String getDefaultText(Component component) {
+  // String s;
+  // if (component == wsDataselectUrlField) {
+  // // s = DataSelectReader.DEFAULT_WS_URL;
+  // s = SwarmConfig.getInstance().fdsnDataselectURL;
+  // } else
+  // if (component == wsStationUrlField) {
+  // // s = WebServiceStationTextClient.DEFAULT_WS_URL;
+  // s = SwarmConfig.getInstance().fdsnStationURL;
+  // } else {
+  // s = "";
+  // }
+  // return s;
+  // }
 
   /**
    * Get the network combination box text.
@@ -389,7 +388,7 @@ public class WebServicesPanel extends DataSourcePanel {
       value = component.toString();
     }
     if (value == null) {
-//      s = getDefaultText(component);
+      // s = getDefaultText(component);
       s = "";
     } else {
       s = getText(value);
@@ -443,7 +442,7 @@ public class WebServicesPanel extends DataSourcePanel {
     network.removeAllItems();
     network.addItem("---Updating List---");
     currentStationUrl = getText(wsStationUrlField);
-    WSNetworkClient wsc = new WSNetworkClient(currentStationUrl);
+    WsNetworkClient wsc = new WsNetworkClient(currentStationUrl);
     List<String> nets = wsc.getNetworkList();
     if (nets != null) {
       network.removeAllItems();
@@ -453,8 +452,8 @@ public class WebServicesPanel extends DataSourcePanel {
       }
     } else {
       String message = "No network found. Please ensure you have the correct fdsnws-station URL.";
-      JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message,
-          "Station query", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message, "Station query",
+          JOptionPane.ERROR_MESSAGE);
     }
   }
 
@@ -505,8 +504,8 @@ public class WebServicesPanel extends DataSourcePanel {
     String result = String.format(getCode() + ":" + WebServicesSource.PARAM_FMT_TEXT,
         getText(network), getText(station), getText(location), getText(channel), gs, gd,
         getText(wsDataselectUrlField), getText(wsStationUrlField));
-    SwarmConfig.getInstance().fdsnDataselectURL = getText(wsDataselectUrlField);
-    SwarmConfig.getInstance().fdsnStationURL = getText(wsStationUrlField);
+    SwarmConfig.getInstance().fdsnDataselectUrl = getText(wsDataselectUrlField);
+    SwarmConfig.getInstance().fdsnStationUrl = getText(wsStationUrlField);
 
     return result;
   }

@@ -3,10 +3,8 @@ package gov.usgs.volcanoes.swarm;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.FormLayout;
-
 import gov.usgs.volcanoes.swarm.map.NationalMapLayer;
 import gov.usgs.volcanoes.swarm.options.SwarmOptions;
-
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,7 +12,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Arrays;
 import java.util.TimeZone;
-
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -26,9 +23,9 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 /**
+ * Options Dialog.
  * 
  * @author Dan Cervelli
- * @version $Id: OptionsDialog.java,v 1.7 2007-05-21 02:38:41 dcervelli Exp $
  */
 public class OptionsDialog extends SwarmModalDialog {
   private static final long serialVersionUID = 1L;
@@ -137,7 +134,7 @@ public class OptionsDialog extends SwarmModalDialog {
     builder.nextLine();
     builder.append("Vp/Vs Ratio =", velocityRatio);
     builder.nextLine();
-    
+
     builder.appendSeparator("Maps");
     builder.append(useMapPacks, 7);
     builder.nextLine();
@@ -170,7 +167,8 @@ public class OptionsDialog extends SwarmModalDialog {
 
     natMapList.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        NationalMapLayer layer = (NationalMapLayer)((JComboBox<?>) e.getSource()).getSelectedItem();
+        NationalMapLayer layer =
+            (NationalMapLayer) ((JComboBox<?>) e.getSource()).getSelectedItem();
         wmsServer.setText(layer.server);
         wmsLayer.setText(layer.layer);
         wmsStyles.setText(layer.style);
@@ -218,8 +216,8 @@ public class OptionsDialog extends SwarmModalDialog {
     }
     timeZones.setSelectedItem(swarmConfig.specificTimeZone.getID());
 
-    useMapPacks.setSelected(!swarmConfig.useWMS);
-    useWms.setSelected(swarmConfig.useWMS);
+    useMapPacks.setSelected(!swarmConfig.useWms);
+    useWms.setSelected(swarmConfig.useWms);
     NationalMapLayer basemap = NationalMapLayer.getFromServer(swarmConfig.wmsServer);
     if (basemap != null) {
       natMapList.setSelectedItem(basemap);
@@ -233,6 +231,8 @@ public class OptionsDialog extends SwarmModalDialog {
   }
 
   /**
+   * Allow ok.
+   * 
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#allowOk()
    */
   public boolean allowOk() {
@@ -263,6 +263,8 @@ public class OptionsDialog extends SwarmModalDialog {
   }
 
   /**
+   * Was ok.
+   * 
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#wasOk()
    */
   public void wasOk() {
@@ -276,7 +278,7 @@ public class OptionsDialog extends SwarmModalDialog {
     swarmConfig.useInstrumentTimeZone = tzInstrument.isSelected();
     swarmConfig.useLocalTimeZone = tzLocal.isSelected();
     swarmConfig.specificTimeZone = TimeZone.getTimeZone((String) timeZones.getSelectedItem());
-    swarmConfig.useWMS = useWms.isSelected();
+    swarmConfig.useWms = useWms.isSelected();
     swarmConfig.wmsServer = wmsServer.getText();
     swarmConfig.wmsLayer = wmsLayer.getText();
     swarmConfig.wmsStyles = wmsStyles.getText();

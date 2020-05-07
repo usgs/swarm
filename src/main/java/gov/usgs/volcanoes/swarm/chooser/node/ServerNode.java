@@ -3,7 +3,6 @@ package gov.usgs.volcanoes.swarm.chooser.node;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.data.FileDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-
 import javax.swing.Icon;
 
 public class ServerNode extends AbstractChooserNode {
@@ -22,6 +21,7 @@ public class ServerNode extends AbstractChooserNode {
 
   /**
    * Get icon.
+   * 
    * @see gov.usgs.volcanoes.swarm.chooser.node.AbstractChooserNode#getIcon()
    */
   public Icon getIcon() {

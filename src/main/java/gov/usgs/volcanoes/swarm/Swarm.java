@@ -1,7 +1,6 @@
 package gov.usgs.volcanoes.swarm;
 
 import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
-
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.time.CurrentTime;
@@ -14,8 +13,8 @@ import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.event.EventFrame;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
-import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.internalframe.InternalFrameListener;
+import gov.usgs.volcanoes.swarm.internalframe.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
@@ -24,7 +23,6 @@ import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
 import gov.usgs.volcanoes.swarm.wave.WaveViewerFrame;
-
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.KeyboardFocusManager;
@@ -37,7 +35,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JDesktopPane;
@@ -48,7 +45,6 @@ import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,6 +87,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
   /**
    * Constructor.
+   * 
    * @param args arguments
    */
   public Swarm(final String[] args) {
@@ -269,8 +266,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
   }
 
-  @Deprecated
-  public static Swarm getApplication() {
+  public static Swarm getInstance() {
     return application;
   }
 
@@ -389,6 +385,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
   /**
    * Make chooser visible or not visible with given parameter.
+   * 
    * @param vis true if make visible; false otherwise.
    */
   public void setChooserVisible(final boolean vis) {
@@ -421,6 +418,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
   /**
    * Set to full screen mode or not given the parameter.
+   * 
    * @param full true if set to full screen mode; false otherwise.
    */
   public void setFullScreenMode(final boolean full) {
@@ -546,6 +544,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
   /**
    * Load wave to clipboard.
+   * 
    * @param source data source for wave data
    * @param channel wave channel
    */
@@ -596,6 +595,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
   /**
    * Open wave viewer frame.
+   * 
    * @param source wave data source
    * @param channel wave channel
    * @return wave viewer frame
@@ -606,9 +606,10 @@ public class Swarm extends JFrame implements InternalFrameListener {
     SwarmInternalFrames.add(frame);
     return frame;
   }
-  
+
   /**
    * Open wave viewer frame.
+   * 
    * @param source wave data source
    * @param channel wave channel
    * @param settings wave view settings
@@ -623,6 +624,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
   /**
    * Open helicorder.
+   * 
    * @param source wave data source
    * @param channel wave channel
    * @param time bottom time
@@ -638,6 +640,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
   /**
    * Open RSAM viewer frame.
+   * 
    * @param source RSAM data source
    * @param channel RSAM channel
    * @return RSAM viewer frame
@@ -647,9 +650,10 @@ public class Swarm extends JFrame implements InternalFrameListener {
     SwarmInternalFrames.add(frame);
     return frame;
   }
-  
+
   /**
    * Open RSAM viewer frame.
+   * 
    * @param source RSAM data source
    * @param channel RSAM channel
    * @param settings RSAM settings
@@ -684,6 +688,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
   /**
    * Save layout.
+   * 
    * @param name layout name
    */
   public void saveLayout(String name) {
@@ -737,6 +742,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
   /**
    * Get current Swarm layout.
+   * 
    * @return Swarm layout
    */
   public SwarmLayout getCurrentLayout() {
@@ -754,12 +760,12 @@ public class Swarm extends JFrame implements InternalFrameListener {
       if (frame instanceof HelicorderViewerFrame) {
         final HelicorderViewerFrame hvf = (HelicorderViewerFrame) frame;
         hvf.saveLayout(cf, "helicorder-" + i++);
-      } 
+      }
 
       if (frame instanceof WaveViewerFrame) {
         final WaveViewerFrame wvf = (WaveViewerFrame) frame;
         wvf.saveLayout(cf, "wave-" + i++);
-      } 
+      }
       if (frame instanceof MultiMonitor) {
         final MultiMonitor mm = (MultiMonitor) frame;
         mm.saveLayout(cf, "monitor-" + i++);
@@ -767,9 +773,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
       if (frame instanceof RsamViewerFrame) {
         final RsamViewerFrame rvf = (RsamViewerFrame) frame;
         rvf.saveLayout(cf, "rsam-" + i++);
-      } 
-    }      
-    
+      }
+    }
+
     final WaveClipboardFrame wcf = WaveClipboardFrame.getInstance();
     if (wcf.isVisible()) {
       wcf.saveLayout(cf, "clipboard");
@@ -786,6 +792,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
   /**
    * Flush frame windows to specified position.
+   * 
    * @param position flush position
    */
   public void flush(final int position) {
@@ -1085,8 +1092,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
   /**
    * Internal frame added.
-   * @see gov.usgs.volcanoes.swarm.internalFrame
-   * .InternalFrameListener#internalFrameAdded(javax.swing.JInternalFrame)
+   * 
+   * @see gov.usgs.volcanoes.swarm.internalframe
+   *      .InternalFrameListener#internalFrameAdded(javax.swing.JInternalFrame)
    */
   public void internalFrameAdded(final JInternalFrame f) {
     desktop.add(f);
@@ -1108,6 +1116,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
   /**
    * Main method.
+   * 
    * @param args arguments
    */
   public static void main(final String[] args) {
@@ -1127,6 +1136,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
 
   /**
    * Open event frame with given event.
+   * 
    * @param event event
    * @return event frame
    */

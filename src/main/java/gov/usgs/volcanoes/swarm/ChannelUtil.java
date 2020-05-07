@@ -1,7 +1,6 @@
 package gov.usgs.volcanoes.swarm;
 
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,7 +20,7 @@ public final class ChannelUtil {
   private ChannelUtil() {
     // uninstantiatable
   }
-  
+
   /**
    * Add the channel.
    * 
@@ -32,7 +31,7 @@ public final class ChannelUtil {
    */
   public static String addChannel(List<String> channels, AbstractChannelInfo ch,
       SeismicDataSource source) {
-    final String formattedScnl = ch.getFormattedSCNL();
+    final String formattedScnl = ch.getFormattedScnl();
     if (!channels.contains(formattedScnl)) {
       Metadata md = SwarmConfig.getInstance().getMetadata(formattedScnl, true);
       md.updateLongitude(ch.getLongitude());
@@ -70,10 +69,10 @@ public final class ChannelUtil {
    * @param location the location name.
    * @return the the formatted SCNL.
    */
-  public static final String getFormattedSCNL(String station, String channel, String network,
+  public static final String getFormattedScnl(String station, String channel, String network,
       String location) {
     String scnl = station + " " + channel + " " + network;
-    if(location != null && (location.length() > 0)) {
+    if (location != null && (location.length() > 0)) {
       scnl += " " + location;
     }
     return scnl.trim();

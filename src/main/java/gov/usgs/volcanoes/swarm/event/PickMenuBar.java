@@ -1,15 +1,13 @@
 package gov.usgs.volcanoes.swarm.event;
 
 import gov.usgs.volcanoes.swarm.Swarm;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.internalframe.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -28,7 +26,7 @@ public class PickMenuBar extends JMenuBar {
   private WaveClipboardFrame clipboard;
   private PickSettingsDialog settingsDialog;
   private JMenu menu;
-  
+
   /**
    * Constructor.
    */
@@ -41,7 +39,7 @@ public class PickMenuBar extends JMenuBar {
     this.settingsDialog = PickSettingsDialog.getInstance();
     this.createMenu();
   }
-  
+
   /**
    * Create right click menu for pick.
    */
@@ -50,11 +48,11 @@ public class PickMenuBar extends JMenuBar {
     menu.addSeparator();
     createEventMenu();
   }
- 
+
   /**
    * Create import/export event menu items.
    */
-  private void createEventMenu() { 
+  private void createEventMenu() {
     JMenuItem createEventMenu = new JMenuItem("Open Event Dialog");
     createEventMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK));
     createEventMenu.addActionListener(new ActionListener() {
@@ -62,9 +60,9 @@ public class PickMenuBar extends JMenuBar {
         openEventDialog();
       }
     });
-    menu.add(createEventMenu);   
+    menu.add(createEventMenu);
   }
-    
+
   /**
    * Open event dialog for export to file.
    */
@@ -77,7 +75,7 @@ public class PickMenuBar extends JMenuBar {
     }
     eventDialog.checkForPicks();
     eventDialog.setSizeAndLocation();
-    eventDialog.setVisible(true);   
+    eventDialog.setVisible(true);
 
     // if event dialog is already in frame it throws an IllegalArgumentException.
     // catch and try again.
@@ -88,7 +86,7 @@ public class PickMenuBar extends JMenuBar {
     }
 
   }
-  
+
   /**
    * Create settings menu item.
    */
@@ -101,7 +99,7 @@ public class PickMenuBar extends JMenuBar {
       }
     });
     menu.add(settingsMenu);
-    
+
     JMenuItem clearMenu = new JMenuItem("Clear All Picks");
     clearMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK));
     clearMenu.addActionListener(new ActionListener() {
@@ -120,5 +118,5 @@ public class PickMenuBar extends JMenuBar {
     });
     menu.add(clearMenu);
   }
-  
+
 }

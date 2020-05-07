@@ -10,12 +10,10 @@ import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.Throbber;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
-
+import gov.usgs.volcanoes.swarm.internalframe.SwarmInternalFrames;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -29,13 +27,14 @@ import javax.swing.event.InternalFrameEvent;
 
 /**
  * Wave Viewer Frame.
+ * 
  * @author Dan Cervelli
  */
 public class WaveViewerFrame extends SwarmFrame implements Runnable {
   public static final long serialVersionUID = -1;
 
   private final long interval = 2000;
-  private static final int[] SPANS = new int[] {15, 30, 60, 120, 180, 240, 300};
+  private static final int[] SPANS = new int[] { 15, 30, 60, 120, 180, 240, 300 };
   private int spanIndex;
   private final SeismicDataSource dataSource;
   private final String channel;
@@ -53,15 +52,17 @@ public class WaveViewerFrame extends SwarmFrame implements Runnable {
 
   /**
    * Constructor.
+   * 
    * @param sds seismic data source
    * @param ch channel
    */
   public WaveViewerFrame(final SeismicDataSource sds, final String ch) {
-    this(sds,ch,null);
+    this(sds, ch, null);
   }
-  
+
   /**
    * Constructor.
+   * 
    * @param sds seismic data source
    * @param ch channel
    * @param settings wave view settings
@@ -195,6 +196,7 @@ public class WaveViewerFrame extends SwarmFrame implements Runnable {
 
   /**
    * Run thread.
+   * 
    * @see java.lang.Runnable#run()
    */
   public void run() {
@@ -208,11 +210,12 @@ public class WaveViewerFrame extends SwarmFrame implements Runnable {
     }
     dataSource.close();
   }
-  
+
   /**
    * Save Layout.
+   * 
    * @see gov.usgs.volcanoes.swarm.SwarmFrame#saveLayout
-   * (gov.usgs.volcanoes.core.configfile.ConfigFile, java.lang.String)
+   *      (gov.usgs.volcanoes.core.configfile.ConfigFile, java.lang.String)
    */
   public void saveLayout(final ConfigFile cf, final String prefix) {
     super.saveLayout(cf, prefix);

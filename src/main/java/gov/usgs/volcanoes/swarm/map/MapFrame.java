@@ -21,7 +21,6 @@ import gov.usgs.volcanoes.swarm.time.UiTime;
 import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
-
 import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.Insets;
@@ -36,7 +35,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.net.MalformedURLException;
 import java.text.ParseException;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -53,12 +51,12 @@ import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Map frame.
+ * 
  * @author Dan Cervelli
  */
 public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOptionsListener {
@@ -134,7 +132,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
       LOGGER.error("Unable to load layer. {}", ex);
     }
   }
-  
+
   private void addSpLayer() {
     SpLayer layer = new SpLayer();
     addLayer(layer);
@@ -152,6 +150,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
   /**
    * Process layout.
+   * 
    * @param cf config file
    */
   public void processLayout(final ConfigFile cf) {
@@ -550,6 +549,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
   /**
    * Set view.
+   * 
    * @param gr geo range
    */
   public void setView(final GeoRange gr) {
@@ -564,6 +564,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
   /**
    * Set status text.
+   * 
    * @param t text
    */
   public void setStatusText(final String t) {
@@ -598,6 +599,8 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
   }
 
   /**
+   * Set kiosk mode.
+   * 
    * @see gov.usgs.volcanoes.swarm.Kioskable#setKioskMode(boolean)
    */
   public void setKioskMode(final boolean b) {
@@ -613,6 +616,7 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
 
   /**
    * Add map layer.
+   * 
    * @param layer map layer
    * @return map panel
    */
@@ -623,6 +627,8 @@ public class MapFrame extends SwarmFrame implements Runnable, Kioskable, SwarmOp
   }
 
   /**
+   * Run.
+   * 
    * @see java.lang.Runnable#run()
    */
   public void run() {

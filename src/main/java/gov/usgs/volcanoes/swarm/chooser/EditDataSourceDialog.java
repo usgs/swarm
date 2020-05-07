@@ -3,12 +3,10 @@ package gov.usgs.volcanoes.swarm.chooser;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwarmModalDialog;
-
 import java.awt.BorderLayout;
 import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -21,6 +19,7 @@ import javax.swing.border.EmptyBorder;
 
 /**
  * Edit data source dialog.
+ * 
  * @author Dan Cervelli
  */
 public class EditDataSourceDialog extends SwarmModalDialog {
@@ -40,6 +39,7 @@ public class EditDataSourceDialog extends SwarmModalDialog {
 
   /**
    * Edit data source dialog.
+   * 
    * @param s source name
    */
   public EditDataSourceDialog(String s) {
@@ -59,7 +59,7 @@ public class EditDataSourceDialog extends SwarmModalDialog {
 
   private void createPanels() {
     panels = new ArrayList<DataSourcePanel>();
-    panels.add(new WWSPanel());
+    panels.add(new WwsPanel());
     panels.add(new WaveServerPanel());
     // panels.add(new DHIPanel());
     panels.add(new WebServicesPanel());
@@ -103,6 +103,7 @@ public class EditDataSourceDialog extends SwarmModalDialog {
 
   /**
    * Reset data source.
+   * 
    * @param src source name
    */
   public void resetSource(String src) {
@@ -141,6 +142,8 @@ public class EditDataSourceDialog extends SwarmModalDialog {
   }
 
   /**
+   * set visible.
+   * 
    * @see java.awt.Dialog#setVisible(boolean)
    */
   public void setVisible(boolean b) {

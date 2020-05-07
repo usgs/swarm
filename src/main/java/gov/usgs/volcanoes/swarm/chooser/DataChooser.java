@@ -33,7 +33,6 @@ import gov.usgs.volcanoes.swarm.data.WwsSource;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.wave.SwarmMultiMonitors;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -58,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -101,14 +99,13 @@ public class DataChooser extends JPanel {
   public static final int NO_DATA_SOURCE = -1;
   public static final int OK = 0;
   private static final long serialVersionUID = 1L;
-  private static final String OPENING_MESSAGE = 
-      Messages.getString("DataChooser.treeOpening"); //$NON-NLS-1$
+  private static final String OPENING_MESSAGE = Messages.getString("DataChooser.treeOpening"); //$NON-NLS-1$
 
-  private static final String[] TIME_VALUES = new String[] {"Now"}; // "Today (Local)",
-                                                                    // "Today (UTC)",
-                                                                    // "Yesterday (Local)",
-                                                                    // "Yesterday (UTC)"
-                                                                    // };
+  private static final String[] TIME_VALUES = new String[] { "Now" }; // "Today (Local)",
+                                                                      // "Today (UTC)",
+                                                                      // "Yesterday (Local)",
+                                                                      // "Yesterday (UTC)"
+                                                                      // };
 
   private static final int MAX_CHANNELS_AT_ONCE = 500;
   public static final Color LINE_COLOR = new Color(0xac, 0xa8, 0x99);
@@ -183,6 +180,7 @@ public class DataChooser extends JPanel {
 
   /**
    * Get data chooser instance.
+   * 
    * @return data chooser
    */
   public static DataChooser getInstance() {
@@ -190,7 +188,7 @@ public class DataChooser extends JPanel {
   }
 
   /**
-   * FileSourceListener.   
+   * FileSourceListener.
    */
   private class FileSourceListener implements SeismicDataSourceListener {
     Map<String, ProgressNode> progressNodes;
@@ -265,6 +263,7 @@ public class DataChooser extends JPanel {
 
   /**
    * Save layout.
+   * 
    * @param cf config file
    * @param prefix prefix
    */
@@ -276,6 +275,7 @@ public class DataChooser extends JPanel {
 
   /**
    * Process layout.
+   * 
    * @param cf config file
    * @param listener action listener
    */
@@ -415,6 +415,7 @@ public class DataChooser extends JPanel {
 
   /**
    * Add time to time box.
+   * 
    * @param t time string
    */
   private void addTimeToBox(String t) {
@@ -431,6 +432,7 @@ public class DataChooser extends JPanel {
 
   /**
    * Get user times.
+   * 
    * @return list of times
    */
   public String[] getUserTimes() {
@@ -444,6 +446,7 @@ public class DataChooser extends JPanel {
 
   /**
    * Get time.
+   * 
    * @return time in j2k
    */
   private double getTime() {
@@ -499,8 +502,7 @@ public class DataChooser extends JPanel {
 
     realtimeButton = new JButton(Icons.wave); // $NON-NLS-1$
     realtimeButton.setFocusable(false);
-    realtimeButton.setToolTipText(
-        Messages.getString("DataChooser.waveButtonToolTip")); //$NON-NLS-1$
+    realtimeButton.setToolTipText(Messages.getString("DataChooser.waveButtonToolTip")); //$NON-NLS-1$
     realtimeButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         SwingWorker worker = new SwingWorker() {
@@ -541,8 +543,7 @@ public class DataChooser extends JPanel {
 
     clipboardButton = new JButton(Icons.clipboard); // $NON-NLS-1$
     clipboardButton.setFocusable(false);
-    clipboardButton.setToolTipText(
-        Messages.getString("DataChooser.clipboardButtonToolTip")); //$NON-NLS-1$
+    clipboardButton.setToolTipText(Messages.getString("DataChooser.clipboardButtonToolTip")); //$NON-NLS-1$
     clipboardButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         SwingWorker worker = new SwingWorker() {
@@ -569,8 +570,7 @@ public class DataChooser extends JPanel {
 
     monitorButton = new JButton(Icons.monitor); // $NON-NLS-1$
     monitorButton.setFocusable(false);
-    monitorButton.setToolTipText(
-        Messages.getString("DataChooser.monitorButtonToolTip")); //$NON-NLS-1$
+    monitorButton.setToolTipText(Messages.getString("DataChooser.monitorButtonToolTip")); //$NON-NLS-1$
     monitorButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         SwingWorker worker = new SwingWorker() {
@@ -695,7 +695,7 @@ public class DataChooser extends JPanel {
   }
 
   /**
-   * MakeVisibileTsl.   
+   * MakeVisibileTsl.
    */
   class MakeVisibileTsl implements TreeSelectionListener {
     public void valueChanged(TreeSelectionEvent e) {
@@ -769,7 +769,7 @@ public class DataChooser extends JPanel {
   }
 
   /**
-   * DataSourceOpener.   
+   * DataSourceOpener.
    */
   private class DataSourceOpener extends SwingWorker {
     private List<String> channels;
@@ -867,6 +867,7 @@ public class DataChooser extends JPanel {
 
   /**
    * Remove server node.
+   * 
    * @param node server node
    */
   public void removeServer(final ServerNode node) {
@@ -880,6 +881,7 @@ public class DataChooser extends JPanel {
 
   /**
    * Insert server.
+   * 
    * @param source seismic data source
    */
   public void insertServer(final SeismicDataSource source) {
@@ -906,6 +908,7 @@ public class DataChooser extends JPanel {
 
   /**
    * Add servers.
+   * 
    * @param servers map of seismic data sources
    */
   public void addServers(final Map<String, SeismicDataSource> servers) {
@@ -985,6 +988,7 @@ public class DataChooser extends JPanel {
 
   /**
    * Set nearest.
+   * 
    * @param channel channel
    */
   public void setNearest(final String channel) {
@@ -1073,7 +1077,7 @@ public class DataChooser extends JPanel {
     rootNode.add(allNode);
     for (String channel : channels) {
       ChannelNode newNode = new ChannelNode(channel);
-      if(SwarmConfig.getInstance().hideStaleChannel && newNode.isStale()) {
+      if (SwarmConfig.getInstance().hideStaleChannel && newNode.isStale()) {
         continue;
       }
       allNode.add(newNode);
@@ -1198,17 +1202,15 @@ public class DataChooser extends JPanel {
 
     if (countExceeded) {
       JOptionPane.showMessageDialog(applicationFrame,
-          Messages.getString("DataChooser.maxChannelsAtOnceError") 
-          + MAX_CHANNELS_AT_ONCE, //$NON-NLS-1$
-          Messages.getString("DataChooser.errorBoxTitle"), 
-          JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$
+          Messages.getString("DataChooser.maxChannelsAtOnceError") + MAX_CHANNELS_AT_ONCE, // $NON-NLS-1$
+          Messages.getString("DataChooser.errorBoxTitle"), JOptionPane.ERROR_MESSAGE); // $NON-NLS-1$
     }
 
     return selections;
   }
 
   /**
-   * ListCellRenderer.   
+   * ListCellRenderer.
    */
   private class ListCellRenderer extends DefaultListCellRenderer {
     private static final long serialVersionUID = 1L;
@@ -1243,7 +1245,7 @@ public class DataChooser extends JPanel {
   }
 
   /**
-   * CellRenderer.   
+   * CellRenderer.
    */
   private class CellRenderer extends DefaultTreeCellRenderer {
     private static final long serialVersionUID = 1L;

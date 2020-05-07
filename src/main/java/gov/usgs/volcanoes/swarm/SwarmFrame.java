@@ -1,11 +1,9 @@
 package gov.usgs.volcanoes.swarm;
 
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
-
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
@@ -28,6 +26,7 @@ public class SwarmFrame extends JInternalFrame {
 
   /**
    * Swarm Frame.
+   * 
    * @param title frame title
    * @param resizable whether resizable
    * @param closable whether closable
@@ -60,6 +59,7 @@ public class SwarmFrame extends JInternalFrame {
 
   /**
    * Save layout.
+   * 
    * @param cf config file
    * @param prefix config file prefix
    */

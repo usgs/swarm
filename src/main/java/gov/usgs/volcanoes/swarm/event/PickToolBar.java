@@ -16,11 +16,9 @@ import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterLayer;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewToolBar;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -29,7 +27,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToolBar;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +61,7 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
 
   /**
    * Constructor.
+   * 
    * @param listener Pick tool bar listener
    */
   public PickToolBar(PickToolBarListener listener, Event event) {
@@ -111,7 +109,9 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
     add(deleteButton);
   }
 
-  /** 
+  /**
+   * Select count changed.
+   * 
    * @see gov.usgs.volcanoes.swarm.event.PickBoxListener#selectCountChanged(int)
    */
   public void selectCountChanged(int count) {
@@ -150,8 +150,8 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
     JButton clipboardButton = SwarmUtil.createToolBarButton(Icons.clipboard,
         "Send picks to clipboard", new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            //WaveClipboardFrame.getInstance().importEvent(event);
-            
+            // WaveClipboardFrame.getInstance().importEvent(event);
+
             // ask if user wants to clear clipboard first
             WaveClipboardFrame clipboard = WaveClipboardFrame.getInstance();
             int result = JOptionPane.showConfirmDialog(Swarm.getApplicationFrame(),
@@ -159,31 +159,31 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
             if (result == JOptionPane.YES_OPTION) {
               clipboard.removeWaves();
             }
-            
-            // update event dialog 
+
+            // update event dialog
             EventDialog.getInstance().setEventDetails(event);
-            
+
             // Add panels to clipbard
-            PickBox pickBox = (PickBox)listener;
+            PickBox pickBox = (PickBox) listener;
             List<PickWavePanel> panels = pickBox.getPanels();
             for (WaveViewPanel wvp : panels) {
               clipboard.addWave(new WaveViewPanel(wvp));
               wvp.getDataSource().getChannels(); // get metadata for channels
               wvp.getDataSource().close();
             }
-            
+
             // Propagate picks to other channels
             for (WaveViewPanel wvp : clipboard.getWaves()) {
               wvp.getSettings().pickEnabled = true;
               PickData pickData = wvp.getPickData();
-              for (String phase : new String[] {PickData.P, PickData.S}) {
+              for (String phase : new String[] { PickData.P, PickData.S }) {
                 Pick pick = pickData.getPick(phase);
                 if (pick != null && pickData.isPickChannel(phase)) {
                   pickData.propagatePick(phase, pick, wvp);
                 }
               }
             }
-            
+
             clipboard.getPickButton().setSelected(true);
             clipboard.getPickMenuBar().setVisible(true);
             clipboard.setVisible(true);
@@ -265,13 +265,12 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
 
     return histButton;
   }
-  
+
   private JButton createDeleteButton() {
-    JButton deleteButton = SwarmUtil.createToolBarButton(Icons.delete,
-        "Remove event from map", new ActionListener() {
+    JButton deleteButton =
+        SwarmUtil.createToolBarButton(Icons.delete, "Remove event from map", new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
-            String message =
-                "Are you sure you want to delete this event from the map?";
+            String message = "Are you sure you want to delete this event from the map?";
             message += " It cannot be undone.";
             message += "\n\nNote: NEIC events may get reimported automatically.";
             int result = JOptionPane.showConfirmDialog(Swarm.getApplicationFrame(), message,
@@ -306,8 +305,8 @@ public class PickToolBar extends JToolBar implements PickBoxListener {
 
   private void doSizePopup() {
     if (popup == null) {
-      final String[] labels = new String[] {"Auto", null, "Tiny", "Small", "Medium", "Large"};
-      final int[] sizes = new int[] {-1, -1, 50, 100, 160, 230};
+      final String[] labels = new String[] { "Auto", null, "Tiny", "Small", "Medium", "Large" };
+      final int[] sizes = new int[] { -1, -1, 50, 100, 160, 230 };
       popup = new JPopupMenu();
       final ButtonGroup group = new ButtonGroup();
       for (int i = 0; i < labels.length; i++) {

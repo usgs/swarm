@@ -8,7 +8,6 @@ import gov.usgs.volcanoes.core.legacy.ew.WaveServer;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,7 +22,7 @@ import java.util.TimeZone;
  * @author Dan Cervelli
  */
 public class WaveServerSource extends SeismicDataSource {
-  //private final static Logger LOGGER = LoggerFactory.getLogger(WaveServerSource.class);
+  // private final static Logger LOGGER = LoggerFactory.getLogger(WaveServerSource.class);
 
   private String params;
   private WaveServer waveServer;
@@ -47,9 +46,10 @@ public class WaveServerSource extends SeismicDataSource {
     this.name = source.name;
     parse(source.params);
   }
-  
+
   /**
    * Parse data source parameters.
+   * 
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#parse(java.lang.String)
    */
   public void parse(String params) {
@@ -73,6 +73,7 @@ public class WaveServerSource extends SeismicDataSource {
 
   /**
    * To config string.
+   * 
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#toConfigString()
    */
   public String toConfigString() {
@@ -104,6 +105,7 @@ public class WaveServerSource extends SeismicDataSource {
 
   /**
    * Close data source.
+   * 
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#close()
    */
   public synchronized void close() {
@@ -114,6 +116,7 @@ public class WaveServerSource extends SeismicDataSource {
 
   /**
    * Get menu.
+   * 
    * @return menu
    */
   public synchronized Menu getMenu() {
@@ -132,6 +135,7 @@ public class WaveServerSource extends SeismicDataSource {
 
   /**
    * Get menu list.
+   * 
    * @param items list of menus
    * @return
    */
@@ -146,6 +150,7 @@ public class WaveServerSource extends SeismicDataSource {
 
   /**
    * Get wave.
+   * 
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getWave(java.lang.String, double, double)
    */
   public synchronized Wave getWave(String station, double t1, double t2) {
@@ -184,6 +189,7 @@ public class WaveServerSource extends SeismicDataSource {
 
   /**
    * Get channels.
+   * 
    * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getChannels()
    */
   public synchronized List<String> getChannels() {
@@ -195,8 +201,9 @@ public class WaveServerSource extends SeismicDataSource {
 
   /**
    * Get helicorders.
-   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getHelicorder
-   * (java.lang.String, double, double, gov.usgs.volcanoes.swarm.data.GulperListener)
+   * 
+   * @see gov.usgs.volcanoes.swarm.data.SeismicDataSource#getHelicorder (java.lang.String, double,
+   *      double, gov.usgs.volcanoes.swarm.data.GulperListener)
    */
   public synchronized HelicorderData getHelicorder(String station, double t1, double t2,
       GulperListener gl) {

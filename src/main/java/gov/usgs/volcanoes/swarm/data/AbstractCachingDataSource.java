@@ -1,7 +1,6 @@
 /**
- * I waive copyright and related rights in the this work worldwide through the CC0 1.0
- * Universal public domain dedication.
- * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ * I waive copyright and related rights in the this work worldwide through the CC0 1.0 Universal
+ * public domain dedication. https://creativecommons.org/publicdomain/zero/1.0/legalcode
  */
 
 package gov.usgs.volcanoes.swarm.data;
@@ -10,26 +9,23 @@ import gov.usgs.volcanoes.core.data.HelicorderData;
 import gov.usgs.volcanoes.core.data.RSAMData;
 import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.swarm.Swarm;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.swing.JFrame;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix2D;
 
 /**
- * An implementation of <code>SeismicDataSource</code> which caches data that
- * passes through it. Requires another SeismicDataSource to provide data.
+ * An implementation of <code>SeismicDataSource</code> which caches data that passes through it.
+ * Requires another SeismicDataSource to provide data.
  * 
- * <p>Mostly build with Dan's code pulled from CachedDataSource.
+ * <p>
+ * Mostly build with Dan's code pulled from CachedDataSource.
  *
  * @author Tom Parker
  */
@@ -85,6 +81,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
 
   /**
    * Get total size of cache.
+   * 
    * @return
    */
   public synchronized long getSize() {
@@ -132,7 +129,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
     final List<CacheEntry> cl = new ArrayList<CacheEntry>();
     for (final String key : cache.keySet()) {
       final List<T> cwl = cache.get(key);
-      for (final T ce : cwl){
+      for (final T ce : cwl) {
         cl.add(ce);
       }
     }
@@ -162,10 +159,10 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
         // should halve large helis
 
         // nothing left to do, purge helicorder cache
-        new CompleteHelicorderPurgeAction(helicorderCache)};
+        new CompleteHelicorderPurgeAction(helicorderCache) };
   }
 
-  /** TODO: maybe this should be an observer? */
+  /** TODO: maybe this should be an observer. */
   private synchronized void enforceSize() {
     if (purgeActions == null) {
       return;
@@ -201,14 +198,15 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
 
   /**
    * Put RSAM into cache.
+   * 
    * @param station channel
-   * @param rsamData rsam data 
+   * @param rsamData rsam data
    */
   public void putRsam(final String station, RSAMData rsamData) {
     if (rsamData == null || rsamData.getData() == null) {
       return;
     }
-    
+
     List<CachedRsam> rsams = rsamCache.get(station);
     if (rsams == null) {
       rsams = new ArrayList<CachedRsam>();
@@ -250,6 +248,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
 
   /**
    * Put helicorder.
+   * 
    * @param station channel
    * @param helicorder helicorder data
    */
@@ -300,6 +299,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
 
   /**
    * Cache wave as helicorder.
+   * 
    * @param station channel
    * @param wave wave data
    */
@@ -307,7 +307,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
     if (inHelicorderCache(station, wave.getStartTime(), wave.getEndTime())) {
       return;
     }
-    
+
     final int seconds = (int) Math.ceil(wave.numSamples() * wave.getSamplingPeriod());
     final DoubleMatrix2D data = DoubleFactory2D.dense.make(seconds, 3);
     for (int i = 0; i < seconds; i++) {
@@ -352,8 +352,9 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
 
   /**
    * Check to see if there are any cached helicorders for given time.
+   * 
    * @param station channel
-   * @param t1 start time 
+   * @param t1 start time
    * @param t2 end time
    * @return
    */
@@ -374,6 +375,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
 
   /**
    * Get RSAM.
+   * 
    * @see gov.usgs.volcanoes.swarm.data.RsamSource#getRsam(java.lang.String, double, double, int)
    */
   public RSAMData getRsam(final String channel, final double t1, final double t2,
@@ -439,6 +441,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
 
   /**
    * Get best wave for given time range.
+   * 
    * @param station channel
    * @param t1 start time
    * @param t2 end time
@@ -475,6 +478,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
 
   /**
    * Put wave.
+   * 
    * @param station channel
    * @param wave wave
    */
@@ -562,8 +566,9 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
 
   /**
    * Get helicorder data.
+   * 
    * @param station channel
-   * @param t1 start time 
+   * @param t1 start time
    * @param t2 end time
    * @param source data source
    * @return
@@ -846,6 +851,7 @@ public abstract class AbstractCachingDataSource extends SeismicDataSource implem
 
     /**
      * Slice.
+     * 
      * @param t1 start time
      * @param t2 end time
      * @return RSAM data

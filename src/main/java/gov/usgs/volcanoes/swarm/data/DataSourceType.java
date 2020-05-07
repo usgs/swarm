@@ -1,6 +1,6 @@
 package gov.usgs.volcanoes.swarm.data;
 
-import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
+import gov.usgs.volcanoes.swarm.data.fdsnws.WebServicesSource;
 import gov.usgs.volcanoes.swarm.data.seedlink.SeedLinkSource;
 
 /**
@@ -9,18 +9,17 @@ import gov.usgs.volcanoes.swarm.data.seedlink.SeedLinkSource;
  * @author Tom Parker
  */
 public enum DataSourceType {
-  WAVE_SERVER_V("ws", WaveServerSource.class), 
-  WINSTON_WAVE_SERVER("wws", WwsSource.class), 
-  WINSTON_DIRECT("wwsd", DirectWwsSource.class), 
-  CACHE("cache", CachedDataSource.class), 
-  FDSN_WS("wsc", WebServicesSource.class), 
-  SEED_LINK("sls", SeedLinkSource.class);
+  WAVE_SERVER_V("ws", WaveServerSource.class), WINSTON_WAVE_SERVER("wws",
+      WwsSource.class), WINSTON_DIRECT("wwsd", DirectWwsSource.class), CACHE("cache",
+          CachedDataSource.class), FDSN_WS("wsc",
+              WebServicesSource.class), SEED_LINK("sls", SeedLinkSource.class);
 
   public String shortName;
   public Class<? extends SeismicDataSource> seismicDataSource;
 
   /**
    * Data source type constructor.
+   * 
    * @param shortName data source type short name
    * @param seismicDataSource seismic data source
    */
@@ -31,6 +30,7 @@ public enum DataSourceType {
 
   /**
    * Get short name for data source type.
+   * 
    * @param sds seismic data source
    * @return name string
    */
@@ -46,6 +46,7 @@ public enum DataSourceType {
 
   /**
    * Parse data source.
+   * 
    * @param s data source string
    * @return data source
    */
@@ -60,6 +61,7 @@ public enum DataSourceType {
 
   /**
    * Parse config for seismic data source.
+   * 
    * @param config data source config string
    * @return seismic data source
    */

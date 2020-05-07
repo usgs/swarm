@@ -11,13 +11,12 @@ import gov.usgs.volcanoes.core.legacy.plot.render.TextRenderer;
 import gov.usgs.volcanoes.core.util.GeoUtils;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Metadata;
-import gov.usgs.volcanoes.swarm.SCNL;
+import gov.usgs.volcanoes.swarm.Scnl;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.volcanoes.swarm.map.MapPanel.LabelSetting;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -41,7 +40,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
 import javax.swing.ButtonGroup;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -50,6 +48,7 @@ import javax.swing.JRadioButtonMenuItem;
 
 /**
  * MapMiniPanel class.
+ * 
  * @author Dan Cervelli
  */
 public class MapMiniPanel extends JComponent
@@ -62,7 +61,7 @@ public class MapMiniPanel extends JComponent
   private int labelFontSize = 10;
   private int timeFontSize = 10;
   private static final int[] SIZES =
-      new int[] {200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700};
+      new int[] { 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700 };
   private int sizeIndex = 3;
   private Metadata activeMetadata;
   private boolean activeMetadataChosen = false;
@@ -98,6 +97,7 @@ public class MapMiniPanel extends JComponent
 
   /**
    * Constructor.
+   * 
    * @param p map panel
    */
   public MapMiniPanel(MapPanel p) {
@@ -113,6 +113,7 @@ public class MapMiniPanel extends JComponent
 
   /**
    * Save layout.
+   * 
    * @param cf configuration file
    * @param prefix configuration prefix
    */
@@ -132,6 +133,7 @@ public class MapMiniPanel extends JComponent
 
   /**
    * Process layout.
+   * 
    * @param cf configuration file
    */
   public void processLayout(ConfigFile cf) {
@@ -159,6 +161,7 @@ public class MapMiniPanel extends JComponent
 
   /**
    * Add metadata.
+   * 
    * @param md metadata
    */
   public void addMetadata(Metadata md) {
@@ -168,8 +171,8 @@ public class MapMiniPanel extends JComponent
       activeMetadata = md;
     }
     if (!activeMetadataChosen) {
-      SCNL as = activeMetadata.getSCNL();
-      SCNL ms = md.getSCNL();
+      Scnl as = activeMetadata.getScnl();
+      Scnl ms = md.getScnl();
       if (ms.channel != null && ms.channel.endsWith("Z")) {
         if (as.channel.endsWith("Z")) {
           if (ms.channel.charAt(0) < as.channel.charAt(0)) {
@@ -213,6 +216,7 @@ public class MapMiniPanel extends JComponent
 
   /**
    * Get wave view panel.
+   * 
    * @return wave view panel
    */
   public WaveViewPanel getWaveViewPanel() {
@@ -225,6 +229,7 @@ public class MapMiniPanel extends JComponent
 
   /**
    * Change size.
+   * 
    * @param ds size delta
    */
   public void changeSize(int ds) {
@@ -319,6 +324,7 @@ public class MapMiniPanel extends JComponent
 
   /**
    * Change channel.
+   * 
    * @param md metadata
    */
   public void changeChannel(Metadata md) {
@@ -341,7 +347,7 @@ public class MapMiniPanel extends JComponent
     if (Double.isNaN(st)) {
       pendingRequest = null;
     } else {
-      pendingRequest = new double[] {st, et};
+      pendingRequest = new double[] { st, et };
     }
   }
 
@@ -359,6 +365,7 @@ public class MapMiniPanel extends JComponent
 
   /**
    * Update wave.
+   * 
    * @param st start time
    * @param et end time
    * @param reenter reenter flag
@@ -494,17 +501,18 @@ public class MapMiniPanel extends JComponent
 
   /**
    * Get SCNL label.
+   * 
    * @return station label.
    */
   public String getLabel() {
     String label = null;
     if (waveVisible) {
-      label = activeMetadata.getSCNL().toString();
+      label = activeMetadata.getScnl().toString();
       if (metadataList.size() > 1) {
         label += "+";
       }
     } else {
-      label = activeMetadata.getSCNL().station;
+      label = activeMetadata.getScnl().station;
     }
 
     return label;
@@ -512,6 +520,7 @@ public class MapMiniPanel extends JComponent
 
   /**
    * Paint.
+   * 
    * @see javax.swing.JComponent#paint(java.awt.Graphics)
    */
   public void paint(Graphics g) {
@@ -555,6 +564,7 @@ public class MapMiniPanel extends JComponent
 
   /**
    * Mouse clicked event.
+   * 
    * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
    */
   public void mouseClicked(MouseEvent e) {
@@ -577,6 +587,7 @@ public class MapMiniPanel extends JComponent
 
   /**
    * Set title background.
+   * 
    * @param b true for mouse over background; false for normal background.
    */
   public void setSelected(boolean b) {
@@ -590,12 +601,12 @@ public class MapMiniPanel extends JComponent
 
   /**
    * Mouse entered event.
+   * 
    * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
    */
   public void mouseEntered(MouseEvent e) {
-    String text =
-        activeMetadata.getSCNL().station + ": "
-            + GeoUtils.lonLatToString(activeMetadata.getLonLat());
+    String text = activeMetadata.getScnl().station + ": "
+        + GeoUtils.lonLatToString(activeMetadata.getLonLat());
     if (!Double.isNaN(activeMetadata.getHeight()) && activeMetadata.getHeight() != -999.0) {
       text += ", " + activeMetadata.getHeight() + " m";
     }
@@ -616,6 +627,7 @@ public class MapMiniPanel extends JComponent
 
   /**
    * Mouse pressed event.
+   * 
    * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
    */
   public void mousePressed(MouseEvent e) {
@@ -632,6 +644,7 @@ public class MapMiniPanel extends JComponent
 
   /**
    * Mouse released event.
+   * 
    * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
    */
   public void mouseReleased(MouseEvent e) {
@@ -670,6 +683,7 @@ public class MapMiniPanel extends JComponent
 
   /**
    * Mouse dragged event.
+   * 
    * @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent)
    */
   public void mouseDragged(MouseEvent e) {
@@ -711,8 +725,8 @@ public class MapMiniPanel extends JComponent
     }
 
     private void setTimeAxis(FrameRenderer fr) {
-      int hTicks = 6;
-      Object[] stt = SmartTick.autoTimeTick(fr.getMinXAxis(), fr.getMaxXAxis(), hTicks);
+      int horizontalTicks = 6;
+      Object[] stt = SmartTick.autoTimeTick(fr.getMinXAxis(), fr.getMaxXAxis(), horizontalTicks);
       if (stt != null) {
         fr.getAxis().createVerticalGridLines((double[]) stt[0]);
 
@@ -732,30 +746,15 @@ public class MapMiniPanel extends JComponent
     }
 
     /*
-     * private void setLinearAxis(FrameRenderer fr, boolean log)
-     * {
-     * int hTicks = 6;
-     * double[] stt = SmartTick.autoTick(fr.getMinXAxis(), fr.getMaxXAxis(), hTicks, false, false);
-     * if (stt != null)
-     * fr.getAxis().createVerticalGridLines(stt);
+     * private void setLinearAxis(FrameRenderer fr, boolean log) { int hTicks = 6; double[] stt =
+     * SmartTick.autoTick(fr.getMinXAxis(), fr.getMaxXAxis(), hTicks, false, false); if (stt !=
+     * null) fr.getAxis().createVerticalGridLines(stt);
      * 
-     * for (int i = 0; i < stt.length; i++)
-     * {
-     * TextRenderer tr = new TextRenderer();
-     * double val = stt[i];
-     * if (log)
-     * val = Math.pow(10, val);
-     * tr.text = String.format("%.0f", val);
-     * tr.x = (float)fr.getXPixel(stt[i]);
-     * if (tr.x >= getWidth() - 3)
-     * tr.x -= 5;
-     * tr.y = fr.getGraphY() + fr.getGraphHeight() + timeFontSize + 2;
-     * tr.color = Color.BLACK;
-     * tr.horizJustification = TextRenderer.CENTER;
-     * tr.font = font;
-     * fr.getAxis().addPostRenderer(tr);
-     * }
-     * }
+     * for (int i = 0; i < stt.length; i++) { TextRenderer tr = new TextRenderer(); double val =
+     * stt[i]; if (log) val = Math.pow(10, val); tr.text = String.format("%.0f", val); tr.x =
+     * (float)fr.getXPixel(stt[i]); if (tr.x >= getWidth() - 3) tr.x -= 5; tr.y = fr.getGraphY() +
+     * fr.getGraphHeight() + timeFontSize + 2; tr.color = Color.BLACK; tr.horizJustification =
+     * TextRenderer.CENTER; tr.font = font; fr.getAxis().addPostRenderer(tr); } }
      */
 
     private void setLeftLabel(FrameRenderer fr, String label) {

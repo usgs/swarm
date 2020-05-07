@@ -3,18 +3,15 @@ package gov.usgs.volcanoes.swarm.map;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.FormLayout;
-
 import gov.usgs.volcanoes.swarm.SwarmModalDialog;
 import gov.usgs.volcanoes.swarm.map.MapPanel.ColorSetting;
 import gov.usgs.volcanoes.swarm.map.MapPanel.LabelSetting;
 import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterSource;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
-
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -25,12 +22,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Map Settings Dialog.
+ * 
  * @author Dan Cervelli
  */
 public class MapSettingsDialog extends SwarmModalDialog {
@@ -63,6 +60,7 @@ public class MapSettingsDialog extends SwarmModalDialog {
 
   /**
    * Constructor.
+   * 
    * @param mapFrame map frame
    */
   public MapSettingsDialog(MapFrame mapFrame) {
@@ -78,7 +76,7 @@ public class MapSettingsDialog extends SwarmModalDialog {
     longitude = new JTextField();
     scale = new JTextField();
 
-    lineWidth = new JTextField();  
+    lineWidth = new JTextField();
     mapLine = new JButton();
     mapLine.setBorderPainted(false);
     mapLine.setBackground(new Color(swarmConfig.mapLineColor));
@@ -101,7 +99,7 @@ public class MapSettingsDialog extends SwarmModalDialog {
     });
 
     refreshInterval = new JTextField();
-    
+
     labelGroup = new ButtonGroup();
     someLabels = new JRadioButton("Some");
     allLabels = new JRadioButton("All");
@@ -159,7 +157,7 @@ public class MapSettingsDialog extends SwarmModalDialog {
     builder.append(allLabels);
     builder.nextLine();
     builder.append("Hide Stations");
-    builder.append(hideStations);    
+    builder.append(hideStations);
     builder.nextLine();
 
     builder.appendSeparator("Events");
@@ -181,6 +179,8 @@ public class MapSettingsDialog extends SwarmModalDialog {
   }
 
   /**
+   * Set visible.
+   * 
    * @see java.awt.Dialog#setVisible(boolean)
    */
   public void setVisible(boolean b) {
@@ -269,7 +269,7 @@ public class MapSettingsDialog extends SwarmModalDialog {
     String message = null;
     try {
       message =
-        "Invalid refresh interval; legal values are between 0 and 3600, 0 to refresh continuously.";
+          "Invalid refresh interval; legal values are between 0 and 3600, 0 to refresh continuously.";
       double ri = Double.parseDouble(refreshInterval.getText());
       if (ri < 0 || ri > 3600) {
         throw new NumberFormatException();
