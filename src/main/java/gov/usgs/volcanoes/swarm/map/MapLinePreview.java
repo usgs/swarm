@@ -1,14 +1,12 @@
 package gov.usgs.volcanoes.swarm.map;
 
 import gov.usgs.volcanoes.swarm.SwarmConfig;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
-
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -33,6 +31,8 @@ public class MapLinePreview extends JPanel {
   }
 
   /**
+   * Set foreground.
+   * 
    * @see javax.swing.JComponent#setForeground(java.awt.Color)
    */
   public void setForeground(Color c) {
@@ -41,7 +41,7 @@ public class MapLinePreview extends JPanel {
     }
   }
 
-  //@SuppressWarnings("serial")
+  // @SuppressWarnings("serial")
   public class LinePreviewPane extends JPanel {
     Color lineColor;
 
@@ -51,11 +51,13 @@ public class MapLinePreview extends JPanel {
     }
 
     /**
+     * Paint component.
+     * 
      * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
      */
     public void paintComponent(Graphics g) {
       Graphics2D g2 = (Graphics2D) g;
-      //System.out.println(lineColor + " : " + lineWidth);
+      // System.out.println(lineColor + " : " + lineWidth);
       g2.setPaintMode();
       g2.setStroke(new BasicStroke(config.mapLineWidth));
       g2.setStroke(new BasicStroke(lineWidth));

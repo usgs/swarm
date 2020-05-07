@@ -1,7 +1,6 @@
 /**
- * I waive copyright and related rights in the this work worldwide
- * through the CC0 1.0 Universal public domain dedication.
- * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ * I waive copyright and related rights in the this work worldwide through the CC0 1.0 Universal
+ * public domain dedication. https://creativecommons.org/publicdomain/zero/1.0/legalcode
  */
 
 package gov.usgs.volcanoes.swarm.event;
@@ -16,14 +15,12 @@ import gov.usgs.volcanoes.quakeml.Pick;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmFrame;
 import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.internalframe.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.util.TreeSet;
-
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
@@ -37,7 +34,6 @@ import javax.swing.event.InternalFrameEvent;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -52,17 +48,18 @@ import org.xml.sax.SAXException;
  */
 public class EventFrame extends SwarmFrame implements EventObserver {
   private static final Logger LOGGER = LoggerFactory.getLogger(EventFrame.class);
-  private static final String EVENT_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?eventid=";
-      
+  private static final String EVENT_URL =
+      "https://earthquake.usgs.gov/fdsnws/event/1/query?eventid=";
+
   public static final long serialVersionUID = -1;
 
-  
+
   private final PickBox pickBox;
   private final StatusTextArea statusText;
   private final Event event;
   private final JSplitPane mainPanel;
   private final PickToolBar toolbar;
-  
+
   private boolean closing = false;
 
   /**
@@ -78,7 +75,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     statusText = new StatusTextArea(" ");
     pickBox = new PickBox(statusText);
     pickBox.setLayout(new BoxLayout(pickBox, BoxLayout.PAGE_AXIS));
-    
+
     toolbar = new PickToolBar(pickBox, event);
 
     mainPanel =
@@ -110,10 +107,10 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     scrollPane.getVerticalScrollBar().setUnitIncrement(40);
-    
+
     JViewport viewPort = scrollPane.getViewport();
     viewPort.setScrollMode(JViewport.BLIT_SCROLL_MODE);
-    
+
     pickPanel.add(scrollPane);
 
     JPanel statusPanel = new JPanel();
@@ -146,7 +143,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
       public void internalFrameClosed(final InternalFrameEvent e) {}
     });
   }
-  
+
   private void updateEvent() {
     new SwingWorker() {
       @Override
@@ -167,7 +164,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
     }.start();
   }
 
- 
+
   /**
    * Fetch detailed event.
    */
@@ -187,13 +184,13 @@ public class EventFrame extends SwarmFrame implements EventObserver {
 
       NodeList eventElements = doc.getElementsByTagName("event");
       Element eventElement = (Element) eventElements.item(0);
-      
+
       // NEIC has better descriptions
       NodeList descriptionNodes = eventElement.getElementsByTagName("description");
       for (int idx = 0; idx < descriptionNodes.getLength(); idx++) {
         eventElement.removeChild(descriptionNodes.item(idx));
       }
-      
+
       workingEvent.parseEvent(eventElement);
     } catch (SAXException e) {
       LOGGER.warn("Unable to retrieve detailed event description. ({})", e.getLocalizedMessage());
@@ -233,7 +230,7 @@ public class EventFrame extends SwarmFrame implements EventObserver {
       pickBox.addPick(arrival);
       mainPanel.validate();
     }
-    
+
     toolbar.decrementThrobber();
   }
 
@@ -246,6 +243,8 @@ public class EventFrame extends SwarmFrame implements EventObserver {
   }
 
   /**
+   * Event updated.
+   * 
    * @see gov.usgs.volcanoes.core.quakeml.EventObserver#eventUpdated()
    */
   public void eventUpdated() {

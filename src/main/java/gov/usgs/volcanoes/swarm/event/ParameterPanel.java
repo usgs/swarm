@@ -1,7 +1,6 @@
 /**
- * I waive copyright and related rights in the this work worldwide
- * through the CC0 1.0 Universal public domain dedication.
- * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ * I waive copyright and related rights in the this work worldwide through the CC0 1.0 Universal
+ * public domain dedication. https://creativecommons.org/publicdomain/zero/1.0/legalcode
  */
 
 package gov.usgs.volcanoes.swarm.event;
@@ -11,20 +10,17 @@ import gov.usgs.volcanoes.quakeml.EvaluationStatus;
 import gov.usgs.volcanoes.quakeml.Event;
 import gov.usgs.volcanoes.quakeml.Magnitude;
 import gov.usgs.volcanoes.quakeml.Origin;
-
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
-
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +33,7 @@ public class ParameterPanel {
 
   /**
    * Create event component.
+   * 
    * @param event seismic event
    * @return component
    */
@@ -68,7 +65,7 @@ public class ParameterPanel {
 
     c.gridy++;
     addKey("Description: ", parameterPanel, c);
-    
+
     // wrap description to support multi-line descriptions
     String description = event.getDescription();
     if (description != null && !description.equals("")) {
@@ -120,7 +117,8 @@ public class ParameterPanel {
 
     double distance = origin.getQuality().getMinimumDistance();
     if (!Double.isNaN(distance)) {
-      String tag = distance + "\u00B0" + " \u2248" + String.format("%.2f", Math.toRadians(distance * 6371)) + " km";
+      String tag = distance + "\u00B0" + " \u2248"
+          + String.format("%.2f", Math.toRadians(distance * 6371)) + " km";
       addValue(tag, parameterPanel, c);
     }
 
@@ -131,7 +129,7 @@ public class ParameterPanel {
     if (phaseCount > 0) {
       addValue(Integer.toString(phaseCount), parameterPanel, c);
     }
-    
+
     c.gridy++;
     addKey("Magnitude: ", parameterPanel, c);
 

@@ -2,13 +2,12 @@ package gov.usgs.volcanoes.swarm.event;
 
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.Time;
-
 import java.awt.Color;
 import java.text.ParseException;
 import java.util.Comparator;
 
 public class TagData implements Comparator<TagData> {
-  
+
   public String channel;
   public double startTime;
   public String classification;
@@ -20,9 +19,10 @@ public class TagData implements Comparator<TagData> {
   public TagData() {
     // TODO Auto-generated constructor stub
   }
-  
+
   /**
    * Constructor that reads line from event classification file.
+   * 
    * @param line string in format of "channel, yyyy-MM-dd HH:mm:ss, classification"
    * @throws ParseException parse exception
    */
@@ -32,6 +32,7 @@ public class TagData implements Comparator<TagData> {
 
   /**
    * Constructor with parameters.
+   * 
    * @param channel - channel name
    * @param startTime - start time in j2k
    * @param classification - classification string
@@ -43,7 +44,7 @@ public class TagData implements Comparator<TagData> {
     setColor();
 
   }
-  
+
   private void parse(String line) throws ParseException {
     String[] data = line.split(",");
     startTime = J2kSec.parse(Time.STANDARD_TIME_FORMAT, data[0].trim());
@@ -61,7 +62,7 @@ public class TagData implements Comparator<TagData> {
           new Color(color.getRed(), color.getGreen(), color.getBlue(), TagMenu.transparency);
     }
   }
-  
+
   public String toString() {
     return J2kSec.format(Time.STANDARD_TIME_FORMAT, startTime) + "," + channel + ","
         + classification;
@@ -70,7 +71,7 @@ public class TagData implements Comparator<TagData> {
   public String getTimeString() {
     return J2kSec.format(Time.STANDARD_TIME_FORMAT, startTime);
   }
-  
+
   public int compare(TagData d1, TagData d2) {
     return Double.compare(d1.startTime, d2.startTime);
   }

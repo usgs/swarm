@@ -20,7 +20,6 @@ import gov.usgs.volcanoes.swarm.Throbber;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -48,7 +47,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -62,16 +60,15 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
 /**
- * MultiMonitor is a window that is used to display multiple seismic
- * channels in real-time.
+ * MultiMonitor is a window that is used to display multiple seismic channels in real-time.
  *
  * @author Dan Cervelli
  */
 public class MultiMonitor extends SwarmFrame implements Kioskable {
   public static final long serialVersionUID = -1;
 
-  public static final int[] SPANS = new int[] {15, 30, 60, 120, 180, 240, 300, 600, 15 * 60,
-      20 * 60, 30 * 60, 60 * 60, 2 * 60 * 60};
+  public static final int[] SPANS = new int[] { 15, 30, 60, 120, 180, 240, 300, 600, 15 * 60,
+      20 * 60, 30 * 60, 60 * 60, 2 * 60 * 60 };
   private int span = 15;
   private final List<WaveViewPanel> panels;
   private SeismicDataSource dataSource;
@@ -112,6 +109,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
 
   /**
    * Constructor.
+   * 
    * @param sds seismic data source
    */
   public MultiMonitor(final SeismicDataSource sds) {
@@ -145,6 +143,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
 
   /**
    * Process layout when opened.
+   * 
    * @param cf config file
    */
   public void processLayout(final ConfigFile cf) {
@@ -158,8 +157,8 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
       final String w = "wave-" + i;
       final String channel = cf.getString(w + ".channel");
       final ConfigFile scf = cf.getSubConfig(w);
-      
-      //TODO: why is wvp discarded?
+
+      // TODO: why is wvp discarded?
       final WaveViewPanel wvp = addChannel(channel);
       wvp.getSettings().set(scf);
     }
@@ -168,7 +167,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
   public int getSpan() {
     return span;
   }
-  
+
   private int getSpan(final String inSpan, final String inSpanIndex) {
     int span;
 
@@ -579,6 +578,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
 
   /**
    * Add channel to monitor.
+   * 
    * @param ch channel
    * @return
    */
@@ -617,6 +617,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
 
   /**
    * Select a wave view panel.
+   * 
    * @param p wave view panel
    */
   public void select(final WaveViewPanel p) {
@@ -637,6 +638,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
 
   /**
    * Remove wave at index.
+   * 
    * @param i index
    */
   public void removeWaveAtIndex(final int i) {
@@ -754,8 +756,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
   }
 
   /**
-   * Sets the start time of the monitor if it's paused. Set to Double.NaN
-   * to resume.
+   * Sets the start time of the monitor if it's paused. Set to Double.NaN to resume.
    *
    * @param start start time
    */
@@ -830,6 +831,7 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
 
   /**
    * Set kiosk mode.
+   * 
    * @see gov.usgs.volcanoes.swarm.Kioskable#setKioskMode(boolean)
    */
   public void setKioskMode(final boolean b) {

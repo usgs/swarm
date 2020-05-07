@@ -11,7 +11,6 @@ import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.ShapeRenderer;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.time.UiTime;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -21,10 +20,8 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
-
 import cern.colt.matrix.DoubleMatrix2D;
 
 /**
@@ -41,14 +38,12 @@ public class RsamRatioPanel extends JComponent implements SettingsListener {
   private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
 
   /**
-   * X pixel location of where the main plot axis should be located on the
-   * component.
+   * X pixel location of where the main plot axis should be located on the component.
    */
   private static final int X_OFFSET = 60;
 
   /**
-   * Y pixel location of where the main plot axis should be located on the
-   * component.
+   * Y pixel location of where the main plot axis should be located on the component.
    */
   private static final int Y_OFFSET = 20;
 
@@ -72,8 +67,8 @@ public class RsamRatioPanel extends JComponent implements SettingsListener {
   private boolean working;
 
   /**
-   * The wave is rendered to an image that is only updated when the settings
-   * change for repaint efficiency.
+   * The wave is rendered to an image that is only updated when the settings change for repaint
+   * efficiency.
    */
   private BufferedImage image;
 
@@ -88,8 +83,7 @@ public class RsamRatioPanel extends JComponent implements SettingsListener {
   /**
    * Constructs a WaveViewPanel with specified settings.
    * 
-   * @param s
-   *          the settings
+   * @param s the settings
    */
   public RsamRatioPanel(RsamViewSettings s) {
     settings = s;
@@ -115,11 +109,9 @@ public class RsamRatioPanel extends JComponent implements SettingsListener {
 
 
   /**
-   * Set the working flag. This flag indicates whether data are being loaded
-   * for this panel.
+   * Set the working flag. This flag indicates whether data are being loaded for this panel.
    * 
-   * @param b
-   *          the working flag state
+   * @param b the working flag state
    */
   public void setWorking(boolean b) {
     working = b;
@@ -141,6 +133,7 @@ public class RsamRatioPanel extends JComponent implements SettingsListener {
 
   /**
    * Set RSAM data.
+   * 
    * @param data RSAM data
    * @param st start time
    * @param et end time
@@ -191,8 +184,7 @@ public class RsamRatioPanel extends JComponent implements SettingsListener {
   }
 
   /**
-   * Does NOT call repaint for efficiency purposes, that is left to the
-   * container.
+   * Does NOT call repaint for efficiency purposes, that is left to the container.
    */
   private void processSettings() {
     if (data == null || data.getData() == null || data.getData().rows() == 0) {
@@ -205,8 +197,7 @@ public class RsamRatioPanel extends JComponent implements SettingsListener {
   /**
    * Paints the component on the specified graphics context.
    * 
-   * @param g
-   *          the graphics context
+   * @param g the graphics context
    */
   public void paint(Graphics g) {
     if (!(g instanceof Graphics2D)) {
@@ -274,8 +265,7 @@ public class RsamRatioPanel extends JComponent implements SettingsListener {
   /**
    * Plots RSAM values.
    * 
-   * @param data
-   *          the RSAM values to plot
+   * @param data the RSAM values to plot
    */
   private void plotValues(Plot plot, RSAMData data) {
     if (data == null || data.getData() == null || data.getData().rows() == 0) {
@@ -324,10 +314,10 @@ public class RsamRatioPanel extends JComponent implements SettingsListener {
     mr.createDefaultLineRenderers(Color.blue);
     plot.addRenderer(mr);
 
-/*    if (settings.filterOn) {
-      plot.addRenderer(getFilterLabel(getWidth() - RIGHT_WIDTH, getHeight() - BOTTOM_HEIGHT,
-          TextRenderer.RIGHT, TextRenderer.BOTTOM));
-    }*/
+    /*
+     * if (settings.filterOn) { plot.addRenderer(getFilterLabel(getWidth() - RIGHT_WIDTH,
+     * getHeight() - BOTTOM_HEIGHT, TextRenderer.RIGHT, TextRenderer.BOTTOM)); }
+     */
   }
 
   /**
@@ -404,34 +394,4 @@ public class RsamRatioPanel extends JComponent implements SettingsListener {
     return getSize();
   }
 
-  /**
-   * Get filter label.
-   * @param x x text location
-   * @param y y text location
-   * @param horizJustification horizontal justification
-   * @param vertJustification vertical justification
-   * @return text renderer
-   */
-/*  public TextRenderer getFilterLabel(int x, int y, int horizJustification, int vertJustification) {
-    String ft = "";
-    switch (settings.filter.getType()) {
-      case BANDPASS:
-        ft = "Band pass [" + settings.filter.getCorner1() + "-" + settings.filter.getCorner2()
-            + " Hz]";
-        break;
-      case HIGHPASS:
-        ft = "High pass [" + settings.filter.getCorner1() + " Hz]";
-        break;
-      case LOWPASS:
-        ft = "Low pass [" + settings.filter.getCorner1() + " Hz]";
-        break;
-      default:
-        break;
-    }
-    TextRenderer tr = new TextRenderer(x, y, ft);
-    tr.horizJustification = horizJustification;
-    tr.vertJustification = vertJustification;
-    tr.color = Color.red;
-    return tr;
-  }*/
 }

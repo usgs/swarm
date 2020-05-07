@@ -2,7 +2,6 @@ package gov.usgs.volcanoes.swarm.chooser;
 
 import gov.usgs.volcanoes.core.util.ResourceReader;
 import gov.usgs.volcanoes.swarm.Swarm;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -40,6 +39,7 @@ public abstract class DataSourcePanel {
 
   /**
    * Get panel.
+   * 
    * @return panel
    */
   public JPanel getPanel() {
@@ -50,8 +50,8 @@ public abstract class DataSourcePanel {
   }
 
   /**
-   * Creates a resource reader for the given resource. If the resource has
-   * has a local filename then it is read otherwise the class loader is used.
+   * Creates a resource reader for the given resource. If the resource has has a local filename then
+   * it is read otherwise the class loader is used.
    * 
    * @param name the resource name
    * @return resource reader

@@ -1,9 +1,7 @@
 package gov.usgs.volcanoes.swarm;
 
 import com.jgoodies.forms.builder.ButtonBarBuilder;
-
 import gov.usgs.volcanoes.core.util.UiUtils;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Point;
@@ -11,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;

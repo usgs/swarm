@@ -7,6 +7,7 @@ import javax.swing.SwingUtilities;
 
 /**
  * Throbber class.
+ * 
  * @author Dan Cervelli
  */
 public class Throbber extends JLabel implements Runnable {
@@ -78,6 +79,8 @@ public class Throbber extends JLabel implements Runnable {
   }
 
   /**
+   * Run.
+   * 
    * @see java.lang.Runnable#run()
    */
   public void run() {

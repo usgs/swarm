@@ -3,7 +3,6 @@ package gov.usgs.volcanoes.swarm.wave;
 import gov.usgs.volcanoes.core.configfile.ConfigFile;
 import gov.usgs.volcanoes.core.math.Butterworth;
 import gov.usgs.volcanoes.core.util.StringUtils;
-
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,7 +48,7 @@ public class WaveViewSettings {
   public WaveViewPanel view;
   public WaveViewSettingsToolbar toolbar;
   public ViewType viewType;
-  
+
   // wave settings
   public boolean autoScaleAmp;
   public boolean autoScaleAmpMemory;
@@ -57,7 +56,7 @@ public class WaveViewSettings {
   public double waveMinAmp;
   public boolean removeBias;
   public boolean useUnits;
-  
+
   // spectra settings
   public boolean spectraLogPower;
   public boolean spectraLogFreq;
@@ -67,7 +66,7 @@ public class WaveViewSettings {
   public double spectraMaxPower;
   public double spectraMinFreq;
   public double spectraMaxFreq;
-  
+
   // spectrogram settings
   public boolean spectrogramLogPower;
   public boolean autoScaleSpectrogramPower;
@@ -80,16 +79,16 @@ public class WaveViewSettings {
   public double binSize;
   public int nfft;
   public boolean useAlternateSpectrum = false;
-  
+
   // particle motion settings
   public boolean useAlternateOrientationCode = false;
   public String alternateOrientationCode = "Z12";
-  
+
   // filter settings
   public boolean filterOn;
   public Butterworth filter;
   public boolean zeroPhaseShift;
-  
+
   // pick mode and tag mode settings
   public boolean pickEnabled = false;
   public boolean tagEnabled = false;
@@ -171,11 +170,12 @@ public class WaveViewSettings {
 
   /**
    * Deep copy WaveViewSettings.
+   * 
    * @param s WaveViewSettings.
    */
   public void copy(WaveViewSettings s) {
     viewType = s.viewType;
-    
+
     // wave options
     autoScaleAmp = s.autoScaleAmp;
     autoScaleAmpMemory = s.autoScaleAmpMemory;
@@ -183,7 +183,7 @@ public class WaveViewSettings {
     waveMinAmp = s.waveMinAmp;
     useUnits = s.useUnits;
     removeBias = s.removeBias;
-    
+
     // spectra options
     spectraLogPower = s.spectraLogPower;
     spectraLogFreq = s.spectraLogFreq;
@@ -193,7 +193,7 @@ public class WaveViewSettings {
     spectraMaxPower = s.spectraMaxPower;
     spectraMinFreq = s.spectraMinFreq;
     spectraMaxFreq = s.spectraMaxFreq;
-    
+
     // spectrogram options
     autoScaleSpectrogramPowerMemory = s.autoScaleSpectrogramPowerMemory;
     autoScaleSpectrogramPower = s.autoScaleSpectrogramPower;
@@ -206,34 +206,33 @@ public class WaveViewSettings {
     spectrogramOverlap = s.spectrogramOverlap;
     spectrogramLogPower = s.spectrogramLogPower;
     useAlternateSpectrum = s.useAlternateSpectrum;
-    
+
     // particle motion options
     useAlternateOrientationCode = s.useAlternateOrientationCode;
     alternateOrientationCode = s.alternateOrientationCode;
-    
+
     // filter options
     zeroPhaseShift = s.zeroPhaseShift;
     filterOn = s.filterOn;
     filter = new Butterworth(s.filter);
-    
+
     // pick mode
     pickEnabled = s.pickEnabled;
   }
 
   /**
    * Set configuration.
+   * 
    * @param cf Configuration file.
    */
   public void set(ConfigFile cf) {
     viewType = ViewType.fromString(cf.getString("viewType"));
-    
+
     // wave settings
-    waveMaxAmp =
-        StringUtils.stringToDouble(cf.getString("waveMaxAmp"),
-            DEFAULT_WAVE_VIEW_SETTINGS.waveMaxAmp);
-    waveMinAmp =
-        StringUtils.stringToDouble(cf.getString("waveMinAmp"),
-            DEFAULT_WAVE_VIEW_SETTINGS.waveMinAmp);
+    waveMaxAmp = StringUtils.stringToDouble(cf.getString("waveMaxAmp"),
+        DEFAULT_WAVE_VIEW_SETTINGS.waveMaxAmp);
+    waveMinAmp = StringUtils.stringToDouble(cf.getString("waveMinAmp"),
+        DEFAULT_WAVE_VIEW_SETTINGS.waveMinAmp);
     autoScaleAmp = StringUtils.stringToBoolean(cf.getString("autoScaleAmp"),
         DEFAULT_WAVE_VIEW_SETTINGS.autoScaleAmp);
     autoScaleAmpMemory = StringUtils.stringToBoolean(cf.getString("autoScaleAmpMemory"),
@@ -242,70 +241,58 @@ public class WaveViewSettings {
         DEFAULT_WAVE_VIEW_SETTINGS.removeBias);
     useUnits =
         StringUtils.stringToBoolean(cf.getString("useUnits"), DEFAULT_WAVE_VIEW_SETTINGS.useUnits);
-    
+
     // spectra settings
-    spectraLogFreq =
-        StringUtils.stringToBoolean(cf.getString("spectraLogFreq"),
-            DEFAULT_WAVE_VIEW_SETTINGS.spectraLogFreq);
-    spectraLogPower =
-        StringUtils.stringToBoolean(cf.getString("spectraLogPower"),
-            DEFAULT_WAVE_VIEW_SETTINGS.spectraLogPower);
-    spectraMinFreq =
-        StringUtils.stringToDouble(cf.getString("spectraMinFreq"),
-            DEFAULT_WAVE_VIEW_SETTINGS.spectraMinFreq);
-    spectraMaxFreq =
-        StringUtils.stringToDouble(cf.getString("spectraMaxFreq"),
-            DEFAULT_WAVE_VIEW_SETTINGS.spectraMaxFreq);
+    spectraLogFreq = StringUtils.stringToBoolean(cf.getString("spectraLogFreq"),
+        DEFAULT_WAVE_VIEW_SETTINGS.spectraLogFreq);
+    spectraLogPower = StringUtils.stringToBoolean(cf.getString("spectraLogPower"),
+        DEFAULT_WAVE_VIEW_SETTINGS.spectraLogPower);
+    spectraMinFreq = StringUtils.stringToDouble(cf.getString("spectraMinFreq"),
+        DEFAULT_WAVE_VIEW_SETTINGS.spectraMinFreq);
+    spectraMaxFreq = StringUtils.stringToDouble(cf.getString("spectraMaxFreq"),
+        DEFAULT_WAVE_VIEW_SETTINGS.spectraMaxFreq);
     autoScaleSpectraPower = StringUtils.stringToBoolean(cf.getString("autoScaleSpectraPower"),
         DEFAULT_WAVE_VIEW_SETTINGS.autoScaleSpectraPower);
     autoScaleSpectraPowerMemory =
         StringUtils.stringToBoolean(cf.getString("autoScaleSpectraPowerMemory"),
             DEFAULT_WAVE_VIEW_SETTINGS.autoScaleSpectraPowerMemory);
-    spectraMaxPower =
-        StringUtils.stringToDouble(cf.getString("spectraMaxPower"),
-            DEFAULT_WAVE_VIEW_SETTINGS.spectraMaxPower);
-    spectraMinPower =
-        StringUtils.stringToDouble(cf.getString("spectraMinPower"),
-            DEFAULT_WAVE_VIEW_SETTINGS.spectraMinPower);
-    
+    spectraMaxPower = StringUtils.stringToDouble(cf.getString("spectraMaxPower"),
+        DEFAULT_WAVE_VIEW_SETTINGS.spectraMaxPower);
+    spectraMinPower = StringUtils.stringToDouble(cf.getString("spectraMinPower"),
+        DEFAULT_WAVE_VIEW_SETTINGS.spectraMinPower);
+
     // spectrogram settings
-    spectrogramMinFreq =
-        StringUtils.stringToDouble(cf.getString("spectrogramMinFreq"),
-            DEFAULT_WAVE_VIEW_SETTINGS.spectrogramMinFreq);
-    spectrogramMaxFreq =
-        StringUtils.stringToDouble(cf.getString("spectrogramMaxFreq"),
-            DEFAULT_WAVE_VIEW_SETTINGS.spectrogramMaxFreq);
+    spectrogramMinFreq = StringUtils.stringToDouble(cf.getString("spectrogramMinFreq"),
+        DEFAULT_WAVE_VIEW_SETTINGS.spectrogramMinFreq);
+    spectrogramMaxFreq = StringUtils.stringToDouble(cf.getString("spectrogramMaxFreq"),
+        DEFAULT_WAVE_VIEW_SETTINGS.spectrogramMaxFreq);
     autoScaleSpectrogramPower =
         StringUtils.stringToBoolean(cf.getString("autoScaleSpectrogramPower"),
             DEFAULT_WAVE_VIEW_SETTINGS.autoScaleSpectrogramPower);
     autoScaleSpectrogramPowerMemory =
         StringUtils.stringToBoolean(cf.getString("autoScaleSpectrogramPowerMemory"),
             DEFAULT_WAVE_VIEW_SETTINGS.autoScaleSpectrogramPowerMemory);
-    spectrogramMaxPower =
-        StringUtils.stringToDouble(cf.getString("spectrogramMaxPower"),
-            DEFAULT_WAVE_VIEW_SETTINGS.spectrogramMaxPower);
-    spectrogramMinPower =
-        StringUtils.stringToDouble(cf.getString("spectrogramMinPower"),
-            DEFAULT_WAVE_VIEW_SETTINGS.spectrogramMinPower);
+    spectrogramMaxPower = StringUtils.stringToDouble(cf.getString("spectrogramMaxPower"),
+        DEFAULT_WAVE_VIEW_SETTINGS.spectrogramMaxPower);
+    spectrogramMinPower = StringUtils.stringToDouble(cf.getString("spectrogramMinPower"),
+        DEFAULT_WAVE_VIEW_SETTINGS.spectrogramMinPower);
     binSize =
         StringUtils.stringToDouble(cf.getString("binSize"), DEFAULT_WAVE_VIEW_SETTINGS.binSize);
     nfft = StringUtils.stringToInt(cf.getString("nfft"), DEFAULT_WAVE_VIEW_SETTINGS.nfft);
     spectrogramOverlap = StringUtils.stringToDouble(cf.getString("spectrogramOverlap"),
         DEFAULT_WAVE_VIEW_SETTINGS.spectrogramOverlap);
-    spectrogramLogPower =
-        StringUtils.stringToBoolean(cf.getString("spectrogramLogPower"),
-            DEFAULT_WAVE_VIEW_SETTINGS.spectrogramLogPower);
-    useAlternateSpectrum = 
-        StringUtils.stringToBoolean(cf.getString("useAlternateSpectrum"),
-            DEFAULT_WAVE_VIEW_SETTINGS.useAlternateSpectrum);
-    
+    spectrogramLogPower = StringUtils.stringToBoolean(cf.getString("spectrogramLogPower"),
+        DEFAULT_WAVE_VIEW_SETTINGS.spectrogramLogPower);
+    useAlternateSpectrum = StringUtils.stringToBoolean(cf.getString("useAlternateSpectrum"),
+        DEFAULT_WAVE_VIEW_SETTINGS.useAlternateSpectrum);
+
     // particle motion settings
     useAlternateOrientationCode =
         StringUtils.stringToBoolean(cf.getString("useAlternateOrientationCode"),
             DEFAULT_WAVE_VIEW_SETTINGS.useAlternateOrientationCode);
     alternateOrientationCode = StringUtils.stringToString(cf.getString("alternateOrientationCode"),
         DEFAULT_WAVE_VIEW_SETTINGS.alternateOrientationCode);
-    
+
     // filter settings
     filterOn =
         StringUtils.stringToBoolean(cf.getString("filterOn"), DEFAULT_WAVE_VIEW_SETTINGS.filterOn);
@@ -316,6 +303,7 @@ public class WaveViewSettings {
 
   /**
    * Save configuration file.
+   * 
    * @param cf Configuration file.
    * @param prefix Configuration name prefix.
    */
@@ -410,7 +398,7 @@ public class WaveViewSettings {
     spectraLogPower = !spectraLogPower;
     notifyView();
   }
-  
+
   public void toggleSpectrogramLogPower() {
     spectrogramLogPower = !spectrogramLogPower;
     notifyView();
@@ -432,6 +420,7 @@ public class WaveViewSettings {
 
   /**
    * Adjust view's scale.
+   * 
    * @param pct Scale percent.
    */
   public void adjustScale(double pct) {

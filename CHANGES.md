@@ -1,3 +1,7 @@
+## Version 3.2.0 - February 18, 2020
+  * Code style updates
+  * Fixes to spotbugs findings
+
 ## Version 3.1.0 - February 18, 2020
   * Allow decimals for one bar range and clip value in helicorder settings 
   * Allow decimals in min/max amp in wave settings for small values 

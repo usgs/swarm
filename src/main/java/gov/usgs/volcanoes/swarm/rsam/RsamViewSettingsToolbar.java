@@ -4,10 +4,8 @@ import gov.usgs.volcanoes.core.util.UiUtils;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -29,6 +27,7 @@ public class RsamViewSettingsToolbar implements SettingsListener {
 
   /**
    * Default constructor.
+   * 
    * @param s RSAM view settings
    * @param dest tool bar destination
    * @param keyComp component
@@ -76,6 +75,9 @@ public class RsamViewSettingsToolbar implements SettingsListener {
     rsamTypes.add(countsToggle);
   }
 
+  /**
+   * Settings changed.
+   */
   public void settingsChanged() {
     if (settings.getType() == ViewType.VALUES) {
       rsamTypes.setSelected(valuesToggle.getModel(), true);

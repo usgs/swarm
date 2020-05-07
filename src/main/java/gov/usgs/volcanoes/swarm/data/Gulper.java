@@ -2,15 +2,14 @@ package gov.usgs.volcanoes.swarm.data;
 
 import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.time.J2kSec;
-
 import java.util.HashSet;
 import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Gulper.
+ * 
  * @author Dan Cervelli
  */
 public class Gulper implements Runnable {
@@ -88,6 +87,7 @@ public class Gulper implements Runnable {
 
   /**
    * Kill gulper.
+   * 
    * @param gl gulper listener
    */
   public void kill(final GulperListener gl) {
@@ -96,7 +96,7 @@ public class Gulper implements Runnable {
       kill();
     }
   }
-  
+
   /**
    * Determine if this gulper has been killed.
    *
@@ -118,6 +118,7 @@ public class Gulper implements Runnable {
 
   /**
    * Update gulper.
+   * 
    * @param t1 start time
    * @param t2 end time
    */
@@ -160,6 +161,7 @@ public class Gulper implements Runnable {
 
   /**
    * Thread's run method.
+   * 
    * @see java.lang.Runnable#run()
    */
   public void run() {

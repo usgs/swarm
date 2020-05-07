@@ -1,17 +1,15 @@
-package gov.usgs.volcanoes.swarm.data.fdsnWs;
+package gov.usgs.volcanoes.swarm.data.fdsnws;
 
 import gov.usgs.volcanoes.swarm.StationInfo;
-
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class WebServiceStationTextClient extends AbstractWebServiceStationClient {
   private static final Logger LOGGER = LoggerFactory.getLogger(WebServiceStationTextClient.class);
-  
+
   /**
    * Create the web service station client.
    */
@@ -25,6 +23,11 @@ public class WebServiceStationTextClient extends AbstractWebServiceStationClient
     return new WebServiceStationTextClient(baseUrlText, net, sta, loc, chan, date);
   }
 
+  /**
+   * Main method for testing.
+   * 
+   * @param args arguments
+   */
   public static void main(String[] args) {
     String error = null;
     WebServiceStationTextClient client = createClient(args);
@@ -53,18 +56,12 @@ public class WebServiceStationTextClient extends AbstractWebServiceStationClient
   /**
    * Create the web service station client.
    * 
-   * @param baseUrlText
-   *          the base URL text.
-   * @param net
-   *          the network or null if none.
-   * @param sta
-   *          the station or null if none.
-   * @param loc
-   *          the location or null if none.
-   * @param chan
-   *          the channel or null if none.
-   * @param date
-   *          the date or null if none.
+   * @param baseUrlText the base URL text.
+   * @param net the network or null if none.
+   * @param sta the station or null if none.
+   * @param loc the location or null if none.
+   * @param chan the channel or null if none.
+   * @param date the date or null if none.
    */
   public WebServiceStationTextClient(String baseUrlText, String net, String sta, String loc,
       String chan, Date date) {
@@ -74,11 +71,9 @@ public class WebServiceStationTextClient extends AbstractWebServiceStationClient
   /**
    * Fetch the stations.
    * 
-   * @param url
-   *          the URL.
+   * @param url the URL.
    * 
-   * @throws Exception
-   *           if an error occurs.
+   * @throws Exception if an error occurs.
    */
   protected void fetch(URL url) throws Exception {
     for (String line; (line = getReader().readLine()) != null;) {
@@ -100,10 +95,8 @@ public class WebServiceStationTextClient extends AbstractWebServiceStationClient
   /**
    * Get the column text.
    * 
-   * @param columns
-   *          the columns.
-   * @param index
-   *          the column index or -1 if none.
+   * @param columns the columns.
+   * @param index the column index or -1 if none.
    * @return the column text or null if none.
    */
   protected String getColumnText(String[] columns, int index) {
@@ -126,8 +119,7 @@ public class WebServiceStationTextClient extends AbstractWebServiceStationClient
   /**
    * Process the line.
    * 
-   * @param line
-   *          the line of text containing the channel information.
+   * @param line the line of text containing the channel information.
    */
   protected void processLine(String line) {
     // skip comment line
@@ -175,9 +167,8 @@ public class WebServiceStationTextClient extends AbstractWebServiceStationClient
           if (columns.length > 6) {
             elevation = StationInfo.parseDouble(getColumnText(columns, 6));
           }
-          processChannel(
-              createChannelInfo(station, channel, network, location, latitude, longitude, elevation,
-                  siteName, groupsType));
+          processChannel(createChannelInfo(station, channel, network, location, latitude, longitude,
+              elevation, siteName, groupsType));
         }
         break;
       default:
@@ -188,8 +179,7 @@ public class WebServiceStationTextClient extends AbstractWebServiceStationClient
   /**
    * Split the line.
    * 
-   * @param line
-   *          the line of text containing the channel information.
+   * @param line the line of text containing the channel information.
    * @return the channel information.
    */
   protected String[] split(String line) {

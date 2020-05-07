@@ -6,7 +6,7 @@ import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.internalframe.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
@@ -16,16 +16,13 @@ import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
 import gov.usgs.volcanoes.swarm.wave.WaveViewerFrame;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +44,7 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
 
   /**
    * Create Swarm layout.
+   * 
    * @param fn config file name
    * @return swarm layout
    */
@@ -223,7 +221,7 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
       }
     }
   }
-  
+
   private void processWaves() {
     final List<String> waves = config.getList("wave");
     if (waves == null) {
@@ -253,9 +251,9 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
     if (kiosk && x != -1 && y != -1) {
       applicationFrame.setLocation(x, y);
     }
-    Swarm.getApplication().setFullScreenMode(kiosk);
+    Swarm.getInstance().setFullScreenMode(kiosk);
   }
-  
+
   private void processClipboard() {
     WaveClipboardFrame wcf = WaveClipboardFrame.getInstance();
     final ConfigFile cf = config.getSubConfig("clipboard");
@@ -282,7 +280,7 @@ public class SwarmLayout implements Comparable<SwarmLayout> {
     }
     wcf.show();
   }
-  
+
   private void processRsam() {
     final List<String> rsams = config.getList("rsam");
     if (rsams == null) {

@@ -2,9 +2,7 @@ package gov.usgs.volcanoes.swarm.data;
 
 import gov.usgs.volcanoes.core.data.HelicorderData;
 import gov.usgs.volcanoes.core.data.Wave;
-
 import java.util.List;
-
 import javax.swing.event.EventListenerList;
 
 /**
@@ -70,6 +68,7 @@ public abstract class SeismicDataSource {
 
   /**
    * Fire channels progress.
+   * 
    * @param id progress id
    * @param p progress percent
    */
@@ -84,6 +83,7 @@ public abstract class SeismicDataSource {
 
   /**
    * Fire helicorder progress.
+   * 
    * @param id progress id
    * @param p progress percent
    */

@@ -6,7 +6,6 @@ import gov.usgs.volcanoes.swarm.data.DataSourceType;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.map.NationalMapLayer;
 import gov.usgs.volcanoes.swarm.map.hypocenters.HypocenterSource;
-
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
@@ -19,14 +18,14 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Swarm configuration class. 
+ * Swarm configuration class.
  * 
- * <p>TODO: This is getting our of hand. Extract configs for individual components. e.g. map
+ * <p>
+ * TODO: Extract configs for individual components. e.g. map
  * 
  * @author Dan Cervelli
  */
@@ -35,9 +34,9 @@ public class SwarmConfig {
   private static final Logger LOGGER = LoggerFactory.getLogger(SwarmConfig.class);
 
   private final List<ConfigListener> listeners;
-  
+
   private static String[] DEFAULT_SERVERS =
-      new String[] {"AVO Winston;wws:pubavo1.wr.usgs.gov:16022:10000:1"
+      new String[] { "AVO Winston;wws:pubavo1.wr.usgs.gov:16022:10000:1"
       // "IRIS DMC - New
       // Zealand;dhi:edu/iris/dmc:IRIS_NetworkDC:edu/iris/dmc:IRIS_BudDataCenter:NZ:3600:1000"
       };
@@ -59,12 +58,12 @@ public class SwarmConfig {
   public String lastPath;
 
   public boolean useLargeCursor;
-  public boolean hideStaleChannel;  
-  
+  public boolean hideStaleChannel;
+
   public boolean durationEnabled;
   public double durationA;
   public double durationB;
-  
+
   public double pVelocity;
   public double velocityRatio;
 
@@ -119,14 +118,14 @@ public class SwarmConfig {
   public String layout = ""; // default layout
   public boolean loadLayout = false; // set to true to auto-load layout
 
-  public boolean useWMS;
+  public boolean useWms;
   public String wmsServer;
   public String wmsLayer;
   public String wmsStyles;
 
-  public String fdsnDataselectURL;
-  public String fdsnStationURL;
-  
+  public String fdsnDataselectUrl;
+  public String fdsnStationUrl;
+
   public String user;
 
   private SwarmConfig() {
@@ -136,28 +135,29 @@ public class SwarmConfig {
   public void addListener(ConfigListener configListener) {
     listeners.add(configListener);
   }
-  
+
   private void notifyListeners() {
     for (ConfigListener listener : listeners) {
       listener.settingsChanged();
-    }  
+    }
   }
-  
+
   public static SwarmConfig getInstance() {
     return SwarmConfigHolder.swarmConfig;
   }
-  
+
   public void setHypocenterSource(HypocenterSource hypocenterSource) {
     this.hypocenterSource = hypocenterSource;
     notifyListeners();
   }
-  
+
   public HypocenterSource getHypocenterSource() {
     return hypocenterSource;
   }
 
   /**
    * Create Swarm configurations.
+   * 
    * @param args arguments
    */
   public void createConfig(final String[] args) {
@@ -165,7 +165,7 @@ public class SwarmConfig {
     LOGGER.info("user.home: " + System.getProperty("user.home"));
 
     metadata = Collections.synchronizedMap(new HashMap<String, Metadata>());
-    
+
     // Identify configuration file to use
     String configFile;
     final int n = args.length - 1;
@@ -200,7 +200,7 @@ public class SwarmConfig {
     }
 
     defaultMetadata = Metadata.loadMetadata(metadataConfigFile);
-    
+
     // Parse configuration file
     final ConfigFile cf = new ConfigFile(configFile);
     cf.put("configFile", configFile, false);
@@ -253,7 +253,7 @@ public class SwarmConfig {
     }
 
     for (final File f : files) {
-      if (f.getName().matches("^.*~$")) {  
+      if (f.getName().matches("^.*~$")) {
         continue;
       }
       if (!f.isDirectory()) {
@@ -288,6 +288,7 @@ public class SwarmConfig {
 
   /**
    * Get metadata.
+   * 
    * @param channel waveform identifier
    * @param create true if creating new metadata
    * @return metadata
@@ -308,6 +309,7 @@ public class SwarmConfig {
 
   /**
    * Assign metadata source.
+   * 
    * @param channels waveform identifier
    * @param source seismic data source
    */
@@ -396,27 +398,26 @@ public class SwarmConfig {
     mapLineWidth = StringUtils.stringToInt(config.getString("mapLineWidth"), 2);
     mapLineColor = StringUtils.stringToInt(config.getString("mapLineColor"), 0x000000);
 
-    useWMS = StringUtils.stringToBoolean(config.getString("useWMS"));
+    useWms = StringUtils.stringToBoolean(config.getString("useWMS"));
     wmsServer =
         StringUtils.stringToString(config.getString("wmsServer"), NationalMapLayer.TOPO.server);
     wmsLayer =
         StringUtils.stringToString(config.getString("wmsLayer"), NationalMapLayer.TOPO.layer);
     wmsStyles =
         StringUtils.stringToString(config.getString("wmsStyles"), NationalMapLayer.TOPO.style);
-    
-    hypocenterSource = HypocenterSource.valueOf(
-        StringUtils.stringToString(config.getString("hypocenterSource"), "NONE"));
 
-    fdsnDataselectURL = StringUtils.stringToString(config.getString("fdsnDataselectURL"),
+    hypocenterSource = HypocenterSource
+        .valueOf(StringUtils.stringToString(config.getString("hypocenterSource"), "NONE"));
+
+    fdsnDataselectUrl = StringUtils.stringToString(config.getString("fdsnDataselectURL"),
         "http://service.iris.edu/fdsnws/dataselect/1/query");
-    fdsnStationURL = StringUtils.stringToString(config.getString("fdsnStationURL"),
+    fdsnStationUrl = StringUtils.stringToString(config.getString("fdsnStationURL"),
         "http://service.iris.edu/fdsnws/station/1/query");
 
-    layout =
-        StringUtils.stringToString(config.getString("layout"), "");
+    layout = StringUtils.stringToString(config.getString("layout"), "");
 
     loadLayout = StringUtils.stringToBoolean(config.getString("loadLayout"), false);
-    
+
     sources = new HashMap<String, SeismicDataSource>();
     final List<String> servers = config.getList("server");
     if (servers != null && servers.size() > 0) {
@@ -464,8 +465,8 @@ public class SwarmConfig {
 
     }
   }
-  
-  public Map<String, SeismicDataSource> getSources(){
+
+  public Map<String, SeismicDataSource> getSources() {
     return sources;
   }
 
@@ -491,6 +492,7 @@ public class SwarmConfig {
 
   /**
    * Get time zone.
+   * 
    * @param channel waveform id
    * @return time zone
    */
@@ -515,6 +517,7 @@ public class SwarmConfig {
 
   /**
    * Create ConfigFile object.
+   * 
    * @return config file
    */
   public ConfigFile toConfigFile() {
@@ -550,7 +553,7 @@ public class SwarmConfig {
     config.put("durationEnabled", Boolean.toString(durationEnabled));
     config.put("durationA", Double.toString(durationA));
     config.put("durationB", Double.toString(durationB));
-    
+
     config.put("pVelocity", Double.toString(pVelocity));
     config.put("velocityRatio", Double.toString(velocityRatio));
 
@@ -578,16 +581,16 @@ public class SwarmConfig {
     config.put("mapLineWidth", Integer.toString(mapLineWidth));
     config.put("mapLineColor", Integer.toString(mapLineColor));
 
-    config.put("useWMS", Boolean.toString(useWMS));
+    config.put("useWMS", Boolean.toString(useWms));
     config.put("wmsServer", wmsServer);
     config.put("wmsLayer", wmsLayer);
     config.put("wmsStyles", wmsStyles);
 
     config.put("hypocenterSource", hypocenterSource.name());
 
-    config.put("fdsnDataselectURL", fdsnDataselectURL);
-    config.put("fdsnStationURL", fdsnStationURL);
-    
+    config.put("fdsnDataselectURL", fdsnDataselectUrl);
+    config.put("fdsnStationURL", fdsnStationUrl);
+
     config.put("layout", layout);
     config.put("loadLayout", Boolean.toString(loadLayout));
 
@@ -629,6 +632,7 @@ public class SwarmConfig {
 
   /**
    * Get Swarm user.
+   * 
    * @return username
    */
   public String getUser() {

@@ -7,11 +7,10 @@ import gov.usgs.volcanoes.core.util.StringUtils;
 import gov.usgs.volcanoes.quakeml.EventSet;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.FileDataSource;
-import gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.internalframe.InternalFrameListener;
+import gov.usgs.volcanoes.swarm.internalframe.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -27,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBoxMenuItem;
@@ -46,11 +44,11 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.xml.sax.SAXException;
 
 /**
  * Swarm Menu.
+ * 
  * @author Dan Cervelli
  */
 public class SwarmMenu extends JMenuBar implements InternalFrameListener {
@@ -160,9 +158,9 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     });
     clearCache.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F12, KeyEvent.CTRL_DOWN_MASK));
     fileMenu.add(clearCache);
-    
+
     fileMenu.addSeparator();
-    
+
     JMenuItem importEvent = new JMenuItem("Import Events...");
     importEvent.setMnemonic('I');
     importEvent.addActionListener(new ActionListener() {
@@ -194,7 +192,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
               // TODO Auto-generated catch block
               e1.printStackTrace();
             }
-            
+
           }
         }
       }
@@ -203,7 +201,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     fileMenu.add(importEvent);
 
     fileMenu.addSeparator();
-    
+
     options = new JMenuItem("Options...");
     options.setMnemonic('O');
     options.addActionListener(new ActionListener() {
@@ -233,7 +231,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     exit.setMnemonic('x');
     exit.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        Swarm.getApplication().closeApp();
+        Swarm.getInstance().closeApp();
       }
     });
     fileMenu.add(exit);
@@ -259,7 +257,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     saveLayout.setMnemonic('S');
     saveLayout.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        Swarm.getApplication().saveLayout(null);
+        Swarm.getInstance().saveLayout(null);
       }
     });
     saveLayout.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK));
@@ -271,7 +269,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     saveLastLayout.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         if (lastLayoutName != null) {
-          Swarm.getApplication().saveLayout(lastLayoutName);
+          Swarm.getInstance().saveLayout(lastLayoutName);
         }
       }
     });
@@ -288,7 +286,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
       }
     });
     layoutMenu.add(removeLayouts);
-    
+
     autoLoadLayout = new JCheckBoxMenuItem("Auto-load Layout");
     autoLoadLayout.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -298,7 +296,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     autoLoadLayout.setToolTipText(
         "Enable if you would like to open this layout automatically next time Swarm is started.");
     layoutMenu.add(autoLoadLayout);
-    
+
     layoutMenu.addSeparator();
     add(layoutMenu);
   }
@@ -309,6 +307,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
 
   /**
    * Set last layout name.
+   * 
    * @param ln layout name
    */
   public void setLastLayoutName(String ln) {
@@ -319,6 +318,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
 
   /**
    * All layout.
+   * 
    * @param sl swarm layout
    */
   public void addLayout(final SwarmLayout sl) {
@@ -346,6 +346,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
 
   /**
    * Remove layout.
+   * 
    * @param sl swarm layout
    */
   public void removeLayout(SwarmLayout sl) {
@@ -362,7 +363,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     chooser.setMnemonic('D');
     chooser.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        Swarm.getApplication().setChooserVisible(!Swarm.getApplication().isChooserVisible());
+        Swarm.getInstance().setChooserVisible(!Swarm.getInstance().isChooserVisible());
       }
     });
     chooser.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, KeyEvent.CTRL_DOWN_MASK));
@@ -405,7 +406,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     tileHelicorders.setMnemonic('H');
     tileHelicorders.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        Swarm.getApplication().tileHelicorders();
+        Swarm.getInstance().tileHelicorders();
       }
     });
     windowMenu.add(tileHelicorders);
@@ -414,7 +415,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     tileWaves.setMnemonic('v');
     tileWaves.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        Swarm.getApplication().tileWaves();
+        Swarm.getInstance().tileWaves();
       }
     });
     windowMenu.add(tileWaves);
@@ -425,7 +426,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     fullScreen.setMnemonic('K');
     fullScreen.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        Swarm.getApplication().toggleFullScreenMode();
+        Swarm.getInstance().toggleFullScreenMode();
       }
     });
     fullScreen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0));
@@ -434,7 +435,7 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
     windowMenu.addMenuListener(new MenuListener() {
       public void menuSelected(MenuEvent e) {
         clipboard.setSelected(WaveClipboardFrame.getInstance().isVisible());
-        chooser.setSelected(Swarm.getApplication().isChooserVisible());
+        chooser.setSelected(Swarm.getInstance().isChooserVisible());
         map.setSelected(MapFrame.getInstance().isVisible());
       }
 
@@ -543,8 +544,10 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
   }
 
   /**
-   * @see gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener
-   * #internalFrameAdded(javax.swing.JInternalFrame)
+   * Call when internal frame added.
+   * 
+   * @see gov.usgs.volcanoes.swarm.internalframe.InternalFrameListener
+   *      #internalFrameAdded(javax.swing.JInternalFrame)
    */
   public void internalFrameAdded(JInternalFrame f) {
     InternalFrameMenuItem mi = new InternalFrameMenuItem(f);
@@ -553,8 +556,10 @@ public class SwarmMenu extends JMenuBar implements InternalFrameListener {
   }
 
   /**
-   * @see gov.usgs.volcanoes.swarm.internalFrame.InternalFrameListener
-   * #internalFrameRemoved(javax.swing.JInternalFrame)
+   * Call when internal frame removed.
+   * 
+   * @see gov.usgs.volcanoes.swarm.internalframe.InternalFrameListener
+   *      #internalFrameRemoved(javax.swing.JInternalFrame)
    */
   public void internalFrameRemoved(JInternalFrame f) {
     InternalFrameMenuItem mi = windows.get(f);

@@ -1,9 +1,3 @@
-/**
- * I waive copyright and related rights in the this work worldwide
- * through the CC0 1.0 Universal public domain dedication.
- * https://creativecommons.org/publicdomain/zero/1.0/legalcode
- */
-
 package gov.usgs.volcanoes.swarm.event;
 
 import gov.usgs.volcanoes.core.time.J2kSec;
@@ -14,7 +8,6 @@ import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.WaveViewTime;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -32,8 +25,7 @@ import java.util.Stack;
  * @author Tom Parker
  *
  */
-public class PickWavePanel extends WaveViewPanel
-    implements EventObserver {
+public class PickWavePanel extends WaveViewPanel implements EventObserver {
 
   private static final long serialVersionUID = 1L;
   private static final Font ANNOTATION_FONT = new Font("Monospaced", Font.BOLD, 12);
@@ -71,7 +63,7 @@ public class PickWavePanel extends WaveViewPanel
       @Override
       public void waveZoomed(final WaveViewPanel src, final double st, final double et,
           final double nst, final double net) {
-        final double[] t = new double[] {st, et};
+        final double[] t = new double[] { st, et };
         zoomHistory.push(t);
         zoom(nst, net);
       }

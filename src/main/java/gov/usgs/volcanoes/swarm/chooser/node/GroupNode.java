@@ -8,6 +8,7 @@ public class GroupNode extends AbstractChooserNode {
 
   /**
    * Constructor.
+   * 
    * @param n group name
    */
   public GroupNode(String n) {

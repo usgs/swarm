@@ -1,12 +1,10 @@
 package gov.usgs.volcanoes.swarm;
 
 import com.jgoodies.looks.plastic.PlasticLookAndFeel;
-
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
-
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -30,6 +28,14 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 public class SwarmUtil {
   private static final Insets ZERO_INSETS = new Insets(0, 0, 0, 0);
 
+  /**
+   * Create stripped split pane.
+   * 
+   * @param orient orientation
+   * @param comp1 component 1
+   * @param comp2 component 2
+   * @return
+   */
   public static JSplitPane createStrippedSplitPane(int orient, JComponent comp1, JComponent comp2) {
     JSplitPane split = new JSplitPane(orient, comp1, comp2);
     split.setBorder(BorderFactory.createEmptyBorder());
@@ -41,6 +47,11 @@ public class SwarmUtil {
     return split;
   }
 
+  /**
+   * Create tool bar.
+   * 
+   * @return
+   */
   public static JToolBar createToolBar() {
     JToolBar tb = new JToolBar();
     tb.setFloatable(false);
@@ -49,6 +60,14 @@ public class SwarmUtil {
     return tb;
   }
 
+  /**
+   * Create tool bar button.
+   * 
+   * @param ic image icon
+   * @param toolTip tool tip string
+   * @param al action listener
+   * @return
+   */
   public static JButton createToolBarButton(ImageIcon ic, String toolTip, ActionListener al) {
     JButton button = new JButton(ic);
     fixButton(button, toolTip);
@@ -59,6 +78,14 @@ public class SwarmUtil {
     return button;
   }
 
+  /**
+   * Create tool bar toggle button.
+   * 
+   * @param ic image icon
+   * @param toolTip tool tip string
+   * @param al action listener
+   * @return
+   */
   public static JToggleButton createToolBarToggleButton(ImageIcon ic, String toolTip,
       ActionListener al) {
     JToggleButton button = new JToggleButton(ic);
@@ -76,6 +103,13 @@ public class SwarmUtil {
     button.setToolTipText(toolTip);
   }
 
+  /**
+   * Search for value in array of integers.
+   * 
+   * @param array of int
+   * @param val value
+   * @return index in array
+   */
   public static int linearSearch(int[] array, int val) {
     for (int i = 0; i < array.length; i++) {
       if (array[i] == val) {

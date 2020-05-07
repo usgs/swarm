@@ -5,7 +5,6 @@ import gov.usgs.volcanoes.quakeml.Pick;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-
 import java.util.HashMap;
 
 /**
@@ -20,15 +19,15 @@ public class PickData {
   public static String S = "S";
   public static String CODA1 = "C1";
   public static String CODA2 = "C2";
-  
+
   protected HashMap<String, Pick> picks = new HashMap<String, Pick>();
   protected HashMap<String, Boolean> pickChannels = new HashMap<String, Boolean>();
   protected HashMap<String, Integer> weight = new HashMap<String, Integer>();
-      
+
   protected boolean hidePhases = false;
   protected boolean hideCoda = false;
   protected boolean plot = true;
-  
+
   /**
    * Default constructor.
    */
@@ -39,6 +38,7 @@ public class PickData {
 
   /**
    * Get coda duration.
+   * 
    * @return duration in seconds
    */
   public double getCodaDuration() {
@@ -62,7 +62,7 @@ public class PickData {
     }
     return Double.NaN;
   }
-  
+
   /**
    * Get S-P Duration.
    * 
@@ -123,7 +123,7 @@ public class PickData {
     double ptime = pickP.getTime() - 1000d * pickP.getTimeQuantity().getUncertainty();
     return getDistance(ptime, stime);
   }
-  
+
 
   /**
    * Get S-P distance.
@@ -138,14 +138,15 @@ public class PickData {
     }
     double duration = (stime - ptime) / 1000d;
     double vp = SwarmConfig.getInstance().pVelocity;
-    double vs = vp/SwarmConfig.getInstance().velocityRatio;
-    double distance = duration * (vp*vs)/(vp-vs);
+    double vs = vp / SwarmConfig.getInstance().velocityRatio;
+    double distance = duration * (vp * vs) / (vp - vs);
     return distance;
   }
-  
+
 
   /**
    * Get pick.
+   * 
    * @param pickType P, S, Coda1, Coda2
    * @return pick
    */
@@ -155,6 +156,7 @@ public class PickData {
 
   /**
    * Get number of picks for channel.
+   * 
    * @return number of picks made
    */
   public int getPickCount() {
@@ -170,7 +172,7 @@ public class PickData {
   public void setPick(String pickType, Pick pick) {
     setPick(pickType, pick, false);
   }
-  
+
   /**
    * Set pick.
    * 
@@ -184,26 +186,27 @@ public class PickData {
     } else {
       picks.put(pickType, pick);
     }
-    pickChannels.put(pickType, pickChannel);  
+    pickChannels.put(pickType, pickChannel);
   }
-  
+
   /**
    * Clear pick.
+   * 
    * @param phase pick type
    */
   public void clearPick(String phase, WaveViewPanel wvp) {
-    setPick(phase, null);  
+    setPick(phase, null);
     if (phase.equals(P) || phase.equals(S)) {
       propagatePick(phase, null, wvp);
       setWeight(phase, 0);
-    }       
+    }
   }
-  
+
   /**
    * Clear all picks.
    */
   public void clearAllPicks(WaveViewPanel wvp) {
-    for (String pickType : new String[] {P, S, CODA1, CODA2}) {
+    for (String pickType : new String[] { P, S, CODA1, CODA2 }) {
       clearPick(pickType, wvp);
     }
   }
@@ -223,6 +226,7 @@ public class PickData {
 
   /**
    * Set pick channel flag.
+   * 
    * @param phase P or S
    * @param pickChannel true if this is the channel pick was made on
    */
@@ -249,26 +253,16 @@ public class PickData {
     pick.setPhaseHint(phase);
     pick.setOnset(onset);
     pick.setPolarity(polarity);
-    /*    if (phase.equals(P) || phase.equals(S)) {      
-      // determine polarity
-      Wave wave = wvp.getWave();
-      int i = wave.getBufferIndexAtTime(j2kTime);
-      try {
-        int value = wave.buffer[i];
-        int nextValue = wave.buffer[i + 1];
-        if (nextValue > value) {
-          pick.setPolarity(Pick.Polarity.POSITIVE);
-        } else if (nextValue < value) {
-          pick.setPolarity(Pick.Polarity.NEGATIVE);
-        } else {
-          pick.setPolarity(Pick.Polarity.UNDECIDABLE);
-        }
-      } catch (ArrayIndexOutOfBoundsException e) {
-        pick.setPolarity(Pick.Polarity.UNDECIDABLE);
-      }
-    }*/
+    /*
+     * if (phase.equals(P) || phase.equals(S)) { // determine polarity Wave wave = wvp.getWave();
+     * int i = wave.getBufferIndexAtTime(j2kTime); try { int value = wave.buffer[i]; int nextValue =
+     * wave.buffer[i + 1]; if (nextValue > value) { pick.setPolarity(Pick.Polarity.POSITIVE); } else
+     * if (nextValue < value) { pick.setPolarity(Pick.Polarity.NEGATIVE); } else {
+     * pick.setPolarity(Pick.Polarity.UNDECIDABLE); } } catch (ArrayIndexOutOfBoundsException e) {
+     * pick.setPolarity(Pick.Polarity.UNDECIDABLE); } }
+     */
     picks.put(phase, pick);
-    
+
     // propagate pick
     if (phase.equals(P) || phase.equals(S)) {
       propagatePick(phase, pick, wvp);
@@ -279,8 +273,8 @@ public class PickData {
     picks.put(phase, pick);
     return pick;
   }
-  
-  
+
+
   /**
    * Propagate P or S pick to wave view panel of same station.
    * 
@@ -317,9 +311,10 @@ public class PickData {
       }
     }
   }
-  
+
   /**
    * Propagate weight setting changes to other panels of same station.
+   * 
    * @param phase P or S
    * @param weight 0 to 4
    * @param wvp wave panel associated with this pick data
@@ -335,9 +330,10 @@ public class PickData {
       }
     }
   }
-  
+
   /**
    * Get picks.
+   * 
    * @return the picks
    */
   public HashMap<String, Pick> getPicks() {
@@ -347,6 +343,7 @@ public class PickData {
 
   /**
    * Set picks.
+   * 
    * @param picks the picks to set
    */
   public void setPicks(HashMap<String, Pick> picks) {
@@ -355,6 +352,7 @@ public class PickData {
 
   /**
    * Get pick channels.
+   * 
    * @return the pickChannels
    */
   public HashMap<String, Boolean> getPickChannels() {
@@ -364,12 +362,13 @@ public class PickData {
 
   /**
    * Set pick channels.
+   * 
    * @param pickChannels the pickChannels to set
    */
   public void setPickChannels(HashMap<String, Boolean> pickChannels) {
     this.pickChannels = pickChannels;
   }
-  
+
   /**
    * Set weight for a pick.
    */
@@ -379,6 +378,7 @@ public class PickData {
 
   /**
    * Get hide phases flag.
+   * 
    * @return the hidePhases
    */
   public boolean isHidePhases() {
@@ -388,6 +388,7 @@ public class PickData {
 
   /**
    * Set hide phases flag.
+   * 
    * @param hidePhases the hidePhases to set
    */
   public void setHidePhases(boolean hidePhases) {
@@ -397,6 +398,7 @@ public class PickData {
 
   /**
    * Get hide coda flag.
+   * 
    * @return the hideCoda
    */
   public boolean isHideCoda() {
@@ -406,6 +408,7 @@ public class PickData {
 
   /**
    * Set hide coda flag.
+   * 
    * @param hideCoda the hideCoda to set
    */
   public void setHideCoda(boolean hideCoda) {
@@ -415,6 +418,7 @@ public class PickData {
 
   /**
    * Get plot option.
+   * 
    * @return the plot
    */
   public boolean isPlot() {
@@ -424,6 +428,7 @@ public class PickData {
 
   /**
    * Set plot option.
+   * 
    * @param plot the plot to set
    */
   public void setPlot(boolean plot) {

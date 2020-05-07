@@ -2,11 +2,9 @@ package gov.usgs.volcanoes.swarm.event;
 
 import gov.usgs.volcanoes.quakeml.Pick;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
-
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -15,7 +13,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 
 /**
- * Right click menu for picks. 
+ * Right click menu for picks.
  * 
  * @author Diana Norgaard
  */
@@ -28,7 +26,7 @@ public class PickMenu extends JPopupMenu {
 
   protected HashMap<String, JRadioButtonMenuItem[]> weightButtons =
       new HashMap<String, JRadioButtonMenuItem[]>();
-  
+
   private JCheckBoxMenuItem hidePhasesMenu;
   private JCheckBoxMenuItem hideCodaMenu;
   private JCheckBoxMenuItem plotMenu;
@@ -52,8 +50,8 @@ public class PickMenu extends JPopupMenu {
     createPickMenu();
     createClearMenu();
     createHideMenu();
-    
-    // S-P plot  
+
+    // S-P plot
     plotMenu = new JCheckBoxMenuItem("Plot");
     plotMenu.setSelected(pickData.plot);
     plotMenu.addActionListener(new ActionListener() {
@@ -65,7 +63,7 @@ public class PickMenu extends JPopupMenu {
     this.add(plotMenu);
 
   }
- 
+
   /**
    * Pick menu.
    */
@@ -73,7 +71,7 @@ public class PickMenu extends JPopupMenu {
     JMenu pickMenu = new JMenu("Pick");
     this.add(pickMenu);
 
-    for (final String phase : new String[] {PickData.P, PickData.S}) {
+    for (final String phase : new String[] { PickData.P, PickData.S }) {
       JMenu phaseMenu = new JMenu(phase);
       pickMenu.add(phaseMenu);
       Pick pick = pickData.getPick(phase);
@@ -87,7 +85,7 @@ public class PickMenu extends JPopupMenu {
         }
         JMenu onsetMenu = new JMenu(onset.toString());
         phaseMenu.add(onsetMenu);
-        
+
         for (final Pick.Polarity polarity : Pick.Polarity.values()) {
           String label = "";
           switch (polarity) {
@@ -101,11 +99,11 @@ public class PickMenu extends JPopupMenu {
               label = "?";
               break;
             default:
-              break;                
+              break;
           }
           JMenu polarityMenu = new JMenu(label);
           onsetMenu.add(polarityMenu);
-         
+
           // create weight menu
           ButtonGroup bg = new ButtonGroup();
           JRadioButtonMenuItem[] mi = new JRadioButtonMenuItem[PickSettings.numWeight];
@@ -132,13 +130,14 @@ public class PickMenu extends JPopupMenu {
             polarityMenu.add(mi[i]);
           }
 
-          String key = phase + onset.toString().substring(0,1) + polarity.toString().substring(0,1);
+          String key =
+              phase + onset.toString().substring(0, 1) + polarity.toString().substring(0, 1);
           weightButtons.put(key, mi);
         }
       }
 
     }
-    for (final String coda : new String[] {PickData.CODA1, PickData.CODA2}) {
+    for (final String coda : new String[] { PickData.CODA1, PickData.CODA2 }) {
       JMenuItem codaMenuItem = new JMenuItem(coda);
       codaMenuItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -149,7 +148,7 @@ public class PickMenu extends JPopupMenu {
       pickMenu.add(codaMenuItem);
     }
   }
-  
+
   /**
    * Clear menu.
    */
@@ -157,8 +156,8 @@ public class PickMenu extends JPopupMenu {
     JMenu clearMenu = new JMenu("Clear");
     this.add(clearMenu);
 
-    for (final String pickType : new String[] {PickData.P, PickData.S, PickData.CODA1,
-        PickData.CODA2}) {
+    for (final String pickType : new String[] { PickData.P, PickData.S, PickData.CODA1,
+        PickData.CODA2 }) {
       JMenuItem clearPick = new JMenuItem(pickType);
       clearPick.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -168,29 +167,29 @@ public class PickMenu extends JPopupMenu {
       });
       clearMenu.add(clearPick);
     }
-    
+
     JMenuItem clearAll = new JMenuItem("All");
     clearAll.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        for (final String pickType : new String[] {PickData.P, PickData.S, PickData.CODA1,
-            PickData.CODA2}) {
+        for (final String pickType : new String[] { PickData.P, PickData.S, PickData.CODA1,
+            PickData.CODA2 }) {
           pickData.clearPick(pickType, wvp);
           wvp.repaint();
         }
       }
     });
     clearMenu.add(clearAll);
-    
+
   }
 
-  
+
   /**
    * Hide menu.
    */
   private void createHideMenu() {
     JMenu hideMenu = new JMenu("Hide");
     this.add(hideMenu);
-    
+
     // hide P & S
     hidePhasesMenu = new JCheckBoxMenuItem("P & S");
     hidePhasesMenu.setSelected(pickData.isHidePhases());
@@ -201,7 +200,7 @@ public class PickMenu extends JPopupMenu {
       }
     });
     hideMenu.add(hidePhasesMenu);
-    
+
 
     hideCodaMenu = new JCheckBoxMenuItem("Coda");
     hideCodaMenu.setSelected(pickData.isHideCoda());
@@ -220,7 +219,7 @@ public class PickMenu extends JPopupMenu {
   public void clearCoda() {
     pickData.picks.remove(PickData.CODA1);
     pickData.picks.remove(PickData.CODA2);
-    wvp.repaint();    
+    wvp.repaint();
   }
 
 
@@ -250,7 +249,7 @@ public class PickMenu extends JPopupMenu {
   public boolean isHidePhases() {
     return hidePhasesMenu.isSelected();
   }
-    
+
   /**
    * Get enabled/disabled option for hiding coda.
    * 

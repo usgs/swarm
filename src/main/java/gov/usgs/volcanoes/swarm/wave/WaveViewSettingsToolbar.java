@@ -5,12 +5,10 @@ import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -30,14 +28,15 @@ public class WaveViewSettingsToolbar {
   private JToggleButton waveToggle;
   private JToggleButton spectraToggle;
   private JToggleButton spectrogramToggle;
-  private JToggleButton particleMotionToggle;      // particle motion analysis
+  private JToggleButton particleMotionToggle; // particle motion analysis
   private ButtonGroup waveTypes;
 
   private Set<WaveViewSettings> settingsSet;
 
   /**
    * Constructor.
-   * @param s  Wave view settings
+   * 
+   * @param s Wave view settings
    * @param dest Tool bar destination
    * @param keyComp key component
    */
@@ -49,6 +48,7 @@ public class WaveViewSettingsToolbar {
 
   /**
    * Create wave view settings tool bar.
+   * 
    * @param dest tool bar
    * @param keyComp key component
    */
@@ -108,7 +108,7 @@ public class WaveViewSettingsToolbar {
     UiUtils.mapKeyStrokeToButton(keyComp, "SLASH", "spectrogram1", spectrogramToggle);
     UiUtils.mapKeyStrokeToButton(keyComp, "G", "spectrogram2", spectrogramToggle);
     dest.add(spectrogramToggle);
-    
+
     particleMotionToggle = SwarmUtil.createToolBarToggleButton(Icons.particle_motion,
         "Particle Motion Analysis (O or ')", new ActionListener() {
           public void actionPerformed(ActionEvent e) {
@@ -191,7 +191,7 @@ public class WaveViewSettingsToolbar {
     waveTypes.add(spectraToggle);
     waveTypes.add(spectrogramToggle);
     waveTypes.add(particleMotionToggle);
- 
+
   }
 
   public void clearSettingsSet() {
@@ -200,6 +200,7 @@ public class WaveViewSettingsToolbar {
 
   /**
    * Add wave view settings.
+   * 
    * @param s settings
    */
   public void addSettings(WaveViewSettings s) {
@@ -212,6 +213,7 @@ public class WaveViewSettingsToolbar {
 
   /**
    * Remove wave view settings.
+   * 
    * @param s settings
    */
   public void removeSettings(WaveViewSettings s) {

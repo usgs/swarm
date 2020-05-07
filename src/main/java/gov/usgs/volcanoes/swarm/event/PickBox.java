@@ -1,7 +1,6 @@
 /**
- * I waive copyright and related rights in the this work worldwide
- * through the CC0 1.0 Universal public domain dedication.
- * https://creativecommons.org/publicdomain/zero/1.0/legalcode
+ * I waive copyright and related rights in the this work worldwide through the CC0 1.0 Universal
+ * public domain dedication. https://creativecommons.org/publicdomain/zero/1.0/legalcode
  */
 
 package gov.usgs.volcanoes.swarm.event;
@@ -20,7 +19,7 @@ import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
-import gov.usgs.volcanoes.swarm.data.fdsnWs.WebServicesSource;
+import gov.usgs.volcanoes.swarm.data.fdsnws.WebServicesSource;
 import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanelAdapter;
@@ -28,7 +27,6 @@ import gov.usgs.volcanoes.swarm.wave.WaveViewPanelListener;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsDialog;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -50,7 +48,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.JFileChooser;
@@ -59,7 +56,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +91,8 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
 
   /**
    * Constructor.
-   * @param statusText status text 
+   * 
+   * @param statusText status text
    */
   public PickBox(StatusTextArea statusText) {
     this.statusText = statusText;
@@ -160,7 +157,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
       @Override
       public void waveZoomed(final WaveViewPanel src, final double st, final double et,
           final double nst, final double net) {
-        final double[] t = new double[] {st, et};
+        final double[] t = new double[] { st, et };
         addHistory(src, t);
         for (final WaveViewPanel wvp : selectedSet) {
           if (wvp != src) {
@@ -226,13 +223,14 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
 
   /**
    * Add pick to pick wave panel.
+   * 
    * @param arrival arrival
    */
   public void addPick(Arrival arrival) {
     this.remove(emptyArrivalLabel);
     Pick pick = arrival.getPick();
     String channel = pick.getChannel();
-    
+
     PickWavePanel wavePanel = findPanel(channel);
     if (wavePanel == null) {
       wavePanel = new PickWavePanel();
@@ -260,13 +258,13 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     // set P and S picks in menu
     String phase = arrival.getPhase();
     PickData pickData = wavePanel.getPickData();
-    for (String phaseHint : new String[] {PickData.P, PickData.S}) {
+    for (String phaseHint : new String[] { PickData.P, PickData.S }) {
       if (phase.indexOf(phaseHint) != -1) {
         pick.setPhaseHint(phaseHint);
         pickData.setPick(phaseHint, pick, true);
       }
     }
-    
+
     wavePanel.addArrival(arrival);
     CodeTimer timer = new CodeTimer("arrival");
     timer.stopAndReport();
@@ -307,6 +305,8 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   }
 
   /**
+   * Write image.
+   * 
    * @see gov.usgs.volcanoes.swarm.event.PickToolBarListener#writeImage()
    */
   public void writeImage() {
@@ -430,13 +430,14 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
 
   /**
    * Scale time based on percent.
+   * 
    * @param wvp wave panel
    * @param pct percent to scale by
    */
   public void scaleTime(final WaveViewPanel wvp, final double pct) {
     final double st = wvp.getStartTime();
     final double et = wvp.getEndTime();
-    final double[] t = new double[] {st, et};
+    final double[] t = new double[] { st, et };
     addHistory(wvp, t);
     final double dt = (et - st) * (1 - pct);
     final double mt = (et - st) / 2 + st;
@@ -446,6 +447,8 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   }
 
   /**
+   * Scale time.
+   * 
    * @see gov.usgs.volcanoes.swarm.event.PickToolBarListener#scaleTime(double)
    */
   public void scaleTime(final double pct) {
@@ -456,6 +459,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
 
   /**
    * Go back to previous selected time in wave panel.
+   * 
    * @param wvp wave panel
    */
   public void back(final WaveViewPanel wvp) {
@@ -469,6 +473,8 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   }
 
   /**
+   * Back.
+   * 
    * @see gov.usgs.volcanoes.swarm.event.PickToolBarListener#back()
    */
   public void back() {
@@ -481,7 +487,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     LOGGER.debug("shifting time {}", pct);
     final double st = wvp.getStartTime();
     final double et = wvp.getEndTime();
-    final double[] t = new double[] {st, et};
+    final double[] t = new double[] { st, et };
     addHistory(wvp, t);
     final double dt = (et - st) * pct;
     final double nst = st + dt;
@@ -490,6 +496,8 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   }
 
   /**
+   * Shift time.
+   * 
    * @see gov.usgs.volcanoes.swarm.event.PickToolBarListener#shiftTime(double)
    */
   public void shiftTime(final double pct) {
@@ -524,6 +532,8 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   }
 
   /**
+   * Display settings dialog.
+   * 
    * @see gov.usgs.volcanoes.swarm.wave.WaveViewToolBarListener#displaySettingsDialog()
    */
   public void displaySettingsDialog() {
@@ -545,8 +555,10 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   }
 
   /**
+   * Set type.
+   * 
    * @see gov.usgs.volcanoes.swarm.wave.WaveViewToolBarListener#setType
-   *                (gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType)
+   *      (gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType)
    */
   public void setType(ViewType viewType) {
     for (WaveViewPanel panel : selectedSet) {
@@ -558,6 +570,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
 
   /**
    * Go to input time.
+   * 
    * @param wvp wave panel
    * @param t time specified time
    */
@@ -579,7 +592,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
       if (wvp.getWave() != null) {
         final double st = wvp.getStartTime();
         final double et = wvp.getEndTime();
-        final double[] ts = new double[] {st, et};
+        final double[] ts = new double[] { st, et };
         addHistory(wvp, ts);
         dt = (et - st);
       }
@@ -597,6 +610,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
 
   /**
    * Go to selected time in all wave panels.
+   * 
    * @param t specified time
    */
   public void gotoTime(final String t) {
@@ -606,6 +620,8 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
   }
 
   /**
+   * Sort channels by nearest.
+   * 
    * @see gov.usgs.volcanoes.swarm.event.PickToolBarListener#sortChannelsByNearest()
    */
   public void sortChannelsByNearest() {
@@ -626,7 +642,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
     for (final PickWavePanel wave : panels) {
       sorted.add(wave);
     }
-    
+
     Collections.sort(sorted, new Comparator<PickWavePanel>() {
       public int compare(final PickWavePanel wvp1, final PickWavePanel wvp2) {
         Metadata md1 = SWARM_CONFIG.getMetadata(wvp1.getChannel());
@@ -637,7 +653,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
       }
     });
 
-    
+
     histories.clear();
     selectedSet.clear();
     for (PickWavePanel wave : panels) {
@@ -655,6 +671,7 @@ public class PickBox extends JPanel implements Scrollable, PickToolBarListener {
 
   /**
    * Get pick wave panels.
+   * 
    * @return list of pick wave panels
    */
   public List<PickWavePanel> getPanels() {

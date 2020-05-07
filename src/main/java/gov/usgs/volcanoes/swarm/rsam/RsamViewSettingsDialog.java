@@ -4,18 +4,15 @@ import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
-
 import gov.usgs.volcanoes.core.math.BinSize;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmModalDialog;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewSettings.ViewType;
-
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-
 import javax.swing.ButtonGroup;
 import javax.swing.InputVerifier;
 import javax.swing.JCheckBox;
@@ -53,9 +50,9 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
   private JCheckBox autoScale;
   private JTextField scaleMax;
   private JTextField scaleMin;
-  
+
   private JCheckBox alarm;
-  
+
   private JCheckBox runningMedianButton;
   private JTextField runningMedianPeriod;
   private JCheckBox runningMeanButton;
@@ -66,16 +63,6 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
   private JTextField eventMaxLength;
   private JComboBox<BinSize> binSize;
 
-/*  private ButtonGroup filterGroup;
-  private JCheckBox filterEnabled;
-  private JRadioButton lowPass;
-  private JRadioButton highPass;
-  private JRadioButton bandPass;
-  private JCheckBox zeroPhaseShift;
-  private JTextField corner1;
-  private JTextField corner2;
-  private JSlider order;*/
-  
   private RsamViewSettingsDialog() {
     super(applicationFrame, "RSAM Settings");
     this.setIconImage(Icons.rsam_values.getImage());
@@ -86,6 +73,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
 
   /**
    * Get instance of RSAM view settings dialog.
+   * 
    * @param s RSAM view settings
    * @return RSAM view settings dialog
    */
@@ -136,29 +124,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     scaleMax.setEnabled(!autoScale.isSelected());
     scaleMin.setText("" + settings.scaleMin);
     scaleMin.setEnabled(!autoScale.isSelected());
-    
-/*    filterEnabled.setSelected(settings.filterOn);
 
-    switch (settings.filter.getType()) {
-      case LOWPASS:
-        lowPass.setSelected(true);
-        corner1.setText("0.0");
-        corner2.setText(String.format("%.1f", settings.filter.getCorner1()));
-        break;
-      case HIGHPASS:
-        highPass.setSelected(true);
-        corner1.setText(String.format("%.1f", settings.filter.getCorner1()));
-        corner2.setText("0.0");
-        break;
-      case BANDPASS:
-        bandPass.setSelected(true);
-        corner1.setText(String.format("%.1f", settings.filter.getCorner1()));
-        corner2.setText(String.format("%.1f", settings.filter.getCorner2()));
-        break;
-      default:
-        break;
-    }
-    order.setValue(settings.filter.getOrder());*/
   }
 
   private void createComponents() {
@@ -209,23 +175,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     eventRatio = new JTextField(4);
     eventMaxLength = new JTextField(4);
     binSize = new JComboBox<BinSize>(BinSize.values());
-    
-/*    filterGroup = new ButtonGroup();
-    filterEnabled = new JCheckBox("Enabled");
-    lowPass = new JRadioButton("Low pass");
-    highPass = new JRadioButton("High pass");
-    bandPass = new JRadioButton("Band pass");
-    filterGroup.add(lowPass);
-    filterGroup.add(highPass);
-    filterGroup.add(bandPass);
-    zeroPhaseShift = new JCheckBox("Zero phase shift");
-    corner1 = new JTextField(7);
-    corner2 = new JTextField(7);
-    order = new JSlider(2, 8, 4);
-    order.setMajorTickSpacing(2);
-    order.setSnapToTicks(true);
-    order.createStandardLabels(2);
-    order.setPaintLabels(true);*/
+
   }
 
   protected void createUi() {
@@ -247,7 +197,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
 
     // RSAM Options
     builder.appendSeparator("RSAM Options");
-    
+
     builder.nextLine();
     builder.append(detrend);
     builder.nextColumn(2);
@@ -263,7 +213,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
     builder.nextColumn(2);
     builder.add(despikePeriod, cc.xyw(builder.getColumn(), builder.getRow(), 1));
-    
+
     builder.nextLine();
     builder.append(autoScale);
     builder.nextColumn(2);
@@ -273,7 +223,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     builder.add(scaleMin, cc.xyw(builder.getColumn(), builder.getRow(), 1));
     builder.nextLine();
     builder.append(alarm);
-    //builder.appendRow("center:18dlu");
+    // builder.appendRow("center:18dlu");
     builder.nextColumn(2);
     builder.add(new JLabel("Scale Max:"),
         cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
@@ -281,7 +231,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     builder.add(scaleMax, cc.xyw(builder.getColumn(), builder.getRow(), 1));
 
     builder.nextLine();
-    
+
     // Event options
     builder.appendSeparator("Event Options");
     builder.nextLine();
@@ -314,72 +264,53 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     builder.append(eventMaxLength);
     builder.nextLine();
 
-    // Filter options
-/*    builder.appendSeparator("Butterworth Filter");
-    
-    builder.append(filterEnabled, 3);
-    builder.append(zeroPhaseShift, 3);
-    builder.nextLine();
-    builder.append(lowPass, 3);
-    builder.add(new JLabel("Min. frequency:"),
-        cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
-    builder.nextColumn(2);
-    builder.append(corner1);
-    builder.nextLine();
-    builder.append(highPass, 3);
-    builder.add(new JLabel("Max. frequency:"),
-        cc.xy(builder.getColumn(), builder.getRow(), "right, center"));
-    builder.nextColumn(2);
-    builder.append(corner2);
-    builder.nextLine();
-    builder.append(bandPass, 3);
-    builder.add(new JLabel("Order"),
-        cc.xyw(builder.getColumn(), builder.getRow(), 3, "center, center"));
-    builder.nextLine();
-    builder.appendRow("center:20dlu");
-    builder.nextColumn(3);
-    builder.append(order, 4);
-    builder.nextLine();*/
-
     dialogPanel = builder.getPanel();
     mainPanel.add(dialogPanel, BorderLayout.CENTER);
 
   }
 
   /**
+   * Allow ok.
+   * 
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#allowOk()
    */
   public boolean allowOk() {
     String message = null;
     try {
       message = "Error in despike period.";
+      @SuppressWarnings("unused")
       int dp = Integer.valueOf(despikePeriod.getText());
 
       message = "Error in event threshold.";
+      @SuppressWarnings("unused")
       int et = Integer.parseInt(eventThreshold.getText());
       message = "Error in event ratio.";
+      @SuppressWarnings("unused")
       double er = Double.parseDouble(eventRatio.getText());
       message = "Error in event max length.";
+      @SuppressWarnings("unused")
       double eml = Double.parseDouble(eventMaxLength.getText());
 
       if (!autoScale.isSelected()) {
         message = "Error in Scale min";
+        @SuppressWarnings("unused")
         int sm = Integer.parseInt(scaleMin.getText());
         message = "Error in Scale max";
+        @SuppressWarnings("unused")
         int sn = Integer.parseInt(scaleMax.getText());
       }
-      
+
       message = "Error in running median period.";
-      //double rm = Double.parseDouble(runningMedianPeriod.getText());
+      // double rm = Double.parseDouble(runningMedianPeriod.getText());
       message = "Error in running mean period.";
-      //double rmp = Double.parseDouble(runningMeanPeriod.getText());
+      // double rmp = Double.parseDouble(runningMeanPeriod.getText());
 
       message = "Error in event threshold.";
-      //double et = Double.parseDouble(eventThreshold.getText());
+      // double et = Double.parseDouble(eventThreshold.getText());
       message = "Error in event ratio.";
-      //double er = Double.parseDouble(eventRatio.getText());
+      // double er = Double.parseDouble(eventRatio.getText());
       message = "Error in event maximum length.";
-      //double eml = Double.parseDouble(eventMaxLength.getText());
+      // double eml = Double.parseDouble(eventMaxLength.getText());
 
 
       return true;
@@ -391,6 +322,8 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
   }
 
   /**
+   * Was ok.
+   * 
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#wasOk()
    */
   public void wasOk() {
@@ -423,27 +356,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
         settings.setType(ViewType.COUNTS);
       }
       settings.alarm = alarm.isSelected();
-/*      settings.filterOn = filterEnabled.isSelected();
-      settings.zeroPhaseShift = zeroPhaseShift.isSelected();
 
-      FilterType ft = null;
-      double c1 = 0;
-      double c2 = 0;
-      if (lowPass.isSelected()) {
-        ft = FilterType.LOWPASS;
-        c1 = Double.parseDouble(corner2.getText());
-        c2 = 0;
-      } else if (highPass.isSelected()) {
-        ft = FilterType.HIGHPASS;
-        c1 = Double.parseDouble(corner1.getText());
-        c2 = 0;
-      } else if (bandPass.isSelected()) {
-        ft = FilterType.BANDPASS;
-        c1 = Double.parseDouble(corner1.getText());
-        c2 = Double.parseDouble(corner2.getText());
-      }
-      settings.filter.set(ft, order.getValue(), 100.0, c1, c2);*/
-      
     } catch (Exception e) {
       e.printStackTrace();
       JOptionPane.showMessageDialog(this, "Illegal values.", "Options Error",
@@ -451,7 +364,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
     }
 
   }
-  
+
   /**
    * Integer input verifier.
    */
@@ -469,6 +382,7 @@ public class RsamViewSettingsDialog extends SwarmModalDialog {
 
     /**
      * Verify.
+     * 
      * @see javax.swing.InputVerifier#verify(javax.swing.JComponent)
      */
     public boolean verify(JComponent input) {

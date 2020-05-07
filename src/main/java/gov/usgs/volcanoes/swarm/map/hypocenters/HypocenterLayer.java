@@ -18,7 +18,6 @@ import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.map.MapLayer;
 import gov.usgs.volcanoes.swarm.map.MapPanel;
 import gov.usgs.volcanoes.swarm.map.MapPanel.ColorSetting;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -36,7 +35,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +47,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 
   private static final int POPUP_PADDING = 2;
 
-  private static final int[] markerSize = {5, 7, 9, 11, 13, 17, 21, 25, 29, 33, 37};
+  private static final int[] markerSize = { 5, 7, 9, 11, 13, 17, 21, 25, 29, 33, 37 };
 
   private static final Color ORANGE = new Color(225, 175, 0, 200);
   private static final Color RED = new Color(200, 0, 0, 200);
@@ -72,6 +70,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 
   /**
    * Constructor.
+   * 
    * @throws MalformedURLException exception
    */
   public HypocenterLayer() throws MalformedURLException {
@@ -103,6 +102,8 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
   }
 
   /**
+   * Draw.
+   * 
    * @see gov.usgs.volcanoes.swarm.map.MapLayer#draw(java.awt.Graphics2D)
    */
   public void draw(Graphics2D g2) {
@@ -144,7 +145,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
       }
       renderer.shape = new Ellipse2D.Float(0f, 0f, diameter, diameter);
 
-      
+
       Color markerColor;
       if (panel.getColorSetting() == ColorSetting.DEPTH) {
         double depth = origin.getDepth() / 1000; // km
@@ -202,6 +203,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
 
   /**
    * Draw popup box.
+   * 
    * @param g2 graphics 2D
    */
   private void drawPopup(Graphics2D g2) {
@@ -282,6 +284,8 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
   }
 
   /**
+   * Mouse clicked event.
+   * 
    * @see gov.usgs.volcanoes.swarm.map.MapLayer#mouseClicked(java.awt.event.MouseEvent)
    */
   public boolean mouseClicked(final MouseEvent e) {
@@ -298,6 +302,8 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
   }
 
   /**
+   * Setting changed.
+   * 
    * @see gov.usgs.volcanoes.swarm.ConfigListener#settingsChanged()
    */
   public void settingsChanged() {
@@ -328,6 +334,8 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
   }
 
   /**
+   * Mouse moved event.
+   * 
    * @see gov.usgs.volcanoes.swarm.map.MapLayer#mouseMoved(java.awt.event.MouseEvent)
    */
   public boolean mouseMoved(MouseEvent e) {
@@ -420,8 +428,10 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
   }
 
   /**
+   * Update.
+   * 
    * @see gov.usgs.volcanoes.core.quakeml.QuakemlObserver#
-   *    update(gov.usgs.volcanoes.core.quakeml.QuakemlSource)
+   *      update(gov.usgs.volcanoes.core.quakeml.QuakemlSource)
    */
   public void update(QuakemlSource source) {
     events.clear();
@@ -433,6 +443,8 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
   }
 
   /**
+   * Set visible.
+   * 
    * @see gov.usgs.volcanoes.swarm.map.MapLayer#setVisible(boolean)
    */
   public void setVisible(boolean isVisible) {
@@ -441,7 +453,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
       quakemlSource.doUpdate(isVisible);
     }
   }
-  
+
   /**
    * Remove event from layer.
    * 
@@ -454,23 +466,25 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
     if (events.containsKey(publicId)) {
       events.remove(publicId);
     }
-    
+
   }
-  
+
   /**
    * Draw legend for event plots.
-   * @param g2
+   * 
+   * @param g2 graphics2d
    */
   public void drawLegend(Graphics2D g2) {
     if (panel.getColorSetting() == ColorSetting.DEPTH) {
       drawDepthLegend(g2);
-    }else {
+    } else {
       drawAgeLegend(g2);
     }
   }
-  
+
   /**
    * Draw legend when events colors are plotted by depth.
+   * 
    * @param g2 Grahics2D
    */
   public void drawDepthLegend(Graphics2D g2) {
@@ -540,7 +554,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
     x += size + 2;
     g2.setColor(BLACK);
     g2.drawString("40+", x, y + size / 2);
-    
+
     // Magnitudes
     x = insetPx + 5;
     y = insetPx + (heightPx - recHeight / 2) + 10;
@@ -558,9 +572,10 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
       x += size + 10;
     }
   }
-  
+
   /**
    * Draw legend when events colors are plotted by age.
+   * 
    * @param g2 graphics 2D.
    */
   public void drawAgeLegend(Graphics2D g2) {
@@ -600,7 +615,7 @@ public final class HypocenterLayer implements MapLayer, ConfigListener, QuakemlO
     g2.fill(circle);
     g2.setColor(BLACK);
     g2.drawString("< 1 Week", x + size + 1, y + size);
-    
+
     // Magnitudes
     x = x + size + 70;
     y = insetPx + (heightPx - recHeight) + 15;

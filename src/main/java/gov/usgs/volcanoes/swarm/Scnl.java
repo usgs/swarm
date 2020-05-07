@@ -5,7 +5,7 @@ package gov.usgs.volcanoes.swarm;
  * 
  * @author Dan Cervelli
  */
-public class SCNL {
+public class Scnl {
   public String station;
   public String channel;
   public String network;
@@ -13,9 +13,10 @@ public class SCNL {
 
   /**
    * Constructor.
-   * @param s channel string 
+   * 
+   * @param s channel string
    */
-  public SCNL(String s) {
+  public Scnl(String s) {
     String[] ss = s.split(" ");
     switch (ss.length) {
       case 4:

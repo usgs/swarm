@@ -7,10 +7,9 @@ import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.Swarm;
 import gov.usgs.volcanoes.swarm.SwarmModalDialog;
 import gov.usgs.volcanoes.swarm.SwingWorker;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.internalframe.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsDialog;
-
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -24,7 +23,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -40,6 +38,7 @@ import javax.swing.border.TitledBorder;
 
 /**
  * Helicorder viewer settings dialog.
+ * 
  * @author Dan Cervelli
  */
 public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
@@ -83,6 +82,7 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
 
   /**
    * Get instance of helicorder viewer settins dialog.
+   * 
    * @param s helicorder viewer settings
    * @param s2 wave view settings
    * @return helicorder viewer settings dialog
@@ -99,6 +99,8 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
   }
 
   /**
+   * Set visible.
+   * 
    * @see java.awt.Dialog#setVisible(boolean)
    */
   public void setVisible(boolean b) {
@@ -110,6 +112,7 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
 
   /**
    * Set settings.
+   * 
    * @param s helicorder viewer settings
    * @param s2 wave view settings
    */
@@ -281,7 +284,7 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
     otherPanel.add(clipValue, GridBagHelper.set(c, "x=2;y=8;w=1;h=1;f=h;wx=0;a=e"));
 
     applyToAll = new JCheckBox("Apply to all open helicorders");
-    
+
     // CENTER PANEL
     JPanel centerPanel = new JPanel();
     BoxLayout bl = new BoxLayout(centerPanel, BoxLayout.Y_AXIS);
@@ -296,8 +299,8 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
     // DIALOG PANEL
     dialogPanel = new JPanel(new BorderLayout());
     dialogPanel.add(centerPanel, BorderLayout.CENTER);
-    
-    
+
+
     mainPanel.add(dialogPanel, BorderLayout.CENTER);
   }
 
@@ -415,7 +418,7 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
       settings.autoScale = autoScale.isSelected();
       settings.barRange = Double.parseDouble(barRange.getText());
       settings.notifyView();
-      
+
       // If option to apply to all helicorders is selected
       if (applyToAll.isSelected()) {
         // heli config
@@ -429,7 +432,7 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
         List<JInternalFrame> frames = SwarmInternalFrames.getFrames();
         for (JInternalFrame frame : frames) {
           if (frame instanceof HelicorderViewerFrame) {
-            HelicorderViewerFrame hvf = (HelicorderViewerFrame)frame;
+            HelicorderViewerFrame hvf = (HelicorderViewerFrame) frame;
             hvf.getHelicorderViewerSettings().set(hcf);
             hvf.getHelicorderViewerSettings().notifyView();
             hvf.getWaveViewSettings().set(wcf);
@@ -476,7 +479,7 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
 
       message = "Invalid one bar range.";
       Double.parseDouble(barRange.getText());
-      
+
       message = "Invalid clip value.";
       Double.parseDouble(clipValue.getText());
 

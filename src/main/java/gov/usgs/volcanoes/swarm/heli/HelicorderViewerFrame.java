@@ -22,7 +22,7 @@ import gov.usgs.volcanoes.swarm.chooser.DataChooser;
 import gov.usgs.volcanoes.swarm.data.GulperListener;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSourceListener;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.internalframe.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.time.TimeListener;
 import gov.usgs.volcanoes.swarm.time.UiTime;
@@ -31,7 +31,6 @@ import gov.usgs.volcanoes.swarm.wave.StatusTextArea;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettingsToolbar;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -47,7 +46,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -85,20 +83,19 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
   private static final int MINUTE = 60;
   private static final int HOUR = MINUTE * 60;
-  
+
   // minutes * 60 = seconds
-  public static final int[] chunkValues =
-      new int[] {10 * MINUTE, 15 * MINUTE, 20 * MINUTE, 
-          30 * MINUTE, 1 * HOUR, 2 * HOUR, 180 * MINUTE, 6 * HOUR};
+  public static final int[] chunkValues = new int[] { 10 * MINUTE, 15 * MINUTE, 20 * MINUTE,
+      30 * MINUTE, 1 * HOUR, 2 * HOUR, 180 * MINUTE, 6 * HOUR };
 
   // hours * 60 = minutes
-  public static final int[] spanValues =
-      new int[] {2 * 60, 4 * 60, 6 * 60, 12 * 60, 24 * 60, 48 * 60, 72 * 60, 96 * 60, 120 * 60,
-          144 * 60, 168 * 60, 192 * 60, 216 * 60, 240 * 60, 264 * 60, 288 * 60, 312 * 60, 336 * 60};
+  public static final int[] spanValues = new int[] { 2 * 60, 4 * 60, 6 * 60, 12 * 60, 24 * 60,
+      48 * 60, 72 * 60, 96 * 60, 120 * 60, 144 * 60, 168 * 60, 192 * 60, 216 * 60, 240 * 60,
+      264 * 60, 288 * 60, 312 * 60, 336 * 60 };
 
   // seconds
-  public static final int[] zoomValues = new int[] {1, 2, 5, 10, 20, 30, 
-      MINUTE, 2 * MINUTE, 5 * MINUTE, 10 * MINUTE, 20 * MINUTE, 40 * MINUTE, 1 * HOUR, 90 * MINUTE};
+  public static final int[] zoomValues = new int[] { 1, 2, 5, 10, 20, 30, MINUTE, 2 * MINUTE,
+      5 * MINUTE, 10 * MINUTE, 20 * MINUTE, 40 * MINUTE, 1 * HOUR, 90 * MINUTE };
 
   private final RefreshThread refreshThread;
   private final SeismicDataSource dataSource;
@@ -152,6 +149,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
   /**
    * Constructor with configuration file as parameter.
+   * 
    * @param cf configuration file
    */
   public HelicorderViewerFrame(final ConfigFile cf) {
@@ -176,6 +174,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
   /**
    * Constructor with data source, channel, and bottom time info as parameters.
+   * 
    * @param sds seismic data source
    * @param ch channel string
    * @param bt bottom time
@@ -196,8 +195,9 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
   /**
    * Save layout.
+   * 
    * @see gov.usgs.volcanoes.swarm.SwarmFrame#saveLayout
-   * (gov.usgs.volcanoes.core.configfile.ConfigFile, java.lang.String)
+   *      (gov.usgs.volcanoes.core.configfile.ConfigFile, java.lang.String)
    */
   public void saveLayout(final ConfigFile cf, final String prefix) {
     super.saveLayout(cf, prefix);
@@ -377,7 +377,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     toolBar.add(subZoom);
 
     new WaveViewSettingsToolbar(waveViewSettings, toolBar, this);
-    
+
     clipboard = SwarmUtil.createToolBarButton(Icons.clipboard,
         "Copy inset to clipboard (C or Ctrl-C)", new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
@@ -420,8 +420,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
     toolBar.addSeparator();
 
-    tagButton = SwarmUtil.createToolBarToggleButton(Icons.tag,
-        "Tag Mode", null);
+    tagButton = SwarmUtil.createToolBarToggleButton(Icons.tag, "Tag Mode", null);
     tagButton.setEnabled(true);
     toolBar.add(tagButton);
 
@@ -438,7 +437,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
     });
 
     toolBar.addSeparator();
-    
+
     scaleButton = SwarmUtil.createToolBarButton(Icons.wavezoom,
         "Toggle between adjusting helicoder scale and clip", new ActionListener() {
           public void actionPerformed(final ActionEvent e) {
@@ -603,6 +602,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
   /**
    * Set pinned flag.
+   * 
    * @param b true if pinned; false otherwise
    */
   public void setPinned(final boolean b) {
@@ -679,6 +679,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
   /**
    * Enable or disable inset buttons.
+   * 
    * @param b true to enable; false to disable
    */
   public void setInsetButtonsEnabled(final boolean b) {
@@ -693,6 +694,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
   /**
    * Enable or disable navigation buttons.
+   * 
    * @param b true to enable; false to disable
    */
   public void setNavigationButtonsEnabled(final boolean b) {
@@ -710,6 +712,8 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
   }
 
   /**
+   * Set kiosk mode.
+   * 
    * @see gov.usgs.volcanoes.swarm.Kioskable#setKioskMode(boolean)
    */
   public void setKioskMode(final boolean b) {
@@ -727,6 +731,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
   /**
    * Set status bar string.
+   * 
    * @param status status text
    */
   public void setStatus(final String status) {
@@ -759,6 +764,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
 
   /**
    * Scroll forward or backward in time.
+   * 
    * @param units positive time units to go forward; negative to go backwards
    */
   public void scroll(final int units) {
@@ -776,7 +782,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
   }
 
   /**
-   * Get and draw helicorder. 
+   * Get and draw helicorder.
    */
   public void getHelicorder() {
     if (noData) {
@@ -887,7 +893,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
           helicorderViewPanel.clearMarks();
           settings.setBottomTime(Double.NaN);
           if (swarmConfig.isKiosk() && !Swarm.isFullScreenMode()) {
-            ((Swarm)Swarm.getApplicationFrame()).toggleFullScreenMode();
+            ((Swarm) Swarm.getApplicationFrame()).toggleFullScreenMode();
           }
         }
 
@@ -1043,7 +1049,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
           } catch (final Exception ex) {
             ex.printStackTrace();
           }
-        } else {    // if tag mode not enabled (image is scaled to display nicely)
+        } else { // if tag mode not enabled (image is scaled to display nicely)
           int width = -1;
           int height = -1;
           try {
@@ -1057,17 +1063,17 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
                 "Error", JOptionPane.ERROR_MESSAGE);
             return;
           }
-  
+
           final Plot plot = new Plot(width, height);
-  
+
           Double end = settings.getBottomTime();
           if (Double.isNaN(end)) {
             end = J2kSec.now();
           }
-  
+
           final Double before = end - settings.span * 60;
           final int tc = 30;
-  
+
           // TODO: this should use existing data.
           final HelicorderData heliData =
               dataSource.getHelicorder(settings.channel, before - tc, end + tc, null);
@@ -1076,7 +1082,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
           if (swarmConfig.heliColors != null) {
             heliRenderer.setDefaultColors(swarmConfig.heliColors); // DCK: add configured colors
           }
-  
+
           heliRenderer.setChannel(settings.channel);
           heliRenderer.setLocation(HelicorderViewPanel.X_OFFSET, HelicorderViewPanel.Y_OFFSET,
               width - HelicorderViewPanel.X_OFFSET - HelicorderViewPanel.RIGHT_WIDTH,
@@ -1092,7 +1098,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
           heliRenderer.setLargeChannelDisplay(includeChannel.isSelected());
           heliRenderer.createDefaultAxis();
           plot.addRenderer(heliRenderer);
-  
+
           if (fileFormatCb.getSelectedItem().equals("PS")) {
             plot.writePS(f.getAbsolutePath());
           } else {
@@ -1110,7 +1116,7 @@ public class HelicorderViewerFrame extends SwarmFrame implements Kioskable {
       chooser.setAccessory(null);
     }
   }
-  
+
   public boolean isTagEnabled() {
     return tagButton.isSelected();
   }

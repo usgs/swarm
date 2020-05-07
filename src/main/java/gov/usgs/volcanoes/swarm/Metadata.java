@@ -8,7 +8,6 @@ import gov.usgs.volcanoes.core.util.Pair;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
 import gov.usgs.volcanoes.winston.Channel;
 import gov.usgs.volcanoes.winston.Instrument;
-
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,9 +27,9 @@ import java.util.TimeZone;
 public class Metadata implements Comparable<Metadata> {
   public static final String DEFAULT_METADATA_FILENAME = "SwarmMetadata.config";
 
-  //private static final Logger LOGGER = LoggerFactory.getLogger(Metadata.class);
+  // private static final Logger LOGGER = LoggerFactory.getLogger(Metadata.class);
 
-  private SCNL scnl;
+  private Scnl scnl;
 
   private String channel = null;
 
@@ -46,7 +45,7 @@ public class Metadata implements Comparable<Metadata> {
   private double height = Double.NaN;
   private double minTime = Double.NaN;
   private double maxTime = Double.NaN;
-  
+
   private double delay = Double.NaN;
   private double xmagCorrection = Double.NaN;
   private double fmagCorrection = Double.NaN;
@@ -69,6 +68,7 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * Determine if metadata has been touched.
+   * 
    * @return true if so
    */
   public boolean isTouched() {
@@ -79,6 +79,7 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * Update time zone.
+   * 
    * @param tz time zone
    */
   public void updateTimeZone(String tz) {
@@ -90,17 +91,19 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * Update channel.
+   * 
    * @param ch channel
    */
   public void updateChannel(String ch) {
     if (channel == null) {
       channel = ch;
-      scnl = new SCNL(channel);
+      scnl = new Scnl(channel);
     }
   }
 
   /**
    * Update alias.
+   * 
    * @param a alias
    */
   public void updateAlias(String a) {
@@ -111,6 +114,7 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * Update units.
+   * 
    * @param u unit
    */
   public void updateUnits(String u) {
@@ -121,6 +125,7 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * Update linear coefficients.
+   * 
    * @param mult multiplier
    * @param off offset
    */
@@ -138,6 +143,7 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * Update longitude.
+   * 
    * @param lon longitude
    */
   public void updateLongitude(double lon) {
@@ -148,6 +154,7 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * Update latitude.
+   * 
    * @param lat latitude
    */
   public void updateLatitude(double lat) {
@@ -158,6 +165,7 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * Update height.
+   * 
    * @param h height
    */
   public void updateHeight(double h) {
@@ -198,7 +206,7 @@ public class Metadata implements Comparable<Metadata> {
     return channel;
   }
 
-  public SCNL getSCNL() {
+  public Scnl getScnl() {
     return scnl;
   }
 
@@ -217,6 +225,7 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * Get min time.
+   * 
    * @return min time or NaN
    */
   public double getMinTime() {
@@ -229,6 +238,7 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * Get max time.
+   * 
    * @return max time or NaN
    */
   public double getMaxTime() {
@@ -241,6 +251,7 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * Add group.
+   * 
    * @param g group
    */
   public void addGroup(String g) {
@@ -256,6 +267,7 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * Interpret metadata string.
+   * 
    * @param s string
    */
   public void interpret(String s) {
@@ -300,6 +312,7 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * Load metadata.
+   * 
    * @param fn metadata configuration file name
    * @return map of metadata
    */
@@ -327,32 +340,31 @@ public class Metadata implements Comparable<Metadata> {
     return data;
   }
 
-  
+
   /**
    * Update metadata given a Channel.
+   * 
    * @param chan source channel
    */
   public void update(Channel chan) {
-    
+
     Instrument ins = chan.instrument;
     updateLongitude(ins.longitude);
     updateLatitude(ins.latitude);
     updateHeight(ins.height);
-    
+
     TimeSpan timeSpan = chan.timeSpan;
     updateMinTime(J2kSec.fromEpoch(timeSpan.startTime));
     updateMaxTime(J2kSec.fromEpoch(timeSpan.endTime));
-    
+
     /*
      * TODO: This was added for the refresh feature (in case a group is deleted from data source).
      * However, adding this breaks the feature that allows user to add groups in
-     * SwarmMetadata.config. Ideally groups no longer used in data source would be removed upon 
+     * SwarmMetadata.config. Ideally groups no longer used in data source would be removed upon
      * refresh but until there is a fix or work around, leave this out.
      */
     /*
-     if (getGroups() != null) { // clear in case of refresh
-      getGroups().clear();
-     }
+     * if (getGroups() != null) { // clear in case of refresh getGroups().clear(); }
      */
     // add groups from source
     List<String> groups = chan.groups;
@@ -368,10 +380,11 @@ public class Metadata implements Comparable<Metadata> {
     updateTimeZone(ins.timeZone);
 
   }
-  
-  
+
+
   /**
    * Get distance to another point.
+   * 
    * @param pt the point
    * @return distance in meters
    */
@@ -386,6 +399,7 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * Get distance to another station.
+   * 
    * @param other metadata of other station
    * @return distance in meters
    */
@@ -401,6 +415,7 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * Get distance comparator.
+   * 
    * @return comparator
    */
   public static Comparator<Pair<Double, String>> getDistanceComparator() {
@@ -417,6 +432,7 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * Find nearest stations to channel.
+   * 
    * @param metadata map of metadata
    * @param channel channel name
    * @return list of distance and channels
@@ -442,12 +458,13 @@ public class Metadata implements Comparable<Metadata> {
 
   /**
    * To String.
+   * 
    * @see java.lang.Object#toString()
    */
   public String toString() {
     return channel + "," + alias + "," + unit + "," + multiplier + "," + offset + "," + longitude
-        + "," + latitude + "," + height + "," + timeZone + ", " + delay + ", "
-        + xmagCorrection + ", " + fmagCorrection + "," + groups.toString();
+        + "," + latitude + "," + height + "," + timeZone + ", " + delay + ", " + xmagCorrection
+        + ", " + fmagCorrection + "," + groups.toString();
   }
 
   public int compareTo(Metadata o) {

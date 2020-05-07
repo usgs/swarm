@@ -4,7 +4,6 @@ import com.jgoodies.forms.builder.ButtonBarBuilder;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.FormLayout;
-
 import gov.usgs.volcanoes.hypo71.Hypo71;
 import gov.usgs.volcanoes.hypo71.Hypocenter;
 import gov.usgs.volcanoes.hypo71.PhaseRecord;
@@ -29,11 +28,10 @@ import gov.usgs.volcanoes.swarm.SwarmFrame;
 import gov.usgs.volcanoes.swarm.Version;
 import gov.usgs.volcanoes.swarm.event.hypo71.Hypo71Manager;
 import gov.usgs.volcanoes.swarm.event.hypo71.Hypo71SettingsDialog;
-import gov.usgs.volcanoes.swarm.internalFrame.SwarmInternalFrames;
+import gov.usgs.volcanoes.swarm.internalframe.SwarmInternalFrames;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -51,7 +49,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -77,7 +74,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -195,7 +191,7 @@ public class EventDialog extends SwarmFrame {
     hypo71Mgr = new Hypo71Manager();
 
 
-    
+
     usePicks = new JRadioButton("Use Clipboard Picks");
     usePicks.setSelected(true);
     usePicks.addActionListener(new ActionListener() {
@@ -246,13 +242,13 @@ public class EventDialog extends SwarmFrame {
           hypo71InputFile.setText(filename);
           hypo71Output = "";
         }
-        //requestFocus();
+        // requestFocus();
       }
     });
     builder.append(openInputFileButton);
     builder.nextLine();
-    
-    
+
+
     JButton settingsButton = new JButton("Settings");
     settingsButton.setToolTipText("For use with clipboard picks only.");
     settingsButton.addActionListener(new ActionListener() {
@@ -260,7 +256,7 @@ public class EventDialog extends SwarmFrame {
         Hypo71SettingsDialog.getInstance().setVisible(true);
       }
     });
-       
+
     JButton locateButton = new JButton("Run");
     locateButton.setToolTipText("Locate hypocenter using Hypo71");
     locateButton.addActionListener(new ActionListener() {
@@ -287,32 +283,32 @@ public class EventDialog extends SwarmFrame {
     builder.appendSeparator("Hypo71 Output");
 
     location = new JTextField();
-    //location.setBorder(null);
+    // location.setBorder(null);
     location.setEditable(false);
     builder.append("Location", location);
     builder.nextLine();
     magnitude = new JTextField();
-    //magnitude.setBorder(null);
+    // magnitude.setBorder(null);
     magnitude.setEditable(false);
     builder.append("Magnitude", magnitude);
     builder.nextLine();
     rms = new JTextField();
-    //rms.setBorder(null);
+    // rms.setBorder(null);
     rms.setEditable(false);
     builder.append("RMS", rms);
     builder.nextLine();
     gap = new JTextField();
-    //gap.setBorder(null);
+    // gap.setBorder(null);
     gap.setEditable(false);
     builder.append("GAP", gap);
     builder.nextLine();
     erh = new JTextField();
-    //erh.setBorder(null);
+    // erh.setBorder(null);
     erh.setEditable(false);
     builder.append("ERH", erh);
     builder.nextLine();
     erz = new JTextField();
-    //erz.setBorder(null);
+    // erz.setBorder(null);
     erz.setEditable(false);
     builder.append("ERZ", erz);
     builder.nextLine();
@@ -525,7 +521,7 @@ public class EventDialog extends SwarmFrame {
           LOGGER.error(message);
           continue;
         }
-        String station = md.getSCNL().station;
+        String station = md.getScnl().station;
         Double delay = Double.isNaN(md.getDelay()) ? 0 : md.getDelay();
         Double fmag = Double.isNaN(md.getFmagCorrection()) ? 0 : md.getFmagCorrection();
         Double xmag = Double.isNaN(md.getXmagCorrection()) ? 0 : md.getXmagCorrection();
@@ -575,7 +571,7 @@ public class EventDialog extends SwarmFrame {
         JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), message, title,
             JOptionPane.INFORMATION_MESSAGE);
       }
-      //requestFocus();
+      // requestFocus();
       PhaseRecord endRecord = new PhaseRecord();
       endRecord.setMSTA("    ");
       hypo71Mgr.phaseRecordsList.add(endRecord);
@@ -600,7 +596,7 @@ public class EventDialog extends SwarmFrame {
     JOptionPane.showMessageDialog(Swarm.getApplicationFrame(), scroll, "Hypo71 Output",
         JOptionPane.INFORMATION_MESSAGE, null);
   }
-  
+
   /**
    * Update hypo71 output panel with key output information.
    * 
@@ -628,12 +624,11 @@ public class EventDialog extends SwarmFrame {
       longitude *= -1;
     }
     double depth = hypocenter.getZ();
-    String locationString =
-        String.format("%.2f  %.2f  %.2f km", latitude, longitude, depth);
+    String locationString = String.format("%.2f  %.2f  %.2f km", latitude, longitude, depth);
     location.setText(locationString);
     magnitude.setText(hypocenter.getMAGOUT().trim());
     rms.setText(String.format("%.2f s", hypocenter.getRMS()));
-    gap.setText(String.format("%s deg",hypocenter.getIGAP()));
+    gap.setText(String.format("%s deg", hypocenter.getIGAP()));
     erh.setText(hypocenter.getERHOUT().trim() + " km");
     erz.setText(hypocenter.getSE3OUT().trim() + " km");
   }
@@ -657,13 +652,13 @@ public class EventDialog extends SwarmFrame {
     if (usePicks.isSelected()) {
       for (WaveViewPanel wvp : WaveClipboardFrame.getInstance().getWaves()) {
         PickData pickData = wvp.getPickData();
-        for (String phase : new String[] {PickData.P, PickData.S}) {
+        for (String phase : new String[] { PickData.P, PickData.S }) {
           if (pickData.getPick(phase) != null && pickData.isPickChannel(phase)) {
             Pick pick = pickData.getPick(phase);
             picks.put(pick.publicId, pick);
           }
         }
-        for (String phase : new String[] {PickData.CODA1, PickData.CODA2}) {
+        for (String phase : new String[] { PickData.CODA1, PickData.CODA2 }) {
           Pick pick = pickData.getPick(phase);
           if (pick != null) {
             picks.put(pick.publicId, pick);
@@ -858,7 +853,7 @@ public class EventDialog extends SwarmFrame {
         event = openEventChooser(eventMap);
       } else {
         event = eventSet.values().iterator().next();
-      }        
+      }
       // See if user wants to clear clipboard first
       int result = JOptionPane.showConfirmDialog(Swarm.getApplicationFrame(),
           "Clear clipboard first?", "Import Event", JOptionPane.YES_NO_OPTION);
@@ -1064,7 +1059,7 @@ public class EventDialog extends SwarmFrame {
   public void setEventTypeCertainty(EventTypeCertainty eventTypeCertainty) {
     this.eventTypeCertainty.setSelectedItem(eventTypeCertainty);
   }
-  
+
   private void createListeners() {
     this.addInternalFrameListener(new InternalFrameAdapter() {
       @Override

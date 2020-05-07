@@ -3,10 +3,8 @@ package gov.usgs.volcanoes.swarm.wave;
 import gov.usgs.volcanoes.swarm.Icons;
 import gov.usgs.volcanoes.swarm.SwarmUtil;
 import gov.usgs.volcanoes.swarm.wave.WaveViewSettings.ViewType;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JToggleButton;
@@ -27,7 +25,8 @@ public class WaveViewToolBar {
 
   /**
    * Create wave view tool bar section of user interface.
-   * @param dest  tool bar; destination.
+   * 
+   * @param dest tool bar; destination.
    */
   public void createUi(JToolBar dest) {
     waveSet = SwarmUtil.createToolBarButton(Icons.wavesettings, "Wave view settings (?)",
@@ -77,6 +76,7 @@ public class WaveViewToolBar {
 
   /**
    * Set enabled flag for the various toggles.
+   * 
    * @param enable true if enabled; false otherwise.
    */
   public void setEnabled(boolean enable) {

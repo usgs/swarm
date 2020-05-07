@@ -4,9 +4,7 @@ import gov.usgs.volcanoes.core.data.Wave;
 import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.core.time.Time;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
-
 import java.util.TimeZone;
-
 import javax.swing.JTextArea;
 
 /**
@@ -19,7 +17,7 @@ public class StatusTextArea extends JTextArea {
 
   private static final long serialVersionUID = -4045063168343152079L;
   private static SwarmConfig swarmConfig;
-  
+
   /**
    * Default Constructor.
    */
@@ -27,8 +25,8 @@ public class StatusTextArea extends JTextArea {
     super(text);
     setEditable(false);
     setLineWrap(true);
-    swarmConfig = SwarmConfig.getInstance();    
-  }  
+    swarmConfig = SwarmConfig.getInstance();
+  }
 
   /**
    * Perform duration calculation.
@@ -46,9 +44,10 @@ public class StatusTextArea extends JTextArea {
       return null;
     }
   }
-    
+
   /**
    * Convert time at cursor to String for display.
+   * 
    * @param time in j2k
    * @return formatted string of time in local and GMT
    */
@@ -65,7 +64,7 @@ public class StatusTextArea extends JTextArea {
     }
   }
 
-  
+
   /**
    * Get wave information text for display.
    * 
@@ -74,8 +73,8 @@ public class StatusTextArea extends JTextArea {
    */
   public static String getWaveInfo(Wave wave) {
     int[] dataRange = wave.getDataRange();
-    
-    
+
+
     String waveInfo = null;
     try {
       waveInfo = String.format("[%s - %s (UTC), %d samples (%.2f s), %.2f samples/s, %d, %d, %.1f]",
@@ -88,5 +87,5 @@ public class StatusTextArea extends JTextArea {
     }
     return waveInfo;
   }
-  
+
 }

@@ -14,7 +14,7 @@ public class ChannelInfo extends AbstractChannelInfo {
   private final String channel;
 
   /** The the formatted SCNL. */
-  private final String formattedSCNL;
+  private final String formattedScnl;
 
   /** The location name. */
   private final String location;
@@ -26,15 +26,15 @@ public class ChannelInfo extends AbstractChannelInfo {
    * Create the channel information.
    * 
    * @param stationInfo the station information.
-   * @param latitude the latitude.
-   * @param longitude the longitude.
+   * @param channel channel code
+   * @param location location code
    */
   public ChannelInfo(StationInfo stationInfo, String channel, String location) {
     this.stationInfo = stationInfo;
     this.channel = channel;
     this.location = location;
-    formattedSCNL =
-        ChannelUtil.getFormattedSCNL(stationInfo.getStation(), channel, stationInfo.getNetwork(), location);
+    formattedScnl = ChannelUtil.getFormattedScnl(stationInfo.getStation(), channel,
+        stationInfo.getNetwork(), location);
   }
 
   /**
@@ -73,7 +73,7 @@ public class ChannelInfo extends AbstractChannelInfo {
     stationInfo = new StationInfo(station, network, latitude, longitude, elevation);
     this.channel = channel;
     this.location = location;
-    formattedSCNL = ChannelUtil.getFormattedSCNL(station, channel, network, location);
+    formattedScnl = ChannelUtil.getFormattedScnl(station, channel, network, location);
   }
 
   /**
@@ -108,8 +108,8 @@ public class ChannelInfo extends AbstractChannelInfo {
    * 
    * @return the formatted SCNL.
    */
-  public String getFormattedSCNL() {
-    return formattedSCNL;
+  public String getFormattedScnl() {
+    return formattedScnl;
   }
 
   /**
@@ -187,6 +187,7 @@ public class ChannelInfo extends AbstractChannelInfo {
 
   /**
    * Get elevation.
+   * 
    * @see gov.usgs.volcanoes.swarm.AbstractChannelInfo#getHeight()
    */
   public double getHeight() {

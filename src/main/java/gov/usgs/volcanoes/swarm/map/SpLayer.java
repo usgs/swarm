@@ -7,7 +7,6 @@ import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.event.PickData;
 import gov.usgs.volcanoes.swarm.wave.WaveClipboardFrame;
 import gov.usgs.volcanoes.swarm.wave.WaveViewPanel;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -21,6 +20,7 @@ import java.util.Vector;
 
 /**
  * This layer will draw S-P circles on the map.
+ * 
  * @author Diana Norgaard
  *
  */
@@ -48,8 +48,7 @@ public class SpLayer implements MapLayer {
     if (WaveClipboardFrame.getInstance().isPickEnabled()) {
       for (WaveViewPanel wvp : waves) {
         PickData pickData = wvp.getPickData();
-        if (pickData != null && pickData.isPlot() 
-            && pickData.getPick(PickData.P) != null
+        if (pickData != null && pickData.isPlot() && pickData.getPick(PickData.P) != null
             && pickData.isPickChannel(PickData.P)) {
           String channel = wvp.getChannel();
           double distance = pickData.getSpDistance();
@@ -62,8 +61,10 @@ public class SpLayer implements MapLayer {
     }
     return spList;
   }
-  
+
   /**
+   * Draw.
+   * 
    * @see gov.usgs.volcanoes.swarm.map.MapLayer#draw(java.awt.Graphics2D)
    */
   public void draw(Graphics2D g2) {
@@ -71,22 +72,22 @@ public class SpLayer implements MapLayer {
     Stroke stroke = g2.getStroke();
     Shape clip = g2.getClip();
     g2.setColor(new Color(SwarmConfig.getInstance().mapLineColor));
-    
+
     // First get updated list of S-P
     Vector<Sp> spList = updateSpList();
     if (spList.size() == 0) {
       return;
     }
 
-    MapPanel  panel = MapFrame.getInstance().getMapPanel();
-    
+    MapPanel panel = MapFrame.getInstance().getMapPanel();
+
     // set clip
     int widthPx = panel.getGraphWidth();
     int heightPx = panel.getGraphHeight();
     int inset = panel.getInset();
     Rectangle2D rectangle = new Rectangle2D.Double(inset, inset, widthPx, heightPx);
     g2.setClip(rectangle);
-    
+
     // draw
     GeoRange range = panel.getRange();
     Projection projection = panel.getProjection();
@@ -119,12 +120,12 @@ public class SpLayer implements MapLayer {
         }
       }
     }
-    
+
     g2.setColor(color);
     g2.setStroke(stroke);
     g2.setClip(clip);
   }
-  
+
   /**
    * S-P data.
    */
@@ -148,7 +149,7 @@ public class SpLayer implements MapLayer {
   }
 
   public void setVisible(boolean isVisible) {
-    
+
   }
 
   public boolean mouseMoved(MouseEvent e) {
@@ -158,7 +159,7 @@ public class SpLayer implements MapLayer {
 
   public void setMapPanel(MapPanel mapPanel) {
     // TODO Auto-generated method stub
-    
+
   }
 
 }

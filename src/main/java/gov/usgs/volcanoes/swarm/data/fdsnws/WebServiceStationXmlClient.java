@@ -1,5 +1,15 @@
-package gov.usgs.volcanoes.swarm.data.fdsnWs;
+package gov.usgs.volcanoes.swarm.data.fdsnws;
 
+import gov.usgs.volcanoes.swarm.StationInfo;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.events.XMLEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import edu.sc.seis.seisFile.fdsnws.stationxml.Channel;
 import edu.sc.seis.seisFile.fdsnws.stationxml.FDSNStationXML;
 import edu.sc.seis.seisFile.fdsnws.stationxml.Network;
@@ -9,29 +19,14 @@ import edu.sc.seis.seisFile.fdsnws.stationxml.StationIterator;
 import edu.sc.seis.seisFile.fdsnws.stationxml.StationXMLException;
 import edu.sc.seis.seisFile.fdsnws.stationxml.StationXMLTagNames;
 
-import gov.usgs.volcanoes.swarm.StationInfo;
-
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.events.XMLEvent;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class WebServiceStationXmlClient extends AbstractWebServiceStationClient {
 
-  private final static Logger LOGGER = LoggerFactory.getLogger(WebServiceStationXmlClient.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(WebServiceStationXmlClient.class);
 
   /**
    * Create the web service station client.
    * 
-   * @param baseUrlText
-   *          the base URL text.
+   * @param args argument strings
    */
   public static WebServiceStationXmlClient createClient(String[] args) {
     String baseUrlText = getArg(args, 0, DEFAULT_WS_URL);
@@ -43,6 +38,11 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
     return new WebServiceStationXmlClient(baseUrlText, net, sta, loc, chan, date);
   }
 
+  /**
+   * Main method for testing.
+   * 
+   * @param args arguments.
+   */
   public static void main(String[] args) {
     String error = null;
     WebServiceStationXmlClient client = createClient(args);
@@ -71,18 +71,12 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
   /**
    * Create the web service station client.
    * 
-   * @param baseUrlText
-   *          the base URL text.
-   * @param net
-   *          the network or null if none.
-   * @param sta
-   *          the station or null if none.
-   * @param loc
-   *          the location or null if none.
-   * @param chan
-   *          the channel or null if none.
-   * @param date
-   *          the date or null if none.
+   * @param baseUrlText the base URL text.
+   * @param net the network or null if none.
+   * @param sta the station or null if none.
+   * @param loc the location or null if none.
+   * @param chan the channel or null if none.
+   * @param date the date or null if none.
    */
   public WebServiceStationXmlClient(String baseUrlText, String net, String sta, String loc,
       String chan, Date date) {
@@ -96,8 +90,7 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
   /**
    * Check the schema version.
    * 
-   * @param staMessage
-   *          the station message.
+   * @param staMessage the station message.
    * @return true if match, false otherwise.
    */
   protected boolean checkSchemaVersion(FDSNStationXML staMessage) {
@@ -117,11 +110,9 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
   /**
    * Fetch the stations.
    * 
-   * @param url
-   *          the URL.
+   * @param url the URL.
    * 
-   * @throws Exception
-   *           if an error occurs.
+   * @throws Exception if an error occurs.
    */
   protected void fetch(URL url) throws Exception {
     // likely not an error in the http layer, so assume XML is returned
@@ -166,15 +157,15 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
             double latitude = s.getLatitude().getValue();
             double longitude = s.getLongitude().getValue();
             double elevation = s.getElevation().getValue();
-          
+
             String siteName = null;
             if (s.getSite() != null) {
               siteName = s.getSite().getName();
             }
             switch (getLevel()) {
               case STATION:
-                processStation(createStationInfo(station,
-                    network, latitude, longitude, elevation, siteName));
+                processStation(
+                    createStationInfo(station, network, latitude, longitude, elevation, siteName));
                 // break;
                 // case CHANNEL:
                 // List<Channel> chanList = s.getChannelList();
@@ -188,8 +179,8 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
                 for (Channel chan : chanList) {
                   String location = chan.getLocCode();
                   String channel = chan.getCode();
-                  processChannel(createChannelInfo(station,
-                      channel, network, location, latitude, longitude, elevation, siteName, groupsType));
+                  processChannel(createChannelInfo(station, channel, network, location, latitude,
+                      longitude, elevation, siteName, groupsType));
                 }
                 // break;
                 // default:
@@ -210,11 +201,9 @@ public class WebServiceStationXmlClient extends AbstractWebServiceStationClient 
   /**
    * Fetch the networks.
    *
-   * @param url
-   *          the URL.
+   * @param url the URL.
    *
-   * @throws Exception
-   *           if an error occurs.
+   * @throws Exception if an error occurs.
    */
   protected void fetchNetworks(URL url) throws Exception {
     // likely not an error in the http layer, so assume XML is returned

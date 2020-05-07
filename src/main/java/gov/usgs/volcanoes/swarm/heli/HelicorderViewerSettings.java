@@ -6,7 +6,8 @@ import gov.usgs.volcanoes.swarm.SwarmConfig;
 /**
  * Settings for a helicorder.
  * 
- * <p>TODO: eliminate this class in favor of vdx.HelicorderSettings
+ * <p>
+ * TODO: eliminate this class in favor of vdx.HelicorderSettings
  *
  * @author Dan Cervelli
  */
@@ -35,6 +36,7 @@ public class HelicorderViewerSettings {
 
   /**
    * Constructor.
+   * 
    * @param ch channel
    */
   public HelicorderViewerSettings(String ch) {
@@ -74,6 +76,7 @@ public class HelicorderViewerSettings {
 
   /**
    * Set config from file.
+   * 
    * @param cf config file
    */
   public void set(ConfigFile cf) {
@@ -96,6 +99,7 @@ public class HelicorderViewerSettings {
 
   /**
    * Save to config file.
+   * 
    * @param cf config file
    * @param prefix config file prefix
    */
@@ -120,6 +124,7 @@ public class HelicorderViewerSettings {
 
   /**
    * Parse setting string.
+   * 
    * @param o setting string
    */
   public void parseSettingsString(String o) {
@@ -130,10 +135,10 @@ public class HelicorderViewerSettings {
         String key = opts[i].substring(0, opts[i].indexOf('='));
         String value = opts[i].substring(opts[i].indexOf('=') + 1);
 
-        if (key.equals("x")) { 
+        if (key.equals("x")) {
           // minutes
           timeChunk = Integer.parseInt(value) * 60;
-        } else if (key.equals("y")) { 
+        } else if (key.equals("y")) {
           // hours
           span = Integer.parseInt(value) * 60;
         }

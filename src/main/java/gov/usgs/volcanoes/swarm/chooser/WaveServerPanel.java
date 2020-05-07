@@ -3,12 +3,9 @@ package gov.usgs.volcanoes.swarm.chooser;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.FormLayout;
-
 import gov.usgs.volcanoes.core.util.StringUtils;
-
 import java.util.Arrays;
 import java.util.TimeZone;
-
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -44,6 +41,8 @@ public class WaveServerPanel extends DataSourcePanel {
   }
 
   /**
+   * Reset source.
+   * 
    * @see gov.usgs.volcanoes.swarm.chooser.DataSourcePanel#resetSource(java.lang.String)
    */
   public void resetSource(String source) {

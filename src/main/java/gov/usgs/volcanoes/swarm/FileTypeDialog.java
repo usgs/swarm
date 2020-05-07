@@ -2,14 +2,12 @@ package gov.usgs.volcanoes.swarm;
 
 
 import gov.usgs.volcanoes.core.data.file.FileType;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
@@ -33,6 +31,7 @@ public class FileTypeDialog extends SwarmModalDialog {
 
   /**
    * Constructor.
+   * 
    * @param saveMode true is selecting file type to save to
    */
   public FileTypeDialog(boolean saveMode) {
@@ -46,7 +45,7 @@ public class FileTypeDialog extends SwarmModalDialog {
   public void setFilename(String fn) {
     filename.setText(fn);
   }
-  
+
   /**
    * Update UI to remove file types not supported for saving.
    */
@@ -54,8 +53,10 @@ public class FileTypeDialog extends SwarmModalDialog {
     DefaultListModel<FileType> model = (DefaultListModel<FileType>) fileTypes.getModel();
     model.removeElement(FileType.WIN);
   }
-  
+
   /**
+   * Create UI.
+   * 
    * @see gov.usgs.volcanoes.swarm.SwarmModalDialog#createUi()
    */
   @Override
@@ -112,6 +113,8 @@ public class FileTypeDialog extends SwarmModalDialog {
   }
 
   /**
+   * set visible.
+   * 
    * @see java.awt.Dialog#setVisible(boolean)
    */
   @Override

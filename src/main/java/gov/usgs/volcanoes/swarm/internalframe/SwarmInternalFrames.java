@@ -1,15 +1,13 @@
-package gov.usgs.volcanoes.swarm.internalFrame;
+package gov.usgs.volcanoes.swarm.internalframe;
 
 import gov.usgs.volcanoes.swarm.heli.HelicorderViewerFrame;
 import gov.usgs.volcanoes.swarm.rsam.RsamViewerFrame;
 import gov.usgs.volcanoes.swarm.wave.MultiMonitor;
 import gov.usgs.volcanoes.swarm.wave.WaveViewerFrame;
-
 import java.beans.PropertyVetoException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.swing.JInternalFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
@@ -65,6 +63,7 @@ public final class SwarmInternalFrames {
 
   /**
    * Remove an internal frame.
+   * 
    * @param f frame
    */
   public static void remove(final JInternalFrame f) {
@@ -82,6 +81,7 @@ public final class SwarmInternalFrames {
 
   /**
    * Add an internal frame.
+   * 
    * @param f frame
    * @param setLoc set location
    */

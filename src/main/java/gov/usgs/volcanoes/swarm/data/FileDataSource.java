@@ -11,7 +11,6 @@ import gov.usgs.volcanoes.swarm.Metadata;
 import gov.usgs.volcanoes.swarm.SwarmConfig;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.map.MapFrame;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,11 +18,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +72,7 @@ public class FileDataSource extends AbstractCachingDataSource {
   private void updateChannelTimes(final String channel, final double t1, final double t2) {
     double[] ct = channelTimes.get(channel);
     if (ct == null) {
-      ct = new double[] {t1, t2};
+      ct = new double[] { t1, t2 };
       channelTimes.put(channel, ct);
     }
     ct[0] = Math.min(ct[0], t1);
@@ -84,6 +81,7 @@ public class FileDataSource extends AbstractCachingDataSource {
 
   /**
    * Open files.
+   * 
    * @param fs files
    */
   public void openFiles(final File[] fs) {
@@ -101,7 +99,7 @@ public class FileDataSource extends AbstractCachingDataSource {
         if (dialog == null) {
           dialog = new FileTypeDialog(false);
         }
-          
+
         if (!dialog.isOpen() || (dialog.isOpen() && !dialog.isAssumeSame())) {
           dialog.setFilename(fs[i].getName());
           dialog.setVisible(true);
@@ -113,7 +111,7 @@ public class FileDataSource extends AbstractCachingDataSource {
         } else {
           fileType = dialog.getFileType();
         }
-        
+
         if (fileType == FileType.WIN) { // Open WIN config file
           if (!useWinBatch) {
             openWinConfigFileDialog();
@@ -177,7 +175,7 @@ public class FileDataSource extends AbstractCachingDataSource {
         } catch (final Throwable t) {
           t.printStackTrace();
           result = t;
-        } 
+        }
         fireChannelsProgress(fileName, 1);
         fireChannelsUpdated();
         MapFrame.getInstance().reset(false);
@@ -194,7 +192,7 @@ public class FileDataSource extends AbstractCachingDataSource {
     };
     worker.start();
   }
-  
+
 
   /**
    * File open dialog for WIN configuration file.
@@ -217,7 +215,7 @@ public class FileDataSource extends AbstractCachingDataSource {
       WinDataFile.configFile = f;
     }
   }
-  
+
   @Override
   public HelicorderData getHelicorder(String channel, double t1, double t2,
       final GulperListener gl) {
@@ -274,6 +272,6 @@ public class FileDataSource extends AbstractCachingDataSource {
   @Override
   public void close() {
     // TODO Auto-generated method stub
-    
+
   }
 }

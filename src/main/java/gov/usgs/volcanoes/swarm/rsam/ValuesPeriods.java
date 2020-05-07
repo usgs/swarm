@@ -21,6 +21,12 @@ public enum ValuesPeriods {
     return periodS;
   }
 
+  /**
+   * Get ValuesPeriods from seconds.
+   * 
+   * @param s seconds
+   * @return
+   */
   public static ValuesPeriods fromS(int s) {
     for (ValuesPeriods p : ValuesPeriods.values()) {
       if (p.periodS == s) {

@@ -12,7 +12,6 @@ import gov.usgs.volcanoes.core.legacy.plot.render.MatrixRenderer;
 import gov.usgs.volcanoes.core.legacy.plot.render.ShapeRenderer;
 import gov.usgs.volcanoes.swarm.SwingWorker;
 import gov.usgs.volcanoes.swarm.time.UiTime;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -25,7 +24,6 @@ import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -35,11 +33,10 @@ import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
-
 import cern.colt.matrix.DoubleMatrix2D;
 
 /**
- * A component that renders a RSAM plot. 
+ * A component that renders a RSAM plot.
  * 
  * @author Tom Parker
  */
@@ -52,14 +49,12 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
   private static final Color BACKGROUND_COLOR = new Color(0xf7, 0xf7, 0xf7);
 
   /**
-   * X pixel location of where the main plot axis should be located on the
-   * component.
+   * X pixel location of where the main plot axis should be located on the component.
    */
   private static final int X_OFFSET = 60;
 
   /**
-   * Y pixel location of where the main plot axis should be located on the
-   * component.
+   * Y pixel location of where the main plot axis should be located on the component.
    */
   private static final int Y_OFFSET = 20;
 
@@ -73,7 +68,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
 
   private double startTime;
   private double endTime;
-  private double lastClipTime=0;
+  private double lastClipTime = 0;
   private RsamViewSettings settings;
 
   private String channel;
@@ -84,8 +79,8 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
   private boolean working;
 
   /**
-   * The wave is rendered to an image that is only updated when the settings
-   * change for repaint efficiency.
+   * The wave is rendered to an image that is only updated when the settings change for repaint
+   * efficiency.
    */
   private BufferedImage image;
 
@@ -100,8 +95,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
   /**
    * Constructs a WaveViewPanel with specified settings.
    * 
-   * @param s
-   *          the settings
+   * @param s the settings
    */
   public RsamViewPanel(RsamViewSettings s) {
     settings = s;
@@ -127,11 +121,9 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
 
 
   /**
-   * Set the working flag. This flag indicates whether data are being loaded
-   * for this panel.
+   * Set the working flag. This flag indicates whether data are being loaded for this panel.
    * 
-   * @param b
-   *          the working flag state
+   * @param b the working flag state
    */
   public void setWorking(boolean b) {
     working = b;
@@ -153,6 +145,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
 
   /**
    * Set RSAM data.
+   * 
    * @param data RSAM data
    * @param st start time
    * @param et end time
@@ -203,8 +196,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
   }
 
   /**
-   * Does NOT call repaint for efficiency purposes, that is left to the
-   * container.
+   * Does NOT call repaint for efficiency purposes, that is left to the container.
    */
   private void processSettings() {
     if (data == null || data.getData() == null || data.getData().rows() == 0) {
@@ -217,8 +209,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
   /**
    * Paints the component on the specified graphics context.
    * 
-   * @param g
-   *          the graphics context
+   * @param g the graphics context
    */
   public void paint(Graphics g) {
     if (!(g instanceof Graphics2D)) {
@@ -256,8 +247,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
   /**
    * Constructs the plot on the specified graphics context.
    * 
-   * @param g2
-   *          the graphics context
+   * @param g2 the graphics context
    */
   private synchronized void constructPlot(Graphics2D g2) {
     Dimension dim = this.getSize();
@@ -287,8 +277,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
   /**
    * Plots RSAM values.
    * 
-   * @param data
-   *          the RSAM values to plot
+   * @param data the RSAM values to plot
    */
   private void plotValues(Plot plot, RSAMData data) {
     if (data == null || data.getData() == null || data.getData().rows() == 0) {
@@ -335,7 +324,7 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
 
     mr.createDefaultLineRenderers(Color.blue);
 
-    
+
     if (settings.alarm) {
       // draw threshold line
       LineRenderer lr = new LineRenderer();
@@ -344,17 +333,17 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
       double y = mr.getYPixel(settings.eventThreshold);
       lr.line = new Line2D.Double(X_OFFSET, y, this.getWidth() - RIGHT_WIDTH, y);
       plot.addRenderer(lr);
-      
+
       // sound audio alarm
       alarm(gdm.getData());
     }
 
     plot.addRenderer(mr);
-    
-/*    if (settings.filterOn) {
-      plot.addRenderer(getFilterLabel(getWidth() - RIGHT_WIDTH, getHeight() - BOTTOM_HEIGHT,
-          TextRenderer.RIGHT, TextRenderer.BOTTOM));
-    }*/
+
+    /*
+     * if (settings.filterOn) { plot.addRenderer(getFilterLabel(getWidth() - RIGHT_WIDTH,
+     * getHeight() - BOTTOM_HEIGHT, TextRenderer.RIGHT, TextRenderer.BOTTOM)); }
+     */
   }
 
   /**
@@ -414,13 +403,14 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
 
   /**
    * Play audio alarm if value exceeds threshold.
+   * 
    * @param data matrix data
    */
   private void alarm(DoubleMatrix2D data) {
     double currentTime = data.get(data.rows() - 1, 0);
     double lastValue = data.get(data.rows() - 1, 1);
     if (lastValue >= settings.eventThreshold && currentTime > lastClipTime) {
-      //System.out.println(currentTime + " " + lastValue);
+      // System.out.println(currentTime + " " + lastValue);
       File soundFile = new File(settings.soundFile);
       AudioInputStream audioInputStream = null;
       try {
@@ -432,12 +422,12 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
         line.open(audioFormat);
         line.start();
 
-        int nBytesRead = 0;
+        int numBytesRead = 0;
         byte[] abData = new byte[1024];
-        while (nBytesRead != -1) {
-          nBytesRead = audioInputStream.read(abData, 0, abData.length);
-          if (nBytesRead >= 0) {
-            line.write(abData, 0, nBytesRead);
+        while (numBytesRead != -1) {
+          numBytesRead = audioInputStream.read(abData, 0, abData.length);
+          if (numBytesRead >= 0) {
+            line.write(abData, 0, numBytesRead);
           }
         }
 
@@ -475,34 +465,4 @@ public class RsamViewPanel extends JComponent implements SettingsListener {
     return getSize();
   }
 
-  /**
-   * Get filter label.
-   * @param x x text location
-   * @param y y text location
-   * @param horizJustification horizontal justification
-   * @param vertJustification vertical justification
-   * @return text renderer
-   */
-/*  public TextRenderer getFilterLabel(int x, int y, int horizJustification, int vertJustification) {
-    String ft = "";
-    switch (settings.filter.getType()) {
-      case BANDPASS:
-        ft = "Band pass [" + settings.filter.getCorner1() + "-" + settings.filter.getCorner2()
-            + " Hz]";
-        break;
-      case HIGHPASS:
-        ft = "High pass [" + settings.filter.getCorner1() + " Hz]";
-        break;
-      case LOWPASS:
-        ft = "Low pass [" + settings.filter.getCorner1() + " Hz]";
-        break;
-      default:
-        break;
-    }
-    TextRenderer tr = new TextRenderer(x, y, ft);
-    tr.horizJustification = horizJustification;
-    tr.vertJustification = vertJustification;
-    tr.color = Color.red;
-    return tr;
-  }*/
 }
