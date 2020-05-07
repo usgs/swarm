@@ -3,8 +3,8 @@
     "name": "Swarm",
     "organization": "U.S. Geological Survey",
     "description": "A Java application designed to display and analyze seismic waveforms in real-time.",
-    "version": "3.1.0",
-    "status": "Development",
+    "version": "3.2.0",
+    "status": "Release Candidate",
     "permissions": {
       "usageType": "openSource",
       "licenses": [
@@ -34,7 +34,7 @@
       "email": "dnorgaard@usgs.gov"
     },
     "date": {
-      "metadataLastUpdated": "2020-05-05"
+      "metadataLastUpdated": "2020-05-07"
     }
   }
 ]
