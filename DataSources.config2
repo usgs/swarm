@@ -1,6 +1,0 @@
-server=CVO Winston;wws:130.118.152.47:16022:15000:1
-server=AVO Winston;wws:pubavo1.wr.usgs.gov:16022:15000:1
-server=HVO Winston;wws:hvo-wws0.wr.usgs.gov:16022:15000:1
-#server=YVO Winston;wws:137.227.233.44:16022:15000:1
-server=VDAP Winston;wws:74.95.35.221:16024:15000:1
-server=Nicaragua;wws:165.98.224.51:16022:15000:1
