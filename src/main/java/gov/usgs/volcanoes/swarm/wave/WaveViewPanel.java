@@ -748,24 +748,29 @@ public class WaveViewPanel extends JComponent {
    * @param pct percent to scale to.
    */
   public void adjustScale(double pct) {
-    double maxa = settings.autoScaleAmp ? maxAmp : settings.waveMaxAmp;
-    double mina = settings.autoScaleAmp ? minAmp : settings.waveMinAmp;
-    settings.autoScaleAmp = false;
-    double range = maxa - mina;
-    double center = range / 2 + mina;
-    double newRange = range * pct;
-    settings.waveMinAmp = center - newRange / 2;
-    settings.waveMaxAmp = center + newRange / 2;
+    if (settings.viewType == ViewType.WAVE) {
+      double maxa = settings.autoScaleAmp ? wave.max() : settings.waveMaxAmp;
+      double mina = settings.autoScaleAmp ? wave.min() : settings.waveMinAmp;
+      settings.autoScaleAmp = false;
+      double range = maxa - mina;
+      double center = range / 2 + mina;
+      double newRange = range * pct;
+      settings.waveMinAmp = center - newRange / 2;
+      settings.waveMaxAmp = center + newRange / 2;
+    }
 
     if (settings.viewType == ViewType.SPECTRA) {
+      settings.autoScaleSpectraPower = false;
       double maxf = settings.spectraMaxFreq * pct;
       System.out.printf("WaveViewPanel(804): maxf = %f\n", maxf);
-      settings.spectrogramMaxFreq =
+      settings.spectraMaxFreq =
           (maxf > wave.getSamplingRate() / 2) ? wave.getSamplingRate() / 2 : maxf;
       System.out.printf("WaveViewPanel(806): settings.spectraMaxFreq = %f\n",
           settings.spectraMaxFreq);
     }
+    
     if (settings.viewType == ViewType.SPECTROGRAM) {
+      settings.autoScaleSpectrogramPower = false;
       double maxf = settings.spectrogramMaxFreq * pct;
       System.out.printf("WaveViewPanel(804): maxf = %f\n", maxf);
       settings.spectrogramMaxFreq =
