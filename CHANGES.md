@@ -1,6 +1,7 @@
 ## Version 3.2.0 - February 18, 2020
   * Code style updates
   * Fixes to spotbugs findings
+  * Fix issues adjusting scale using left and right brackets in wave views
 
 ## Version 3.1.0 - February 18, 2020
   * Allow decimals for one bar range and clip value in helicorder settings 
