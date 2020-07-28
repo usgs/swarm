@@ -59,6 +59,7 @@ public class SwarmConfig {
 
   public boolean useLargeCursor;
   public boolean hideStaleChannel;
+  public boolean alwaysTileHorizontally;
 
   public boolean durationEnabled;
   public double durationA;
@@ -351,6 +352,7 @@ public class SwarmConfig {
 
     useLargeCursor = StringUtils.stringToBoolean(config.getString("useLargeCursor"), false);
     hideStaleChannel = StringUtils.stringToBoolean(config.getString("hideStaleChannel"), false);
+    alwaysTileHorizontally = StringUtils.stringToBoolean(config.getString("alwaysTileHorizontally"), false);
 
     span = StringUtils.stringToInt(config.getString("span"), 24);
     timeChunk = StringUtils.stringToInt(config.getString("timeChunk"), 30);
@@ -540,6 +542,7 @@ public class SwarmConfig {
     config.put("windowMaximized", Boolean.toString(windowMaximized));
     config.put("useLargeCursor", Boolean.toString(useLargeCursor));
     config.put("hideStaleChannel", Boolean.toString(hideStaleChannel));
+    config.put("alwaysTileHorizontally", Boolean.toString(alwaysTileHorizontally));
 
     config.put("span", Integer.toString(span));
     config.put("timeChunk", Integer.toString(timeChunk));

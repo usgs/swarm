@@ -1,7 +1,9 @@
-## Version 3.2.0 - February 18, 2020
+## Version 3.2.0 - TBD
   * Code style updates
   * Fixes to spotbugs findings
   * Fix issues adjusting scale using left and right brackets in wave views
+  * Fix helicorder update issue when accessing FDSN WS
+  * Add option to always tile helicorders horizontally (for when there are 4)
 
 ## Version 3.1.0 - February 18, 2020
   * Allow decimals for one bar range and clip value in helicorder settings 

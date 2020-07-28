@@ -40,6 +40,7 @@ public class OptionsDialog extends SwarmModalDialog {
   private JTextField velocityRatio;
   private JCheckBox useLargeCursor;
   private JCheckBox hideStaleChannel;
+  private JCheckBox alwaysTileHorizontally;
 
   private JCheckBox tzInstrument;
   private JRadioButton tzLocal;
@@ -71,8 +72,9 @@ public class OptionsDialog extends SwarmModalDialog {
     durationB = new JTextField();
     pVelocity = new JTextField();
     velocityRatio = new JTextField();
-    useLargeCursor = new JCheckBox("Large Helicorder Cursor");
+    useLargeCursor = new JCheckBox("Large helicorder cursor");
     hideStaleChannel = new JCheckBox("Hide stale channels");
+    alwaysTileHorizontally = new JCheckBox("Always tile helicorders horizontally");
     tzInstrument = new JCheckBox("Use instrument time zone if available");
     tzLocal = new JRadioButton("Use local machine time zone:");
     tzSpecific = new JRadioButton("Use specific time zone:");
@@ -177,6 +179,7 @@ public class OptionsDialog extends SwarmModalDialog {
     builder.appendSeparator("Other");
     builder.append(useLargeCursor, 7);
     builder.append(hideStaleChannel, 7);
+    builder.append(alwaysTileHorizontally, 7);
     builder.nextLine();
 
     dialogPanel = builder.getPanel();
@@ -203,6 +206,7 @@ public class OptionsDialog extends SwarmModalDialog {
   public void setCurrentValues() {
     useLargeCursor.setSelected(swarmConfig.useLargeCursor);
     hideStaleChannel.setSelected(swarmConfig.hideStaleChannel);
+    alwaysTileHorizontally.setSelected(swarmConfig.alwaysTileHorizontally);
     durationA.setText(Double.toString(swarmConfig.durationA));
     durationB.setText(Double.toString(swarmConfig.durationB));
     durationEnabled.setSelected(swarmConfig.durationEnabled);
@@ -270,6 +274,7 @@ public class OptionsDialog extends SwarmModalDialog {
   public void wasOk() {
     swarmConfig.useLargeCursor = useLargeCursor.isSelected();
     swarmConfig.hideStaleChannel = hideStaleChannel.isSelected();
+    swarmConfig.alwaysTileHorizontally = alwaysTileHorizontally.isSelected();
     swarmConfig.durationEnabled = durationEnabled.isSelected();
     swarmConfig.durationA = Double.parseDouble(durationA.getText().trim());
     swarmConfig.durationB = Double.parseDouble(durationB.getText().trim());
