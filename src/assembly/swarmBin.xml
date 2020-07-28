@@ -18,6 +18,7 @@
 				<include>NTP.config</include>
 				<include>WaveDefaults.config</include>
 				<include>RsamDefaults.config</include>
+				<include>SwarmGroups.config</include>
 				<include>EventClassifications.config</include>
 				<include>Hypo71.config</include>
 				<include>layouts/Augustine.config</include>
