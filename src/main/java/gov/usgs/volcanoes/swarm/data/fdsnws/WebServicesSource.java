@@ -2,6 +2,7 @@ package gov.usgs.volcanoes.swarm.data.fdsnws;
 
 import gov.usgs.volcanoes.core.data.HelicorderData;
 import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.ChannelGroupInfo;
 import gov.usgs.volcanoes.swarm.ChannelInfo;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
@@ -186,6 +187,8 @@ public class WebServicesSource extends SeismicDataSource {
   public synchronized HelicorderData getHelicorder(String station, double t1, double t2,
       GulperListener gl) {
 
+    double now = J2kSec.now();
+    
     CachedDataSource cache = CachedDataSource.getInstance();
 
     HelicorderData hd = cache.getHelicorder(station, t1, t2, (GulperListener) null);
@@ -195,6 +198,9 @@ public class WebServicesSource extends SeismicDataSource {
           gulpDelay);
     }
 
+    if (hd != null && hd.getEndTime() < now) { 
+      getWave(station, hd.getEndTime(), now); 
+    }
     return hd;
   }
 
