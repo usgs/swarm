@@ -283,7 +283,9 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
     otherPanel.add(cvLabel, GridBagHelper.set(c, "x=0;y=8;w=2;h=1;wx=1;a=w;f=n"));
     otherPanel.add(clipValue, GridBagHelper.set(c, "x=2;y=8;w=1;h=1;f=h;wx=0;a=e"));
 
+    JPanel ata = new JPanel();
     applyToAll = new JCheckBox("Apply to all open helicorders");
+    ata.add(applyToAll);
 
     // CENTER PANEL
     JPanel centerPanel = new JPanel();
@@ -294,7 +296,7 @@ public class HelicorderViewerSettingsDialog extends SwarmModalDialog {
     centerPanel.add(zoomPanel);
     centerPanel.add(clippingPanel);
     centerPanel.add(otherPanel);
-    centerPanel.add(applyToAll);
+    centerPanel.add(ata);
 
     // DIALOG PANEL
     dialogPanel = new JPanel(new BorderLayout());
