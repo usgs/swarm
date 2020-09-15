@@ -17,8 +17,11 @@ import org.slf4j.LoggerFactory;
 
 public class WebServicesSource extends SeismicDataSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(WebServicesSource.class);
-  private static final String DATASELECT_URL = "http://service.iris.edu/fdsnws/dataselect/1/query";
-  private static final String STATION_URL = "http://service.iris.edu/fdsnws/station/1/query";
+  private static final String IRIS_DATASELECT_URL = "http://service.iris.edu/fdsnws/dataselect/1/query";
+  private static final String IRIS_STATION_URL = "http://service.iris.edu/fdsnws/station/1/query";
+
+  public static final String DEFAULT_DATASELECT_URL = "http://localhost/fdsnws/dataselect/1/query";
+  public static final String DEFAULT_STATION_URL = "http://localhost/fdsnws/station/1/query";
 
   /** Web services source tab title. */
   public static final String TAB_TITLE = "FDSN WS";
@@ -96,8 +99,8 @@ public class WebServicesSource extends SeismicDataSource {
     sb.append(comps[1]).append("|");
     sb.append(3600).append("|");
     sb.append(1000).append("|");
-    sb.append(DATASELECT_URL).append("|");
-    sb.append(STATION_URL);
+    sb.append(IRIS_DATASELECT_URL).append("|");
+    sb.append(IRIS_STATION_URL);
     parse(sb.toString());
   }
 

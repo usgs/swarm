@@ -128,10 +128,8 @@ public class WebServicesPanel extends DataSourcePanel {
     String chan = "";
     String gs = "60";
     String gd = "1.0";
-    // String wsDataSelectUrl = getDefaultText(wsDataselectUrlField);
-    // String wsStationUrl = getDefaultText(wsStationUrlField);
-    String wsDataSelectUrl = "";
-    String wsStationUrl = "";
+    String wsDataSelectUrl = getDefaultText(wsDataselectUrlField);
+    String wsStationUrl = getDefaultText(wsStationUrlField);
     int index;
     if (source != null && (index = source.indexOf(codeText)) != -1) {
       String[] ss =
@@ -340,26 +338,24 @@ public class WebServicesPanel extends DataSourcePanel {
 
   }
 
-  // /**
-  // * Get the default text for the specified component.
-  // *
-  // * @param component the component.
-  // * @return the default text.
-  // */
-  // private String getDefaultText(Component component) {
-  // String s;
-  // if (component == wsDataselectUrlField) {
-  // // s = DataSelectReader.DEFAULT_WS_URL;
-  // s = SwarmConfig.getInstance().fdsnDataselectURL;
-  // } else
-  // if (component == wsStationUrlField) {
-  // // s = WebServiceStationTextClient.DEFAULT_WS_URL;
-  // s = SwarmConfig.getInstance().fdsnStationURL;
-  // } else {
-  // s = "";
-  // }
-  // return s;
-  // }
+  /**
+   * Get the default text for the specified component.
+   * 
+   * @param component the component.
+   * @return the default text.
+   */
+  private String getDefaultText(Component component) {
+    String s;
+    if (component == wsDataselectUrlField) {
+      s = WebServicesSource.DEFAULT_DATASELECT_URL;
+    } else
+      if (component == wsStationUrlField) {
+        s = WebServicesSource.DEFAULT_STATION_URL;
+      } else {
+        s = "";
+      }
+    return s;
+  }
 
   /**
    * Get the network combination box text.
