@@ -1,6 +1,5 @@
 ## Version 3.2.0 - TBD
-  * Code style updates
-  * Fixes to spotbugs findings
+  * Fix issue with reading WIN file for channels with 0.5 data size
   * Fix issues adjusting scale using left and right brackets in wave views
   * Fix helicorder update issue when accessing FDSN WS
   * Add option to always tile helicorders horizontally (for when there are 4)
