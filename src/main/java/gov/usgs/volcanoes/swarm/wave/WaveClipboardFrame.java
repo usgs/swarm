@@ -970,6 +970,43 @@ public class WaveClipboardFrame extends SwarmFrame {
     }
     select(p);
   }
+  
+  /**
+   * Sort wave panels in clipboard by picks.
+   */
+  public synchronized void sortChannelsByPicks() {
+    final WaveViewPanel panel = getSingleSelected();
+    if (panel == null) {
+      return;
+    }
+
+    final ArrayList<WaveViewPanel> sorted = new ArrayList<WaveViewPanel>(waves.size());
+    for (final WaveViewPanel wave : waves) {
+      sorted.add(wave);
+    }
+
+    Collections.sort(sorted, new Comparator<WaveViewPanel>() {
+      public int compare(final WaveViewPanel wvp1, final WaveViewPanel wvp2) {
+        Pick p1 = wvp1.getPickData().getPick("P");
+        if (p1 == null) {
+          p1 = wvp1.getPickData().getPick("S");
+        }
+        Pick p2 = wvp2.getPickData().getPick("P");
+        if (p2 == null) {
+          p2 = wvp2.getPickData().getPick("S");
+        }
+        Long l1 = (p1 == null) ? Long.MAX_VALUE : p1.getTime();
+        Long l2 = (p2 == null) ? Long.MAX_VALUE : p2.getTime();
+        return Long.compare(l1, l2);
+      }
+    });
+
+    removeWaves();
+    for (final WaveViewPanel wave : sorted) {
+      addWave(wave);
+    }
+    select(panel);
+  }
 
   /**
    * Get selected wave panel.
