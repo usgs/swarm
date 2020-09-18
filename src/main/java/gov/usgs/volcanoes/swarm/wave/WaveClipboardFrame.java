@@ -976,9 +976,9 @@ public class WaveClipboardFrame extends SwarmFrame {
    */
   public synchronized void sortChannelsByPicks() {
     final WaveViewPanel panel = getSingleSelected();
-    if (panel == null) {
-      return;
-    }
+    /*
+     * if (panel == null) { return; }
+     */
 
     final ArrayList<WaveViewPanel> sorted = new ArrayList<WaveViewPanel>(waves.size());
     for (final WaveViewPanel wave : waves) {
@@ -987,13 +987,13 @@ public class WaveClipboardFrame extends SwarmFrame {
 
     Collections.sort(sorted, new Comparator<WaveViewPanel>() {
       public int compare(final WaveViewPanel wvp1, final WaveViewPanel wvp2) {
-        Pick p1 = wvp1.getPickData().getPick("P");
+        Pick p1 = wvp1.getPickData().getPick(PickData.P);
         if (p1 == null) {
-          p1 = wvp1.getPickData().getPick("S");
+          p1 = wvp1.getPickData().getPick(PickData.S);
         }
-        Pick p2 = wvp2.getPickData().getPick("P");
+        Pick p2 = wvp2.getPickData().getPick(PickData.P);
         if (p2 == null) {
-          p2 = wvp2.getPickData().getPick("S");
+          p2 = wvp2.getPickData().getPick(PickData.S);
         }
         Long l1 = (p1 == null) ? Long.MAX_VALUE : p1.getTime();
         Long l2 = (p2 == null) ? Long.MAX_VALUE : p2.getTime();
@@ -1008,6 +1008,32 @@ public class WaveClipboardFrame extends SwarmFrame {
     select(panel);
   }
 
+  /**
+   * Sort wave panels in clipboard by picks.
+   */
+  public synchronized void alignByPick(String pickString) {
+    final WaveViewPanel panel = getSingleSelected();
+    if (panel == null) {
+      return;
+    }
+
+    for (final WaveViewPanel wave : waves) {
+      Pick pick;
+      if(pickString == PickData.P) {
+        pick = wave.getPickData().getPick(PickData.P);
+      }else {
+        pick = wave.getPickData().getPick(PickData.S);
+      }
+      if(pick != null) {
+        double mid = (wave.getEndTime()-wave.getStartTime())/2;
+        double ptime = J2kSec.fromEpoch(pick.getTime());
+        wave.setStartTime(ptime-mid);
+        wave.setEndTime(ptime+mid); 
+        wave.createImage();
+      }
+    }
+  }
+  
   /**
    * Get selected wave panel.
    * 

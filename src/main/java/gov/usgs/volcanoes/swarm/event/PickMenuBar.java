@@ -119,13 +119,28 @@ public class PickMenuBar extends JMenuBar {
     menu.add(clearMenu);
     
     JMenuItem sortMenu = new JMenuItem("Sort Waves By Picks");
-    sortMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, ActionEvent.CTRL_MASK));
     sortMenu.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         clipboard.sortChannelsByPicks();
       }
     });
     menu.add(sortMenu);
+    
+    JMenuItem alingByPMenu = new JMenuItem("Align P Picks");
+    alingByPMenu.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        clipboard.alignByPick(PickData.P);
+      }
+    });
+    menu.add(alingByPMenu);
+    
+    JMenuItem alingBySMenu = new JMenuItem("Align S Picks");
+     alingBySMenu.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        clipboard.alignByPick(PickData.S);
+      }
+    });
+    menu.add(alingBySMenu);
   }
 
 }
