@@ -4,6 +4,7 @@
   * Fix helicorder update issue when accessing FDSN WS
   * Add option to always tile helicorders horizontally (for when there are 4)
   * Add feature to sort waves by pick times in clipboard
+  * Add feature to align waves by picks in clipboard
 
 ## Version 3.1.0 - February 18, 2020
   * Allow decimals for one bar range and clip value in helicorder settings 
