@@ -14,8 +14,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.TimeZone;
-import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import edu.iris.Fissures.seed.container.Blockette;
@@ -49,8 +49,8 @@ public class SeedLinkClient implements Runnable {
   /** Multiselect string. Example: "IU_KONO:BHE BHN,GE_WLF,MN_AQU:HH?.D" */
   private String multiselect = null;
 
-  /** SCNL's and last request time. */
-  private TreeMap<String, Double> scnlMap = new TreeMap<String, Double>();
+  /** SCNL list */
+  private HashSet<String> scnlList = new HashSet<String>();
 
   /** Client thread. */
   private Thread thread;
@@ -58,7 +58,7 @@ public class SeedLinkClient implements Runnable {
   /** Start and end time of thread. In J2k seconds. */
   private double startTime = Double.MAX_VALUE;
   private double endTime = 0;
-
+  
   /**
    * Create SeedLink client with channel, start and end time.
    * 
@@ -71,7 +71,7 @@ public class SeedLinkClient implements Runnable {
   public SeedLinkClient(String host, int port, double startTime, double endTime, String scnl) {
     super();
     sladdr = host + ":" + port;
-    scnlMap.put(scnl, J2kSec.now());
+    scnlList.add(scnl);
     createConnection();
     setStartEndTimes(startTime, endTime);
     // slconn.setLastpkttime(true);
@@ -155,38 +155,45 @@ public class SeedLinkClient implements Runnable {
     return null;
   }
 
+  /**
+   * Add channel for client to get.
+   * @param scnl
+   */
   protected synchronized void add(String scnl) {
-    add(scnl, Double.MAX_VALUE);
+    add(scnl, (J2kSec.now()-600.0));
   }
 
   /**
    * Add channel for client to get.
    * 
-   * @param key gulper listener
    * @param scnl channel string
    * @param t1 start time
    */
   protected synchronized void add(String scnl, double t1) {
     this.startTime = t1;
-    boolean reconnect = false;
-    if (!scnlMap.keySet().contains(scnl)) {
-      reconnect = true;
-    }
-    scnlMap.put(scnl, J2kSec.now());
-    if (reconnect) {
+    if (scnlList.add(scnl)) {
       LOGGER.debug("Added {}", scnl);
       infolevel = null;
       closeConnection();
       createConnection();
     }
   }
+  
+  /**
+   * Check to see if channel data is already being retrieved
+   * @param scnl
+   * @return
+   */
+  protected boolean exists(String scnl) {
+    return scnlList.contains(scnl);
+  }
 
   /**
    * Remove station from list of channels to get.
    */
   protected synchronized void remove(String scnl) {
-    Double lrt = scnlMap.remove(scnl);
-    if (lrt != null && !Double.isNaN(lrt)) {
+    boolean removed = scnlList.remove(scnl);
+    if (removed) {
       closeConnection();
       createConnection();
     }
@@ -197,13 +204,13 @@ public class SeedLinkClient implements Runnable {
    * Update multiselect statement.
    */
   private void updateMultiSelect() {
-    if (scnlMap.size() == 0) {
+    if (scnlList.size() == 0) {
       multiselect = null;
       return;
     }
     String tmpMs = "";
     String prevStation = "";
-    for (String scnl : scnlMap.keySet()) {
+    for (String scnl : scnlList) {
       ChannelInfo channelInfo = new ChannelInfo(scnl);
       String station = channelInfo.getNetwork() + "_" + channelInfo.getStation();
       String selector = channelInfo.getLocation() + channelInfo.getChannel();
@@ -232,17 +239,8 @@ public class SeedLinkClient implements Runnable {
     if (scnl == null || wave == null) {
       return;
     }
-    Double lastRequestTime = scnlMap.get(scnl);
-    if (scnlMap.keySet().contains(scnl)) {
-      if (Double.isNaN(lastRequestTime) || J2kSec.now() - lastRequestTime < 300) {
-        CachedDataSource.getInstance().putWave(scnl, wave);
-        CachedDataSource.getInstance().cacheWaveAsHelicorder(scnl, wave);
-      } else {
-        // Don't save if last request time is more than 5 min ago.
-        // Remove SCNL from list.
-        remove(scnl);
-      }
-    }
+    CachedDataSource.getInstance().putWave(scnl, wave);
+    CachedDataSource.getInstance().cacheWaveAsHelicorder(scnl, wave);
   }
 
   /*
@@ -387,7 +385,7 @@ public class SeedLinkClient implements Runnable {
         scnl = scnl.trim().replace(" ", "$");
         cacheWave(scnl, wave);
       } catch (Exception ex) {
-        LOGGER.warn("packetHandler: could create wave", ex);
+        LOGGER.warn("packetHandler: could not create wave", ex);
         return true; // close the connection
       }
     }
@@ -471,7 +469,6 @@ public class SeedLinkClient implements Runnable {
    * Close the SeedLink connection.
    */
   public synchronized void closeConnection() {
-    LOGGER.debug("Closing the SeedLinkConnection");
     slconn.terminate();
   }
 

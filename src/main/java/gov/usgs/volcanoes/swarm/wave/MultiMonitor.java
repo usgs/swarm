@@ -525,14 +525,19 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
       RectangleRenderer rr = ar.getFrame();
       rr.color = Color.GRAY;
 
+      final Metadata md = SwarmConfig.getInstance().getMetadata(panel.getChannel(), true);
+      String title = md.getAlias();
+      if(title==null || title.isEmpty()) {
+        title=panel.getChannel();
+      }
       final TextRenderer label = new TextRenderer(fr.getGraphX() + 5,
-          fr.getGraphY() + labelFontSize + 3, panel.getChannel(), Color.BLACK);
+          fr.getGraphY() + labelFontSize + 3, title, Color.BLACK);
       label.font = font;
       label.color = Color.BLACK;
 
       rr = new RectangleRenderer();
       rr.rect = new Rectangle2D.Double();
-      rr.rect.setFrame(font.getStringBounds(panel.getChannel(), frc));
+      rr.rect.setFrame(font.getStringBounds(title, frc));
       rr.rect.x = 2;
       rr.rect.width += 5;
       rr.rect.y = 3;
@@ -550,7 +555,6 @@ public class MultiMonitor extends SwarmFrame implements Kioskable {
         double b = 0;
         String units = "Counts";
         if (panel.getSettings().useUnits) {
-          final Metadata md = SwarmConfig.getInstance().getMetadata(panel.getChannel(), true);
           m = md.getMultiplier();
           b = md.getOffset();
           units = md.getUnit();

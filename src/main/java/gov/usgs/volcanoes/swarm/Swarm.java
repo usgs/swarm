@@ -985,7 +985,7 @@ public class Swarm extends JFrame implements InternalFrameListener {
       return;
     }
 
-    if (hcs.size() == 4) {
+    if (hcs.size() == 4 && !config.alwaysTileHorizontally) {
       final int w = ds.width / 2;
       final int h = ds.height / 2;
       final HelicorderViewerFrame hvf0 = hcs.get(0);

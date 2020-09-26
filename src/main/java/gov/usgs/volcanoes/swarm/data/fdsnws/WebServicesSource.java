@@ -2,6 +2,7 @@ package gov.usgs.volcanoes.swarm.data.fdsnws;
 
 import gov.usgs.volcanoes.core.data.HelicorderData;
 import gov.usgs.volcanoes.core.data.Wave;
+import gov.usgs.volcanoes.core.time.J2kSec;
 import gov.usgs.volcanoes.swarm.ChannelGroupInfo;
 import gov.usgs.volcanoes.swarm.ChannelInfo;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
@@ -16,8 +17,11 @@ import org.slf4j.LoggerFactory;
 
 public class WebServicesSource extends SeismicDataSource {
   private static final Logger LOGGER = LoggerFactory.getLogger(WebServicesSource.class);
-  private static final String DATASELECT_URL = "http://service.iris.edu/fdsnws/dataselect/1/query";
-  private static final String STATION_URL = "http://service.iris.edu/fdsnws/station/1/query";
+  private static final String IRIS_DATASELECT_URL = "http://service.iris.edu/fdsnws/dataselect/1/query";
+  private static final String IRIS_STATION_URL = "http://service.iris.edu/fdsnws/station/1/query";
+
+  public static final String DEFAULT_DATASELECT_URL = "http://localhost/fdsnws/dataselect/1/query";
+  public static final String DEFAULT_STATION_URL = "http://localhost/fdsnws/station/1/query";
 
   /** Web services source tab title. */
   public static final String TAB_TITLE = "FDSN WS";
@@ -95,8 +99,8 @@ public class WebServicesSource extends SeismicDataSource {
     sb.append(comps[1]).append("|");
     sb.append(3600).append("|");
     sb.append(1000).append("|");
-    sb.append(DATASELECT_URL).append("|");
-    sb.append(STATION_URL);
+    sb.append(IRIS_DATASELECT_URL).append("|");
+    sb.append(IRIS_STATION_URL);
     parse(sb.toString());
   }
 
@@ -186,6 +190,8 @@ public class WebServicesSource extends SeismicDataSource {
   public synchronized HelicorderData getHelicorder(String station, double t1, double t2,
       GulperListener gl) {
 
+    double now = J2kSec.now();
+    
     CachedDataSource cache = CachedDataSource.getInstance();
 
     HelicorderData hd = cache.getHelicorder(station, t1, t2, (GulperListener) null);
@@ -195,6 +201,9 @@ public class WebServicesSource extends SeismicDataSource {
           gulpDelay);
     }
 
+    if (hd != null && hd.getEndTime() < now) { 
+      getWave(station, hd.getEndTime(), now); 
+    }
     return hd;
   }
 

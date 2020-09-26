@@ -44,7 +44,7 @@ public class PickMenuBar extends JMenuBar {
    * Create right click menu for pick.
    */
   private void createMenu() {
-    createSettingsMenu();
+    createTopMenus();
     menu.addSeparator();
     createEventMenu();
   }
@@ -88,9 +88,9 @@ public class PickMenuBar extends JMenuBar {
   }
 
   /**
-   * Create settings menu item.
+   * Create top menu items.
    */
-  private void createSettingsMenu() {
+  private void createTopMenus() {
     JMenuItem settingsMenu = new JMenuItem("Settings");
     settingsMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
     settingsMenu.addActionListener(new ActionListener() {
@@ -117,6 +117,30 @@ public class PickMenuBar extends JMenuBar {
       }
     });
     menu.add(clearMenu);
+    
+    JMenuItem sortMenu = new JMenuItem("Sort Waves By Picks");
+    sortMenu.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        clipboard.sortChannelsByPicks();
+      }
+    });
+    menu.add(sortMenu);
+    
+    JMenuItem alingByPMenu = new JMenuItem("Align P Picks");
+    alingByPMenu.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        clipboard.alignByPick(PickData.P);
+      }
+    });
+    menu.add(alingByPMenu);
+    
+    JMenuItem alingBySMenu = new JMenuItem("Align S Picks");
+     alingBySMenu.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        clipboard.alignByPick(PickData.S);
+      }
+    });
+    menu.add(alingBySMenu);
   }
 
 }
