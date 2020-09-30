@@ -7,6 +7,7 @@ import gov.usgs.volcanoes.swarm.ChannelGroupInfo;
 import gov.usgs.volcanoes.swarm.ChannelInfo;
 import gov.usgs.volcanoes.swarm.data.CachedDataSource;
 import gov.usgs.volcanoes.swarm.data.DataSourceType;
+import gov.usgs.volcanoes.swarm.data.Gulper;
 import gov.usgs.volcanoes.swarm.data.GulperList;
 import gov.usgs.volcanoes.swarm.data.GulperListener;
 import gov.usgs.volcanoes.swarm.data.SeismicDataSource;
@@ -192,6 +193,7 @@ public class WebServicesSource extends SeismicDataSource {
 
     double now = J2kSec.now();
     
+    
     CachedDataSource cache = CachedDataSource.getInstance();
 
     HelicorderData hd = cache.getHelicorder(station, t1, t2, (GulperListener) null);
@@ -202,7 +204,10 @@ public class WebServicesSource extends SeismicDataSource {
     }
 
     if (hd != null && hd.getEndTime() < now) { 
-      getWave(station, hd.getEndTime(), now); 
+      Gulper g = GulperList.INSTANCE.getGulper(getGulperKey(station));
+      if(g==null || g.isKilled()) {
+        getWave(station, hd.getEndTime(), now); 
+      } // otherwise let gulper finish first
     }
     return hd;
   }

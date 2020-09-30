@@ -185,7 +185,7 @@ public class WebServicesClient extends AbstractDataRecordClient {
     final Date begin = getDate(t1);
     final Date end = getDate(t2);
     final List<Wave> waves = createWaves();
-    final DataSelectReader reader = new DataSelectReader(wsDataSelectUrl) {
+    final DataSelectReader reader = new DataSelectReader(wsDataSelectUrl,10000) {
       /**
        * Process a data record.
        * 
