@@ -71,4 +71,12 @@ public class GulperList {
   public synchronized void removeGulper(Gulper g) {
     gulpers.remove(g.getKey());
   }
+  
+  /**
+   * @param key
+   * @return
+   */
+  public Gulper getGulper(String key) {
+    return gulpers.get(key);
+  }
 }
