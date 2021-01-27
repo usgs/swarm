@@ -1,7 +1,11 @@
+## Version 3.2.1 - January 27, 2021
+  * Use quakeml 1.1.1 to support date formats that end in +00:00, -00:00, or have no time zone specified at end
+  * Always enable both options for Hypo71 crustal model input 
+
 ## Version 3.2.0 - September 30, 2020
   * Fix issue with reading WIN file for channels with 0.5 data size
   * Fix issues adjusting scale using left and right brackets in wave views
-  * Fix helicorder update issue when accessing FDSN WS
+  * Fix helicorder update issue for new data when accessing FDSN WS
   * Add option to always tile helicorders horizontally (for when there are 4)
   * Add feature to sort waves by pick times in clipboard
   * Add feature to align waves by picks in clipboard

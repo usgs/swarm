@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>gov.usgs.volcanoes</groupId>
 	<artifactId>swarm</artifactId>
-	<version>3.2.0</version> 
+	<version>3.2.1</version> 
 	<packaging>jar</packaging>
 
 	<name>Swarm</name>
@@ -472,12 +472,12 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.1</version>
+			<version>1.7.30</version>
 		</dependency>
 		<dependency>
 			<groupId>gov.usgs.volcanoes</groupId>
 			<artifactId>quakeml</artifactId>
-			<version>1.0.0</version>
+			<version>1.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>gov.usgs.volcanoes</groupId>

@@ -964,6 +964,7 @@ public class EventDialog extends SwarmFrame {
    * disable.
    */
   public void checkForPicks() {
+    
     boolean hasPicks = false;
     for (WaveViewPanel wvp : WaveClipboardFrame.getInstance().getWaves()) {
       if (wvp.getPickData().getPickCount() > 0) {
@@ -972,14 +973,15 @@ public class EventDialog extends SwarmFrame {
       }
     }
     if (hasPicks) {
-      usePicks.setEnabled(true);
-      crustalModelFile.setEnabled(true);
+      //usePicks.setEnabled(true);
+      //crustalModelFile.setEnabled(true);
       usePicks.setSelected(true);
     } else {
-      usePicks.setEnabled(false);
-      crustalModelFile.setEnabled(false);
+      //usePicks.setEnabled(false);
+      //crustalModelFile.setEnabled(false);
       useInputFile.setSelected(true);
     }
+     
   }
 
   /**
