@@ -369,7 +369,9 @@ public class Swarm extends JFrame implements InternalFrameListener {
     swarmMenu.autoLoadLayout.setSelected(Swarm.config.loadLayout);
     if (Swarm.config.loadLayout && !Swarm.config.layout.equals("")) {
       SwarmLayout sl = Swarm.config.layouts.get(Swarm.config.layout);
-      sl.process();
+      if(sl != null) {
+        sl.process();
+      }
     }
 
     this.setVisible(true);
