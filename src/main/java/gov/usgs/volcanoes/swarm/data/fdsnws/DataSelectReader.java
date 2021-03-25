@@ -15,7 +15,6 @@ import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import edu.sc.seis.seisFile.SeisFileException;
-import edu.sc.seis.seisFile.StringMSeedQueryReader;
 import edu.sc.seis.seisFile.mseed.DataRecord;
 import edu.sc.seis.seisFile.mseed.SeedFormatException;
 import edu.sc.seis.seisFile.mseed.SeedRecord;
@@ -26,7 +25,7 @@ import edu.sc.seis.seisFile.mseed.SeedRecord;
  * 
  * @author Kevin Frechette (ISTI)
  */
-public class DataSelectReader extends StringMSeedQueryReader {
+public class DataSelectReader {
   private static final Logger LOGGER = LoggerFactory.getLogger(DataSelectReader.class);
 
   /** The timeout in milliseconds. */
@@ -103,7 +102,7 @@ public class DataSelectReader extends StringMSeedQueryReader {
    * @see edu.sc.seis.seisFile.dataSelectWS.MSeedQueryReader#createQuery(java.lang .String,
    *      java.lang.String, java.lang.String, java.lang.String, java.util.Date, float)
    */
-  @Override
+
   public String createQuery(String network, String station, String location, String channel,
       Date begin, Date end) {
     String query;
